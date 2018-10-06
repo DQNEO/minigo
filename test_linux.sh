@@ -2,13 +2,14 @@
 set -e
 export PATH="/usr/lib/go-1.10/bin:$PATH"
 
+as_file="./out/a.s"
 
 function run_case {
     local code=$1
     local expected=$2
-    rm -f a.s
-    echo -n "$code" | go run main.go > a.s
-    gcc a.s
+    rm -f $as_file
+    echo -n "$code" | go run main.go > $as_file
+    gcc $as_file
     ./a.out || true
     if [[ $? -eq 0 ]];then
         echo "ok"
