@@ -14,7 +14,11 @@ type Token struct {
 
 type Ast struct {
 	typ     string
+	// string
+	sval string
+	// int
 	ival    int
+	// unary
 	operand *Ast
 	// binop
 	op string
@@ -40,11 +44,17 @@ func debugToken(tok *Token) {
 }
 
 func debugAst(name string, ast *Ast) {
-	if ast.typ == "int" {
+	switch ast.typ {
+	case "funcall":
+		debugPrintVar("funcall", ast)
+		for _, arg := range ast.args {
+			debugPrintVar("arg", arg)
+		}
+	case  "int" :
 		debugPrintVar(name, fmt.Sprintf("%d", ast.ival))
-	} else if ast.typ == "uop" {
+	case "uop" :
 		debugAst(name, ast.operand)
-	} else if ast.typ == "binop" {
+	case "binop" :
 		debugPrintVar("ast.binop", ast.typ)
 		debugAst("left", ast.left)
 		debugAst("right", ast.right)

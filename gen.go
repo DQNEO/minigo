@@ -32,11 +32,11 @@ func emitFuncMainEpilogue() {
 }
 
 func emitExpr(ast *Ast) {
-	if ast.typ == "uop" {
-		emit("movl	$%d, %%eax", ast.operand.ival)
+	if ast.typ == "int" {
+		emit("movl	$%d, %%eax", ast.ival)
 	} else if ast.typ == "binop" {
-		emit("movl	$%d, %%eax", ast.left.operand.ival)
-		emit("movl	$%d, %%ebx", ast.right.operand.ival)
+		emit("movl	$%d, %%eax", ast.left.ival)
+		emit("movl	$%d, %%ebx", ast.right.ival)
 		if ast.op == "+" {
 			emit("addl	%%ebx, %%eax")
 		} else if ast.op == "-" {
@@ -84,18 +84,7 @@ func generate(expr *Ast) {
 	emitDataSection()
 	emitFuncMainPrologue()
 
-	// call printf("%d\n", expr)
-	astString := &Ast{
-		typ: "string",
-		label: "L0",
-	}
-	funcall := &Ast{
-		typ:"funcall",
-		fname : "printf",
-		args: []*Ast{astString, expr},
-	}
-
-	emitExpr(funcall)
+	emitExpr(expr)
 
 	emit("mov $0, %%eax") // return 0
 	emitFuncMainEpilogue()
