@@ -36,7 +36,7 @@ func debugPrintVar(name string, v interface{}) {
 }
 
 func debugToken(tok *Token) {
-	debugPrint(fmt.Sprintf("tok: type= %7s, sval=\"%s\"", tok.typ, tok.sval))
+	debugPrint(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
 func debugAst(name string, ast *Ast) {
