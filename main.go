@@ -19,6 +19,8 @@ type Ast struct {
 	typ     string
 	ival    int
 	operand *Ast
+	// binop
+	op string
 	left    *Ast
 	right   *Ast
 }
@@ -251,18 +253,18 @@ func parseExpr() *Ast {
 		if tok.typ != "punct" {
 			return ast
 		}
-		if tok.sval == "+" {
+		if tok.sval == "+" || tok.sval == "*" {
 			right := parseUnaryExpr()
 			debugAst("right", right)
 			return &Ast{
 				typ:   "binop",
+				op: tok.sval,
 				left:  ast,
 				right: right,
 			}
 		} else {
-			fmt.Printf("unknown token=%v\n", tok)
 			debugToken(tok)
-			panic("internal error")
+			errorf("unknown token=%v\n", tok.sval)
 		}
 	}
 
@@ -282,7 +284,11 @@ func emitAst(ast *Ast) {
 	} else if ast.typ == "binop" {
 		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.left.operand.ival)
 		fmt.Printf("\tmovl	$%d, %%eax\n", ast.right.operand.ival)
-		fmt.Printf("\taddl	%%ebx, %%eax\n")
+		if ast.op == "+" {
+			fmt.Printf("\taddl	%%ebx, %%eax\n")
+		} else if ast.op == "*" {
+			fmt.Printf("\timul	%%ebx, %%eax\n")
+		}
 	} else {
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}
@@ -310,6 +316,11 @@ func debugAst(name string, ast *Ast) {
 		debugAst("left", ast.left)
 		debugAst("right", ast.right)
 	}
+}
+
+func errorf(format string, v ...interface{}) {
+	s := fmt.Sprintf(format, v)
+	panic(s)
 }
 
 func assert(cond bool, msg string) {

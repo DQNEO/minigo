@@ -22,5 +22,6 @@ function run_case {
 run_case 0 0
 run_case 7 7
 run_case '2 + 5' 7
+run_case '2 * 3' 6
 
 echo "All tests passed"
