@@ -20,6 +20,11 @@ type Ast struct {
 	op string
 	left    *Ast
 	right   *Ast
+	// string
+	label string
+	// funcall
+	fname string
+	args []*Ast
 }
 
 func debugPrint(s string) {

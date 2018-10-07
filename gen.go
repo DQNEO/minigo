@@ -44,8 +44,39 @@ func emitExpr(ast *Ast) {
 		} else if ast.op == "*" {
 			emit("imul	%%ebx, %%eax")
 		}
+	} else if ast.typ == "string" {
+		emit("lea .%s(%%rip), %%rax", ast.label)
+	} else if ast.typ == "funcall" {
+		emitFuncall(ast)
 	} else {
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
+	}
+}
+
+var regs = []string{"rdi", "rsi"}
+
+func emitFuncall(funcall *Ast) {
+	fname := funcall.fname
+	args := funcall.args
+	for i, _ := range args {
+		emit("push %%%s", regs[i])
+	}
+
+	for _, arg := range args {
+		emitExpr(arg)
+		emit("push %%rax")
+	}
+
+	for i, _ := range args {
+		j := len(args) - 1 - i
+		emit("pop %%%s", regs[j])
+	}
+	emit("mov $0, %%rax")
+	emit("call %s", fname)
+
+	for i, _ := range args {
+		j := len(args) - 1 - i
+		emit("pop %%%s", regs[j])
 	}
 }
 
@@ -54,18 +85,17 @@ func generate(expr *Ast) {
 	emitFuncMainPrologue()
 
 	// call printf("%d\n", expr)
-	emit("push %%rdi")
-	emit("push %%rsi")
+	astString := &Ast{
+		typ: "string",
+		label: "L0",
+	}
+	funcall := &Ast{
+		typ:"funcall",
+		fname : "printf",
+		args: []*Ast{astString, expr},
+	}
 
-	emitExpr(expr)
-	emit("push %%rax")
-
-	emit("lea .L0(%%rip), %%rdi") // first argument
-	emit("pop %%rsi") // second argument
-	emit("mov $0, %%rax")
-	emit("call printf")
-	emit("pop %%rsi")
-	emit("pop %%rdi")
+	emitExpr(funcall)
 
 	emit("mov $0, %%eax") // return 0
 	emitFuncMainEpilogue()
