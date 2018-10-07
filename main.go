@@ -4,23 +4,27 @@ import "fmt"
 import (
 	"io/ioutil"
 	"strings"
-	"regexp"
 	"strconv"
+	"errors"
 )
 
 type Token struct {
-	typ  string
-	sval string
+	typ   string
+	sval  string
 }
 
 type Ast struct {
 	typ     string
 	ival    int
 	operand *Ast
+	left    *Ast
+	right   *Ast
 }
 
 var tokens []*Token
 var tokenIndex int
+var source string
+var sourceInex int
 
 func readFile(filename string) string {
 	bytes, err := ioutil.ReadFile(filename)
@@ -30,18 +34,87 @@ func readFile(filename string) string {
 	return string(bytes)
 }
 
+func getc() (byte,error) {
+	if sourceInex >= len(source) {
+		return 0, errors.New("EOF")
+	}
+	r := source[sourceInex]
+	sourceInex++
+	return r, nil
+}
+
+func ungetc() {
+	sourceInex--
+}
+
+func is_number(c byte) bool {
+	debugPrint(fmt.Sprintf("is_numeric %c", c))
+	return '0' <= c && c  <= '9'
+}
+
+
+func read_number(c1 byte) string {
+	var chars = []byte{c1}
+	for {
+		c,err := getc()
+		debugPrint("read_number")
+		if err != nil {
+			return string(chars)
+		}
+		if is_number(c) {
+			chars = append(chars, c)
+			continue
+		} else {
+			ungetc()
+			return string(chars)
+		}
+	}
+}
+
+func is_space(c byte) bool {
+	return  c == ' ' || c == '\t'
+}
+
+func skip_space() {
+	for {
+		c,err:= getc()
+		if err != nil {
+			return
+		}
+		if is_space(c) {
+			continue
+		} else {
+			ungetc()
+			return
+		}
+	}
+}
+
 func tokinize(s string) []*Token {
 	var r []*Token
-	trimed := strings.Trim(s, "\n")
-	chars := strings.Split(trimed, " ")
-	var regexNumber = regexp.MustCompile(`^[0-9]+$`)
-	for _, char := range chars {
-		debugPrint("char", char)
-		var tok *Token
-		if regexNumber.MatchString(char) {
-			tok = &Token{typ: "number", sval: strings.Trim(char, " \n")}
+	s = strings.Trim(s, "\n")
+	source = s
+	for  {
+		c, err := getc()
+		if err != nil {
+			return r
 		}
-
+		var tok *Token
+		switch  {
+		case c == 0:
+			return r
+		case is_number(c):
+			val := read_number(c)
+			tok = &Token{typ: "number", sval: val}
+		case c == ' ' || c == '\t' :
+			skip_space()
+			tok = &Token{typ: "space", sval: " "}
+		case c == '+':
+			tok = &Token{typ: "punct", sval: fmt.Sprintf("%c", c)}
+		default:
+			fmt.Printf("c='%c'\n", c)
+			panic("unknown char")
+		}
 		r = append(r, tok)
 	}
 
@@ -60,6 +133,9 @@ func readToken() *Token {
 
 func parseUnaryExpr() *Ast {
 	tok := readToken()
+	if tok.typ == "space" {
+		tok = readToken()
+	}
 	ival, _ := strconv.Atoi(tok.sval)
 	return &Ast{
 		typ: "uop",
@@ -72,6 +148,32 @@ func parseUnaryExpr() *Ast {
 
 func parseExpr() *Ast {
 	ast := parseUnaryExpr()
+	for {
+		tok := readToken()
+		if tok == nil {
+			return ast
+		}
+		if tok.typ == "space" {
+			continue
+		}
+		if tok.typ != "punct" {
+			return ast
+		}
+		if tok.sval == "+" {
+			right := parseUnaryExpr()
+			debugAst("right", right)
+			return &Ast{
+				typ:   "binop",
+				left:  ast,
+				right: right,
+			}
+		} else {
+			fmt.Printf("unknown token=%v\n", tok)
+			debugToken(tok)
+			panic("internal error")
+		}
+	}
+
 	return ast
 }
 
@@ -84,36 +186,55 @@ func generate(ast *Ast) {
 
 func emitAst(ast *Ast) {
 	if ast.typ == "uop" {
-		emitUop(ast)
+		fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
+	} else if ast.typ == "binop" {
+		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.left.operand.ival)
+		fmt.Printf("\tmovl	$%d, %%eax\n", ast.right.operand.ival)
+		fmt.Printf("\taddl	%%ebx, %%eax\n")
+	} else {
+		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}
 }
 
-func emitUop(ast *Ast) {
-	fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
+func debugPrint(s string) {
+	fmt.Printf("# %s\n", s)
 }
 
-func debugPrint(name string, v interface{}) {
-	fmt.Printf("# %s=%v\n", name, v)
+func debugPrintVar(name string, v interface{}) {
+	debugPrint(fmt.Sprintf("%s=%v", name, v))
+}
+
+func debugToken(tok *Token) {
+	debugPrint(fmt.Sprintf("tok:type=%s, sval=%s", tok.typ, tok.sval))
 }
 
 func debugTokens(tokens []*Token) {
 	for _, tok := range tokens {
-		debugPrint("tok", tok)
+		debugToken(tok)
 	}
 }
 
-func debugAst(ast *Ast) {
-	if ast.typ == "uop" {
-		debugPrint("ast.uop", ast.operand)
+func debugAst(name string, ast *Ast) {
+	if ast.typ == "int" {
+		debugPrintVar(name, fmt.Sprintf("%d", ast.ival))
+	} else if ast.typ == "uop" {
+		debugAst(name, ast.operand)
+	} else if ast.typ == "binop" {
+		debugPrintVar("ast.binop", ast.typ)
+		debugAst("left", ast.left)
+		debugAst("right", ast.right)
 	}
 }
 
 func main() {
 	s := readFile("/dev/stdin")
 	tokens = tokinize(s)
+	if len(tokens) == 0 {
+		panic("no token")
+	}
 	tokenIndex = 0
 	debugTokens(tokens)
 	ast := parseExpr()
-	debugAst(ast)
+	debugAst("root", ast)
 	generate(ast)
 }

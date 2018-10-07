@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 export PATH="/usr/lib/go-1.10/bin:$PATH"
 
 as_file="./out/a.s"
@@ -10,8 +10,8 @@ function run_case {
     rm -f $as_file
     echo -n "$code" | go run main.go > $as_file
     gcc $as_file
-    ./a.out || true
-    if [[ $? -eq 0 ]];then
+    local actual=`./a.out ; echo $?`
+    if [[ actual -eq $expected ]];then
         echo "ok"
     else
         echo "not ok"
@@ -21,5 +21,6 @@ function run_case {
 }
 run_case 0 0
 run_case 7 7
+run_case '2 + 5' 7
 
 echo "All tests passed"
