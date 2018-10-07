@@ -12,6 +12,7 @@ func emitLabel(format string, v ...interface{})  {
 
 
 func emitFuncMainPrologue() {
+	emit(".text")
 	emit(".globl	main")
 	emitLabel("main:")
 }
