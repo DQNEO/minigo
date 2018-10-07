@@ -320,7 +320,15 @@ func assert(cond bool, msg string) {
 
 func main() {
 	debugMode = true
-	s := readFile("/dev/stdin")
+
+	var sourceFile string
+	if len(os.Args) > 1 {
+		sourceFile = os.Args[1] + ".go"
+	} else {
+		sourceFile = "/dev/stdin"
+	}
+
+	s := readFile(sourceFile)
 
 	// tokenize
 	tokens = tokenize(s)
