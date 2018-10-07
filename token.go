@@ -185,7 +185,9 @@ func tokenize(s string) []*Token {
 			fmt.Printf("c='%c'\n", c)
 			panic("unknown char")
 		}
-		debugToken(tok)
+		if debugMode {
+			debugToken(tok)
+		}
 		r = append(r, tok)
 	}
 
