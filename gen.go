@@ -18,6 +18,7 @@ func emitFuncMainPrologue() {
 }
 
 func emitFuncMainEpilogue() {
+	emit("leave")
 	emit("ret")
 }
 
