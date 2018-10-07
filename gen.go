@@ -3,12 +3,12 @@ package main
 import "fmt"
 
 func emitFuncMainPrologue() {
-	fmt.Println("\t.globl	main")
-	fmt.Println("main:")
+	fmt.Printf("\t.globl	main\n")
+	fmt.Printf("main:\n")
 }
 
 func emitFuncMainEpilogue() {
-	fmt.Println("\tret")
+	fmt.Printf("\tret\n")
 }
 
 func emitExpr(ast *Ast) {
