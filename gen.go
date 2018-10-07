@@ -2,6 +2,15 @@ package main
 
 import "fmt"
 
+func emitFuncMainPrologue() {
+	fmt.Println("\t.globl	main")
+	fmt.Println("main:")
+}
+
+func emitFuncMainEpilogue() {
+	fmt.Println("\tret")
+}
+
 func emitExpr(ast *Ast) {
 	if ast.typ == "uop" {
 		fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
@@ -21,8 +30,7 @@ func emitExpr(ast *Ast) {
 }
 
 func generate(expr *Ast) {
-	fmt.Println("\t.globl	main")
-	fmt.Println("main:")
+	emitFuncMainPrologue()
 	emitExpr(expr)
-	fmt.Println("\tret")
+	emitFuncMainEpilogue()
 }
