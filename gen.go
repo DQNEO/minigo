@@ -13,7 +13,7 @@ func emitLabel(format string, v ...interface{})  {
 func emitDataSection() {
 	emit(".data")
 
-	// put first string
+	// put strings
 	for _, ast := range strings {
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.sval)
