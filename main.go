@@ -2,9 +2,6 @@ package main
 
 import "fmt"
 import (
-	"io/ioutil"
-	"strconv"
-	"errors"
 	"os"
 )
 
@@ -23,277 +20,6 @@ type Ast struct {
 	op string
 	left    *Ast
 	right   *Ast
-}
-
-var tokens []*Token
-var tokenIndex int
-var source string
-var sourceInex int
-
-func readFile(filename string) string {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	return string(bytes)
-}
-
-func getc() (byte,error) {
-	if sourceInex >= len(source) {
-		return 0, errors.New("EOF")
-	}
-	r := source[sourceInex]
-	//fmt.Printf("%c",r)
-	sourceInex++
-	return r, nil
-}
-
-func ungetc() {
-	sourceInex--
-}
-
-func is_number(c byte) bool {
-	return '0' <= c && c  <= '9'
-}
-
-func is_punct(c byte) bool {
-	switch c {
-	case '+', '-', '(', ')', '=', '{','}','*','[',']',',',':','.','!', '<','>','&','|', '%', '/':
-		return true
-	default:
-		return false
-	}
-}
-
-func read_number(c0 byte) string {
-	var chars = []byte{c0}
-	for {
-		c,err := getc()
-		if err != nil {
-			return string(chars)
-		}
-		if is_number(c) {
-			chars = append(chars, c)
-			continue
-		} else {
-			ungetc()
-			return string(chars)
-		}
-	}
-}
-
-func is_name(b byte) bool {
-	return b == '_' || is_alphabet(b)
-}
-
-
-func is_alphabet(b byte) bool {
-	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
-}
-
-func read_name(c0 byte) string {
-	var chars = []byte{c0}
-	for {
-		c,err := getc()
-		if err != nil {
-			return string(chars)
-		}
-		if is_name(c) {
-			chars = append(chars, c)
-			continue
-		} else {
-			ungetc()
-			return string(chars)
-		}
-	}
-}
-
-func read_string() string {
-	var chars = []byte{}
-	for {
-		c,err := getc()
-		if err != nil {
-			panic("invalid string literal")
-		}
-		if c == '\\' {
-			c,err = getc()
-			chars = append(chars, c)
-			continue
-		}
-		if c != '"' {
-			chars = append(chars, c)
-			continue
-		} else {
-			return string(chars)
-		}
-	}
-}
-
-func expect(e byte) {
-	c,err := getc()
-	if err != nil {
-		panic("unexpected EOF")
-	}
-	if c != e {
-		fmt.Printf("char '%c' expected, but got '%c'\n", e, c)
-		panic("unexpected char")
-	}
-}
-
-func read_char() string {
-	c,err := getc()
-	if err != nil {
-		panic("invalid char literal")
-	}
-	if c == '\\' {
-		c,err = getc()
-	}
-	debugPrint("gotc:" +  string(c))
-	expect('\'')
-	return string([]byte{c})
-}
-
-func is_space(c byte) bool {
-	return  c == ' ' || c == '\t'
-}
-
-func skip_space() {
-	for {
-		c,err:= getc()
-		if err != nil {
-			return
-		}
-		if is_space(c) {
-			continue
-		} else {
-			ungetc()
-			return
-		}
-	}
-}
-
-
-func tokenize(s string) []*Token {
-	var r []*Token
-	source = s
-	for  {
-		c, err := getc()
-		if err != nil {
-			return r
-		}
-		var tok *Token
-		switch  {
-		case c == 0:
-			return r
-		case c == '\n':
-			tok = &Token{typ:"newline"}
-		case is_number(c):
-			sval := read_number(c)
-			tok = &Token{typ: "number", sval: sval}
-		case is_name(c):
-			sval := read_name(c)
-			tok = &Token{typ:"ident", sval:sval}
-		case c == '\'':
-			sval := read_char()
-			tok = &Token{typ: "char", sval:sval}
-		case c == '"':
-			sval := read_string()
-			tok = &Token{typ: "string", sval:sval}
-		case c == ' ' || c == '\t' :
-			skip_space()
-			tok = &Token{typ: "space"}
-		case is_punct(c):
-			tok = &Token{typ: "punct", sval: fmt.Sprintf("%c", c)}
-		default:
-			fmt.Printf("c='%c'\n", c)
-			panic("unknown char")
-		}
-		debugToken(tok)
-		r = append(r, tok)
-	}
-
-	return r
-}
-
-func readToken() *Token {
-
-	if tokenIndex <= len(tokens)-1 {
-		r := tokens[tokenIndex]
-		tokenIndex++
-		return r
-	}
-	return nil
-}
-
-func parseUnaryExpr() *Ast {
-	tok := readToken()
-	if tok.typ == "space" {
-		tok = readToken()
-	}
-	ival, _ := strconv.Atoi(tok.sval)
-	return &Ast{
-		typ: "uop",
-		operand: &Ast{
-			typ:  "int",
-			ival: ival,
-		},
-	}
-}
-
-func parseExpr() *Ast {
-	ast := parseUnaryExpr()
-	for {
-		tok := readToken()
-		if tok == nil || tok.typ == "newline" {
-			return ast
-		}
-		if tok.typ == "space" {
-			continue
-		}
-		if tok.typ != "punct" {
-			return ast
-		}
-		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
-			right := parseUnaryExpr()
-			debugAst("right", right)
-			return &Ast{
-				typ:   "binop",
-				op: tok.sval,
-				left:  ast,
-				right: right,
-			}
-		} else {
-			debugToken(tok)
-			errorf("unknown token=%v\n", tok.sval)
-		}
-	}
-
-	return ast
-}
-
-func generate(ast *Ast) {
-	fmt.Println("\t.globl	main")
-	fmt.Println("main:")
-	emitAst(ast)
-	fmt.Println("\tret")
-}
-
-func emitAst(ast *Ast) {
-	if ast.typ == "uop" {
-		fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
-	} else if ast.typ == "binop" {
-		fmt.Printf("\tmovl	$%d, %%eax\n", ast.left.operand.ival)
-		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.right.operand.ival)
-		if ast.op == "+" {
-			fmt.Printf("\taddl	%%ebx, %%eax\n")
-		} else if ast.op == "-" {
-			fmt.Printf("\tsubl	%%ebx, %%eax\n")
-		} else if ast.op == "*" {
-			fmt.Printf("\timul	%%ebx, %%eax\n")
-		}
-	} else {
-		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
-	}
 }
 
 func debugPrint(s string) {
@@ -331,6 +57,7 @@ func assert(cond bool, msg string) {
 	}
 }
 
+
 func main() {
 	debugMode = true
 
@@ -341,10 +68,8 @@ func main() {
 		sourceFile = "/dev/stdin"
 	}
 
-	s := readFile(sourceFile)
-
 	// tokenize
-	tokens = tokenize(s)
+	tokenizeFromFile(sourceFile)
 	assert(len(tokens) > 0, "tokens should have length")
 
 	if debugMode {
@@ -353,29 +78,13 @@ func main() {
 
 	// parse
 	tokenIndex = 0
-	ast := parseExpr()
+	expr := parseExpr()
 
 	if debugMode {
 		debugPrint("==== Dump Ast ===")
-		debugAst("root", ast)
+		debugAst("root", expr)
 	}
 
 	// generate
-	generate(ast)
-}
-
-func renderTokens(tokens []*Token) {
-	debugPrint("==== Start Dump Tokens ===")
-	for _, tok := range tokens {
-		if tok.typ == "newline" {
-			fmt.Fprintf(os.Stderr, "\n")
-		} else if tok.typ == "space" {
-			fmt.Fprintf(os.Stderr, "  ")
-		} else if tok.typ == "string" {
-			fmt.Fprintf(os.Stderr, "\"%s\"", tok.sval)
-		} else {
-			fmt.Fprintf(os.Stderr, tok.sval)
-		}
-	}
-	debugPrint("==== End Dump Tokens ===")
+	generate(expr)
 }

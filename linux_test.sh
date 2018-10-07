@@ -8,7 +8,7 @@ function run_case {
     local code="$1"
     local expected=$2
     rm -f $as_file
-    echo  "$code" | go run main.go > $as_file
+    echo  "$code" | go run *.go > $as_file
     gcc $as_file
     local actual=`./a.out ; echo $?`
     if [[ actual -eq $expected ]];then
