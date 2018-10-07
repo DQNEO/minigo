@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"errors"
+	"os"
 )
 
 var debugMode = false
@@ -40,6 +41,7 @@ func getc() (byte,error) {
 		return 0, errors.New("EOF")
 	}
 	r := source[sourceInex]
+	//fmt.Printf("%c",r)
 	sourceInex++
 	return r, nil
 }
@@ -52,9 +54,17 @@ func is_number(c byte) bool {
 	return '0' <= c && c  <= '9'
 }
 
+func is_punct(c byte) bool {
+	switch c {
+	case '+', '-', '(', ')', '=', '{','}','*','[',']',',',':','.','!', '<','>','&','|', '%', '/':
+		return true
+	default:
+		return false
+	}
+}
 
-func read_number(c1 byte) string {
-	var chars = []byte{c1}
+func read_number(c0 byte) string {
+	var chars = []byte{c0}
 	for {
 		c,err := getc()
 		if err != nil {
@@ -68,6 +78,77 @@ func read_number(c1 byte) string {
 			return string(chars)
 		}
 	}
+}
+
+func is_name(b byte) bool {
+	return b == '_' || is_alphabet(b)
+}
+
+
+func is_alphabet(b byte) bool {
+	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
+}
+
+func read_name(c0 byte) string {
+	var chars = []byte{c0}
+	for {
+		c,err := getc()
+		if err != nil {
+			return string(chars)
+		}
+		if is_name(c) {
+			chars = append(chars, c)
+			continue
+		} else {
+			ungetc()
+			return string(chars)
+		}
+	}
+}
+
+func read_string() string {
+	var chars = []byte{}
+	for {
+		c,err := getc()
+		if err != nil {
+			panic("invalid string literal")
+		}
+		if c == '\\' {
+			c,err = getc()
+			chars = append(chars, c)
+			continue
+		}
+		if c != '"' {
+			chars = append(chars, c)
+			continue
+		} else {
+			return string(chars)
+		}
+	}
+}
+
+func expect(e byte) {
+	c,err := getc()
+	if err != nil {
+		panic("unexpected EOF")
+	}
+	if c != e {
+		fmt.Printf("char '%c' expected, but got '%c'\n", e, c)
+		panic("unexpected char")
+	}
+}
+
+func read_char() string {
+	c,err := getc()
+	if err != nil {
+		panic("invalid char literal")
+	}
+	if c == '\\' {
+		c,err = getc()
+	}
+	debugPrint("gotc:" +  string(c))
+	expect('\'')
+	return string([]byte{c})
 }
 
 func is_space(c byte) bool {
@@ -89,7 +170,8 @@ func skip_space() {
 	}
 }
 
-func tokinize(s string) []*Token {
+
+func tokenize(s string) []*Token {
 	var r []*Token
 	source = s
 	for  {
@@ -104,17 +186,27 @@ func tokinize(s string) []*Token {
 		case c == '\n':
 			tok = &Token{typ:"newline"}
 		case is_number(c):
-			val := read_number(c)
-			tok = &Token{typ: "number", sval: val}
+			sval := read_number(c)
+			tok = &Token{typ: "number", sval: sval}
+		case is_name(c):
+			sval := read_name(c)
+			tok = &Token{typ:"ident", sval:sval}
+		case c == '\'':
+			sval := read_char()
+			tok = &Token{typ: "char", sval:sval}
+		case c == '"':
+			sval := read_string()
+			tok = &Token{typ: "string", sval:sval}
 		case c == ' ' || c == '\t' :
 			skip_space()
 			tok = &Token{typ: "space"}
-		case c == '+':
+		case is_punct(c):
 			tok = &Token{typ: "punct", sval: fmt.Sprintf("%c", c)}
 		default:
 			fmt.Printf("c='%c'\n", c)
 			panic("unknown char")
 		}
+		debugToken(tok)
 		r = append(r, tok)
 	}
 
@@ -197,7 +289,7 @@ func emitAst(ast *Ast) {
 }
 
 func debugPrint(s string) {
-	fmt.Printf("# %s\n", s)
+	fmt.Fprintf(os.Stderr, "# %s\n", s)
 }
 
 func debugPrintVar(name string, v interface{}) {
@@ -206,12 +298,6 @@ func debugPrintVar(name string, v interface{}) {
 
 func debugToken(tok *Token) {
 	debugPrint(fmt.Sprintf("tok: type= %7s, sval=\"%s\"", tok.typ, tok.sval))
-}
-
-func debugTokens(tokens []*Token) {
-	for _, tok := range tokens {
-		debugToken(tok)
-	}
 }
 
 func debugAst(name string, ast *Ast) {
@@ -237,13 +323,11 @@ func main() {
 	s := readFile("/dev/stdin")
 
 	// tokenize
-	tokens = tokinize(s)
+	tokens = tokenize(s)
 	assert(len(tokens) > 0, "tokens should have length")
 
 	if debugMode {
-		debugPrint("==== Start Dump Tokens ===")
-		debugTokens(tokens)
-		debugPrint("==== End Dump Tokens ===")
+		renderTokens(tokens)
 	}
 
 	// parse
@@ -257,4 +341,20 @@ func main() {
 
 	// generate
 	generate(ast)
+}
+
+func renderTokens(tokens []*Token) {
+	debugPrint("==== Start Dump Tokens ===")
+	for _, tok := range tokens {
+		if tok.typ == "newline" {
+			fmt.Fprintf(os.Stderr, "\n")
+		} else if tok.typ == "space" {
+			fmt.Fprintf(os.Stderr, "  ")
+		} else if tok.typ == "string" {
+			fmt.Fprintf(os.Stderr, "\"%s\"", tok.sval)
+		} else {
+			fmt.Fprintf(os.Stderr, tok.sval)
+		}
+	}
+	debugPrint("==== End Dump Tokens ===")
 }
