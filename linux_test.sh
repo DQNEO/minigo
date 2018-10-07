@@ -23,5 +23,6 @@ run_case 0 0
 run_case 7 7
 run_case '2 + 5' 7
 run_case '2 * 3' 6
+run_case '3 -2' 1
 
 echo "All tests passed"

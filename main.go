@@ -253,7 +253,7 @@ func parseExpr() *Ast {
 		if tok.typ != "punct" {
 			return ast
 		}
-		if tok.sval == "+" || tok.sval == "*" {
+		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
 			right := parseUnaryExpr()
 			debugAst("right", right)
 			return &Ast{
@@ -282,10 +282,12 @@ func emitAst(ast *Ast) {
 	if ast.typ == "uop" {
 		fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
 	} else if ast.typ == "binop" {
-		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.left.operand.ival)
-		fmt.Printf("\tmovl	$%d, %%eax\n", ast.right.operand.ival)
+		fmt.Printf("\tmovl	$%d, %%eax\n", ast.left.operand.ival)
+		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.right.operand.ival)
 		if ast.op == "+" {
 			fmt.Printf("\taddl	%%ebx, %%eax\n")
+		} else if ast.op == "-" {
+			fmt.Printf("\tsubl	%%ebx, %%eax\n")
 		} else if ast.op == "*" {
 			fmt.Printf("\timul	%%ebx, %%eax\n")
 		}
