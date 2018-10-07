@@ -10,11 +10,20 @@ func emitLabel(format string, v ...interface{})  {
 	fmt.Printf(format + "\n", v...)
 }
 
+func emitDataSection() {
+	emit(".data")
+
+	// put dummy label
+	emitLabel(".L0:")
+	emit(".string \"%%d\\n\"")
+}
 
 func emitFuncMainPrologue() {
 	emit(".text")
 	emit(".globl	main")
 	emitLabel("main:")
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
 }
 
 func emitFuncMainEpilogue() {
@@ -41,7 +50,23 @@ func emitExpr(ast *Ast) {
 }
 
 func generate(expr *Ast) {
+	emitDataSection()
 	emitFuncMainPrologue()
+
+	// call printf("%d\n", expr)
+	emit("push %%rdi")
+	emit("push %%rsi")
+
 	emitExpr(expr)
+	emit("push %%rax")
+
+	emit("lea .L0(%%rip), %%rdi") // first argument
+	emit("pop %%rsi") // second argument
+	emit("mov $0, %%rax")
+	emit("call printf")
+	emit("pop %%rsi")
+	emit("pop %%rdi")
+
+	emit("mov $0, %%eax") // return 0
 	emitFuncMainEpilogue()
 }
