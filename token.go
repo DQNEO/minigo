@@ -194,7 +194,7 @@ func tokenize(s string) []*Token {
 
 
 func renderTokens(tokens []*Token) {
-	debugPrint("==== Start Dump Tokens ===")
+	debugPrint("==== Start Render Tokens ===")
 	for _, tok := range tokens {
 		if tok.typ == "newline" {
 			fmt.Fprintf(os.Stderr, "\n")
@@ -206,7 +206,7 @@ func renderTokens(tokens []*Token) {
 			fmt.Fprintf(os.Stderr, tok.sval)
 		}
 	}
-	debugPrint("==== End Dump Tokens ===")
+	debugPrint("==== End Render Tokens ===")
 }
 
 func tokenizeFromFile(path string) {
