@@ -14,8 +14,6 @@ type Token struct {
 
 type Ast struct {
 	typ     string
-	// string
-	sval string
 	// int
 	ival    int
 	// unary
@@ -25,7 +23,8 @@ type Ast struct {
 	left    *Ast
 	right   *Ast
 	// string
-	label string
+	sval   string
+	slabel string
 	// funcall
 	fname string
 	args []*Ast

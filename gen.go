@@ -13,9 +13,11 @@ func emitLabel(format string, v ...interface{})  {
 func emitDataSection() {
 	emit(".data")
 
-	// put dummy label
-	emitLabel(".L0:")
-	emit(".string \"%%d\\n\"")
+	// put first string
+	for _, ast := range strings {
+		emitLabel(".%s:", ast.slabel)
+		emit(".string \"%s\"", ast.sval)
+	}
 }
 
 func emitFuncMainPrologue() {
@@ -45,7 +47,7 @@ func emitExpr(ast *Ast) {
 			emit("imul	%%ebx, %%eax")
 		}
 	} else if ast.typ == "string" {
-		emit("lea .%s(%%rip), %%rax", ast.label)
+		emit("lea .%s(%%rip), %%rax", ast.slabel)
 	} else if ast.typ == "funcall" {
 		emitFuncall(ast)
 	} else {

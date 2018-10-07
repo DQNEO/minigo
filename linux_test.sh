@@ -19,10 +19,10 @@ function run_case {
     fi
 
 }
-run_case 'printf("dummy",0)' 0
-run_case 'printf("dummy",7)' 7
-run_case 'printf("dummy", 2 + 5)' 7
-run_case 'printf("dummy", 2 * 3)' 6
-run_case 'printf("dummy", 3 -2)' 1
+run_case 'printf("%d",0)' 0
+run_case 'printf("%d",7)' 7
+run_case 'printf("%d", 2 + 5)' 7
+run_case 'printf("%d", 2 * 3)' 6
+run_case 'printf("%d", 3 -2)' 1
 
 echo "All tests passed"

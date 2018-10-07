@@ -1,6 +1,7 @@
 package main
 
 import "strconv"
+import "fmt"
 
 var tokens []*Token
 var tokenIndex int
@@ -38,6 +39,20 @@ func parseIdentOrFuncall(name string) *Ast {
 	return nil
 }
 
+var stringIndex = 0
+var strings []*Ast
+
+func newAstString(sval string) *Ast {
+	ast := &Ast{
+		typ:    "string",
+		sval:   sval,
+		slabel: fmt.Sprintf("L%d",stringIndex),
+	}
+	stringIndex++
+	strings = append(strings, ast)
+	return ast
+}
+
 func parseUnaryExpr() *Ast {
 	tok := readToken()
 	if tok.typ == "space" {
@@ -46,11 +61,7 @@ func parseUnaryExpr() *Ast {
 
 	switch tok.typ {
 	case "string":
-		return &Ast{
-			typ: "string",
-			sval: tok.sval,
-			label:"L0",
-		}
+		return newAstString(tok.sval)
 	case "ident":
 		return parseIdentOrFuncall(tok.sval)
 	case "number":
