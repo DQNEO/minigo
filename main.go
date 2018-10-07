@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-var debugMode = 0
+var debugMode = false
 
 type Token struct {
 	typ   string
@@ -50,7 +50,6 @@ func ungetc() {
 }
 
 func is_number(c byte) bool {
-	debugPrint(fmt.Sprintf("is_numeric %c", c))
 	return '0' <= c && c  <= '9'
 }
 
@@ -59,7 +58,6 @@ func read_number(c1 byte) string {
 	var chars = []byte{c1}
 	for {
 		c,err := getc()
-		debugPrint("read_number")
 		if err != nil {
 			return string(chars)
 		}
@@ -228,19 +226,35 @@ func debugAst(name string, ast *Ast) {
 	}
 }
 
-func main() {
-	debugMode = 1
-	s := readFile("/dev/stdin")
-	tokens = tokinize(s)
-	if len(tokens) == 0 {
-		panic("no token")
+func assert(cond bool, msg string) {
+	if !cond {
+		panic(fmt.Sprintf("assertion failed: %s", msg))
 	}
-	debugPrint("==== Start Dump Tokens ===")
+}
+
+func main() {
+	debugMode = true
+	s := readFile("/dev/stdin")
+
+	// tokenize
+	tokens = tokinize(s)
+	assert(len(tokens) > 0, "tokens should have length")
+
+	if debugMode {
+		debugPrint("==== Start Dump Tokens ===")
+		debugTokens(tokens)
+		debugPrint("==== End Dump Tokens ===")
+	}
+
+	// parse
 	tokenIndex = 0
-	debugTokens(tokens)
-	debugPrint("==== End Dump Tokens ===")
 	ast := parseExpr()
-	debugPrint("==== Dump Ast ===")
-	debugAst("root", ast)
+
+	if debugMode {
+		debugPrint("==== Dump Ast ===")
+		debugAst("root", ast)
+	}
+
+	// generate
 	generate(ast)
 }
