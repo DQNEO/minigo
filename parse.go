@@ -21,17 +21,44 @@ func unreadToken() {
 	tokenIndex--
 }
 
+func (tok *Token) isPunct(punct string) bool {
+	return tok != nil && tok.typ == "punct"  && tok.sval == punct
+}
+
+func expectPunct(punct string) {
+	tok := readToken()
+	if tok.isPunct(punct) {
+		errorf("punct %s expected but got %v", punct, tok)
+	}
+}
+
+func readFuncallArgs() []*Ast {
+	var r []*Ast
+	for {
+		tok := readToken()
+		if tok.isPunct(")") {
+			return r
+		}
+		unreadToken()
+		arg := parseExpr()
+		r = append(r, arg)
+		tok = readToken()
+		if tok.isPunct(")") {
+			return r
+		} else if tok.isPunct(",") {
+			continue
+		}
+	}
+}
+
 func parseIdentOrFuncall(name string) *Ast {
 	tok := readToken()
-	if tok != nil && tok.typ == "punct" && tok.sval == "(" {
-		arg1 := parseExpr()
-		readToken() // expect ","
-		arg2 := parseExpr()
-		readToken() // expect "):
+	if tok.isPunct("(") {
+		args := readFuncallArgs()
 		return &Ast{
 			typ: "funcall",
 			fname : name,
-			args:[]*Ast{arg1, arg2},
+			args:args,
 		}
 	}
 
