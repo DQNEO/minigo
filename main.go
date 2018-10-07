@@ -3,7 +3,6 @@ package main
 import "fmt"
 import (
 	"io/ioutil"
-	"strings"
 	"strconv"
 	"errors"
 )
@@ -92,7 +91,6 @@ func skip_space() {
 
 func tokinize(s string) []*Token {
 	var r []*Token
-	s = strings.Trim(s, "\n")
 	source = s
 	for  {
 		c, err := getc()
@@ -103,12 +101,14 @@ func tokinize(s string) []*Token {
 		switch  {
 		case c == 0:
 			return r
+		case c == '\n':
+			tok = &Token{typ:"newline"}
 		case is_number(c):
 			val := read_number(c)
 			tok = &Token{typ: "number", sval: val}
 		case c == ' ' || c == '\t' :
 			skip_space()
-			tok = &Token{typ: "space", sval: " "}
+			tok = &Token{typ: "space"}
 		case c == '+':
 			tok = &Token{typ: "punct", sval: fmt.Sprintf("%c", c)}
 		default:
@@ -150,7 +150,7 @@ func parseExpr() *Ast {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
-		if tok == nil {
+		if tok == nil || tok.typ == "newline" {
 			return ast
 		}
 		if tok.typ == "space" {
