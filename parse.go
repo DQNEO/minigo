@@ -55,7 +55,7 @@ func parseExpr() *Ast {
 			}
 		} else {
 			debugToken(tok)
-			errorf("unknown token=%v\n", tok.sval)
+			errorf("unable to handle token=%v\n", tok.sval)
 		}
 	}
 
