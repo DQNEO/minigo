@@ -8,6 +8,8 @@ import (
 	"errors"
 )
 
+var debugMode = 0
+
 type Token struct {
 	typ   string
 	sval  string
@@ -205,7 +207,7 @@ func debugPrintVar(name string, v interface{}) {
 }
 
 func debugToken(tok *Token) {
-	debugPrint(fmt.Sprintf("tok:type=%s, sval=%s", tok.typ, tok.sval))
+	debugPrint(fmt.Sprintf("tok: type= %7s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
 func debugTokens(tokens []*Token) {
@@ -227,14 +229,18 @@ func debugAst(name string, ast *Ast) {
 }
 
 func main() {
+	debugMode = 1
 	s := readFile("/dev/stdin")
 	tokens = tokinize(s)
 	if len(tokens) == 0 {
 		panic("no token")
 	}
+	debugPrint("==== Start Dump Tokens ===")
 	tokenIndex = 0
 	debugTokens(tokens)
+	debugPrint("==== End Dump Tokens ===")
 	ast := parseExpr()
+	debugPrint("==== Dump Ast ===")
 	debugAst("root", ast)
 	generate(ast)
 }
