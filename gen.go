@@ -2,27 +2,36 @@ package main
 
 import "fmt"
 
+func emit(format string, v ...interface{})  {
+	fmt.Printf("\t" + format + "\n", v...)
+}
+
+func emitLabel(format string, v ...interface{})  {
+	fmt.Printf(format + "\n", v...)
+}
+
+
 func emitFuncMainPrologue() {
-	fmt.Printf("\t.globl	main\n")
-	fmt.Printf("main:\n")
+	emit(".globl	main")
+	emitLabel("main:")
 }
 
 func emitFuncMainEpilogue() {
-	fmt.Printf("\tret\n")
+	emit("ret")
 }
 
 func emitExpr(ast *Ast) {
 	if ast.typ == "uop" {
-		fmt.Printf("\tmovl	$%d, %%eax\n", ast.operand.ival)
+		emit("movl	$%d, %%eax", ast.operand.ival)
 	} else if ast.typ == "binop" {
-		fmt.Printf("\tmovl	$%d, %%eax\n", ast.left.operand.ival)
-		fmt.Printf("\tmovl	$%d, %%ebx\n", ast.right.operand.ival)
+		emit("movl	$%d, %%eax", ast.left.operand.ival)
+		emit("movl	$%d, %%ebx", ast.right.operand.ival)
 		if ast.op == "+" {
-			fmt.Printf("\taddl	%%ebx, %%eax\n")
+			emit("addl	%%ebx, %%eax")
 		} else if ast.op == "-" {
-			fmt.Printf("\tsubl	%%ebx, %%eax\n")
+			emit("subl	%%ebx, %%eax")
 		} else if ast.op == "*" {
-			fmt.Printf("\timul	%%ebx, %%eax\n")
+			emit("imul	%%ebx, %%eax")
 		}
 	} else {
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
