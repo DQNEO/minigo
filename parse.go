@@ -271,7 +271,7 @@ func parseTopLevels() []*Ast {
 			r = append(r, ast)
 			continue
 		} else {
-			errorf("unknown token %v", tok)
+			errorf("unable to handle token %v", tok)
 		}
 	}
 	return r
