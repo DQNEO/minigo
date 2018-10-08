@@ -211,8 +211,8 @@ func renderTokens(tokens []*Token) {
 	debugPrint("==== End Render Tokens ===")
 }
 
-func tokenizeFromFile(path string) {
+func tokenizeFromFile(path string) []*Token{
 	s := readFile(path)
-	tokens = tokenize(s)
+	return tokenize(s)
 }
 

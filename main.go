@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// tokenize
-	tokenizeFromFile(sourceFile)
+	tokens := tokenizeFromFile(sourceFile)
 	assert(len(tokens) > 0, "tokens should have length")
 
 	if debugMode {

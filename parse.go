@@ -3,8 +3,6 @@ package main
 import "strconv"
 import "fmt"
 
-var tokens []*Token
-
 type TokenStream struct {
 	tokens []*Token
 	index int
@@ -13,8 +11,8 @@ type TokenStream struct {
 var ts *TokenStream
 
 func (ts *TokenStream) readToken() *Token{
-	if ts.index <= len(tokens)-1 {
-		r := tokens[ts.index]
+	if ts.index <= len(ts.tokens)-1 {
+		r := ts.tokens[ts.index]
 		ts.index++
 		return r
 	}
