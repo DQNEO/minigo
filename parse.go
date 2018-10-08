@@ -4,15 +4,15 @@ import "strconv"
 import "fmt"
 
 type Ast struct {
-	typ     string
+	typ string
 	// int
-	ival    int
+	ival int
 	// unary
 	operand *Ast
 	// binop
-	op string
-	left    *Ast
-	right   *Ast
+	op    string
+	left  *Ast
+	right *Ast
 	// string
 	sval   string
 	slabel string
@@ -20,7 +20,7 @@ type Ast struct {
 	stmts []*Ast
 	// funcall
 	fname string
-	args []*Ast
+	args  []*Ast
 	// funcdef
 	body *Ast
 	// package
@@ -31,12 +31,12 @@ type Ast struct {
 
 type TokenStream struct {
 	tokens []*Token
-	index int
+	index  int
 }
 
 var ts *TokenStream
 
-func (ts *TokenStream) readToken() *Token{
+func (ts *TokenStream) readToken() *Token {
 	if ts.index <= len(ts.tokens)-1 {
 		r := ts.tokens[ts.index]
 		ts.index++
@@ -62,7 +62,7 @@ func unreadToken() {
 }
 
 func (tok *Token) isPunct(punct string) bool {
-	return tok != nil && tok.typ == "punct"  && tok.sval == punct
+	return tok != nil && tok.typ == "punct" && tok.sval == punct
 }
 
 func skipSpaceToken() {
@@ -115,9 +115,9 @@ func parseIdentOrFuncall(name string) *Ast {
 	if tok.isPunct("(") {
 		args := readFuncallArgs()
 		return &Ast{
-			typ: "funcall",
-			fname : name,
-			args:args,
+			typ:   "funcall",
+			fname: name,
+			args:  args,
 		}
 	}
 
@@ -132,7 +132,7 @@ func newAstString(sval string) *Ast {
 	ast := &Ast{
 		typ:    "string",
 		sval:   sval,
-		slabel: fmt.Sprintf("L%d",stringIndex),
+		slabel: fmt.Sprintf("L%d", stringIndex),
 	}
 	stringIndex++
 	strings = append(strings, ast)
@@ -182,11 +182,11 @@ func parseExpr() *Ast {
 			right := parseUnaryExpr()
 			return &Ast{
 				typ:   "binop",
-				op: tok.sval,
+				op:    tok.sval,
 				left:  ast,
 				right: right,
 			}
-		} else if tok.sval == "," || tok.sval == ")"{ // end of funcall argument
+		} else if tok.sval == "," || tok.sval == ")" { // end of funcall argument
 			unreadToken()
 			return ast
 		} else {
@@ -236,11 +236,11 @@ func parseFuncDef() *Ast {
 	stmts := parseCompoundStmt()
 
 	return &Ast{
-		typ: "funcdef",
+		typ:   "funcdef",
 		fname: fname.sval,
-		body : &Ast{
-			typ:"compound",
-			stmts:stmts,
+		body: &Ast{
+			typ:   "compound",
+			stmts: stmts,
 		},
 	}
 }
@@ -260,13 +260,13 @@ func parseTopLevels() []*Ast {
 			tok = readToken()
 			assert(tok.typ == "ident", "expect ident")
 			ast := &Ast{
-				typ: "package",
+				typ:     "package",
 				pkgname: tok.sval,
 			}
 			readToken() // expect newline
 			r = append(r, ast)
 			continue
-		} else if tok.typ == "ident"  && tok.sval == "func" {
+		} else if tok.typ == "ident" && tok.sval == "func" {
 			ast := parseFuncDef()
 			r = append(r, ast)
 			continue

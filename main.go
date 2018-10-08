@@ -24,7 +24,7 @@ func main() {
 
 	t := &TokenStream{
 		tokens: tokens,
-		index: 0,
+		index:  0,
 	}
 	// parse
 	asts := parse(t)

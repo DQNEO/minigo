@@ -2,12 +2,12 @@ package main
 
 import "fmt"
 
-func emit(format string, v ...interface{})  {
-	fmt.Printf("\t" + format + "\n", v...)
+func emit(format string, v ...interface{}) {
+	fmt.Printf("\t"+format+"\n", v...)
 }
 
-func emitLabel(format string, v ...interface{})  {
-	fmt.Printf(format + "\n", v...)
+func emitLabel(format string, v ...interface{}) {
+	fmt.Printf(format+"\n", v...)
 }
 
 func emitDataSection() {

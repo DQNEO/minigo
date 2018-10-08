@@ -5,20 +5,19 @@ import "io/ioutil"
 import "os"
 import "errors"
 
-
 type byteStream struct {
-	source string
+	source     string
 	sourceInex int
 }
 
 type Token struct {
-	typ   string
-	sval  string
+	typ  string
+	sval string
 }
 
 var bs *byteStream
 
-func (bs *byteStream) getc() (byte,error) {
+func (bs *byteStream) getc() (byte, error) {
 	if bs.sourceInex >= len(bs.source) {
 		return 0, errors.New("EOF")
 	}
@@ -32,7 +31,7 @@ func (bs *byteStream) ungetc() {
 	bs.sourceInex--
 }
 
-func getc() (byte,error) {
+func getc() (byte, error) {
 	return bs.getc()
 }
 
@@ -41,12 +40,12 @@ func ungetc() {
 }
 
 func is_number(c byte) bool {
-	return '0' <= c && c  <= '9'
+	return '0' <= c && c <= '9'
 }
 
 func is_punct(c byte) bool {
 	switch c {
-	case '+', '-', '(', ')', '=', '{','}','*','[',']',',',':','.','!', '<','>','&','|', '%', '/':
+	case '+', '-', '(', ')', '=', '{', '}', '*', '[', ']', ',', ':', '.', '!', '<', '>', '&', '|', '%', '/':
 		return true
 	default:
 		return false
@@ -56,7 +55,7 @@ func is_punct(c byte) bool {
 func read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
-		c,err := getc()
+		c, err := getc()
 		if err != nil {
 			return string(chars)
 		}
@@ -74,7 +73,6 @@ func is_name(b byte) bool {
 	return b == '_' || is_alphabet(b)
 }
 
-
 func is_alphabet(b byte) bool {
 	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
 }
@@ -82,7 +80,7 @@ func is_alphabet(b byte) bool {
 func read_name(c0 byte) string {
 	var chars = []byte{c0}
 	for {
-		c,err := getc()
+		c, err := getc()
 		if err != nil {
 			return string(chars)
 		}
@@ -99,12 +97,12 @@ func read_name(c0 byte) string {
 func read_string() string {
 	var chars = []byte{}
 	for {
-		c,err := getc()
+		c, err := getc()
 		if err != nil {
 			panic("invalid string literal")
 		}
 		if c == '\\' {
-			c,err = getc()
+			c, err = getc()
 			chars = append(chars, c)
 			continue
 		}
@@ -118,7 +116,7 @@ func read_string() string {
 }
 
 func expect(e byte) {
-	c,err := getc()
+	c, err := getc()
 	if err != nil {
 		panic("unexpected EOF")
 	}
@@ -129,25 +127,25 @@ func expect(e byte) {
 }
 
 func read_char() string {
-	c,err := getc()
+	c, err := getc()
 	if err != nil {
 		panic("invalid char literal")
 	}
 	if c == '\\' {
-		c,err = getc()
+		c, err = getc()
 	}
-	debugPrint("gotc:" +  string(c))
+	debugPrint("gotc:" + string(c))
 	expect('\'')
 	return string([]byte{c})
 }
 
 func is_space(c byte) bool {
-	return  c == ' ' || c == '\t'
+	return c == ' ' || c == '\t'
 }
 
 func skip_space() {
 	for {
-		c,err:= getc()
+		c, err := getc()
 		if err != nil {
 			return
 		}
@@ -171,33 +169,33 @@ func readFile(filename string) string {
 func tokenize(s string) []*Token {
 	var r []*Token
 	bs = &byteStream{
-		source: s,
-		sourceInex:0,
+		source:     s,
+		sourceInex: 0,
 	}
-	for  {
+	for {
 		c, err := getc()
 		if err != nil {
 			return r
 		}
 		var tok *Token
-		switch  {
+		switch {
 		case c == 0:
 			return r
 		case c == '\n':
-			tok = &Token{typ:"newline"}
+			tok = &Token{typ: "newline"}
 		case is_number(c):
 			sval := read_number(c)
 			tok = &Token{typ: "number", sval: sval}
 		case is_name(c):
 			sval := read_name(c)
-			tok = &Token{typ:"ident", sval:sval}
+			tok = &Token{typ: "ident", sval: sval}
 		case c == '\'':
 			sval := read_char()
-			tok = &Token{typ: "char", sval:sval}
+			tok = &Token{typ: "char", sval: sval}
 		case c == '"':
 			sval := read_string()
-			tok = &Token{typ: "string", sval:sval}
-		case c == ' ' || c == '\t' :
+			tok = &Token{typ: "string", sval: sval}
+		case c == ' ' || c == '\t':
 			skip_space()
 			tok = &Token{typ: "space"}
 		case is_punct(c):
@@ -215,7 +213,6 @@ func tokenize(s string) []*Token {
 	return r
 }
 
-
 func renderTokens(tokens []*Token) {
 	debugPrint("==== Start Render Tokens ===")
 	for _, tok := range tokens {
@@ -232,8 +229,7 @@ func renderTokens(tokens []*Token) {
 	debugPrint("==== End Render Tokens ===")
 }
 
-func tokenizeFromFile(path string) []*Token{
+func tokenizeFromFile(path string) []*Token {
 	s := readFile(path)
 	return tokenize(s)
 }
-

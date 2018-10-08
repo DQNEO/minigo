@@ -24,11 +24,11 @@ func debugAst(name string, ast *Ast) {
 		for _, arg := range ast.args {
 			debugPrintVar("arg", arg)
 		}
-	case  "int" :
+	case "int":
 		debugPrintVar(name, fmt.Sprintf("%d", ast.ival))
-	case "uop" :
+	case "uop":
 		debugAst(name, ast.operand)
-	case "binop" :
+	case "binop":
 		debugPrintVar("ast.binop", ast.typ)
 		debugAst("left", ast.left)
 		debugAst("right", ast.right)
@@ -39,9 +39,9 @@ func debugAst(name string, ast *Ast) {
 
 func errorf(format string, v ...interface{}) {
 	/*
-	currentTokenIndex := ts.index - 1
-	fmt.Printf("%v %v %v\n",
-		ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
+		currentTokenIndex := ts.index - 1
+		fmt.Printf("%v %v %v\n",
+			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
 	*/
 	s := fmt.Sprintf(format, v...)
 	panic(s)
@@ -52,5 +52,3 @@ func assert(cond bool, msg string) {
 		panic(fmt.Sprintf("assertion failed: %s", msg))
 	}
 }
-
-
