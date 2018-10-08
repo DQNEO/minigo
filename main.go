@@ -95,13 +95,13 @@ func main() {
 		index: 0,
 	}
 	// parse
-	expr := parseExpr()
+	ast := parse()
 
 	if debugMode {
 		debugPrint("==== Dump Ast ===")
-		debugAst("root", expr)
+		debugAst("root", ast)
 	}
 
 	// generate
-	generate(expr)
+	generate(ast)
 }

@@ -115,6 +115,10 @@ func parseUnaryExpr() *Ast {
 	return nil
 }
 
+func parse() *Ast {
+	return parseExpr()
+}
+
 func parseExpr() *Ast {
 	ast := parseUnaryExpr()
 	for {
