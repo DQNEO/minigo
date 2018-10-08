@@ -221,12 +221,17 @@ func parseFuncDef() *Ast {
 	}
 }
 
-func parse(t *TokenStream) *Ast {
-	ts = t
+func parseTopLevels() []*Ast {
+	var r []*Ast
 	tok := readToken()
 	var ast *Ast
 	if tok.typ == "ident"  && tok.sval == "func" {
 		ast = parseFuncDef()
 	}
-	return ast
+	return append(r, ast)
+}
+
+func parse(t *TokenStream) []*Ast {
+	ts = t
+	return parseTopLevels()
 }

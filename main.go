@@ -110,13 +110,13 @@ func main() {
 		index: 0,
 	}
 	// parse
-	ast := parse(t)
+	asts := parse(t)
 
 	if debugMode {
 		debugPrint("==== Dump Ast ===")
-		debugAst("root", ast)
+		debugAst("root", asts[0])
 	}
 
 	// generate
-	generate(ast)
+	generate(asts[0])
 }
