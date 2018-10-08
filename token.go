@@ -102,6 +102,7 @@ func read_string() string {
 			panic("invalid string literal")
 		}
 		if c == '\\' {
+			chars = append(chars, c)
 			c, err = getc()
 			chars = append(chars, c)
 			continue
