@@ -6,33 +6,48 @@ import "os"
 import "errors"
 
 type byteStream struct {
-	source     string
-	sourceInex int
+	filename  string
+	source    string
+	nextIndex int
+	line      int
+	column    int
 }
 
 type Token struct {
 	typ  string
 	sval string
+	filename string
+	line int
+	column int
 }
 
 var bs *byteStream
 
 func (bs *byteStream) getc() (byte, error) {
-	if bs.sourceInex >= len(bs.source) {
+	if bs.nextIndex >= len(bs.source) {
 		return 0, errors.New("EOF")
 	}
-	r := bs.source[bs.sourceInex]
-	//fmt.Printf("%c",r)
-	bs.sourceInex++
+	r := bs.source[bs.nextIndex]
+	if r == '\n' {
+		bs.line++
+		bs.column = 1
+	}
+	bs.nextIndex++
+	bs.column++
 	return r, nil
 }
 
 func (bs *byteStream) ungetc() {
-	bs.sourceInex--
+	bs.nextIndex--
+	r := bs.source[bs.nextIndex]
+	if r == '\n' {
+		bs.line--
+	}
 }
 
 func (tok *Token) String() string {
-	return fmt.Sprintf("(%s \"%s\")", tok.typ, tok.sval)
+	return fmt.Sprintf("(%s \"%s\" %s:%d:%d)",
+		tok.typ, tok.sval, tok.filename, tok.line, tok.column)
 }
 
 func getc() (byte, error) {
@@ -171,12 +186,18 @@ func readFile(filename string) string {
 	return string(bytes)
 }
 
-func tokenize(s string) []*Token {
-	var r []*Token
-	bs = &byteStream{
-		source:     s,
-		sourceInex: 0,
+func makeToken(typ string, sval string) *Token {
+	return &Token{
+		typ: typ,
+		sval: sval,
+		filename: bs.filename,
+		line: bs.line,
+		column:bs.column,
 	}
+}
+
+func tokenize() []*Token {
+	var r []*Token
 	for {
 		c, err := getc()
 		if err != nil {
@@ -187,24 +208,24 @@ func tokenize(s string) []*Token {
 		case c == 0:
 			return r
 		case c == '\n':
-			tok = &Token{typ: "newline"}
+			tok = makeToken("newline", "")
 		case is_number(c):
 			sval := read_number(c)
-			tok = &Token{typ: "number", sval: sval}
+			tok = makeToken( "number",  sval)
 		case is_name(c):
 			sval := read_name(c)
-			tok = &Token{typ: "ident", sval: sval}
+			tok = makeToken( "ident",  sval)
 		case c == '\'':
 			sval := read_char()
-			tok = &Token{typ: "char", sval: sval}
+			tok = makeToken( "char",  sval)
 		case c == '"':
 			sval := read_string()
-			tok = &Token{typ: "string", sval: sval}
+			tok = makeToken( "string",  sval)
 		case c == ' ' || c == '\t':
 			skip_space()
-			tok = &Token{typ: "space"}
+			tok = makeToken( "space", "")
 		case is_punct(c):
-			tok = &Token{typ: "punct", sval: fmt.Sprintf("%c", c)}
+			tok = makeToken( "punct", string([]byte{c}))
 		default:
 			fmt.Printf("c='%c'\n", c)
 			panic("unknown char")
@@ -236,5 +257,12 @@ func renderTokens(tokens []*Token) {
 
 func tokenizeFromFile(path string) []*Token {
 	s := readFile(path)
-	return tokenize(s)
+	bs = &byteStream{
+		filename:path,
+		source:    s,
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	return tokenize()
 }
