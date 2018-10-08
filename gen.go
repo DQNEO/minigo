@@ -20,15 +20,15 @@ func emitDataSection() {
 	}
 }
 
-func emitFuncMainPrologue() {
+func emitFuncPrologue(funcdef *Ast) {
 	emit(".text")
-	emit(".globl	main")
-	emitLabel("main:")
+	emit(".globl	%s", funcdef.fname)
+	emitLabel("%s:", funcdef.fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 }
 
-func emitFuncMainEpilogue() {
+func emitFuncEpilogue() {
 	emit("leave")
 	emit("ret")
 }
@@ -51,7 +51,7 @@ func emitExpr(ast *Ast) {
 		emit("lea .%s(%%rip), %%rax", ast.slabel)
 	case "funcall":
 		emitFuncall(ast)
-	case "stmts":
+	case "compound":
 		for _, stmt := range ast.stmts {
 			emitExpr(stmt)
 		}
@@ -87,12 +87,16 @@ func emitFuncall(funcall *Ast) {
 	}
 }
 
-func generate(expr *Ast) {
+func emitTopLevel(toplevel *Ast) {
+	if toplevel.typ == "funcdef" {
+		emitFuncPrologue(toplevel)
+		emitExpr(toplevel.body)
+		emit("mov $0, %%eax") // return 0
+		emitFuncEpilogue()
+	}
+}
+
+func generate(ast *Ast) {
 	emitDataSection()
-	emitFuncMainPrologue()
-
-	emitExpr(expr)
-
-	emit("mov $0, %%eax") // return 0
-	emitFuncMainEpilogue()
+	emitTopLevel(ast)
 }

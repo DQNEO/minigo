@@ -14,30 +14,6 @@ function run_test_go {
     diff out/actual.txt test/expected.txt
 }
 
-function run_case {
-    local code="$1"
-    local expected=$2
-    rm -f $as_file
-    echo  "$code" | ./${prog_name} > $as_file
-    gcc -no-pie -o $executable $as_file
-    local actual=`$executable`
-    if [[ "$actual" -eq "$expected" ]];then
-        echo "ok"
-    else
-        echo "not ok"
-        exit 1
-    fi
-
-}
-
 run_test_go
-
-run_case "printf(\"hello\")
-printf(\"world\")" "helloworld"
-run_case 'printf("%d",0)' 0
-run_case 'printf("%d",7)' 7
-run_case 'printf("%d", 2 + 5)' 7
-run_case 'printf("%d", 2 * 3)' 6
-run_case 'printf("%d", 3 -2)' 1
 
 echo "All tests passed"

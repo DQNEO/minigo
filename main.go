@@ -25,11 +25,17 @@ type Ast struct {
 	// string
 	sval   string
 	slabel string
+	// compound
+	stmts []*Ast
 	// funcall
 	fname string
 	args []*Ast
-	// compound stmt
-	stmts []*Ast
+	// funcdef
+	body *Ast
+	// decl package
+	pkgname string
+	// imports
+	packages []string
 }
 
 func debugPrint(s string) {
@@ -59,10 +65,17 @@ func debugAst(name string, ast *Ast) {
 		debugPrintVar("ast.binop", ast.typ)
 		debugAst("left", ast.left)
 		debugAst("right", ast.right)
+	default:
+		debugPrintVar(name, ast)
 	}
 }
 
 func errorf(format string, v ...interface{}) {
+	/*
+	currentTokenIndex := ts.index - 1
+	fmt.Printf("%v %v %v\n",
+		ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
+	*/
 	s := fmt.Sprintf(format, v...)
 	panic(s)
 }

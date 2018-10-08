@@ -23,6 +23,10 @@ func (ts *TokenStream) unreadToken() {
 	ts.index--
 }
 
+func (stream *TokenStream) getToken(i int) interface{} {
+	return ts.tokens[i]
+}
+
 func readToken() *Token {
 	return ts.readToken()
 }
@@ -35,10 +39,29 @@ func (tok *Token) isPunct(punct string) bool {
 	return tok != nil && tok.typ == "punct"  && tok.sval == punct
 }
 
+func skipSpaceToken() {
+	for {
+		tok := readToken()
+		if tok == nil {
+			return
+		}
+		if tok.typ == "space" {
+			continue
+		} else {
+			unreadToken()
+			return
+		}
+
+	}
+}
+
 func expectPunct(punct string) {
 	tok := readToken()
-	if tok.isPunct(punct) {
-		errorf("punct %s expected but got %v", punct, tok)
+	if tok.typ != "punct" {
+		errorf("token type punct expected, but got %v", tok)
+	}
+	if !tok.isPunct(punct) {
+		errorf("punct '%s' expected but got '%s'", punct, tok.sval)
 	}
 }
 
@@ -154,19 +177,56 @@ func parseStmt() *Ast {
 	return parseExpr()
 }
 
-func parseCompoundStmt() *Ast {
-	var stmts []*Ast
+func parseCompoundStmt() []*Ast {
+	var r []*Ast
 	for {
+		tok := readToken()
+		if tok.isPunct("}") {
+			return r
+		}
+		if tok.typ == "newline" {
+			continue
+		}
+		unreadToken()
 		stmt := parseStmt()
 		if stmt == nil {
-			return &Ast{typ:"stmts", stmts:stmts}
+			errorf("internal error")
 		}
-		stmts = append(stmts, stmt)
+		debugPrintVar("append", stmt)
+		r = append(r, stmt)
 	}
-	return parseStmt()
+	return nil
+}
+
+func parseFuncDef() *Ast {
+	skipSpaceToken()
+	fname := readToken()
+	if fname.typ != "ident" {
+		errorf("identifer expected, but got %v", fname)
+	}
+	expectPunct("(")
+	expectPunct(")")
+	skipSpaceToken()
+	// expect Type
+	expectPunct("{")
+	stmts := parseCompoundStmt()
+
+	return &Ast{
+		typ: "funcdef",
+		fname: fname.sval,
+		body : &Ast{
+			typ:"compound",
+			stmts:stmts,
+		},
+	}
 }
 
 func parse(t *TokenStream) *Ast {
 	ts = t
-	return parseCompoundStmt()
+	tok := readToken()
+	var ast *Ast
+	if tok.typ == "ident"  && tok.sval == "func" {
+		ast = parseFuncDef()
+	}
+	return ast
 }
