@@ -8,10 +8,10 @@ prog_name="minigo"
 go build -o minigo *.go
 
 function run_test_go {
-    ./${prog_name} < test/test.go > $as_file
+    ./${prog_name} < t/test.go > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
-    diff out/actual.txt test/expected.txt
+    diff out/actual.txt t/expected.txt
 }
 
 run_test_go
