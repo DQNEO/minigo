@@ -223,12 +223,35 @@ func parseFuncDef() *Ast {
 
 func parseTopLevels() []*Ast {
 	var r []*Ast
-	tok := readToken()
-	var ast *Ast
-	if tok.typ == "ident"  && tok.sval == "func" {
-		ast = parseFuncDef()
+	for {
+		tok := readToken()
+		if tok == nil {
+			return r
+		}
+		if tok.typ == "newline" {
+			continue
+		}
+		if tok.typ == "ident" && tok.sval == "package" {
+			skipSpaceToken()
+			tok = readToken()
+			debugToken(tok)
+			assert(tok.typ == "ident", "expect ident")
+			ast := &Ast{
+				typ: "package",
+				pkgname: tok.sval,
+			}
+			readToken() // expect newline
+			r = append(r, ast)
+			continue
+		} else if tok.typ == "ident"  && tok.sval == "func" {
+			ast := parseFuncDef()
+			r = append(r, ast)
+			continue
+		} else {
+			errorf("unknown token %v", tok)
+		}
 	}
-	return append(r, ast)
+	return r
 }
 
 func parse(t *TokenStream) []*Ast {

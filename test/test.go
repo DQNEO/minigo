@@ -1,8 +1,8 @@
+package main
+
 func main() {
-	printf("%d", 2 + 5)
-	printf("%d", 2 * 3)
-	printf("%d", 3 -2)
-	puts("")
-	puts("hello")
-	puts("world")
+	puts("hello world")
+	printf("%d", 3 - 2)
+	printf("%d", 1 + 1)
+	printf("%d", 1 * 3)
 }

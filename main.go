@@ -32,7 +32,7 @@ type Ast struct {
 	args []*Ast
 	// funcdef
 	body *Ast
-	// decl package
+	// package
 	pkgname string
 	// imports
 	packages []string
@@ -114,9 +114,9 @@ func main() {
 
 	if debugMode {
 		debugPrint("==== Dump Ast ===")
-		debugAst("root", asts[0])
+		debugAst("root", asts[1])
 	}
 
 	// generate
-	generate(asts[0])
+	generate(asts)
 }

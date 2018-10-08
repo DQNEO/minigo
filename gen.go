@@ -96,7 +96,9 @@ func emitTopLevel(toplevel *Ast) {
 	}
 }
 
-func generate(ast *Ast) {
+func generate(toplevels []*Ast) {
 	emitDataSection()
-	emitTopLevel(ast)
+	for _, toplevel := range toplevels {
+		emitTopLevel(toplevel)
+	}
 }
