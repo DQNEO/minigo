@@ -7,11 +7,6 @@ import (
 
 var debugMode = false
 
-type Token struct {
-	typ   string
-	sval  string
-}
-
 type Ast struct {
 	typ     string
 	// int

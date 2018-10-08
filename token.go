@@ -5,21 +5,39 @@ import "io/ioutil"
 import "os"
 import "errors"
 
-var source string
-var sourceInex int
 
-func getc() (byte,error) {
-	if sourceInex >= len(source) {
+type byteStream struct {
+	source string
+	sourceInex int
+}
+
+type Token struct {
+	typ   string
+	sval  string
+}
+
+var bs *byteStream
+
+func (bs *byteStream) getc() (byte,error) {
+	if bs.sourceInex >= len(bs.source) {
 		return 0, errors.New("EOF")
 	}
-	r := source[sourceInex]
+	r := bs.source[bs.sourceInex]
 	//fmt.Printf("%c",r)
-	sourceInex++
+	bs.sourceInex++
 	return r, nil
 }
 
+func (bs *byteStream) ungetc() {
+	bs.sourceInex--
+}
+
+func getc() (byte,error) {
+	return bs.getc()
+}
+
 func ungetc() {
-	sourceInex--
+	bs.ungetc()
 }
 
 func is_number(c byte) bool {
@@ -152,7 +170,10 @@ func readFile(filename string) string {
 
 func tokenize(s string) []*Token {
 	var r []*Token
-	source = s
+	bs = &byteStream{
+		source: s,
+		sourceInex:0,
+	}
 	for  {
 		c, err := getc()
 		if err != nil {
