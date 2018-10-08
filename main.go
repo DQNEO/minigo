@@ -92,12 +92,12 @@ func main() {
 		renderTokens(tokens)
 	}
 
-	ts = &TokenStream{
+	t := &TokenStream{
 		tokens: tokens,
 		index: 0,
 	}
 	// parse
-	ast := parse()
+	ast := parse(t)
 
 	if debugMode {
 		debugPrint("==== Dump Ast ===")

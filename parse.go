@@ -166,6 +166,7 @@ func parseCompoundStmt() *Ast {
 	return parseStmt()
 }
 
-func parse() *Ast {
+func parse(t *TokenStream) *Ast {
+	ts = t
 	return parseCompoundStmt()
 }
