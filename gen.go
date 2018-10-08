@@ -51,6 +51,10 @@ func emitExpr(ast *Ast) {
 		emit("lea .%s(%%rip), %%rax", ast.slabel)
 	case "funcall":
 		emitFuncall(ast)
+	case "stmts":
+		for _, stmt := range ast.stmts {
+			emitExpr(stmt)
+		}
 	default:
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}

@@ -28,6 +28,8 @@ type Ast struct {
 	// funcall
 	fname string
 	args []*Ast
+	// compound stmt
+	stmts []*Ast
 }
 
 func debugPrint(s string) {

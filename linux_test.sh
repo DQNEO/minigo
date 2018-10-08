@@ -11,7 +11,7 @@ function run_case {
     echo  "$code" | go run *.go > $as_file
     gcc -no-pie $as_file
     local actual=`./a.out`
-    if [[ actual -eq $expected ]];then
+    if [[ "$actual" -eq "$expected" ]];then
         echo "ok"
     else
         echo "not ok"
@@ -19,6 +19,9 @@ function run_case {
     fi
 
 }
+
+run_case "printf(\"hello\")
+printf(\"world\")" "helloworld"
 run_case 'printf("%d",0)' 0
 run_case 'printf("%d",7)' 7
 run_case 'printf("%d", 2 + 5)' 7

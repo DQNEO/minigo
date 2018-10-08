@@ -94,6 +94,9 @@ func newAstString(sval string) *Ast {
 
 func parseUnaryExpr() *Ast {
 	tok := readToken()
+	if tok == nil {
+		return nil
+	}
 	if tok.typ == "space" {
 		tok = readToken()
 	}
@@ -154,6 +157,14 @@ func parseStmt() *Ast {
 }
 
 func parseCompoundStmt() *Ast {
+	var stmts []*Ast
+	for {
+		stmt := parseStmt()
+		if stmt == nil {
+			return &Ast{typ:"stmts", stmts:stmts}
+		}
+		stmts = append(stmts, stmt)
+	}
 	return parseStmt()
 }
 
