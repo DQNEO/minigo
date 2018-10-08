@@ -4,21 +4,33 @@ import "strconv"
 import "fmt"
 
 var tokens []*Token
-var tokenIndex int
 
+type TokenStream struct {
+	tokens []*Token
+	index int
+}
 
-func readToken() *Token {
+var ts *TokenStream
 
-	if tokenIndex <= len(tokens)-1 {
-		r := tokens[tokenIndex]
-		tokenIndex++
+func (ts *TokenStream) readToken() *Token{
+	if ts.index <= len(tokens)-1 {
+		r := tokens[ts.index]
+		ts.index++
 		return r
 	}
 	return nil
 }
 
+func (ts *TokenStream) unreadToken() {
+	ts.index--
+}
+
+func readToken() *Token {
+	return ts.readToken()
+}
+
 func unreadToken() {
-	tokenIndex--
+	ts.unreadToken()
 }
 
 func (tok *Token) isPunct(punct string) bool {

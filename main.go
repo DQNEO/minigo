@@ -73,7 +73,7 @@ func assert(cond bool, msg string) {
 
 
 func main() {
-	debugMode = false
+	debugMode = true
 
 	var sourceFile string
 	if len(os.Args) > 1 {
@@ -90,8 +90,11 @@ func main() {
 		renderTokens(tokens)
 	}
 
+	ts = &TokenStream{
+		tokens: tokens,
+		index: 0,
+	}
 	// parse
-	tokenIndex = 0
 	expr := parseExpr()
 
 	if debugMode {
