@@ -34,9 +34,10 @@ func emitFuncMainEpilogue() {
 }
 
 func emitExpr(ast *Ast) {
-	if ast.typ == "int" {
+	switch ast.typ {
+	case "int":
 		emit("movl	$%d, %%eax", ast.ival)
-	} else if ast.typ == "binop" {
+	case "binop":
 		emit("movl	$%d, %%eax", ast.left.ival)
 		emit("movl	$%d, %%ebx", ast.right.ival)
 		if ast.op == "+" {
@@ -46,11 +47,11 @@ func emitExpr(ast *Ast) {
 		} else if ast.op == "*" {
 			emit("imul	%%ebx, %%eax")
 		}
-	} else if ast.typ == "string" {
+	case "string":
 		emit("lea .%s(%%rip), %%rax", ast.slabel)
-	} else if ast.typ == "funcall" {
+	case "funcall":
 		emitFuncall(ast)
-	} else {
+	default:
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}
 }
