@@ -154,7 +154,6 @@ func parseExpr() *Ast {
 		}
 		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
 			right := parseUnaryExpr()
-			debugAst("right", right)
 			return &Ast{
 				typ:   "binop",
 				op: tok.sval,
@@ -192,7 +191,6 @@ func parseCompoundStmt() []*Ast {
 		if stmt == nil {
 			errorf("internal error")
 		}
-		debugPrintVar("append", stmt)
 		r = append(r, stmt)
 	}
 	return nil
@@ -234,7 +232,6 @@ func parseTopLevels() []*Ast {
 		if tok.typ == "ident" && tok.sval == "package" {
 			skipSpaceToken()
 			tok = readToken()
-			debugToken(tok)
 			assert(tok.typ == "ident", "expect ident")
 			ast := &Ast{
 				typ: "package",

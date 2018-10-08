@@ -88,7 +88,7 @@ func assert(cond bool, msg string) {
 
 
 func main() {
-	debugMode = true
+	debugMode = false
 
 	var sourceFile string
 	if len(os.Args) > 1 {
