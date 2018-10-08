@@ -115,10 +115,6 @@ func parseUnaryExpr() *Ast {
 	return nil
 }
 
-func parse() *Ast {
-	return parseExpr()
-}
-
 func parseExpr() *Ast {
 	ast := parseUnaryExpr()
 	for {
@@ -153,4 +149,14 @@ func parseExpr() *Ast {
 	return ast
 }
 
+func parseStmt() *Ast {
+	return parseExpr()
+}
 
+func parseCompoundStmt() *Ast {
+	return parseStmt()
+}
+
+func parse() *Ast {
+	return parseCompoundStmt()
+}
