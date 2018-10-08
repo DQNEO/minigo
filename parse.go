@@ -3,6 +3,32 @@ package main
 import "strconv"
 import "fmt"
 
+type Ast struct {
+	typ     string
+	// int
+	ival    int
+	// unary
+	operand *Ast
+	// binop
+	op string
+	left    *Ast
+	right   *Ast
+	// string
+	sval   string
+	slabel string
+	// compound
+	stmts []*Ast
+	// funcall
+	fname string
+	args []*Ast
+	// funcdef
+	body *Ast
+	// package
+	pkgname string
+	// imports
+	packages []string
+}
+
 type TokenStream struct {
 	tokens []*Token
 	index int

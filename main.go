@@ -7,32 +7,6 @@ import (
 
 var debugMode = false
 
-type Ast struct {
-	typ     string
-	// int
-	ival    int
-	// unary
-	operand *Ast
-	// binop
-	op string
-	left    *Ast
-	right   *Ast
-	// string
-	sval   string
-	slabel string
-	// compound
-	stmts []*Ast
-	// funcall
-	fname string
-	args []*Ast
-	// funcdef
-	body *Ast
-	// package
-	pkgname string
-	// imports
-	packages []string
-}
-
 func debugPrint(s string) {
 	fmt.Fprintf(os.Stderr, "# %s\n", s)
 }
