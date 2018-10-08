@@ -31,6 +31,10 @@ func (bs *byteStream) ungetc() {
 	bs.sourceInex--
 }
 
+func (tok *Token) String() string {
+	return fmt.Sprintf("(%s \"%s\")", tok.typ, tok.sval)
+}
+
 func getc() (byte, error) {
 	return bs.getc()
 }
