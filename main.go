@@ -63,7 +63,7 @@ func debugAst(name string, ast *Ast) {
 }
 
 func errorf(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v)
+	s := fmt.Sprintf(format, v...)
 	panic(s)
 }
 
