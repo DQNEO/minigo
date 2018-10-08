@@ -54,7 +54,15 @@ func (stream *TokenStream) getToken(i int) interface{} {
 }
 
 func readToken() *Token {
-	return ts.readToken()
+	for {
+		tok := ts.readToken()
+		if tok == nil {
+			return nil
+		}
+		if tok.typ != "space" {
+			return tok
+		}
+	}
 }
 
 func unreadToken() {
@@ -65,6 +73,7 @@ func (tok *Token) isPunct(punct string) bool {
 	return tok != nil && tok.typ == "punct" && tok.sval == punct
 }
 
+/*
 func skipSpaceToken() {
 	for {
 		tok := readToken()
@@ -80,6 +89,7 @@ func skipSpaceToken() {
 
 	}
 }
+*/
 
 func expectPunct(punct string) {
 	tok := readToken()
@@ -223,14 +233,14 @@ func parseCompoundStmt() []*Ast {
 }
 
 func parseFuncDef() *Ast {
-	skipSpaceToken()
+	//skipSpaceToken()
 	fname := readToken()
 	if fname.typ != "ident" {
 		errorf("identifer expected, but got %v", fname)
 	}
 	expectPunct("(")
 	expectPunct(")")
-	skipSpaceToken()
+	//skipSpaceToken()
 	// expect Type
 	expectPunct("{")
 	stmts := parseCompoundStmt()
@@ -256,7 +266,7 @@ func parseTopLevels() []*Ast {
 			continue
 		}
 		if tok.typ == "ident" && tok.sval == "package" {
-			skipSpaceToken()
+			//skipSpaceToken()
 			tok = readToken()
 			assert(tok.typ == "ident", "expect ident")
 			ast := &Ast{
