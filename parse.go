@@ -255,6 +255,34 @@ func parseFuncDef() *Ast {
 	}
 }
 
+func expectType(typ string) {
+	tok := readToken()
+	if tok == nil || tok.typ != typ {
+		errorf("token type %s expected, but got %s", tok)
+	}
+}
+
+func expectNewline() {
+	expectType("newline")
+}
+
+func parseImport() *Ast {
+	//skipSpaceToken()
+	tok := readToken()
+	if tok == nil {
+		errorf("import expects package name")
+	}
+	if tok.typ != "string" {
+		errorf("import expects package name")
+	}
+	packageName := tok.sval
+	expectNewline()
+	return &Ast{
+		typ:"import",
+		packages: []string{packageName},
+	}
+}
+
 func parseTopLevels() []*Ast {
 	var r []*Ast
 	for {
@@ -274,6 +302,10 @@ func parseTopLevels() []*Ast {
 				pkgname: tok.sval,
 			}
 			readToken() // expect newline
+			r = append(r, ast)
+			continue
+		} else if tok.typ == "ident" && tok.sval == "import" {
+			ast := parseImport()
 			r = append(r, ast)
 			continue
 		} else if tok.typ == "ident" && tok.sval == "func" {
