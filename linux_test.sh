@@ -3,14 +3,14 @@ set -ex
 PATH="/usr/lib/go-1.10/bin:$PATH"
 
 as_file="./out/a.s"
-
+executable="./out/a.out"
 prog_name="minigo"
 go build -o minigo *.go
 
 function run_test_go {
     ./${prog_name} < test/test.go > $as_file
-    gcc -no-pie -o out/a.out $as_file
-    ./out/a.out > out/actual.txt
+    gcc -no-pie -o $executable $as_file
+    $executable > out/actual.txt
     diff out/actual.txt test/expected.txt
 }
 
@@ -19,8 +19,8 @@ function run_case {
     local expected=$2
     rm -f $as_file
     echo  "$code" | ./${prog_name} > $as_file
-    gcc -no-pie -o out/a.out $as_file
-    local actual=`./out/a.out`
+    gcc -no-pie -o $executable $as_file
+    local actual=`$executable`
     if [[ "$actual" -eq "$expected" ]];then
         echo "ok"
     else
