@@ -50,6 +50,42 @@ func (tok *Token) String() string {
 		tok.typ, tok.sval, tok.filename, tok.line, tok.column)
 }
 
+func (tok *Token) isPunct(s string) bool {
+	return tok != nil && tok.typ == "punct" && tok.sval == s
+}
+
+func (tok *Token) isKeyword(s string) bool {
+	return tok != nil && tok.typ == "keyword" && tok.sval == s
+}
+
+func (tok *Token) isIdent(s string) bool {
+	return tok != nil && tok.typ == "ident" && tok.sval == s
+}
+
+func (tok *Token) isTypePunct() bool {
+	return tok != nil && tok.typ == "punct"
+}
+
+func (tok *Token) isTypeKeyword() bool {
+	return tok != nil && tok.typ == "keyword"
+}
+
+func (tok *Token) isTypeString() bool {
+	return tok != nil && tok.typ == "string"
+}
+
+func (tok *Token) isTypeIdent() bool {
+	return tok != nil && tok.typ == "ident"
+}
+
+func (tok *Token) isTypeSpace() bool {
+	return tok != nil && tok.typ == "space"
+}
+
+func (tok *Token) isTypeNewline() bool {
+	return tok != nil && tok.typ == "newline"
+}
+
 func getc() (byte, error) {
 	return bs.getc()
 }

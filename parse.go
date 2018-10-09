@@ -59,7 +59,7 @@ func readToken() *Token {
 		if tok == nil {
 			return nil
 		}
-		if tok.typ != "space" {
+		if !tok.isTypeSpace() {
 			return tok
 		}
 	}
@@ -69,9 +69,6 @@ func unreadToken() {
 	ts.unreadToken()
 }
 
-func (tok *Token) isPunct(punct string) bool {
-	return tok != nil && tok.typ == "punct" && tok.sval == punct
-}
 
 /*
 func skipSpaceToken() {
@@ -93,7 +90,7 @@ func skipSpaceToken() {
 
 func expectPunct(punct string) {
 	tok := readToken()
-	if tok.typ != "punct" {
+	if !tok.isTypePunct() {
 		errorf("token type punct expected, but got %v", tok)
 	}
 	if !tok.isPunct(punct) {
@@ -154,7 +151,7 @@ func parseUnaryExpr() *Ast {
 	if tok == nil {
 		return nil
 	}
-	if tok.typ == "space" {
+	if tok.isTypeSpace() {
 		tok = readToken()
 	}
 
@@ -179,13 +176,13 @@ func parseExpr() *Ast {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
-		if tok == nil || tok.typ == "newline" {
+		if tok == nil || tok.isTypeNewline() {
 			return ast
 		}
-		if tok.typ == "space" {
+		if tok.isTypeSpace() {
 			continue
 		}
-		if tok.typ != "punct" {
+		if !tok.isTypePunct() {
 			return ast
 		}
 		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
@@ -219,7 +216,7 @@ func parseCompoundStmt() []*Ast {
 		if tok.isPunct("}") {
 			return r
 		}
-		if tok.typ == "newline" {
+		if tok.isTypeNewline() {
 			continue
 		}
 		unreadToken()
@@ -235,7 +232,7 @@ func parseCompoundStmt() []*Ast {
 func parseFuncDef() *Ast {
 	//skipSpaceToken()
 	fname := readToken()
-	if fname.typ != "ident" {
+	if !fname.isTypeIdent() {
 		errorf("identifer expected, but got %v", fname)
 	}
 	expectPunct("(")
@@ -272,7 +269,7 @@ func parseImport() *Ast {
 	if tok == nil {
 		errorf("import expects package name")
 	}
-	if tok.typ != "string" {
+	if !tok.isTypeString() {
 		errorf("import expects package name")
 	}
 	packageName := tok.sval
@@ -290,13 +287,13 @@ func parseTopLevels() []*Ast {
 		if tok == nil {
 			return r
 		}
-		if tok.typ == "newline" {
+		if tok.isTypeNewline() {
 			continue
 		}
-		if tok.typ == "keyword" && tok.sval == "package" {
+		if tok.isKeyword("package") {
 			//skipSpaceToken()
 			tok = readToken()
-			assert(tok.typ == "ident", "expect ident")
+			assert(tok.isTypeIdent(), "expect ident")
 			ast := &Ast{
 				typ:     "package",
 				pkgname: tok.sval,
@@ -304,11 +301,11 @@ func parseTopLevels() []*Ast {
 			readToken() // expect newline
 			r = append(r, ast)
 			continue
-		} else if tok.typ == "keyword" && tok.sval == "import" {
+		} else if tok.isKeyword("import") {
 			ast := parseImport()
 			r = append(r, ast)
 			continue
-		} else if tok.typ == "keyword" && tok.sval == "func" {
+		} else if tok.isKeyword("func") {
 			ast := parseFuncDef()
 			r = append(r, ast)
 			continue
