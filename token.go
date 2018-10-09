@@ -98,6 +98,19 @@ func is_number(c byte) bool {
 	return '0' <= c && c <= '9'
 }
 
+/**
+
+ Operators and punctuation
+ https://golang.org/ref/spec#Operators_and_punctuation
+
++    &     +=    &=     &&    ==    !=    (    )
+-    |     -=    |=     ||    <     <=    [    ]
+*    ^     *=    ^=     <-    >     >=    {    }
+/    <<    /=    <<=    ++    =     :=    ,    ;
+%    >>    %=    >>=    --    !     ...   .    :
+     &^          &^=
+
+ */
 func is_punct(c byte) bool {
 	switch c {
 	case '+', '-', '(', ')', '=', '{', '}', '*', '[', ']', ',', ':', '.', '!', '<', '>', '&', '|', '%', '/':
