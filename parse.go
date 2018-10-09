@@ -161,7 +161,7 @@ func parseUnaryExpr() *Ast {
 	switch tok.typ {
 	case "string":
 		return newAstString(tok.sval)
-	case "ident":
+	case "ident","keyword":
 		return parseIdentOrFuncall(tok.sval)
 	case "number":
 		ival, _ := strconv.Atoi(tok.sval)
@@ -293,7 +293,7 @@ func parseTopLevels() []*Ast {
 		if tok.typ == "newline" {
 			continue
 		}
-		if tok.typ == "ident" && tok.sval == "package" {
+		if tok.typ == "keyword" && tok.sval == "package" {
 			//skipSpaceToken()
 			tok = readToken()
 			assert(tok.typ == "ident", "expect ident")
@@ -304,11 +304,11 @@ func parseTopLevels() []*Ast {
 			readToken() // expect newline
 			r = append(r, ast)
 			continue
-		} else if tok.typ == "ident" && tok.sval == "import" {
+		} else if tok.typ == "keyword" && tok.sval == "import" {
 			ast := parseImport()
 			r = append(r, ast)
 			continue
-		} else if tok.typ == "ident" && tok.sval == "func" {
+		} else if tok.typ == "keyword" && tok.sval == "func" {
 			ast := parseFuncDef()
 			r = append(r, ast)
 			continue

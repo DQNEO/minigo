@@ -196,6 +196,21 @@ func makeToken(typ string, sval string) *Token {
 	}
 }
 
+// https://golang.org/ref/spec#Keywords
+var keywords = []string{
+	"break", "default", "func", "interface", "select", "case", "defer", "go", "map", "struct", "chan", "else", "goto", "package", "switch", "const", "fallthrough", "if", "range", "type", "continue", "for", "import", "return", "var",
+}
+
+// util
+func in_array(item string, list []string) bool {
+	for _, v := range list {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
 func tokenize() []*Token {
 	var r []*Token
 	for {
@@ -214,7 +229,11 @@ func tokenize() []*Token {
 			tok = makeToken( "number",  sval)
 		case is_name(c):
 			sval := read_name(c)
-			tok = makeToken( "ident",  sval)
+			if in_array(sval, keywords) {
+				tok = makeToken("keyword", sval)
+			} else {
+				tok = makeToken( "ident",  sval)
+			}
 		case c == '\'':
 			sval := read_char()
 			tok = makeToken( "char",  sval)
