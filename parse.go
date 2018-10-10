@@ -121,6 +121,11 @@ func parseIdentOrFuncall(name string) *Ast {
 	tok := readToken()
 	if tok.isPunct("(") {
 		args := readFuncallArgs()
+
+		// workaround: replace "println" -> "puts"
+		if name == "println" {
+			name = "puts"
+		}
 		return &Ast{
 			typ:   "funcall",
 			fname: name,
