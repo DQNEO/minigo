@@ -1,17 +1,7 @@
 package main
 
 import "fmt"
-import "io/ioutil"
 import "os"
-import "errors"
-
-type byteStream struct {
-	filename  string
-	source    string
-	nextIndex int
-	line      int
-	column    int
-}
 
 type Token struct {
 	typ  string
@@ -21,29 +11,7 @@ type Token struct {
 	column int
 }
 
-var bs *byteStream
-
-func (bs *byteStream) getc() (byte, error) {
-	if bs.nextIndex >= len(bs.source) {
-		return 0, errors.New("EOF")
-	}
-	r := bs.source[bs.nextIndex]
-	if r == '\n' {
-		bs.line++
-		bs.column = 1
-	}
-	bs.nextIndex++
-	bs.column++
-	return r, nil
-}
-
-func (bs *byteStream) ungetc() {
-	bs.nextIndex--
-	r := bs.source[bs.nextIndex]
-	if r == '\n' {
-		bs.line--
-	}
-}
+var bs *ByteStream
 
 func (tok *Token) String() string {
 	return fmt.Sprintf("(%s \"%s\" %s:%d:%d)",
@@ -87,11 +55,11 @@ func (tok *Token) isTypeNewline() bool {
 }
 
 func getc() (byte, error) {
-	return bs.getc()
+	return bs.get()
 }
 
 func ungetc() {
-	bs.ungetc()
+	bs.unget()
 }
 
 func is_number(c byte) bool {
@@ -227,13 +195,6 @@ func skip_space() {
 	}
 }
 
-func readFile(filename string) string {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-	return string(bytes)
-}
 
 func makeToken(typ string, sval string) *Token {
 	return &Token{
@@ -324,13 +285,6 @@ func renderTokens(tokens []*Token) {
 }
 
 func tokenizeFromFile(path string) []*Token {
-	s := readFile(path)
-	bs = &byteStream{
-		filename:path,
-		source:    s,
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
+	bs = NewByteStream(path)
 	return tokenize()
 }
