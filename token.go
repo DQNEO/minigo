@@ -377,7 +377,7 @@ func tokenize() []*Token {
 			if c == '-' {
 				tok = makeToken("punct", "<-")
 			} else if c == '=' {
-				tok = makeToken("punct", ">=")
+				tok = makeToken("punct", "<=")
 			} else if c == '<' {
 				c ,_ = getc()
 				if c == '=' {
