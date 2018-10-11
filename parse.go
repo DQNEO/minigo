@@ -260,7 +260,7 @@ func parseFuncDef() *Ast {
 func expectType(typ string) {
 	tok := readToken()
 	if tok == nil || tok.typ != typ {
-		errorf("token type %s expected, but got %s", tok)
+		errorf("token type %s expected, but got %s", typ, tok)
 	}
 }
 
