@@ -3,7 +3,7 @@ package main
 import "os"
 
 func main() {
-	debugMode = false
+	debugMode = true
 
 	var sourceFile string
 	if len(os.Args) > 1 {

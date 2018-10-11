@@ -66,28 +66,6 @@ func is_number(c byte) bool {
 	return '0' <= c && c <= '9'
 }
 
-/**
-
- Operators and punctuation
- https://golang.org/ref/spec#Operators_and_punctuation
-
-+    &     +=    &=     &&    ==    !=    (    )
--    |     -=    |=     ||    <     <=    [    ]
-*    ^     *=    ^=     <-    >     >=    {    }
-/    <<    /=    <<=    ++    =     :=    ,    ;
-%    >>    %=    >>=    --    !     ...   .    :
-     &^          &^=
-
- */
-func is_punct(c byte) bool {
-	switch c {
-	case '+', '-', '(', ')', '=', '{', '}', '*', '[', ']', ',', ':', '.', '!', '<', '>', '&', '|', '%', '/':
-		return true
-	default:
-		return false
-	}
-}
-
 func read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
@@ -221,6 +199,19 @@ func in_array(item string, list []string) bool {
 	return false
 }
 
+/**
+
+ Operators and punctuation
+ https://golang.org/ref/spec#Operators_and_punctuation
+
++    &     +=    &=     &&    ==    !=    (    )
+-    |     -=    |=     ||    <     <=    [    ]
+*    ^     *=    ^=     <-    >     >=    {    }
+/    <<    /=    <<=    ++    =     :=    ,    ;
+%    >>    %=    >>=    --    !     ...   .    :
+     &^          &^=
+
+ */
 func tokenize() []*Token {
 	var r []*Token
 	for {
@@ -229,32 +220,185 @@ func tokenize() []*Token {
 			return r
 		}
 		var tok *Token
-		switch {
-		case c == 0:
+		switch c {
+		case 0:
 			return r
-		case c == '\n':
+		case '\n':
 			tok = makeToken("newline", "")
-		case is_number(c):
+		case '0','1','2','3','4','5','6','7','8','9':
 			sval := read_number(c)
 			tok = makeToken( "number",  sval)
-		case is_name(c):
+		case '_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z':
 			sval := read_name(c)
 			if in_array(sval, keywords) {
 				tok = makeToken("keyword", sval)
 			} else {
 				tok = makeToken( "ident",  sval)
 			}
-		case c == '\'':
+		case '\'':
 			sval := read_char()
 			tok = makeToken( "char",  sval)
-		case c == '"':
+		case '"':
 			sval := read_string()
 			tok = makeToken( "string",  sval)
-		case c == ' ' || c == '\t':
+		case ' ','\t':
 			skip_space()
-			tok = makeToken( "space", "")
-		case is_punct(c):
-			tok = makeToken( "punct", string([]byte{c}))
+			tok = makeToken( "space", string(c))
+		case '(',')','[',']','{','}',',',';':
+			tok = makeToken( "punct", string(c))
+		case '!':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", "!=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "!")
+			}
+		case '%':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", "%=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "%")
+			}
+		case '*':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", "*=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "*")
+			}
+		case ':':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", ":=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", ":")
+			}
+		case '=':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", "==")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "=")
+			}
+		case '^':
+			c, _ := getc()
+			if c == '=' {
+				tok = makeToken( "punct", "^=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "^")
+			}
+		case '&':
+			c, _ := getc()
+			if c == '&' {
+				tok = makeToken("punct", "&&")
+			} else if c == '=' {
+				tok = makeToken("punct", "&=")
+			} else if c == '^' {
+				c, _ := getc()
+				if c == '=' {
+					tok = makeToken("punct", "&^=")
+				} else {
+					ungetc()
+					tok = makeToken( "punct", "&^")
+				}
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "&")
+			}
+		case '+':
+			c, _ = getc()
+			if c == '+' {
+				tok = makeToken("punct", "++")
+			} else if c == '=' {
+				tok = makeToken("punct", "+=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "+")
+			}
+		case '-':
+			c, _ = getc()
+			if c == '-' {
+				tok = makeToken("punct", "--")
+			} else if c == '=' {
+				tok = makeToken("punct", "-=")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "-")
+			}
+		case '|':
+			c, _ = getc()
+			if c == '=' {
+				tok = makeToken("punct", "|=")
+			} else if c == '|' {
+				tok = makeToken("punct", "||")
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "|")
+			}
+		case '.':
+			c, _ = getc()
+			if c == '.' {
+				c, _ = getc()
+				if c == '.' {
+					tok = makeToken("punct", "...")
+				} else {
+					panic("invalid token '..'")
+				}
+			} else {
+				ungetc()
+				tok = makeToken( "punct", ".")
+			}
+		case '>':
+			c, _ = getc()
+			if c == '=' {
+				tok = makeToken("punct", ">=")
+			} else if c == '>' {
+				c, _ = getc()
+				if c == '=' {
+					tok = makeToken("punct", ">>=")
+				} else {
+					ungetc()
+					tok = makeToken("punct", ">>")
+				}
+			} else {
+				ungetc()
+				tok = makeToken( "punct", ">")
+			}
+		case '<':
+			c ,_ = getc()
+			if c == '-' {
+				tok = makeToken("punct", "<-")
+			} else if c == '=' {
+				tok = makeToken("punct", ">=")
+			} else if c == '<' {
+				c ,_ = getc()
+				if c == '=' {
+					tok = makeToken("punct", "<<=")
+				} else {
+					ungetc()
+					tok = makeToken("punct", "<<")
+				}
+			} else {
+				ungetc()
+				tok = makeToken( "punct", "<")
+			}
+		case '/':
+			c ,_ = getc()
+			if c == '=' {
+				tok = makeToken("punct", "/=")
+			} else {
+				ungetc()
+				tok = makeToken("punct", "/")
+			}
+			// @TODO handle comments
 		default:
 			fmt.Printf("c='%c'\n", c)
 			panic("unknown char")
@@ -278,7 +422,7 @@ func renderTokens(tokens []*Token) {
 		} else if tok.typ == "string" {
 			fmt.Fprintf(os.Stderr, "\"%s\"", tok.sval)
 		} else {
-			fmt.Fprintf(os.Stderr, tok.sval)
+			fmt.Fprintf(os.Stderr, "%s", tok.sval)
 		}
 	}
 	debugPrint("==== End Render Tokens ===")

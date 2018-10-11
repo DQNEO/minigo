@@ -1,7 +1,4 @@
-Operators and punctuation
-https://golang.org/ref/spec#Operators_and_punctuation
-------
-
+"https://golang.org/ref/spec#Operators_and_punctuation"
 !
 !=
 %
