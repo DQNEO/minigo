@@ -1,7 +1,6 @@
 package main
 
 import "fmt"
-import "os"
 
 type Token struct {
 	typ  string
@@ -412,18 +411,28 @@ func tokenize() []*Token {
 	return r
 }
 
+
+func (tok *Token) render() string {
+	switch tok.typ {
+	case "newline":
+			return "\n"
+	case "space":
+			return tok.sval
+	case "char":
+		return fmt.Sprintf("'%s'", tok.sval)
+	case "punct":
+		return fmt.Sprintf("%s", tok.sval)
+	case "string":
+			return fmt.Sprintf("\"%s\"", tok.sval)
+	default:
+			return fmt.Sprintf("%s", tok.sval)
+	}
+}
+
 func renderTokens(tokens []*Token) {
 	debugPrint("==== Start Render Tokens ===")
 	for _, tok := range tokens {
-		if tok.typ == "newline" {
-			fmt.Fprintf(os.Stderr, "\n")
-		} else if tok.typ == "space" {
-			fmt.Fprintf(os.Stderr, "  ")
-		} else if tok.typ == "string" {
-			fmt.Fprintf(os.Stderr, "\"%s\"", tok.sval)
-		} else {
-			fmt.Fprintf(os.Stderr, "%s", tok.sval)
-		}
+		debugPrint(tok.render())
 	}
 	debugPrint("==== End Render Tokens ===")
 }

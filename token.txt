@@ -1,3 +1,6 @@
+abc
+func
+'a'
 "https://golang.org/ref/spec#Operators_and_punctuation"
 !
 !=
