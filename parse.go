@@ -113,6 +113,8 @@ func readFuncallArgs() []*Ast {
 			return r
 		} else if tok.isPunct(",") {
 			continue
+		} else {
+			errorf("invalid token in funcall arguments: %s", tok)
 		}
 	}
 }
