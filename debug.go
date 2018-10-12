@@ -3,8 +3,21 @@ package main
 import "fmt"
 import "os"
 
+func debugf(format string, v... interface{}) {
+	debugPrint(fmt.Sprintf(format, v...))
+}
+
 func debugPrint(s string) {
-	fmt.Fprintf(os.Stderr, "# %s\n", s)
+	spaces := ""
+	for i:=0;i<nest;i++ {
+		spaces += "  "
+	}
+
+	fmt.Fprintf(os.Stderr, "|%s %s\n", spaces, s)
+}
+
+func debugPrintV(v interface{}) {
+	debugPrint(fmt.Sprintf("%v", v))
 }
 
 func debugPrintVar(name string, v interface{}) {
@@ -15,23 +28,38 @@ func dumpToken(tok *Token) {
 	debugPrint(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
-func dumpAst(name string, ast *Ast) {
+var nest = 0
+
+func dumpAst(ast *Ast) {
 	switch ast.typ {
-	case "funcall":
-		debugPrintVar("funcall", ast)
-		for _, arg := range ast.args {
-			debugPrintVar("arg", arg)
+	case "package":
+		debugf("(package %s)", ast.pkgname)
+	case "funcdef":
+		debugf("funcdef %s", ast.fname)
+		nest++
+		for _, stmt := range ast.body.stmts {
+			dumpAst(stmt)
 		}
+		nest--
+	case "funcall":
+		debugf(ast.fname)
+		nest++
+		for _, arg := range ast.args {
+			dumpAst(arg)
+		}
+		nest--
 	case "int":
-		debugPrintVar(name, fmt.Sprintf("%d", ast.ival))
-	case "uop":
-		dumpAst(name, ast.operand)
+		debugf("int %d", ast.ival)
+	case "string":
+		debugf("\"%s\"", ast.sval)
 	case "binop":
-		debugPrintVar("ast.binop", ast.typ)
-		dumpAst("left", ast.left)
-		dumpAst("right", ast.right)
+		debugf("binop %s", ast.op)
+		nest++
+		dumpAst(ast.left)
+		dumpAst(ast.right)
+		nest--
 	default:
-		debugPrintVar(name, ast)
+		errorf("Unknown ast type:%v", ast.typ)
 	}
 }
 

@@ -39,13 +39,16 @@ func main() {
 		index:  0,
 	}
 	// parse
-	asts := parse(t)
+	toplevels := parse(t)
 
 	if debugAst {
-		debugPrint("==== Dump Ast ===")
-		dumpAst("root", asts[1])
+		debugPrint("==== Dump Ast Start ===")
+		for _, toplevel := range toplevels {
+			dumpAst(toplevel)
+		}
+		debugPrint("==== Dump Ast End ===")
 	}
 
 	// generate
-	generate(asts)
+	generate(toplevels)
 }
