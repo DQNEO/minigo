@@ -3,8 +3,6 @@ package main
 import "fmt"
 import "os"
 
-var debugMode = false
-
 func debugPrint(s string) {
 	fmt.Fprintf(os.Stderr, "# %s\n", s)
 }
@@ -13,11 +11,11 @@ func debugPrintVar(name string, v interface{}) {
 	debugPrint(fmt.Sprintf("%s=%v", name, v))
 }
 
-func debugToken(tok *Token) {
+func dumpToken(tok *Token) {
 	debugPrint(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
-func debugAst(name string, ast *Ast) {
+func dumpAst(name string, ast *Ast) {
 	switch ast.typ {
 	case "funcall":
 		debugPrintVar("funcall", ast)
@@ -27,11 +25,11 @@ func debugAst(name string, ast *Ast) {
 	case "int":
 		debugPrintVar(name, fmt.Sprintf("%d", ast.ival))
 	case "uop":
-		debugAst(name, ast.operand)
+		dumpAst(name, ast.operand)
 	case "binop":
 		debugPrintVar("ast.binop", ast.typ)
-		debugAst("left", ast.left)
-		debugAst("right", ast.right)
+		dumpAst("left", ast.left)
+		dumpAst("right", ast.right)
 	default:
 		debugPrintVar(name, ast)
 	}

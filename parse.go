@@ -202,7 +202,7 @@ func parseExpr() *Ast {
 			unreadToken()
 			return ast
 		} else {
-			debugToken(tok)
+			dumpToken(tok)
 			errorf("unable to handle token=\"%s\"\n", tok.sval)
 		}
 	}
