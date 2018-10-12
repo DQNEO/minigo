@@ -1,4 +1,4 @@
-minigo:
+minigo: *.go
 	go build -o minigo
 
 clean:
