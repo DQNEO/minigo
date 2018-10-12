@@ -26,9 +26,11 @@ func emitFuncPrologue(funcdef *Ast) {
 	emitLabel("%s:", funcdef.fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
+	emit("#")
 }
 
 func emitFuncEpilogue() {
+	emit("#")
 	emit("leave")
 	emit("ret")
 }
@@ -65,10 +67,12 @@ var regs = []string{"rdi", "rsi"}
 func emitFuncall(funcall *Ast) {
 	fname := funcall.fname
 	args := funcall.args
+	emit("# backup before funcall")
 	for i, _ := range args {
 		emit("push %%%s", regs[i])
 	}
 
+	emit("# setting arguments")
 	for _, arg := range args {
 		emitExpr(arg)
 		emit("push %%rax")
