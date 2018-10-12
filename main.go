@@ -3,13 +3,15 @@ package main
 import "os"
 
 func main() {
-	debugMode = true
 
 	var sourceFile string
+	sourceFile = "/dev/stdin"
+
 	if len(os.Args) > 1 {
-		sourceFile = os.Args[1] + ".go"
-	} else {
-		sourceFile = "/dev/stdin"
+		opt := os.Args[1]
+		if opt == "-v" {
+			debugMode = true
+		}
 	}
 
 	// tokenize
