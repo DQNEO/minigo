@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
-make clean >/dev/null  2>&1
-make >/dev/null 2>&1
+make clean
+make
 ./minigo "$@"
