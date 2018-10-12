@@ -1,7 +1,9 @@
 package main
 
 import "strconv"
-import "fmt"
+import (
+	"fmt"
+)
 
 type Ast struct {
 	typ string
@@ -179,7 +181,23 @@ func parseUnaryExpr() *Ast {
 	return nil
 }
 
+func priority(op string) int {
+	switch op {
+	case "-","+":
+		return 10
+	case "*":
+		return 20
+	default :
+		errorf("unkown operator")
+	}
+	return 0;
+}
+
 func parseExpr() *Ast {
+	return parseExprInt(-1)
+}
+
+func parseExprInt(prior int) *Ast {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
@@ -193,12 +211,19 @@ func parseExpr() *Ast {
 			return ast
 		}
 		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
-			right := parseUnaryExpr()
-			return &Ast{
-				typ:   "binop",
-				op:    tok.sval,
-				left:  ast,
-				right: right,
+			prior2 := priority(tok.sval)
+			if prior < prior2 {
+				right := parseExprInt(prior2)
+				ast = &Ast{
+					typ:   "binop",
+					op:    tok.sval,
+					left:  ast,
+					right: right,
+				}
+				continue
+			} else {
+				unreadToken()
+				return ast
 			}
 		} else if tok.sval == "," || tok.sval == ")" { // end of funcall argument
 			unreadToken()

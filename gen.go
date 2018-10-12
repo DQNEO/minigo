@@ -40,8 +40,12 @@ func emitExpr(ast *Ast) {
 	case "int":
 		emit("movl	$%d, %%eax", ast.ival)
 	case "binop":
-		emit("movl	$%d, %%eax", ast.left.ival)
-		emit("movl	$%d, %%ebx", ast.right.ival)
+		emitExpr(ast.left)
+		emit("push %%rax")
+		emitExpr(ast.right)
+		emit("push %%rax")
+		emit("pop %%rbx")
+		emit("pop %%rax")
 		if ast.op == "+" {
 			emit("addl	%%ebx, %%eax")
 		} else if ast.op == "-" {
