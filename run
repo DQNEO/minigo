@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
-
-go run *.go "$@"
+set -e
+make clean >/dev/null  2>&1
+make >/dev/null 2>&1
+./minigo
