@@ -39,25 +39,7 @@ type Ast struct {
 	offset int
 }
 
-type TokenStream struct {
-	tokens []*Token
-	index  int
-}
-
 var ts *TokenStream
-
-func (ts *TokenStream) readToken() *Token {
-	if ts.index > len(ts.tokens)-1 {
-		return nil
-	}
-	r := ts.tokens[ts.index]
-	ts.index++
-	return r
-}
-
-func (ts *TokenStream) unreadToken() {
-	ts.index--
-}
 
 func (stream *TokenStream) getToken(i int) interface{} {
 	return ts.tokens[i]
@@ -66,9 +48,6 @@ func (stream *TokenStream) getToken(i int) interface{} {
 func readToken() *Token {
 	for {
 		tok := ts.readToken()
-		if tok == nil {
-			return nil
-		}
 		if !tok.isTypeSpace() {
 			return tok
 		}
@@ -364,7 +343,7 @@ func parseTopLevels() []*Ast {
 	var r []*Ast
 	for {
 		tok := readToken()
-		if tok == nil {
+		if tok.isEOF() {
 			return r
 		}
 		if tok.isTypeNewline() {

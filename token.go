@@ -2,6 +2,25 @@ package main
 
 import "fmt"
 
+type TokenStream struct {
+	tokens []*Token
+	index  int
+}
+
+
+func (ts *TokenStream) readToken() *Token {
+	if ts.index > len(ts.tokens)-1 {
+		return makeToken("EOF", "")
+	}
+	r := ts.tokens[ts.index]
+	ts.index++
+	return r
+}
+
+func (ts *TokenStream) unreadToken() {
+	ts.index--
+}
+
 type Token struct {
 	typ  string
 	sval string
@@ -15,6 +34,10 @@ var bs *ByteStream
 func (tok *Token) String() string {
 	return fmt.Sprintf("(%s \"%s\" %s:%d:%d)",
 		tok.typ, tok.sval, tok.filename, tok.line, tok.column)
+}
+
+func (tok *Token) isEOF() bool {
+	return tok != nil && tok.typ == "EOF"
 }
 
 func (tok *Token) isPunct(s string) bool {
