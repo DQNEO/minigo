@@ -19,7 +19,7 @@ function test_expr {
     local code="$1"
     local expected=$2
     rm -f $as_file
-    echo  "
+    echo -e "
 package main
 
 func main() {
@@ -40,8 +40,7 @@ func main() {
 
 test_file
 
-test_expr 'printf("%d",0)' 0
-test_expr 'printf("%d",7)' 7
+test_expr "printf(\"%d\",1)\nprintf(\"%d\",7)" 17
 test_expr 'printf("%d", 2 + 5)' 7
 test_expr 'printf("%d", 2 * 3)' 6
 test_expr 'printf("%d", 3 -2)' 1
