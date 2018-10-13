@@ -120,9 +120,9 @@ func emitTopLevel(toplevel *Ast) {
 	}
 }
 
-func generate(toplevels []*Ast) {
+func generate(a *AstFile) {
 	emitDataSection()
-	for _, toplevel := range toplevels {
+	for _, toplevel := range a.asts {
 		emitTopLevel(toplevel)
 	}
 }

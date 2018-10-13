@@ -39,6 +39,10 @@ type Ast struct {
 	offset int
 }
 
+type AstFile struct {
+	asts []*Ast
+}
+
 var ts *TokenStream
 
 func (stream *TokenStream) getToken(i int) interface{} {
@@ -329,8 +333,8 @@ func parseImport() *Ast {
 	}
 }
 
-func parseTopLevels() []*Ast {
-	var r []*Ast
+func parseTopLevels() *AstFile {
+	var r = &AstFile{}
 	for {
 		tok := readToken()
 		if tok.isEOF() {
@@ -348,15 +352,15 @@ func parseTopLevels() []*Ast {
 				pkgname: tok.sval,
 			}
 			readToken() // expect newline
-			r = append(r, ast)
+			r.asts = append(r.asts, ast)
 			continue
 		} else if tok.isKeyword("import") {
 			ast := parseImport()
-			r = append(r, ast)
+			r.asts = append(r.asts, ast)
 			continue
 		} else if tok.isKeyword("func") {
 			ast := parseFuncDef()
-			r = append(r, ast)
+			r.asts = append(r.asts, ast)
 			continue
 		} else {
 			errorf("unable to handle token %v", tok)
@@ -365,7 +369,7 @@ func parseTopLevels() []*Ast {
 	return r
 }
 
-func parse(t *TokenStream) []*Ast {
+func parse(t *TokenStream) *AstFile {
 	ts = t
 	return parseTopLevels()
 }
