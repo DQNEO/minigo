@@ -47,12 +47,12 @@ type TokenStream struct {
 var ts *TokenStream
 
 func (ts *TokenStream) readToken() *Token {
-	if ts.index <= len(ts.tokens)-1 {
-		r := ts.tokens[ts.index]
-		ts.index++
-		return r
+	if ts.index > len(ts.tokens)-1 {
+		return nil
 	}
-	return nil
+	r := ts.tokens[ts.index]
+	ts.index++
+	return r
 }
 
 func (ts *TokenStream) unreadToken() {
