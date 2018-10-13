@@ -247,7 +247,7 @@ func autoSemicolonInsert(last *Token) bool {
 	if last.isTypeIdent() {
 		return true
 	}
-	if last.typ == "number" {
+	if last.typ == "number" || last.typ == "string" {
 		return true
 	}
 	if last.isKeyword("break") || last.isKeyword("continue") || last.isKeyword("fallthrough") || last.isKeyword("return") {

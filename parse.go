@@ -316,13 +316,30 @@ func expectNewline() {
 
 func parseImport() *AstImport {
 	tok := readToken()
-	if !tok.isTypeString() {
-		errorf("import expects package name")
+	var paths []string
+	if tok.isPunct("(") {
+		for {
+			tok := readToken()
+			if tok.isTypeString() {
+				paths = append(paths, tok.sval)
+				expectPunct(";")
+			} else if tok.isPunct(")") {
+				break
+			} else {
+				errorf("invalid import path %s", tok)
+			}
+		}
+	} else {
+		if !tok.isTypeString() {
+			errorf("import expects package name")
+		}
+		paths = []string{tok.sval}
 	}
-	packageName := tok.sval
-	expectNewline()
+
+	expectPunct(";")
+
 	return &AstImport{
-		paths: []string{packageName},
+		paths: paths,
 	}
 }
 
