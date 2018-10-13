@@ -42,11 +42,7 @@ func main() {
 	astFile := parse(t)
 
 	if debugAst {
-		debugPrint("==== Dump Ast Start ===")
-		for _, toplevel := range astFile.asts {
-			dumpAst(toplevel)
-		}
-		debugPrint("==== Dump Ast End ===")
+		astFile.dump()
 	}
 
 	// generate

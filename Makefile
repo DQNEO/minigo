@@ -2,4 +2,4 @@ minigo: *.go
 	go build -o minigo
 
 clean:
-	rm minigo
+	rm -f minigo

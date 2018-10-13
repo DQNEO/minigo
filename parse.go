@@ -24,9 +24,6 @@ type Ast struct {
 	// funcall
 	fname string
 	args  []*Ast
-	// funcdef
-	localvars []*Ast
-	body *Ast
 	// package
 	pkgname string
 	// imports
@@ -39,8 +36,25 @@ type Ast struct {
 	offset int
 }
 
+type AstPkgDecl struct {
+	name string
+}
+
+type AstImport struct {
+	paths []string
+}
+
+type AstFuncDef struct {
+	// funcdef
+	fname string
+	localvars []*Ast
+	body *Ast
+}
+
 type AstFile struct {
-	asts []*Ast
+	pkg *AstPkgDecl
+	imports []*AstImport
+	funcdefs []*AstFuncDef
 }
 
 var ts *TokenStream
@@ -282,7 +296,7 @@ func parseCompoundStmt() []*Ast {
 	return nil
 }
 
-func parseFuncDef() *Ast {
+func parseFuncDef() *AstFuncDef {
 	localvars = make([]*Ast, 0)
 	localenv = make(map[string]*Ast)
 	fname := readToken()
@@ -297,8 +311,7 @@ func parseFuncDef() *Ast {
 	stmts := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
-	return &Ast{
-		typ:   "funcdef",
+	return &AstFuncDef{
 		fname: fname.sval,
 		localvars: _localvars,
 		body: &Ast{
@@ -319,7 +332,7 @@ func expectNewline() {
 	expectType("newline")
 }
 
-func parseImport() *Ast {
+func parseImport() *AstImport {
 	//skipSpaceToken()
 	tok := readToken()
 	if !tok.isTypeString() {
@@ -327,9 +340,8 @@ func parseImport() *Ast {
 	}
 	packageName := tok.sval
 	expectNewline()
-	return &Ast{
-		typ:"import",
-		packages: []string{packageName},
+	return &AstImport{
+		paths: []string{packageName},
 	}
 }
 
@@ -347,20 +359,16 @@ func parseTopLevels() *AstFile {
 			//skipSpaceToken()
 			tok = readToken()
 			assert(tok.isTypeIdent(), "expect ident")
-			ast := &Ast{
-				typ:     "package",
-				pkgname: tok.sval,
-			}
+			r.pkg = &AstPkgDecl{name :tok.sval}
 			readToken() // expect newline
-			r.asts = append(r.asts, ast)
 			continue
 		} else if tok.isKeyword("import") {
 			ast := parseImport()
-			r.asts = append(r.asts, ast)
+			r.imports = append(r.imports, ast)
 			continue
 		} else if tok.isKeyword("func") {
 			ast := parseFuncDef()
-			r.asts = append(r.asts, ast)
+			r.funcdefs = append(r.funcdefs, ast)
 			continue
 		} else {
 			errorf("unable to handle token %v", tok)

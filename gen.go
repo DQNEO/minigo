@@ -20,17 +20,17 @@ func emitDataSection() {
 	}
 }
 
-func emitFuncPrologue(funcdef *Ast) {
-	emitLabel("# funcdef %s", funcdef.fname)
+func emitFuncPrologue(f *AstFuncDef) {
+	emitLabel("# f %s", f.fname)
 	emit(".text")
-	emit(".globl	%s", funcdef.fname)
-	emitLabel("%s:", funcdef.fname)
+	emit(".globl	%s", f.fname)
+	emitLabel("%s:", f.fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	if len(funcdef.localvars) > 0 {
+	if len(f.localvars) > 0 {
 		emit("# allocate stack area")
-		stack_size := 8 * len(funcdef.localvars)
+		stack_size := 8 * len(f.localvars)
 		emit("sub $%d, %%rsp", stack_size)
 	}
 
@@ -111,18 +111,16 @@ func emitFuncall(funcall *Ast) {
 	}
 }
 
-func emitTopLevel(toplevel *Ast) {
-	if toplevel.typ == "funcdef" {
-		emitFuncPrologue(toplevel)
-		emitExpr(toplevel.body)
-		emit("mov $0, %%eax") // return 0
-		emitFuncEpilogue()
-	}
+func emitFuncdef(f *AstFuncDef) {
+	emitFuncPrologue(f)
+	emitExpr(f.body)
+	emit("mov $0, %%eax") // return 0
+	emitFuncEpilogue()
 }
 
 func generate(a *AstFile) {
 	emitDataSection()
-	for _, toplevel := range a.asts {
-		emitTopLevel(toplevel)
+	for _, f := range a.funcdefs {
+		emitFuncdef(f)
 	}
 }

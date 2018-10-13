@@ -28,19 +28,36 @@ func dumpToken(tok *Token) {
 	debugPrint(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
-var nest = 0
+var nest int
+
+func (a *AstPkgDecl) dump() {
+	debugf("package %s", a.name)
+}
+
+func (a *AstFuncDef) dump() {
+	debugf("funcdef %s", a.fname)
+	nest++
+	for _, stmt := range a.body.stmts {
+		dumpAst(stmt)
+	}
+	nest--
+}
+
+func (a *AstFile) dump() {
+	debugPrint("==== Dump Ast Start ===")
+	a.pkg.dump()
+	for _, imprt := range a.imports {
+		debugf("import \"%v\"", imprt.paths)
+	}
+	for _, f := range a.funcdefs {
+		f.dump()
+	}
+	debugPrint("==== Dump Ast End ===")
+}
+
 
 func dumpAst(ast *Ast) {
 	switch ast.typ {
-	case "package":
-		debugf("(package %s)", ast.pkgname)
-	case "funcdef":
-		debugf("funcdef %s", ast.fname)
-		nest++
-		for _, stmt := range ast.body.stmts {
-			dumpAst(stmt)
-		}
-		nest--
 	case "funcall":
 		debugf(ast.fname)
 		nest++
