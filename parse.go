@@ -160,9 +160,6 @@ func parseUnaryExpr() *Ast {
 	if tok == nil {
 		return nil
 	}
-	if tok.isTypeSpace() {
-		tok = readToken()
-	}
 
 	switch tok.typ {
 	case "string":
