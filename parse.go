@@ -24,10 +24,6 @@ type Ast struct {
 	// funcall
 	fname string
 	args  []*Ast
-	// package
-	pkgname string
-	// imports
-	packages []string
 	// decl
 	declvar *Ast
 	// lvar (local var)
@@ -212,7 +208,7 @@ func parseExprInt(prior int) *Ast {
 			assert(ast.typ == "lvar", "assure lvaue")
 			rexpr := parseExpr()
 			return &Ast{
-				typ:"assign",
+				typ:"assign", // assignment is not an expression
 				left: ast,
 				right:rexpr,
 			}
