@@ -150,10 +150,6 @@ func newAstString(sval string) *Ast {
 
 func parseUnaryExpr() *Ast {
 	tok := readToken()
-	if tok == nil {
-		return nil
-	}
-
 	switch tok.typ {
 	case "string":
 		return newAstString(tok.sval)
@@ -191,7 +187,7 @@ func parseExprInt(prior int) *Ast {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
-		if tok == nil || tok.isTypeNewline() {
+		if tok.isTypeNewline() {
 			return ast
 		}
 		if !tok.isTypePunct() {
@@ -277,9 +273,6 @@ func parseCompoundStmt() []*Ast {
 		}
 		unreadToken()
 		stmt := parseStmt()
-		if stmt == nil {
-			errorf("internal error")
-		}
 		r = append(r, stmt)
 	}
 	return nil
@@ -313,7 +306,7 @@ func parseFuncDef() *Ast {
 
 func expectType(typ string) {
 	tok := readToken()
-	if tok == nil || tok.typ != typ {
+	if tok.typ != typ {
 		errorf("token type %s expected, but got %s", typ, tok)
 	}
 }
@@ -325,9 +318,6 @@ func expectNewline() {
 func parseImport() *Ast {
 	//skipSpaceToken()
 	tok := readToken()
-	if tok == nil {
-		errorf("import expects package name")
-	}
 	if !tok.isTypeString() {
 		errorf("import expects package name")
 	}
