@@ -23,6 +23,6 @@ func main() {
 	fa()
 	fb()
 	fc()
-	puts("hello world")
+	println("hello world")
 }
 
