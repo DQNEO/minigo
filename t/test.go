@@ -1,7 +1,9 @@
 package main
 
 func fa() {
-	printf("%d\n", 2 - 1 - 1)
+	var i
+	i = 0
+	printf("%d\n", i)
 }
 
 func fb() {
