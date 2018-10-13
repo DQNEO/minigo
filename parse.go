@@ -215,9 +215,6 @@ func parseExprInt(prior int) *Ast {
 		if tok == nil || tok.isTypeNewline() {
 			return ast
 		}
-		if tok.isTypeSpace() {
-			continue
-		}
 		if !tok.isTypePunct() {
 			return ast
 		}
