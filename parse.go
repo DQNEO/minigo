@@ -205,7 +205,7 @@ func parseExprInt(prior int) *Ast {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
-		if tok.isTypeNewline() {
+		if tok.isSemicolon() {
 			return ast
 		}
 		if !tok.isTypePunct() {
@@ -292,7 +292,7 @@ func parseCompoundStmt() []*Ast {
 		if tok.isPunct("}") {
 			return r
 		}
-		if tok.isTypeNewline() {
+		if tok.isSemicolon() {
 			continue
 		}
 		unreadToken()
@@ -358,7 +358,7 @@ func parseTopLevels() *AstFile {
 		if tok.isEOF() {
 			return r
 		}
-		if tok.isTypeNewline() {
+		if tok.isSemicolon() {
 			continue
 		}
 		if tok.isKeyword("package") {

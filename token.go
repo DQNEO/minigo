@@ -72,8 +72,8 @@ func (tok *Token) isTypeSpace() bool {
 	return tok != nil && tok.typ == "space"
 }
 
-func (tok *Token) isTypeNewline() bool {
-	return tok != nil && tok.typ == "newline"
+func (tok *Token) isSemicolon() bool {
+	return tok.isPunct(";")
 }
 
 func getc() (byte, error) {
@@ -233,7 +233,34 @@ func in_array(item string, list []string) bool {
 %    >>    %=    >>=    --    !     ...   .    :
      &^          &^=
 
- */
+*/
+
+
+
+var semicolon = &Token{
+	typ: "punct",
+	sval:";",
+}
+
+// https://golang.org/ref/spec#Semicolons
+func autoSemicolonInsert(last *Token) bool {
+	if last.isTypeIdent() {
+		return true
+	}
+	if last.typ == "number" {
+		return true
+	}
+	if last.isKeyword("break") || last.isKeyword("continue") || last.isKeyword("fallthrough") || last.isKeyword("return") {
+		return true
+	}
+
+	if last.isPunct("++") || last.isPunct("--") || last.isPunct(")") || last.isPunct("]") || last.isPunct("}") {
+		return true
+	}
+
+	return false
+}
+
 func tokenize() []*Token {
 	var r []*Token
 	for {
@@ -246,7 +273,14 @@ func tokenize() []*Token {
 		case 0:
 			return r
 		case '\n':
-			tok = makeToken("newline", "")
+			// Insert semicolon
+			if len(r) > 0 {
+				last := r[len(r) -1]
+				if autoSemicolonInsert(last) {
+					r = append(r, semicolon)
+				}
+			}
+			tok = makeToken("space", "\n")
 		case '0','1','2','3','4','5','6','7','8','9':
 			sval := read_number(c)
 			tok = makeToken( "number",  sval)
@@ -437,8 +471,6 @@ func tokenize() []*Token {
 
 func (tok *Token) render() string {
 	switch tok.typ {
-	case "newline":
-			return "\n"
 	case "space":
 			return tok.sval
 	case "char":
