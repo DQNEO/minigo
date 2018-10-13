@@ -1,7 +1,7 @@
 package main
 
 func fa() {
-	var i
+	var i int
 	i = 0
 	printf("%d\n", i)
 }

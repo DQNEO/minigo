@@ -250,16 +250,23 @@ func parseExprInt(prior int) *Ast {
 var localvars []*Ast
 var localenv map[string]*Ast
 
-func read_decl_var() *Ast {
+func readDeclVar() *Ast {
 	tok := readToken()
 	if !tok.isTypeIdent() {
 		errorf("var expects ident, but got %s", tok)
 	}
 	varname := tok.sval
+
+	tok2 := readToken()
+	if !tok2.isTypeIdent() {
+		errorf("Type expected, but got %s", tok2)
+	}
+	gtype := tok2.sval
+
 	lvar := &Ast{
 		typ: "lvar",
 		varname: varname,
-		gtype: "int",
+		gtype: gtype,
 	}
 	localvars = append(localvars, lvar)
 	localenv[varname] = lvar
@@ -272,7 +279,7 @@ func read_decl_var() *Ast {
 func parseStmt() *Ast {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return read_decl_var()
+		return readDeclVar()
 	}
 	unreadToken()
 	return parseExpr()
