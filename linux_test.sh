@@ -5,15 +5,45 @@ PATH="/usr/lib/go-1.10/bin:$PATH"
 as_file="./out/a.s"
 executable="./out/a.out"
 prog_name="minigo"
-go build -o minigo *.go
 
-function run_test_go {
+make
+
+function test_file {
     ./${prog_name} < t/test.go > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
     diff out/actual.txt t/expected.txt
 }
 
-run_test_go
+function test_expr {
+    local code="$1"
+    local expected=$2
+    rm -f $as_file
+    echo  "
+package main
+
+func main() {
+  $code
+}
+
+  " |  ./${prog_name} > $as_file
+    gcc -no-pie -o $executable $as_file
+    local actual=`$executable`
+    if [[ "$actual" -eq "$expected" ]];then
+        echo "ok"
+    else
+        echo "not ok"
+        exit 1
+    fi
+
+}
+
+test_file
+
+test_expr 'printf("%d",0)' 0
+test_expr 'printf("%d",7)' 7
+test_expr 'printf("%d", 2 + 5)' 7
+test_expr 'printf("%d", 2 * 3)' 6
+test_expr 'printf("%d", 3 -2)' 1
 
 echo "All tests passed"
