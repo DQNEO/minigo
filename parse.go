@@ -292,7 +292,6 @@ func parseFuncDef() *AstFuncDef {
 	}
 	expectPunct("(")
 	expectPunct(")")
-	//skipSpaceToken()
 	// expect Type
 	expectPunct("{")
 	stmts := parseCompoundStmt()
@@ -320,7 +319,6 @@ func expectNewline() {
 }
 
 func parseImport() *AstImport {
-	//skipSpaceToken()
 	tok := readToken()
 	if !tok.isTypeString() {
 		errorf("import expects package name")
@@ -346,7 +344,7 @@ func parseTopLevels() *AstFile {
 			tok = readToken()
 			assert(tok.isTypeIdent(), "expect ident")
 			r.pkg = &AstPkgDecl{name :tok.sval}
-			readToken() // expect newline
+			readToken()
 			continue
 		} else if tok.isKeyword("import") {
 			ast := parseImport()
