@@ -76,25 +76,6 @@ func unreadToken() {
 	ts.unreadToken()
 }
 
-
-/*
-func skipSpaceToken() {
-	for {
-		tok := readToken()
-		if tok == nil {
-			return
-		}
-		if tok.typ == "space" {
-			continue
-		} else {
-			unreadToken()
-			return
-		}
-
-	}
-}
-*/
-
 func expectPunct(punct string) {
 	tok := readToken()
 	if !tok.isTypePunct() {
@@ -362,7 +343,6 @@ func parseTopLevels() *AstFile {
 			continue
 		}
 		if tok.isKeyword("package") {
-			//skipSpaceToken()
 			tok = readToken()
 			assert(tok.isTypeIdent(), "expect ident")
 			r.pkg = &AstPkgDecl{name :tok.sval}
