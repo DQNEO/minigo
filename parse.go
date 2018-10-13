@@ -6,6 +6,7 @@ import (
 )
 
 type Ast struct {
+	//
 	typ string
 	// int
 	ival int
@@ -24,11 +25,18 @@ type Ast struct {
 	fname string
 	args  []*Ast
 	// funcdef
+	localvars []*Ast
 	body *Ast
 	// package
 	pkgname string
 	// imports
 	packages []string
+	// decl
+	declvar *Ast
+	// lvar (local var)
+	varname string
+	gtype string
+	offset int
 }
 
 type TokenStream struct {
@@ -122,8 +130,14 @@ func readFuncallArgs() []*Ast {
 }
 
 func parseIdentOrFuncall(name string) *Ast {
+
+	if lvar,ok := localenv[name]; ok {
+		return lvar
+	}
+
 	tok := readToken()
 	if tok.isPunct("(") {
+		// try funcall
 		args := readFuncallArgs()
 
 		// workaround: replace "println" -> "puts"
@@ -222,6 +236,15 @@ func parseExprInt(prior int) *Ast {
 				unreadToken()
 				return ast
 			}
+		} else if tok.sval == "=" {
+			//assure_lvalue(ast)
+			assert(ast.typ == "lvar", "assure lvaue")
+			rexpr := parseExpr()
+			return &Ast{
+				typ:"assign",
+				left: ast,
+				right:rexpr,
+			}
 		} else if tok.sval == "," || tok.sval == ")" { // end of funcall argument
 			unreadToken()
 			return ast
@@ -234,7 +257,35 @@ func parseExprInt(prior int) *Ast {
 	return ast
 }
 
+var localvars []*Ast
+var localenv map[string]*Ast
+
+func read_decl_var() *Ast {
+	tok := readToken()
+	if !tok.isTypeIdent() {
+		errorf("var expects ident, but got %s", tok)
+	}
+	varname := tok.sval
+	lvar := &Ast{
+		typ: "lvar",
+		varname: varname,
+		gtype: "int",
+		offset: -8,
+	}
+	localvars = append(localvars, lvar)
+	localenv[varname] = lvar
+	return &Ast{
+		typ:     "decl",
+		declvar: lvar,
+	}
+}
+
 func parseStmt() *Ast {
+	tok := readToken()
+	if tok.isKeyword("var") {
+		return read_decl_var()
+	}
+	unreadToken()
 	return parseExpr()
 }
 
@@ -259,7 +310,8 @@ func parseCompoundStmt() []*Ast {
 }
 
 func parseFuncDef() *Ast {
-	//skipSpaceToken()
+	localvars = make([]*Ast, 0)
+	localenv = make(map[string]*Ast)
 	fname := readToken()
 	if !fname.isTypeIdent() {
 		errorf("identifer expected, but got %v", fname)
@@ -270,10 +322,12 @@ func parseFuncDef() *Ast {
 	// expect Type
 	expectPunct("{")
 	stmts := parseCompoundStmt()
-
+	_localvars := localvars
+	localvars = nil
 	return &Ast{
 		typ:   "funcdef",
 		fname: fname.sval,
+		localvars: _localvars,
 		body: &Ast{
 			typ:   "compound",
 			stmts: stmts,

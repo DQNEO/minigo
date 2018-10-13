@@ -52,12 +52,22 @@ func dumpAst(ast *Ast) {
 		debugf("int %d", ast.ival)
 	case "string":
 		debugf("\"%s\"", ast.sval)
+	case "assign":
+		debugf("assign")
+		nest++
+		dumpAst(ast.left)
+		dumpAst(ast.right)
+		nest--
 	case "binop":
 		debugf("binop %s", ast.op)
 		nest++
 		dumpAst(ast.left)
 		dumpAst(ast.right)
 		nest--
+	case "decl":
+		debugf("decl")
+	case "lvar":
+		debugf("lvar")
 	default:
 		errorf("Unknown ast type:%v", ast.typ)
 	}

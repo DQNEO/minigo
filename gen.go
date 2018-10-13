@@ -21,12 +21,20 @@ func emitDataSection() {
 }
 
 func emitFuncPrologue(funcdef *Ast) {
+	emitLabel("# funcdef %s", funcdef.fname)
 	emit(".text")
 	emit(".globl	%s", funcdef.fname)
 	emitLabel("%s:", funcdef.fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
-	emit("#")
+
+	if len(funcdef.localvars) > 0 {
+		emit("# allocate stack area")
+		stack_size := 8 * len(funcdef.localvars)
+		emit("sub $%d, %%rsp", stack_size)
+	}
+
+	emit("# end of prologue")
 }
 
 func emitFuncEpilogue() {
@@ -53,6 +61,12 @@ func emitExpr(ast *Ast) {
 		} else if ast.op == "*" {
 			emit("imul	%%ebx, %%eax")
 		}
+	case "lvar":
+		emit("mov %d(%%rbp), %%eax", ast.offset)
+	case "assign":
+		emitExpr(ast.right)
+		emit("push %%rax")
+		emit("mov %%eax, %d(%%rbp)", ast.left.offset)
 	case "string":
 		emit("lea .%s(%%rip), %%rax", ast.slabel)
 	case "funcall":
@@ -61,6 +75,8 @@ func emitExpr(ast *Ast) {
 		for _, stmt := range ast.stmts {
 			emitExpr(stmt)
 		}
+	case "decl":
+		;
 	default:
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}
@@ -70,8 +86,8 @@ var regs = []string{"rdi", "rsi"}
 
 func emitFuncall(funcall *Ast) {
 	fname := funcall.fname
+	emit("# funcall %s", fname)
 	args := funcall.args
-	emit("# backup before funcall")
 	for i, _ := range args {
 		emit("push %%%s", regs[i])
 	}
