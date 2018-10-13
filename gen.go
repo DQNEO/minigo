@@ -82,7 +82,7 @@ func emitExpr(ast *Ast) {
 	}
 }
 
-var regs = []string{"rdi", "rsi"}
+var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func emitFuncall(funcall *Ast) {
 	fname := funcall.fname
