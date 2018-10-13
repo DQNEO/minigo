@@ -260,7 +260,6 @@ func read_decl_var() *Ast {
 		typ: "lvar",
 		varname: varname,
 		gtype: "int",
-		offset: -8,
 	}
 	localvars = append(localvars, lvar)
 	localenv[varname] = lvar

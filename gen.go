@@ -112,6 +112,13 @@ func emitFuncall(funcall *Ast) {
 }
 
 func emitFuncdef(f *AstFuncDef) {
+	// calc offset
+	var offset int
+	for _, lvar := range f.localvars {
+		offset -= 8
+		lvar.offset = offset
+	}
+
 	emitFuncPrologue(f)
 	emitExpr(f.body)
 	emit("mov $0, %%eax") // return 0
