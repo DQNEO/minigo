@@ -38,11 +38,37 @@ func (a *AstFuncDef) dump() {
 	debugf("funcdef %s", a.fname)
 	nest++
 	for _, stmt := range a.body.stmts {
-		dumpAst(stmt.expr)
+		stmt.dump()
 	}
 	nest--
 }
 
+func (a *AstAssignment) dump() {
+	debugf("assign")
+	nest++
+	a.left.dump()
+	a.right.dump()
+	nest--
+}
+
+func (a *AstDeclLocalVar) dump() {
+	if a.initval == nil {
+		debugf("var %s", a.localvar.varname)
+	} else {
+		debugf("var %s =", a.localvar.varname)
+		a.initval.dump()
+	}
+}
+
+func (a *AstStmt) dump() {
+	if a.decl != nil {
+		a.decl.dump()
+	} else if a.assignment != nil {
+		a.assignment.dump()
+	} else if a.expr != nil {
+		a.expr.dump()
+	}
+}
 func (a *AstFile) dump() {
 	debugPrint("==== Dump AstExpr Start ===")
 	a.pkg.dump()
@@ -56,13 +82,13 @@ func (a *AstFile) dump() {
 }
 
 
-func dumpAst(ast *AstExpr) {
+func (ast *AstExpr) dump() {
 	switch ast.typ {
 	case "funcall":
 		debugf(ast.fname)
 		nest++
 		for _, arg := range ast.args {
-			dumpAst(arg)
+			arg.dump()
 		}
 		nest--
 	case "int":
@@ -72,14 +98,14 @@ func dumpAst(ast *AstExpr) {
 	case "assign":
 		debugf("assign")
 		nest++
-		dumpAst(ast.left)
-		dumpAst(ast.right)
+		ast.left.dump()
+		ast.right.dump()
 		nest--
 	case "binop":
 		debugf("binop %s", ast.op)
 		nest++
-		dumpAst(ast.left)
-		dumpAst(ast.right)
+		ast.left.dump()
+		ast.right.dump()
 		nest--
 	case "decl":
 		debugf("decl")

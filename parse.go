@@ -263,9 +263,6 @@ func readDeclLocalVar() *AstDeclLocalVar {
 }
 
 func parseAssignment(left *AstExpr) *AstAssignment {
-	expectPunct("=")
-	//assure_lvalue(ast)
-	assert(left.typ == "lvar", "assure lvaue")
 	rexpr := parseExpr(nil)
 	return &AstAssignment{
 		left:  left,
@@ -282,7 +279,8 @@ func parseStmt() *AstStmt {
 	ast := parseUnaryExpr()
 	tok2 := readToken()
 	if tok2.isPunct("=") {
-		unreadToken()
+		//assure_lvalue(ast)
+		assert(ast.typ == "lvar", "assure lvaue")
 		return &AstStmt{assignment:	parseAssignment(ast)}
 	}
 	unreadToken()
