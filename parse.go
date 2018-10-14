@@ -28,9 +28,9 @@ type AstExpr struct {
 	offset int
 }
 
-type AstDeclLocalVar struct {
-	localvar *AstExpr
-	initval *AstExpr
+type AstDeclVar struct {
+	variable *AstExpr
+	initval  *AstExpr
 }
 
 type AstAssignment struct {
@@ -39,9 +39,9 @@ type AstAssignment struct {
 }
 
 type AstStmt struct {
-	decllocalvar *AstDeclLocalVar
-	assignment   *AstAssignment
-	expr         *AstExpr
+	declvar    *AstDeclVar
+	assignment *AstAssignment
+	expr       *AstExpr
 }
 
 type AstPkgDecl struct {
@@ -68,7 +68,13 @@ type AstFile struct {
 	pkg *AstPkgDecl
 	imports []*AstImport
 	funcdefs []*AstFuncDef
+	decls []*AstDeclVar
 }
+
+var localvars []*AstExpr
+var localenv  = make(map[string]*AstExpr)
+var globalvars []*AstExpr
+var globalenv = make(map[string]*AstExpr)
 
 var ts *TokenStream
 
@@ -123,6 +129,10 @@ func parseIdentOrFuncall(name string) *AstExpr {
 		return lvar
 	}
 
+	if gvar,ok := globalenv[name]; ok {
+		return gvar
+	}
+
 	tok := readToken()
 	if tok.isPunct("(") {
 		// try funcall
@@ -139,7 +149,7 @@ func parseIdentOrFuncall(name string) *AstExpr {
 		}
 	}
 
-	errorf("TBD")
+	errorf("TBD for token %s for name %s", tok, name)
 	return nil
 }
 
@@ -231,10 +241,7 @@ func parseExprInt(prior int, ast *AstExpr) *AstExpr {
 	return ast
 }
 
-var localvars []*AstExpr
-var localenv map[string]*AstExpr
-
-func readDeclLocalVar() *AstStmt {
+func parseDeclVar(isGlobal bool) *AstStmt {
 	// read varname
 	tok := readToken()
 	if !tok.isTypeIdent() {
@@ -249,14 +256,24 @@ func readDeclLocalVar() *AstStmt {
 	}
 	gtype := tok2.sval
 
-	lvar := &AstExpr{
-		typ: "lvar",
-		varname: varname,
-		gtype: gtype,
+	var variable *AstExpr
+	if isGlobal {
+		variable = &AstExpr{
+			typ: "gvar",
+			varname: varname,
+			gtype: gtype,
+		}
+		globalvars = append(globalvars, variable)
+		globalenv[varname] = variable
+	} else {
+		variable = &AstExpr{
+			typ: "lvar",
+			varname: varname,
+			gtype: gtype,
+		}
+		localvars = append(localvars, variable)
+		localenv[varname] = variable
 	}
-
-	localvars = append(localvars, lvar)
-	localenv[varname] = lvar
 
 	// read "="
 	tok3 := readToken()
@@ -267,9 +284,9 @@ func readDeclLocalVar() *AstStmt {
 		unreadToken()
 	}
 	expectPunct(";")
-	return &AstStmt{decllocalvar:&AstDeclLocalVar{
-		localvar: lvar,
-		initval:initval,
+	return &AstStmt{declvar:&AstDeclVar{
+		variable: variable,
+		initval:  initval,
 	}}
 }
 
@@ -284,7 +301,7 @@ func parseAssignment(left *AstExpr) *AstAssignment {
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return readDeclLocalVar()
+		return parseDeclVar(false)
 	}
 	unreadToken()
 	ast := parseUnaryExpr()
@@ -396,6 +413,9 @@ func parseTopLevels() *AstFile {
 			ast := parseImport()
 			r.imports = append(r.imports, ast)
 			continue
+		} else if tok.isKeyword("var") {
+			decl := parseDeclVar(true)
+			r.decls = append(r.decls, decl.declvar)
 		} else if tok.isKeyword("func") {
 			ast := parseFuncDef()
 			r.funcdefs = append(r.funcdefs, ast)

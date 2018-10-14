@@ -51,18 +51,18 @@ func (a *AstAssignment) dump() {
 	nest--
 }
 
-func (a *AstDeclLocalVar) dump() {
+func (a *AstDeclVar) dump() {
 	if a.initval == nil {
-		debugf("var %s", a.localvar.varname)
+		debugf("var %s", a.variable.varname)
 	} else {
-		debugf("var %s =", a.localvar.varname)
+		debugf("var %s =", a.variable.varname)
 		a.initval.dump()
 	}
 }
 
 func (a *AstStmt) dump() {
-	if a.decllocalvar != nil {
-		a.decllocalvar.dump()
+	if a.declvar != nil {
+		a.declvar.dump()
 	} else if a.assignment != nil {
 		a.assignment.dump()
 	} else if a.expr != nil {

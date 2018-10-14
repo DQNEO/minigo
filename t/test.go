@@ -30,12 +30,20 @@ func fe() {
 	printf("%d\n", a + b)
 }
 
+var gi int = 10
+
+func ff() {
+	printf("%d\n", gi)
+}
+
+
 func main() {
 	fa()
 	fb()
 	fc()
 	fd()
 	fe()
+	ff()
 	println("hello world")
 }
 

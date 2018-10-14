@@ -71,6 +71,10 @@ func emitLocalVariable(ast *AstExpr) {
 	emit("mov %d(%%rbp), %%eax", ast.offset)
 }
 
+func emitGlobalVariable(ast *AstExpr) {
+	emit("mov %s(%%rip), %%eax", ast.varname)
+}
+
 func assign(left *AstExpr, right *AstExpr) {
 	emitExpr(right)
 	emit("push %%rax")
@@ -81,9 +85,9 @@ func emitAssignment(ast *AstAssignment) {
 	assign(ast.left, ast.right)
 }
 
-func emitDeclLocalVar(ast *AstDeclLocalVar) {
+func emitDeclLocalVar(ast *AstDeclVar) {
 	if ast.initval != nil {
-		assign(ast.localvar, ast.initval)
+		assign(ast.variable, ast.initval)
 	}
 }
 
@@ -93,8 +97,8 @@ func emitCompound(ast *AstCompountStmt) {
 			emitExpr(stmt.expr)
 		} else if stmt.assignment != nil {
 			emitAssignment(stmt.assignment)
-		} else if stmt.decllocalvar != nil {
-			emitDeclLocalVar(stmt.decllocalvar)
+		} else if stmt.declvar != nil {
+			emitDeclLocalVar(stmt.declvar)
 		}
 	}
 }
@@ -107,6 +111,8 @@ func emitExpr(ast *AstExpr) {
 		emitBinop(ast)
 	case "lvar":
 		emitLocalVariable(ast)
+	case "gvar":
+		emitGlobalVariable(ast)
 	case "string":
 		emitString(ast)
 	case "funcall":
@@ -159,8 +165,18 @@ func emitFuncdef(f *AstFuncDef) {
 	emitFuncEpilogue()
 }
 
+func emitGlobalDeclVar(declvar *AstDeclVar) {
+	emitLabel(".global %s", declvar.variable.varname)
+	emitLabel("%s:", declvar.variable.varname)
+	assert(declvar.initval.typ == "int", "")
+	emit(".long %d", declvar.initval.ival)
+}
+
 func generate(a *AstFile) {
 	emitDataSection()
+	for _, declvar := range a.decls {
+		emitGlobalDeclVar(declvar)
+	}
 	for _, f := range a.funcdefs {
 		emitFuncdef(f)
 	}
