@@ -185,7 +185,7 @@ func parseUnaryExpr() Expr {
 	switch tok.typ {
 	case "string":
 		return newAstString(tok.sval)
-	case "ident","keyword":
+	case "ident":
 		return parseIdentOrFuncall(tok.sval)
 	case "number":
 		ival, _ := strconv.Atoi(tok.sval)
