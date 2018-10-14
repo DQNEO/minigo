@@ -38,13 +38,13 @@ func (a *AstFuncDef) dump() {
 	debugf("funcdef %s", a.fname)
 	nest++
 	for _, stmt := range a.body.stmts {
-		dumpAst(stmt)
+		dumpAst(stmt.expr)
 	}
 	nest--
 }
 
 func (a *AstFile) dump() {
-	debugPrint("==== Dump Ast Start ===")
+	debugPrint("==== Dump AstExpr Start ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {
 		debugf("import \"%v\"", imprt.paths)
@@ -52,11 +52,11 @@ func (a *AstFile) dump() {
 	for _, f := range a.funcdefs {
 		f.dump()
 	}
-	debugPrint("==== Dump Ast End ===")
+	debugPrint("==== Dump AstExpr End ===")
 }
 
 
-func dumpAst(ast *Ast) {
+func dumpAst(ast *AstExpr) {
 	switch ast.typ {
 	case "funcall":
 		debugf(ast.fname)

@@ -43,15 +43,15 @@ func emitFuncEpilogue() {
 	emit("ret")
 }
 
-func emitInt(ast *Ast) {
+func emitInt(ast *AstExpr) {
 	emit("movl	$%d, %%eax", ast.ival)
 }
 
-func emitString(ast *Ast) {
+func emitString(ast *AstExpr) {
 	emit("lea .%s(%%rip), %%rax", ast.slabel)
 }
 
-func emitBinop(ast *Ast) {
+func emitBinop(ast *AstExpr) {
 	emitExpr(ast.left)
 	emit("push %%rax")
 	emitExpr(ast.right)
@@ -67,11 +67,11 @@ func emitBinop(ast *Ast) {
 	}
 }
 
-func emitLocalVariable(ast *Ast) {
+func emitLocalVariable(ast *AstExpr) {
 	emit("mov %d(%%rbp), %%eax", ast.offset)
 }
 
-func emitAssignment(ast *Ast) {
+func emitAssignment(ast *AstExpr) {
 	emitExpr(ast.right)
 	emit("push %%rax")
 	emit("mov %%eax, %d(%%rbp)", ast.left.offset)
@@ -79,11 +79,15 @@ func emitAssignment(ast *Ast) {
 
 func emitCompound(ast *AstCompountStmt) {
 	for _, stmt := range ast.stmts {
-		emitExpr(stmt)
+		if stmt.expr != nil {
+			emitExpr(stmt.expr)
+		} else if stmt.decl != nil {
+			;
+		}
 	}
 }
 
-func emitExpr(ast *Ast) {
+func emitExpr(ast *AstExpr) {
 	switch ast.typ {
 	case "int":
 		emitInt(ast)
@@ -97,8 +101,6 @@ func emitExpr(ast *Ast) {
 		emitString(ast)
 	case "funcall":
 		emitFuncall(ast)
-	case "decl":
-		;
 	default:
 		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
 	}
@@ -106,7 +108,7 @@ func emitExpr(ast *Ast) {
 
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-func emitFuncall(funcall *Ast) {
+func emitFuncall(funcall *AstExpr) {
 	fname := funcall.fname
 	emit("# funcall %s", fname)
 	args := funcall.args

@@ -5,25 +5,23 @@ import (
 	"fmt"
 )
 
-type Ast struct {
+type AstExpr struct {
 	//
 	typ string
 	// int
 	ival int
 	// unary
-	operand *Ast
+	operand *AstExpr
 	// binop
 	op    string
-	left  *Ast
-	right *Ast
+	left  *AstExpr
+	right *AstExpr
 	// string
 	sval   string
 	slabel string
 	// funcall
 	fname string
-	args  []*Ast
-	// decl
-	declvar *Ast
+	args  []*AstExpr
 	// lvar (local var)
 	varname string
 	gtype string
@@ -40,13 +38,13 @@ type AstImport struct {
 
 type AstCompountStmt struct {
 	// compound
-	stmts []*Ast
+	stmts []*AstStmt
 }
 
 type AstFuncDef struct {
 	// funcdef
 	fname string
-	localvars []*Ast
+	localvars []*AstExpr
 	body *AstCompountStmt
 }
 
@@ -85,8 +83,8 @@ func expectPunct(punct string) {
 	}
 }
 
-func readFuncallArgs() []*Ast {
-	var r []*Ast
+func readFuncallArgs() []*AstExpr {
+	var r []*AstExpr
 	for {
 		tok := readToken()
 		if tok.isPunct(")") {
@@ -106,7 +104,7 @@ func readFuncallArgs() []*Ast {
 	}
 }
 
-func parseIdentOrFuncall(name string) *Ast {
+func parseIdentOrFuncall(name string) *AstExpr {
 
 	if lvar,ok := localenv[name]; ok {
 		return lvar
@@ -121,7 +119,7 @@ func parseIdentOrFuncall(name string) *Ast {
 		if name == "println" {
 			name = "puts"
 		}
-		return &Ast{
+		return &AstExpr{
 			typ:   "funcall",
 			fname: name,
 			args:  args,
@@ -133,10 +131,10 @@ func parseIdentOrFuncall(name string) *Ast {
 }
 
 var stringIndex = 0
-var strings []*Ast
+var strings []*AstExpr
 
-func newAstString(sval string) *Ast {
-	ast := &Ast{
+func newAstString(sval string) *AstExpr {
+	ast := &AstExpr{
 		typ:    "string",
 		sval:   sval,
 		slabel: fmt.Sprintf("L%d", stringIndex),
@@ -146,7 +144,7 @@ func newAstString(sval string) *Ast {
 	return ast
 }
 
-func parseUnaryExpr() *Ast {
+func parseUnaryExpr() *AstExpr {
 	tok := readToken()
 	switch tok.typ {
 	case "string":
@@ -155,7 +153,7 @@ func parseUnaryExpr() *Ast {
 		return parseIdentOrFuncall(tok.sval)
 	case "number":
 		ival, _ := strconv.Atoi(tok.sval)
-		return &Ast{
+		return &AstExpr{
 			typ:  "int",
 			ival: ival,
 		}
@@ -177,11 +175,11 @@ func priority(op string) int {
 	return 0;
 }
 
-func parseExpr() *Ast {
+func parseExpr() *AstExpr {
 	return parseExprInt(-1)
 }
 
-func parseExprInt(prior int) *Ast {
+func parseExprInt(prior int) *AstExpr {
 	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
@@ -195,7 +193,7 @@ func parseExprInt(prior int) *Ast {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				right := parseExprInt(prior2)
-				ast = &Ast{
+				ast = &AstExpr{
 					typ:   "binop",
 					op:    tok.sval,
 					left:  ast,
@@ -210,7 +208,7 @@ func parseExprInt(prior int) *Ast {
 			//assure_lvalue(ast)
 			assert(ast.typ == "lvar", "assure lvaue")
 			rexpr := parseExpr()
-			return &Ast{
+			return &AstExpr{
 				typ:"assign", // assignment is not an expression
 				left: ast,
 				right:rexpr,
@@ -227,10 +225,20 @@ func parseExprInt(prior int) *Ast {
 	return ast
 }
 
-var localvars []*Ast
-var localenv map[string]*Ast
+var localvars []*AstExpr
+var localenv map[string]*AstExpr
 
-func readDeclVar() *Ast {
+type AstDeclLocalVar struct {
+	localvar *AstExpr
+	initval *AstExpr
+}
+
+type AstStmt struct {
+	decl *AstDeclLocalVar
+	expr *AstExpr
+}
+
+func readDeclLocalVar() *AstDeclLocalVar {
 	tok := readToken()
 	if !tok.isTypeIdent() {
 		errorf("var expects ident, but got %s", tok)
@@ -243,26 +251,25 @@ func readDeclVar() *Ast {
 	}
 	gtype := tok2.sval
 
-	lvar := &Ast{
+	lvar := &AstExpr{
 		typ: "lvar",
 		varname: varname,
 		gtype: gtype,
 	}
 	localvars = append(localvars, lvar)
 	localenv[varname] = lvar
-	return &Ast{
-		typ:     "decl",
-		declvar: lvar,
+	return &AstDeclLocalVar{
+		localvar: lvar,
 	}
 }
 
-func parseStmt() *Ast {
+func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return readDeclVar()
+		return &AstStmt{decl:readDeclLocalVar()}
 	}
 	unreadToken()
-	return parseExpr()
+	return &AstStmt{expr:parseExpr()}
 }
 
 func parseCompoundStmt() *AstCompountStmt {
@@ -283,8 +290,8 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDef {
-	localvars = make([]*Ast, 0)
-	localenv = make(map[string]*Ast)
+	localvars = make([]*AstExpr, 0)
+	localenv = make(map[string]*AstExpr)
 	fname := readToken()
 	if !fname.isTypeIdent() {
 		errorf("identifer expected, but got %v", fname)
