@@ -28,6 +28,22 @@ type AstExpr struct {
 	offset int
 }
 
+type AstDeclLocalVar struct {
+	localvar *AstExpr
+	initval *AstExpr
+}
+
+type AstAssignment struct {
+	left  *AstExpr
+	right *AstExpr
+}
+
+type AstStmt struct {
+	decl *AstDeclLocalVar
+	assignment *AstAssignment
+	expr *AstExpr
+}
+
 type AstPkgDecl struct {
 	name string
 }
@@ -91,7 +107,7 @@ func readFuncallArgs() []*AstExpr {
 			return r
 		}
 		unreadToken()
-		arg := parseExpr()
+		arg := parseExpr(nil)
 		r = append(r, arg)
 		tok = readToken()
 		if tok.isPunct(")") {
@@ -175,12 +191,14 @@ func priority(op string) int {
 	return 0;
 }
 
-func parseExpr() *AstExpr {
-	return parseExprInt(-1)
+func parseExpr(ast *AstExpr) *AstExpr {
+	return parseExprInt(-1, ast)
 }
 
-func parseExprInt(prior int) *AstExpr {
-	ast := parseUnaryExpr()
+func parseExprInt(prior int, ast *AstExpr) *AstExpr {
+	if ast == nil {
+		ast = parseUnaryExpr()
+	}
 	for {
 		tok := readToken()
 		if tok.isSemicolon() {
@@ -192,7 +210,7 @@ func parseExprInt(prior int) *AstExpr {
 		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
-				right := parseExprInt(prior2)
+				right := parseExprInt(prior2,nil)
 				ast = &AstExpr{
 					typ:   "binop",
 					op:    tok.sval,
@@ -203,15 +221,6 @@ func parseExprInt(prior int) *AstExpr {
 			} else {
 				unreadToken()
 				return ast
-			}
-		} else if tok.sval == "=" {
-			//assure_lvalue(ast)
-			assert(ast.typ == "lvar", "assure lvaue")
-			rexpr := parseExpr()
-			return &AstExpr{
-				typ:"assign", // assignment is not an expression
-				left: ast,
-				right:rexpr,
 			}
 		} else if tok.sval == "," || tok.sval == ")" { // end of funcall argument
 			unreadToken()
@@ -227,16 +236,6 @@ func parseExprInt(prior int) *AstExpr {
 
 var localvars []*AstExpr
 var localenv map[string]*AstExpr
-
-type AstDeclLocalVar struct {
-	localvar *AstExpr
-	initval *AstExpr
-}
-
-type AstStmt struct {
-	decl *AstDeclLocalVar
-	expr *AstExpr
-}
 
 func readDeclLocalVar() *AstDeclLocalVar {
 	tok := readToken()
@@ -263,13 +262,31 @@ func readDeclLocalVar() *AstDeclLocalVar {
 	}
 }
 
+func parseAssignment(left *AstExpr) *AstAssignment {
+	expectPunct("=")
+	//assure_lvalue(ast)
+	assert(left.typ == "lvar", "assure lvaue")
+	rexpr := parseExpr(nil)
+	return &AstAssignment{
+		left:  left,
+		right: rexpr,
+	}
+}
+
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
 		return &AstStmt{decl:readDeclLocalVar()}
 	}
 	unreadToken()
-	return &AstStmt{expr:parseExpr()}
+	ast := parseUnaryExpr()
+	tok2 := readToken()
+	if tok2.isPunct("=") {
+		unreadToken()
+		return &AstStmt{assignment:	parseAssignment(ast)}
+	}
+	unreadToken()
+	return &AstStmt{expr:parseExpr(ast)}
 }
 
 func parseCompoundStmt() *AstCompountStmt {
