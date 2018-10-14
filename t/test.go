@@ -1,10 +1,13 @@
 package main
 
+var ga int
+
 func fa() {
+	printf("%d\n", ga)
 }
 
+
 func fb() {
-	printf("%d\n", 0)
 	printf("%d\n", 2 - 1)
 	printf("%d\n", 1 + 1)
 	printf("%d\n", 1 + 1 + 1)
@@ -30,10 +33,10 @@ func fe() {
 	printf("%d\n", a + b)
 }
 
-var gi int = 10
+var gb int = 10
 
 func ff() {
-	printf("%d\n", gi)
+	printf("%d\n", gb)
 }
 
 

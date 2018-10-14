@@ -87,12 +87,12 @@ func (ast *AstAssignment) emit() {
 }
 
 func emitDeclLocalVar(ast *AstDeclVar) {
-	if ast.initval != nil {
-		assignLocal(ast.variable, ast.initval)
-	} else {
+	if ast.initval == nil {
 		// assign zero value
-		assignLocal(ast.variable, &ExprNumberLiteral{val:0})
+		ast.initval = &ExprNumberLiteral{}
 	}
+
+	assignLocal(ast.variable, ast.initval)
 }
 
 func emitCompound(ast *AstCompountStmt) {
@@ -155,11 +155,16 @@ func emitGlobalDeclVar(declvar *AstDeclVar) {
 	assert(variable.isGlobal, "should be global")
 	emitLabel(".global %s", variable.varname)
 	emitLabel("%s:", variable.varname)
-	ival, ok := declvar.initval.(*ExprNumberLiteral)
-	if !ok {
-		errorf("only number can be assign to global variables")
+	if declvar.initval == nil {
+		// set zero value
+		emit(".long %d", 0)
+	} else {
+		ival, ok := declvar.initval.(*ExprNumberLiteral)
+		if !ok {
+			errorf("only number can be assign to global variables")
+		}
+		emit(".long %d", ival.val)
 	}
-	emit(".long %d", ival.val)
 }
 
 func generate(a *AstFile) {
