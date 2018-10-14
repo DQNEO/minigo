@@ -43,38 +43,60 @@ func emitFuncEpilogue() {
 	emit("ret")
 }
 
+func emitInt(ast *Ast) {
+	emit("movl	$%d, %%eax", ast.ival)
+}
+
+func emitString(ast *Ast) {
+	emit("lea .%s(%%rip), %%rax", ast.slabel)
+}
+
+func emitBinop(ast *Ast) {
+	emitExpr(ast.left)
+	emit("push %%rax")
+	emitExpr(ast.right)
+	emit("push %%rax")
+	emit("pop %%rbx")
+	emit("pop %%rax")
+	if ast.op == "+" {
+		emit("addl	%%ebx, %%eax")
+	} else if ast.op == "-" {
+		emit("subl	%%ebx, %%eax")
+	} else if ast.op == "*" {
+		emit("imul	%%ebx, %%eax")
+	}
+}
+
+func emitLocalVariable(ast *Ast) {
+	emit("mov %d(%%rbp), %%eax", ast.offset)
+}
+
+func emitAssignment(ast *Ast) {
+	emitExpr(ast.right)
+	emit("push %%rax")
+	emit("mov %%eax, %d(%%rbp)", ast.left.offset)
+}
+
+func emitCompound(ast *AstCompountStmt) {
+	for _, stmt := range ast.stmts {
+		emitExpr(stmt)
+	}
+}
+
 func emitExpr(ast *Ast) {
 	switch ast.typ {
 	case "int":
-		emit("movl	$%d, %%eax", ast.ival)
+		emitInt(ast)
 	case "binop":
-		emitExpr(ast.left)
-		emit("push %%rax")
-		emitExpr(ast.right)
-		emit("push %%rax")
-		emit("pop %%rbx")
-		emit("pop %%rax")
-		if ast.op == "+" {
-			emit("addl	%%ebx, %%eax")
-		} else if ast.op == "-" {
-			emit("subl	%%ebx, %%eax")
-		} else if ast.op == "*" {
-			emit("imul	%%ebx, %%eax")
-		}
+		emitBinop(ast)
 	case "lvar":
-		emit("mov %d(%%rbp), %%eax", ast.offset)
+		emitLocalVariable(ast)
 	case "assign":
-		emitExpr(ast.right)
-		emit("push %%rax")
-		emit("mov %%eax, %d(%%rbp)", ast.left.offset)
+		emitAssignment(ast)
 	case "string":
-		emit("lea .%s(%%rip), %%rax", ast.slabel)
+		emitString(ast)
 	case "funcall":
 		emitFuncall(ast)
-	case "compound":
-		for _, stmt := range ast.stmts {
-			emitExpr(stmt)
-		}
 	case "decl":
 		;
 	default:
@@ -120,7 +142,7 @@ func emitFuncdef(f *AstFuncDef) {
 	}
 
 	emitFuncPrologue(f)
-	emitExpr(f.body)
+	emitCompound(f.body)
 	emit("mov $0, %%eax") // return 0
 	emitFuncEpilogue()
 }

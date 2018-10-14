@@ -19,8 +19,6 @@ type Ast struct {
 	// string
 	sval   string
 	slabel string
-	// compound
-	stmts []*Ast
 	// funcall
 	fname string
 	args  []*Ast
@@ -40,11 +38,16 @@ type AstImport struct {
 	paths []string
 }
 
+type AstCompountStmt struct {
+	// compound
+	stmts []*Ast
+}
+
 type AstFuncDef struct {
 	// funcdef
 	fname string
 	localvars []*Ast
-	body *Ast
+	body *AstCompountStmt
 }
 
 type AstFile struct {
@@ -262,8 +265,8 @@ func parseStmt() *Ast {
 	return parseExpr()
 }
 
-func parseCompoundStmt() []*Ast {
-	var r []*Ast
+func parseCompoundStmt() *AstCompountStmt {
+	r := &AstCompountStmt{}
 	for {
 		tok := readToken()
 		if tok.isPunct("}") {
@@ -274,7 +277,7 @@ func parseCompoundStmt() []*Ast {
 		}
 		unreadToken()
 		stmt := parseStmt()
-		r = append(r, stmt)
+		r.stmts = append(r.stmts, stmt)
 	}
 	return nil
 }
@@ -290,16 +293,13 @@ func parseFuncDef() *AstFuncDef {
 	expectPunct(")")
 	// expect Type
 	expectPunct("{")
-	stmts := parseCompoundStmt()
+	body := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
 	return &AstFuncDef{
 		fname: fname.sval,
 		localvars: _localvars,
-		body: &Ast{
-			typ:   "compound",
-			stmts: stmts,
-		},
+		body: body,
 	}
 }
 
