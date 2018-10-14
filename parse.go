@@ -183,10 +183,10 @@ func newAstString(sval string) *ExprStringLiteral {
 func parseUnaryExpr() Expr {
 	tok := readToken()
 	switch tok.typ {
-	case "string":
-		return newAstString(tok.sval)
 	case "ident":
 		return parseIdentOrFuncall(tok.sval)
+	case "string":
+		return newAstString(tok.sval)
 	case "number":
 		ival, _ := strconv.Atoi(tok.sval)
 		return &ExprNumberLiteral{
