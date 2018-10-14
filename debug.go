@@ -43,11 +43,11 @@ func (a *AstFuncDef) dump() {
 	nest--
 }
 
-func (a *AstAssignment) dump() {
+func (ast *AstAssignment) dump() {
 	debugf("assign")
 	nest++
-	a.left.dump()
-	a.right.dump()
+	ast.left.dump()
+	ast.right.dump()
 	nest--
 }
 
@@ -81,39 +81,33 @@ func (a *AstFile) dump() {
 	debugPrint("==== Dump AstExpr End ===")
 }
 
-
-func (ast *AstExpr) dump() {
-	switch ast.typ {
-	case "funcall":
-		debugf(ast.fname)
-		nest++
-		for _, arg := range ast.args {
-			arg.dump()
-		}
-		nest--
-	case "int":
-		debugf("int %d", ast.ival)
-	case "string":
-		debugf("\"%s\"", ast.sval)
-	case "assign":
-		debugf("assign")
-		nest++
-		ast.left.dump()
-		ast.right.dump()
-		nest--
-	case "binop":
-		debugf("binop %s", ast.op)
-		nest++
-		ast.left.dump()
-		ast.right.dump()
-		nest--
-	case "decl":
-		debugf("decl")
-	case "lvar":
-		debugf("lvar")
-	default:
-		errorf("Unknown ast type:%v", ast.typ)
+func (ast *ExprFuncall) dump() {
+	debugf(ast.fname)
+	nest++
+	for _, arg := range ast.args {
+		arg.dump()
 	}
+	nest--
+}
+
+func (ast *ExprVariable) dump() {
+	debugf("var %s", ast.varname)
+}
+
+func (ast *ExprNumberLiteral) dump() {
+	debugf("int %d", ast.val)
+}
+
+func (ast *ExprStringLiteral) dump() {
+	debugf("\"%s\"", ast.val)
+}
+
+func (ast *ExprBinop) dump() {
+	debugf("binop %s", ast.op)
+	nest++
+	ast.left.dump()
+	ast.right.dump()
+	nest--
 }
 
 func errorf(format string, v ...interface{}) {

@@ -16,7 +16,7 @@ func emitDataSection() {
 	// put strings
 	for _, ast := range strings {
 		emitLabel(".%s:", ast.slabel)
-		emit(".string \"%s\"", ast.sval)
+		emit(".string \"%s\"", ast.val)
 	}
 }
 
@@ -43,18 +43,26 @@ func emitFuncEpilogue() {
 	emit("ret")
 }
 
-func emitInt(ast *AstExpr) {
-	emit("movl	$%d, %%eax", ast.ival)
+func (ast *ExprNumberLiteral) emit() {
+	emit("movl	$%d, %%eax", ast.val)
 }
 
-func emitString(ast *AstExpr) {
+func (ast *ExprStringLiteral) emit() {
 	emit("lea .%s(%%rip), %%rax", ast.slabel)
 }
 
-func emitBinop(ast *AstExpr) {
-	emitExpr(ast.left)
+func (ast *ExprVariable) emit() {
+	if ast.isGlobal {
+		emit("mov %s(%%rip), %%eax", ast.varname)
+	} else {
+		emit("mov %d(%%rbp), %%eax", ast.offset)
+	}
+}
+
+func (ast *ExprBinop) emit() {
+	ast.left.emit()
 	emit("push %%rax")
-	emitExpr(ast.right)
+	ast.right.emit()
 	emit("push %%rax")
 	emit("pop %%rbx")
 	emit("pop %%rax")
@@ -67,64 +75,41 @@ func emitBinop(ast *AstExpr) {
 	}
 }
 
-func emitLocalVariable(ast *AstExpr) {
-	emit("mov %d(%%rbp), %%eax", ast.offset)
-}
-
-func emitGlobalVariable(ast *AstExpr) {
-	emit("mov %s(%%rip), %%eax", ast.varname)
-}
-
-func assign(left *AstExpr, right *AstExpr) {
-	emitExpr(right)
+func assignLocal(left *ExprVariable, right Expr) {
+	assert(!left.isGlobal, "should be a local var")
+	right.emit()
 	emit("push %%rax")
 	emit("mov %%eax, %d(%%rbp)", left.offset)
 }
 
-func emitAssignment(ast *AstAssignment) {
-	assign(ast.left, ast.right)
+func (ast *AstAssignment) emit() {
+	assignLocal(ast.left, ast.right)
 }
 
 func emitDeclLocalVar(ast *AstDeclVar) {
 	if ast.initval != nil {
-		assign(ast.variable, ast.initval)
+		assignLocal(ast.variable, ast.initval)
+	} else {
+		// assign zero value
+		assignLocal(ast.variable, &ExprNumberLiteral{val:0})
 	}
 }
 
 func emitCompound(ast *AstCompountStmt) {
 	for _, stmt := range ast.stmts {
 		if stmt.expr != nil {
-			emitExpr(stmt.expr)
+			stmt.expr.emit()
 		} else if stmt.assignment != nil {
-			emitAssignment(stmt.assignment)
+			stmt.assignment.emit()
 		} else if stmt.declvar != nil {
 			emitDeclLocalVar(stmt.declvar)
 		}
 	}
 }
 
-func emitExpr(ast *AstExpr) {
-	switch ast.typ {
-	case "int":
-		emitInt(ast)
-	case "binop":
-		emitBinop(ast)
-	case "lvar":
-		emitLocalVariable(ast)
-	case "gvar":
-		emitGlobalVariable(ast)
-	case "string":
-		emitString(ast)
-	case "funcall":
-		emitFuncall(ast)
-	default:
-		panic(fmt.Sprintf("unexpected ast type %s", ast.typ))
-	}
-}
-
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-func emitFuncall(funcall *AstExpr) {
+func (funcall *ExprFuncall) emit() {
 	fname := funcall.fname
 	emit("# funcall %s", fname)
 	args := funcall.args
@@ -134,7 +119,7 @@ func emitFuncall(funcall *AstExpr) {
 
 	emit("# setting arguments")
 	for _, arg := range args {
-		emitExpr(arg)
+		arg.emit()
 		emit("push %%rax")
 	}
 
@@ -166,10 +151,15 @@ func emitFuncdef(f *AstFuncDef) {
 }
 
 func emitGlobalDeclVar(declvar *AstDeclVar) {
-	emitLabel(".global %s", declvar.variable.varname)
-	emitLabel("%s:", declvar.variable.varname)
-	assert(declvar.initval.typ == "int", "")
-	emit(".long %d", declvar.initval.ival)
+	variable := declvar.variable
+	assert(variable.isGlobal, "should be global")
+	emitLabel(".global %s", variable.varname)
+	emitLabel("%s:", variable.varname)
+	ival, ok := declvar.initval.(*ExprNumberLiteral)
+	if !ok {
+		errorf("only number can be assign to global variables")
+	}
+	emit(".long %d", ival.val)
 }
 
 func generate(a *AstFile) {

@@ -5,43 +5,58 @@ import (
 	"fmt"
 )
 
-type AstExpr struct {
-	//
-	typ string
-	// int
-	ival int
-	// unary
-	operand *AstExpr
-	// binop
-	op    string
-	left  *AstExpr
-	right *AstExpr
-	// string
-	sval   string
+type Expr interface  {
+	emit()
+	dump()
+}
+
+type ExprNumberLiteral struct {
+	val int
+}
+
+type ExprStringLiteral struct {
+	val string
 	slabel string
-	// funcall
-	fname string
-	args  []*AstExpr
-	// lvar (local var)
+}
+
+type ExprVariable struct {
 	varname string
 	gtype string
 	offset int
+	isGlobal bool
+}
+
+type ExprFuncall struct {
+	// funcall
+	fname string
+	args  []Expr
+}
+
+type ExprBinop struct {
+	op    string
+	left  Expr
+	right Expr
+}
+
+type ExprUop struct {
+	op string
+	operand Expr
 }
 
 type AstDeclVar struct {
-	variable *AstExpr
-	initval  *AstExpr
+	variable *ExprVariable // lvar or gvar
+	initval  Expr
 }
 
 type AstAssignment struct {
-	left  *AstExpr
-	right *AstExpr
+	left  *ExprVariable // lvalue
+	right Expr
 }
 
 type AstStmt struct {
 	declvar    *AstDeclVar
 	assignment *AstAssignment
-	expr       *AstExpr
+	expr       Expr
 }
 
 type AstPkgDecl struct {
@@ -60,7 +75,7 @@ type AstCompountStmt struct {
 type AstFuncDef struct {
 	// funcdef
 	fname string
-	localvars []*AstExpr
+	localvars []*ExprVariable
 	body *AstCompountStmt
 }
 
@@ -71,10 +86,10 @@ type AstFile struct {
 	decls []*AstDeclVar
 }
 
-var localvars []*AstExpr
-var localenv  = make(map[string]*AstExpr)
-var globalvars []*AstExpr
-var globalenv = make(map[string]*AstExpr)
+var localvars []*ExprVariable
+var localenv  = make(map[string]*ExprVariable)
+var globalvars []*ExprVariable
+var globalenv = make(map[string]*ExprVariable)
 
 var ts *TokenStream
 
@@ -102,8 +117,8 @@ func expectPunct(punct string) {
 	}
 }
 
-func readFuncallArgs() []*AstExpr {
-	var r []*AstExpr
+func readFuncallArgs() []Expr {
+	var r []Expr
 	for {
 		tok := readToken()
 		if tok.isPunct(")") {
@@ -123,7 +138,7 @@ func readFuncallArgs() []*AstExpr {
 	}
 }
 
-func parseIdentOrFuncall(name string) *AstExpr {
+func parseIdentOrFuncall(name string) Expr {
 
 	if lvar,ok := localenv[name]; ok {
 		return lvar
@@ -142,8 +157,7 @@ func parseIdentOrFuncall(name string) *AstExpr {
 		if name == "println" {
 			name = "puts"
 		}
-		return &AstExpr{
-			typ:   "funcall",
+		return &ExprFuncall{
 			fname: name,
 			args:  args,
 		}
@@ -154,12 +168,11 @@ func parseIdentOrFuncall(name string) *AstExpr {
 }
 
 var stringIndex = 0
-var strings []*AstExpr
+var strings []*ExprStringLiteral
 
-func newAstString(sval string) *AstExpr {
-	ast := &AstExpr{
-		typ:    "string",
-		sval:   sval,
+func newAstString(sval string) *ExprStringLiteral {
+	ast := &ExprStringLiteral{
+		val:   sval,
 		slabel: fmt.Sprintf("L%d", stringIndex),
 	}
 	stringIndex++
@@ -167,7 +180,7 @@ func newAstString(sval string) *AstExpr {
 	return ast
 }
 
-func parseUnaryExpr() *AstExpr {
+func parseUnaryExpr() Expr {
 	tok := readToken()
 	switch tok.typ {
 	case "string":
@@ -176,9 +189,8 @@ func parseUnaryExpr() *AstExpr {
 		return parseIdentOrFuncall(tok.sval)
 	case "number":
 		ival, _ := strconv.Atoi(tok.sval)
-		return &AstExpr{
-			typ:  "int",
-			ival: ival,
+		return &ExprNumberLiteral{
+			val: ival,
 		}
 	default:
 		errorf("unable to handle token %v", tok)
@@ -198,11 +210,11 @@ func priority(op string) int {
 	return 0;
 }
 
-func parseExpr(ast *AstExpr) *AstExpr {
+func parseExpr(ast Expr) Expr {
 	return parseExprInt(-1, ast)
 }
 
-func parseExprInt(prior int, ast *AstExpr) *AstExpr {
+func parseExprInt(prior int, ast Expr) Expr {
 	if ast == nil {
 		ast = parseUnaryExpr()
 	}
@@ -218,8 +230,7 @@ func parseExprInt(prior int, ast *AstExpr) *AstExpr {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				right := parseExprInt(prior2,nil)
-				ast = &AstExpr{
-					typ:   "binop",
+				ast = &ExprBinop{
 					op:    tok.sval,
 					left:  ast,
 					right: right,
@@ -256,18 +267,17 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 	}
 	gtype := tok2.sval
 
-	var variable *AstExpr
+	var variable *ExprVariable
 	if isGlobal {
-		variable = &AstExpr{
-			typ: "gvar",
+		variable = &ExprVariable{
 			varname: varname,
 			gtype: gtype,
+			isGlobal: true,
 		}
 		globalvars = append(globalvars, variable)
 		globalenv[varname] = variable
 	} else {
-		variable = &AstExpr{
-			typ: "lvar",
+		variable = &ExprVariable{
 			varname: varname,
 			gtype: gtype,
 		}
@@ -277,7 +287,7 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 
 	// read "="
 	tok3 := readToken()
-	var initval *AstExpr
+	var initval Expr
 	if tok3.isPunct("=") {
 		initval = parseUnaryExpr()
 	} else {
@@ -290,7 +300,7 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 	}}
 }
 
-func parseAssignment(left *AstExpr) *AstAssignment {
+func parseAssignment(left *ExprVariable) *AstAssignment {
 	rexpr := parseExpr(nil)
 	return &AstAssignment{
 		left:  left,
@@ -308,7 +318,7 @@ func parseStmt() *AstStmt {
 	tok2 := readToken()
 	if tok2.isPunct("=") {
 		//assure_lvalue(ast)
-		return &AstStmt{assignment:	parseAssignment(ast)}
+		return &AstStmt{assignment:	parseAssignment(ast.(*ExprVariable))}
 	}
 	unreadToken()
 	return &AstStmt{expr:parseExpr(ast)}
@@ -332,8 +342,8 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDef {
-	localvars = make([]*AstExpr, 0)
-	localenv = make(map[string]*AstExpr)
+	localvars = make([]*ExprVariable, 0)
+	localenv = make(map[string]*ExprVariable)
 	fname := readToken()
 	if !fname.isTypeIdent() {
 		errorf("identifer expected, but got %v", fname)
