@@ -22,7 +22,7 @@ type ExprStringLiteral struct {
 type ExprVariable struct {
 	varname string
 	gtype string
-	offset int
+	offset int // for local variable
 	isGlobal bool
 }
 
