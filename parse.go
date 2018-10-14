@@ -140,14 +140,6 @@ func readFuncallArgs() []Expr {
 
 func parseIdentOrFuncall(name string) Expr {
 
-	if lvar,ok := localenv[name]; ok {
-		return lvar
-	}
-
-	if gvar,ok := globalenv[name]; ok {
-		return gvar
-	}
-
 	tok := readToken()
 	if tok.isPunct("(") {
 		// try funcall
@@ -162,8 +154,17 @@ func parseIdentOrFuncall(name string) Expr {
 			args:  args,
 		}
 	}
+	unreadToken()
 
-	errorf("TBD for token %s for name %s", tok, name)
+	if lvar,ok := localenv[name]; ok {
+		return lvar
+	}
+
+	if gvar,ok := globalenv[name]; ok {
+		return gvar
+	}
+
+	errorf("Undefined variable %s", name)
 	return nil
 }
 
