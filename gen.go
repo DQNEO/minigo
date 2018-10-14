@@ -71,10 +71,20 @@ func emitLocalVariable(ast *AstExpr) {
 	emit("mov %d(%%rbp), %%eax", ast.offset)
 }
 
-func emitAssignment(ast *AstAssignment) {
-	emitExpr(ast.right)
+func assign(left *AstExpr, right *AstExpr) {
+	emitExpr(right)
 	emit("push %%rax")
-	emit("mov %%eax, %d(%%rbp)", ast.left.offset)
+	emit("mov %%eax, %d(%%rbp)", left.offset)
+}
+
+func emitAssignment(ast *AstAssignment) {
+	assign(ast.left, ast.right)
+}
+
+func emitDeclLocalVar(ast *AstDeclLocalVar) {
+	if ast.initval != nil {
+		assign(ast.localvar, ast.initval)
+	}
 }
 
 func emitCompound(ast *AstCompountStmt) {
@@ -83,8 +93,8 @@ func emitCompound(ast *AstCompountStmt) {
 			emitExpr(stmt.expr)
 		} else if stmt.assignment != nil {
 			emitAssignment(stmt.assignment)
-		} else if stmt.decl != nil {
-			;
+		} else if stmt.decllocalvar != nil {
+			emitDeclLocalVar(stmt.decllocalvar)
 		}
 	}
 }

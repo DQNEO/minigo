@@ -39,9 +39,9 @@ type AstAssignment struct {
 }
 
 type AstStmt struct {
-	decl *AstDeclLocalVar
-	assignment *AstAssignment
-	expr *AstExpr
+	decllocalvar *AstDeclLocalVar
+	assignment   *AstAssignment
+	expr         *AstExpr
 }
 
 type AstPkgDecl struct {
@@ -91,9 +91,6 @@ func unreadToken() {
 
 func expectPunct(punct string) {
 	tok := readToken()
-	if !tok.isTypePunct() {
-		errorf("token type punct expected, but got %v", tok)
-	}
 	if !tok.isPunct(punct) {
 		errorf("punct '%s' expected but got '%s'", punct, tok.sval)
 	}
@@ -237,13 +234,15 @@ func parseExprInt(prior int, ast *AstExpr) *AstExpr {
 var localvars []*AstExpr
 var localenv map[string]*AstExpr
 
-func readDeclLocalVar() *AstDeclLocalVar {
+func readDeclLocalVar() *AstStmt {
+	// read varname
 	tok := readToken()
 	if !tok.isTypeIdent() {
 		errorf("var expects ident, but got %s", tok)
 	}
 	varname := tok.sval
 
+	// read type
 	tok2 := readToken()
 	if !tok2.isTypeIdent() {
 		errorf("Type expected, but got %s", tok2)
@@ -255,11 +254,23 @@ func readDeclLocalVar() *AstDeclLocalVar {
 		varname: varname,
 		gtype: gtype,
 	}
+
 	localvars = append(localvars, lvar)
 	localenv[varname] = lvar
-	return &AstDeclLocalVar{
-		localvar: lvar,
+
+	// read "="
+	tok3 := readToken()
+	var initval *AstExpr
+	if tok3.isPunct("=") {
+		initval = parseUnaryExpr()
+	} else {
+		unreadToken()
 	}
+	expectPunct(";")
+	return &AstStmt{decllocalvar:&AstDeclLocalVar{
+		localvar: lvar,
+		initval:initval,
+	}}
 }
 
 func parseAssignment(left *AstExpr) *AstAssignment {
@@ -273,7 +284,7 @@ func parseAssignment(left *AstExpr) *AstAssignment {
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return &AstStmt{decl:readDeclLocalVar()}
+		return readDeclLocalVar()
 	}
 	unreadToken()
 	ast := parseUnaryExpr()

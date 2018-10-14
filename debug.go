@@ -61,8 +61,8 @@ func (a *AstDeclLocalVar) dump() {
 }
 
 func (a *AstStmt) dump() {
-	if a.decl != nil {
-		a.decl.dump()
+	if a.decllocalvar != nil {
+		a.decllocalvar.dump()
 	} else if a.assignment != nil {
 		a.assignment.dump()
 	} else if a.expr != nil {

@@ -19,10 +19,23 @@ func fc() {
 	printf("%d\n", i + 4)
 }
 
+func fd() {
+	var j int = 2
+	printf("%d\n", j + 6)
+}
+
+func fe() {
+	var a int = 5
+	var b int = 4
+	printf("%d\n", a + b)
+}
+
 func main() {
 	fa()
 	fb()
 	fc()
+	fd()
+	fe()
 	println("hello world")
 }
 
