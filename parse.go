@@ -308,7 +308,6 @@ func parseStmt() *AstStmt {
 	tok2 := readToken()
 	if tok2.isPunct("=") {
 		//assure_lvalue(ast)
-		assert(ast.typ == "lvar", "assure lvaue")
 		return &AstStmt{assignment:	parseAssignment(ast)}
 	}
 	unreadToken()
