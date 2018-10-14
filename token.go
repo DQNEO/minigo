@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+type identifier string
+
 type TokenStream struct {
 	tokens []*Token
 	index  int
@@ -51,6 +53,14 @@ func (tok *Token) isKeyword(s string) bool {
 func (tok *Token) isIdent(s string) bool {
 	return tok != nil && tok.typ == "ident" && tok.sval == s
 }
+
+func (tok *Token) getIdent() identifier {
+	if !tok.isTypeIdent() {
+		errorf("tok %s is not ident", tok)
+	}
+	return identifier(tok.sval)
+}
+
 
 func (tok *Token) isTypePunct() bool {
 	return tok != nil && tok.typ == "punct"

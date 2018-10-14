@@ -30,7 +30,7 @@ func dumpToken(tok *Token) {
 
 var nest int
 
-func (a *AstPkgDecl) dump() {
+func (a *AstPkgClause) dump() {
 	debugf("package %s", a.name)
 }
 

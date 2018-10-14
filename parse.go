@@ -59,8 +59,8 @@ type AstStmt struct {
 	expr       Expr
 }
 
-type AstPkgDecl struct {
-	name string
+type AstPkgClause struct {
+	name identifier
 }
 
 type AstImport struct {
@@ -80,7 +80,7 @@ type AstFuncDef struct {
 }
 
 type AstFile struct {
-	pkg *AstPkgDecl
+	pkg *AstPkgClause
 	imports []*AstImport
 	funcdefs []*AstFuncDef
 	decls []*AstDeclVar
@@ -415,7 +415,7 @@ func parseTopLevels() *AstFile {
 		if tok.isKeyword("package") {
 			tok = readToken()
 			assert(tok.isTypeIdent(), "expect ident")
-			r.pkg = &AstPkgDecl{name :tok.sval}
+			r.pkg = &AstPkgClause{name :tok.getIdent()}
 			readToken()
 			continue
 		} else if tok.isKeyword("import") {
