@@ -5,6 +5,28 @@ import (
 	"fmt"
 )
 
+var globalscope *scope
+var currentscope *scope
+
+type scope struct {
+	idents map[identifier]*ExprVariable
+	outer *scope
+}
+
+func (sc *scope) get(name identifier) *ExprVariable {
+	for s := sc; s != nil; s = s.outer {
+		v := s.idents[name]
+		if v != nil {
+			return v
+		}
+	}
+	return nil
+}
+
+func (sc *scope) set(name identifier, variable *ExprVariable) {
+	sc.idents[name] = variable
+}
+
 type Expr interface  {
 	emit()
 	dump()
@@ -87,9 +109,7 @@ type AstFile struct {
 }
 
 var localvars []*ExprVariable
-var localenv  = make(map[string]*ExprVariable)
 var globalvars []*ExprVariable
-var globalenv = make(map[string]*ExprVariable)
 
 var ts *TokenStream
 
@@ -152,16 +172,14 @@ func parseIdentOrFuncall(name string) Expr {
 	}
 	unreadToken()
 
-	if lvar,ok := localenv[name]; ok {
-		return lvar
+
+	variable := currentscope.get(identifier(name))
+	if variable == nil {
+		errorf("Undefined variable %s", name)
+		return nil
 	}
 
-	if gvar,ok := globalenv[name]; ok {
-		return gvar
-	}
-
-	errorf("Undefined variable %s", name)
-	return nil
+	return variable
 }
 
 var stringIndex = 0
@@ -272,15 +290,14 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 			isGlobal: true,
 		}
 		globalvars = append(globalvars, variable)
-		globalenv[varname] = variable
 	} else {
 		variable = &ExprVariable{
 			varname: varname,
 			gtype: gtype,
 		}
 		localvars = append(localvars, variable)
-		localenv[varname] = variable
 	}
+	currentscope.set(identifier(varname), variable)
 
 	// read "="
 	tok3 := readToken()
@@ -340,7 +357,7 @@ func parseCompoundStmt() *AstCompountStmt {
 
 func parseFuncDef() *AstFuncDef {
 	localvars = make([]*ExprVariable, 0)
-	localenv = make(map[string]*ExprVariable)
+	currentscope = newScope(globalscope)
 	fname := readToken()
 	if !fname.isTypeIdent() {
 		errorf("identifer expected, but got %v", fname)
@@ -352,6 +369,7 @@ func parseFuncDef() *AstFuncDef {
 	body := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
+	currentscope = globalscope
 	return &AstFuncDef{
 		fname: fname.sval,
 		localvars: _localvars,
@@ -433,7 +451,16 @@ func parseTopLevels() *AstFile {
 	return r
 }
 
+func newScope(outer *scope) *scope {
+	return &scope{
+		outer:outer,
+		idents:make(map[identifier]*ExprVariable),
+	}
+}
+
 func parse(t *TokenStream) *AstFile {
 	ts = t
+	globalscope = newScope(nil)
+	currentscope = globalscope
 	return parseTopLevels()
 }
