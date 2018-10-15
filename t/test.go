@@ -49,6 +49,9 @@ func ff() {
 	printf("%d\n", gb)
 }
 
+func fg(a int, b int) {
+	printf("%d\n",  a + b)
+}
 
 func main() {
 	fa()
@@ -57,6 +60,7 @@ func main() {
 	fd()
 	fe()
 	ff()
+	fg(5, 6)
 	println("hello world")
 }
 

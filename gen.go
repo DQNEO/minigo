@@ -28,10 +28,24 @@ func emitFuncPrologue(f *AstFuncDef) {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	if len(f.localvars) > 0 {
-		emit("# allocate stack area")
-		stack_size := 8 * len(f.localvars)
-		emit("sub $%d, %%rsp", stack_size)
+	// calc offset
+	var offset int
+	for i, param := range f.params {
+		offset -= 8
+		param.offset = offset
+		emit("push %%%s", regs[i])
+	}
+
+	var localarea int
+	for _, lvar := range f.localvars {
+		localarea -= 8
+		offset -= 8
+		lvar.offset = offset
+	}
+
+	if localarea != 0 {
+		emit("# allocate localarea")
+		emit("sub $%d, %%rsp", -localarea)
 	}
 
 	emit("# end of prologue")
@@ -55,6 +69,9 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		emit("mov %s(%%rip), %%eax", ast.varname)
 	} else {
+		if ast.offset == 0 {
+			errorf("offset should not be zero for localvar %s", ast)
+		}
 		emit("mov %d(%%rbp), %%eax", ast.offset)
 	}
 }
@@ -137,13 +154,6 @@ func (funcall *ExprFuncall) emit() {
 }
 
 func emitFuncdef(f *AstFuncDef) {
-	// calc offset
-	var offset int
-	for _, lvar := range f.localvars {
-		offset -= 8
-		lvar.offset = offset
-	}
-
 	emitFuncPrologue(f)
 	emitCompound(f.body)
 	emit("mov $0, %%eax") // return 0

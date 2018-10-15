@@ -98,6 +98,8 @@ type AstCompountStmt struct {
 type AstFuncDef struct {
 	// funcdef
 	fname string
+	rettype string
+	params []*ExprVariable
 	localvars []*ExprVariable
 	body *AstCompountStmt
 }
@@ -371,15 +373,51 @@ func parseFuncDef() *AstFuncDef {
 		errorf("identifer expected, but got %v", fname)
 	}
 	expectPunct("(")
-	expectPunct(")")
-	// expect Type
-	expectPunct("{")
+	var params []*ExprVariable
+
+	tok := readToken()
+	if !tok.isPunct(")") {
+		unreadToken()
+		for {
+			tok := readToken()
+			assert(tok.isTypeIdent(), "should be ident")
+			pname := tok.sval
+			ptype := readToken() //type
+			// assureType(tok.sval)
+			variable := &ExprVariable{
+				varname:pname,
+				gtype: ptype.sval,
+			}
+			params = append(params, variable)
+			currentscope.set(identifier(pname), variable)
+			tok = readToken()
+			if tok.isPunct(")") {
+				break
+			}
+			if !tok.isPunct(",") {
+				errorf("Invalid token %s", tok)
+			}
+		}
+	}
+
+	// read func rettype
+	tok = readToken()
+	var rettype string
+	if tok.isTypeIdent() {
+		// rettype
+		rettype = tok.sval
+		expectPunct("{")
+	} else {
+		assert(tok.isPunct("{"), "begin of func body")
+	}
 	body := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
 	currentscope = globalscope
 	return &AstFuncDef{
 		fname: fname.sval,
+		rettype:rettype,
+		params: params,
 		localvars: _localvars,
 		body: body,
 	}
