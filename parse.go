@@ -142,7 +142,7 @@ func readFuncallArgs() []Expr {
 			return r
 		}
 		unreadToken()
-		arg := parseExpr(nil)
+		arg := parseExpr()
 		r = append(r, arg)
 		tok = readToken()
 		if tok.isPunct(")") {
@@ -230,26 +230,23 @@ func priority(op string) int {
 	return 0;
 }
 
-func parseExpr(ast Expr) Expr {
-	return parseExprInt(-1, ast)
+func parseExpr() Expr {
+	return parseExprInt(-1)
 }
 
-func parseExprInt(prior int, ast Expr) Expr {
-	if ast == nil {
-		ast = parseUnaryExpr()
-	}
+func parseExprInt(prior int) Expr {
+	ast := parseUnaryExpr()
 	for {
 		tok := readToken()
 		if tok.isSemicolon() {
+			unreadToken()
 			return ast
 		}
-		if !tok.isTypePunct() {
-			return ast
-		}
+
 		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
-				right := parseExprInt(prior2,nil)
+				right := parseExprInt(prior2)
 				ast = &ExprBinop{
 					op:    tok.sval,
 					left:  ast,
@@ -319,10 +316,14 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 	}}
 }
 
-func parseAssignment(left *ExprVariable) *AstAssignment {
-	rexpr := parseExpr(nil)
+func parseAssignment() *AstAssignment {
+	tleft := readToken()
+	variable := currentscope.get(identifier(tleft.sval))
+	expectPunct("=")
+	rexpr := parseExpr()
+	expectPunct(";")
 	return &AstAssignment{
-		left:  left,
+		left:  variable,
 		right: rexpr,
 	}
 }
@@ -332,15 +333,17 @@ func parseStmt() *AstStmt {
 	if tok.isKeyword("var") {
 		return parseDeclVar(false)
 	}
-	unreadToken()
-	ast := parseUnaryExpr()
 	tok2 := readToken()
+
 	if tok2.isPunct("=") {
+		unreadToken()
+		unreadToken()
 		//assure_lvalue(ast)
-		return &AstStmt{assignment:	parseAssignment(ast.(*ExprVariable))}
+		return &AstStmt{assignment:	parseAssignment()}
 	}
 	unreadToken()
-	return &AstStmt{expr:parseExpr(ast)}
+	unreadToken()
+	return &AstStmt{expr:parseExpr()}
 }
 
 func parseCompoundStmt() *AstCompountStmt {
