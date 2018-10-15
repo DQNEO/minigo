@@ -282,7 +282,7 @@ func tokenize() []*Token {
 		}
 		var tok *Token
 		switch c {
-		case 0:
+		case 0:// no need?
 			return r
 		case '\n':
 			// Insert semicolon
