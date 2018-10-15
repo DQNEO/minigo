@@ -184,7 +184,7 @@ func parseIdentOrFuncall(name string) Expr {
 }
 
 var stringIndex = 0
-var strings []*ExprStringLiteral
+var stringLiterals []*ExprStringLiteral
 
 func newAstString(sval string) *ExprStringLiteral {
 	ast := &ExprStringLiteral{
@@ -192,7 +192,7 @@ func newAstString(sval string) *ExprStringLiteral {
 		slabel: fmt.Sprintf("L%d", stringIndex),
 	}
 	stringIndex++
-	strings = append(strings, ast)
+	stringLiterals = append(stringLiterals, ast)
 	return ast
 }
 

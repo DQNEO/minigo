@@ -13,8 +13,8 @@ func emitLabel(format string, v ...interface{}) {
 func emitDataSection() {
 	emit(".data")
 
-	// put strings
-	for _, ast := range strings {
+	// put stringLiterals
+	for _, ast := range stringLiterals {
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.val)
 	}
