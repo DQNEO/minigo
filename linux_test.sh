@@ -10,7 +10,7 @@ make clean
 make
 
 function test_file {
-    ./${prog_name} < t/test.go > $as_file
+    ./${prog_name} t/test.go > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
     diff out/actual.txt t/expected.txt
@@ -27,7 +27,7 @@ func main() {
   $code
 }
 
-  " |  ./${prog_name} > $as_file
+  " |  ./${prog_name} - > $as_file
     gcc -no-pie -o $executable $as_file
     local actual=`$executable`
     if [[ "$actual" -eq "$expected" ]];then
