@@ -197,7 +197,7 @@ func newAstString(sval string) *ExprStringLiteral {
 	return ast
 }
 
-func parseUnaryExpr() Expr {
+func parsePrim() Expr {
 	tok := readToken()
 	switch tok.typ {
 	case "ident":
@@ -213,6 +213,10 @@ func parseUnaryExpr() Expr {
 		errorf("unable to handle token %v", tok)
 	}
 	return nil
+}
+
+func parseUnaryExpr() Expr {
+	return parsePrim()
 }
 
 func priority(op string) int {
