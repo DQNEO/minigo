@@ -85,10 +85,6 @@ func (tok *Token) isTypeIdent() bool {
 	return tok != nil && tok.typ == "ident"
 }
 
-func (tok *Token) isTypeSpace() bool {
-	return tok != nil && tok.typ == "space"
-}
-
 func (tok *Token) isSemicolon() bool {
 	return tok.isPunct(";")
 }
@@ -516,8 +512,6 @@ func tokenize() []*Token {
 
 func (tok *Token) render() string {
 	switch tok.typ {
-	case "space":
-			return tok.sval
 	case "char":
 		return fmt.Sprintf("'%s'", tok.sval)
 	case "punct":
