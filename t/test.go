@@ -3,15 +3,14 @@ package main
 var ga int
 
 func fa() {
-	printf("%d\n", ga)
-	printf("")// this is comment
-	printf("") // this is comment
+	printf("%d\n", ga)// => 0
 }
 
 
-/* this
-is
-comment
+/* this is
+a
+block
+  comment
 * /
 *
 /
@@ -19,9 +18,9 @@ comment
 */
 
 func fb() {
-	printf("%d\n", 2 - 1)
+	printf("%d\n", 2 - 1)// this is a comment
 	printf("%d\n", 1 + 1)
-	printf("%d\n", 1 + 1 + 1)
+	printf("%d\n", 1 + 1 + 1) // this is another comment //
 	printf("%d\n", 2 * 2)
 	printf("%d\n", 2 * 3 - 1)
 	printf("%d\n", 1 + 1 * 5)
@@ -35,7 +34,7 @@ func fc() {
 
 func fd() {
 	var j int = 2
-	printf("%d\n", j + 6)
+	printf("%d\n", j * 4)
 }
 
 func fe() {
