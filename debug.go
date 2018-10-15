@@ -117,6 +117,7 @@ func errorf(format string, v ...interface{}) {
 			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
 	*/
 	s := fmt.Sprintf(format, v...)
+	s += " [" + sourceFile + "]"
 	panic(s)
 }
 
