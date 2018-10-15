@@ -10,13 +10,14 @@ make clean
 make
 
 function test_file {
-    ./${prog_name} t/test.go > $as_file
+    local source=$1
+    ./${prog_name} $source > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
     diff out/actual.txt t/expected.txt
 }
 
-function test_expr {
+function test_main {
     local code="$1"
     local expected=$2
     rm -f $as_file
@@ -39,12 +40,12 @@ func main() {
 
 }
 
-test_file
+test_file t/test.go
 
-test_expr "var i int; i = 3; printf(\"%d\",i)" 3
-test_expr "printf(\"%d\",1); printf(\"%d\",7)" 17
-test_expr 'printf("%d", 2 + 5)' 7
-test_expr 'printf("%d", 2 * 3)' 6
-test_expr 'printf("%d", 3 -2)' 1
+test_main "var i int; i = 3; printf(\"%d\",i)" 3
+test_main "printf(\"%d\",1); printf(\"%d\",7)" 17
+test_main 'printf("%d", 2 + 5)' 7
+test_main 'printf("%d", 2 * 3)' 6
+test_main 'printf("%d", 3 -2)' 1
 
 echo "All tests passed"
