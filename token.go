@@ -189,17 +189,17 @@ func read_char() string {
 	return string([]byte{c})
 }
 
-func is_space(c byte) bool {
+func isSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\r'
 }
 
-func skip_space() {
+func skipSpace() {
 	for {
 		c, err := getc()
 		if err != nil {
 			return
 		}
-		if is_space(c) {
+		if isSpace(c) {
 			continue
 		} else {
 			ungetc()
@@ -335,7 +335,7 @@ func tokenize() []*Token {
 			sval := read_string()
 			tok = makeToken( "string",  sval)
 		case ' ','\t':
-			skip_space()
+			skipSpace()
 			continue
 		case '/':
 			c ,_ = getc()
