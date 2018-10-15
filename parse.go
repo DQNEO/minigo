@@ -41,6 +41,7 @@ type ExprStringLiteral struct {
 	slabel string
 }
 
+// local or global variable
 type ExprVariable struct {
 	varname string
 	gtype string
@@ -65,8 +66,9 @@ type ExprUop struct {
 	operand Expr
 }
 
+// local or global
 type AstDeclVar struct {
-	variable *ExprVariable // lvar or gvar
+	variable *ExprVariable
 	initval  Expr
 }
 
