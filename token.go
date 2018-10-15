@@ -194,7 +194,7 @@ func read_char() string {
 }
 
 func is_space(c byte) bool {
-	return c == ' ' || c == '\t'
+	return c == ' ' || c == '\t' || c == '\r'
 }
 
 func skip_space() {
@@ -273,6 +273,34 @@ func autoSemicolonInsert(last *Token) bool {
 	return false
 }
 
+func skipLine() {
+	for {
+		c, err := getc()
+		if err != nil || c == '\n' {
+			ungetc()
+			return
+		}
+	}
+}
+
+func skipBlockComment() {
+	var hasReadAsterisk bool
+
+	for {
+		c, err := getc()
+		if err != nil {
+			errorf("premature end of block comment")
+		}
+		if c == '*' {
+			hasReadAsterisk = true
+		} else if hasReadAsterisk && c == '/' {
+			return
+		} else {
+			hasReadAsterisk = false
+		}
+	}
+}
+
 func tokenize() []*Token {
 	var r []*Token
 	for {
@@ -292,7 +320,7 @@ func tokenize() []*Token {
 					r = append(r, semicolon)
 				}
 			}
-			tok = makeToken("space", "\n")
+			continue
 		case '0','1','2','3','4','5','6','7','8','9':
 			sval := read_number(c)
 			tok = makeToken( "number",  sval)
@@ -312,7 +340,21 @@ func tokenize() []*Token {
 			tok = makeToken( "string",  sval)
 		case ' ','\t':
 			skip_space()
-			tok = makeToken( "space", string(c))
+			continue
+		case '/':
+			c ,_ = getc()
+			if c == '/' {
+				skipLine()
+				continue
+			} else if c == '*' {
+				skipBlockComment()
+				continue
+			} else if c == '=' {
+				tok = makeToken("punct", "/=")
+			} else {
+				ungetc()
+				tok = makeToken("punct", "/")
+			}
 		case '(',')','[',']','{','}',',',';':
 			tok = makeToken( "punct", string(c))
 		case '!':
@@ -458,15 +500,6 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( "punct", "<")
 			}
-		case '/':
-			c ,_ = getc()
-			if c == '=' {
-				tok = makeToken("punct", "/=")
-			} else {
-				ungetc()
-				tok = makeToken("punct", "/")
-			}
-			// @TODO handle comments
 		default:
 			fmt.Printf("c='%c'\n", c)
 			panic("unknown char")

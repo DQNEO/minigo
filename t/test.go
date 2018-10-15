@@ -4,8 +4,19 @@ var ga int
 
 func fa() {
 	printf("%d\n", ga)
+	printf("")// this is comment
+	printf("") // this is comment
 }
 
+
+/* this
+is
+comment
+* /
+*
+/
+
+*/
 
 func fb() {
 	printf("%d\n", 2 - 1)

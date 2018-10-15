@@ -98,12 +98,8 @@ func (stream *TokenStream) getToken(i int) interface{} {
 }
 
 func readToken() *Token {
-	for {
-		tok := ts.readToken()
-		if !tok.isTypeSpace() {
-			return tok
-		}
-	}
+	tok := ts.readToken()
+	return tok
 }
 
 func unreadToken() {
