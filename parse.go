@@ -50,7 +50,6 @@ type ExprVariable struct {
 }
 
 type ExprFuncall struct {
-	// funcall
 	fname string
 	args  []Expr
 }
