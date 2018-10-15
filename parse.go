@@ -131,7 +131,7 @@ func unreadToken() {
 func expectPunct(punct string) {
 	tok := readToken()
 	if !tok.isPunct(punct) {
-		errorf("punct '%s' expected but got '%s'", punct, tok.sval)
+		errorf("punct '%s' expected but got '%s'", punct, tok)
 	}
 }
 
