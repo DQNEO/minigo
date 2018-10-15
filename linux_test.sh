@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 PATH="/usr/lib/go-1.10/bin:$PATH"
 
 as_file="./out/a.s"
