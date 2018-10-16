@@ -43,14 +43,14 @@ type ExprStringLiteral struct {
 
 // local or global variable
 type ExprVariable struct {
-	varname string
+	varname identifier
 	gtype string
 	offset int // for local variable
 	isGlobal bool
 }
 
 type ExprFuncall struct {
-	fname string
+	fname identifier
 	args  []Expr
 }
 
@@ -97,7 +97,7 @@ type AstCompountStmt struct {
 
 type AstFuncDef struct {
 	// funcdef
-	fname string
+	fname identifier
 	rettype string
 	params []*ExprVariable
 	localvars []*ExprVariable
@@ -157,7 +157,7 @@ func readFuncallArgs() []Expr {
 	}
 }
 
-func parseIdentOrFuncall(name string) Expr {
+func parseIdentOrFuncall(name identifier) Expr {
 
 	tok := readToken()
 	if tok.isPunct("(") {
@@ -176,7 +176,7 @@ func parseIdentOrFuncall(name string) Expr {
 	unreadToken()
 
 
-	variable := currentscope.get(identifier(name))
+	variable := currentscope.get(name)
 	if variable == nil {
 		errorf("Undefined variable %s", name)
 		return nil
@@ -202,7 +202,7 @@ func parsePrim() Expr {
 	tok := readToken()
 	switch tok.typ {
 	case T_IDENT:
-		return parseIdentOrFuncall(tok.sval)
+		return parseIdentOrFuncall(tok.getIdent())
 	case T_STRING:
 		return newAstString(tok.sval)
 	case T_INT:
@@ -274,10 +274,7 @@ func parseExprInt(prior int) Expr {
 func parseDeclVar(isGlobal bool) *AstStmt {
 	// read varname
 	tok := readToken()
-	if !tok.isTypeIdent() {
-		errorf("var expects ident, but got %s", tok)
-	}
-	varname := tok.sval
+	varname := tok.getIdent()
 
 	// read type
 	tok2 := readToken()
@@ -301,7 +298,7 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 		}
 		localvars = append(localvars, variable)
 	}
-	currentscope.set(identifier(varname), variable)
+	currentscope.set(varname, variable)
 
 	// read "="
 	tok3 := readToken()
@@ -320,7 +317,7 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 
 func parseAssignment() *AstAssignment {
 	tleft := readToken()
-	variable := currentscope.get(identifier(tleft.sval))
+	variable := currentscope.get(tleft.getIdent())
 	expectPunct("=")
 	rexpr := parseExpr()
 	expectPunct(";")
@@ -368,10 +365,7 @@ func parseCompoundStmt() *AstCompountStmt {
 func parseFuncDef() *AstFuncDef {
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(globalscope)
-	fname := readToken()
-	if !fname.isTypeIdent() {
-		errorf("identifer expected, but got %v", fname)
-	}
+	fname := readToken().getIdent()
 	expectPunct("(")
 	var params []*ExprVariable
 
@@ -380,8 +374,7 @@ func parseFuncDef() *AstFuncDef {
 		unreadToken()
 		for {
 			tok := readToken()
-			assert(tok.isTypeIdent(), "should be ident")
-			pname := tok.sval
+			pname := tok.getIdent()
 			ptype := readToken() //type
 			// assureType(tok.sval)
 			variable := &ExprVariable{
@@ -389,7 +382,7 @@ func parseFuncDef() *AstFuncDef {
 				gtype: ptype.sval,
 			}
 			params = append(params, variable)
-			currentscope.set(identifier(pname), variable)
+			currentscope.set(pname, variable)
 			tok = readToken()
 			if tok.isPunct(")") {
 				break
@@ -415,7 +408,7 @@ func parseFuncDef() *AstFuncDef {
 	localvars = nil
 	currentscope = globalscope
 	return &AstFuncDef{
-		fname: fname.sval,
+		fname: fname,
 		rettype:rettype,
 		params: params,
 		localvars: _localvars,

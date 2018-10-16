@@ -82,7 +82,7 @@ func (a *AstFile) dump() {
 }
 
 func (ast *ExprFuncall) dump() {
-	debugf(ast.fname)
+	debugf(string(ast.fname))
 	nest++
 	for _, arg := range ast.args {
 		arg.dump()
