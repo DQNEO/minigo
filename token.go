@@ -30,8 +30,20 @@ func (ts *TokenStream) unreadToken() {
 	ts.index--
 }
 
+type TokenType string
+
+const (
+	T_EOF TokenType = "EOF"
+	T_INT TokenType  = "int"
+	T_STRING TokenType = "string"
+	T_CHAR TokenType = "char"
+	T_IDENT TokenType = "ident"
+	T_PUNCT TokenType = "punct"
+	T_KEYWORWD TokenType = "keyword"
+)
+
 type Token struct {
-	typ  string
+	typ  TokenType
 	sval string
 	filename string
 	line int
@@ -46,19 +58,19 @@ func (tok *Token) String() string {
 }
 
 func (tok *Token) isEOF() bool {
-	return tok != nil && tok.typ == "EOF"
+	return tok != nil && tok.typ == T_EOF
 }
 
 func (tok *Token) isPunct(s string) bool {
-	return tok != nil && tok.typ == "punct" && tok.sval == s
+	return tok != nil && tok.typ == T_PUNCT && tok.sval == s
 }
 
 func (tok *Token) isKeyword(s string) bool {
-	return tok != nil && tok.typ == "keyword" && tok.sval == s
+	return tok != nil && tok.typ == T_KEYWORWD && tok.sval == s
 }
 
 func (tok *Token) isIdent(s string) bool {
-	return tok != nil && tok.typ == "ident" && tok.sval == s
+	return tok != nil && tok.typ == T_IDENT && tok.sval == s
 }
 
 func (tok *Token) getIdent() identifier {
@@ -70,19 +82,19 @@ func (tok *Token) getIdent() identifier {
 
 
 func (tok *Token) isTypePunct() bool {
-	return tok != nil && tok.typ == "punct"
+	return tok != nil && tok.typ == T_PUNCT
 }
 
 func (tok *Token) isTypeKeyword() bool {
-	return tok != nil && tok.typ == "keyword"
+	return tok != nil && tok.typ == T_KEYWORWD
 }
 
 func (tok *Token) isTypeString() bool {
-	return tok != nil && tok.typ == "string"
+	return tok != nil && tok.typ == T_STRING
 }
 
 func (tok *Token) isTypeIdent() bool {
-	return tok != nil && tok.typ == "ident"
+	return tok != nil && tok.typ == T_IDENT
 }
 
 func (tok *Token) isSemicolon() bool {
@@ -209,7 +221,7 @@ func skipSpace() {
 }
 
 
-func makeToken(typ string, sval string) *Token {
+func makeToken(typ TokenType, sval string) *Token {
 	return &Token{
 		typ: typ,
 		sval: sval,
@@ -246,7 +258,7 @@ func in_array(item string, list []string) bool {
 
 
 var semicolon = &Token{
-	typ: "punct",
+	typ: T_PUNCT,
 	sval:";",
 }
 
@@ -255,7 +267,7 @@ func autoSemicolonInsert(last *Token) bool {
 	if last.isTypeIdent() {
 		return true
 	}
-	if last.typ == "number" || last.typ == "string" {
+	if last.typ == T_INT || last.typ == T_STRING {
 		return true
 	}
 	if last.isKeyword("break") || last.isKeyword("continue") || last.isKeyword("fallthrough") || last.isKeyword("return") {
@@ -319,21 +331,21 @@ func tokenize() []*Token {
 			continue
 		case '0','1','2','3','4','5','6','7','8','9':
 			sval := read_number(c)
-			tok = makeToken( "number",  sval)
+			tok = makeToken(T_INT,  sval)
 		case '_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
 			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z':
 			sval := read_name(c)
 			if in_array(sval, keywords) {
-				tok = makeToken("keyword", sval)
+				tok = makeToken(T_KEYWORWD, sval)
 			} else {
-				tok = makeToken( "ident",  sval)
+				tok = makeToken( T_IDENT,  sval)
 			}
 		case '\'':
 			sval := read_char()
-			tok = makeToken( "char",  sval)
+			tok = makeToken( T_CHAR,  sval)
 		case '"':
 			sval := read_string()
-			tok = makeToken( "string",  sval)
+			tok = makeToken( T_STRING,  sval)
 		case ' ','\t':
 			skipSpace()
 			continue
@@ -346,155 +358,155 @@ func tokenize() []*Token {
 				skipBlockComment()
 				continue
 			} else if c == '=' {
-				tok = makeToken("punct", "/=")
+				tok = makeToken(T_PUNCT, "/=")
 			} else {
 				ungetc()
-				tok = makeToken("punct", "/")
+				tok = makeToken(T_PUNCT, "/")
 			}
 		case '(',')','[',']','{','}',',',';':
-			tok = makeToken( "punct", string(c))
+			tok = makeToken( T_PUNCT, string(c))
 		case '!':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", "!=")
+				tok = makeToken( T_PUNCT, "!=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "!")
+				tok = makeToken( T_PUNCT, "!")
 			}
 		case '%':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", "%=")
+				tok = makeToken( T_PUNCT, "%=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "%")
+				tok = makeToken( T_PUNCT, "%")
 			}
 		case '*':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", "*=")
+				tok = makeToken( T_PUNCT, "*=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "*")
+				tok = makeToken( T_PUNCT, "*")
 			}
 		case ':':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", ":=")
+				tok = makeToken( T_PUNCT, ":=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", ":")
+				tok = makeToken( T_PUNCT, ":")
 			}
 		case '=':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", "==")
+				tok = makeToken( T_PUNCT, "==")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "=")
+				tok = makeToken( T_PUNCT, "=")
 			}
 		case '^':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( "punct", "^=")
+				tok = makeToken( T_PUNCT, "^=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "^")
+				tok = makeToken( T_PUNCT, "^")
 			}
 		case '&':
 			c, _ := getc()
 			if c == '&' {
-				tok = makeToken("punct", "&&")
+				tok = makeToken(T_PUNCT, "&&")
 			} else if c == '=' {
-				tok = makeToken("punct", "&=")
+				tok = makeToken(T_PUNCT, "&=")
 			} else if c == '^' {
 				c, _ := getc()
 				if c == '=' {
-					tok = makeToken("punct", "&^=")
+					tok = makeToken(T_PUNCT, "&^=")
 				} else {
 					ungetc()
-					tok = makeToken( "punct", "&^")
+					tok = makeToken( T_PUNCT, "&^")
 				}
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "&")
+				tok = makeToken( T_PUNCT, "&")
 			}
 		case '+':
 			c, _ = getc()
 			if c == '+' {
-				tok = makeToken("punct", "++")
+				tok = makeToken(T_PUNCT, "++")
 			} else if c == '=' {
-				tok = makeToken("punct", "+=")
+				tok = makeToken(T_PUNCT, "+=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "+")
+				tok = makeToken( T_PUNCT, "+")
 			}
 		case '-':
 			c, _ = getc()
 			if c == '-' {
-				tok = makeToken("punct", "--")
+				tok = makeToken(T_PUNCT, "--")
 			} else if c == '=' {
-				tok = makeToken("punct", "-=")
+				tok = makeToken(T_PUNCT, "-=")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "-")
+				tok = makeToken( T_PUNCT, "-")
 			}
 		case '|':
 			c, _ = getc()
 			if c == '=' {
-				tok = makeToken("punct", "|=")
+				tok = makeToken(T_PUNCT, "|=")
 			} else if c == '|' {
-				tok = makeToken("punct", "||")
+				tok = makeToken(T_PUNCT, "||")
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "|")
+				tok = makeToken( T_PUNCT, "|")
 			}
 		case '.':
 			c, _ = getc()
 			if c == '.' {
 				c, _ = getc()
 				if c == '.' {
-					tok = makeToken("punct", "...")
+					tok = makeToken(T_PUNCT, "...")
 				} else {
 					panic("invalid token '..'")
 				}
 			} else {
 				ungetc()
-				tok = makeToken( "punct", ".")
+				tok = makeToken( T_PUNCT, ".")
 			}
 		case '>':
 			c, _ = getc()
 			if c == '=' {
-				tok = makeToken("punct", ">=")
+				tok = makeToken(T_PUNCT, ">=")
 			} else if c == '>' {
 				c, _ = getc()
 				if c == '=' {
-					tok = makeToken("punct", ">>=")
+					tok = makeToken(T_PUNCT, ">>=")
 				} else {
 					ungetc()
-					tok = makeToken("punct", ">>")
+					tok = makeToken(T_PUNCT, ">>")
 				}
 			} else {
 				ungetc()
-				tok = makeToken( "punct", ">")
+				tok = makeToken( T_PUNCT, ">")
 			}
 		case '<':
 			c ,_ = getc()
 			if c == '-' {
-				tok = makeToken("punct", "<-")
+				tok = makeToken(T_PUNCT, "<-")
 			} else if c == '=' {
-				tok = makeToken("punct", "<=")
+				tok = makeToken(T_PUNCT, "<=")
 			} else if c == '<' {
 				c ,_ = getc()
 				if c == '=' {
-					tok = makeToken("punct", "<<=")
+					tok = makeToken(T_PUNCT, "<<=")
 				} else {
 					ungetc()
-					tok = makeToken("punct", "<<")
+					tok = makeToken(T_PUNCT, "<<")
 				}
 			} else {
 				ungetc()
-				tok = makeToken( "punct", "<")
+				tok = makeToken( T_PUNCT, "<")
 			}
 		default:
 			fmt.Printf("c='%c'\n", c)
@@ -512,11 +524,11 @@ func tokenize() []*Token {
 
 func (tok *Token) render() string {
 	switch tok.typ {
-	case "char":
+	case T_CHAR:
 		return fmt.Sprintf("'%s'", tok.sval)
-	case "punct":
+	case T_PUNCT:
 		return fmt.Sprintf("%s", tok.sval)
-	case "string":
+	case T_STRING:
 			return fmt.Sprintf("\"%s\"", tok.sval)
 	default:
 			return fmt.Sprintf("%s", tok.sval)
