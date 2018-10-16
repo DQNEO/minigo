@@ -315,6 +315,15 @@ func skipBlockComment() {
 	}
 }
 
+func isIn(c byte, set []byte) bool {
+	for _, c2 := range set {
+		if c == c2 {
+			return true
+		}
+	}
+	return false
+}
+
 func tokenize() []*Token {
 	var r []*Token
 	for {
@@ -323,10 +332,10 @@ func tokenize() []*Token {
 			return r
 		}
 		var tok *Token
-		switch c {
-		case 0:// no need?
+		switch  {
+		case c == 0:// no need?
 			return r
-		case '\n':
+		case c == '\n':
 			// Insert semicolon
 			if len(r) > 0 {
 				last := r[len(r) -1]
@@ -335,27 +344,27 @@ func tokenize() []*Token {
 				}
 			}
 			continue
-		case '0','1','2','3','4','5','6','7','8','9':
+		case isIn(c, []byte{'0','1','2','3','4','5','6','7','8','9'}):
 			sval := read_number(c)
 			tok = makeToken(T_INT,  sval)
-		case '_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z':
+		case isIn(c, []byte{'_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'}):
 			sval := readIdentifier(c)
 			if in_array(sval, keywords) {
 				tok = makeToken(T_KEYWORWD, sval)
 			} else {
 				tok = makeToken( T_IDENT,  sval)
 			}
-		case '\'':
+		case c == '\'':
 			sval := read_char()
 			tok = makeToken( T_CHAR,  sval)
-		case '"':
+		case c == '"':
 			sval := read_string()
 			tok = makeToken( T_STRING,  sval)
-		case ' ','\t':
+		case isIn(c, []byte{' ','\t'}):
 			skipSpace()
 			continue
-		case '/':
+		case c == '/':
 			c ,_ = getc()
 			if c == '/' {
 				skipLine()
@@ -369,9 +378,9 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken(T_PUNCT, "/")
 			}
-		case '(',')','[',']','{','}',',',';':
+		case isIn(c, []byte{'(',')','[',']','{','}',',',';'}):
 			tok = makeToken( T_PUNCT, string(c))
-		case '!':
+		case c == '!':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, "!=")
@@ -379,7 +388,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "!")
 			}
-		case '%':
+		case c == '%':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, "%=")
@@ -387,7 +396,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "%")
 			}
-		case '*':
+		case c == '*':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, "*=")
@@ -395,7 +404,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "*")
 			}
-		case ':':
+		case c == ':':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, ":=")
@@ -403,7 +412,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, ":")
 			}
-		case '=':
+		case c == '=':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, "==")
@@ -411,7 +420,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "=")
 			}
-		case '^':
+		case c == '^':
 			c, _ := getc()
 			if c == '=' {
 				tok = makeToken( T_PUNCT, "^=")
@@ -419,7 +428,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "^")
 			}
-		case '&':
+		case c == '&':
 			c, _ := getc()
 			if c == '&' {
 				tok = makeToken(T_PUNCT, "&&")
@@ -437,7 +446,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "&")
 			}
-		case '+':
+		case c == '+':
 			c, _ = getc()
 			if c == '+' {
 				tok = makeToken(T_PUNCT, "++")
@@ -447,7 +456,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "+")
 			}
-		case '-':
+		case c == '-':
 			c, _ = getc()
 			if c == '-' {
 				tok = makeToken(T_PUNCT, "--")
@@ -457,7 +466,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "-")
 			}
-		case '|':
+		case c == '|':
 			c, _ = getc()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "|=")
@@ -467,7 +476,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, "|")
 			}
-		case '.':
+		case c == '.':
 			c, _ = getc()
 			if c == '.' {
 				c, _ = getc()
@@ -480,7 +489,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, ".")
 			}
-		case '>':
+		case c == '>':
 			c, _ = getc()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, ">=")
@@ -496,7 +505,7 @@ func tokenize() []*Token {
 				ungetc()
 				tok = makeToken( T_PUNCT, ">")
 			}
-		case '<':
+		case c == '<':
 			c ,_ = getc()
 			if c == '-' {
 				tok = makeToken(T_PUNCT, "<-")
