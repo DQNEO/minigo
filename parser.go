@@ -27,90 +27,6 @@ func (sc *scope) set(name identifier, variable *ExprVariable) {
 	sc.idents[name] = variable
 }
 
-type Expr interface  {
-	emit()
-	dump()
-}
-
-type ExprNumberLiteral struct {
-	val int
-}
-
-type ExprStringLiteral struct {
-	val string
-	slabel string
-}
-
-// local or global variable
-type ExprVariable struct {
-	varname identifier
-	gtype string
-	offset int // for local variable
-	isGlobal bool
-}
-
-type ExprFuncall struct {
-	fname identifier
-	args  []Expr
-}
-
-type ExprBinop struct {
-	op    string
-	left  Expr
-	right Expr
-}
-
-type ExprUop struct {
-	op string
-	operand Expr
-}
-
-// local or global
-type AstDeclVar struct {
-	variable *ExprVariable
-	initval  Expr
-}
-
-type AstAssignment struct {
-	left  *ExprVariable // lvalue
-	right Expr
-}
-
-type AstStmt struct {
-	declvar    *AstDeclVar
-	assignment *AstAssignment
-	expr       Expr
-}
-
-type AstPackageClause struct {
-	name identifier
-}
-
-type AstImportDecl struct {
-	paths []string
-}
-
-type AstCompountStmt struct {
-	// compound
-	stmts []*AstStmt
-}
-
-type AstFuncDef struct {
-	// funcdef
-	fname identifier
-	rettype string
-	params []*ExprVariable
-	localvars []*ExprVariable
-	body *AstCompountStmt
-}
-
-type AstSourceFile struct {
-	pkg *AstPackageClause
-	imports []*AstImportDecl
-	funcdefs []*AstFuncDef
-	decls []*AstDeclVar
-}
-
 var localvars []*ExprVariable
 var globalvars []*ExprVariable
 
@@ -287,7 +203,7 @@ func parseExprInt(prior int) Expr {
 	return ast
 }
 
-func parseDeclVar(isGlobal bool) *AstStmt {
+func parseDeclVar(isGlobal bool) *AstVarDecl {
 	// read varname
 	tok := readToken()
 	varname := tok.getIdent()
@@ -325,10 +241,10 @@ func parseDeclVar(isGlobal bool) *AstStmt {
 		unreadToken()
 	}
 	expectPunct(";")
-	return &AstStmt{declvar:&AstDeclVar{
+	return &AstVarDecl{
 		variable: variable,
 		initval:  initval,
-	}}
+	}
 }
 
 func parseAssignment() *AstAssignment {
@@ -346,7 +262,7 @@ func parseAssignment() *AstAssignment {
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return parseDeclVar(false)
+		return  &AstStmt{declvar:parseDeclVar(false)}
 	}
 	tok2 := readToken()
 
@@ -378,7 +294,7 @@ func parseCompoundStmt() *AstCompountStmt {
 	return nil
 }
 
-func parseFuncDef() *AstFuncDef {
+func parseFuncDef() *AstFuncDecl {
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(globalscope)
 	fname := readToken().getIdent()
@@ -423,7 +339,7 @@ func parseFuncDef() *AstFuncDef {
 	_localvars := localvars
 	localvars = nil
 	currentscope = globalscope
-	return &AstFuncDef{
+	return &AstFuncDecl{
 		fname: fname,
 		rettype:rettype,
 		params: params,
@@ -480,17 +396,8 @@ func mayHaveImportDecls() []*AstImportDecl {
 	}
 }
 
-// https://golang.org/ref/spec#Source_file_organization
-// Each source file consists of
-// a package clause defining the package to which it belongs,
-// followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
-// followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func parseSourceFile() *AstSourceFile {
-
-	var r = &AstSourceFile{
-		pkg :    shouldHavePackageClause(),
-		imports: mayHaveImportDecls(),
-	}
+func mayHaveTopLevelDecls() []*AstTopLevelDecl {
+	var r []*AstTopLevelDecl
 
 	for {
 		tok := readToken()
@@ -498,11 +405,11 @@ func parseSourceFile() *AstSourceFile {
 			return r
 		}
 		if tok.isKeyword("var") {
-			decl := parseDeclVar(true)
-			r.decls = append(r.decls, decl.declvar)
+			vardecl := parseDeclVar(true)
+			r = append(r, &AstTopLevelDecl{vardecl:vardecl})
 		} else if tok.isKeyword("func") {
-			ast := parseFuncDef()
-			r.funcdefs = append(r.funcdefs, ast)
+			funcdecl := parseFuncDef()
+			r  = append(r, &AstTopLevelDecl{funcdecl:funcdecl})
 		} else if tok.isPunct(";") {
 			continue
 		} else {
@@ -510,6 +417,19 @@ func parseSourceFile() *AstSourceFile {
 		}
 	}
 	return r
+}
+
+// https://golang.org/ref/spec#Source_file_organization
+// Each source file consists of
+// a package clause defining the package to which it belongs,
+// followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
+// followed by a possibly empty set of declarations of functions, types, variables, and constants.
+func parseSourceFile() *AstSourceFile {
+	return &AstSourceFile{
+		pkg :    shouldHavePackageClause(),
+		imports: mayHaveImportDecls(),
+		decls: mayHaveTopLevelDecls(),
+	}
 }
 
 func newScope(outer *scope) *scope {

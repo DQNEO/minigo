@@ -20,7 +20,7 @@ func emitDataSection() {
 	}
 }
 
-func emitFuncPrologue(f *AstFuncDef) {
+func emitFuncPrologue(f *AstFuncDecl) {
 	emitLabel("# f %s", f.fname)
 	emit(".text")
 	emit(".globl	%s", f.fname)
@@ -103,7 +103,7 @@ func (ast *AstAssignment) emit() {
 	assignLocal(ast.left, ast.right)
 }
 
-func emitDeclLocalVar(ast *AstDeclVar) {
+func emitDeclLocalVar(ast *AstVarDecl) {
 	if ast.initval == nil {
 		// assign zero value
 		ast.initval = &ExprNumberLiteral{}
@@ -153,14 +153,14 @@ func (funcall *ExprFuncall) emit() {
 	}
 }
 
-func emitFuncdef(f *AstFuncDef) {
+func emitFuncdef(f *AstFuncDecl) {
 	emitFuncPrologue(f)
 	emitCompound(f.body)
 	emit("mov $0, %%eax") // return 0
 	emitFuncEpilogue()
 }
 
-func emitGlobalDeclVar(declvar *AstDeclVar) {
+func emitGlobalDeclVar(declvar *AstVarDecl) {
 	variable := declvar.variable
 	assert(variable.isGlobal, "should be global")
 	emitLabel(".global %s", variable.varname)
@@ -177,12 +177,13 @@ func emitGlobalDeclVar(declvar *AstDeclVar) {
 	}
 }
 
-func generate(a *AstSourceFile) {
+func generate(f *AstSourceFile) {
 	emitDataSection()
-	for _, declvar := range a.decls {
-		emitGlobalDeclVar(declvar)
-	}
-	for _, f := range a.funcdefs {
-		emitFuncdef(f)
+	for _, decl := range f.decls {
+		if decl.vardecl != nil {
+			emitGlobalDeclVar(decl.vardecl)
+		} else if decl.funcdecl != nil {
+			emitFuncdef(decl.funcdecl)
+		}
 	}
 }

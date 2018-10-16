@@ -34,7 +34,7 @@ func (a *AstPackageClause) dump() {
 	debugf("package %s", a.name)
 }
 
-func (a *AstFuncDef) dump() {
+func (a *AstFuncDecl) dump() {
 	debugf("funcdef %s", a.fname)
 	nest++
 	for _, stmt := range a.body.stmts {
@@ -51,7 +51,7 @@ func (ast *AstAssignment) dump() {
 	nest--
 }
 
-func (a *AstDeclVar) dump() {
+func (a *AstVarDecl) dump() {
 	if a.initval == nil {
 		debugf("var %s", a.variable.varname)
 	} else {
@@ -75,8 +75,12 @@ func (a *AstSourceFile) dump() {
 	for _, imprt := range a.imports {
 		debugf("import \"%v\"", imprt.paths)
 	}
-	for _, f := range a.funcdefs {
-		f.dump()
+	for _, decl := range a.decls {
+		if decl.funcdecl != nil {
+			decl.funcdecl.dump()
+		} else if decl.vardecl != nil {
+			decl.vardecl.dump()
+		}
 	}
 	debugPrint("==== Dump AstExpr End ===")
 }
