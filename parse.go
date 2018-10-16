@@ -82,11 +82,11 @@ type AstStmt struct {
 	expr       Expr
 }
 
-type AstPkgClause struct {
+type AstPackageClause struct {
 	name identifier
 }
 
-type AstImport struct {
+type AstImportDecl struct {
 	paths []string
 }
 
@@ -104,9 +104,9 @@ type AstFuncDef struct {
 	body *AstCompountStmt
 }
 
-type AstFile struct {
-	pkg *AstPkgClause
-	imports []*AstImport
+type AstSourceFile struct {
+	pkg *AstPackageClause
+	imports []*AstImportDecl
 	funcdefs []*AstFuncDef
 	decls []*AstDeclVar
 }
@@ -128,6 +128,22 @@ func readToken() *Token {
 func unreadToken() {
 	ts.unreadToken()
 }
+
+func readIdent() identifier {
+	tok := readToken()
+	if !tok.isTypeIdent() {
+		errorf("Identifier expected, but got %s", tok)
+	}
+	return tok.getIdent()
+}
+
+func expectKeyword(name string) {
+	tok := readToken()
+	if !tok.isKeyword(name) {
+		errorf("Keyword %s expected but got %s", tok)
+	}
+}
+
 
 func expectPunct(punct string) {
 	tok := readToken()
@@ -416,7 +432,7 @@ func parseFuncDef() *AstFuncDef {
 	}
 }
 
-func parseImport() *AstImport {
+func parseImport() *AstImportDecl {
 	tok := readToken()
 	var paths []string
 	if tok.isPunct("(") {
@@ -440,37 +456,54 @@ func parseImport() *AstImport {
 
 	expectPunct(";")
 
-	return &AstImport{
+	return &AstImportDecl{
 		paths: paths,
 	}
 }
 
-func parseTopLevels() *AstFile {
-	var r = &AstFile{}
+func shouldHavePackageClause() *AstPackageClause {
+	expectKeyword("package")
+	r := &AstPackageClause{name :readIdent()}
+	expectPunct(";")
+	return r
+}
+
+func mayHaveImportDecls() []*AstImportDecl {
+	var r []*AstImportDecl
+	for {
+		tok := readToken()
+		if !tok.isKeyword("import") {
+			unreadToken()
+			return r
+		}
+		r = append(r, parseImport())
+	}
+}
+
+// https://golang.org/ref/spec#Source_file_organization
+// Each source file consists of
+// a package clause defining the package to which it belongs,
+// followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
+// followed by a possibly empty set of declarations of functions, types, variables, and constants.
+func parseSourceFile() *AstSourceFile {
+
+	var r = &AstSourceFile{
+		pkg :    shouldHavePackageClause(),
+		imports: mayHaveImportDecls(),
+	}
+
 	for {
 		tok := readToken()
 		if tok.isEOF() {
 			return r
 		}
-		if tok.isSemicolon() {
-			continue
-		}
-		if tok.isKeyword("package") {
-			tok = readToken()
-			assert(tok.isTypeIdent(), "expect ident")
-			r.pkg = &AstPkgClause{name :tok.getIdent()}
-			readToken()
-			continue
-		} else if tok.isKeyword("import") {
-			ast := parseImport()
-			r.imports = append(r.imports, ast)
-			continue
-		} else if tok.isKeyword("var") {
+		if tok.isKeyword("var") {
 			decl := parseDeclVar(true)
 			r.decls = append(r.decls, decl.declvar)
 		} else if tok.isKeyword("func") {
 			ast := parseFuncDef()
 			r.funcdefs = append(r.funcdefs, ast)
+		} else if tok.isPunct(";") {
 			continue
 		} else {
 			errorf("unable to handle token %v", tok)
@@ -486,9 +519,9 @@ func newScope(outer *scope) *scope {
 	}
 }
 
-func parse(t *TokenStream) *AstFile {
+func parse(t *TokenStream) *AstSourceFile {
 	ts = t
 	globalscope = newScope(nil)
 	currentscope = globalscope
-	return parseTopLevels()
+	return parseSourceFile()
 }

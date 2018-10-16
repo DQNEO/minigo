@@ -177,7 +177,7 @@ func emitGlobalDeclVar(declvar *AstDeclVar) {
 	}
 }
 
-func generate(a *AstFile) {
+func generate(a *AstSourceFile) {
 	emitDataSection()
 	for _, declvar := range a.decls {
 		emitGlobalDeclVar(declvar)
