@@ -2,6 +2,10 @@ package main
 
 var ga int
 
+func f0() {
+
+}
+
 func fa() {
 	printf("%d\n", ga)// => 0
 }
@@ -54,6 +58,7 @@ func fg(a int, b int) {
 }
 
 func main() {
+	f0()
 	fa()
 	fb()
 	fc()

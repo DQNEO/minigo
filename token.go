@@ -109,10 +109,6 @@ func ungetc() {
 	bs.unget()
 }
 
-func is_number(c byte) bool {
-	return '0' <= c && c <= '9'
-}
-
 func read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
@@ -120,7 +116,7 @@ func read_number(c0 byte) string {
 		if err != nil {
 			return string(chars)
 		}
-		if is_number(c) {
+		if isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
@@ -130,22 +126,32 @@ func read_number(c0 byte) string {
 	}
 }
 
-func is_name(b byte) bool {
-	return b == '_' || is_alphabet(b)
-}
-
-func is_alphabet(b byte) bool {
+// https://golang.org/ref/spec#unicode_letter
+func isUnicodeLetter(b byte) bool {
+	// tentative implementation
 	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
 }
 
-func read_name(c0 byte) string {
+// https://golang.org/ref/spec#unicode_digit
+func isUnicodeDigit(c byte) bool {
+	// tentative implementation
+	return '0' <= c && c <= '9'
+}
+
+// https://golang.org/ref/spec#Letters_and_digits
+func isLetter(b byte) bool {
+	return isUnicodeLetter(b) || b == '_'
+}
+
+// https://golang.org/ref/spec#Identifiers
+func readIdentifier(c0 byte) string {
 	var chars = []byte{c0}
 	for {
 		c, err := getc()
 		if err != nil {
 			return string(chars)
 		}
-		if is_name(c) {
+		if isLetter(c) || isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
@@ -334,7 +340,7 @@ func tokenize() []*Token {
 			tok = makeToken(T_INT,  sval)
 		case '_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
 			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z':
-			sval := read_name(c)
+			sval := readIdentifier(c)
 			if in_array(sval, keywords) {
 				tok = makeToken(T_KEYWORWD, sval)
 			} else {
