@@ -1,8 +1,6 @@
-* 4 Token Types
 * Type
 * Show source position on error
 * re-organize dump/debug functions
 * replace printf by fmt.Printf()
-* introduce identifier type
 * accept f1()
 * rename parse* funcs to read*
