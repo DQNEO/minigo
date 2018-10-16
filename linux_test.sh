@@ -4,10 +4,7 @@ PATH="/usr/lib/go-1.10/bin:$PATH"
 
 as_file="./out/a.s"
 executable="./out/a.out"
-prog_name="minigo"
-
-make clean
-make
+prog_name="minigo.linux"
 
 function test_file {
     local source=$1
