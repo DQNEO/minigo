@@ -203,18 +203,7 @@ func parseExprInt(prior int) Expr {
 	return ast
 }
 
-func parseDeclVar(isGlobal bool) *AstVarDecl {
-	// read varname
-	tok := readToken()
-	varname := tok.getIdent()
-
-	// read type
-	tok2 := readToken()
-	if !tok2.isTypeIdent() {
-		errorf("Type expected, but got %s", tok2)
-	}
-	gtype := tok2.sval
-
+func registerVariable(varname identifier, gtype string, isGlobal bool) *ExprVariable {
 	var variable *ExprVariable
 	if isGlobal {
 		variable = &ExprVariable{
@@ -231,16 +220,40 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 		localvars = append(localvars, variable)
 	}
 	currentscope.set(varname, variable)
+	return variable
+}
 
-	// read "="
-	tok3 := readToken()
+func parseDeclVar(isGlobal bool) *AstVarDecl {
+	// read varname
+	varname := readIdent()
+
+	// Type or "="
+	tok := readToken()
+	var gtype string
 	var initval Expr
-	if tok3.isPunct("=") {
-		initval = parseUnaryExpr()
+	if tok.isPunct("=") {
+		//var x = EXPR
+		initval = parseExpr()
+		gtype = "int" // should infer type
+		expectPunct(";")
+	} else if tok.isTypeIdent() {
+		// var x T (= EXPR)
+		gtype = tok.sval
+		tok3 := readToken()
+		if tok3.isPunct("=") {
+			initval = parseExpr()
+			expectPunct(";")
+		} else if tok3.isPunct(";") {
+			// k
+		} else {
+			errorf("Invalid token %s", tok3)
+		}
 	} else {
-		unreadToken()
+		errorf("Type or = expected, but got %s", tok)
 	}
-	expectPunct(";")
+
+	variable := registerVariable(varname, gtype, isGlobal)
+
 	return &AstVarDecl{
 		variable: variable,
 		initval:  initval,
