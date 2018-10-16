@@ -201,11 +201,11 @@ func newAstString(sval string) *ExprStringLiteral {
 func parsePrim() Expr {
 	tok := readToken()
 	switch tok.typ {
-	case "ident":
+	case T_IDENT:
 		return parseIdentOrFuncall(tok.sval)
-	case "string":
+	case T_STRING:
 		return newAstString(tok.sval)
-	case "number":
+	case T_INT:
 		ival, _ := strconv.Atoi(tok.sval)
 		return &ExprNumberLiteral{
 			val: ival,
@@ -421,17 +421,6 @@ func parseFuncDef() *AstFuncDef {
 		localvars: _localvars,
 		body: body,
 	}
-}
-
-func expectType(typ string) {
-	tok := readToken()
-	if tok.typ != typ {
-		errorf("token type %s expected, but got %s", typ, tok)
-	}
-}
-
-func expectNewline() {
-	expectType("newline")
 }
 
 func parseImport() *AstImport {
