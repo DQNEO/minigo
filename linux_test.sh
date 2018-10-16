@@ -8,10 +8,11 @@ prog_name="minigo.linux"
 
 function test_file {
     local source=$1
+    local expected=$2
     ./${prog_name} $source > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
-    diff out/actual.txt t/expected.txt
+    diff out/actual.txt $expected
 }
 
 function test_main {
@@ -37,7 +38,8 @@ func main() {
 
 }
 
-test_file t/test.go
+test_file t/test.go t/test.txt
+test_file t/hello.go t/hello.txt
 
 test_main "var i int; i = 3; printf(\"%d\",i)" 3
 test_main "printf(\"%d\",1); printf(\"%d\",7)" 17
