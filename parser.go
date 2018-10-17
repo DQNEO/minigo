@@ -89,28 +89,56 @@ func readFuncallArgs() []Expr {
 	}
 }
 
-func parseIdentOrFuncall(name identifier) Expr {
+// https://golang.org/ref/spec#Operands
+type AstOperandName struct {
+	pkg identifier
+	ident identifier
+}
 
+func parseIdentOrFuncall(firstIdent identifier) Expr {
+
+	// https://golang.org/ref/spec#QualifiedIdent
+	// read QualifiedIdent
 	tok := readToken()
+	var pkg identifier
+	var ident identifier
+	if tok.isPunct(".") {
+		pkg = firstIdent
+		ident = readIdent()
+	} else {
+		unreadToken()
+		pkg = ""
+		ident = firstIdent
+	}
+
+	operand := AstOperandName{
+		pkg:   pkg,
+		ident: ident,
+	}
+
+	tok = readToken()
 	if tok.isPunct("(") {
 		// try funcall
 		args := readFuncallArgs()
 
-		// workaround: replace "println" -> "puts"
-		if name == "println" {
-			name = "puts"
+		if operand.pkg == "" && operand.ident == "println" {
+			// dirty hack: "println" -> "puts"
+			operand.ident = "puts"
+		} else if operand.pkg == "fmt" && operand.ident == "Printf" {
+			// dirty hack: "fmt" -> "Printf"
+			operand.ident = "printf"
 		}
 		return &ExprFuncall{
-			fname: name,
+			fname: operand.ident,
 			args:  args,
 		}
 	}
 	unreadToken()
 
 
-	variable := currentscope.get(name)
+	variable := currentscope.get(firstIdent)
 	if variable == nil {
-		errorf("Undefined variable %s", name)
+		errorf("Undefined variable %s", firstIdent)
 		return nil
 	}
 
