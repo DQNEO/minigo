@@ -38,6 +38,7 @@ func main() {
 
 }
 
+test_file t/min.go /dev/null
 test_file t/test.go t/expected/test.txt
 test_file t/hello.go t/expected/hello.txt
 
