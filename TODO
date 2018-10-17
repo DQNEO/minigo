@@ -2,6 +2,4 @@
 * Type
 * Show source position on error
 * re-organize dump/debug functions
-* replace printf by fmt.Printf()
-* accept f1()
 * rename parse* funcs to read*
