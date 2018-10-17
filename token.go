@@ -202,7 +202,6 @@ func read_char() string {
 	if c == '\\' {
 		c, err = getc()
 	}
-	debugPrint("gotc:" + string(c))
 	expect('\'')
 	return string([]byte{c})
 }
