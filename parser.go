@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+var universeblockscope *scope
 var globalscope *scope
 var currentscope *scope
 
@@ -579,8 +580,9 @@ func newScope(outer *scope) *scope {
 
 func parse(t *TokenStream) *AstSourceFile {
 	ts = t
-	globalscope = newScope(nil)
-	globalscope.set("int", &Gtype{"int"})
+	universeblockscope = newScope(nil)
+	universeblockscope.set("int", &Gtype{"int"})
+	globalscope = newScope(universeblockscope)
 	currentscope = globalscope
 	return parseSourceFile()
 }
