@@ -9,11 +9,11 @@ var globalscope *scope
 var currentscope *scope
 
 type scope struct {
-	idents map[identifier]*ExprVariable
+	idents map[identifier]interface{}
 	outer *scope
 }
 
-func (sc *scope) get(name identifier) *ExprVariable {
+func (sc *scope) get(name identifier) interface{} {
 	for s := sc; s != nil; s = s.outer {
 		v := s.idents[name]
 		if v != nil {
@@ -23,8 +23,23 @@ func (sc *scope) get(name identifier) *ExprVariable {
 	return nil
 }
 
-func (sc *scope) set(name identifier, variable *ExprVariable) {
-	sc.idents[name] = variable
+func (sc *scope) set(name identifier, v interface{}) {
+	if v == nil {
+		panic("nil cannot be set")
+	}
+	sc.idents[name] = v
+}
+
+func (sc *scope) getGtype(name identifier) *Gtype {
+	v := sc.get(name)
+	if v == nil {
+		errorf("type %s is not defined", name)
+	}
+	gtype, ok := v.(*Gtype)
+	if !ok {
+		errorf("type %s is not defined", name)
+	}
+	return gtype
 }
 
 var localvars []*ExprVariable
@@ -136,8 +151,9 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 	unreadToken()
 
 
-	variable := currentscope.get(firstIdent)
-	if variable == nil {
+	v := currentscope.get(firstIdent)
+	variable, ok := v.(*ExprVariable)
+	if v == nil || !ok {
 		errorf("Undefined variable %s", firstIdent)
 		return nil
 	}
@@ -321,7 +337,11 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 
 func parseAssignment() *AstAssignment {
 	tleft := readToken()
-	variable := currentscope.get(tleft.getIdent())
+	v := currentscope.get(tleft.getIdent())
+	variable, ok := v.(*ExprVariable)
+	if !ok {
+		errorf("%s is not a variable", tleft)
+	}
 	expectPunct("=")
 	rexpr := parseExpr()
 	expectPunct(";")
@@ -470,36 +490,40 @@ func mayHaveImportDecls() []*AstImportDecl {
 	}
 }
 
-type AstTypeSpec struct {
-
+type Gtype struct {
+	typ string // "int", "string", "struct" , "interface",...
 }
 
 type AstTypeDecl struct {
-	name identifier
-	typespec *AstTypeSpec
+	name  identifier
+	gtype *Gtype
 }
 
-func parseStructDef() *AstTypeSpec {
-	return nil
+func parseStructDef() *Gtype {
+	return &Gtype{"struct"}
 }
 
-func parseInterfaceDef() *AstTypeSpec {
-	return nil
+func parseInterfaceDef() *Gtype {
+	return &Gtype{"interface"}
 }
 
 func parseTypeDecl() *AstTypeDecl  {
 	name := readIdent()
 	tok := readToken()
-	var typespec *AstTypeSpec
+	var gtype *Gtype
 	if tok.sval == "struct" {
-		typespec = parseStructDef()
+		gtype = parseStructDef()
 	} else if tok.sval == "interface" {
-		typespec = parseInterfaceDef()
+		gtype = parseInterfaceDef()
+	} else {
+		ident := tok.getIdent() // "int", "bool", etc
+		currentscope.getGtype(ident) // check existence
+		gtype = currentscope.getGtype(ident)
 	}
-
+	currentscope.set(name, gtype)
 	return &AstTypeDecl{
-		name: name,
-		typespec: typespec,
+		name:  name,
+		gtype: gtype,
 	}
 }
 
@@ -549,13 +573,14 @@ func parseSourceFile() *AstSourceFile {
 func newScope(outer *scope) *scope {
 	return &scope{
 		outer:outer,
-		idents:make(map[identifier]*ExprVariable),
+		idents:make(map[identifier]interface{}),
 	}
 }
 
 func parse(t *TokenStream) *AstSourceFile {
 	ts = t
 	globalscope = newScope(nil)
+	globalscope.set("int", &Gtype{"int"})
 	currentscope = globalscope
 	return parseSourceFile()
 }
