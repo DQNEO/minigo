@@ -1,4 +1,7 @@
 
+all: minigo.linux minigo.darwin
+	make minigo.linux minigo.darwin
+
 minigo.linux: *.go
 	GOOS=linux   GOARCH=amd64 go build -o minigo.linux
 
