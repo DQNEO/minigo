@@ -6,7 +6,7 @@ import (
 )
 
 var universeblockscope *scope
-var globalscope *scope
+var packageblockscope *scope
 var currentscope *scope
 
 type scope struct {
@@ -391,7 +391,7 @@ func parseCompoundStmt() *AstCompountStmt {
 
 func parseFuncDef() *AstFuncDecl {
 	localvars = make([]*ExprVariable, 0)
-	currentscope = newScope(globalscope)
+	currentscope = newScope(packageblockscope)
 	fname := readToken().getIdent()
 	expectPunct("(")
 	var params []*ExprVariable
@@ -433,7 +433,7 @@ func parseFuncDef() *AstFuncDecl {
 	body := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
-	currentscope = globalscope
+	currentscope = packageblockscope
 	return &AstFuncDecl{
 		fname: fname,
 		rettype:rettype,
@@ -594,7 +594,7 @@ func newUniverseBlockScope() *scope {
 func parse(t *TokenStream) *AstSourceFile {
 	ts = t
 	universeblockscope = newUniverseBlockScope()
-	globalscope = newScope(universeblockscope)
-	currentscope = globalscope
+	packageblockscope = newScope(universeblockscope)
+	currentscope = packageblockscope
 	return parseSourceFile()
 }
