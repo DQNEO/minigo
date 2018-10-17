@@ -87,6 +87,7 @@ type AstTopLevelDecl struct {
 	funcdecl *AstFuncDecl
 	vardecl *AstVarDecl
 	constdecl *AstConstDecl
+	typedecl *AstTypeDecl
 }
 
 type AstSourceFile struct {

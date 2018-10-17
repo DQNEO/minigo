@@ -469,6 +469,40 @@ func mayHaveImportDecls() []*AstImportDecl {
 	}
 }
 
+type AstTypeSpec struct {
+
+}
+
+type AstTypeDecl struct {
+	name identifier
+	typespec *AstTypeSpec
+}
+
+func parseStructDef() *AstTypeSpec {
+	return nil
+}
+
+func parseInterfaceDef() *AstTypeSpec {
+	return nil
+}
+
+func parseTypeDecl() *AstTypeDecl  {
+	name := readIdent()
+	tok := readToken()
+	var typespec *AstTypeSpec
+	if tok.sval == "struct" {
+		typespec = parseStructDef()
+	} else if tok.sval == "interface" {
+		typespec = parseInterfaceDef()
+	}
+
+	return &AstTypeDecl{
+		name: name,
+		typespec: typespec,
+	}
+}
+
+
 func mayHaveTopLevelDecls() []*AstTopLevelDecl {
 	var r []*AstTopLevelDecl
 
@@ -486,10 +520,13 @@ func mayHaveTopLevelDecls() []*AstTopLevelDecl {
 		} else if tok.isKeyword("func") {
 			funcdecl := parseFuncDef()
 			r  = append(r, &AstTopLevelDecl{funcdecl:funcdecl})
+		} else if tok.isKeyword("type") {
+			typedecl := parseTypeDecl()
+			r  = append(r, &AstTopLevelDecl{typedecl:typedecl})
 		} else if tok.isPunct(";") {
 			continue
 		} else {
-			errorf("unable to handle token %v", tok)
+			errorf("TBD: unable to handle token %v", tok)
 		}
 	}
 	return r
