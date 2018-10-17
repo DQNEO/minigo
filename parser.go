@@ -77,7 +77,7 @@ func expectKeyword(name string) {
 }
 
 
-func expectPunct(punct string) {
+func expect(punct string) {
 	tok := readToken()
 	if !tok.isPunct(punct) {
 		errorf("punct '%s' expected but got '%s'", punct, tok)
@@ -278,14 +278,14 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 		//var x = EXPR
 		initval = parseExpr()
 		gtype = "int" // should infer type
-		expectPunct(";")
+		expect(";")
 	} else if tok.isTypeIdent() {
 		// var x T (= EXPR)
 		gtype = tok.sval
 		tok3 := readToken()
 		if tok3.isPunct("=") {
 			initval = parseExpr()
-			expectPunct(";")
+			expect(";")
 		} else if tok3.isPunct(";") {
 			// k
 		} else {
@@ -316,13 +316,13 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 		// infer mode: const x = EXPR
 		val = parseExpr()
 		gtype = "int" // TODO: infer type
-		expectPunct(";")
+		expect(";")
 	} else if tok.isTypeIdent() {
 		// const x T = EXPR
 		gtype = tok.sval
-		expectPunct("=")
+		expect("=")
 		val = parseExpr()
-		expectPunct(";")
+		expect(";")
 	} else {
 		errorf("Type or = expected, but got %s", tok)
 	}
@@ -343,9 +343,9 @@ func parseAssignment() *AstAssignment {
 	if !ok {
 		errorf("%s is not a variable", tleft)
 	}
-	expectPunct("=")
+	expect("=")
 	rexpr := parseExpr()
-	expectPunct(";")
+	expect(";")
 	return &AstAssignment{
 		left:  variable,
 		right: rexpr,
@@ -393,7 +393,7 @@ func parseFuncDef() *AstFuncDecl {
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(packageblockscope)
 	fname := readToken().getIdent()
-	expectPunct("(")
+	expect("(")
 	var params []*ExprVariable
 
 	tok := readToken()
@@ -426,7 +426,7 @@ func parseFuncDef() *AstFuncDecl {
 	if tok.isTypeIdent() {
 		// rettype
 		rettype = tok.sval
-		expectPunct("{")
+		expect("{")
 	} else {
 		assert(tok.isPunct("{"), "begin of func body")
 	}
@@ -451,7 +451,7 @@ func parseImport() *AstImportDecl {
 			tok := readToken()
 			if tok.isTypeString() {
 				paths = append(paths, tok.sval)
-				expectPunct(";")
+				expect(";")
 			} else if tok.isPunct(")") {
 				break
 			} else {
@@ -465,7 +465,7 @@ func parseImport() *AstImportDecl {
 		paths = []string{tok.sval}
 	}
 
-	expectPunct(";")
+	expect(";")
 
 	return &AstImportDecl{
 		paths: paths,
@@ -475,7 +475,7 @@ func parseImport() *AstImportDecl {
 func shouldHavePackageClause() *AstPackageClause {
 	expectKeyword("package")
 	r := &AstPackageClause{name :readIdent()}
-	expectPunct(";")
+	expect(";")
 	return r
 }
 
@@ -507,7 +507,7 @@ func parseStructDef() *Gtype {
 }
 
 func parseInterfaceDef() *Gtype {
-	expectPunct("{")
+	expect("{")
 	var methods []identifier
 	for {
 		tok := readToken()
@@ -515,12 +515,12 @@ func parseInterfaceDef() *Gtype {
 			break
 		}
 		fname := tok.getIdent()
-		expectPunct("(")
-		expectPunct(")")
-		expectPunct(";")
+		expect("(")
+		expect(")")
+		expect(";")
 		methods = append(methods, fname)
 	}
-	expectPunct(";")
+	expect(";")
 	return &Gtype{
 		typ:"interface",
 		methods: methods,
