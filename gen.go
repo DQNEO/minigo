@@ -176,7 +176,7 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	} else {
 		ival, ok := initval.(*ExprNumberLiteral)
 		if !ok {
-			errorf("only number can be assign to global variables")
+			errorf("only number can be assign to global variables but got %s", initval)
 		}
 		emit(".long %d", ival.val)
 	}

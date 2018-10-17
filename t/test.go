@@ -63,10 +63,8 @@ func fe() {
 	fmt.Printf("%d\n", a + b)
 }
 
-var gb int = 10
-
 func ff() {
-	fmt.Printf("%d\n", gb)
+	fmt.Printf("%d%d\n", true, false)
 }
 
 func fg(a int, b int) {
@@ -90,6 +88,11 @@ func fi() {
 	fmt.Printf("%d\n", c0 + c1 + c2)
 }
 
+var gb int = 14
+
+func f14() {
+	fmt.Printf("%d\n", gb)
+}
 
 func main() {
 	f0()
@@ -102,6 +105,7 @@ func main() {
 	fg(5, 6)
 	fh()
 	fi()
+	f14()
 	println("hello world")
 }
 

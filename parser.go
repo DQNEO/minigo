@@ -13,6 +13,24 @@ var predeclaredTypes = []*Gtype{
 	gBool,
 }
 
+var predeclaredConsts = []*AstConstDecl{
+	&AstConstDecl{
+		variable:&ExprConstVariable{
+			name:"true",
+			gtype:gBool,
+			val: &ExprNumberLiteral{1},
+		},
+	},
+	&AstConstDecl{
+		variable:&ExprConstVariable{
+			name:"false",
+			gtype:gBool,
+			val: &ExprNumberLiteral{0},
+		},
+	},
+}
+
+
 var universeblockscope *scope
 var packageblockscope *scope
 var currentscope *scope
@@ -668,6 +686,9 @@ func newUniverseBlockScope() *scope {
 	r := newScope(nil)
 	for _, t := range predeclaredTypes {
 		r.set(t.typ, t)
+	}
+	for _, c := range predeclaredConsts {
+		r.set(c.variable.name, c.variable)
 	}
 	return r
 }
