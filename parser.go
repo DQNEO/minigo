@@ -582,6 +582,7 @@ func parse(t *TokenStream) *AstSourceFile {
 	ts = t
 	universeblockscope = newScope(nil)
 	universeblockscope.set("int", &Gtype{"int"})
+	universeblockscope.set("bool", &Gtype{"bool"})
 	globalscope = newScope(universeblockscope)
 	currentscope = globalscope
 	return parseSourceFile()
