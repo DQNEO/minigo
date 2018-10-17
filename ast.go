@@ -17,7 +17,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	varname identifier
-	gtype string
+	gtype *Gtype
 	offset int // for local variable
 	isGlobal bool
 }

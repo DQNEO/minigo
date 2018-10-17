@@ -5,6 +5,14 @@ import (
 	"fmt"
 )
 
+var gBool = &Gtype{typ:"bool",}
+var gInt = &Gtype{typ:"int",}
+
+var predeclaredTypes = []*Gtype{
+	gInt,
+	gBool,
+}
+
 var universeblockscope *scope
 var packageblockscope *scope
 var currentscope *scope
@@ -247,7 +255,7 @@ func parseExprInt(prior int) Expr {
 	return ast
 }
 
-func newVariable(varname identifier, gtype string, isGlobal bool) *ExprVariable {
+func newVariable(varname identifier, gtype *Gtype, isGlobal bool) *ExprVariable {
 	var variable *ExprVariable
 	if isGlobal {
 		variable = &ExprVariable{
@@ -266,22 +274,47 @@ func newVariable(varname identifier, gtype string, isGlobal bool) *ExprVariable 
 	return variable
 }
 
+// https://golang.org/ref/spec#Type
+func parseType() *Gtype {
+	for {
+		tok := readToken()
+		if tok.isPunct("*") {
+			// pointer
+		} else if tok.isKeyword("struct") {
+
+		} else if tok.isTypeIdent() {
+			typename := tok.getIdent()
+			gtype := currentscope.getGtype(typename)
+			return gtype
+		} else if tok.isPunct("[") {
+		} else if tok.isPunct("]") {
+
+		} else {
+			unreadToken()
+			break
+		}
+
+	}
+	return gInt // FIXME
+}
+
 func parseDeclVar(isGlobal bool) *AstVarDecl {
 	// read name
 	name := readIdent()
 
-	// Type or "="
+	// "=" or Type
 	tok := readToken()
-	var gtype string
+	var gtype *Gtype
 	var initval Expr
 	if tok.isPunct("=") {
 		//var x = EXPR
 		initval = parseExpr()
-		gtype = "int" // should infer type
+		gtype = gInt  // FIXME: infer type
 		expect(";")
-	} else if tok.isTypeIdent() {
-		// var x T (= EXPR)
-		gtype = tok.sval
+	} else {
+		unreadToken()
+		// expect Type
+		gtype = parseType()
 		tok3 := readToken()
 		if tok3.isPunct("=") {
 			initval = parseExpr()
@@ -291,8 +324,6 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 		} else {
 			errorf("Invalid token %s", tok3)
 		}
-	} else {
-		errorf("Type or = expected, but got %s", tok)
 	}
 
 	variable := newVariable(name, gtype, isGlobal)
@@ -310,21 +341,21 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 
 	// Type or "="
 	tok := readToken()
-	var gtype string
+	var gtype *Gtype
 	var val Expr
 	if tok.isPunct("=") {
 		// infer mode: const x = EXPR
 		val = parseExpr()
-		gtype = "int" // TODO: infer type
+		gtype = gInt// FIXME: infer type
 		expect(";")
-	} else if tok.isTypeIdent() {
+	} else {
+		unreadToken()
+		// expect Type
+		gtype = parseType()
 		// const x T = EXPR
-		gtype = tok.sval
 		expect("=")
 		val = parseExpr()
 		expect(";")
-	} else {
-		errorf("Type or = expected, but got %s", tok)
 	}
 
 	variable := newVariable(name, gtype, isGlobal)
@@ -402,11 +433,11 @@ func parseFuncDef() *AstFuncDecl {
 		for {
 			tok := readToken()
 			pname := tok.getIdent()
-			ptype := readToken() //type
+			ptype := parseType()
 			// assureType(tok.sval)
 			variable := &ExprVariable{
 				varname:pname,
-				gtype: ptype.sval,
+				gtype: ptype,
 			}
 			params = append(params, variable)
 			currentscope.set(pname, variable)
@@ -621,11 +652,6 @@ func newScope(outer *scope) *scope {
 		outer:outer,
 		idents:make(map[identifier]interface{}),
 	}
-}
-
-var predeclaredTypes = []*Gtype{
-	&Gtype{typ:"int",},
-	&Gtype{typ:"bool",},
 }
 
 func newUniverseBlockScope() *scope {
