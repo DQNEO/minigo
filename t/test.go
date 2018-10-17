@@ -4,9 +4,12 @@ import "fmt"
 
 var ga int
 
+type myint int
+type mymyint myint
+type bool int
+type mybool bool
 
 func f0() {
-
 }
 
 func fa() {
