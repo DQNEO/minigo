@@ -2,6 +2,11 @@ package main
 
 import "fmt"
 
+type myinterface interface  {
+	x()
+	y()
+}
+
 var ga int
 
 type myint int

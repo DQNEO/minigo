@@ -492,7 +492,9 @@ func mayHaveImportDecls() []*AstImportDecl {
 }
 
 type Gtype struct {
-	typ identifier // "int", "string", "struct" , "interface",...
+	typ     identifier
+	methods []identifier
+	// "int", "string", "struct" , "interface",...
 }
 
 type AstTypeDecl struct {
@@ -501,20 +503,37 @@ type AstTypeDecl struct {
 }
 
 func parseStructDef() *Gtype {
-	return &Gtype{"struct"}
+	return &Gtype{typ:"struct"}
 }
 
 func parseInterfaceDef() *Gtype {
-	return &Gtype{"interface"}
+	expectPunct("{")
+	var methods []identifier
+	for {
+		tok := readToken()
+		if tok.isPunct("}") {
+			break
+		}
+		fname := tok.getIdent()
+		expectPunct("(")
+		expectPunct(")")
+		expectPunct(";")
+		methods = append(methods, fname)
+	}
+	expectPunct(";")
+	return &Gtype{
+		typ:"interface",
+		methods: methods,
+	}
 }
 
 func parseTypeDecl() *AstTypeDecl  {
 	name := readIdent()
 	tok := readToken()
 	var gtype *Gtype
-	if tok.sval == "struct" {
+	if tok.isKeyword("struct" ) {
 		gtype = parseStructDef()
-	} else if tok.sval == "interface" {
+	} else if tok.isKeyword("interface")  {
 		gtype = parseInterfaceDef()
 	} else {
 		ident := tok.getIdent() // "int", "bool", etc
@@ -579,8 +598,8 @@ func newScope(outer *scope) *scope {
 }
 
 var predeclaredTypes = []*Gtype{
-	&Gtype{"int"},
-	&Gtype{"bool"},
+	&Gtype{typ:"int",},
+	&Gtype{typ:"bool",},
 }
 
 func newUniverseBlockScope() *scope {
