@@ -112,6 +112,10 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 	assignLocal(ast.variable, ast.initval)
 }
 
+func emitDeclLocalConst(ast *AstConstDecl) {
+	assignLocal(ast.variable, ast.initval)
+}
+
 func emitCompound(ast *AstCompountStmt) {
 	for _, stmt := range ast.stmts {
 		if stmt.expr != nil {
@@ -120,6 +124,8 @@ func emitCompound(ast *AstCompountStmt) {
 			stmt.assignment.emit()
 		} else if stmt.declvar != nil {
 			emitDeclLocalVar(stmt.declvar)
+		} else if stmt.constdecl != nil {
+			emitDeclLocalConst(stmt.constdecl)
 		}
 	}
 }
@@ -160,16 +166,15 @@ func emitFuncdef(f *AstFuncDecl) {
 	emitFuncEpilogue()
 }
 
-func emitGlobalDeclVar(declvar *AstVarDecl) {
-	variable := declvar.variable
+func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	assert(variable.isGlobal, "should be global")
 	emitLabel(".global %s", variable.varname)
 	emitLabel("%s:", variable.varname)
-	if declvar.initval == nil {
+	if initval == nil {
 		// set zero value
 		emit(".long %d", 0)
 	} else {
-		ival, ok := declvar.initval.(*ExprNumberLiteral)
+		ival, ok := initval.(*ExprNumberLiteral)
 		if !ok {
 			errorf("only number can be assign to global variables")
 		}
@@ -181,7 +186,9 @@ func generate(f *AstSourceFile) {
 	emitDataSection()
 	for _, decl := range f.decls {
 		if decl.vardecl != nil {
-			emitGlobalDeclVar(decl.vardecl)
+			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)
+		} else if decl.constdecl != nil {
+			emitGlobalDeclVar(decl.constdecl.variable, decl.constdecl.initval)
 		} else if decl.funcdecl != nil {
 			emitFuncdef(decl.funcdecl)
 		}

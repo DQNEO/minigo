@@ -2,6 +2,7 @@ package main
 
 var ga int
 
+
 func f0() {
 
 }
@@ -65,6 +66,16 @@ func fh() {
 	printf("%d\n", gc + gd + ge)
 }
 
+const c0 int = 1
+const c1 = 2
+
+func fi() {
+	const c1 int = 3
+	const c2  = 9
+	printf("%d\n", c0 + c1 + c2)
+}
+
+
 func main() {
 	f0()
 	fa()
@@ -75,6 +86,7 @@ func main() {
 	ff()
 	fg(5, 6)
 	fh()
+	fi()
 	println("hello world")
 }
 

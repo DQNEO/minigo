@@ -195,7 +195,6 @@ func parseExprInt(prior int) Expr {
 			unreadToken()
 			return ast
 		} else {
-			dumpToken(tok)
 			errorf("unable to handle token=\"%s\"\n", tok.sval)
 		}
 	}
@@ -260,6 +259,37 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 	}
 }
 
+func parseConstDecl(isGlobal bool) *AstConstDecl {
+	// read name
+	name := readIdent()
+
+	// Type or "="
+	tok := readToken()
+	var gtype string
+	var val Expr
+	if tok.isPunct("=") {
+		// infer mode: const x = EXPR
+		val = parseExpr()
+		gtype = "int" // TODO: infer type
+		expectPunct(";")
+	} else if tok.isTypeIdent() {
+		// const x T = EXPR
+		gtype = tok.sval
+		expectPunct("=")
+		val = parseExpr()
+		expectPunct(";")
+	} else {
+		errorf("Type or = expected, but got %s", tok)
+	}
+
+	variable := registerVariable(name, gtype, isGlobal)
+
+	return &AstConstDecl{
+		variable: variable,
+		initval:  val,
+	}
+}
+
 func parseAssignment() *AstAssignment {
 	tleft := readToken()
 	variable := currentscope.get(tleft.getIdent())
@@ -276,6 +306,8 @@ func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
 		return  &AstStmt{declvar:parseDeclVar(false)}
+	} else if tok.isKeyword("const") {
+		return  &AstStmt{constdecl:parseConstDecl(false)}
 	}
 	tok2 := readToken()
 
@@ -419,7 +451,10 @@ func mayHaveTopLevelDecls() []*AstTopLevelDecl {
 		}
 		if tok.isKeyword("var") {
 			vardecl := parseDeclVar(true)
-			r = append(r, &AstTopLevelDecl{vardecl:vardecl})
+			r = append(r, &AstTopLevelDecl{vardecl: vardecl})
+		} else if tok.isKeyword("const") {
+			constdecl := parseConstDecl(true)
+			r = append(r, &AstTopLevelDecl{constdecl:constdecl})
 		} else if tok.isKeyword("func") {
 			funcdecl := parseFuncDef()
 			r  = append(r, &AstTopLevelDecl{funcdecl:funcdecl})

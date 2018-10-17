@@ -44,6 +44,11 @@ type AstVarDecl struct {
 	initval  Expr
 }
 
+type AstConstDecl struct {
+	variable *ExprVariable
+	initval  Expr
+}
+
 type AstAssignment struct {
 	left  *ExprVariable // lvalue
 	right Expr
@@ -51,6 +56,7 @@ type AstAssignment struct {
 
 type AstStmt struct {
 	declvar    *AstVarDecl
+	constdecl  *AstConstDecl
 	assignment *AstAssignment
 	expr       Expr
 }
@@ -80,6 +86,7 @@ type AstFuncDecl struct {
 type AstTopLevelDecl struct {
 	funcdecl *AstFuncDecl
 	vardecl *AstVarDecl
+	constdecl *AstConstDecl
 }
 
 type AstSourceFile struct {

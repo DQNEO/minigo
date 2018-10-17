@@ -12,7 +12,7 @@ function test_file {
     ./${prog_name} $source > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
-    diff out/actual.txt $expected
+    diff -u out/actual.txt $expected
 }
 
 function test_main {
