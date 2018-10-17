@@ -22,6 +22,12 @@ type ExprVariable struct {
 	isGlobal bool
 }
 
+type ExprConstVariable struct {
+	name identifier
+	gtype *Gtype
+	val Expr // like ExprConstExpr ?
+}
+
 type ExprFuncall struct {
 	fname identifier
 	args  []Expr
@@ -45,8 +51,7 @@ type AstVarDecl struct {
 }
 
 type AstConstDecl struct {
-	variable *ExprVariable
-	initval  Expr
+	variable *ExprConstVariable
 }
 
 type AstAssignment struct {

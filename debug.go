@@ -98,6 +98,10 @@ func (ast *ExprVariable) dump() {
 	debugf("var %s", ast.varname)
 }
 
+func (ast *ExprConstVariable) dump() {
+	debugf("var %s", ast.name)
+}
+
 func (ast *ExprNumberLiteral) dump() {
 	debugf("int %d", ast.val)
 }

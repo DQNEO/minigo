@@ -76,6 +76,10 @@ func (ast *ExprVariable) emit() {
 	}
 }
 
+func (ast *ExprConstVariable) emit() {
+	ast.val.emit()
+}
+
 func (ast *ExprBinop) emit() {
 	ast.left.emit()
 	emit("push %%rax")
@@ -112,10 +116,6 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 	assignLocal(ast.variable, ast.initval)
 }
 
-func emitDeclLocalConst(ast *AstConstDecl) {
-	assignLocal(ast.variable, ast.initval)
-}
-
 func emitCompound(ast *AstCompountStmt) {
 	for _, stmt := range ast.stmts {
 		if stmt.expr != nil {
@@ -125,7 +125,7 @@ func emitCompound(ast *AstCompountStmt) {
 		} else if stmt.declvar != nil {
 			emitDeclLocalVar(stmt.declvar)
 		} else if stmt.constdecl != nil {
-			emitDeclLocalConst(stmt.constdecl)
+			// nothing to do
 		}
 	}
 }
@@ -187,8 +187,6 @@ func generate(f *AstSourceFile) {
 	for _, decl := range f.decls {
 		if decl.vardecl != nil {
 			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)
-		} else if decl.constdecl != nil {
-			emitGlobalDeclVar(decl.constdecl.variable, decl.constdecl.initval)
 		} else if decl.funcdecl != nil {
 			emitFuncdef(decl.funcdecl)
 		}

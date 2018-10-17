@@ -161,13 +161,20 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 
 
 	v := currentscope.get(firstIdent)
-	variable, ok := v.(*ExprVariable)
-	if v == nil || !ok {
+	if v == nil{
 		errorf("Undefined variable %s", firstIdent)
 		return nil
 	}
+	variable, ok := v.(*ExprVariable)
+	if ok {
+		return variable
+	}
+	variable2, ok := v.(*ExprConstVariable)
+	if ok {
+		return variable2
+	}
 
-	return variable
+	return nil
 }
 
 var stringIndex = 0
@@ -358,12 +365,15 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 		expect(";")
 	}
 
-	variable := newVariable(name, gtype, isGlobal)
+	variable := &ExprConstVariable{
+		name: name,
+		gtype: gtype,
+		val: val,
+	}
 	currentscope.set(name, variable)
 
 	return &AstConstDecl{
 		variable: variable,
-		initval:  val,
 	}
 }
 
