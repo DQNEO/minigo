@@ -492,9 +492,14 @@ func mayHaveImportDecls() []*AstImportDecl {
 }
 
 type Gtype struct {
-	typ     identifier
-	methods []identifier
-	// "int", "string", "struct" , "interface",...
+	typ     identifier // "int", "string", "struct" , "interface",...
+	methods []identifier // for interface
+	fields []*StructField // for struct
+}
+
+type StructField struct {
+	name identifier
+	gtype *Gtype
 }
 
 type AstTypeDecl struct {
@@ -502,8 +507,29 @@ type AstTypeDecl struct {
 	gtype *Gtype
 }
 
+// read after "struct" token
 func parseStructDef() *Gtype {
-	return &Gtype{typ:"struct"}
+	expect("{")
+	var fields []*StructField
+	for {
+		tok := readToken()
+		if tok.isPunct("}") {
+			break
+		}
+		fieldname := tok.getIdent()
+		ident := readIdent() // "int", "bool", etc
+		fieldtyep := currentscope.getGtype(ident)
+		fields = append(fields, &StructField{
+			name: fieldname,
+			gtype: fieldtyep,
+		})
+		expect(";")
+	}
+	expect(";")
+	return &Gtype{
+		typ:"struct",
+		fields: fields,
+	}
 }
 
 func parseInterfaceDef() *Gtype {

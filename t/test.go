@@ -7,6 +7,11 @@ type myinterface interface  {
 	y()
 }
 
+type mystruct struct {
+	x int
+	y int
+}
+
 var ga int
 
 type myint int
