@@ -183,17 +183,6 @@ func read_string() string {
 	}
 }
 
-func expect(e byte) {
-	c, err := getc()
-	if err != nil {
-		panic("unexpected EOF")
-	}
-	if c != e {
-		fmt.Printf("char '%c' expected, but got '%c'\n", e, c)
-		panic("unexpected char")
-	}
-}
-
 func read_char() string {
 	c, err := getc()
 	if err != nil {
@@ -202,7 +191,10 @@ func read_char() string {
 	if c == '\\' {
 		c, err = getc()
 	}
-	expect('\'')
+	end, _ := getc()
+	if end != '\'' {
+		panic("unexpected char")
+	}
 	return string([]byte{c})
 }
 
