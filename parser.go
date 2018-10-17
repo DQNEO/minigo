@@ -492,7 +492,7 @@ func mayHaveImportDecls() []*AstImportDecl {
 }
 
 type Gtype struct {
-	typ string // "int", "string", "struct" , "interface",...
+	typ identifier // "int", "string", "struct" , "interface",...
 }
 
 type AstTypeDecl struct {
@@ -578,11 +578,22 @@ func newScope(outer *scope) *scope {
 	}
 }
 
+var predeclaredTypes = []*Gtype{
+	&Gtype{"int"},
+	&Gtype{"bool"},
+}
+
+func newUniverseBlockScope() *scope {
+	r := newScope(nil)
+	for _, t := range predeclaredTypes {
+		r.set(t.typ, t)
+	}
+	return r
+}
+
 func parse(t *TokenStream) *AstSourceFile {
 	ts = t
-	universeblockscope = newScope(nil)
-	universeblockscope.set("int", &Gtype{"int"})
-	universeblockscope.set("bool", &Gtype{"bool"})
+	universeblockscope = newUniverseBlockScope()
 	globalscope = newScope(universeblockscope)
 	currentscope = globalscope
 	return parseSourceFile()
