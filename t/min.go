@@ -1,6 +1,7 @@
 package main
 
-type a int
+type myint int
+type mymyint myint
 
 func main() {
 
