@@ -120,8 +120,9 @@ func errorf(format string, v ...interface{}) {
 		fmt.Printf("%v %v %v\n",
 			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
 	*/
-	s := fmt.Sprintf(format, v...)
-	s += " [" + sourceFile + "]"
+	var s string
+	s += bs.location() + ": "
+	s += fmt.Sprintf(format, v...)
 	panic(s)
 }
 

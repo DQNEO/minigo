@@ -324,7 +324,8 @@ func isIn(c byte, set []byte) bool {
 	return false
 }
 
-func tokenize() []*Token {
+func tokenize(_bs *ByteStream) []*Token {
+	bs = _bs
 	var r []*Token
 	for {
 		c, err := getc()
@@ -558,7 +559,19 @@ func renderTokens(tokens []*Token) {
 	debugPrint("==== End Render Tokens ===")
 }
 
-func tokenizeFromFile(path string) []*Token {
-	bs = NewByteStream(path)
-	return tokenize()
+func newTokenStreamFromFile(path string) *TokenStream {
+	// tokenize
+	bs := NewByteStream(path)
+	tokens := tokenize(bs)
+	assert(len(tokens) > 0, "tokens should have length")
+
+	if debugToken {
+		renderTokens(tokens)
+	}
+
+	return &TokenStream{
+		tokens: tokens,
+		index:  0,
+	}
 }
+

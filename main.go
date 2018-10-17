@@ -32,20 +32,9 @@ func main() {
 		parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	// tokenize
-	tokens := tokenizeFromFile(sourceFile)
-	assert(len(tokens) > 0, "tokens should have length")
-
-	if debugToken {
-		renderTokens(tokens)
-	}
-
-	t := &TokenStream{
-		tokens: tokens,
-		index:  0,
-	}
 	// parse
-	astFile := parse(t)
+	ts := newTokenStreamFromFile(sourceFile)
+	astFile := parse(ts)
 
 	if debugAst {
 		astFile.dump()
