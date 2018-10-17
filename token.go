@@ -53,8 +53,11 @@ type Token struct {
 var bs *ByteStream
 
 func (tok *Token) String() string {
+	return tok.sval
+	/*
 	return fmt.Sprintf("&Token{%s, \"%s\"} at %s:%d:%d)",
 		tok.typ, tok.sval, tok.filename, tok.line, tok.column)
+	*/
 }
 
 func (tok *Token) isEOF() bool {
