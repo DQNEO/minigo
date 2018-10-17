@@ -230,7 +230,7 @@ func parseExprInt(prior int) Expr {
 	return ast
 }
 
-func registerVariable(varname identifier, gtype string, isGlobal bool) *ExprVariable {
+func newVariable(varname identifier, gtype string, isGlobal bool) *ExprVariable {
 	var variable *ExprVariable
 	if isGlobal {
 		variable = &ExprVariable{
@@ -246,13 +246,12 @@ func registerVariable(varname identifier, gtype string, isGlobal bool) *ExprVari
 		}
 		localvars = append(localvars, variable)
 	}
-	currentscope.set(varname, variable)
 	return variable
 }
 
 func parseDeclVar(isGlobal bool) *AstVarDecl {
-	// read varname
-	varname := readIdent()
+	// read name
+	name := readIdent()
 
 	// Type or "="
 	tok := readToken()
@@ -279,7 +278,8 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 		errorf("Type or = expected, but got %s", tok)
 	}
 
-	variable := registerVariable(varname, gtype, isGlobal)
+	variable := newVariable(name, gtype, isGlobal)
+	currentscope.set(name, variable)
 
 	return &AstVarDecl{
 		variable: variable,
@@ -310,7 +310,8 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 		errorf("Type or = expected, but got %s", tok)
 	}
 
-	variable := registerVariable(name, gtype, isGlobal)
+	variable := newVariable(name, gtype, isGlobal)
+	currentscope.set(name, variable)
 
 	return &AstConstDecl{
 		variable: variable,
