@@ -523,6 +523,12 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDecl {
+	debugf("func %s start with %s" , "parseFuncDef", peekToken())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseFuncDef")
+	}()
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(packageblockscope)
 	fname := readToken().getIdent()
@@ -708,13 +714,13 @@ func parseTypeDecl() *AstTypeDecl  {
 }
 
 func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
-	var r *AstTopLevelDecl
 	debugf("func %s start with %s" , "parseTopLevelDecl", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
 		debugf("func %s end", "parseTopLevelDecl")
 	}()
+	var r *AstTopLevelDecl
 	switch  {
 	case tok.isKeyword("var"):
 		vardecl := parseDeclVar(true)
@@ -740,7 +746,13 @@ func debugAstConstructed(ast interface{}) {
 	debugPrintVar("Ast constructed", ast)
 }
 
-func mayHaveTopLevelDecls() []*AstTopLevelDecl {
+func parseTopLevelDecls() []*AstTopLevelDecl {
+	debugf("func %s start with %s" , "parseTopLevelDecls", peekToken())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseTopLevelDecls")
+	}()
 	var r []*AstTopLevelDecl
 	for {
 		tok := readToken()
@@ -766,7 +778,7 @@ func parseSourceFile() *AstSourceFile {
 	return &AstSourceFile{
 		pkg :    shouldHavePackageClause(),
 		imports: mayHaveImportDecls(),
-		decls: mayHaveTopLevelDecls(),
+		decls:   parseTopLevelDecls(),
 	}
 }
 
