@@ -4,31 +4,34 @@ import "fmt"
 import "os"
 
 func debugf(format string, v... interface{}) {
-	debugPrint(fmt.Sprintf(format, v...))
-}
-
-func debugPrint(s string) {
+	if !debugMode {
+		return
+	}
 	spaces := ""
-	for i:=0;i<nest;i++ {
+	for i:=0;i< debugNest;i++ {
 		spaces += "  "
 	}
 
-	fmt.Fprintf(os.Stderr, "|%s %s\n", spaces, s)
+	fmt.Fprintf(os.Stderr, spaces + format + "\n", v...)
 }
 
 func debugPrintV(v interface{}) {
-	debugPrint(fmt.Sprintf("%v", v))
+	debugf("%v", v)
 }
 
 func debugPrintVar(name string, v interface{}) {
-	debugPrint(fmt.Sprintf("%s=%v", name, v))
+	debugf("%s = %v", name, v)
+}
+
+func (tok *Token) errorf(format string, v... interface{}) {
+	errorf(tok.String() + ": " + format, v...)
 }
 
 func dumpToken(tok *Token) {
-	debugPrint(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
+	debugf(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
 
-var nest int
+var debugNest int
 
 func (a *AstPackageClause) dump() {
 	debugf("package %s", a.name)
@@ -36,19 +39,19 @@ func (a *AstPackageClause) dump() {
 
 func (a *AstFuncDecl) dump() {
 	debugf("funcdef %s", a.fname)
-	nest++
+	debugNest++
 	for _, stmt := range a.body.stmts {
 		stmt.dump()
 	}
-	nest--
+	debugNest--
 }
 
 func (ast *AstAssignment) dump() {
 	debugf("assign")
-	nest++
+	debugNest++
 	ast.left.dump()
 	ast.right.dump()
-	nest--
+	debugNest--
 }
 
 func (a *AstVarDecl) dump() {
@@ -70,7 +73,7 @@ func (a *AstStmt) dump() {
 	}
 }
 func (a *AstSourceFile) dump() {
-	debugPrint("==== Dump AstExpr Start ===")
+	debugf("==== Dump AstExpr Start ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {
 		debugf("import \"%v\"", imprt.paths)
@@ -82,16 +85,16 @@ func (a *AstSourceFile) dump() {
 			decl.vardecl.dump()
 		}
 	}
-	debugPrint("==== Dump AstExpr End ===")
+	debugf("==== Dump AstExpr End ===")
 }
 
 func (ast *ExprFuncall) dump() {
 	debugf(string(ast.fname))
-	nest++
+	debugNest++
 	for _, arg := range ast.args {
 		arg.dump()
 	}
-	nest--
+	debugNest--
 }
 
 func (ast *ExprVariable) dump() {
@@ -112,10 +115,10 @@ func (ast *ExprStringLiteral) dump() {
 
 func (ast *ExprBinop) dump() {
 	debugf("binop %s", ast.op)
-	nest++
+	debugNest++
 	ast.left.dump()
 	ast.right.dump()
-	nest--
+	debugNest--
 }
 
 func errorf(format string, v ...interface{}) {
@@ -125,7 +128,7 @@ func errorf(format string, v ...interface{}) {
 			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
 	*/
 	var s string
-	s += bs.location() + ": "
+	//s += bs.location() + ": "
 	s += fmt.Sprintf(format, v...)
 	panic(s)
 }

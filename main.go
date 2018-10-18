@@ -7,6 +7,7 @@ import (
 
 var debugAst = false
 var debugToken = false
+var debugMode = false
 var sourceFile string
 
 func parseOpts(args []string) {
@@ -16,6 +17,9 @@ func parseOpts(args []string) {
 		}
 		if opt == "-a" {
 			debugAst = true
+		}
+		if opt == "-d" {
+			debugMode = true
 		}
 
 		if strings.HasSuffix(opt, ".go") {

@@ -1,16 +1,17 @@
 package main
 
-import "strconv"
 import (
 	"fmt"
 )
 
 var gBool = &Gtype{typ:"bool",}
 var gInt = &Gtype{typ:"int",}
+var gString = &Gtype{typ:"string",}
 
 var predeclaredTypes = []*Gtype{
 	gInt,
 	gBool,
+	gString,
 }
 
 var predeclaredConsts = []*AstConstDecl{
@@ -76,6 +77,11 @@ var ts *TokenStream
 
 func (stream *TokenStream) getToken(i int) interface{} {
 	return ts.tokens[i]
+}
+
+func peekToken() *Token {
+	tok := ts.peekToken()
+	return tok
 }
 
 func readToken() *Token {
@@ -210,20 +216,82 @@ func newAstString(sval string) *ExprStringLiteral {
 
 func parsePrim() Expr {
 	tok := readToken()
-	switch tok.typ {
-	case T_IDENT:
+	switch  {
+	case tok.isTypeIdent():
 		return parseIdentOrFuncall(tok.getIdent())
-	case T_STRING:
+	case tok.isTypeString():
 		return newAstString(tok.sval)
-	case T_INT:
-		ival, _ := strconv.Atoi(tok.sval)
+	case tok.isTypeInt():
+		ival := tok.getIntval()
 		return &ExprNumberLiteral{
 			val: ival,
 		}
+	case tok.isPunct("["):
+		return parseArrayLiteral()
 	default:
-		errorf("unable to handle token %v", tok)
+		errorf("unable to handle %s", tok)
 	}
 	return nil
+}
+
+type ExprArrayLiteral struct {
+	gtype *Gtype
+	values []Expr
+}
+
+func (e ExprArrayLiteral) emit() {
+
+}
+
+func (e ExprArrayLiteral) dump() {
+
+}
+
+func parseArrayLiteral() Expr {
+	debugf("func %s start with %s" , "parseArrayLiteral", peekToken().String())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseArrayLiteral")
+	}()
+	expect("]")
+	typ := parseType()
+	expect("{")
+	var values []Expr
+	for {
+		tok := readToken()
+		if tok.isPunct("}") {
+			break
+		}
+		var v Expr
+		if tok.isTypeString() {
+			v = &ExprStringLiteral{val: tok.sval}
+		} else if tok.isTypeInt() {
+			v = &ExprNumberLiteral{val: tok.getIntval()}
+		}
+		tok = readToken()
+		if tok.isPunct(",") {
+			continue
+		} else if tok.isPunct("}") {
+			break
+		} else {
+			errorf("unpexpected %s", tok)
+		}
+		values = append(values, v)
+	}
+
+	gtype := &Gtype{
+		typ:   "array",
+		count: len(values),
+		ptr:   typ,
+	}
+
+	r := &ExprArrayLiteral{
+		gtype: gtype,
+		values: values,
+	}
+	debugAstConstructed(r)
+	return r
 }
 
 func parseUnaryExpr() Expr {
@@ -243,6 +311,12 @@ func priority(op string) int {
 }
 
 func parseExpr() Expr {
+	debugf("func %s start with %s" , "parseExpr", peekToken().String())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseExpr")
+	}()
 	return parseExprInt(-1)
 }
 
@@ -269,11 +343,11 @@ func parseExprInt(prior int) Expr {
 				unreadToken()
 				return ast
 			}
-		} else if tok.sval == "," || tok.sval == ")" { // end of funcall argument
+		} else if tok.sval == "," || tok.sval == ")" || tok.sval == "}" || tok.isPunct(";"){ // end of funcall argument
 			unreadToken()
 			return ast
 		} else {
-			errorf("unable to handle token=\"%s\"\n", tok.sval)
+			tok.errorf("Unexpected")
 		}
 	}
 
@@ -552,6 +626,8 @@ func mayHaveImportDecls() []*AstImportDecl {
 
 type Gtype struct {
 	typ     identifier // "int", "string", "struct" , "interface",...
+	ptr *Gtype
+	count int // for fixed array
 	methods []identifier // for interface
 	fields []*StructField // for struct
 }
@@ -576,8 +652,7 @@ func parseStructDef() *Gtype {
 			break
 		}
 		fieldname := tok.getIdent()
-		ident := readIdent() // "int", "bool", etc
-		fieldtyep := currentscope.getGtype(ident)
+		fieldtyep := parseType()
 		fields = append(fields, &StructField{
 			name: fieldname,
 			gtype: fieldtyep,
@@ -632,32 +707,52 @@ func parseTypeDecl() *AstTypeDecl  {
 	}
 }
 
+func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
+	var r *AstTopLevelDecl
+	debugf("func %s start with %s" , "parseTopLevelDecl", peekToken())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseTopLevelDecl")
+	}()
+	switch  {
+	case tok.isKeyword("var"):
+		vardecl := parseDeclVar(true)
+		r = &AstTopLevelDecl{vardecl: vardecl}
+	case tok.isKeyword("const"):
+		constdecl := parseConstDecl(true)
+		r = &AstTopLevelDecl{constdecl:constdecl}
+	case tok.isKeyword("func"):
+		funcdecl := parseFuncDef()
+		r =  &AstTopLevelDecl{funcdecl:funcdecl}
+	case tok.isKeyword("type"):
+		typedecl := parseTypeDecl()
+		r = &AstTopLevelDecl{typedecl:typedecl}
+	default:
+		errorf("TBD: unable to handle token %v", tok)
+	}
+
+	debugAstConstructed(r)
+	return r
+}
+
+func debugAstConstructed(ast interface{}) {
+	debugPrintVar("Ast constructed", ast)
+}
 
 func mayHaveTopLevelDecls() []*AstTopLevelDecl {
 	var r []*AstTopLevelDecl
-
 	for {
 		tok := readToken()
 		if tok.isEOF() {
 			return r
 		}
-		if tok.isKeyword("var") {
-			vardecl := parseDeclVar(true)
-			r = append(r, &AstTopLevelDecl{vardecl: vardecl})
-		} else if tok.isKeyword("const") {
-			constdecl := parseConstDecl(true)
-			r = append(r, &AstTopLevelDecl{constdecl:constdecl})
-		} else if tok.isKeyword("func") {
-			funcdecl := parseFuncDef()
-			r  = append(r, &AstTopLevelDecl{funcdecl:funcdecl})
-		} else if tok.isKeyword("type") {
-			typedecl := parseTypeDecl()
-			r  = append(r, &AstTopLevelDecl{typedecl:typedecl})
-		} else if tok.isPunct(";") {
+
+		if tok.isPunct(";") {
 			continue
-		} else {
-			errorf("TBD: unable to handle token %v", tok)
 		}
+		ast := parseTopLevelDecl(tok)
+		r = append(r, ast)
 	}
 	return r
 }

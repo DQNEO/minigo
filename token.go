@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // https://golang.org/ref/spec#Keywords
 var keywords = []string{
@@ -16,6 +19,14 @@ type TokenStream struct {
 	index  int
 }
 
+
+func (ts *TokenStream) peekToken() *Token {
+	if ts.index > len(ts.tokens)-1 {
+		return makeToken("EOF", "")
+	}
+	r := ts.tokens[ts.index]
+	return r
+}
 
 func (ts *TokenStream) readToken() *Token {
 	if ts.index > len(ts.tokens)-1 {
@@ -53,8 +64,8 @@ type Token struct {
 var bs *ByteStream
 
 func (tok *Token) String() string {
-	return fmt.Sprintf("\"%s\" [token.type:%s] (at %s:%d:%d)",
-		tok.sval, tok.typ, tok.filename, tok.line, tok.column)
+	return fmt.Sprintf("\"%s\" (at %s:%d:%d)",
+		tok.sval, tok.filename, tok.line, tok.column)
 }
 
 func (tok *Token) isEOF() bool {
@@ -80,6 +91,10 @@ func (tok *Token) getIdent() identifier {
 	return identifier(tok.sval)
 }
 
+func (tok *Token) getIntval() int {
+	val, _ := strconv.Atoi(tok.sval)
+	return val
+}
 
 func (tok *Token) isTypePunct() bool {
 	return tok != nil && tok.typ == T_PUNCT
@@ -87,6 +102,10 @@ func (tok *Token) isTypePunct() bool {
 
 func (tok *Token) isTypeKeyword() bool {
 	return tok != nil && tok.typ == T_KEYWORWD
+}
+
+func (tok *Token) isTypeInt() bool {
+	return tok != nil && tok.typ == T_INT
 }
 
 func (tok *Token) isTypeString() bool {
@@ -542,12 +561,13 @@ func (tok *Token) render() string {
 	}
 }
 
+
 func renderTokens(tokens []*Token) {
-	debugPrint("==== Start Render Tokens ===")
+	debugf("==== Start Render Tokens ===")
 	for _, tok := range tokens {
-		debugPrint(tok.render())
+		debugf(tok.render())
 	}
-	debugPrint("==== End Render Tokens ===")
+	debugf("==== End Render Tokens ===")
 }
 
 func newTokenStreamFromFile(path string) *TokenStream {
