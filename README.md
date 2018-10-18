@@ -2,7 +2,10 @@
 
 minigo is a Go compiler from scratch.
 
-The design is much influenced from 8cc (https://github.com/rui314/8cc), and my go port of 8cc (https://github.com/DQNEO/8cc.go)
+The design is much influenced from 
+
+* 8cc (https://github.com/rui314/8cc)
+* 8cc.go (https://github.com/DQNEO/8cc.go)
 
 # LICENSE
 
