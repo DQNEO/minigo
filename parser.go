@@ -343,7 +343,7 @@ func parseExprInt(prior int) Expr {
 				unreadToken()
 				return ast
 			}
-		} else if tok.sval == "," || tok.sval == ")" || tok.sval == "}" || tok.isPunct(";"){ // end of funcall argument
+		} else if tok.sval == "," || tok.sval == ")" || tok.sval == "{" || tok.sval == "}" || tok.isPunct(";"){ // end of funcall argument
 			unreadToken()
 			return ast
 		} else {
@@ -485,12 +485,57 @@ func parseAssignment() *AstAssignment {
 	}
 }
 
+func parseIdentList() []identifier {
+	var r []identifier
+	for {
+		tok := readToken()
+		if tok.isTypeIdent() {
+			r = append(r, tok.getIdent())
+		} else if len(r) == 0 {
+			// at least one ident is needed
+			tok.errorf("Ident expected")
+		}
+
+		tok = readToken()
+		if tok.isPunct(",") {
+			continue
+		} else {
+			unreadToken()
+			return r
+		}
+	}
+	return r
+}
+
+func parseForStmt() *AstForStmt {
+	debugf("func %s start with %s" , "parseForStmt", peekToken())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseForStmt")
+	}()
+	var r = &AstForStmt{}
+	// Assume "range" style
+	idents := parseIdentList()
+	r.idents = idents
+	expect(":=")
+	expectKeyword("range")
+	r.list = parseExpr()
+	expect("{")
+	r.block = parseCompoundStmt()
+	return r
+}
+
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
 		return  &AstStmt{declvar:parseDeclVar(false)}
 	} else if tok.isKeyword("const") {
 		return  &AstStmt{constdecl:parseConstDecl(false)}
+	} else if tok.isKeyword("type") {
+		return  &AstStmt{typedecl:parseTypeDecl()}
+	} else if tok.isKeyword("for") {
+		return  &AstStmt{forstmt:parseForStmt()}
 	}
 	tok2 := readToken()
 

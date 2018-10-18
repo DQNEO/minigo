@@ -94,6 +94,19 @@ func f14() {
 	fmt.Printf("%d\n", gb)
 }
 
+var garbage int
+
+func f15() {
+	var sum int
+	var i int
+	var a int
+	var b int
+	for a, b := range []int{1,2,3} {
+		sum = a + b
+	}
+	i = sum + a + b
+	sum = i
+}
 func main() {
 	f0()
 	fa()
@@ -106,6 +119,7 @@ func main() {
 	fh()
 	fi()
 	f14()
+	f15()
 	println("hello world")
 }
 

@@ -59,10 +59,23 @@ type AstAssignment struct {
 	right Expr
 }
 
+type AstForStmt struct {
+	idents []identifier
+	list Expr
+	// or
+	left *AstStmt
+	middle *AstStmt
+	right *AstStmt
+
+	block *AstCompountStmt
+}
+
 type AstStmt struct {
 	declvar    *AstVarDecl
 	constdecl  *AstConstDecl
+	typedecl   *AstTypeDecl
 	assignment *AstAssignment
+	forstmt    *AstForStmt
 	expr       Expr
 }
 
