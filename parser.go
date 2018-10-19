@@ -148,7 +148,39 @@ type AstOperandName struct {
 	ident identifier
 }
 
+type ExprSliced struct {
+	ref *AstOperandName
+	low Expr
+	high Expr
+}
+
+func (e *ExprSliced) dump() {
+
+}
+func (e *ExprSliced) emit() {
+
+}
+
+type ExprIndexAccess struct {
+	ref *AstOperandName
+	index Expr
+}
+
+func (e *ExprIndexAccess) dump() {
+
+}
+
+func (e *ExprIndexAccess) emit() {
+
+}
+
 func parseIdentOrFuncall(firstIdent identifier) Expr {
+	debugf("func %s start with %s" , "parseIdentOrFuncall", peekToken().String())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseIdentOrFuncall")
+	}()
 
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
@@ -164,7 +196,7 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 		ident = firstIdent
 	}
 
-	operand := AstOperandName{
+	operand := &AstOperandName{
 		pkg:   pkg,
 		ident: ident,
 	}
@@ -185,8 +217,46 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 			fname: operand.ident,
 			args:  args,
 		}
+	} else if tok.isPunct("[") {
+		// index access
+		// assure operand is array, slice, or map
+		tok := readToken()
+		if tok.isPunct(":") {
+			lowIndex := &ExprNumberLiteral{
+				val:0,
+			}
+			highIndex := parseExpr()
+			expect("]")
+			return &ExprSliced{
+				ref : operand,
+				low: lowIndex,
+				high: highIndex,
+			}
+		} else {
+			unreadToken()
+			index := parseExpr()
+			tok := readToken()
+			if tok.isPunct("]") {
+				return &ExprIndexAccess{
+					ref: operand,
+					index: index,
+				}
+			} else if tok.isPunct(":") {
+				highIndex := parseExpr()
+				expect("]")
+				return &ExprSliced{
+					ref : operand,
+					low: index,
+					high: highIndex,
+				}
+
+			} else {
+				tok.errorf("invalid token in index access")
+			}
+		}
+	} else {
+		unreadToken()
 	}
-	unreadToken()
 
 
 	v := currentscope.get(firstIdent)
@@ -365,10 +435,16 @@ func parseExprInt(prior int) Expr {
 				unreadToken()
 				return ast
 			}
-		} else if tok.sval == "," || tok.sval == ")" || tok.sval == "{" || tok.sval == "}" || tok.isPunct(";"){ // end of funcall argument
+		/*
+		} else if tok.sval == "," || tok.sval == ")" ||
+			tok.sval == "{" || tok.sval == "}" ||
+			tok.isPunct(";") || tok.isPunct(":") { // end of funcall argument
 			unreadToken()
 			return ast
+		*/
 		} else {
+			unreadToken()
+			return ast
 			tok.errorf("Unexpected")
 		}
 	}
