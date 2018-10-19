@@ -45,10 +45,6 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) setPackageName(i identifier, ref *AstPackageRef) {
-	sc._set(i,ref)
-}
-
 func (sc *scope) setVarDecl(name identifier, decl *AstVarDecl) {
 	sc._set(name, decl)
 }
