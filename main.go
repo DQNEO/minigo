@@ -43,6 +43,10 @@ func main() {
 	if debugAst {
 		astFile.dump()
 	}
+	resolve(astFile)
+	if debugAst {
+		astFile.dump()
+	}
 
 	// generate
 	generate(astFile)

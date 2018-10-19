@@ -56,11 +56,22 @@ func (ast *AstAssignment) dump() {
 
 func (a *AstVarDecl) dump() {
 	if a.initval == nil {
-		debugf("var %s", a.variable.varname)
+		debugf("decl var %s %s",
+			a.variable.varname, a.variable.gtype)
 	} else {
-		debugf("var %s =", a.variable.varname)
+		debugf("decl var %s %s = (%s)",
+			a.variable.varname, a.variable.gtype, a.initval)
 		a.initval.dump()
 	}
+}
+
+func (a *AstConstDecl) dump() {
+	debugf("decl const %v", a.variable)
+}
+
+func (a *AstTypeDecl) dump() {
+	debugf("decl type def %v unresolved(%v) gtype(%v)",
+		a.typedef.name, a.typedef.typeConstructor, a.gtype)
 }
 
 func (a *AstStmt) dump() {
@@ -81,8 +92,12 @@ func (a *AstSourceFile) dump() {
 	for _, decl := range a.decls {
 		if decl.funcdecl != nil {
 			decl.funcdecl.dump()
+		} else if decl.typedecl != nil {
+			decl.typedecl.dump()
 		} else if decl.vardecl != nil {
 			decl.vardecl.dump()
+		} else if decl.constdecl != nil {
+			decl.constdecl.dump()
 		}
 	}
 	debugf("==== Dump AstExpr End ===")

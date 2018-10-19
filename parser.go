@@ -4,16 +4,6 @@ import (
 	"fmt"
 )
 
-var gBool = &Gtype{typ:"bool",}
-var gInt = &Gtype{typ:"int",}
-var gString = &Gtype{typ:"string",}
-
-var predeclaredTypes = []*Gtype{
-	gInt,
-	gBool,
-	gString,
-}
-
 var predeclaredConsts = []*AstConstDecl{
 	&AstConstDecl{
 		variable:&ExprConstVariable{
@@ -43,7 +33,7 @@ var currentscope *scope
 
 type scope struct {
 	idents map[identifier]interface{}
-	outer *scope
+	outer  *scope
 }
 
 func (sc *scope) get(name identifier) interface{} {
@@ -56,7 +46,27 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) set(name identifier, v interface{}) {
+func (sc *scope) setPackageName(i identifier, ref *AstPackageRef) {
+	sc._set(i,ref)
+}
+
+func (sc *scope) setVarDecl(name identifier, decl *AstVarDecl) {
+	sc._set(name, decl)
+}
+
+func (sc *scope) setTypeDecl(name identifier, decl *AstTypeDecl) {
+	sc._set(name, decl)
+}
+
+func (sc *scope) setConstDecl(name identifier, decl *AstConstDecl) {
+	sc._set(name, decl)
+}
+
+func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
+	sc._set(name, decl)
+}
+
+func (sc *scope) _set(name identifier, v interface{}) {
 	if v == nil {
 		panic("nil cannot be set")
 	}
@@ -264,18 +274,16 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 		errorf("Undefined variable: %s", firstIdent)
 		return nil
 	}
-	variable, _ := v.(*ExprVariable)
-	if variable != nil {
-		return variable
+	vardecl, _ := v.(*AstVarDecl)
+	if vardecl != nil {
+		return vardecl.variable
 	}
-	variable2, _ := v.(*ExprConstVariable)
-	if variable2 != nil {
-		return variable2
+	constdecl, _ := v.(*AstConstDecl)
+	if constdecl != nil {
+		return constdecl.variable
 	}
-
-	return &ExprVariable{
-		varname:firstIdent,
-	}
+	errorf("variable not found %v",firstIdent )
+	return nil
 }
 
 var stringIndex = 0
@@ -359,7 +367,7 @@ func parseArrayLiteral() Expr {
 
 	gtype := &Gtype{
 		typ:   "array",
-		count: len(values),
+		length: len(values),
 		ptr:   typ,
 	}
 
@@ -480,9 +488,9 @@ func parseType() *Gtype {
 		} else if tok.isKeyword("struct") {
 
 		} else if tok.isTypeIdent() {
-			typename := tok.getIdent()
-			gtype := currentscope.getGtype(typename)
-			return gtype
+			//_ := tok.getIdent()
+			//_ := currentscope.getGtype(typename)
+			//return gtype
 		} else if tok.isPunct("[") {
 		} else if tok.isPunct("]") {
 
@@ -501,17 +509,17 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 
 	// "=" or Type
 	tok := readToken()
-	var gtype *Gtype
+	//var gtype *Gtype
 	var initval Expr
 	if tok.isPunct("=") {
 		//var x = EXPR
 		initval = parseExpr()
-		gtype = gInt  // FIXME: infer type
+		//gtype = gInt  // FIXME: infer type
 		expect(";")
 	} else {
 		unreadToken()
 		// expect Type
-		gtype = parseType()
+		_ = parseType()
 		tok3 := readToken()
 		if tok3.isPunct("=") {
 			initval = parseExpr()
@@ -523,13 +531,14 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 		}
 	}
 
-	variable := newVariable(name, gtype, isGlobal)
-	currentscope.set(name, variable)
+	variable := newVariable(name, nil, isGlobal)
 
-	return &AstVarDecl{
+	r := &AstVarDecl{
 		variable: variable,
 		initval:  initval,
 	}
+	currentscope.setVarDecl(name, r)
+	return r
 }
 
 func parseConstDecl(isGlobal bool) *AstConstDecl {
@@ -538,17 +547,15 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 
 	// Type or "="
 	tok := readToken()
-	var gtype *Gtype
 	var val Expr
 	if tok.isPunct("=") {
 		// infer mode: const x = EXPR
 		val = parseExpr()
-		gtype = gInt// FIXME: infer type
 		expect(";")
 	} else {
 		unreadToken()
 		// expect Type
-		gtype = parseType()
+		_ = parseType()
 		// const x T = EXPR
 		expect("=")
 		val = parseExpr()
@@ -557,20 +564,24 @@ func parseConstDecl(isGlobal bool) *AstConstDecl {
 
 	variable := &ExprConstVariable{
 		name: name,
-		gtype: gtype,
 		val: val,
 	}
-	currentscope.set(name, variable)
 
-	return &AstConstDecl{
+	r := &AstConstDecl{
 		variable: variable,
 	}
+
+	currentscope.setConstDecl(name, r)
+	return r
 }
 
 func parseAssignment() *AstAssignment {
 	tleft := readToken()
-	v := currentscope.get(tleft.getIdent())
-	variable, ok := v.(*ExprVariable)
+	item := currentscope.get(tleft.getIdent())
+	if item == nil {
+		errorf("variable %s is not found", tleft.getIdent())
+	}
+	vardecl, ok := item.(*AstVarDecl)
 	if !ok {
 		errorf("%s is not a variable", tleft)
 	}
@@ -578,7 +589,7 @@ func parseAssignment() *AstAssignment {
 	rexpr := parseExpr()
 	expect(";")
 	return &AstAssignment{
-		left:  variable,
+		left:  vardecl.variable,
 		right: rexpr,
 	}
 }
@@ -619,7 +630,7 @@ func parseForStmt() *AstForStmt {
 	expect(":=")
 	// TODO register each ient to the scope
 	for _, ident := range idents {
-		currentscope.set(ident, "dummy")
+		currentscope.setVarDecl(ident, &AstVarDecl{variable:newVariable(ident,nil,false)})
 	}
 	r.idents = idents
 	expectKeyword("range")
@@ -736,7 +747,9 @@ func parseFuncDef() *AstFuncDecl {
 				gtype: ptype,
 			}
 			params = append(params, variable)
-			currentscope.set(pname, variable)
+			currentscope.setVarDecl(pname, &AstVarDecl{
+				variable:variable,
+			})
 			tok = readToken()
 			if tok.isPunct(")") {
 				break
@@ -794,12 +807,14 @@ func parseImport() *AstImportDecl {
 	}
 
 	expect(";")
-	for _, path := range paths {
-		packageblockscope.set(identifier(path), 1)
-	}
 	return &AstImportDecl{
 		paths: paths,
 	}
+}
+
+type AstPackageRef struct{
+	name identifier
+	path string
 }
 
 func shouldHavePackageClause() *AstPackageClause {
@@ -821,26 +836,40 @@ func mayHaveImportDecls() []*AstImportDecl {
 	}
 }
 
-type Gtype struct {
-	typ     identifier // "int", "string", "struct" , "interface",...
-	ptr *Gtype
-	count int // for fixed array
-	methods []identifier // for interface
-	fields []*StructField // for struct
+type AstTypeDef struct {
+	name identifier // we need this ?
+	typeConstructor interface{} // (identifier | QualifiedIdent) | TypeLiteral
 }
 
+type AstTypeDecl struct {
+	typedef *AstTypeDef
+	gtype *Gtype // resolved later
+}
+
+
+type Gtype struct {
+	typ     string //
+	size    int
+	ptr *Gtype
+	structdef *AstStructDef
+	length int // for fixed array
+}
+
+type AstInterfaceDef struct {
+	methods []identifier // for interface
+}
+
+type AstStructDef struct {
+	fields []*StructField // for struct
+}
 type StructField struct {
 	name identifier
 	gtype *Gtype
 }
 
-type AstTypeDecl struct {
-	name  identifier
-	gtype *Gtype
-}
 
 // read after "struct" token
-func parseStructDef() *Gtype {
+func parseStructDef() *AstStructDef {
 	expect("{")
 	var fields []*StructField
 	for {
@@ -857,13 +886,12 @@ func parseStructDef() *Gtype {
 		expect(";")
 	}
 	expect(";")
-	return &Gtype{
-		typ:"struct",
+	return &AstStructDef{
 		fields: fields,
 	}
 }
 
-func parseInterfaceDef() *Gtype {
+func parseInterfaceDef() *AstInterfaceDef {
 	expect("{")
 	var methods []identifier
 	for {
@@ -878,8 +906,7 @@ func parseInterfaceDef() *Gtype {
 		methods = append(methods, fname)
 	}
 	expect(";")
-	return &Gtype{
-		typ:"interface",
+	return &AstInterfaceDef{
 		methods: methods,
 	}
 }
@@ -887,21 +914,25 @@ func parseInterfaceDef() *Gtype {
 func parseTypeDecl() *AstTypeDecl  {
 	name := readIdent()
 	tok := readToken()
-	var gtype *Gtype
+	var typeConstuctor interface{}
 	if tok.isKeyword("struct" ) {
-		gtype = parseStructDef()
+		typeConstuctor = parseStructDef()
 	} else if tok.isKeyword("interface")  {
-		gtype = parseInterfaceDef()
+		typeConstuctor = parseInterfaceDef()
+	} else if tok.isTypeIdent() {
+		ident := tok.getIdent() // name of another type
+		typeConstuctor = ident
 	} else {
-		ident := tok.getIdent() // "int", "bool", etc
-		currentscope.getGtype(ident) // check existence
-		gtype = currentscope.getGtype(ident)
+		tok.errorf("TBD")
 	}
-	currentscope.set(name, gtype)
-	return &AstTypeDecl{
-		name:  name,
-		gtype: gtype,
+	r := &AstTypeDecl{
+		typedef:&AstTypeDef{
+			name:            name,
+			typeConstructor: typeConstuctor,
+		},
 	}
+	currentscope.setTypeDecl(name, r)
+	return r
 }
 
 func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
@@ -966,32 +997,146 @@ func parseTopLevelDecls() []*AstTopLevelDecl {
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func parseSourceFile() *AstSourceFile {
-	return &AstSourceFile{
-		pkg :    shouldHavePackageClause(),
-		imports: mayHaveImportDecls(),
-		decls:   parseTopLevelDecls(),
+	r := &AstSourceFile{}
+	r.pkg =   shouldHavePackageClause()
+	r.imports =  mayHaveImportDecls()
+	r.packageNames = make(map[identifier]string)
+	for _, importdecl := range r.imports {
+		for _, path := range importdecl.paths {
+			ident := identifier(path)
+			r.packageNames[ident] = path
+		}
 	}
+
+	r.decls =   parseTopLevelDecls()
+	return r
 }
 
 func newScope(outer *scope) *scope {
 	return &scope{
-		outer:outer,
-		idents:make(map[identifier]interface{}),
+		outer:  outer,
+		idents: make(map[identifier]interface{}),
 	}
 }
 
+var gInt = &Gtype{typ:"scalar",size:8,}
+var gBool = &Gtype{typ:"scalar",size:8,}
+
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
-	for _, t := range predeclaredTypes {
-		r.set(t.typ, t)
-	}
+	r.setTypeDecl("int", &AstTypeDecl{gtype:gInt})
+	r.setTypeDecl("bool", &AstTypeDecl{gtype:gBool})
+
 	for _, c := range predeclaredConsts {
-		r.set(c.variable.name, c.variable)
+		r.setConstDecl(c.variable.name,c)
 	}
 	for _, f := range predeclaredFunctions {
-		r.set(f.fname, 1)
+		r.setFuncDecl(f.fname, &AstFuncDecl{})
 	}
 	return r
+}
+
+func resolveVar(decl *AstVarDecl) {
+	if decl.variable.gtype != nil {
+		return
+	}
+
+	constructor := decl.variable.typeConstructor
+	switch constructor.(type) {
+	case identifier:
+		item := packageblockscope.get(constructor.(identifier))
+		if item == nil {
+			errorf("Undefined type %v", item)
+		}
+		typedecl, ok := item.(*AstTypeDecl)
+		if !ok {
+			errorf("%v is not a type", item)
+		}
+		if typedecl.gtype == nil {
+			errorf("type is not resolved", item)
+		}
+		decl.variable.gtype = typedecl.gtype
+	}
+}
+
+
+func resolveConst(decl *AstConstDecl) {
+	if decl.variable.gtype != nil {
+		return
+	}
+
+	constructor := decl.variable.typeConstructor
+	switch constructor.(type) {
+	case identifier:
+		item := packageblockscope.get(constructor.(identifier))
+		if item == nil {
+			errorf("Undefined type %v", item)
+		}
+		typedecl, ok := item.(*AstTypeDecl)
+		if !ok {
+			errorf("%v is not a type", item)
+		}
+		if typedecl.gtype == nil {
+			errorf("type is not resolved", item)
+		}
+		decl.variable.gtype = typedecl.gtype
+	}
+}
+
+func resolveType(decl *AstTypeDecl) {
+	if decl.gtype != nil {
+		return
+	}
+
+	constructor := decl.typedef.typeConstructor
+	switch constructor.(type) {
+	case identifier:
+		item := packageblockscope.get(constructor.(identifier))
+		if item == nil {
+			errorf("Undefined type %v", item)
+		}
+		typedecl, ok := item.(*AstTypeDecl)
+		if !ok {
+			errorf("%v is not a type", item)
+		}
+		if typedecl.gtype == nil {
+			resolveType(typedecl)
+		}
+		decl.gtype = &Gtype{
+			typ:"ref",
+			size:typedecl.gtype.size,
+			ptr:typedecl.gtype,
+		}
+
+	}
+}
+
+func resolve(file *AstSourceFile) {
+	// resolve types
+	for _, decl := range packageblockscope.idents {
+		typedecl, ok := decl.(*AstTypeDecl)
+		if ok {
+			resolveType(typedecl)
+			typedecl.dump()
+		}
+	}
+
+	for _, decl := range packageblockscope.idents {
+		constdecl, ok := decl.(*AstConstDecl)
+		if ok {
+			resolveConst(constdecl)
+			constdecl.dump()
+		}
+	}
+
+	for _, decl := range packageblockscope.idents {
+		vardecl, ok := decl.(*AstVarDecl)
+		if ok {
+			debugf("resolve decl :")
+			resolveVar(vardecl)
+			vardecl.dump()
+		}
+	}
 }
 
 func parse(t *TokenStream) *AstSourceFile {

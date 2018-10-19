@@ -17,6 +17,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	varname identifier
+	typeConstructor interface{}
 	gtype *Gtype
 	offset int // for local variable
 	isGlobal bool
@@ -24,6 +25,7 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	name identifier
+	typeConstructor interface{}
 	gtype *Gtype
 	val Expr // like ExprConstExpr ?
 }
@@ -110,6 +112,7 @@ type AstFuncDecl struct {
 }
 
 type AstTopLevelDecl struct {
+	// either of followings
 	funcdecl *AstFuncDecl
 	vardecl *AstVarDecl
 	constdecl *AstConstDecl
@@ -120,6 +123,7 @@ type AstSourceFile struct {
 	pkg *AstPackageClause
 	imports []*AstImportDecl
 	decls []*AstTopLevelDecl
+	packageNames map[identifier]string
 }
 
 

@@ -41,8 +41,8 @@ func emitFuncPrologue(f *AstFuncDecl) {
 		localarea -= 8
 		offset -= 8
 		lvar.offset = offset
+		debugf("set offset %d to lvar %s", lvar.offset, lvar.varname)
 	}
-
 	if localarea != 0 {
 		emit("# allocate localarea")
 		emit("sub $%d, %%rsp", -localarea)
@@ -70,7 +70,7 @@ func (ast *ExprVariable) emit() {
 		emit("mov %s(%%rip), %%eax", ast.varname)
 	} else {
 		if ast.offset == 0 {
-			errorf("offset should not be zero for localvar %s", ast)
+			errorf("offset should not be zero for localvar %s", ast.varname)
 		}
 		emit("mov %d(%%rbp), %%eax", ast.offset)
 	}
@@ -142,6 +142,7 @@ func (funcall *ExprFuncall) emit() {
 
 	emit("# setting arguments")
 	for _, arg := range args {
+		debugf("arg = %v", arg)
 		arg.emit()
 		emit("push %%rax")
 	}
