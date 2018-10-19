@@ -31,6 +31,11 @@ var predeclaredConsts = []*AstConstDecl{
 	},
 }
 
+var predeclaredFunctions = []*AstFuncDecl{
+	{
+		fname:"len",
+	},
+}
 
 var universeblockscope *scope
 var packageblockscope *scope
@@ -186,19 +191,21 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 
 	v := currentscope.get(firstIdent)
 	if v == nil{
-		errorf("Undefined variable %s", firstIdent)
+		errorf("Undefined variable: %s", firstIdent)
 		return nil
 	}
-	variable, ok := v.(*ExprVariable)
-	if ok {
+	variable, _ := v.(*ExprVariable)
+	if variable != nil {
 		return variable
 	}
-	variable2, ok := v.(*ExprConstVariable)
-	if ok {
+	variable2, _ := v.(*ExprConstVariable)
+	if variable2 != nil {
 		return variable2
 	}
 
-	return nil
+	return &ExprVariable{
+		varname:firstIdent,
+	}
 }
 
 var stringIndex = 0
@@ -300,28 +307,38 @@ func parseUnaryExpr() Expr {
 
 func priority(op string) int {
 	switch op {
+	case "==","!=", "<",">", ">=", "<=":
+		return 10
 	case "-","+":
 		return 10
 	case "*":
 		return 20
 	default :
-		errorf("unkown operator")
+		errorf("unkown operator %s", op)
 	}
 	return 0;
 }
 
 func parseExpr() Expr {
-	debugf("func %s start with %s" , "parseExpr", peekToken().String())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseExpr")
-	}()
 	return parseExprInt(-1)
 }
 
+var  binops  = []string{
+	"+","*","-", "==","!=","<",">","<=","=>",
+}
+
 func parseExprInt(prior int) Expr {
+	debugf("func %s start with %s" , "parseExprInt", peekToken().String())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseExprInt")
+	}()
 	ast := parseUnaryExpr()
+	debugAstConstructed(ast)
+	if ast == nil {
+		return nil
+	}
 	for {
 		tok := readToken()
 		if tok.isSemicolon() {
@@ -329,15 +346,20 @@ func parseExprInt(prior int) Expr {
 			return ast
 		}
 
-		if tok.sval == "+" || tok.sval == "*" || tok.sval == "-" {
+		// if bion
+		if in_array(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				right := parseExprInt(prior2)
+				if ast == nil {
+					tok.errorf("bad left unary expr:%v", ast)
+				}
 				ast = &ExprBinop{
 					op:    tok.sval,
 					left:  ast,
 					right: right,
 				}
+				debugAstConstructed(ast)
 				continue
 			} else {
 				unreadToken()
@@ -515,14 +537,49 @@ func parseForStmt() *AstForStmt {
 		debugf("func %s end", "parseForStmt")
 	}()
 	var r = &AstForStmt{}
+	currentscope = newScope(currentscope)
 	// Assume "range" style
 	idents := parseIdentList()
-	r.idents = idents
 	expect(":=")
+	// TODO register each ient to the scope
+	for _, ident := range idents {
+		currentscope.set(ident, "dummy")
+	}
+	r.idents = idents
 	expectKeyword("range")
 	r.list = parseExpr()
 	expect("{")
 	r.block = parseCompoundStmt()
+	currentscope = currentscope.outer
+	return r
+}
+
+func parseIfStmt() *AstIfStmt {
+	debugf("func %s start with %s" , "parseForStmt", peekToken())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseForStmt")
+	}()
+	var r = &AstIfStmt{}
+	currentscope = newScope(currentscope)
+	r.cond = parseExpr()
+	expect("{")
+	r.then = parseCompoundStmt()
+	tok := readToken()
+	if (tok.isKeyword("else")) {
+		tok := readToken()
+		if tok.isPunct("{") {
+			r.els = &AstStmt{compound:parseCompoundStmt()}
+		} else if tok.isKeyword("if") {
+			r.els = &AstStmt{ifstmt:parseIfStmt(),}
+		} else {
+			tok.errorf("Syntax error")
+		}
+	} else {
+		unreadToken()
+	}
+	currentscope = currentscope.outer
 	return r
 }
 
@@ -536,6 +593,8 @@ func parseStmt() *AstStmt {
 		return  &AstStmt{typedecl:parseTypeDecl()}
 	} else if tok.isKeyword("for") {
 		return  &AstStmt{forstmt:parseForStmt()}
+	} else if tok.isKeyword("if") {
+		return  &AstStmt{ifstmt:parseIfStmt()}
 	}
 	tok2 := readToken()
 
@@ -551,6 +610,14 @@ func parseStmt() *AstStmt {
 }
 
 func parseCompoundStmt() *AstCompountStmt {
+	debugf("func %s start with %s" , "parseCompoundStmt", peekToken().String())
+	debugNest++
+	defer func() {
+		debugNest--
+		debugf("func %s end", "parseCompoundStmt")
+	}()
+
+
 	r := &AstCompountStmt{}
 	for {
 		tok := readToken()
@@ -614,6 +681,7 @@ func parseFuncDef() *AstFuncDecl {
 	} else {
 		assert(tok.isPunct("{"), "begin of func body")
 	}
+	debugf("scope:%s", currentscope)
 	body := parseCompoundStmt()
 	_localvars := localvars
 	localvars = nil
@@ -650,7 +718,9 @@ func parseImport() *AstImportDecl {
 	}
 
 	expect(";")
-
+	for _, path := range paths {
+		packageblockscope.set(identifier(path), 1)
+	}
 	return &AstImportDecl{
 		paths: paths,
 	}
@@ -841,6 +911,9 @@ func newUniverseBlockScope() *scope {
 	}
 	for _, c := range predeclaredConsts {
 		r.set(c.variable.name, c.variable)
+	}
+	for _, f := range predeclaredFunctions {
+		r.set(f.fname, 1)
 	}
 	return r
 }

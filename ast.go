@@ -70,12 +70,20 @@ type AstForStmt struct {
 	block *AstCompountStmt
 }
 
+type AstIfStmt struct {
+	cond Expr
+	then *AstCompountStmt
+	els  *AstStmt
+}
+
 type AstStmt struct {
+	compound   *AstCompountStmt
 	declvar    *AstVarDecl
 	constdecl  *AstConstDecl
 	typedecl   *AstTypeDecl
 	assignment *AstAssignment
 	forstmt    *AstForStmt
+	ifstmt     *AstIfStmt
 	expr       Expr
 }
 
