@@ -1,3 +1,5 @@
+* Gtype bool, struct ,etc
+*
 * Type
 * Show source position on error
 * re-organize dump/debug functions

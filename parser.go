@@ -969,8 +969,8 @@ func resolveType(decl *AstTypeDecl) {
 	}
 }
 
+//TODO: resolve local scope
 func resolve(file *AstSourceFile) {
-	// resolve types
 	for _, decl := range packageblockscope.idents {
 		typedecl, ok := decl.(*AstTypeDecl)
 		if ok {
