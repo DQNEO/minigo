@@ -4,87 +4,6 @@ import (
 	"fmt"
 )
 
-var predeclaredConsts = []*AstConstDecl{
-	&AstConstDecl{
-		variable:&ExprConstVariable{
-			name:"true",
-			gtype:gBool,
-			val: &ExprNumberLiteral{1},
-		},
-	},
-	&AstConstDecl{
-		variable:&ExprConstVariable{
-			name:"false",
-			gtype:gBool,
-			val: &ExprNumberLiteral{0},
-		},
-	},
-}
-
-var predeclaredFunctions = []*AstFuncDecl{
-	{
-		fname:"len",
-	},
-}
-
-var universeblockscope *scope
-var packageblockscope *scope
-var currentscope *scope
-
-type scope struct {
-	idents map[identifier]interface{}
-	outer  *scope
-}
-
-func (sc *scope) get(name identifier) interface{} {
-	for s := sc; s != nil; s = s.outer {
-		v := s.idents[name]
-		if v != nil {
-			return v
-		}
-	}
-	return nil
-}
-
-func (sc *scope) setPackageName(i identifier, ref *AstPackageRef) {
-	sc._set(i,ref)
-}
-
-func (sc *scope) setVarDecl(name identifier, decl *AstVarDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) setTypeDecl(name identifier, decl *AstTypeDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) setConstDecl(name identifier, decl *AstConstDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) _set(name identifier, v interface{}) {
-	if v == nil {
-		panic("nil cannot be set")
-	}
-	sc.idents[name] = v
-}
-
-func (sc *scope) getGtype(name identifier) *Gtype {
-	v := sc.get(name)
-	if v == nil {
-		errorf("type %s is not defined", name)
-	}
-	gtype, ok := v.(*Gtype)
-	if !ok {
-		errorf("type %s is not defined", name)
-	}
-	return gtype
-}
-
 var localvars []*ExprVariable
 var globalvars []*ExprVariable
 
@@ -812,11 +731,6 @@ func parseImport() *AstImportDecl {
 	}
 }
 
-type AstPackageRef struct{
-	name identifier
-	path string
-}
-
 func shouldHavePackageClause() *AstPackageClause {
 	expectKeyword("package")
 	r := &AstPackageClause{name :readIdent()}
@@ -835,38 +749,6 @@ func mayHaveImportDecls() []*AstImportDecl {
 		r = append(r, parseImport())
 	}
 }
-
-type AstTypeDef struct {
-	name identifier // we need this ?
-	typeConstructor interface{} // (identifier | QualifiedIdent) | TypeLiteral
-}
-
-type AstTypeDecl struct {
-	typedef *AstTypeDef
-	gtype *Gtype // resolved later
-}
-
-
-type Gtype struct {
-	typ     string //
-	size    int
-	ptr *Gtype
-	structdef *AstStructDef
-	length int // for fixed array
-}
-
-type AstInterfaceDef struct {
-	methods []identifier // for interface
-}
-
-type AstStructDef struct {
-	fields []*StructField // for struct
-}
-type StructField struct {
-	name identifier
-	gtype *Gtype
-}
-
 
 // read after "struct" token
 func parseStructDef() *AstStructDef {
@@ -1009,30 +891,6 @@ func parseSourceFile() *AstSourceFile {
 	}
 
 	r.decls =   parseTopLevelDecls()
-	return r
-}
-
-func newScope(outer *scope) *scope {
-	return &scope{
-		outer:  outer,
-		idents: make(map[identifier]interface{}),
-	}
-}
-
-var gInt = &Gtype{typ:"scalar",size:8,}
-var gBool = &Gtype{typ:"scalar",size:8,}
-
-func newUniverseBlockScope() *scope {
-	r := newScope(nil)
-	r.setTypeDecl("int", &AstTypeDecl{gtype:gInt})
-	r.setTypeDecl("bool", &AstTypeDecl{gtype:gBool})
-
-	for _, c := range predeclaredConsts {
-		r.setConstDecl(c.variable.name,c)
-	}
-	for _, f := range predeclaredFunctions {
-		r.setFuncDecl(f.fname, &AstFuncDecl{})
-	}
 	return r
 }
 

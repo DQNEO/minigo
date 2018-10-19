@@ -127,3 +127,40 @@ type AstSourceFile struct {
 }
 
 
+type AstPackageRef struct{
+	name identifier
+	path string
+}
+
+type AstTypeDef struct {
+	name identifier // we need this ?
+	typeConstructor interface{} // (identifier | QualifiedIdent) | TypeLiteral
+}
+
+type AstTypeDecl struct {
+	typedef *AstTypeDef
+	gtype *Gtype // resolved later
+}
+
+
+type Gtype struct {
+	typ     string //
+	size    int
+	ptr *Gtype
+	structdef *AstStructDef
+	length int // for fixed array
+}
+
+type AstInterfaceDef struct {
+	methods []identifier // for interface
+}
+
+type AstStructDef struct {
+	fields []*StructField // for struct
+}
+type StructField struct {
+	name identifier
+	gtype *Gtype
+}
+
+
