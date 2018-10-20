@@ -516,7 +516,6 @@ func (p *parser) parseForStmt() *AstForStmt {
 	// Assume "range" style
 	idents := p.parseIdentList()
 	p.expect(":=")
-	// TODO register each ient to the scope
 	for _, ident := range idents {
 		p.currentScope.setVarDecl(ident, &AstVarDecl{variable: p.newVariable(ident, nil, false)})
 	}
