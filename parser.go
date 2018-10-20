@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"runtime"
+	"strings"
 )
 
 var localvars []*ExprVariable
@@ -46,6 +48,7 @@ func expect(punct string) {
 }
 
 func readFuncallArgs() []Expr {
+	traceIn(); defer traceOut()
 	var r []Expr
 	for {
 		tok := readToken()
@@ -99,12 +102,7 @@ func (e *ExprIndexAccess) emit() {
 }
 
 func parseIdentOrFuncall(firstIdent identifier) Expr {
-	debugf("func %s start with %s", "parseIdentOrFuncall", peekToken().String())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseIdentOrFuncall")
-	}()
+	traceIn(); defer traceOut()
 
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
@@ -213,6 +211,7 @@ func newAstString(sval string) *ExprStringLiteral {
 }
 
 func parsePrim() Expr {
+	traceIn(); defer traceOut()
 	tok := readToken()
 	switch {
 	case tok.isTypeIdent():
@@ -246,12 +245,8 @@ func (e ExprArrayLiteral) dump() {
 }
 
 func parseArrayLiteral() Expr {
-	debugf("func %s start with %s", "parseArrayLiteral", peekToken().String())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseArrayLiteral")
-	}()
+	traceIn(); defer traceOut()
+
 	expect("]")
 	typ := parseType()
 	expect("{")
@@ -319,12 +314,8 @@ var binops = []string{
 }
 
 func parseExprInt(prior int) Expr {
-	debugf("func %s start with %s", "parseExprInt", peekToken().String())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseExprInt")
-	}()
+	traceIn(); defer traceOut()
+
 	ast := parseUnaryExpr()
 	debugAstConstructed(ast)
 	if ast == nil {
@@ -394,6 +385,7 @@ func newVariable(varname identifier, gtype *Gtype, isGlobal bool) *ExprVariable 
 
 // https://golang.org/ref/spec#Type
 func parseType() *Gtype {
+	traceIn(); defer traceOut()
 	for {
 		tok := readToken()
 		if tok.isPunct("*") {
@@ -417,6 +409,7 @@ func parseType() *Gtype {
 }
 
 func parseDeclVar(isGlobal bool) *AstVarDecl {
+	traceIn(); defer traceOut()
 	// read name
 	name := readIdent()
 
@@ -455,6 +448,7 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 }
 
 func parseConstDecl() *AstConstDecl {
+	traceIn(); defer traceOut()
 	// read name
 	name := readIdent()
 
@@ -489,6 +483,7 @@ func parseConstDecl() *AstConstDecl {
 }
 
 func parseAssignment() *AstAssignment {
+	traceIn(); defer traceOut()
 	tleft := readToken()
 	item := currentscope.get(tleft.getIdent())
 	if item == nil {
@@ -508,6 +503,7 @@ func parseAssignment() *AstAssignment {
 }
 
 func parseIdentList() []identifier {
+	traceIn(); defer traceOut()
 	var r []identifier
 	for {
 		tok := readToken()
@@ -530,12 +526,7 @@ func parseIdentList() []identifier {
 }
 
 func parseForStmt() *AstForStmt {
-	debugf("func %s start with %s", "parseForStmt", peekToken())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseForStmt")
-	}()
+	traceIn(); defer traceOut()
 	var r = &AstForStmt{}
 	currentscope = newScope(currentscope)
 	// Assume "range" style
@@ -555,12 +546,7 @@ func parseForStmt() *AstForStmt {
 }
 
 func parseIfStmt() *AstIfStmt {
-	debugf("func %s start with %s", "parseForStmt", peekToken())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseForStmt")
-	}()
+	traceIn(); defer traceOut()
 	var r = &AstIfStmt{}
 	currentscope = newScope(currentscope)
 	r.cond = parseExpr()
@@ -584,6 +570,7 @@ func parseIfStmt() *AstIfStmt {
 }
 
 func parseStmt() *AstStmt {
+	traceIn(); defer traceOut()
 	tok := readToken()
 	if tok.isKeyword("var") {
 		return &AstStmt{declvar: parseDeclVar(false)}
@@ -610,12 +597,7 @@ func parseStmt() *AstStmt {
 }
 
 func parseCompoundStmt() *AstCompountStmt {
-	debugf("func %s start with %s", "parseCompoundStmt", peekToken().String())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseCompoundStmt")
-	}()
+	traceIn(); defer traceOut()
 
 	r := &AstCompountStmt{}
 	for {
@@ -634,12 +616,7 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDecl {
-	debugf("func %s start with %s", "parseFuncDef", peekToken())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseFuncDef")
-	}()
+	traceIn(); defer traceOut()
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(packageblockscope)
 	fname := readToken().getIdent()
@@ -787,6 +764,7 @@ func parseInterfaceDef() *AstInterfaceDef {
 }
 
 func parseTypeDecl() *AstTypeDecl {
+	traceIn(); defer traceOut()
 	name := readIdent()
 	tok := readToken()
 	var typeConstuctor interface{}
@@ -811,12 +789,7 @@ func parseTypeDecl() *AstTypeDecl {
 }
 
 func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
-	debugf("func %s start with %s", "parseTopLevelDecl", peekToken())
-	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseTopLevelDecl")
-	}()
+	traceIn(); defer traceOut()
 	var r *AstTopLevelDecl
 	switch {
 	case tok.isKeyword("var"):
@@ -843,13 +816,28 @@ func debugAstConstructed(ast interface{}) {
 	debugPrintVar("Ast constructed", ast)
 }
 
-func parseTopLevelDecls() []*AstTopLevelDecl {
-	debugf("func %s start with %s", "parseTopLevelDecls", peekToken())
+func getCallerName(n int) string {
+	pc, _, _, ok := runtime.Caller(n)
+	if !ok {
+		errorf("Unable to get caller")
+	}
+	details := runtime.FuncForPC(pc)
+	r := (strings.Split(details.Name(), "."))[1]
+	return r
+}
+
+func traceIn() {
+	debugf("func %s start with %s", getCallerName(2), peekToken())
 	debugNest++
-	defer func() {
-		debugNest--
-		debugf("func %s end", "parseTopLevelDecls")
-	}()
+}
+
+func traceOut() {
+	debugNest--
+	debugf("func %s end", getCallerName(2))
+}
+
+func parseTopLevelDecls() []*AstTopLevelDecl {
+	traceIn(); defer traceOut()
 	var r []*AstTopLevelDecl
 	for {
 		tok := readToken()
