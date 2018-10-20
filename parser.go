@@ -515,6 +515,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	defer p.traceOut(p.traceIn())
 	var r = &AstForStmt{}
 	p.enterNewScope()
+	defer p.exitScope()
 	// Assume "range" style
 	idents := p.parseIdentList()
 	p.expect(":=")
@@ -527,7 +528,6 @@ func (p *parser) parseForStmt() *AstForStmt {
 	r.list = p.parseExpr()
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
-	p.exitScope()
 	return r
 }
 
@@ -535,6 +535,7 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	defer p.traceOut(p.traceIn())
 	var r = &AstIfStmt{}
 	p.enterNewScope()
+	defer p.exitScope()
 	r.cond = p.parseExpr()
 	p.expect("{")
 	r.then = p.parseCompoundStmt()
@@ -551,7 +552,6 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	} else {
 		p.unreadToken()
 	}
-	p.exitScope()
 	return r
 }
 
@@ -605,6 +605,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
 	localvars = make([]*ExprVariable, 0)
 	p.enterNewScope()
+	defer p.exitScope()
 	fname := p.readToken().getIdent()
 	p.expect("(")
 	var params []*ExprVariable
@@ -655,7 +656,6 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		body:      body,
 	}
 	localvars = nil
-	p.exitScope()
 	return r
 }
 
