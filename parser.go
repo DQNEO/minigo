@@ -9,20 +9,18 @@ import (
 var localvars []*ExprVariable
 var globalvars []*ExprVariable
 
-var ts *TokenStream
-
 func (p *parser) peekToken() *Token {
-	tok := ts.peekToken()
+	tok := p.tokenStream.peekToken()
 	return tok
 }
 
 func (p *parser) readToken() *Token {
-	tok := ts.readToken()
+	tok := p.tokenStream.readToken()
 	return tok
 }
 
 func (p *parser) unreadToken() {
-	ts.unreadToken()
+	p.tokenStream.unreadToken()
 }
 
 func (p *parser) readIdent() identifier {
@@ -823,7 +821,6 @@ type parser struct {
 func (p *parser) parseSourceFile(sourceFile string) *AstSourceFile {
 	p.tokenStream = newTokenStreamFromFile(sourceFile)
 	p.currentScope = packageblockscope
-	ts = p.tokenStream // to be deleted
 	currentscope = p.currentScope // to be deleted
 
 	r := &AstSourceFile{}
