@@ -714,7 +714,7 @@ func (p *parser) expectPackageClause() *AstPackageClause {
 	return r
 }
 
-func (p *parser) mayHaveImportDecls() []*AstImportDecl {
+func (p *parser) parseImportDecls() []*AstImportDecl {
 	defer p.traceOut(p.traceIn())
 	var r []*AstImportDecl
 	for {
@@ -867,7 +867,7 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 
 	r := &AstSourceFile{}
 	r.pkg = p.expectPackageClause()
-	r.imports = p.mayHaveImportDecls()
+	r.imports = p.parseImportDecls()
 
 	r.packageNames = make(map[identifier]string)
 	for _, importdecl := range r.imports {
