@@ -47,6 +47,30 @@ func expect(punct string) {
 	}
 }
 
+func debugAstConstructed(ast interface{}) {
+	debugPrintVar("Ast constructed", ast)
+}
+
+func getCallerName(n int) string {
+	pc, _, _, ok := runtime.Caller(n)
+	if !ok {
+		errorf("Unable to get caller")
+	}
+	details := runtime.FuncForPC(pc)
+	r := (strings.Split(details.Name(), "."))[1]
+	return r
+}
+
+func traceIn() {
+	debugf("func %s start with %s", getCallerName(2), peekToken())
+	debugNest++
+}
+
+func traceOut() {
+	debugNest--
+	debugf("func %s end", getCallerName(2))
+}
+
 func readFuncallArgs() []Expr {
 	traceIn(); defer traceOut()
 	var r []Expr
@@ -765,30 +789,6 @@ func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 
 	debugAstConstructed(r)
 	return r
-}
-
-func debugAstConstructed(ast interface{}) {
-	debugPrintVar("Ast constructed", ast)
-}
-
-func getCallerName(n int) string {
-	pc, _, _, ok := runtime.Caller(n)
-	if !ok {
-		errorf("Unable to get caller")
-	}
-	details := runtime.FuncForPC(pc)
-	r := (strings.Split(details.Name(), "."))[1]
-	return r
-}
-
-func traceIn() {
-	debugf("func %s start with %s", getCallerName(2), peekToken())
-	debugNest++
-}
-
-func traceOut() {
-	debugNest--
-	debugf("func %s end", getCallerName(2))
 }
 
 func parseTopLevelDecls() []*AstTopLevelDecl {
