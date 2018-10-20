@@ -678,6 +678,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 }
 
 func (p *parser) parseImport() *AstImportDecl {
+	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	var paths []string
 	if tok.isPunct("(") {
@@ -706,6 +707,7 @@ func (p *parser) parseImport() *AstImportDecl {
 }
 
 func (p *parser) expectPackageClause() *AstPackageClause {
+	defer p.traceOut(p.traceIn())
 	p.expectKeyword("package")
 	r := &AstPackageClause{name: p.readIdent()}
 	p.expect(";")
@@ -713,6 +715,7 @@ func (p *parser) expectPackageClause() *AstPackageClause {
 }
 
 func (p *parser) mayHaveImportDecls() []*AstImportDecl {
+	defer p.traceOut(p.traceIn())
 	var r []*AstImportDecl
 	for {
 		tok := p.readToken()
@@ -726,6 +729,7 @@ func (p *parser) mayHaveImportDecls() []*AstImportDecl {
 
 // read after "struct" token
 func (p *parser) parseStructDef() *AstStructDef {
+	defer p.traceOut(p.traceIn())
 	p.expect("{")
 	var fields []*StructField
 	for {
@@ -748,6 +752,7 @@ func (p *parser) parseStructDef() *AstStructDef {
 }
 
 func (p *parser) parseInterfaceDef() *AstInterfaceDef {
+	defer p.traceOut(p.traceIn())
 	p.expect("{")
 	var methods []identifier
 	for {
