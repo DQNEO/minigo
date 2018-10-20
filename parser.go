@@ -61,18 +61,19 @@ func getCallerName(n int) string {
 	return r
 }
 
-func traceIn() {
+func traceIn() int {
 	debugf("func %s start with %s", getCallerName(2), peekToken())
 	debugNest++
+	return 0
 }
 
-func traceOut() {
+func traceOut(_ int) {
 	debugNest--
 	debugf("func %s end", getCallerName(2))
 }
 
 func readFuncallArgs() []Expr {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r []Expr
 	for {
 		tok := readToken()
@@ -94,7 +95,7 @@ func readFuncallArgs() []Expr {
 }
 
 func parseIdentOrFuncall(firstIdent identifier) Expr {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
@@ -203,7 +204,7 @@ func newAstString(sval string) *ExprStringLiteral {
 }
 
 func parsePrim() Expr {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	tok := readToken()
 	switch {
 	case tok.isTypeIdent():
@@ -224,7 +225,7 @@ func parsePrim() Expr {
 }
 
 func parseArrayLiteral() Expr {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 
 	expect("]")
 	typ := parseType()
@@ -293,7 +294,7 @@ var binops = []string{
 }
 
 func parseExprInt(prior int) Expr {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 
 	ast := parseUnaryExpr()
 	debugAstConstructed(ast)
@@ -364,7 +365,7 @@ func newVariable(varname identifier, gtype *Gtype, isGlobal bool) *ExprVariable 
 
 // https://golang.org/ref/spec#Type
 func parseType() *Gtype {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	for {
 		tok := readToken()
 		if tok.isPunct("*") {
@@ -388,7 +389,7 @@ func parseType() *Gtype {
 }
 
 func parseDeclVar(isGlobal bool) *AstVarDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	// read name
 	name := readIdent()
 
@@ -427,7 +428,7 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 }
 
 func parseConstDecl() *AstConstDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	// read name
 	name := readIdent()
 
@@ -462,7 +463,7 @@ func parseConstDecl() *AstConstDecl {
 }
 
 func parseAssignment() *AstAssignment {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	tleft := readToken()
 	item := currentscope.get(tleft.getIdent())
 	if item == nil {
@@ -482,7 +483,7 @@ func parseAssignment() *AstAssignment {
 }
 
 func parseIdentList() []identifier {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r []identifier
 	for {
 		tok := readToken()
@@ -505,7 +506,7 @@ func parseIdentList() []identifier {
 }
 
 func parseForStmt() *AstForStmt {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r = &AstForStmt{}
 	currentscope = newScope(currentscope)
 	// Assume "range" style
@@ -525,7 +526,7 @@ func parseForStmt() *AstForStmt {
 }
 
 func parseIfStmt() *AstIfStmt {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r = &AstIfStmt{}
 	currentscope = newScope(currentscope)
 	r.cond = parseExpr()
@@ -549,7 +550,7 @@ func parseIfStmt() *AstIfStmt {
 }
 
 func parseStmt() *AstStmt {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	tok := readToken()
 	if tok.isKeyword("var") {
 		return &AstStmt{declvar: parseDeclVar(false)}
@@ -576,7 +577,7 @@ func parseStmt() *AstStmt {
 }
 
 func parseCompoundStmt() *AstCompountStmt {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 
 	r := &AstCompountStmt{}
 	for {
@@ -595,7 +596,7 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	localvars = make([]*ExprVariable, 0)
 	currentscope = newScope(packageblockscope)
 	fname := readToken().getIdent()
@@ -743,7 +744,7 @@ func parseInterfaceDef() *AstInterfaceDef {
 }
 
 func parseTypeDecl() *AstTypeDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	name := readIdent()
 	tok := readToken()
 	var typeConstuctor interface{}
@@ -768,7 +769,7 @@ func parseTypeDecl() *AstTypeDecl {
 }
 
 func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r *AstTopLevelDecl
 	switch {
 	case tok.isKeyword("var"):
@@ -792,7 +793,7 @@ func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 }
 
 func parseTopLevelDecls() []*AstTopLevelDecl {
-	traceIn(); defer traceOut()
+	defer traceOut(traceIn())
 	var r []*AstTopLevelDecl
 	for {
 		tok := readToken()
