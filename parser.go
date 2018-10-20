@@ -9,10 +9,6 @@ var globalvars []*ExprVariable
 
 var ts *TokenStream
 
-func (stream *TokenStream) getToken(i int) interface{} {
-	return ts.tokens[i]
-}
-
 func peekToken() *Token {
 	tok := ts.peekToken()
 	return tok
@@ -460,7 +456,7 @@ func parseDeclVar(isGlobal bool) *AstVarDecl {
 	return r
 }
 
-func parseConstDecl(isGlobal bool) *AstConstDecl {
+func parseConstDecl() *AstConstDecl {
 	// read name
 	name := readIdent()
 
@@ -594,7 +590,7 @@ func parseStmt() *AstStmt {
 	if tok.isKeyword("var") {
 		return  &AstStmt{declvar:parseDeclVar(false)}
 	} else if tok.isKeyword("const") {
-		return  &AstStmt{constdecl:parseConstDecl(false)}
+		return  &AstStmt{constdecl:parseConstDecl()}
 	} else if tok.isKeyword("type") {
 		return  &AstStmt{typedecl:parseTypeDecl()}
 	} else if tok.isKeyword("for") {
@@ -830,7 +826,7 @@ func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 		vardecl := parseDeclVar(true)
 		r = &AstTopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
-		constdecl := parseConstDecl(true)
+		constdecl := parseConstDecl()
 		r = &AstTopLevelDecl{constdecl:constdecl}
 	case tok.isKeyword("func"):
 		funcdecl := parseFuncDef()
@@ -970,7 +966,7 @@ func resolveType(decl *AstTypeDecl) {
 }
 
 //TODO: resolve local scope
-func resolve(file *AstSourceFile) {
+func resolve() {
 	for _, decl := range packageblockscope.idents {
 		typedecl, ok := decl.(*AstTypeDecl)
 		if ok {

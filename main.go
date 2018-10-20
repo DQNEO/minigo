@@ -43,7 +43,7 @@ func main() {
 	if debugAst {
 		astFile.dump()
 	}
-	resolve(astFile)
+	resolve()
 	if debugAst {
 		astFile.dump()
 	}
