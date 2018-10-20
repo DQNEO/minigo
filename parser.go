@@ -6,9 +6,6 @@ import (
 	"strings"
 )
 
-var localvars []*ExprVariable
-var globalvars []*ExprVariable
-
 func (p *parser) peekToken() *Token {
 	tok := p.tokenStream.peekToken()
 	return tok
@@ -350,13 +347,13 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype, isGlobal bool) *E
 			gtype:    gtype,
 			isGlobal: true,
 		}
-		globalvars = append(globalvars, variable)
+		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
 			varname: varname,
 			gtype:   gtype,
 		}
-		localvars = append(localvars, variable)
+		p.localvars = append(p.localvars, variable)
 	}
 	return variable
 }
@@ -603,7 +600,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 
 func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
-	localvars = make([]*ExprVariable, 0)
+	p.localvars = make([]*ExprVariable, 0)
 	p.enterNewScope()
 	defer p.exitScope()
 	fname := p.readToken().getIdent()
@@ -652,10 +649,10 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		fname:     fname,
 		rettype:   rettype,
 		params:    params,
-		localvars: localvars,
+		localvars: p.localvars,
 		body:      body,
 	}
-	localvars = nil
+	p.localvars = nil
 	return r
 }
 
@@ -820,6 +817,8 @@ type parser struct {
 	tokenStream *TokenStream
 	packageBlockScope *scope
 	currentScope *scope
+	globalvars []*ExprVariable
+	localvars []*ExprVariable
 }
 
 // https://golang.org/ref/spec#Source_file_organization
