@@ -705,7 +705,7 @@ func (p *parser) parseImport() *AstImportDecl {
 	}
 }
 
-func (p *parser) shouldHavePackageClause() *AstPackageClause {
+func (p *parser) expectPackageClause() *AstPackageClause {
 	p.expectKeyword("package")
 	r := &AstPackageClause{name: p.readIdent()}
 	p.expect(";")
@@ -861,8 +861,9 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	p.currentScope = packageBlockScope
 
 	r := &AstSourceFile{}
-	r.pkg = p.shouldHavePackageClause()
+	r.pkg = p.expectPackageClause()
 	r.imports = p.mayHaveImportDecls()
+
 	r.packageNames = make(map[identifier]string)
 	for _, importdecl := range r.imports {
 		for _, path := range importdecl.paths {
