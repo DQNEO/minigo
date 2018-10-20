@@ -28,6 +28,11 @@ func (p *parser) peekToken() *Token {
 	return r
 }
 
+func (p *parser) lastToken() *Token {
+	ts := p.tokenStream
+	return ts.tokens[ts.index - 1]
+}
+
 func (p *parser) readToken() *Token {
 	ts := p.tokenStream
 	if ts.index > len(ts.tokens)-1 {
@@ -729,6 +734,7 @@ func (p *parser) parseImportDecls() []*AstImportDecl {
 
 // read after "struct" token
 func (p *parser) parseStructDef() *AstStructDef {
+	assert(p.lastToken().isKeyword("struct"),"")
 	defer p.traceOut(p.traceIn())
 	p.expect("{")
 	var fields []*StructField
