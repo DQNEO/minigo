@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+type parser struct {
+	tokenStream *TokenStream
+	packageBlockScope *scope
+	currentScope *scope
+	globalvars []*ExprVariable
+	localvars []*ExprVariable
+}
+
 func (p *parser) peekToken() *Token {
 	tok := p.tokenStream.peekToken()
 	return tok
@@ -810,14 +818,6 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 		r = append(r, ast)
 	}
 	return r
-}
-
-type parser struct {
-	tokenStream *TokenStream
-	packageBlockScope *scope
-	currentScope *scope
-	globalvars []*ExprVariable
-	localvars []*ExprVariable
 }
 
 // https://golang.org/ref/spec#Source_file_organization
