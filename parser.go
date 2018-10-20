@@ -38,7 +38,6 @@ func expectKeyword(name string) {
 	}
 }
 
-
 func expect(punct string) {
 	tok := readToken()
 	if !tok.isPunct(punct) {
@@ -69,13 +68,13 @@ func readFuncallArgs() []Expr {
 
 // https://golang.org/ref/spec#Operands
 type AstOperandName struct {
-	pkg identifier
+	pkg   identifier
 	ident identifier
 }
 
 type ExprSliced struct {
-	ref *AstOperandName
-	low Expr
+	ref  *AstOperandName
+	low  Expr
 	high Expr
 }
 
@@ -87,7 +86,7 @@ func (e *ExprSliced) emit() {
 }
 
 type ExprIndexAccess struct {
-	ref *AstOperandName
+	ref   *AstOperandName
 	index Expr
 }
 
@@ -100,7 +99,7 @@ func (e *ExprIndexAccess) emit() {
 }
 
 func parseIdentOrFuncall(firstIdent identifier) Expr {
-	debugf("func %s start with %s" , "parseIdentOrFuncall", peekToken().String())
+	debugf("func %s start with %s", "parseIdentOrFuncall", peekToken().String())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -148,13 +147,13 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 		tok := readToken()
 		if tok.isPunct(":") {
 			lowIndex := &ExprNumberLiteral{
-				val:0,
+				val: 0,
 			}
 			highIndex := parseExpr()
 			expect("]")
 			return &ExprSliced{
-				ref : operand,
-				low: lowIndex,
+				ref:  operand,
+				low:  lowIndex,
 				high: highIndex,
 			}
 		} else {
@@ -163,15 +162,15 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 			tok := readToken()
 			if tok.isPunct("]") {
 				return &ExprIndexAccess{
-					ref: operand,
+					ref:   operand,
 					index: index,
 				}
 			} else if tok.isPunct(":") {
 				highIndex := parseExpr()
 				expect("]")
 				return &ExprSliced{
-					ref : operand,
-					low: index,
+					ref:  operand,
+					low:  index,
 					high: highIndex,
 				}
 
@@ -183,9 +182,8 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 		unreadToken()
 	}
 
-
 	v := currentscope.get(firstIdent)
-	if v == nil{
+	if v == nil {
 		errorf("Undefined variable: %s", firstIdent)
 		return nil
 	}
@@ -197,7 +195,7 @@ func parseIdentOrFuncall(firstIdent identifier) Expr {
 	if constdecl != nil {
 		return constdecl.variable
 	}
-	errorf("variable not found %v",firstIdent )
+	errorf("variable not found %v", firstIdent)
 	return nil
 }
 
@@ -206,7 +204,7 @@ var stringLiterals []*ExprStringLiteral
 
 func newAstString(sval string) *ExprStringLiteral {
 	ast := &ExprStringLiteral{
-		val:   sval,
+		val:    sval,
 		slabel: fmt.Sprintf("L%d", stringIndex),
 	}
 	stringIndex++
@@ -216,7 +214,7 @@ func newAstString(sval string) *ExprStringLiteral {
 
 func parsePrim() Expr {
 	tok := readToken()
-	switch  {
+	switch {
 	case tok.isTypeIdent():
 		return parseIdentOrFuncall(tok.getIdent())
 	case tok.isTypeString():
@@ -235,7 +233,7 @@ func parsePrim() Expr {
 }
 
 type ExprArrayLiteral struct {
-	gtype *Gtype
+	gtype  *Gtype
 	values []Expr
 }
 
@@ -248,7 +246,7 @@ func (e ExprArrayLiteral) dump() {
 }
 
 func parseArrayLiteral() Expr {
-	debugf("func %s start with %s" , "parseArrayLiteral", peekToken().String())
+	debugf("func %s start with %s", "parseArrayLiteral", peekToken().String())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -281,13 +279,13 @@ func parseArrayLiteral() Expr {
 	}
 
 	gtype := &Gtype{
-		typ:   "array",
+		typ:    "array",
 		length: len(values),
-		ptr:   typ,
+		ptr:    typ,
 	}
 
 	r := &ExprArrayLiteral{
-		gtype: gtype,
+		gtype:  gtype,
 		values: values,
 	}
 	debugAstConstructed(r)
@@ -300,13 +298,13 @@ func parseUnaryExpr() Expr {
 
 func priority(op string) int {
 	switch op {
-	case "==","!=", "<",">", ">=", "<=":
+	case "==", "!=", "<", ">", ">=", "<=":
 		return 10
-	case "-","+":
+	case "-", "+":
 		return 10
 	case "*":
 		return 20
-	default :
+	default:
 		errorf("unkown operator %s", op)
 	}
 	return 0
@@ -316,12 +314,12 @@ func parseExpr() Expr {
 	return parseExprInt(-1)
 }
 
-var  binops  = []string{
-	"+","*","-", "==","!=","<",">","<=","=>",
+var binops = []string{
+	"+", "*", "-", "==", "!=", "<", ">", "<=", "=>",
 }
 
 func parseExprInt(prior int) Expr {
-	debugf("func %s start with %s" , "parseExprInt", peekToken().String())
+	debugf("func %s start with %s", "parseExprInt", peekToken().String())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -358,13 +356,13 @@ func parseExprInt(prior int) Expr {
 				unreadToken()
 				return ast
 			}
-		/*
-		} else if tok.sval == "," || tok.sval == ")" ||
-			tok.sval == "{" || tok.sval == "}" ||
-			tok.isPunct(";") || tok.isPunct(":") { // end of funcall argument
-			unreadToken()
-			return ast
-		*/
+			/*
+				} else if tok.sval == "," || tok.sval == ")" ||
+					tok.sval == "{" || tok.sval == "}" ||
+					tok.isPunct(";") || tok.isPunct(":") { // end of funcall argument
+					unreadToken()
+					return ast
+			*/
 		} else {
 			unreadToken()
 			return ast
@@ -379,15 +377,15 @@ func newVariable(varname identifier, gtype *Gtype, isGlobal bool) *ExprVariable 
 	var variable *ExprVariable
 	if isGlobal {
 		variable = &ExprVariable{
-			varname: varname,
-			gtype: gtype,
+			varname:  varname,
+			gtype:    gtype,
 			isGlobal: true,
 		}
 		globalvars = append(globalvars, variable)
 	} else {
 		variable = &ExprVariable{
 			varname: varname,
-			gtype: gtype,
+			gtype:   gtype,
 		}
 		localvars = append(localvars, variable)
 	}
@@ -479,7 +477,7 @@ func parseConstDecl() *AstConstDecl {
 
 	variable := &ExprConstVariable{
 		name: name,
-		val: val,
+		val:  val,
 	}
 
 	r := &AstConstDecl{
@@ -532,7 +530,7 @@ func parseIdentList() []identifier {
 }
 
 func parseForStmt() *AstForStmt {
-	debugf("func %s start with %s" , "parseForStmt", peekToken())
+	debugf("func %s start with %s", "parseForStmt", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -545,7 +543,7 @@ func parseForStmt() *AstForStmt {
 	expect(":=")
 	// TODO register each ient to the scope
 	for _, ident := range idents {
-		currentscope.setVarDecl(ident, &AstVarDecl{variable:newVariable(ident,nil,false)})
+		currentscope.setVarDecl(ident, &AstVarDecl{variable: newVariable(ident, nil, false)})
 	}
 	r.idents = idents
 	expectKeyword("range")
@@ -557,7 +555,7 @@ func parseForStmt() *AstForStmt {
 }
 
 func parseIfStmt() *AstIfStmt {
-	debugf("func %s start with %s" , "parseForStmt", peekToken())
+	debugf("func %s start with %s", "parseForStmt", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -569,12 +567,12 @@ func parseIfStmt() *AstIfStmt {
 	expect("{")
 	r.then = parseCompoundStmt()
 	tok := readToken()
-	if (tok.isKeyword("else")) {
+	if tok.isKeyword("else") {
 		tok := readToken()
 		if tok.isPunct("{") {
-			r.els = &AstStmt{compound:parseCompoundStmt()}
+			r.els = &AstStmt{compound: parseCompoundStmt()}
 		} else if tok.isKeyword("if") {
-			r.els = &AstStmt{ifstmt:parseIfStmt(),}
+			r.els = &AstStmt{ifstmt: parseIfStmt()}
 		} else {
 			tok.errorf("Syntax error")
 		}
@@ -588,15 +586,15 @@ func parseIfStmt() *AstIfStmt {
 func parseStmt() *AstStmt {
 	tok := readToken()
 	if tok.isKeyword("var") {
-		return  &AstStmt{declvar:parseDeclVar(false)}
+		return &AstStmt{declvar: parseDeclVar(false)}
 	} else if tok.isKeyword("const") {
-		return  &AstStmt{constdecl:parseConstDecl()}
+		return &AstStmt{constdecl: parseConstDecl()}
 	} else if tok.isKeyword("type") {
-		return  &AstStmt{typedecl:parseTypeDecl()}
+		return &AstStmt{typedecl: parseTypeDecl()}
 	} else if tok.isKeyword("for") {
-		return  &AstStmt{forstmt:parseForStmt()}
+		return &AstStmt{forstmt: parseForStmt()}
 	} else if tok.isKeyword("if") {
-		return  &AstStmt{ifstmt:parseIfStmt()}
+		return &AstStmt{ifstmt: parseIfStmt()}
 	}
 	tok2 := readToken()
 
@@ -604,21 +602,20 @@ func parseStmt() *AstStmt {
 		unreadToken()
 		unreadToken()
 		//assure_lvalue(ast)
-		return &AstStmt{assignment:	parseAssignment()}
+		return &AstStmt{assignment: parseAssignment()}
 	}
 	unreadToken()
 	unreadToken()
-	return &AstStmt{expr:parseExpr()}
+	return &AstStmt{expr: parseExpr()}
 }
 
 func parseCompoundStmt() *AstCompountStmt {
-	debugf("func %s start with %s" , "parseCompoundStmt", peekToken().String())
+	debugf("func %s start with %s", "parseCompoundStmt", peekToken().String())
 	debugNest++
 	defer func() {
 		debugNest--
 		debugf("func %s end", "parseCompoundStmt")
 	}()
-
 
 	r := &AstCompountStmt{}
 	for {
@@ -637,7 +634,7 @@ func parseCompoundStmt() *AstCompountStmt {
 }
 
 func parseFuncDef() *AstFuncDecl {
-	debugf("func %s start with %s" , "parseFuncDef", peekToken())
+	debugf("func %s start with %s", "parseFuncDef", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -658,12 +655,12 @@ func parseFuncDef() *AstFuncDecl {
 			ptype := parseType()
 			// assureType(tok.sval)
 			variable := &ExprVariable{
-				varname:pname,
-				gtype: ptype,
+				varname: pname,
+				gtype:   ptype,
 			}
 			params = append(params, variable)
 			currentscope.setVarDecl(pname, &AstVarDecl{
-				variable:variable,
+				variable: variable,
 			})
 			tok = readToken()
 			if tok.isPunct(")") {
@@ -691,11 +688,11 @@ func parseFuncDef() *AstFuncDecl {
 	localvars = nil
 	currentscope = packageblockscope
 	return &AstFuncDecl{
-		fname: fname,
-		rettype:rettype,
-		params: params,
+		fname:     fname,
+		rettype:   rettype,
+		params:    params,
 		localvars: _localvars,
-		body: body,
+		body:      body,
 	}
 }
 
@@ -729,7 +726,7 @@ func parseImport() *AstImportDecl {
 
 func shouldHavePackageClause() *AstPackageClause {
 	expectKeyword("package")
-	r := &AstPackageClause{name :readIdent()}
+	r := &AstPackageClause{name: readIdent()}
 	expect(";")
 	return r
 }
@@ -758,7 +755,7 @@ func parseStructDef() *AstStructDef {
 		fieldname := tok.getIdent()
 		fieldtyep := parseType()
 		fields = append(fields, &StructField{
-			name: fieldname,
+			name:  fieldname,
 			gtype: fieldtyep,
 		})
 		expect(";")
@@ -789,13 +786,13 @@ func parseInterfaceDef() *AstInterfaceDef {
 	}
 }
 
-func parseTypeDecl() *AstTypeDecl  {
+func parseTypeDecl() *AstTypeDecl {
 	name := readIdent()
 	tok := readToken()
 	var typeConstuctor interface{}
-	if tok.isKeyword("struct" ) {
+	if tok.isKeyword("struct") {
 		typeConstuctor = parseStructDef()
-	} else if tok.isKeyword("interface")  {
+	} else if tok.isKeyword("interface") {
 		typeConstuctor = parseInterfaceDef()
 	} else if tok.isTypeIdent() {
 		ident := tok.getIdent() // name of another type
@@ -804,7 +801,7 @@ func parseTypeDecl() *AstTypeDecl  {
 		tok.errorf("TBD")
 	}
 	r := &AstTypeDecl{
-		typedef:&AstTypeDef{
+		typedef: &AstTypeDef{
 			name:            name,
 			typeConstructor: typeConstuctor,
 		},
@@ -814,26 +811,26 @@ func parseTypeDecl() *AstTypeDecl  {
 }
 
 func parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
-	debugf("func %s start with %s" , "parseTopLevelDecl", peekToken())
+	debugf("func %s start with %s", "parseTopLevelDecl", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
 		debugf("func %s end", "parseTopLevelDecl")
 	}()
 	var r *AstTopLevelDecl
-	switch  {
+	switch {
 	case tok.isKeyword("var"):
 		vardecl := parseDeclVar(true)
 		r = &AstTopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
 		constdecl := parseConstDecl()
-		r = &AstTopLevelDecl{constdecl:constdecl}
+		r = &AstTopLevelDecl{constdecl: constdecl}
 	case tok.isKeyword("func"):
 		funcdecl := parseFuncDef()
-		r =  &AstTopLevelDecl{funcdecl:funcdecl}
+		r = &AstTopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("type"):
 		typedecl := parseTypeDecl()
-		r = &AstTopLevelDecl{typedecl:typedecl}
+		r = &AstTopLevelDecl{typedecl: typedecl}
 	default:
 		errorf("TBD: unable to handle token %v", tok)
 	}
@@ -847,7 +844,7 @@ func debugAstConstructed(ast interface{}) {
 }
 
 func parseTopLevelDecls() []*AstTopLevelDecl {
-	debugf("func %s start with %s" , "parseTopLevelDecls", peekToken())
+	debugf("func %s start with %s", "parseTopLevelDecls", peekToken())
 	debugNest++
 	defer func() {
 		debugNest--
@@ -876,8 +873,8 @@ func parseTopLevelDecls() []*AstTopLevelDecl {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func parseSourceFile() *AstSourceFile {
 	r := &AstSourceFile{}
-	r.pkg =   shouldHavePackageClause()
-	r.imports =  mayHaveImportDecls()
+	r.pkg = shouldHavePackageClause()
+	r.imports = mayHaveImportDecls()
 	r.packageNames = make(map[identifier]string)
 	for _, importdecl := range r.imports {
 		for _, path := range importdecl.paths {
@@ -886,7 +883,7 @@ func parseSourceFile() *AstSourceFile {
 		}
 	}
 
-	r.decls =   parseTopLevelDecls()
+	r.decls = parseTopLevelDecls()
 	return r
 }
 
@@ -912,7 +909,6 @@ func resolveVar(decl *AstVarDecl) {
 		decl.variable.gtype = typedecl.gtype
 	}
 }
-
 
 func resolveConst(decl *AstConstDecl) {
 	if decl.variable.gtype != nil {
@@ -957,9 +953,9 @@ func resolveType(decl *AstTypeDecl) {
 			resolveType(typedecl)
 		}
 		decl.gtype = &Gtype{
-			typ:"ref",
-			size:typedecl.gtype.size,
-			ptr:typedecl.gtype,
+			typ:  "ref",
+			size: typedecl.gtype.size,
+			ptr:  typedecl.gtype,
 		}
 
 	}

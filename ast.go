@@ -1,6 +1,6 @@
 package main
 
-type Expr interface  {
+type Expr interface {
 	emit()
 	dump()
 }
@@ -10,24 +10,24 @@ type ExprNumberLiteral struct {
 }
 
 type ExprStringLiteral struct {
-	val string
+	val    string
 	slabel string
 }
 
 // local or global variable
 type ExprVariable struct {
-	varname identifier
+	varname         identifier
 	typeConstructor interface{}
-	gtype *Gtype
-	offset int // for local variable
-	isGlobal bool
+	gtype           *Gtype
+	offset          int // for local variable
+	isGlobal        bool
 }
 
 type ExprConstVariable struct {
-	name identifier
+	name            identifier
 	typeConstructor interface{}
-	gtype *Gtype
-	val Expr // like ExprConstExpr ?
+	gtype           *Gtype
+	val             Expr // like ExprConstExpr ?
 }
 
 type ExprFuncall struct {
@@ -42,7 +42,7 @@ type ExprBinop struct {
 }
 
 type ExprUop struct {
-	op string
+	op      string
 	operand Expr
 }
 
@@ -63,11 +63,11 @@ type AstAssignment struct {
 
 type AstForStmt struct {
 	idents []identifier
-	list Expr
+	list   Expr
 	// or
-	left *AstStmt
+	left   *AstStmt
 	middle *AstStmt
-	right *AstStmt
+	right  *AstStmt
 
 	block *AstCompountStmt
 }
@@ -104,51 +104,49 @@ type AstCompountStmt struct {
 
 type AstFuncDecl struct {
 	// funcdef
-	fname identifier
-	rettype string
-	params []*ExprVariable
+	fname     identifier
+	rettype   string
+	params    []*ExprVariable
 	localvars []*ExprVariable
-	body *AstCompountStmt
+	body      *AstCompountStmt
 }
 
 type AstTopLevelDecl struct {
 	// either of followings
-	funcdecl *AstFuncDecl
-	vardecl *AstVarDecl
+	funcdecl  *AstFuncDecl
+	vardecl   *AstVarDecl
 	constdecl *AstConstDecl
-	typedecl *AstTypeDecl
+	typedecl  *AstTypeDecl
 }
 
 type AstSourceFile struct {
-	pkg *AstPackageClause
-	imports []*AstImportDecl
-	decls []*AstTopLevelDecl
+	pkg          *AstPackageClause
+	imports      []*AstImportDecl
+	decls        []*AstTopLevelDecl
 	packageNames map[identifier]string
 }
 
-
-type AstPackageRef struct{
+type AstPackageRef struct {
 	name identifier
 	path string
 }
 
 type AstTypeDef struct {
-	name identifier // we need this ?
+	name            identifier  // we need this ?
 	typeConstructor interface{} // (identifier | QualifiedIdent) | TypeLiteral
 }
 
 type AstTypeDecl struct {
 	typedef *AstTypeDef
-	gtype *Gtype // resolved later
+	gtype   *Gtype // resolved later
 }
 
-
 type Gtype struct {
-	typ     string //
-	size    int
-	ptr *Gtype
+	typ       string //
+	size      int
+	ptr       *Gtype
 	structdef *AstStructDef
-	length int // for fixed array
+	length    int // for fixed array
 }
 
 type AstInterfaceDef struct {
@@ -159,8 +157,6 @@ type AstStructDef struct {
 	fields []*StructField // for struct
 }
 type StructField struct {
-	name identifier
+	name  identifier
 	gtype *Gtype
 }
-
-

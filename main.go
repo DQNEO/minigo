@@ -11,7 +11,7 @@ var debugMode = false
 var sourceFile string
 
 func parseOpts(args []string) {
-	for _,opt := range args {
+	for _, opt := range args {
 		if opt == "-t" {
 			debugToken = true
 		}

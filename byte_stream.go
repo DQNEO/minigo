@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 )
 
 type ByteStream struct {
@@ -17,7 +17,7 @@ type ByteStream struct {
 func NewByteStream(path string) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
-		filename:path,
+		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
@@ -34,7 +34,7 @@ func readFile(filename string) []byte {
 }
 
 func (bs *ByteStream) location() string {
-	return fmt.Sprintf("%s:%d:%d",  bs.filename, bs.line, bs.column)
+	return fmt.Sprintf("%s:%d:%d", bs.filename, bs.line, bs.column)
 }
 
 func (bs *ByteStream) get() (byte, error) {
@@ -58,5 +58,3 @@ func (bs *ByteStream) unget() {
 		bs.line--
 	}
 }
-
-

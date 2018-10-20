@@ -19,7 +19,6 @@ type TokenStream struct {
 	index  int
 }
 
-
 func (ts *TokenStream) peekToken() *Token {
 	if ts.index > len(ts.tokens)-1 {
 		return makeToken("EOF", "")
@@ -44,21 +43,21 @@ func (ts *TokenStream) unreadToken() {
 type TokenType string
 
 const (
-	T_EOF TokenType = "EOF"
-	T_INT TokenType  = "int"
-	T_STRING TokenType = "string"
-	T_CHAR TokenType = "char"
-	T_IDENT TokenType = "ident"
-	T_PUNCT TokenType = "punct"
+	T_EOF      TokenType = "EOF"
+	T_INT      TokenType = "int"
+	T_STRING   TokenType = "string"
+	T_CHAR     TokenType = "char"
+	T_IDENT    TokenType = "ident"
+	T_PUNCT    TokenType = "punct"
 	T_KEYWORWD TokenType = "keyword"
 )
 
 type Token struct {
-	typ  TokenType
-	sval string
+	typ      TokenType
+	sval     string
 	filename string
-	line int
-	column int
+	line     int
+	column   int
 }
 
 var bs *ByteStream
@@ -236,14 +235,13 @@ func skipSpace() {
 	}
 }
 
-
 func makeToken(typ TokenType, sval string) *Token {
 	return &Token{
-		typ: typ,
-		sval: sval,
+		typ:      typ,
+		sval:     sval,
 		filename: bs.filename,
-		line: bs.line,
-		column:bs.column,
+		line:     bs.line,
+		column:   bs.column,
 	}
 }
 
@@ -271,11 +269,9 @@ func in_array(item string, list []string) bool {
 
 */
 
-
-
 var semicolon = &Token{
-	typ: T_PUNCT,
-	sval:";",
+	typ:  T_PUNCT,
+	sval: ";",
 }
 
 // https://golang.org/ref/spec#Semicolons
@@ -343,40 +339,40 @@ func tokenize(_bs *ByteStream) []*Token {
 			return r
 		}
 		var tok *Token
-		switch  {
-		case c == 0:// no need?
+		switch {
+		case c == 0: // no need?
 			return r
 		case c == '\n':
 			// Insert semicolon
 			if len(r) > 0 {
-				last := r[len(r) -1]
+				last := r[len(r)-1]
 				if autoSemicolonInsert(last) {
 					r = append(r, semicolon)
 				}
 			}
 			continue
-		case isIn(c, []byte{'0','1','2','3','4','5','6','7','8','9'}):
+		case isIn(c, []byte{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}):
 			sval := read_number(c)
-			tok = makeToken(T_INT,  sval)
-		case isIn(c, []byte{'_','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-			'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'}):
+			tok = makeToken(T_INT, sval)
+		case isIn(c, []byte{'_', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}):
 			sval := readIdentifier(c)
 			if in_array(sval, keywords) {
 				tok = makeToken(T_KEYWORWD, sval)
 			} else {
-				tok = makeToken( T_IDENT,  sval)
+				tok = makeToken(T_IDENT, sval)
 			}
 		case c == '\'':
 			sval := read_char()
-			tok = makeToken( T_CHAR,  sval)
+			tok = makeToken(T_CHAR, sval)
 		case c == '"':
 			sval := read_string()
-			tok = makeToken( T_STRING,  sval)
-		case isIn(c, []byte{' ','\t'}):
+			tok = makeToken(T_STRING, sval)
+		case isIn(c, []byte{' ', '\t'}):
 			skipSpace()
 			continue
 		case c == '/':
-			c ,_ = getc()
+			c, _ = getc()
 			if c == '/' {
 				skipLine()
 				continue
@@ -389,55 +385,55 @@ func tokenize(_bs *ByteStream) []*Token {
 				ungetc()
 				tok = makeToken(T_PUNCT, "/")
 			}
-		case isIn(c, []byte{'(',')','[',']','{','}',',',';'}):
-			tok = makeToken( T_PUNCT, string(c))
+		case isIn(c, []byte{'(', ')', '[', ']', '{', '}', ',', ';'}):
+			tok = makeToken(T_PUNCT, string(c))
 		case c == '!':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, "!=")
+				tok = makeToken(T_PUNCT, "!=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "!")
+				tok = makeToken(T_PUNCT, "!")
 			}
 		case c == '%':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, "%=")
+				tok = makeToken(T_PUNCT, "%=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "%")
+				tok = makeToken(T_PUNCT, "%")
 			}
 		case c == '*':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, "*=")
+				tok = makeToken(T_PUNCT, "*=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "*")
+				tok = makeToken(T_PUNCT, "*")
 			}
 		case c == ':':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, ":=")
+				tok = makeToken(T_PUNCT, ":=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, ":")
+				tok = makeToken(T_PUNCT, ":")
 			}
 		case c == '=':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, "==")
+				tok = makeToken(T_PUNCT, "==")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "=")
+				tok = makeToken(T_PUNCT, "=")
 			}
 		case c == '^':
 			c, _ := getc()
 			if c == '=' {
-				tok = makeToken( T_PUNCT, "^=")
+				tok = makeToken(T_PUNCT, "^=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "^")
+				tok = makeToken(T_PUNCT, "^")
 			}
 		case c == '&':
 			c, _ := getc()
@@ -451,11 +447,11 @@ func tokenize(_bs *ByteStream) []*Token {
 					tok = makeToken(T_PUNCT, "&^=")
 				} else {
 					ungetc()
-					tok = makeToken( T_PUNCT, "&^")
+					tok = makeToken(T_PUNCT, "&^")
 				}
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "&")
+				tok = makeToken(T_PUNCT, "&")
 			}
 		case c == '+':
 			c, _ = getc()
@@ -465,7 +461,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				tok = makeToken(T_PUNCT, "+=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "+")
+				tok = makeToken(T_PUNCT, "+")
 			}
 		case c == '-':
 			c, _ = getc()
@@ -475,7 +471,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				tok = makeToken(T_PUNCT, "-=")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "-")
+				tok = makeToken(T_PUNCT, "-")
 			}
 		case c == '|':
 			c, _ = getc()
@@ -485,7 +481,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				tok = makeToken(T_PUNCT, "||")
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "|")
+				tok = makeToken(T_PUNCT, "|")
 			}
 		case c == '.':
 			c, _ = getc()
@@ -498,7 +494,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				}
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, ".")
+				tok = makeToken(T_PUNCT, ".")
 			}
 		case c == '>':
 			c, _ = getc()
@@ -514,16 +510,16 @@ func tokenize(_bs *ByteStream) []*Token {
 				}
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, ">")
+				tok = makeToken(T_PUNCT, ">")
 			}
 		case c == '<':
-			c ,_ = getc()
+			c, _ = getc()
 			if c == '-' {
 				tok = makeToken(T_PUNCT, "<-")
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "<=")
 			} else if c == '<' {
-				c ,_ = getc()
+				c, _ = getc()
 				if c == '=' {
 					tok = makeToken(T_PUNCT, "<<=")
 				} else {
@@ -532,7 +528,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				}
 			} else {
 				ungetc()
-				tok = makeToken( T_PUNCT, "<")
+				tok = makeToken(T_PUNCT, "<")
 			}
 		default:
 			fmt.Printf("c='%c'\n", c)
@@ -547,7 +543,6 @@ func tokenize(_bs *ByteStream) []*Token {
 	return r
 }
 
-
 func (tok *Token) render() string {
 	switch tok.typ {
 	case T_CHAR:
@@ -555,12 +550,11 @@ func (tok *Token) render() string {
 	case T_PUNCT:
 		return fmt.Sprintf("%s", tok.sval)
 	case T_STRING:
-			return fmt.Sprintf("\"%s\"", tok.sval)
+		return fmt.Sprintf("\"%s\"", tok.sval)
 	default:
-			return fmt.Sprintf("%s", tok.sval)
+		return fmt.Sprintf("%s", tok.sval)
 	}
 }
-
 
 func renderTokens(tokens []*Token) {
 	debugf("==== Start Render Tokens ===")
@@ -585,4 +579,3 @@ func newTokenStreamFromFile(path string) *TokenStream {
 		index:  0,
 	}
 }
-

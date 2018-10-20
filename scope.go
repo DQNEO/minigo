@@ -1,28 +1,28 @@
 package main
 
-var gInt = &Gtype{typ:"scalar",size:8,}
-var gBool = &Gtype{typ:"scalar",size:8,}
+var gInt = &Gtype{typ: "scalar", size: 8}
+var gBool = &Gtype{typ: "scalar", size: 8}
 
 var predeclaredConsts = []*AstConstDecl{
 	&AstConstDecl{
-		variable:&ExprConstVariable{
-			name:"true",
-			gtype:gBool,
-			val: &ExprNumberLiteral{1},
+		variable: &ExprConstVariable{
+			name:  "true",
+			gtype: gBool,
+			val:   &ExprNumberLiteral{1},
 		},
 	},
 	&AstConstDecl{
-		variable:&ExprConstVariable{
-			name:"false",
-			gtype:gBool,
-			val: &ExprNumberLiteral{0},
+		variable: &ExprConstVariable{
+			name:  "false",
+			gtype: gBool,
+			val:   &ExprNumberLiteral{0},
 		},
 	},
 }
 
 var predeclaredFunctions = []*AstFuncDecl{
 	{
-		fname:"len",
+		fname: "len",
 	},
 }
 
@@ -89,11 +89,11 @@ func newScope(outer *scope) *scope {
 
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
-	r.setTypeDecl("int", &AstTypeDecl{gtype:gInt})
-	r.setTypeDecl("bool", &AstTypeDecl{gtype:gBool})
+	r.setTypeDecl("int", &AstTypeDecl{gtype: gInt})
+	r.setTypeDecl("bool", &AstTypeDecl{gtype: gBool})
 
 	for _, c := range predeclaredConsts {
-		r.setConstDecl(c.variable.name,c)
+		r.setConstDecl(c.variable.name, c)
 	}
 	for _, f := range predeclaredFunctions {
 		r.setFuncDecl(f.fname, &AstFuncDecl{})

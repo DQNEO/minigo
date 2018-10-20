@@ -3,16 +3,16 @@ package main
 import "fmt"
 import "os"
 
-func debugf(format string, v... interface{}) {
+func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
 	}
 	spaces := ""
-	for i:=0;i< debugNest;i++ {
+	for i := 0; i < debugNest; i++ {
 		spaces += "  "
 	}
 
-	fmt.Fprintf(os.Stderr, spaces + format + "\n", v...)
+	fmt.Fprintf(os.Stderr, spaces+format+"\n", v...)
 }
 
 func debugPrintV(v interface{}) {
@@ -23,8 +23,8 @@ func debugPrintVar(name string, v interface{}) {
 	debugf("%s = %v", name, v)
 }
 
-func (tok *Token) errorf(format string, v... interface{}) {
-	errorf(tok.String() + ": " + format, v...)
+func (tok *Token) errorf(format string, v ...interface{}) {
+	errorf(tok.String()+": "+format, v...)
 }
 
 func dumpToken(tok *Token) {
