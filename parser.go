@@ -171,7 +171,7 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 		p.unreadToken()
 	}
 
-	v := currentscope.get(firstIdent)
+	v := p.currentScope.get(firstIdent)
 	if v == nil {
 		errorf("Undefined variable: %s", firstIdent)
 		return nil
@@ -372,7 +372,7 @@ func (p *parser) parseType() *Gtype {
 
 		} else if tok.isTypeIdent() {
 			//_ := tok.getIdent()
-			//_ := currentscope.getGtype(typename)
+			//_ := p.p.currentScope.getGtype(typename)
 			//return gtype
 		} else if tok.isPunct("[") {
 		} else if tok.isPunct("]") {
@@ -421,7 +421,7 @@ func (p *parser) parseDeclVar(isGlobal bool) *AstVarDecl {
 		variable: variable,
 		initval:  initval,
 	}
-	currentscope.setVarDecl(name, r)
+	p.currentScope.setVarDecl(name, r)
 	return r
 }
 
@@ -456,14 +456,14 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 		variable: variable,
 	}
 
-	currentscope.setConstDecl(name, r)
+	p.currentScope.setConstDecl(name, r)
 	return r
 }
 
 func (p *parser) parseAssignment() *AstAssignment {
 	defer p.traceOut(p.traceIn())
 	tleft := p.readToken()
-	item := currentscope.get(tleft.getIdent())
+	item := p.currentScope.get(tleft.getIdent())
 	if item == nil {
 		errorf("variable %s is not found", tleft.getIdent())
 	}
@@ -503,30 +503,38 @@ func (p *parser) parseIdentList() []identifier {
 	return r
 }
 
+func (p *parser) enterNewScope() {
+	p.currentScope = newScope(p.currentScope)
+}
+
+func (p *parser) exitScope() {
+	p.currentScope = p.currentScope.outer
+}
+
 func (p *parser) parseForStmt() *AstForStmt {
 	defer p.traceOut(p.traceIn())
 	var r = &AstForStmt{}
-	currentscope = newScope(currentscope)
+	p.enterNewScope()
 	// Assume "range" style
 	idents := p.parseIdentList()
 	p.expect(":=")
 	// TODO register each ient to the scope
 	for _, ident := range idents {
-		currentscope.setVarDecl(ident, &AstVarDecl{variable: p.newVariable(ident, nil, false)})
+		p.currentScope.setVarDecl(ident, &AstVarDecl{variable: p.newVariable(ident, nil, false)})
 	}
 	r.idents = idents
 	p.expectKeyword("range")
 	r.list = p.parseExpr()
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
-	currentscope = currentscope.outer
+	p.exitScope()
 	return r
 }
 
 func (p *parser) parseIfStmt() *AstIfStmt {
 	defer p.traceOut(p.traceIn())
 	var r = &AstIfStmt{}
-	currentscope = newScope(currentscope)
+	p.enterNewScope()
 	r.cond = p.parseExpr()
 	p.expect("{")
 	r.then = p.parseCompoundStmt()
@@ -543,7 +551,7 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	} else {
 		p.unreadToken()
 	}
-	currentscope = currentscope.outer
+	p.exitScope()
 	return r
 }
 
@@ -596,7 +604,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
 	localvars = make([]*ExprVariable, 0)
-	currentscope = newScope(packageblockscope)
+	p.enterNewScope()
 	fname := p.readToken().getIdent()
 	p.expect("(")
 	var params []*ExprVariable
@@ -614,7 +622,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 				gtype:   ptype,
 			}
 			params = append(params, variable)
-			currentscope.setVarDecl(pname, &AstVarDecl{
+			p.currentScope.setVarDecl(pname, &AstVarDecl{
 				variable: variable,
 			})
 			tok = p.readToken()
@@ -637,7 +645,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	} else {
 		assert(tok.isPunct("{"), "begin of func body")
 	}
-	debugf("scope:%s", currentscope)
+	debugf("scope:%s", p.currentScope)
 	body := p.parseCompoundStmt()
 	r := &AstFuncDecl{
 		fname:     fname,
@@ -647,7 +655,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		body:      body,
 	}
 	localvars = nil
-	currentscope = packageblockscope
+	p.exitScope()
 	return r
 }
 
@@ -762,7 +770,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 			typeConstructor: typeConstuctor,
 		},
 	}
-	currentscope.setTypeDecl(name, r)
+	p.currentScope.setTypeDecl(name, r)
 	return r
 }
 
@@ -810,6 +818,7 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 
 type parser struct {
 	tokenStream *TokenStream
+	packageBlockScope *scope
 	currentScope *scope
 }
 
@@ -818,10 +827,10 @@ type parser struct {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(sourceFile string) *AstSourceFile {
+func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *AstSourceFile {
 	p.tokenStream = newTokenStreamFromFile(sourceFile)
-	p.currentScope = packageblockscope
-	currentscope = p.currentScope // to be deleted
+	p.packageBlockScope = packageBlockScope
+	p.currentScope = packageBlockScope
 
 	r := &AstSourceFile{}
 	r.pkg = p.shouldHavePackageClause()
@@ -838,7 +847,11 @@ func (p *parser) parseSourceFile(sourceFile string) *AstSourceFile {
 	return r
 }
 
-func resolveVar(decl *AstVarDecl) {
+type resolver struct {
+	packageblockscope *scope
+}
+
+func (r *resolver) resolveVar(decl *AstVarDecl) {
 	if decl.variable.gtype != nil {
 		return
 	}
@@ -846,7 +859,7 @@ func resolveVar(decl *AstVarDecl) {
 	constructor := decl.variable.typeConstructor
 	switch constructor.(type) {
 	case identifier:
-		item := packageblockscope.get(constructor.(identifier))
+		item := r.packageblockscope.get(constructor.(identifier))
 		if item == nil {
 			errorf("Undefined type %v", item)
 		}
@@ -861,7 +874,7 @@ func resolveVar(decl *AstVarDecl) {
 	}
 }
 
-func resolveConst(decl *AstConstDecl) {
+func (r *resolver) resolveConst(decl *AstConstDecl) {
 	if decl.variable.gtype != nil {
 		return
 	}
@@ -869,7 +882,7 @@ func resolveConst(decl *AstConstDecl) {
 	constructor := decl.variable.typeConstructor
 	switch constructor.(type) {
 	case identifier:
-		item := packageblockscope.get(constructor.(identifier))
+		item := r.packageblockscope.get(constructor.(identifier))
 		if item == nil {
 			errorf("Undefined type %v", item)
 		}
@@ -884,7 +897,7 @@ func resolveConst(decl *AstConstDecl) {
 	}
 }
 
-func resolveType(decl *AstTypeDecl) {
+func (r *resolver) resolveType(decl *AstTypeDecl) {
 	if decl.gtype != nil {
 		return
 	}
@@ -892,7 +905,7 @@ func resolveType(decl *AstTypeDecl) {
 	constructor := decl.typedef.typeConstructor
 	switch constructor.(type) {
 	case identifier:
-		item := packageblockscope.get(constructor.(identifier))
+		item := r.packageblockscope.get(constructor.(identifier))
 		if item == nil {
 			errorf("Undefined type %v", item)
 		}
@@ -901,7 +914,7 @@ func resolveType(decl *AstTypeDecl) {
 			errorf("%v is not a type", item)
 		}
 		if typedecl.gtype == nil {
-			resolveType(typedecl)
+			r.resolveType(typedecl)
 		}
 		decl.gtype = &Gtype{
 			typ:  "ref",
@@ -913,28 +926,28 @@ func resolveType(decl *AstTypeDecl) {
 }
 
 //TODO: resolve local scope
-func resolve() {
-	for _, decl := range packageblockscope.idents {
+func (r *resolver) resolve() {
+	for _, decl := range r.packageblockscope.idents {
 		typedecl, ok := decl.(*AstTypeDecl)
 		if ok {
-			resolveType(typedecl)
+			r.resolveType(typedecl)
 			typedecl.dump()
 		}
 	}
 
-	for _, decl := range packageblockscope.idents {
+	for _, decl := range r.packageblockscope.idents {
 		constdecl, ok := decl.(*AstConstDecl)
 		if ok {
-			resolveConst(constdecl)
+			r.resolveConst(constdecl)
 			constdecl.dump()
 		}
 	}
 
-	for _, decl := range packageblockscope.idents {
+	for _, decl := range r.packageblockscope.idents {
 		vardecl, ok := decl.(*AstVarDecl)
 		if ok {
 			debugf("resolve decl :")
-			resolveVar(vardecl)
+			r.resolveVar(vardecl)
 			vardecl.dump()
 		}
 	}

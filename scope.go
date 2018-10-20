@@ -26,10 +26,6 @@ var predeclaredFunctions = []*AstFuncDecl{
 	},
 }
 
-var universeblockscope *scope
-var packageblockscope *scope
-var currentscope *scope
-
 type scope struct {
 	idents map[identifier]interface{}
 	outer  *scope

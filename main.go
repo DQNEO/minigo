@@ -37,17 +37,20 @@ func main() {
 	}
 
 	// init scope
-	universeblockscope = newUniverseBlockScope()
-	packageblockscope = newScope(universeblockscope)
+	universeblockscope := newUniverseBlockScope()
+	packageblockscope := newScope(universeblockscope)
 
 	// parse
 	p := &parser{}
-	astFile := p.parseSourceFile(sourceFile)
+	astFile := p.parseSourceFile(sourceFile, packageblockscope)
 
 	if debugAst {
 		astFile.dump()
 	}
-	resolve()
+	r := &resolver{
+		packageblockscope:packageblockscope,
+	}
+	r.resolve()
 	if debugAst {
 		astFile.dump()
 	}
