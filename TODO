@@ -1,6 +1,5 @@
 * Gtype bool, struct ,etc
 * Gtype2string
-* Refactor stack tracing of parser
 * Type
 * Show source position on error
 * re-organize dump/debug functions
