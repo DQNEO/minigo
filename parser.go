@@ -14,18 +14,32 @@ type parser struct {
 	localvars []*ExprVariable
 }
 
+type TokenStream struct {
+	tokens []*Token
+	index  int
+}
+
 func (p *parser) peekToken() *Token {
-	tok := p.tokenStream.peekToken()
-	return tok
+	ts := p.tokenStream
+	if ts.index > len(ts.tokens)-1 {
+		return makeToken("EOF", "")
+	}
+	r := ts.tokens[ts.index]
+	return r
 }
 
 func (p *parser) readToken() *Token {
-	tok := p.tokenStream.readToken()
-	return tok
+	ts := p.tokenStream
+	if ts.index > len(ts.tokens)-1 {
+		return makeToken("EOF", "")
+	}
+	r := ts.tokens[ts.index]
+	ts.index++
+	return r
 }
 
 func (p *parser) unreadToken() {
-	p.tokenStream.unreadToken()
+	p.tokenStream.index--
 }
 
 func (p *parser) readIdent() identifier {
@@ -826,7 +840,23 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *AstSourceFile {
-	p.tokenStream = newTokenStreamFromFile(sourceFile)
+
+	// tokenize
+	bs := NewByteStream(sourceFile)
+	tokens := tokenize(bs)
+	assert(len(tokens) > 0, "tokens should have length")
+
+	/*
+	if debugToken {
+		renderTokens(tokens)
+	}
+	*/
+
+	p.tokenStream = &TokenStream{
+		tokens: tokens,
+		index:  0,
+	}
+
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 

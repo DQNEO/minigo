@@ -14,31 +14,6 @@ var keywords = []string{
 
 type identifier string
 
-type TokenStream struct {
-	tokens []*Token
-	index  int
-}
-
-func (ts *TokenStream) peekToken() *Token {
-	if ts.index > len(ts.tokens)-1 {
-		return makeToken("EOF", "")
-	}
-	r := ts.tokens[ts.index]
-	return r
-}
-
-func (ts *TokenStream) readToken() *Token {
-	if ts.index > len(ts.tokens)-1 {
-		return makeToken("EOF", "")
-	}
-	r := ts.tokens[ts.index]
-	ts.index++
-	return r
-}
-
-func (ts *TokenStream) unreadToken() {
-	ts.index--
-}
 
 type TokenType string
 
@@ -556,6 +531,7 @@ func (tok *Token) render() string {
 	}
 }
 
+/*
 func renderTokens(tokens []*Token) {
 	debugf("==== Start Render Tokens ===")
 	for _, tok := range tokens {
@@ -563,19 +539,5 @@ func renderTokens(tokens []*Token) {
 	}
 	debugf("==== End Render Tokens ===")
 }
+*/
 
-func newTokenStreamFromFile(path string) *TokenStream {
-	// tokenize
-	bs := NewByteStream(path)
-	tokens := tokenize(bs)
-	assert(len(tokens) > 0, "tokens should have length")
-
-	if debugToken {
-		renderTokens(tokens)
-	}
-
-	return &TokenStream{
-		tokens: tokens,
-		index:  0,
-	}
-}
