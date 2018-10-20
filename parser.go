@@ -309,7 +309,7 @@ func priority(op string) int {
 	default :
 		errorf("unkown operator %s", op)
 	}
-	return 0;
+	return 0
 }
 
 func parseExpr() Expr {
