@@ -160,3 +160,49 @@ type StructField struct {
 	name  identifier
 	gtype *Gtype
 }
+
+// https://golang.org/ref/spec#Operands
+type AstOperandName struct {
+	pkg   identifier
+	ident identifier
+}
+
+type ExprSliced struct {
+	ref  *AstOperandName
+	low  Expr
+	high Expr
+}
+
+func (e *ExprSliced) dump() {
+
+}
+func (e *ExprSliced) emit() {
+
+}
+
+type ExprIndexAccess struct {
+	ref   *AstOperandName
+	index Expr
+}
+
+func (e *ExprIndexAccess) dump() {
+
+}
+
+func (e *ExprIndexAccess) emit() {
+
+}
+
+type ExprArrayLiteral struct {
+	gtype  *Gtype
+	values []Expr
+}
+
+func (e ExprArrayLiteral) emit() {
+
+}
+
+func (e ExprArrayLiteral) dump() {
+
+}
+
