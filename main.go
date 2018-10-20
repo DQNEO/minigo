@@ -36,9 +36,13 @@ func main() {
 		parseOpts(os.Args[1:len(os.Args)])
 	}
 
+	// init scope
+	universeblockscope = newUniverseBlockScope()
+	packageblockscope = newScope(universeblockscope)
+
 	// parse
-	ts := newTokenStreamFromFile(sourceFile)
-	astFile := parse(ts)
+	p := &parser{}
+	astFile := p.parseSourceFile(sourceFile)
 
 	if debugAst {
 		astFile.dump()
