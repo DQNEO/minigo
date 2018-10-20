@@ -684,16 +684,16 @@ func parseFuncDef() *AstFuncDecl {
 	}
 	debugf("scope:%s", currentscope)
 	body := parseCompoundStmt()
-	_localvars := localvars
-	localvars = nil
-	currentscope = packageblockscope
-	return &AstFuncDecl{
+	r := &AstFuncDecl{
 		fname:     fname,
 		rettype:   rettype,
 		params:    params,
-		localvars: _localvars,
+		localvars: localvars,
 		body:      body,
 	}
+	localvars = nil
+	currentscope = packageblockscope
+	return r
 }
 
 func parseImport() *AstImportDecl {
