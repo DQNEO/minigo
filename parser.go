@@ -734,7 +734,7 @@ func (p *parser) parseImportDecls() []*AstImportDecl {
 
 // read after "struct" token
 func (p *parser) parseStructDef() *AstStructDef {
-	assert(p.lastToken().isKeyword("struct"),"")
+	assert(p.lastToken().isKeyword("struct"),`require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
 	p.expect("{")
 	var fields []*StructField
