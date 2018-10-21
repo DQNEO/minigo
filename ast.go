@@ -93,8 +93,12 @@ type AstPackageClause struct {
 	name identifier
 }
 
+type AstImportSpec struct {
+	packageName identifier
+	path string
+}
 type AstImportDecl struct {
-	paths []string
+	specs[] *AstImportSpec
 }
 
 type AstCompountStmt struct {
@@ -123,7 +127,6 @@ type AstSourceFile struct {
 	pkg          *AstPackageClause
 	imports      []*AstImportDecl
 	decls        []*AstTopLevelDecl
-	packageNames map[identifier]string
 }
 
 type AstPackageRef struct {

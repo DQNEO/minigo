@@ -87,7 +87,7 @@ func (a *AstSourceFile) dump() {
 	debugf("==== Dump AstExpr Start ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {
-		debugf("import \"%v\"", imprt.paths)
+		debugf("import \"%v\"", imprt.specs)
 	}
 	for _, decl := range a.decls {
 		if decl.funcdecl != nil {

@@ -12,6 +12,7 @@ type parser struct {
 	currentScope *scope
 	globalvars []*ExprVariable
 	localvars []*ExprVariable
+	importedNames map[identifier]bool
 }
 
 type TokenStream struct {
@@ -122,6 +123,8 @@ func (p *parser) readFuncallArgs() []Expr {
 	}
 }
 
+//var outerPackages map[identifier](map[identifier]interface{})
+
 func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	defer p.traceOut(p.traceIn())
 
@@ -131,8 +134,15 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	var pkg identifier
 	var ident identifier
 	if tok.isPunct(".") {
+		// Assume firstIdent is a package name
 		pkg = firstIdent
-		ident = p.readIdent()
+		_, ok := p.importedNames[pkg]
+		if ok {
+			ident = p.readIdent()
+			debugf("Reference to outer entity %s.%s", pkg, ident)
+		} else {
+			//return nil
+		}
 	} else {
 		p.unreadToken()
 		pkg = ""
@@ -692,12 +702,16 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 func (p *parser) parseImport() *AstImportDecl {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
-	var paths []string
+	var specs []*AstImportSpec
 	if tok.isPunct("(") {
 		for {
 			tok := p.readToken()
 			if tok.isTypeString() {
-				paths = append(paths, tok.sval)
+				name := identifier(tok.sval)
+				specs = append(specs, &AstImportSpec{
+					packageName: name,
+					path:        tok.sval,
+				})
 				p.expect(";")
 			} else if tok.isPunct(")") {
 				break
@@ -709,12 +723,16 @@ func (p *parser) parseImport() *AstImportDecl {
 		if !tok.isTypeString() {
 			errorf("import expects package name")
 		}
-		paths = []string{tok.sval}
+		name := identifier(tok.sval)
+		specs = []*AstImportSpec{&AstImportSpec{
+			packageName: name,
+			path:        tok.sval,
+		},
+		}
 	}
-
 	p.expect(";")
 	return &AstImportDecl{
-		paths: paths,
+		specs: specs,
 	}
 }
 
@@ -882,14 +900,13 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	r.pkg = p.expectPackageClause()
 	r.imports = p.parseImportDecls()
 
-	r.packageNames = make(map[identifier]string)
+	p.importedNames = make(map[identifier]bool)
 	for _, importdecl := range r.imports {
-		for _, path := range importdecl.paths {
-			ident := identifier(path)
-			r.packageNames[ident] = path
+		for _, spec := range importdecl.specs {
+			p.importedNames[spec.packageName] = true
 		}
 	}
-
+	debugPrintV(p.importedNames)
 	r.decls = p.parseTopLevelDecls()
 	return r
 }
