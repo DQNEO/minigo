@@ -417,6 +417,7 @@ func (p *parser) parseType() *Gtype {
 }
 
 func (p *parser) parseDeclVar(isGlobal bool) *AstVarDecl {
+	assert(p.lastToken().isKeyword("var"),`require "var" is already read`)
 	defer p.traceOut(p.traceIn())
 	// read name
 	name := p.readIdent()
