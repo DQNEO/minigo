@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
-	"strings"
+
 )
 
 type parser struct {
@@ -79,8 +79,8 @@ func getCallerName(n int) string {
 		errorf("Unable to get caller")
 	}
 	details := runtime.FuncForPC(pc)
-	r := (strings.Split(details.Name(), "."))[1]
-	return r
+	//r := (strings.Split(details.Name(), "."))[2]
+	return details.Name()
 }
 
 func (p *parser) traceIn() int {
