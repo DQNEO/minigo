@@ -7,6 +7,7 @@ import (
 
 var debugAst = false
 var debugToken = false
+var debugParser = false
 var debugMode = false
 var sourceFile string
 
@@ -17,6 +18,9 @@ func parseOpts(args []string) {
 		}
 		if opt == "-a" {
 			debugAst = true
+		}
+		if opt == "-p" {
+			debugParser = true
 		}
 		if opt == "-d" {
 			debugMode = true

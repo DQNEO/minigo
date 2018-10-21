@@ -84,12 +84,18 @@ func getCallerName(n int) string {
 }
 
 func (p *parser) traceIn() int {
+	if (!debugParser) {
+		return 0
+	}
 	debugf("func %s start with %s", getCallerName(2), p.peekToken())
 	debugNest++
 	return 0
 }
 
 func (p *parser) traceOut(_ int) {
+	if (!debugParser) {
+		return
+	}
 	debugNest--
 	debugf("func %s end", getCallerName(2))
 }
