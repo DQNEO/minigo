@@ -457,7 +457,7 @@ func (p *parser) parseType() *Gtype {
 	return gInt // FIXME
 }
 
-func (p *parser) parseDeclVar(isGlobal bool) *AstVarDecl {
+func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	assert(p.lastToken().isKeyword("var"),`require "var" is already read`)
 	defer p.traceOut(p.traceIn())
 	// read name
@@ -630,7 +630,7 @@ func (p *parser) parseStmt() *AstStmt {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	if tok.isKeyword("var") {
-		return &AstStmt{declvar: p.parseDeclVar(false)}
+		return &AstStmt{declvar: p.parseVarDecl(false)}
 	} else if tok.isKeyword("const") {
 		return &AstStmt{constdecl: p.parseConstDecl()}
 	} else if tok.isKeyword("type") {
@@ -866,7 +866,7 @@ func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 	p.isFunctionScope = false
 	switch {
 	case tok.isKeyword("var"):
-		vardecl := p.parseDeclVar(true)
+		vardecl := p.parseVarDecl(true)
 		r = &AstTopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
 		constdecl := p.parseConstDecl()
