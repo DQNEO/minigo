@@ -173,6 +173,29 @@ func emitFuncdef(f *AstFuncDecl) {
 	emitFuncEpilogue()
 }
 
+func evalIntExpr(e Expr) int {
+	switch e.(type) {
+	case *ExprNumberLiteral:
+		return e.(*ExprNumberLiteral).val
+	case *AstIdentExpr:
+		return evalIntExpr(e.(*AstIdentExpr).expr)
+	case *ExprBinop:
+		binop := e.(*ExprBinop)
+		switch binop.op {
+		case "+":
+			return evalIntExpr(binop.left) + evalIntExpr(binop.right)
+		case "-":
+			return evalIntExpr(binop.left) - evalIntExpr(binop.right)
+		case "*":
+			return evalIntExpr(binop.left) * evalIntExpr(binop.right)
+
+		}
+	default:
+		errorf("unkown type %v to eval", e)
+	}
+	return 0
+}
+
 func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	assert(variable.isGlobal, "should be global")
 	emitLabel(".global %s", variable.varname)
@@ -181,11 +204,8 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		// set zero value
 		emit(".long %d", 0)
 	} else {
-		ival, ok := initval.(*ExprNumberLiteral)
-		if !ok {
-			errorf("only number can be assign to global variables but got %s", initval)
-		}
-		emit(".long %d", ival.val)
+		val := evalIntExpr(initval)
+		emit(".long %d", val)
 	}
 }
 

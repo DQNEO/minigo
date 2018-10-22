@@ -1048,11 +1048,16 @@ func (r *resolver) resolve(p *parser) {
 		if entity == nil {
 			errorf("ident %s not found", ie.name)
 		}
-		cnst , ok := entity.(*AstConstDecl)
-		if !ok {
+		switch entity.(type) {
+		case *AstConstDecl:
+			cnst := entity.(*AstConstDecl)
+			ie.expr = cnst.variable
+		case *AstVarDecl:
+			vr := entity.(*AstVarDecl)
+			ie.expr = vr.initval
+		default:
 			errorf("ident %s is not a const", ie.name)
 		}
-		ie.expr = cnst.variable
 	}
 
 }

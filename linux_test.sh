@@ -44,6 +44,7 @@ test_file min
 test_file test
 test_file hello
 test_file const
+test_file var
 
 test_main "var i int; i = 3; printf(\"%d\",i)" 3
 test_main "printf(\"%d\",1); printf(\"%d\",7)" 17
