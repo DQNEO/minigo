@@ -279,6 +279,12 @@ func (p *parser) parsePrim() Expr {
 		return &ExprNumberLiteral{
 			val: ival,
 		}
+	case tok.isTypeChar():
+		sval := tok.sval
+		c := sval[0]
+		return &ExprNumberLiteral{
+			val: int(c),
+		}
 	case tok.isPunct("["):
 		return p.parseArrayLiteral()
 	default:
@@ -473,7 +479,7 @@ func (p *parser) parseDeclVar(isGlobal bool) *AstVarDecl {
 		tok3 := p.readToken()
 		if tok3.isPunct("=") {
 			initval = p.parseExpr()
-			p.expect(";")
+			//p.expect(";")
 		} else if tok3.isPunct(";") {
 			// k
 		} else {

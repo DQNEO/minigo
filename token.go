@@ -82,6 +82,10 @@ func (tok *Token) isTypeInt() bool {
 	return tok != nil && tok.typ == T_INT
 }
 
+func (tok *Token) isTypeChar() bool {
+	return tok != nil && tok.typ == T_CHAR
+}
+
 func (tok *Token) isTypeString() bool {
 	return tok != nil && tok.typ == T_STRING
 }
