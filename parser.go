@@ -1052,7 +1052,7 @@ func (r *resolver) resolve(p *parser) {
 		if !ok {
 			errorf("ident %s is not a const", ie.name)
 		}
-		ie.expr = cnst.variable.val
+		ie.expr = cnst.variable
 	}
 
 }
