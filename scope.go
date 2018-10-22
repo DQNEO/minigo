@@ -3,29 +3,6 @@ package main
 var gInt = &Gtype{typ: "scalar", size: 8}
 var gBool = &Gtype{typ: "scalar", size: 8}
 
-var predeclaredConsts = []*AstConstDecl{
-	&AstConstDecl{
-		variable: &ExprConstVariable{
-			name:  "true",
-			gtype: gBool,
-			val:   &ExprNumberLiteral{1},
-		},
-	},
-	&AstConstDecl{
-		variable: &ExprConstVariable{
-			name:  "false",
-			gtype: gBool,
-			val:   &ExprNumberLiteral{0},
-		},
-	},
-}
-
-var predeclaredFunctions = []*AstFuncDecl{
-	{
-		fname: "len",
-	},
-}
-
 type scope struct {
 	idents map[identifier]interface{}
 	outer  *scope
@@ -88,11 +65,23 @@ func newUniverseBlockScope() *scope {
 	r.setTypeDecl("int", &AstTypeDecl{gtype: gInt})
 	r.setTypeDecl("bool", &AstTypeDecl{gtype: gBool})
 
-	for _, c := range predeclaredConsts {
-		r.setConstDecl(c.variable.name, c)
-	}
-	for _, f := range predeclaredFunctions {
-		r.setFuncDecl(f.fname, &AstFuncDecl{})
-	}
+	r.setConstDecl(identifier("iota"), &AstConstDecl{})
+	r.setConstDecl("true", &AstConstDecl{
+		variable: &ExprConstVariable{
+			name:  "true",
+			gtype: gBool,
+			val:   &ExprNumberLiteral{1},
+		},
+	})
+	r.setConstDecl("false", &AstConstDecl{
+		variable: &ExprConstVariable{
+			name:  "false",
+			gtype: gBool,
+			val:   &ExprNumberLiteral{0},
+		},
+	})
+
+
+	r.setFuncDecl("len", &AstFuncDecl{fname: "len",})
 	return r
 }

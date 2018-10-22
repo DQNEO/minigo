@@ -42,7 +42,6 @@ func main() {
 
 	// init scope
 	universeblockscope := newUniverseBlockScope()
-	universeblockscope.setConstDecl(identifier("iota"), &AstConstDecl{})
 	packageblockscope := newScope(universeblockscope)
 
 	// parse
