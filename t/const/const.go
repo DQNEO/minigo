@@ -6,10 +6,9 @@ const a = b
 const b = 1
 
 const x = iota
-const iota = 7
-
+const iota = 2
 
 func main() {
 	fmt.Printf("1 == %d\n", a)
-	fmt.Printf("7 == %d\n", x)
+	fmt.Printf("2 == %d\n", x)
 }
