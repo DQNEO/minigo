@@ -77,7 +77,13 @@ func (ast *ExprVariable) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	ast.val.emit()
+	switch ast.val.(type) {
+	case *AstIdentExpr:
+		e := ast.val.(*AstIdentExpr)
+		e.expr.emit()
+	default:
+		ast.val.emit()
+	}
 }
 
 func (ast *ExprBinop) emit() {

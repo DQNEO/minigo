@@ -8,6 +8,8 @@ import (
 
 type parser struct {
 	tokenStream *TokenStream
+	isFunctionScope bool
+	unresolvedident []*AstIdentExpr
 	packageBlockScope *scope
 	currentScope *scope
 	globalvars []*ExprVariable
@@ -125,6 +127,19 @@ func (p *parser) readFuncallArgs() []Expr {
 
 //var outerPackages map[identifier](map[identifier]interface{})
 
+type AstIdentExpr struct {
+	name identifier
+	expr Expr
+}
+
+func (a *AstIdentExpr) emit() {
+	a.expr.emit()
+}
+
+func (a *AstIdentExpr) dump() {
+	a.expr.dump()
+}
+
 func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	defer p.traceOut(p.traceIn())
 
@@ -211,20 +226,30 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 		p.unreadToken()
 	}
 
-	v := p.currentScope.get(firstIdent)
-	if v == nil {
-		errorf("Undefined variable: %s", firstIdent)
-		return nil
+	if p.isFunctionScope {
+		v := p.currentScope.get(firstIdent)
+		if v == nil {
+			errorf("Undefined variable: %s", firstIdent)
+			return nil
+		}
+		vardecl, _ := v.(*AstVarDecl)
+		if vardecl != nil {
+			return vardecl.variable
+		}
+		constdecl, _ := v.(*AstConstDecl)
+		if constdecl != nil {
+			return constdecl.variable
+		}
+		errorf("variable not found %v", firstIdent)
+	} else {
+		// top level. do not lookup ident yet
+		r := &AstIdentExpr{
+			name: ident,
+		}
+		p.unresolvedident = append(p.unresolvedident , r)
+		return r
+
 	}
-	vardecl, _ := v.(*AstVarDecl)
-	if vardecl != nil {
-		return vardecl.variable
-	}
-	constdecl, _ := v.(*AstConstDecl)
-	if constdecl != nil {
-		return constdecl.variable
-	}
-	errorf("variable not found %v", firstIdent)
 	return nil
 }
 
@@ -687,6 +712,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		assert(tok.isPunct("{"), "begin of func body")
 	}
 	debugf("scope:%s", p.currentScope)
+	p.isFunctionScope = true
 	body := p.parseCompoundStmt()
 	r := &AstFuncDecl{
 		fname:     fname,
@@ -831,6 +857,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	var r *AstTopLevelDecl
+	p.isFunctionScope = false
 	switch {
 	case tok.isKeyword("var"):
 		vardecl := p.parseDeclVar(true)
@@ -990,7 +1017,7 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 }
 
 //TODO: resolve local scope
-func (r *resolver) resolve() {
+func (r *resolver) resolve(p *parser) {
 	for _, decl := range r.packageblockscope.idents {
 		typedecl, ok := decl.(*AstTypeDecl)
 		if ok {
@@ -1012,7 +1039,20 @@ func (r *resolver) resolve() {
 		if ok {
 			debugf("resolve decl :")
 			r.resolveVar(vardecl)
-			vardecl.dump()
+			//vardecl.dump()
 		}
 	}
+
+	for _, ie := range p.unresolvedident {
+		entity := p.packageBlockScope.get(ie.name)
+		if entity == nil {
+			errorf("ident %s not found", ie.name)
+		}
+		cnst , ok := entity.(*AstConstDecl)
+		if !ok {
+			errorf("ident %s is not a const", ie.name)
+		}
+		ie.expr = cnst.variable.val
+	}
+
 }

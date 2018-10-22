@@ -41,6 +41,7 @@ func main() {
 test_file t/min.go /dev/null
 test_file t/test.go t/expected/test.txt
 test_file t/hello.go t/expected/hello.txt
+test_file t/const.go t/expected/const.txt
 
 test_main "var i int; i = 3; printf(\"%d\",i)" 3
 test_main "printf(\"%d\",1); printf(\"%d\",7)" 17

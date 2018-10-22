@@ -42,6 +42,7 @@ func main() {
 
 	// init scope
 	universeblockscope := newUniverseBlockScope()
+	universeblockscope.setConstDecl(identifier("iota"), &AstConstDecl{})
 	packageblockscope := newScope(universeblockscope)
 
 	// parse
@@ -54,7 +55,7 @@ func main() {
 	r := &resolver{
 		packageblockscope:packageblockscope,
 	}
-	r.resolve()
+	r.resolve(p)
 	if debugAst {
 		astFile.dump()
 	}
