@@ -14,6 +14,7 @@ function test_file {
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
     diff -u out/actual.txt $expected
+    echo "ok ... $src"
 }
 
 function test_main {
@@ -31,7 +32,7 @@ func main() {
     gcc -no-pie -o $executable $as_file
     local actual=`$executable`
     if [[ "$actual" -eq "$expected" ]];then
-        echo "ok"
+        echo "ok ... main"
     else
         echo "not ok"
         exit 1
