@@ -201,8 +201,9 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 			index := p.parseExpr()
 			tok := p.readToken()
 			if tok.isPunct("]") {
+				variable := p.ident2expression(firstIdent)
 				return &ExprIndexAccess{
-					ref:   operand,
+					variable:   variable,
 					index: index,
 				}
 			} else if tok.isPunct(":") {
@@ -222,10 +223,14 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 		p.unreadToken()
 	}
 
+	return p.ident2expression(firstIdent)
+}
+
+func (p *parser) ident2expression(id identifier) Expr {
 	if p.isFunctionScope {
-		v := p.currentScope.get(firstIdent)
+		v := p.currentScope.get(id)
 		if v == nil {
-			errorf("Undefined variable: %s", firstIdent)
+			errorf("Undefined variable: %s", id)
 			return nil
 		}
 		vardecl, _ := v.(*AstVarDecl)
@@ -236,17 +241,18 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 		if constdecl != nil {
 			return constdecl.variable
 		}
-		errorf("variable not found %v", firstIdent)
+		errorf("variable not found %v", id)
 	} else {
 		// top level. do not lookup ident yet
 		r := &AstIdentExpr{
-			name: ident,
+			name: id,
 		}
 		p.unresolvedident = append(p.unresolvedident , r)
 		return r
-
 	}
+
 	return nil
+
 }
 
 var stringIndex = 0

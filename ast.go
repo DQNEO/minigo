@@ -213,29 +213,13 @@ func (e *ExprSliced) emit() {
 }
 
 type ExprIndexAccess struct {
-	ref   *AstOperandName
+	variable Expr
 	index Expr
 }
 
 func (e *ExprIndexAccess) dump() {
 	errorf("TBD")
 
-}
-
-func (e *ExprIndexAccess) emit() {
-	varname := e.ref.ident
-	emit("lea %s(%%rip), %%rax", varname)
-	emit("push %%rax")
-	e.index.emit()
-	emit("mov %%rax, %%rcx")
-	size := 4
-	emit("mov $%d, %%rax", size)
-	emit("imul %%rcx, %%rax")
-	emit("push %%rax")
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("add %%rcx , %%rbx")
-	emit("mov (%%rbx), %%rax")
 }
 
 type ExprArrayLiteral struct {

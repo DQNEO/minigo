@@ -144,6 +144,29 @@ func emitCompound(ast *AstCompountStmt) {
 
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
+func (e *ExprIndexAccess) emit() {
+	variable := e.variable
+	var varname identifier
+	switch variable.(type) {
+	case *ExprVariable:
+		varname = variable.(*ExprVariable).varname
+	case *AstIdentExpr:
+		varname = variable.(*AstIdentExpr).name
+	}
+	emit("lea %s(%%rip), %%rax", varname)
+	emit("push %%rax")
+	e.index.emit()
+	emit("mov %%rax, %%rcx")
+	size := 4
+	emit("mov $%d, %%rax", size)
+	emit("imul %%rcx, %%rax")
+	emit("push %%rax")
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("add %%rcx , %%rbx")
+	emit("mov (%%rbx), %%rax")
+}
+
 func (funcall *ExprFuncall) emit() {
 	fname := funcall.fname
 	emit("# funcall %s", fname)
@@ -211,6 +234,7 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		arrayliteral, ok := initval.(*ExprArrayLiteral)
 		assert(ok, "should be array lieteral")
 		for _, value := range arrayliteral.values {
+			debugPrintV(value)
 			emit(".long %d", evalIntExpr(value))
 		}
 	} else {
