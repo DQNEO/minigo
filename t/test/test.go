@@ -101,9 +101,11 @@ func f15() {
 	var i int
 	var a int
 	var b int
+	/*
 	for a, b := range []int{1,2,3} {
 		sum = a + b
 	}
+	*/
 	i = sum + a + b
 	sum = i
 }

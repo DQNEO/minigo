@@ -102,11 +102,17 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
-func assignLocal(left *ExprVariable, right Expr) {
-	assert(!left.isGlobal, "should be a local var")
+func assignLocal(left Expr, right Expr) {
+	//assert(!left.isGlobal, "should be a local var")
 	right.emit()
-	emit("push %%rax")
-	emit("mov %%eax, %d(%%rbp)", left.offset)
+	switch left.(type) {
+	case *ExprVariable:
+		vr := left.(*ExprVariable)
+		emit("push %%rax")
+		emit("mov %%eax, %d(%%rbp)", vr.offset)
+	default:
+		errorf("Unexpected type %v", left)
+	}
 }
 
 func (ast *AstAssignment) emit() {
@@ -198,14 +204,23 @@ func evalIntExpr(e Expr) int {
 
 func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	assert(variable.isGlobal, "should be global")
+	assert(variable.gtype != nil, "variable has gtype")
 	emitLabel(".global %s", variable.varname)
 	emitLabel("%s:", variable.varname)
-	if initval == nil {
-		// set zero value
-		emit(".long %d", 0)
+	if variable.gtype.typ == G_ARRAY {
+		arrayliteral, ok := initval.(*ExprArrayLiteral)
+		assert(ok, "should be array lieteral")
+		for _, value := range arrayliteral.values {
+			emit(".long %d", evalIntExpr(value))
+		}
 	} else {
-		val := evalIntExpr(initval)
-		emit(".long %d", val)
+		if initval == nil {
+			// set zero value
+			emit(".long %d", 0)
+		} else {
+			val := evalIntExpr(initval)
+			emit(".long %d", val)
+		}
 	}
 }
 

@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Expr interface {
 	emit()
 	dump()
@@ -57,7 +59,7 @@ type AstConstDecl struct {
 }
 
 type AstAssignment struct {
-	left  *ExprVariable // lvalue
+	left  Expr
 	right Expr
 }
 
@@ -144,12 +146,39 @@ type AstTypeDecl struct {
 	gtype   *Gtype // resolved later
 }
 
+type GTYPE_TYPE int
+const (
+	G_UNKOWN GTYPE_TYPE = iota
+	G_INT
+	G_BOOL
+	G_BYTE
+	G_STRUCT
+	G_ARRAY
+	G_SLICE
+	G_STRING
+	G_MAP
+	G_POINTER
+)
+
 type Gtype struct {
-	typ       string //
-	size      int
-	ptr       *Gtype
-	structdef *AstStructDef
+	typ       GTYPE_TYPE
+	size      int // for scalar type like int, bool, byte
+	ptr       *Gtype // for array, pointer, etc
+	structdef *AstStructDef // for struct type
 	length    int // for fixed array
+}
+
+func (gtype *Gtype) String() string {
+	switch gtype.typ {
+	case G_INT:
+		return "int"
+	case G_ARRAY:
+		elm := gtype.ptr
+		return fmt.Sprintf("[]%s", elm)
+	default:
+		errorf("unkown type: %d", gtype.typ)
+	}
+	return ""
 }
 
 type AstInterfaceDef struct {
@@ -204,8 +233,3 @@ type ExprArrayLiteral struct {
 func (e ExprArrayLiteral) emit() {
 
 }
-
-func (e ExprArrayLiteral) dump() {
-
-}
-

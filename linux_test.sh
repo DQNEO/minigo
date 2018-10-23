@@ -10,11 +10,12 @@ function test_file {
     local basename=$1
     local src=t/$basename/${basename}.go
     local expected=t/expected/${basename}.txt
+    echo -n "test_file $src  ... "
     ./${prog_name} $src > $as_file
     gcc -no-pie -o $executable $as_file
     $executable > out/actual.txt
     diff -u out/actual.txt $expected
-    echo "ok ... $src"
+    echo ok
 }
 
 function test_main {

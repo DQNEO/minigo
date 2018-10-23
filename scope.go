@@ -1,7 +1,7 @@
 package main
 
-var gInt = &Gtype{typ: "scalar", size: 8}
-var gBool = &Gtype{typ: "scalar", size: 8}
+var gInt = &Gtype{typ: G_INT, size: 8}
+var gBool = &Gtype{typ: G_BOOL, size: 8}
 
 type scope struct {
 	idents map[identifier]interface{}

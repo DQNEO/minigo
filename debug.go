@@ -59,9 +59,11 @@ func (a *AstVarDecl) dump() {
 		debugf("decl var %s %s",
 			a.variable.varname, a.variable.gtype)
 	} else {
-		debugf("decl var %s %s = (%s)",
-			a.variable.varname, a.variable.gtype, a.initval)
+		debugf("decl var")
+		debugNest++
+		a.variable.dump()
 		a.initval.dump()
+		debugNest--
 	}
 }
 
@@ -120,12 +122,25 @@ func (ast *ExprConstVariable) dump() {
 	debugf("var %s", ast.name)
 }
 
+func (e ExprArrayLiteral) dump() {
+	debugNest++
+	for _, v := range e.values {
+		v.dump()
+	}
+	debugNest--
+}
+
 func (ast *ExprNumberLiteral) dump() {
 	debugf("int %d", ast.val)
 }
 
 func (ast *ExprStringLiteral) dump() {
 	debugf("\"%s\"", ast.val)
+}
+
+func (a *AstIdentExpr) dump() {
+	assert(a.expr != nil , "ident.expr is set")
+	a.expr.dump()
 }
 
 func (ast *ExprBinop) dump() {

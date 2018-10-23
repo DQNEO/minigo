@@ -136,10 +136,6 @@ func (a *AstIdentExpr) emit() {
 	a.expr.emit()
 }
 
-func (a *AstIdentExpr) dump() {
-	a.expr.dump()
-}
-
 func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	defer p.traceOut(p.traceIn())
 
@@ -294,8 +290,9 @@ func (p *parser) parsePrim() Expr {
 }
 
 func (p *parser) parseArrayLiteral() Expr {
+	assert(p.lastToken().isPunct("["),"[ is read")
 	defer p.traceOut(p.traceIn())
-
+	tlen := p.readToken()
 	p.expect("]")
 	typ := p.parseType()
 	p.expect("{")
@@ -311,6 +308,7 @@ func (p *parser) parseArrayLiteral() Expr {
 		} else if tok.isTypeInt() {
 			v = &ExprNumberLiteral{val: tok.getIntval()}
 		}
+		values = append(values, v)
 		tok = p.readToken()
 		if tok.isPunct(",") {
 			continue
@@ -319,11 +317,15 @@ func (p *parser) parseArrayLiteral() Expr {
 		} else {
 			errorf("unpexpected %s", tok)
 		}
-		values = append(values, v)
+	}
+	if len(values) != tlen.getIntval() {
+		debugPrintV(values)
+		errorf("array length does not match (%d != %d)",
+			len(values), tlen.getIntval())
 	}
 
 	gtype := &Gtype{
-		typ:    "array",
+		typ:    G_ARRAY,
 		length: len(values),
 		ptr:    typ,
 	}
@@ -446,6 +448,15 @@ func (p *parser) parseType() *Gtype {
 			//_ := p.p.currentScope.getGtype(typename)
 			//return gtype
 		} else if tok.isPunct("[") {
+			// array
+			tlen := p.readToken()
+			p.expect("]")
+			typ := p.parseType()
+			return &Gtype{
+				typ: G_ARRAY,
+				length: tlen.getIntval(),
+				ptr: typ,
+			}
 		} else if tok.isPunct("]") {
 
 		} else {
@@ -458,24 +469,25 @@ func (p *parser) parseType() *Gtype {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
-	assert(p.lastToken().isKeyword("var"),`require "var" is already read`)
+	assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read name
 	name := p.readIdent()
 
 	// "=" or Type
 	tok := p.readToken()
-	//var gtype *Gtype
+	var typ *Gtype
 	var initval Expr
 	if tok.isPunct("=") {
+		// Infer mode
 		//var x = EXPR
 		initval = p.parseExpr()
-		//gtype = gInt  // FIXME: infer type
+		typ = gInt  // FIXME: infer type
 		p.expect(";")
 	} else {
 		p.unreadToken()
 		// expect Type
-		_ = p.parseType()
+		typ = p.parseType()
 		tok3 := p.readToken()
 		if tok3.isPunct("=") {
 			initval = p.parseExpr()
@@ -487,7 +499,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 		}
 	}
 
-	variable := p.newVariable(name, nil, isGlobal)
+	variable := p.newVariable(name, typ, isGlobal)
 
 	r := &AstVarDecl{
 		variable: variable,
@@ -627,6 +639,7 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 }
 
 func (p *parser) parseStmt() *AstStmt {
+	assert(p.isFunctionScope, "is in function scope")
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	if tok.isKeyword("var") {
@@ -640,17 +653,19 @@ func (p *parser) parseStmt() *AstStmt {
 	} else if tok.isKeyword("if") {
 		return &AstStmt{ifstmt: p.parseIfStmt()}
 	}
+	p.unreadToken()
+	expr1 := p.parseExpr()
 	tok2 := p.readToken()
-
 	if tok2.isPunct("=") {
+		expr2 := p.parseExpr()
+		return &AstStmt{assignment: &AstAssignment{
+			left: expr1,
+			right:expr2,
+		}}
+	} else {
 		p.unreadToken()
-		p.unreadToken()
-		//assure_lvalue(ast)
-		return &AstStmt{assignment: p.parseAssignment()}
+		return &AstStmt{expr: expr1}
 	}
-	p.unreadToken()
-	p.unreadToken()
-	return &AstStmt{expr: p.parseExpr()}
 }
 
 func (p *parser) parseCompoundStmt() *AstCompountStmt {
@@ -1014,7 +1029,7 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 			r.resolveType(typedecl)
 		}
 		decl.gtype = &Gtype{
-			typ:  "ref",
+			typ:  G_UNKOWN,
 			size: typedecl.gtype.size,
 			ptr:  typedecl.gtype,
 		}
