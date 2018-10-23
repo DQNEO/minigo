@@ -206,10 +206,10 @@ type ExprSliced struct {
 }
 
 func (e *ExprSliced) dump() {
-
+	errorf("TBD")
 }
 func (e *ExprSliced) emit() {
-
+	errorf("TBD")
 }
 
 type ExprIndexAccess struct {
@@ -218,6 +218,7 @@ type ExprIndexAccess struct {
 }
 
 func (e *ExprIndexAccess) dump() {
+	errorf("TBD")
 
 }
 
@@ -231,5 +232,5 @@ type ExprArrayLiteral struct {
 }
 
 func (e ExprArrayLiteral) emit() {
-
+	errorf("TBD")
 }
