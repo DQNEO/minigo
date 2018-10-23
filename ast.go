@@ -213,7 +213,7 @@ func (e *ExprSliced) emit() {
 }
 
 type ExprIndexAccess struct {
-	variable Expr
+	variable Expr // identexpr or variableexpr
 	index Expr
 }
 
