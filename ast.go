@@ -228,5 +228,5 @@ type ExprArrayLiteral struct {
 }
 
 func (e ExprArrayLiteral) emit() {
-	errorf("TBD")
+	errorf("DO NOT EMIT")
 }

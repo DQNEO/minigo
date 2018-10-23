@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+const INT_SIZE = 8 // not like 8cc
+
 func emit(format string, v ...interface{}) {
 	fmt.Printf("\t"+format+"\n", v...)
 }
@@ -31,15 +33,16 @@ func emitFuncPrologue(f *AstFuncDecl) {
 	// calc offset
 	var offset int
 	for i, param := range f.params {
-		offset -= 8
+		offset -= INT_SIZE
 		param.offset = offset
 		emit("push %%%s", regs[i])
 	}
 
 	var localarea int
 	for _, lvar := range f.localvars {
-		localarea -= 8
-		offset -= 8
+		area := calcAreaOfVar(lvar.gtype)
+		localarea -= area
+		offset -= area
 		lvar.offset = offset
 		debugf("set offset %d to lvar %s", lvar.offset, lvar.varname)
 	}
@@ -49,6 +52,14 @@ func emitFuncPrologue(f *AstFuncDecl) {
 	}
 
 	emit("# end of prologue")
+}
+
+func calcAreaOfVar(gtype *Gtype) int {
+	if gtype.typ == G_ARRAY {
+		return gtype.length * calcAreaOfVar(gtype.ptr)
+	} else {
+		return INT_SIZE
+	}
 }
 
 func emitFuncEpilogue() {
@@ -102,30 +113,41 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
-func assignLocal(left Expr, right Expr) {
-	//assert(!left.isGlobal, "should be a local var")
+func assignLocal(left Expr, loff int ,right Expr) {
 	right.emit()
 	switch left.(type) {
 	case *ExprVariable:
 		vr := left.(*ExprVariable)
-		emit("push %%rax")
-		emit("mov %%eax, %d(%%rbp)", vr.offset)
+		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
 	default:
 		errorf("Unexpected type %v", left)
 	}
 }
 
 func (ast *AstAssignment) emit() {
-	assignLocal(ast.left, ast.right)
+	assignLocal(ast.left, 0, ast.right)
 }
 
 func emitDeclLocalVar(ast *AstVarDecl) {
+	if ast.variable.gtype.typ == G_ARRAY &&   ast.initval != nil {
+		// initialize local array
+		debugf("initialize local array")
+		initvalues,ok := ast.initval.(*ExprArrayLiteral)
+		if !ok {
+			errorf("error?")
+		}
+		for i, val := range initvalues.values {
+			assignLocal(ast.variable, i * ast.variable.gtype.ptr.size, val)
+		}
+		return
+	}
+
 	if ast.initval == nil {
 		// assign zero value
 		ast.initval = &ExprNumberLiteral{}
 	}
 
-	assignLocal(ast.variable, ast.initval)
+	assignLocal(ast.variable,0, ast.initval)
 }
 
 func emitCompound(ast *AstCompountStmt) {
@@ -145,19 +167,35 @@ func emitCompound(ast *AstCompountStmt) {
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprIndexAccess) emit() {
+	emit("# emit *ExprIndexAccess")
 	variable := e.variable
 	var varname identifier
 	switch variable.(type) {
 	case *ExprVariable:
-		varname = variable.(*ExprVariable).varname
+		vr := variable.(*ExprVariable)
+		if vr.isGlobal {
+			varname = vr.varname
+			emit("lea %s(%%rip), %%rax", varname)
+		} else {
+			emit("lea %d(%%rbp), %%rax", vr.offset)
+		}
 	case *AstIdentExpr:
-		varname = variable.(*AstIdentExpr).name
+		ex := variable.(*AstIdentExpr).expr
+		switch ex.(type) {
+		case *ExprVariable:
+			vr := variable.(*ExprVariable)
+			if vr.isGlobal {
+				varname = vr.varname
+				emit("lea %s(%%rip), %%rax", varname)
+			} else {
+				emit("lea %d(%%rbp), %%rax", vr.offset)
+			}
+		}
 	}
-	emit("lea %s(%%rip), %%rax", varname)
 	emit("push %%rax")
 	e.index.emit()
 	emit("mov %%rax, %%rcx")
-	size := 4
+	size := 8
 	emit("mov $%d, %%rax", size)
 	emit("imul %%rcx, %%rax")
 	emit("push %%rax")
@@ -235,15 +273,15 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		assert(ok, "should be array lieteral")
 		for _, value := range arrayliteral.values {
 			debugPrintV(value)
-			emit(".long %d", evalIntExpr(value))
+			emit(".quad %d", evalIntExpr(value))
 		}
 	} else {
 		if initval == nil {
 			// set zero value
-			emit(".long %d", 0)
+			emit(".quad %d", 0)
 		} else {
 			val := evalIntExpr(initval)
-			emit(".long %d", val)
+			emit(".quad %d", val)
 		}
 	}
 }
