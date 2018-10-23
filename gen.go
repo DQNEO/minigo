@@ -153,15 +153,15 @@ func (funcall *ExprFuncall) emit() {
 	}
 
 	emit("# setting arguments")
-	for _, arg := range args {
+	for i, arg := range args {
 		debugf("arg = %v", arg)
 		arg.emit()
-		emit("push %%rax")
+		emit("push %%rax  # argument no %d", i + 1)
 	}
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop %%%s", regs[j])
+		emit("pop %%%s   # argument no %d", regs[j], j + 1)
 	}
 	emit("mov $0, %%rax")
 	emit("call %s", fname)
