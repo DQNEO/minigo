@@ -148,7 +148,7 @@ type AstTypeDecl struct {
 
 type GTYPE_TYPE int
 const (
-	G_UNKOWN GTYPE_TYPE = iota
+	G_UNRESOLVED GTYPE_TYPE = iota
 	G_INT
 	G_BOOL
 	G_BYTE
@@ -164,19 +164,24 @@ type Gtype struct {
 	typ       GTYPE_TYPE
 	size      int // for scalar type like int, bool, byte
 	ptr       *Gtype // for array, pointer, etc
+	identexpr *AstIdentExpr // for later resolution (G_UNRESOLVED)
 	structdef *AstStructDef // for struct type
 	length    int // for fixed array
 }
 
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
+	case G_UNRESOLVED:
+		return "unkown"
 	case G_INT:
 		return "int"
+	case G_BYTE:
+		return "byte"
 	case G_ARRAY:
 		elm := gtype.ptr
 		return fmt.Sprintf("[]%s", elm)
 	default:
-		errorf("unkown type: %d", gtype.typ)
+		errorf("default: %d", gtype.typ)
 	}
 	return ""
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"os"
 )
 
 type parser struct {
@@ -99,6 +100,10 @@ func (p *parser) traceOut(_ int) {
 	if (!debugParser) {
 		return
 	}
+	if r := recover(); r != nil {
+		fmt.Println(r)
+		os.Exit(1)
+	}
 	debugNest--
 	debugf("func %s end", getCallerName(2))
 }
@@ -130,6 +135,7 @@ func (p *parser) readFuncallArgs() []Expr {
 type AstIdentExpr struct {
 	name identifier
 	expr Expr
+	gtype *Gtype
 }
 
 func (a *AstIdentExpr) emit() {
@@ -251,6 +257,7 @@ func (p *parser) ident2expression(id identifier) Expr {
 		return r
 	}
 
+	errorf("TBD")
 	return nil
 
 }
@@ -292,6 +299,7 @@ func (p *parser) parsePrim() Expr {
 	default:
 		errorf("unable to handle %s", tok)
 	}
+	errorf("unable to handle %s", tok)
 	return nil
 }
 
@@ -313,7 +321,14 @@ func (p *parser) parseArrayLiteral() Expr {
 			v = &ExprStringLiteral{val: tok.sval}
 		} else if tok.isTypeInt() {
 			v = &ExprNumberLiteral{val: tok.getIntval()}
+		} else if tok.isTypeChar() {
+			v = &ExprNumberLiteral{
+				val: int(tok.sval[0]),
+			}
+		} else {
+			tok.errorf("TBD")
 		}
+		assert(v != nil, "v is not nil")
 		values = append(values, v)
 		tok = p.readToken()
 		if tok.isPunct(",") {
@@ -450,6 +465,33 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isKeyword("struct") {
 
 		} else if tok.isTypeIdent() {
+			ident := tok.getIdent()
+			if (p.isFunctionScope) {
+				gtype := p.currentScope.getGtype(ident)
+				if gtype == nil {
+					// resolve later
+					ie := &AstIdentExpr{
+						name:ident,
+					}
+					p.unresolvedident = append(p.unresolvedident, ie)
+					return &Gtype{
+						typ:       G_UNRESOLVED,
+						identexpr: ie,
+					}
+				}
+				return gtype
+			} else {
+				// resolve later
+				ie := &AstIdentExpr{
+					name:ident,
+				}
+				p.unresolvedident = append(p.unresolvedident, ie)
+				return &Gtype{
+					typ:       G_UNRESOLVED,
+					identexpr: ie,
+				}
+			}
+
 			//_ := tok.getIdent()
 			//_ := p.p.currentScope.getGtype(typename)
 			//return gtype
@@ -471,7 +513,8 @@ func (p *parser) parseType() *Gtype {
 		}
 
 	}
-	return gInt // FIXME
+	errorf("Unkown type")
+	return nil
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
@@ -479,34 +522,29 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	defer p.traceOut(p.traceIn())
 	// read name
 	name := p.readIdent()
-
-	// "=" or Type
-	tok := p.readToken()
 	var typ *Gtype
 	var initval Expr
+	// "=" or Type
+	tok := p.readToken()
 	if tok.isPunct("=") {
+		// no type. infer.
 		// Infer mode
-		//var x = EXPR
 		initval = p.parseExpr()
-		typ = gInt  // FIXME: infer type
-		p.expect(";")
+		if typ == nil {
+			typ = gInt  // FIXME: infer type
+		}
 	} else {
 		p.unreadToken()
-		// expect Type
 		typ = p.parseType()
-		tok3 := p.readToken()
-		if tok3.isPunct("=") {
+		assert(typ != nil, "has typ")
+		tok := p.readToken()
+		if tok.isPunct("=") {
 			initval = p.parseExpr()
-			//p.expect(";")
-		} else if tok3.isPunct(";") {
-			// k
-		} else {
-			errorf("Invalid token %s", tok3)
 		}
 	}
+	//p.expect(";")
 
 	variable := p.newVariable(name, typ, isGlobal)
-
 	r := &AstVarDecl{
 		variable: variable,
 		initval:  initval,
@@ -1035,7 +1073,7 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 			r.resolveType(typedecl)
 		}
 		decl.gtype = &Gtype{
-			typ:  G_UNKOWN,
+			typ:  typedecl.gtype.typ,
 			size: typedecl.gtype.size,
 			ptr:  typedecl.gtype,
 		}
@@ -1082,6 +1120,10 @@ func (r *resolver) resolve(p *parser) {
 		case *AstVarDecl:
 			vr := entity.(*AstVarDecl)
 			ie.expr = vr.initval
+		case *AstTypeDecl:
+			d := entity.(*AstTypeDecl)
+			assert(d.gtype != nil, "type decl has gtype")
+			ie.gtype = d.gtype
 		default:
 			errorf("ident %s is not a const", ie.name)
 		}

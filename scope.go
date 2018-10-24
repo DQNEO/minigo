@@ -45,13 +45,13 @@ func (sc *scope) _set(name identifier, v interface{}) {
 func (sc *scope) getGtype(name identifier) *Gtype {
 	v := sc.get(name)
 	if v == nil {
-		errorf("type %s is not defined", name)
+		return nil
 	}
-	gtype, ok := v.(*Gtype)
+	decl, ok := v.(*AstTypeDecl)
 	if !ok {
 		errorf("type %s is not defined", name)
 	}
-	return gtype
+	return decl.gtype
 }
 
 func newScope(outer *scope) *scope {

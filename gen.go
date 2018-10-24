@@ -40,6 +40,10 @@ func emitFuncPrologue(f *AstFuncDecl) {
 
 	var localarea int
 	for _, lvar := range f.localvars {
+		if lvar.gtype == nil {
+			errorf("lvar has no gtype: %s", lvar)
+		}
+		assert(lvar.gtype != nil, "lvar has gtype")
 		area := calcAreaOfVar(lvar.gtype)
 		localarea -= area
 		offset -= area
@@ -55,6 +59,7 @@ func emitFuncPrologue(f *AstFuncDecl) {
 }
 
 func calcAreaOfVar(gtype *Gtype) int {
+	assert(gtype != nil, "gtype exists")
 	if gtype.typ == G_ARRAY {
 		return gtype.length * calcAreaOfVar(gtype.ptr)
 	} else {
@@ -78,7 +83,11 @@ func (ast *ExprStringLiteral) emit() {
 
 func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
-		emit("mov %s(%%rip), %%eax", ast.varname)
+		if ast.gtype.typ == G_ARRAY {
+			emit("lea %s(%%rip), %%eax", ast.varname)
+		} else {
+			emit("mov %s(%%rip), %%eax", ast.varname)
+		}
 	} else {
 		if ast.offset == 0 {
 			errorf("offset should not be zero for localvar %s", ast.varname)
@@ -170,9 +179,10 @@ func (e *ExprIndexAccess) emit() {
 	emit("# emit *ExprIndexAccess")
 	variable := e.variable
 	var varname identifier
+	var vr *ExprVariable
 	switch variable.(type) {
 	case *ExprVariable:
-		vr := variable.(*ExprVariable)
+		vr = variable.(*ExprVariable)
 		if vr.isGlobal {
 			varname = vr.varname
 			emit("lea %s(%%rip), %%rax", varname)
@@ -183,7 +193,7 @@ func (e *ExprIndexAccess) emit() {
 		ex := variable.(*AstIdentExpr).expr
 		switch ex.(type) {
 		case *ExprVariable:
-			vr := variable.(*ExprVariable)
+			vr = variable.(*ExprVariable)
 			if vr.isGlobal {
 				varname = vr.varname
 				emit("lea %s(%%rip), %%rax", varname)
@@ -195,7 +205,13 @@ func (e *ExprIndexAccess) emit() {
 	emit("push %%rax")
 	e.index.emit()
 	emit("mov %%rax, %%rcx")
-	size := 8
+	elmType := vr.gtype.ptr
+	if elmType.typ == G_UNRESOLVED {
+		elmType = elmType.identexpr.gtype
+	}
+
+	size :=  elmType.size
+	assert(size > 0, "size > 0")
 	emit("mov $%d, %%rax", size)
 	emit("imul %%rcx, %%rax")
 	emit("push %%rax")
@@ -271,9 +287,18 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	if variable.gtype.typ == G_ARRAY {
 		arrayliteral, ok := initval.(*ExprArrayLiteral)
 		assert(ok, "should be array lieteral")
+		elmType := variable.gtype.ptr
 		for _, value := range arrayliteral.values {
-			debugPrintV(value)
-			emit(".quad %d", evalIntExpr(value))
+			assert(value !=nil, "value is set")
+			if elmType.typ == G_UNRESOLVED && elmType.identexpr != nil {
+				elmType = elmType.identexpr.gtype
+			}
+			assert(elmType != nil, "elm is not nil")
+			if elmType.size == 8 {
+				emit(".quad %d", evalIntExpr(value))
+			} else if elmType.size == 1 {
+				emit(".byte %d", evalIntExpr(value))
+			}
 		}
 	} else {
 		if initval == nil {
