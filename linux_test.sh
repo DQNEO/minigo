@@ -18,29 +18,6 @@ function test_file {
     echo ok
 }
 
-function test_main {
-    local code="$1"
-    local expected=$2
-    rm -f $as_file
-    echo -e "
-package main
-
-func main() {
-  $code
-}
-
-  " |  ./${prog_name} - > $as_file
-    gcc -no-pie -o $executable $as_file
-    local actual=`$executable`
-    if [[ "$actual" -eq "$expected" ]];then
-        echo "ok ... main"
-    else
-        echo "not ok"
-        exit 1
-    fi
-
-}
-
 test_file min
 test_file test
 test_file hello
@@ -49,11 +26,5 @@ test_file var
 test_file byte
 test_file array
 test_file type
-
-test_main "var i int; i = 3; printf(\"%d\",i)" 3
-test_main "printf(\"%d\",1); printf(\"%d\",7)" 17
-test_main 'printf("%d", 2 + 5)' 7
-test_main 'printf("%d", 2 * 3)' 6
-test_main 'printf("%d", 3 -2)' 1
 
 echo "All tests passed"

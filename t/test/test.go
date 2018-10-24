@@ -38,18 +38,18 @@ block
 */
 
 func fb() {
-	fmt.Printf("%d\n", 2 - 1)// this is a comment
-	fmt.Printf("%d\n", 1 + 1)
+	fmt.Printf("%d\n", 1)// this is a comment
+	fmt.Printf("%d\n", 4 - 2)
 	fmt.Printf("%d\n", 1 + 1 + 1) // this is another comment //
-	fmt.Printf("%d\n", 2 * 2)
+	fmt.Printf("%d\n", 1 * 2 + 2)
 	fmt.Printf("%d\n", 2 * 3 - 1)
-	fmt.Printf("%d\n", 1 + 1 * 5)
+	fmt.Printf("%d\n", 9 - 1 - 2)
 }
 
 func fc() {
 	var i int
-	i = 3
-	fmt.Printf("%d\n", i + 4)
+	i = 7
+	fmt.Printf("%d\n", i)
 }
 
 func fd() {
