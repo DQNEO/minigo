@@ -1025,7 +1025,7 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 	case identifier:
 		item := r.packageblockscope.get(constructor.(identifier))
 		if item == nil {
-			errorf("Undefined type %v", item)
+			errorf("Undefined type %v", constructor)
 		}
 		typedecl, ok := item.(*AstTypeDecl)
 		if !ok {

@@ -1,6 +1,7 @@
 package main
 
 var gInt = &Gtype{typ: G_INT, size: 8}
+var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
 
 type scope struct {
@@ -63,6 +64,7 @@ func newScope(outer *scope) *scope {
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
 	r.setTypeDecl("int", &AstTypeDecl{gtype: gInt})
+	r.setTypeDecl("byte", &AstTypeDecl{gtype: gByte})
 	r.setTypeDecl("bool", &AstTypeDecl{gtype: gBool})
 
 	r.setConstDecl(identifier("iota"), &AstConstDecl{})
