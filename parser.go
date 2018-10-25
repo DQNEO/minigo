@@ -898,21 +898,21 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	name := p.readIdent()
 	tok := p.readToken()
-	var typeConstuctor interface{}
+	var typeConstructor interface{}
 	if tok.isKeyword("struct") {
-		typeConstuctor = p.parseStructDef()
+		typeConstructor = p.parseStructDef()
 	} else if tok.isKeyword("interface") {
-		typeConstuctor = p.parseInterfaceDef()
+		typeConstructor = p.parseInterfaceDef()
 	} else if tok.isTypeIdent() {
 		ident := tok.getIdent() // name of another type
-		typeConstuctor = ident
+		typeConstructor = ident
 	} else {
 		tok.errorf("TBD")
 	}
 	r := &AstTypeDecl{
 		typedef: &AstTypeDef{
 			name:            name,
-			typeConstructor: typeConstuctor,
+			typeConstructor: typeConstructor,
 		},
 	}
 	p.currentScope.setTypeDecl(name, r)
