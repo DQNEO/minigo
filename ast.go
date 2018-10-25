@@ -137,8 +137,8 @@ type AstPackageRef struct {
 }
 
 type AstTypeDef struct {
-	name            identifier  // we need this ?
-	typeConstructor identifier // (identifier | QualifiedIdent) | TypeLiteral
+	name  identifier  // we need this ?
+	gtype *Gtype
 }
 
 type AstTypeDecl struct {
@@ -149,9 +149,12 @@ type AstTypeDecl struct {
 type GTYPE_TYPE int
 const (
 	G_UNRESOLVED GTYPE_TYPE = iota
+	G_REL
+	// below are universe block primitive types
 	G_INT
 	G_BOOL
 	G_BYTE
+	// end of universe
 	G_STRUCT
 	G_ARRAY
 	G_SLICE
@@ -162,11 +165,12 @@ const (
 
 type Gtype struct {
 	typ       GTYPE_TYPE
-	size      int // for scalar type like int, bool, byte
-	ptr       *Gtype // for array, pointer, etc
-	identexpr *AstIdentExpr // for later resolution (G_UNRESOLVED)
+	relname   identifier    // for rel type
+	size      int           // for scalar type like int, bool, byte
+	ptr       *Gtype        // for array, pointer, etc
+	relation  *Relation     // for later resolution (G_UNRESOLVED)
 	structdef *AstStructDef // for struct type
-	length    int // for fixed array
+	length    int           // for fixed array
 }
 
 func (gtype *Gtype) String() string {
@@ -218,7 +222,7 @@ func (e *ExprSliced) emit() {
 }
 
 type ExprIndexAccess struct {
-	variable Expr // identexpr or variableexpr
+	variable Expr // relation or variableexpr
 	index Expr
 }
 

@@ -98,8 +98,8 @@ func (ast *ExprVariable) emit() {
 
 func (ast *ExprConstVariable) emit() {
 	switch ast.val.(type) {
-	case *AstIdentExpr:
-		e := ast.val.(*AstIdentExpr)
+	case *Relation:
+		e := ast.val.(*Relation)
 		e.expr.emit()
 	default:
 		ast.val.emit()
@@ -189,8 +189,8 @@ func (e *ExprIndexAccess) emit() {
 		} else {
 			emit("lea %d(%%rbp), %%rax", vr.offset)
 		}
-	case *AstIdentExpr:
-		ex := variable.(*AstIdentExpr).expr
+	case *Relation:
+		ex := variable.(*Relation).expr
 		switch ex.(type) {
 		case *ExprVariable:
 			vr = variable.(*ExprVariable)
@@ -207,7 +207,7 @@ func (e *ExprIndexAccess) emit() {
 	emit("mov %%rax, %%rcx")
 	elmType := vr.gtype.ptr
 	if elmType.typ == G_UNRESOLVED {
-		elmType = elmType.identexpr.gtype
+		elmType = elmType.relation.gtype
 	}
 
 	size :=  elmType.size
@@ -260,8 +260,8 @@ func evalIntExpr(e Expr) int {
 	switch e.(type) {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
-	case *AstIdentExpr:
-		return evalIntExpr(e.(*AstIdentExpr).expr)
+	case *Relation:
+		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
 		switch binop.op {
@@ -290,8 +290,8 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		elmType := variable.gtype.ptr
 		for _, value := range arrayliteral.values {
 			assert(value !=nil, "value is set")
-			if elmType.typ == G_UNRESOLVED && elmType.identexpr != nil {
-				elmType = elmType.identexpr.gtype
+			if elmType.typ == G_UNRESOLVED && elmType.relation != nil {
+				elmType = elmType.relation.gtype
 			}
 			assert(elmType != nil, "elm is not nil")
 			if elmType.size == 8 {

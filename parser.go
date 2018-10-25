@@ -10,7 +10,7 @@ import (
 type parser struct {
 	tokenStream *TokenStream
 	isFunctionScope bool
-	unresolvedident []*AstIdentExpr
+	unresolvedident []*Relation
 	packageBlockScope *scope
 	currentScope *scope
 	globalvars []*ExprVariable
@@ -132,13 +132,13 @@ func (p *parser) readFuncallArgs() []Expr {
 
 //var outerPackages map[identifier](map[identifier]interface{})
 
-type AstIdentExpr struct {
+type Relation struct {
 	name identifier
 	expr Expr
 	gtype *Gtype
 }
 
-func (a *AstIdentExpr) emit() {
+func (a *Relation) emit() {
 	a.expr.emit()
 }
 
@@ -250,7 +250,7 @@ func (p *parser) ident2expression(id identifier) Expr {
 		errorf("variable not found %v", id)
 	} else {
 		// top level. do not lookup ident yet
-		r := &AstIdentExpr{
+		r := &Relation{
 			name: id,
 		}
 		p.unresolvedident = append(p.unresolvedident , r)
@@ -470,25 +470,25 @@ func (p *parser) parseType() *Gtype {
 				gtype := p.currentScope.getGtype(ident)
 				if gtype == nil {
 					// resolve later
-					ie := &AstIdentExpr{
+					ie := &Relation{
 						name:ident,
 					}
 					p.unresolvedident = append(p.unresolvedident, ie)
 					return &Gtype{
-						typ:       G_UNRESOLVED,
-						identexpr: ie,
+						typ:      G_UNRESOLVED,
+						relation: ie,
 					}
 				}
 				return gtype
 			} else {
 				// resolve later
-				ie := &AstIdentExpr{
+				ie := &Relation{
 					name:ident,
 				}
 				p.unresolvedident = append(p.unresolvedident, ie)
 				return &Gtype{
-					typ:       G_UNRESOLVED,
-					identexpr: ie,
+					typ:      G_UNRESOLVED,
+					relation: ie,
 				}
 			}
 
@@ -898,23 +898,31 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	name := p.readIdent()
 	tok := p.readToken()
-	var typeConstructor identifier
+	var ident identifier
 	if tok.isKeyword("struct") {
 		_ = p.parseStructDef()
 	} else if tok.isKeyword("interface") {
 		_ = p.parseInterfaceDef()
 	} else if tok.isTypeIdent() {
-		ident := tok.getIdent() // name of another type
-		typeConstructor = ident
+		// name of another type
+		ident = tok.getIdent()
 	} else {
 		tok.errorf("TBD")
 	}
 	r := &AstTypeDecl{
 		typedef: &AstTypeDef{
 			name:            name,
-			typeConstructor: typeConstructor,
+			gtype: &Gtype{
+				typ:     G_REL,
+				relname: ident,
+				relation: &Relation{
+					name:  ident,
+					gtype: nil,
+				},
+			},
 		},
 	}
+
 	p.currentScope.setTypeDecl(name, r)
 	return r
 }
@@ -1055,11 +1063,11 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 		return
 	}
 
-	constructor := decl.typedef.typeConstructor
-	if constructor == "" {
+	constructor := decl.typedef.gtype
+	if constructor == nil {
 		errorf("empty constructor %s", constructor)
 	}
-	item := r.packageblockscope.get(constructor)
+	item := r.packageblockscope.get(constructor.relname)
 	if item == nil {
 			errorf("Undefined type %v", constructor)
 		}

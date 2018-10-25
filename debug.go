@@ -73,7 +73,7 @@ func (a *AstConstDecl) dump() {
 
 func (a *AstTypeDecl) dump() {
 	debugf("decl type def %v unresolved(%v) gtype(%v)",
-		a.typedef.name, a.typedef.typeConstructor, a.gtype)
+		a.typedef.name, a.typedef.gtype, a.gtype)
 }
 
 func (a *AstStmt) dump() {
@@ -138,7 +138,7 @@ func (ast *ExprStringLiteral) dump() {
 	debugf("\"%s\"", ast.val)
 }
 
-func (a *AstIdentExpr) dump() {
+func (a *Relation) dump() {
 	assert(a.expr != nil , "ident.expr is set")
 	a.expr.dump()
 }
