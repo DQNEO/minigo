@@ -19,7 +19,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	varname         identifier
-	typeConstructor interface{}
+	typeConstructor identifier
 	gtype           *Gtype
 	offset          int // for local variable
 	isGlobal        bool
@@ -27,7 +27,7 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	name            identifier
-	typeConstructor interface{}
+	typeConstructor identifier
 	gtype           *Gtype
 	val             Expr // like ExprConstExpr ?
 }
@@ -138,7 +138,7 @@ type AstPackageRef struct {
 
 type AstTypeDef struct {
 	name            identifier  // we need this ?
-	typeConstructor interface{} // (identifier | QualifiedIdent) | TypeLiteral
+	typeConstructor identifier // (identifier | QualifiedIdent) | TypeLiteral
 }
 
 type AstTypeDecl struct {

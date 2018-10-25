@@ -898,7 +898,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	name := p.readIdent()
 	tok := p.readToken()
-	var typeConstructor interface{}
+	var typeConstructor identifier
 	if tok.isKeyword("struct") {
 		_ = p.parseStructDef()
 	} else if tok.isKeyword("interface") {
@@ -1013,9 +1013,7 @@ func (r *resolver) resolveVar(decl *AstVarDecl) {
 	}
 
 	constructor := decl.variable.typeConstructor
-	switch constructor.(type) {
-	case identifier:
-		item := r.packageblockscope.get(constructor.(identifier))
+		item := r.packageblockscope.get(constructor)
 		if item == nil {
 			errorf("Undefined type %v", item)
 		}
@@ -1027,7 +1025,6 @@ func (r *resolver) resolveVar(decl *AstVarDecl) {
 			errorf("type is not resolved", item)
 		}
 		decl.variable.gtype = typedecl.gtype
-	}
 }
 
 func (r *resolver) resolveConst(decl *AstConstDecl) {
@@ -1036,11 +1033,12 @@ func (r *resolver) resolveConst(decl *AstConstDecl) {
 	}
 
 	constructor := decl.variable.typeConstructor
-	switch constructor.(type) {
-	case identifier:
-		item := r.packageblockscope.get(constructor.(identifier))
+	if constructor == "" {
+		return
+	}
+		item := r.packageblockscope.get(constructor)
 		if item == nil {
-			errorf("Undefined type %v", item)
+			errorf("Undefined type %v for %s", item, constructor)
 		}
 		typedecl, ok := item.(*AstTypeDecl)
 		if !ok {
@@ -1050,7 +1048,6 @@ func (r *resolver) resolveConst(decl *AstConstDecl) {
 			errorf("type is not resolved", item)
 		}
 		decl.variable.gtype = typedecl.gtype
-	}
 }
 
 func (r *resolver) resolveType(decl *AstTypeDecl) {
@@ -1059,10 +1056,11 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 	}
 
 	constructor := decl.typedef.typeConstructor
-	switch constructor.(type) {
-	case identifier:
-		item := r.packageblockscope.get(constructor.(identifier))
-		if item == nil {
+	if constructor == "" {
+		errorf("empty constructor %s", constructor)
+	}
+	item := r.packageblockscope.get(constructor)
+	if item == nil {
 			errorf("Undefined type %v", constructor)
 		}
 		typedecl, ok := item.(*AstTypeDecl)
@@ -1077,8 +1075,6 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 			size: typedecl.gtype.size,
 			ptr:  typedecl.gtype,
 		}
-
-	}
 }
 
 //TODO: resolve local scope
