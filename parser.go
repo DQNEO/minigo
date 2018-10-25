@@ -909,16 +909,19 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	} else {
 		tok.errorf("TBD")
 	}
+	rel :=  &Relation{
+		name:  ident,
+		gtype: nil, // unresolved
+	}
+
 	r := &AstTypeDecl{
+		name:            name,
 		typedef: &AstTypeDef{
 			name:            name,
 			gtype: &Gtype{
 				typ:     G_REL,
 				relname: ident,
-				relation: &Relation{
-					name:  ident,
-					gtype: nil,
-				},
+				relation: rel,
 			},
 		},
 	}
@@ -1063,26 +1066,24 @@ func (r *resolver) resolveType(decl *AstTypeDecl) {
 		return
 	}
 
-	constructor := decl.typedef.gtype
-	if constructor == nil {
-		errorf("empty constructor %s", constructor)
-	}
-	item := r.packageblockscope.get(constructor.relname)
+	relname := decl.typedef.gtype.relname
+	item := r.packageblockscope.get(relname)
 	if item == nil {
-			errorf("Undefined type %v", constructor)
-		}
-		typedecl, ok := item.(*AstTypeDecl)
-		if !ok {
-			errorf("%v is not a type", item)
-		}
-		if typedecl.gtype == nil {
-			r.resolveType(typedecl)
-		}
-		decl.gtype = &Gtype{
-			typ:  typedecl.gtype.typ,
-			size: typedecl.gtype.size,
-			ptr:  typedecl.gtype,
-		}
+		// should be resolved by universe scope
+		return
+	}
+	typedecl, ok := item.(*AstTypeDecl)
+	if !ok {
+		errorf("%v is not a type", item)
+	}
+	if typedecl.gtype == nil {
+		r.resolveType(typedecl)
+	}
+	decl.gtype = &Gtype{
+		typ:  typedecl.gtype.typ,
+		size: typedecl.gtype.size,
+		ptr:  typedecl.gtype.ptr,
+	}
 }
 
 //TODO: resolve local scope

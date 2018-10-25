@@ -142,6 +142,7 @@ type AstTypeDef struct {
 }
 
 type AstTypeDecl struct {
+	name  identifier
 	typedef *AstTypeDef
 	gtype   *Gtype // resolved later
 }
