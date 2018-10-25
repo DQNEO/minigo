@@ -900,9 +900,9 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	tok := p.readToken()
 	var typeConstructor interface{}
 	if tok.isKeyword("struct") {
-		typeConstructor = p.parseStructDef()
+		_ = p.parseStructDef()
 	} else if tok.isKeyword("interface") {
-		typeConstructor = p.parseInterfaceDef()
+		_ = p.parseInterfaceDef()
 	} else if tok.isTypeIdent() {
 		ident := tok.getIdent() // name of another type
 		typeConstructor = ident
