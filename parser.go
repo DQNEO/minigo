@@ -487,7 +487,6 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	// "=" or Type
 	tok := p.readToken()
 	if tok.isPunct("=") {
-		// no type. infer.
 		// Infer mode
 		initval = p.parseExpr()
 		if typ == nil {
