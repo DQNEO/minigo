@@ -143,7 +143,7 @@ type GTYPE_TYPE int
 const (
 	G_UNKOWNE GTYPE_TYPE = iota
 	G_REL
-	// below are universe block primitive types
+	// below are primitive types in the universe block
 	G_INT
 	G_BOOL
 	G_BYTE
