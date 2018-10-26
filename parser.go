@@ -966,7 +966,7 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 }
 
 func (p *parser) resolve() {
-	// have the universe in the background
+	// set the universe in the background
 	universeblockscope := newUniverseBlockScope()
 	p.packageBlockScope.outer = universeblockscope
 	for _, rel := range p.unresolvedRelations {
