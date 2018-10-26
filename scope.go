@@ -20,8 +20,16 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
-	sc._set(name, decl)
+func (sc *scope) setFuncDecl(name identifier, fdecl *AstFuncDecl) {
+	sc._set(name, fdecl)
+}
+
+func (sc *scope) setConst(name identifier, cnst *ExprConstVariable) {
+	sc._set(name, cnst)
+}
+
+func (sc *scope) setVar(name identifier, variable *ExprVariable) {
+	sc._set(name, variable)
 }
 
 func (sc *scope) setGtype(name identifier, gtype *Gtype) {
@@ -40,11 +48,11 @@ func (sc *scope) getGtype(name identifier) *Gtype {
 	if v == nil {
 		return nil
 	}
-	decl, ok := v.(*AstTypeDecl)
+	gtype, ok := v.(*Gtype)
 	if !ok {
 		errorf("type %s is not defined", name)
 	}
-	return decl.gtype
+	return gtype
 }
 
 func newScope(outer *scope) *scope {
@@ -60,13 +68,13 @@ func newUniverseBlockScope() *scope {
 	r.setGtype("int", gInt)
 	r.setGtype("byte", gByte)
 	r.setGtype("bool", gBool)
-	r._set(identifier("iota"), &ExprConstVariable{})
-	r._set("true",  &ExprConstVariable{
+	r.setConst(identifier("iota"), &ExprConstVariable{})
+	r.setConst("true",  &ExprConstVariable{
 			name:  "true",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{1},
 	})
-	r._set("false", &ExprConstVariable{
+	r.setConst("false", &ExprConstVariable{
 			name:  "false",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{0},

@@ -508,7 +508,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 		variable: variable,
 		initval:  initval,
 	}
-	p.currentScope._set(newName, variable)
+	p.currentScope.setVar(newName, variable)
 	return r
 }
 
@@ -543,7 +543,7 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 		variable: variable,
 	}
 
-	p.currentScope._set(newName, variable)
+	p.currentScope.setConst(newName, variable)
 	return r
 }
 
@@ -607,7 +607,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	idents := p.parseIdentList()
 	p.expect(":=")
 	for _, ident := range idents {
-		p.currentScope._set(ident, nil)
+		p.currentScope.setVar(ident, nil)
 	}
 	r.idents = idents
 	p.expectKeyword("range")
@@ -712,7 +712,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 				gtype:   ptype,
 			}
 			params = append(params, variable)
-			p.currentScope._set(pname, variable)
+			p.currentScope.setVar(pname, variable)
 			tok = p.readToken()
 			if tok.isPunct(")") {
 				break
