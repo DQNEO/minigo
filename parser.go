@@ -83,7 +83,7 @@ func getCallerName(n int) string {
 }
 
 func (p *parser) traceIn() int {
-	if (!debugParser) {
+	if !debugParser {
 		return 0
 	}
 	debugf("func %s start with %s", getCallerName(2), p.peekToken())
@@ -92,7 +92,7 @@ func (p *parser) traceIn() int {
 }
 
 func (p *parser) traceOut(_ int) {
-	if (!debugParser) {
+	if !debugParser {
 		return
 	}
 	if r := recover(); r != nil {
