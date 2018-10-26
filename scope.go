@@ -1,5 +1,6 @@
 package main
 
+// built-in types
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
@@ -19,20 +20,20 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) setVarDecl(name identifier, decl *AstVarDecl) {
-	sc._set(name, decl)
+func (sc *scope) setFuncDecl(name identifier, fdecl *AstFuncDecl) {
+	sc._set(name, fdecl)
 }
 
-func (sc *scope) setTypeDecl(name identifier, decl *AstTypeDecl) {
-	sc._set(name, decl)
+func (sc *scope) setConst(name identifier, cnst *ExprConstVariable) {
+	sc._set(name, cnst)
 }
 
-func (sc *scope) setConstDecl(name identifier, decl *AstConstDecl) {
-	sc._set(name, decl)
+func (sc *scope) setVar(name identifier, variable *ExprVariable) {
+	sc._set(name, variable)
 }
 
-func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
-	sc._set(name, decl)
+func (sc *scope) setGtype(name identifier, gtype *Gtype) {
+	sc._set(name, gtype)
 }
 
 func (sc *scope) _set(name identifier, v interface{}) {
@@ -47,11 +48,11 @@ func (sc *scope) getGtype(name identifier) *Gtype {
 	if v == nil {
 		return nil
 	}
-	decl, ok := v.(*AstTypeDecl)
+	gtype, ok := v.(*Gtype)
 	if !ok {
 		errorf("type %s is not defined", name)
 	}
-	return decl.gtype
+	return gtype
 }
 
 func newScope(outer *scope) *scope {
@@ -63,26 +64,21 @@ func newScope(outer *scope) *scope {
 
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
-	r.setTypeDecl("int", &AstTypeDecl{gtype: gInt})
-	r.setTypeDecl("byte", &AstTypeDecl{gtype: gByte})
-	r.setTypeDecl("bool", &AstTypeDecl{gtype: gBool})
 
-	r.setConstDecl(identifier("iota"), &AstConstDecl{})
-	r.setConstDecl("true", &AstConstDecl{
-		variable: &ExprConstVariable{
+	r.setGtype("int", gInt)
+	r.setGtype("byte", gByte)
+	r.setGtype("bool", gBool)
+	r.setConst(identifier("iota"), &ExprConstVariable{})
+	r.setConst("true",  &ExprConstVariable{
 			name:  "true",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{1},
-		},
 	})
-	r.setConstDecl("false", &AstConstDecl{
-		variable: &ExprConstVariable{
+	r.setConst("false", &ExprConstVariable{
 			name:  "false",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{0},
-		},
 	})
-
 
 	r.setFuncDecl("len", &AstFuncDecl{fname: "len",})
 	return r

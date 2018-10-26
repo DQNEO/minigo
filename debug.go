@@ -72,8 +72,8 @@ func (a *AstConstDecl) dump() {
 }
 
 func (a *AstTypeDecl) dump() {
-	debugf("decl type def %v unresolved(%v) gtype(%v)",
-		a.typedef.name, a.typedef.gtype, a.gtype)
+	debugf("decl type def %v gtype(%v)",
+		a.name, a.gtype)
 }
 
 func (a *AstStmt) dump() {

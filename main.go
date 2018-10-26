@@ -40,9 +40,7 @@ func main() {
 		parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	// init scope
-	universeblockscope := newUniverseBlockScope()
-	packageblockscope := newScope(universeblockscope)
+	packageblockscope := newScope(nil)
 
 	// parse
 	p := &parser{}
@@ -51,10 +49,9 @@ func main() {
 	if debugAst {
 		astFile.dump()
 	}
-	r := &resolver{
-		packageblockscope:packageblockscope,
-	}
-	r.resolve(p)
+
+	p.resolve()
+
 	if debugAst {
 		astFile.dump()
 	}
