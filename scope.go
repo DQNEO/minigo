@@ -23,6 +23,10 @@ func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
 	sc._set(name, decl)
 }
 
+func (sc *scope) setGtype(name identifier, gtype *Gtype) {
+	sc._set(name, gtype)
+}
+
 func (sc *scope) _set(name identifier, v interface{}) {
 	if v == nil {
 		panic("nil cannot be set")
@@ -51,9 +55,10 @@ func newScope(outer *scope) *scope {
 
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
-	r._set("int", gInt)
-	r._set("byte", gByte)
-	r._set("bool", gBool)
+
+	r.setGtype("int", gInt)
+	r.setGtype("byte", gByte)
+	r.setGtype("bool", gBool)
 	r._set(identifier("iota"), &ExprConstVariable{})
 	r._set("true",  &ExprConstVariable{
 			name:  "true",

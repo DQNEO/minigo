@@ -875,7 +875,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 		name: newName,
 		gtype: gtype,
 	}
-	p.currentScope._set(newName, gtype)
+	p.currentScope.setGtype(newName, gtype)
 	return r
 }
 
