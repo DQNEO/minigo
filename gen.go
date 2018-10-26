@@ -318,7 +318,6 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		elmType := variable.gtype.ptr
 		assert(elmType != nil, "elm is not nil")
 		for _, value := range arrayliteral.values {
-			debugf("hello world start")
 			assert(value !=nil, "value is set")
 			size := elmType.getSize()
 			if size == 8 {
@@ -328,8 +327,6 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 			} else {
 				errorf("Unexpected size %d", size)
 			}
-
-			debugf("hello world end")
 		}
 	} else {
 		if initval == nil {
