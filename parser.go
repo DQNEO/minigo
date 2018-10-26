@@ -431,23 +431,29 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype, isGlobal bool) *E
 // https://golang.org/ref/spec#Type
 func (p *parser) parseType() *Gtype {
 	defer p.traceOut(p.traceIn())
+	var gtype *Gtype
+
 	for {
 		tok := p.readToken()
-		if tok.isPunct("*") {
-			// pointer
-		} else if tok.isKeyword("struct") {
-
-		} else if tok.isTypeIdent() {
+		if tok.isTypeIdent() {
 			ident := tok.getIdent()
+			// unresolved
 			rel := &Relation{
 				name: ident,
 			}
 			p.tryResolve(rel)
-			return &Gtype{
+			gtype = &Gtype{
 				typ:      G_REL,
 				relname:ident,
 				relation:rel,
 			}
+			return gtype
+		} else if tok.isPunct("*") {
+			// pointer
+		} else if tok.isKeyword("struct") {
+			_ = p.parseStructDef()
+		} else if tok.isKeyword("interface") {
+			_ = p.parseInterfaceDef()
 		} else if tok.isPunct("[") {
 			// array
 			tlen := p.readToken()
@@ -864,28 +870,41 @@ func (p *parser) tryResolve(rel *Relation) {
 func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
-	tok := p.readToken()
+	var gtype *Gtype
 	var ident identifier
-	if tok.isKeyword("struct") {
+
+	tok := p.readToken()
+	if tok.isTypeIdent() {
+		// refer another type
+		ident = tok.getIdent()
+		// unresolved
+		rel :=  &Relation{
+			name:  ident,
+		}
+		p.tryResolve(rel)
+		gtype = &Gtype{
+			typ:      G_REL,
+			relname:  ident,
+			relation: rel,
+		}
+	} else if tok.isPunct("*") {
+		// pointer
+	} else if tok.isKeyword("struct") {
 		_ = p.parseStructDef()
 	} else if tok.isKeyword("interface") {
 		_ = p.parseInterfaceDef()
-	} else if tok.isTypeIdent() {
-		// newName of another type
-		ident = tok.getIdent()
+	} else if tok.isPunct("[") {
+		// array
+		tlen := p.readToken()
+		p.expect("]")
+		typ := p.parseType()
+		gtype = &Gtype{
+			typ: G_ARRAY,
+			length: tlen.getIntval(),
+			ptr: typ,
+		}
 	} else {
 		tok.errorf("TBD")
-	}
-	// unresolved
-	rel :=  &Relation{
-		name:  ident,
-	}
-	p.tryResolve(rel)
-
-	gtype := &Gtype{
-		typ:      G_REL,
-		relname:  ident,
-		relation: rel,
 	}
 
 	r := &AstTypeDecl{
