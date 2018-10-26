@@ -128,6 +128,10 @@ func assignLocal(left Expr, loff int ,right Expr) {
 	case *ExprVariable:
 		vr := left.(*ExprVariable)
 		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
+	case *Relation:
+		rel := left.(*Relation)
+		vr := rel.expr.(*ExprVariable)
+		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
 	default:
 		errorf("Unexpected type %v", left)
 	}
@@ -145,8 +149,11 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		if !ok {
 			errorf("error?")
 		}
+		arraygtype :=  ast.variable.gtype
+		elmType := arraygtype.ptr.relation.gtype
+		debugf("gtype:%v", elmType)
 		for i, val := range initvalues.values {
-			assignLocal(ast.variable, i * ast.variable.gtype.ptr.size, val)
+			assignLocal(ast.variable, i * elmType.size, val)
 		}
 		return
 	}
@@ -193,7 +200,7 @@ func (e *ExprIndexAccess) emit() {
 		ex := variable.(*Relation).expr
 		switch ex.(type) {
 		case *ExprVariable:
-			vr = variable.(*ExprVariable)
+			vr = ex.(*ExprVariable)
 			if vr.isGlobal {
 				varname = vr.varname
 				emit("lea %s(%%rip), %%rax", varname)
@@ -206,11 +213,20 @@ func (e *ExprIndexAccess) emit() {
 	e.index.emit()
 	emit("mov %%rax, %%rcx")
 	elmType := vr.gtype.ptr
-	if elmType.typ == G_UNRESOLVED {
-		elmType = elmType.relation.gtype
+	gtype := elmType
+	for {
+		if gtype.typ == G_REL {
+			debugf("gtype is rel. name is %s ", gtype.relname)
+			gtype = gtype.relation.gtype
+		}else {
+			break
+		}
 	}
 
-	size :=  elmType.size
+	size :=  gtype.size
+	if size == 0 {
+		errorf("size 0 %v", gtype)
+	}
 	assert(size > 0, "size > 0")
 	emit("mov $%d, %%rax", size)
 	emit("imul %%rcx, %%rax")
@@ -258,8 +274,13 @@ func emitFuncdef(f *AstFuncDecl) {
 
 func evalIntExpr(e Expr) int {
 	switch e.(type) {
+	case nil:
+		errorf("e is nil")
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
+	case *ExprVariable:
+		// FIXME
+		return 1
 	case *Relation:
 		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
@@ -274,9 +295,17 @@ func evalIntExpr(e Expr) int {
 
 		}
 	default:
-		errorf("unkown type %v to eval", e)
+		errorf("unkown type %v", e)
 	}
 	return 0
+}
+
+func (gtype *Gtype) getSize() int {
+	if gtype.typ == G_REL {
+		return gtype.relation.gtype.getSize()
+	} else {
+		return gtype.size
+	}
 }
 
 func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
@@ -288,17 +317,20 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		arrayliteral, ok := initval.(*ExprArrayLiteral)
 		assert(ok, "should be array lieteral")
 		elmType := variable.gtype.ptr
+		assert(elmType != nil, "elm is not nil")
 		for _, value := range arrayliteral.values {
+			debugf("hello world start")
 			assert(value !=nil, "value is set")
-			if elmType.typ == G_UNRESOLVED && elmType.relation != nil {
-				elmType = elmType.relation.gtype
-			}
-			assert(elmType != nil, "elm is not nil")
-			if elmType.size == 8 {
+			size := elmType.getSize()
+			if size == 8 {
 				emit(".quad %d", evalIntExpr(value))
-			} else if elmType.size == 1 {
+			} else if size == 1 {
 				emit(".byte %d", evalIntExpr(value))
+			} else {
+				errorf("Unexpected size %d", size)
 			}
+
+			debugf("hello world end")
 		}
 	} else {
 		if initval == nil {

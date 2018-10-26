@@ -19,7 +19,6 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	varname         identifier
-	typeConstructor identifier
 	gtype           *Gtype
 	offset          int // for local variable
 	isGlobal        bool
@@ -27,7 +26,6 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	name            identifier
-	typeConstructor identifier
 	gtype           *Gtype
 	val             Expr // like ExprConstExpr ?
 }
@@ -136,20 +134,14 @@ type AstPackageRef struct {
 	path string
 }
 
-type AstTypeDef struct {
-	name  identifier  // we need this ?
-	gtype *Gtype
-}
-
 type AstTypeDecl struct {
 	name  identifier
-	typedef *AstTypeDef
-	gtype   *Gtype // resolved later
+	gtype   *Gtype
 }
 
 type GTYPE_TYPE int
 const (
-	G_UNRESOLVED GTYPE_TYPE = iota
+	G_UNKOWNE GTYPE_TYPE = iota
 	G_REL
 	// below are universe block primitive types
 	G_INT
@@ -166,18 +158,18 @@ const (
 
 type Gtype struct {
 	typ       GTYPE_TYPE
-	relname   identifier    // for rel type
+	relname   identifier    // for G_REL
+	relation  *Relation     // for G_REL
 	size      int           // for scalar type like int, bool, byte
-	ptr       *Gtype        // for array, pointer, etc
-	relation  *Relation     // for later resolution (G_UNRESOLVED)
+	ptr       *Gtype        // for array, pointer
 	structdef *AstStructDef // for struct type
 	length    int           // for fixed array
 }
 
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
-	case G_UNRESOLVED:
-		return "unkown"
+	case G_REL:
+		return "rel"
 	case G_INT:
 		return "int"
 	case G_BYTE:

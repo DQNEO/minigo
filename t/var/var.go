@@ -5,8 +5,8 @@ import "fmt"
 var a = b
 var b = 1
 
-var x = iota
-var iota = 2
+var x = iota + 1
+var iota = 1
 
 var sum = b + 2
 

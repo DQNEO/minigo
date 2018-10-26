@@ -73,10 +73,6 @@ func (p *parser) expect(punct string) {
 	}
 }
 
-func debugAstConstructed(ast interface{}) {
-	debugPrintVar("Ast constructed", ast)
-}
-
 func getCallerName(n int) string {
 	pc, _, _, ok := runtime.Caller(n)
 	if !ok {
@@ -207,9 +203,12 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 			index := p.parseExpr()
 			tok := p.readToken()
 			if tok.isPunct("]") {
-				variable := p.ident2expression(firstIdent)
+				rel := &Relation{
+					name: firstIdent,
+				}
+				p.tryResolve(rel)
 				return &ExprIndexAccess{
-					variable:   variable,
+					variable:   rel,
 					index: index,
 				}
 			} else if tok.isPunct(":") {
@@ -229,37 +228,11 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 		p.unreadToken()
 	}
 
-	return p.ident2expression(firstIdent)
-}
-
-func (p *parser) ident2expression(id identifier) Expr {
-	if p.isFunctionScope {
-		v := p.currentScope.get(id)
-		if v == nil {
-			errorf("Undefined variable: %s", id)
-			return nil
-		}
-		vardecl, _ := v.(*AstVarDecl)
-		if vardecl != nil {
-			return vardecl.variable
-		}
-		constdecl, _ := v.(*AstConstDecl)
-		if constdecl != nil {
-			return constdecl.variable
-		}
-		errorf("variable not found %v", id)
-	} else {
-		// top level. do not lookup ident yet
-		r := &Relation{
-			name: id,
-		}
-		p.unresolvedRelations = append(p.unresolvedRelations, r)
-		return r
+	rel := &Relation{
+		name: firstIdent,
 	}
-
-	errorf("TBD")
-	return nil
-
+	p.tryResolve(rel)
+	return rel
 }
 
 var stringIndex = 0
@@ -355,7 +328,7 @@ func (p *parser) parseArrayLiteral() Expr {
 		gtype:  gtype,
 		values: values,
 	}
-	debugAstConstructed(r)
+
 	return r
 }
 
@@ -389,7 +362,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 	defer p.traceOut(p.traceIn())
 
 	ast := p.parseUnaryExpr()
-	debugAstConstructed(ast)
+
 	if ast == nil {
 		return nil
 	}
@@ -413,7 +386,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 					left:  ast,
 					right: right,
 				}
-				debugAstConstructed(ast)
+
 				continue
 			} else {
 				p.unreadToken()
@@ -466,35 +439,15 @@ func (p *parser) parseType() *Gtype {
 
 		} else if tok.isTypeIdent() {
 			ident := tok.getIdent()
-			if (p.isFunctionScope) {
-				gtype := p.currentScope.getGtype(ident)
-				if gtype == nil {
-					// resolve later
-					ie := &Relation{
-						name:ident,
-					}
-					p.unresolvedRelations = append(p.unresolvedRelations, ie)
-					return &Gtype{
-						typ:      G_UNRESOLVED,
-						relation: ie,
-					}
-				}
-				return gtype
-			} else {
-				// resolve later
-				ie := &Relation{
-					name:ident,
-				}
-				p.unresolvedRelations = append(p.unresolvedRelations, ie)
-				return &Gtype{
-					typ:      G_UNRESOLVED,
-					relation: ie,
-				}
+			rel := &Relation{
+				name: ident,
 			}
-
-			//_ := tok.getIdent()
-			//_ := p.p.currentScope.getGtype(typename)
-			//return gtype
+			p.tryResolve(rel)
+			return &Gtype{
+				typ:      G_REL,
+				relname:ident,
+				relation:rel,
+			}
 		} else if tok.isPunct("[") {
 			// array
 			tlen := p.readToken()
@@ -520,8 +473,8 @@ func (p *parser) parseType() *Gtype {
 func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
 	defer p.traceOut(p.traceIn())
-	// read name
-	name := p.readIdent()
+	// read newName
+	newName := p.readIdent()
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
@@ -544,19 +497,19 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	}
 	//p.expect(";")
 
-	variable := p.newVariable(name, typ, isGlobal)
+	variable := p.newVariable(newName, typ, isGlobal)
 	r := &AstVarDecl{
 		variable: variable,
 		initval:  initval,
 	}
-	p.currentScope.setVarDecl(name, r)
+	p.currentScope._set(newName, variable)
 	return r
 }
 
 func (p *parser) parseConstDecl() *AstConstDecl {
 	defer p.traceOut(p.traceIn())
-	// read name
-	name := p.readIdent()
+	// read newName
+	newName := p.readIdent()
 
 	// Type or "="
 	tok := p.readToken()
@@ -576,7 +529,7 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 	}
 
 	variable := &ExprConstVariable{
-		name: name,
+		name: newName,
 		val:  val,
 	}
 
@@ -584,7 +537,7 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 		variable: variable,
 	}
 
-	p.currentScope.setConstDecl(name, r)
+	p.currentScope._set(newName, variable)
 	return r
 }
 
@@ -648,7 +601,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	idents := p.parseIdentList()
 	p.expect(":=")
 	for _, ident := range idents {
-		p.currentScope.setVarDecl(ident, &AstVarDecl{variable: p.newVariable(ident, nil, false)})
+		p.currentScope._set(ident, nil)
 	}
 	r.idents = idents
 	p.expectKeyword("range")
@@ -753,9 +706,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 				gtype:   ptype,
 			}
 			params = append(params, variable)
-			p.currentScope.setVarDecl(pname, &AstVarDecl{
-				variable: variable,
-			})
+			p.currentScope._set(pname, variable)
 			tok = p.readToken()
 			if tok.isPunct(")") {
 				break
@@ -894,9 +845,25 @@ func (p *parser) parseInterfaceDef() *AstInterfaceDef {
 	}
 }
 
+func (p *parser) tryResolve(rel *Relation) {
+	relfound := p.currentScope.get(rel.name)
+	if relfound != nil {
+		switch relfound.(type) {
+		case *Gtype :
+			rel.gtype = relfound.(*Gtype)
+		case Expr:
+			rel.expr = relfound.(Expr)
+		default:
+			errorf("Bad type relfound %v", relfound)
+		}
+	} else {
+		p.unresolvedRelations = append(p.unresolvedRelations, rel)
+	}
+}
+
 func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
-	name := p.readIdent()
+	newName := p.readIdent()
 	tok := p.readToken()
 	var ident identifier
 	if tok.isKeyword("struct") {
@@ -904,29 +871,29 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	} else if tok.isKeyword("interface") {
 		_ = p.parseInterfaceDef()
 	} else if tok.isTypeIdent() {
-		// name of another type
+		// newName of another type
 		ident = tok.getIdent()
 	} else {
 		tok.errorf("TBD")
 	}
+	// unresolved
 	rel :=  &Relation{
 		name:  ident,
-		gtype: nil, // unresolved
+	}
+	p.tryResolve(rel)
+
+	gtype := &Gtype{
+		typ:      G_REL,
+		relname:  ident,
+		relation: rel,
 	}
 
 	r := &AstTypeDecl{
-		name:            name,
-		typedef: &AstTypeDef{
-			name:            name,
-			gtype: &Gtype{
-				typ:     G_REL,
-				relname: ident,
-				relation: rel,
-			},
-		},
+		name: newName,
+		gtype: gtype,
 	}
 
-	p.currentScope.setTypeDecl(name, r)
+	p.currentScope._set(newName, gtype)
 	return r
 }
 
@@ -951,7 +918,7 @@ func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 		errorf("TBD: unable to handle token %v", tok)
 	}
 
-	debugAstConstructed(r)
+	//debugAstConstructed(r)
 	return r
 }
 
@@ -1014,124 +981,12 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	return r
 }
 
-type resolver struct {
-	packageblockscope *scope
-}
-
-func (r *resolver) resolveVar(decl *AstVarDecl) {
-	if decl.variable.gtype != nil {
-		return
-	}
-
-	constructor := decl.variable.typeConstructor
-		item := r.packageblockscope.get(constructor)
-		if item == nil {
-			errorf("Undefined type %v", item)
-		}
-		typedecl, ok := item.(*AstTypeDecl)
-		if !ok {
-			errorf("%v is not a type", item)
-		}
-		if typedecl.gtype == nil {
-			errorf("type is not resolved", item)
-		}
-		decl.variable.gtype = typedecl.gtype
-}
-
-func (r *resolver) resolveConst(decl *AstConstDecl) {
-	if decl.variable.gtype != nil {
-		return
-	}
-
-	constructor := decl.variable.typeConstructor
-	if constructor == "" {
-		return
-	}
-		item := r.packageblockscope.get(constructor)
-		if item == nil {
-			errorf("Undefined type %v for %s", item, constructor)
-		}
-		typedecl, ok := item.(*AstTypeDecl)
-		if !ok {
-			errorf("%v is not a type", item)
-		}
-		if typedecl.gtype == nil {
-			errorf("type is not resolved", item)
-		}
-		decl.variable.gtype = typedecl.gtype
-}
-
-func (r *resolver) resolveType(decl *AstTypeDecl) {
-	if decl.gtype != nil {
-		return
-	}
-
-	relname := decl.typedef.gtype.relname
-	item := r.packageblockscope.get(relname)
-	if item == nil {
-		// should be resolved by universe scope
-		return
-	}
-	typedecl, ok := item.(*AstTypeDecl)
-	if !ok {
-		errorf("%v is not a type", item)
-	}
-	if typedecl.gtype == nil {
-		r.resolveType(typedecl)
-	}
-	decl.gtype = &Gtype{
-		typ:  typedecl.gtype.typ,
-		size: typedecl.gtype.size,
-		ptr:  typedecl.gtype.ptr,
-	}
-}
-
-//TODO: resolve local scope
-func (r *resolver) resolve(p *parser) {
-	for _, decl := range r.packageblockscope.idents {
-		typedecl, ok := decl.(*AstTypeDecl)
-		if ok {
-			r.resolveType(typedecl)
-			typedecl.dump()
-		}
-	}
-
-	for _, decl := range r.packageblockscope.idents {
-		constdecl, ok := decl.(*AstConstDecl)
-		if ok {
-			r.resolveConst(constdecl)
-			constdecl.dump()
-		}
-	}
-
-	for _, decl := range r.packageblockscope.idents {
-		vardecl, ok := decl.(*AstVarDecl)
-		if ok {
-			debugf("resolve decl :")
-			r.resolveVar(vardecl)
-			//vardecl.dump()
-		}
-	}
-
+func (p *parser) resolve() {
+	// have the universe in the background
+	universeblockscope := newUniverseBlockScope()
+	p.packageBlockScope.outer = universeblockscope
 	for _, rel := range p.unresolvedRelations {
-		entity := p.packageBlockScope.get(rel.name)
-		if entity == nil {
-			errorf("ident %s not found", rel.name)
-		}
-		switch entity.(type) {
-		case *AstConstDecl:
-			cnst := entity.(*AstConstDecl)
-			rel.expr = cnst.variable
-		case *AstVarDecl:
-			vr := entity.(*AstVarDecl)
-			rel.expr = vr.initval
-		case *AstTypeDecl:
-			d := entity.(*AstTypeDecl)
-			assert(d.gtype != nil, "type decl has gtype")
-			rel.gtype = d.gtype
-		default:
-			errorf("ident %s is not a const", rel.name)
-		}
+		p.tryResolve(rel)
 	}
 
 }

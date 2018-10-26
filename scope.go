@@ -19,18 +19,6 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) setVarDecl(name identifier, decl *AstVarDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) setTypeDecl(name identifier, decl *AstTypeDecl) {
-	sc._set(name, decl)
-}
-
-func (sc *scope) setConstDecl(name identifier, decl *AstConstDecl) {
-	sc._set(name, decl)
-}
-
 func (sc *scope) setFuncDecl(name identifier, decl *AstFuncDecl) {
 	sc._set(name, decl)
 }
@@ -63,26 +51,20 @@ func newScope(outer *scope) *scope {
 
 func newUniverseBlockScope() *scope {
 	r := newScope(nil)
-	r.setTypeDecl("int", &AstTypeDecl{gtype: gInt})
-	r.setTypeDecl("byte", &AstTypeDecl{gtype: gByte})
-	r.setTypeDecl("bool", &AstTypeDecl{gtype: gBool})
-
-	r.setConstDecl(identifier("iota"), &AstConstDecl{})
-	r.setConstDecl("true", &AstConstDecl{
-		variable: &ExprConstVariable{
+	r._set("int", gInt)
+	r._set("byte", gByte)
+	r._set("bool", gBool)
+	r._set(identifier("iota"), &ExprConstVariable{})
+	r._set("true",  &ExprConstVariable{
 			name:  "true",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{1},
-		},
 	})
-	r.setConstDecl("false", &AstConstDecl{
-		variable: &ExprConstVariable{
+	r._set("false", &ExprConstVariable{
 			name:  "false",
 			gtype: gBool,
 			val:   &ExprNumberLiteral{0},
-		},
 	})
-
 
 	r.setFuncDecl("len", &AstFuncDecl{fname: "len",})
 	return r
