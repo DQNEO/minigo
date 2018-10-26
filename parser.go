@@ -456,14 +456,26 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isKeyword("interface") {
 			_ = p.parseInterfaceDef()
 		} else if tok.isPunct("[") {
-			// array
-			tlen := p.readToken()
-			p.expect("]")
-			typ := p.parseType()
-			return &Gtype{
-				typ: G_ARRAY,
-				length: tlen.getIntval(),
-				ptr: typ,
+			// array or slice
+			tok := p.readToken()
+			if tok.isPunct("]") {
+				// slice
+				typ := p.parseType()
+				return &Gtype{
+					typ:       G_SLICE,
+					ptr:       typ, // element type
+					length:    0,
+					capacity:  0,
+				}
+			} else {
+				// array
+				p.expect("]")
+				typ := p.parseType()
+				return &Gtype{
+					typ:    G_ARRAY,
+					length: tok.getIntval(),
+					ptr:    typ,
+				}
 			}
 		} else if tok.isPunct("]") {
 

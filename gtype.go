@@ -20,13 +20,17 @@ const (
 )
 
 type Gtype struct {
-	typ       GTYPE_TYPE
-	relname   identifier    // for G_REL
-	relation  *Relation     // for G_REL
-	size      int           // for scalar type like int, bool, byte
-	ptr       *Gtype        // for array, pointer
-	structdef *AstStructDef // for struct type
-	length    int           // for fixed array
+	typ             GTYPE_TYPE
+	relname         identifier    // for G_REL
+	relation        *Relation     // for G_REL
+	size            int           // for scalar type like int, bool, byte
+	ptr             *Gtype        // for array, pointer
+	structdef       *AstStructDef // for struct type
+	length          int           // for slice, array
+	capacity        int           // for slice
+	underlyingarray interface{}
+
+	// for fixed array
 }
 
 type StructField struct {
