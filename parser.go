@@ -130,6 +130,8 @@ func (p *parser) readFuncallArgs() []Expr {
 
 type Relation struct {
 	name identifier
+
+	// either of expr or gtype
 	expr Expr
 	gtype *Gtype
 }
