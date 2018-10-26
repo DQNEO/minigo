@@ -11,4 +11,6 @@ var iota = 0
 func main() {
 	fmt.Printf("%d\n", a)
 	fmt.Printf("%d\n", x)
+	localvar := 10
+	fmt.Printf("%d\n", localvar)
 }

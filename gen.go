@@ -130,6 +130,7 @@ func assignLocal(left Expr, loff int ,right Expr) {
 		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
 	case *Relation:
 		rel := left.(*Relation)
+		assert(rel.expr != nil, "rel links to a variable")
 		vr := rel.expr.(*ExprVariable)
 		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
 	default:

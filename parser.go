@@ -147,7 +147,12 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	tok := p.readToken()
 	var pkg identifier
 	var ident identifier
-	if tok.isPunct(".") {
+	if tok.isPunct(":=") {
+		p.unreadToken()
+		return &Relation{
+			name: firstIdent,
+		}
+	} else if tok.isPunct(".") {
 		// Assume firstIdent is a package name
 		pkg = firstIdent
 		_, ok := p.importedNames[pkg]
@@ -653,6 +658,7 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	return r
 }
 
+// this is in function scope
 func (p *parser) parseStmt() *AstStmt {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
@@ -673,8 +679,20 @@ func (p *parser) parseStmt() *AstStmt {
 	if tok2.isPunct("=") {
 		expr2 := p.parseExpr()
 		return &AstStmt{assignment: &AstAssignment{
-			left: expr1,
-			right:expr2,
+			left:  expr1,
+			right: expr2,
+		}}
+	} else if tok2.isPunct(":=") {
+		// ShortVarDecl
+		expr2 := p.parseExpr()
+		rel := expr1.(*Relation) // a brand new rel
+		gtype := gInt // FIXME: infer type
+		variable := p.newVariable(rel.name, gtype,false)
+		rel.expr = variable
+		p.currentScope.setVar(rel.name, variable)
+		return &AstStmt{assignment: &AstAssignment{
+			left:  expr1,
+			right: expr2,
 		}}
 	} else {
 		p.unreadToken()
