@@ -870,48 +870,11 @@ func (p *parser) tryResolve(rel *Relation) {
 func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
-	var gtype *Gtype
-	var ident identifier
-
-	tok := p.readToken()
-	if tok.isTypeIdent() {
-		// refer another type
-		ident = tok.getIdent()
-		// unresolved
-		rel :=  &Relation{
-			name:  ident,
-		}
-		p.tryResolve(rel)
-		gtype = &Gtype{
-			typ:      G_REL,
-			relname:  ident,
-			relation: rel,
-		}
-	} else if tok.isPunct("*") {
-		// pointer
-	} else if tok.isKeyword("struct") {
-		_ = p.parseStructDef()
-	} else if tok.isKeyword("interface") {
-		_ = p.parseInterfaceDef()
-	} else if tok.isPunct("[") {
-		// array
-		tlen := p.readToken()
-		p.expect("]")
-		typ := p.parseType()
-		gtype = &Gtype{
-			typ: G_ARRAY,
-			length: tlen.getIntval(),
-			ptr: typ,
-		}
-	} else {
-		tok.errorf("TBD")
-	}
-
+	gtype := p.parseType()
 	r := &AstTypeDecl{
 		name: newName,
 		gtype: gtype,
 	}
-
 	p.currentScope._set(newName, gtype)
 	return r
 }
