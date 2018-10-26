@@ -19,10 +19,6 @@ func debugPrintV(v interface{}) {
 	debugf("%v", v)
 }
 
-func debugPrintVar(name string, v interface{}) {
-	debugf("%s = %v", name, v)
-}
-
 func (tok *Token) errorf(format string, v ...interface{}) {
 	errorf(tok.String()+": "+format, v...)
 }
