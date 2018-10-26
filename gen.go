@@ -279,8 +279,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		// FIXME
-		return 1
+		errorf("variable cannot be inteppreted at compile time")
 	case *Relation:
 		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
@@ -337,7 +336,13 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 			// set zero value
 			emit(".quad %d", 0)
 		} else {
-			val := evalIntExpr(initval)
+			var val int
+			switch initval.(type) {
+			case *ExprNumberLiteral:
+				val = initval.(*ExprNumberLiteral).val
+			case *ExprConstVariable:
+				val = evalIntExpr(initval)
+			}
 			emit(".quad %d", val)
 		}
 	}
