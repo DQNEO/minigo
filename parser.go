@@ -771,7 +771,7 @@ func (p *parser) parseImport() *AstImportDecl {
 			errorf("import expects package name")
 		}
 		name := identifier(tok.sval)
-		specs = []*AstImportSpec{&AstImportSpec{
+		specs = []*AstImportSpec{{
 			packageName: name,
 			path:        tok.sval,
 		},
