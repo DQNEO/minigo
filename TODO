@@ -1,7 +1,6 @@
-* Gtype: pointer, struct ,slice, map
+* Gtype: string, pointer, struct ,slice, map
 * Gtype to String()
 * Show source position on error
 * re-organize dump/debug functions
 * convert Gtype as an interface?
 * emit expression of top-level var decls
-
