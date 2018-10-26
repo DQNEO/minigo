@@ -8,14 +8,14 @@ import (
 )
 
 type parser struct {
-	tokenStream *TokenStream
-	isFunctionScope bool
-	unresolvedident []*Relation
-	packageBlockScope *scope
-	currentScope *scope
-	globalvars []*ExprVariable
-	localvars []*ExprVariable
-	importedNames map[identifier]bool
+	tokenStream         *TokenStream
+	isFunctionScope     bool
+	unresolvedRelations []*Relation
+	packageBlockScope   *scope
+	currentScope        *scope
+	globalvars          []*ExprVariable
+	localvars           []*ExprVariable
+	importedNames       map[identifier]bool
 }
 
 type TokenStream struct {
@@ -253,7 +253,7 @@ func (p *parser) ident2expression(id identifier) Expr {
 		r := &Relation{
 			name: id,
 		}
-		p.unresolvedident = append(p.unresolvedident , r)
+		p.unresolvedRelations = append(p.unresolvedRelations, r)
 		return r
 	}
 
@@ -473,7 +473,7 @@ func (p *parser) parseType() *Gtype {
 					ie := &Relation{
 						name:ident,
 					}
-					p.unresolvedident = append(p.unresolvedident, ie)
+					p.unresolvedRelations = append(p.unresolvedRelations, ie)
 					return &Gtype{
 						typ:      G_UNRESOLVED,
 						relation: ie,
@@ -485,7 +485,7 @@ func (p *parser) parseType() *Gtype {
 				ie := &Relation{
 					name:ident,
 				}
-				p.unresolvedident = append(p.unresolvedident, ie)
+				p.unresolvedRelations = append(p.unresolvedRelations, ie)
 				return &Gtype{
 					typ:      G_UNRESOLVED,
 					relation: ie,
@@ -1113,24 +1113,24 @@ func (r *resolver) resolve(p *parser) {
 		}
 	}
 
-	for _, ie := range p.unresolvedident {
-		entity := p.packageBlockScope.get(ie.name)
+	for _, rel := range p.unresolvedRelations {
+		entity := p.packageBlockScope.get(rel.name)
 		if entity == nil {
-			errorf("ident %s not found", ie.name)
+			errorf("ident %s not found", rel.name)
 		}
 		switch entity.(type) {
 		case *AstConstDecl:
 			cnst := entity.(*AstConstDecl)
-			ie.expr = cnst.variable
+			rel.expr = cnst.variable
 		case *AstVarDecl:
 			vr := entity.(*AstVarDecl)
-			ie.expr = vr.initval
+			rel.expr = vr.initval
 		case *AstTypeDecl:
 			d := entity.(*AstTypeDecl)
 			assert(d.gtype != nil, "type decl has gtype")
-			ie.gtype = d.gtype
+			rel.gtype = d.gtype
 		default:
-			errorf("ident %s is not a const", ie.name)
+			errorf("ident %s is not a const", rel.name)
 		}
 	}
 
