@@ -194,22 +194,22 @@ func (e *ExprArrayIndex) emit() {
 	} else {
 		emit("lea %d(%%rbp), %%rax", vr.offset)
 	}
-	emit("push %%rax")
+	emit("push %%rax") // store address of variable
 	e.index.emit()
-	emit("mov %%rax, %%rcx")
+	emit("mov %%rax, %%rcx") // index
 	elmType := vr.gtype.ptr
 	size :=  elmType.getSize()
 	if size == 0 {
 		errorf("size 0 %v", elmType)
 	}
 	assert(size > 0, "size > 0")
-	emit("mov $%d, %%rax", size)
-	emit("imul %%rcx, %%rax")
-	emit("push %%rax")
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("add %%rcx , %%rbx")
-	emit("mov (%%rbx), %%rax")
+	emit("mov $%d, %%rax", size) // size of one element
+	emit("imul %%rcx, %%rax")    // index * size
+	emit("push %%rax")           // store index * size
+	emit("pop %%rcx")            // load  index * size
+	emit("pop %%rbx")            // load address of variable
+	emit("add %%rcx , %%rbx")    // (index * size) + address
+	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 }
 
 func (funcall *ExprFuncall) emit() {
