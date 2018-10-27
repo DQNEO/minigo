@@ -198,19 +198,9 @@ func (e *ExprArrayIndex) emit() {
 	e.index.emit()
 	emit("mov %%rax, %%rcx")
 	elmType := vr.gtype.ptr
-	gtype := elmType
-	for {
-		if gtype.typ == G_REL {
-			debugf("gtype is rel. name is %s ", gtype.relname)
-			gtype = gtype.relation.gtype
-		}else {
-			break
-		}
-	}
-
-	size :=  gtype.size
+	size :=  elmType.getSize()
 	if size == 0 {
-		errorf("size 0 %v", gtype)
+		errorf("size 0 %v", elmType)
 	}
 	assert(size > 0, "size > 0")
 	emit("mov $%d, %%rax", size)
