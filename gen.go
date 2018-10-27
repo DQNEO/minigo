@@ -96,14 +96,15 @@ func (ast *ExprVariable) emit() {
 	}
 }
 
-func (ast *ExprConstVariable) emit() {
-	switch ast.val.(type) {
-	case *Relation:
-		e := ast.val.(*Relation)
-		e.expr.emit()
-	default:
-		ast.val.emit()
+func (rel *Relation) emit() {
+	if rel.expr == nil {
+		errorf("rel.expr is nil: %s", rel.name)
 	}
+	rel.expr.emit()
+}
+
+func (ast *ExprConstVariable) emit() {
+	ast.val.emit()
 }
 
 func (ast *ExprBinop) emit() {

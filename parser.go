@@ -135,10 +135,6 @@ type Relation struct {
 	gtype *Gtype
 }
 
-func (a *Relation) emit() {
-	a.expr.emit()
-}
-
 func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 	defer p.traceOut(p.traceIn())
 
