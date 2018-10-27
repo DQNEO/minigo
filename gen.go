@@ -184,8 +184,8 @@ func emitCompound(ast *AstCompountStmt) {
 
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-func (e *ExprIndexAccess) emit() {
-	emit("# emit *ExprIndexAccess")
+func (e *ExprArrayIndex) emit() {
+	emit("# emit *ExprArrayIndex")
 	variable := e.variable
 	var varname identifier
 	var vr *ExprVariable

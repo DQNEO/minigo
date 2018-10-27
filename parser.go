@@ -209,7 +209,7 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 					name: firstIdent,
 				}
 				p.tryResolve(rel)
-				return &ExprIndexAccess{
+				return &ExprArrayIndex{
 					variable:   rel,
 					index: index,
 				}

@@ -164,12 +164,12 @@ func (e *ExprSliced) emit() {
 	errorf("TBD")
 }
 
-type ExprIndexAccess struct {
+type ExprArrayIndex struct {
 	variable Expr // relation or variableexpr
 	index Expr
 }
 
-func (e *ExprIndexAccess) dump() {
+func (e *ExprArrayIndex) dump() {
 	errorf("TBD")
 
 }
