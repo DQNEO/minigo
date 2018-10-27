@@ -210,7 +210,7 @@ func (p *parser) parseIdentOrFuncall(firstIdent identifier) Expr {
 				}
 				p.tryResolve(rel)
 				return &ExprArrayIndex{
-					variable:   rel,
+					rel:   rel,
 					index: index,
 				}
 			} else if tok.isPunct(":") {

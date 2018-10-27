@@ -186,19 +186,8 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprArrayIndex) emit() {
 	emit("# emit *ExprArrayIndex")
-	variable := e.variable
 	var varname identifier
-	var vr *ExprVariable
-	switch variable.(type) {
-	case *ExprVariable:
-		vr = variable.(*ExprVariable)
-	case *Relation:
-		ex := variable.(*Relation).expr
-		switch ex.(type) {
-		case *ExprVariable:
-			vr = ex.(*ExprVariable)
-		}
-	}
+	vr := e.rel.expr.(*ExprVariable)
 	if vr.isGlobal {
 		varname = vr.varname
 		emit("lea %s(%%rip), %%rax", varname)
