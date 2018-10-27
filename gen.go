@@ -63,7 +63,7 @@ func calcAreaOfVar(gtype *Gtype) int {
 	if gtype.typ == G_ARRAY {
 		return gtype.length * calcAreaOfVar(gtype.ptr)
 	} else {
-		return INT_SIZE
+		return gtype.getSize()
 	}
 }
 
