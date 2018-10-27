@@ -63,7 +63,7 @@ func calcAreaOfVar(gtype *Gtype) int {
 	if gtype.typ == G_ARRAY {
 		return gtype.length * calcAreaOfVar(gtype.ptr)
 	} else {
-		return INT_SIZE
+		return gtype.getSize()
 	}
 }
 
@@ -134,6 +134,35 @@ func assignLocal(left Expr, loff int ,right Expr) {
 		assert(rel.expr != nil, "rel links to a variable")
 		vr := rel.expr.(*ExprVariable)
 		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
+	case *ExprArrayIndex:
+		emit("push %%rax") // push RHS value
+		e := left.(*ExprArrayIndex)
+		// load head address of the array
+		// load index
+		// multi index * size
+		// calc address = head address + offset
+		// copy value to the address
+		vr := e.rel.expr.(*ExprVariable)
+		if vr.isGlobal {
+			emit("lea %s(%%rip), %%rax", vr.varname)
+		} else {
+			emit("lea %d(%%rbp), %%rax", vr.offset)
+		}
+		emit("push %%rax") // store address of variable
+		e.index.emit()
+		emit("mov %%rax, %%rcx") // index
+		elmType := vr.gtype.ptr
+		size :=  elmType.getSize()
+		assert(size > 0, "size > 0")
+		emit("mov $%d, %%rax", size) // size of one element
+		emit("imul %%rcx, %%rax")    // index * size
+		emit("push %%rax")           // store index * size
+		emit("pop %%rcx")            // load  index * size
+		emit("pop %%rbx")            // load address of variable
+		emit("add %%rcx , %%rbx")    // (index * size) + address
+		emit("pop %%rax")            // load RHS value
+		emit("mov %%rax, (%%rbx)")   // dereference the content of an emelment
+
 	default:
 		errorf("Unexpected type %v", left)
 	}
