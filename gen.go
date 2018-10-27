@@ -186,11 +186,9 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprArrayIndex) emit() {
 	emit("# emit *ExprArrayIndex")
-	var varname identifier
 	vr := e.rel.expr.(*ExprVariable)
 	if vr.isGlobal {
-		varname = vr.varname
-		emit("lea %s(%%rip), %%rax", varname)
+		emit("lea %s(%%rip), %%rax", vr.varname)
 	} else {
 		emit("lea %d(%%rbp), %%rax", vr.offset)
 	}
@@ -199,9 +197,6 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov %%rax, %%rcx") // index
 	elmType := vr.gtype.ptr
 	size :=  elmType.getSize()
-	if size == 0 {
-		errorf("size 0 %v", elmType)
-	}
 	assert(size > 0, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
 	emit("imul %%rcx, %%rax")    // index * size
