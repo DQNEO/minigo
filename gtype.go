@@ -38,6 +38,14 @@ type StructField struct {
 	gtype *Gtype
 }
 
+func (gtype *Gtype) getSize() int {
+	if gtype.typ == G_REL {
+		return gtype.relation.gtype.getSize()
+	} else {
+		return gtype.size
+	}
+}
+
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
 	case G_REL:

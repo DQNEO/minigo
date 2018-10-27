@@ -274,14 +274,6 @@ func evalIntExpr(e Expr) int {
 	return 0
 }
 
-func (gtype *Gtype) getSize() int {
-	if gtype.typ == G_REL {
-		return gtype.relation.gtype.getSize()
-	} else {
-		return gtype.size
-	}
-}
-
 func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	assert(variable.isGlobal, "should be global")
 	assert(variable.gtype != nil, "variable has gtype")
