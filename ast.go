@@ -164,6 +164,7 @@ func (e *ExprSliced) emit() {
 	errorf("TBD")
 }
 
+// Expr e.g. array[2]
 type ExprArrayIndex struct {
 	rel *Relation
 	index Expr
