@@ -192,24 +192,18 @@ func (e *ExprArrayIndex) emit() {
 	switch variable.(type) {
 	case *ExprVariable:
 		vr = variable.(*ExprVariable)
-		if vr.isGlobal {
-			varname = vr.varname
-			emit("lea %s(%%rip), %%rax", varname)
-		} else {
-			emit("lea %d(%%rbp), %%rax", vr.offset)
-		}
 	case *Relation:
 		ex := variable.(*Relation).expr
 		switch ex.(type) {
 		case *ExprVariable:
 			vr = ex.(*ExprVariable)
-			if vr.isGlobal {
-				varname = vr.varname
-				emit("lea %s(%%rip), %%rax", varname)
-			} else {
-				emit("lea %d(%%rbp), %%rax", vr.offset)
-			}
 		}
+	}
+	if vr.isGlobal {
+		varname = vr.varname
+		emit("lea %s(%%rip), %%rax", varname)
+	} else {
+		emit("lea %d(%%rbp), %%rax", vr.offset)
 	}
 	emit("push %%rax")
 	e.index.emit()
