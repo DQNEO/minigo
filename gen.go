@@ -123,15 +123,18 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
-func assignLocal(left Expr, loff int ,right Expr) {
-	right.emit()
-	switch left.(type) {
-	case *ExprVariable:
-		vr := left.(*ExprVariable)
-		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
+func (ast *AstAssignment) emit() {
+	ast.right.emit()
+	switch ast.left.(type) {
+	case *Relation:
+		// e.g. x = 1
+		// resolve relation
+		rel := ast.left.(*Relation)
+		vr := rel.expr.(*ExprVariable)
+		emit("mov %%eax, %d(%%rbp)", vr.offset)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
-		e := left.(*ExprArrayIndex)
+		e := ast.left.(*ExprArrayIndex)
 		// load head address of the array
 		// load index
 		// multi index * size
@@ -147,7 +150,7 @@ func assignLocal(left Expr, loff int ,right Expr) {
 		e.index.emit()
 		emit("mov %%rax, %%rcx") // index
 		elmType := vr.gtype.ptr
-		size :=  elmType.getSize()
+		size := elmType.getSize()
 		assert(size > 0, "size > 0")
 		emit("mov $%d, %%rax", size) // size of one element
 		emit("imul %%rcx, %%rax")    // index * size
@@ -159,19 +162,7 @@ func assignLocal(left Expr, loff int ,right Expr) {
 		emit("mov %%rax, (%%rbx)")   // dereference the content of an emelment
 
 	default:
-		errorf("Unexpected type %v", left)
-	}
-}
-
-func (ast *AstAssignment) emit() {
-	switch ast.left.(type) {
-	case *Relation:
-		// e.g. x = 1
-		// resolve relation
-		rel := ast.left.(*Relation)
-		assignLocal(rel.expr, 0, ast.right)
-	default:
-		assignLocal(ast.left, 0, ast.right)
+		errorf("Unexpected type %v", ast.left)
 	}
 }
 
@@ -187,7 +178,9 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		elmType := arraygtype.ptr.relation.gtype
 		debugf("gtype:%v", elmType)
 		for i, val := range initvalues.values {
-			assignLocal(ast.variable, i * elmType.size, val)
+			val.emit()
+			localoffset := ast.variable.offset + i * elmType.getSize()
+			emit("mov %%eax, %d(%%rbp)", localoffset)
 		}
 		return
 	}
@@ -197,7 +190,8 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		ast.initval = &ExprNumberLiteral{}
 	}
 
-	assignLocal(ast.variable,0, ast.initval)
+	ast.initval.emit()
+	emit("mov %%eax, %d(%%rbp)", ast.variable.offset)
 }
 
 func emitCompound(ast *AstCompountStmt) {
