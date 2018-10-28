@@ -40,30 +40,28 @@ func emitFuncPrologue(f *AstFuncDecl) {
 
 	var localarea int
 	for _, lvar := range f.localvars {
-		if lvar.gtype == nil {
-			errorf("lvar has no gtype: %s", lvar)
-		}
 		assert(lvar.gtype != nil, "lvar has gtype")
-		area := calcAreaOfVar(lvar.gtype)
-		localarea -= area
-		offset -= area
+		size := lvar.gtype.getSize()
+		assert(size != 0, "size is not zero")
+		loff := align(size, 8)
+		localarea -= loff
+		offset -= loff
 		lvar.offset = offset
 		debugf("set offset %d to lvar %s", lvar.offset, lvar.varname)
 	}
 	if localarea != 0 {
-		emit("# allocate localarea")
-		emit("sub $%d, %%rsp", -localarea)
+		emit("sub $%d, %%rsp # allocate localarea", -localarea)
 	}
 
 	emit("# end of prologue")
 }
 
-func calcAreaOfVar(gtype *Gtype) int {
-	assert(gtype != nil, "gtype exists")
-	if gtype.typ == G_ARRAY {
-		return gtype.length * calcAreaOfVar(gtype.ptr)
+func align(n int, m int) int {
+	remainder := n % m
+	if remainder == 0 {
+		return n
 	} else {
-		return gtype.getSize()
+		return n - remainder + m
 	}
 }
 
@@ -182,16 +180,14 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 			localoffset := ast.variable.offset + i * elmType.getSize()
 			emit("mov %%eax, %d(%%rbp)", localoffset)
 		}
-		return
+	} else {
+		if ast.initval == nil {
+			// assign zero value
+			ast.initval = &ExprNumberLiteral{}
+		}
+		ast.initval.emit()
+		emit("mov %%eax, %d(%%rbp)", ast.variable.offset)
 	}
-
-	if ast.initval == nil {
-		// assign zero value
-		ast.initval = &ExprNumberLiteral{}
-	}
-
-	ast.initval.emit()
-	emit("mov %%eax, %d(%%rbp)", ast.variable.offset)
 }
 
 func emitCompound(ast *AstCompountStmt) {

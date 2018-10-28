@@ -42,7 +42,11 @@ func (gtype *Gtype) getSize() int {
 	if gtype.typ == G_REL {
 		return gtype.relation.gtype.getSize()
 	} else {
-		return gtype.size
+		if gtype.typ == G_ARRAY {
+			return gtype.length * gtype.ptr.getSize()
+		} else {
+			return gtype.size
+		}
 	}
 }
 
