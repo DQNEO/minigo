@@ -269,8 +269,9 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isPunct("["):  // array literal
 		return p.parseArrayLiteral()
-	case tok.isTypeIdent():
-		return p.parseIdentOrFuncall(tok.getIdent())
+	case tok.isTypeIdent(): {
+			return p.parseIdentOrFuncall(tok.getIdent())
+	}
 	default:
 		errorf("unable to handle %s", tok)
 	}
