@@ -121,6 +121,7 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
+
 func (ast *AstAssignment) emit() {
 	ast.right.emit()
 	switch ast.left.(type) {
@@ -129,7 +130,7 @@ func (ast *AstAssignment) emit() {
 		// resolve relation
 		rel := ast.left.(*Relation)
 		vr := rel.expr.(*ExprVariable)
-		emit("mov %%rax, %d(%%rbp)", vr.offset)
+		emitLsave(vr.offset)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
 		e := ast.left.(*ExprArrayIndex)
@@ -164,6 +165,11 @@ func (ast *AstAssignment) emit() {
 	}
 }
 
+func emitLsave(loff int) {
+	reg := "rax"
+	emit("mov %%%s, %d(%%rbp)", reg, loff)
+}
+
 func emitDeclLocalVar(ast *AstVarDecl) {
 	if ast.variable.gtype.typ == G_ARRAY &&   ast.initval != nil {
 		// initialize local array
@@ -178,7 +184,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		for i, val := range initvalues.values {
 			val.emit()
 			localoffset := ast.variable.offset + i * elmType.getSize()
-			emit("mov %%rax, %d(%%rbp)", localoffset)
+			emitLsave(localoffset)
 		}
 	} else {
 		if ast.initval == nil {
@@ -186,7 +192,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 			ast.initval = &ExprNumberLiteral{}
 		}
 		ast.initval.emit()
-		emit("mov %%rax, %d(%%rbp)", ast.variable.offset)
+		emitLsave(ast.variable.offset)
 	}
 }
 
