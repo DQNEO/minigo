@@ -130,7 +130,7 @@ func (ast *AstAssignment) emit() {
 		// resolve relation
 		rel := ast.left.(*Relation)
 		vr := rel.expr.(*ExprVariable)
-		emitLsave(vr.offset)
+		emitLsave(vr.gtype.getSize(), vr.offset)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
 		e := ast.left.(*ExprArrayIndex)
@@ -165,8 +165,17 @@ func (ast *AstAssignment) emit() {
 	}
 }
 
-func emitLsave(loff int) {
-	reg := "rax"
+func emitLsave(regSize int, loff int) {
+	var reg string
+	switch regSize {
+	case 1:
+		reg = "al"
+	case 8:
+		reg = "rax"
+	default:
+		errorf("Unexpected reg size %d", regSize)
+
+	}
 	emit("mov %%%s, %d(%%rbp)", reg, loff)
 }
 
@@ -184,7 +193,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		for i, val := range initvalues.values {
 			val.emit()
 			localoffset := ast.variable.offset + i * elmType.getSize()
-			emitLsave(localoffset)
+			emitLsave(elmType.getSize(), localoffset)
 		}
 	} else {
 		if ast.initval == nil {
@@ -192,7 +201,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 			ast.initval = &ExprNumberLiteral{}
 		}
 		ast.initval.emit()
-		emitLsave(ast.variable.offset)
+		emitLsave(ast.variable.gtype.getSize(), ast.variable.offset)
 	}
 }
 
