@@ -129,11 +129,6 @@ func assignLocal(left Expr, loff int ,right Expr) {
 	case *ExprVariable:
 		vr := left.(*ExprVariable)
 		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
-	case *Relation:
-		rel := left.(*Relation)
-		assert(rel.expr != nil, "rel links to a variable")
-		vr := rel.expr.(*ExprVariable)
-		emit("mov %%eax, %d(%%rbp)", vr.offset + loff)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
 		e := left.(*ExprArrayIndex)
@@ -169,7 +164,15 @@ func assignLocal(left Expr, loff int ,right Expr) {
 }
 
 func (ast *AstAssignment) emit() {
-	assignLocal(ast.left, 0, ast.right)
+	switch ast.left.(type) {
+	case *Relation:
+		// e.g. x = 1
+		// resolve relation
+		rel := ast.left.(*Relation)
+		assignLocal(rel.expr, 0, ast.right)
+	default:
+		assignLocal(ast.left, 0, ast.right)
+	}
 }
 
 func emitDeclLocalVar(ast *AstVarDecl) {
