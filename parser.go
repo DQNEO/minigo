@@ -254,8 +254,6 @@ func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	switch {
-	case tok.isTypeIdent():
-		return p.parseIdentOrFuncall(tok.getIdent())
 	case tok.isTypeString(): // string literal
 		return p.newAstString(tok.sval)
 	case tok.isTypeInt():    // int literal
@@ -271,6 +269,8 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isPunct("["):  // array literal
 		return p.parseArrayLiteral()
+	case tok.isTypeIdent():
+		return p.parseIdentOrFuncall(tok.getIdent())
 	default:
 		errorf("unable to handle %s", tok)
 	}
