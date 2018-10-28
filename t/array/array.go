@@ -29,6 +29,8 @@ func f3() {
 	fmt.Printf("%c", lbytes[3])
 	fmt.Printf("%c", lbytes[4])
 	fmt.Printf("%c", lbytes[5])
+
+	fmt.Printf("%s", lbytes)
 }
 
 func main() {

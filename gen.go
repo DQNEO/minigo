@@ -90,7 +90,11 @@ func (ast *ExprVariable) emit() {
 		if ast.offset == 0 {
 			errorf("offset should not be zero for localvar %s", ast.varname)
 		}
-		emit("mov %d(%%rbp), %%rax", ast.offset)
+		if ast.gtype.typ == G_ARRAY {
+			emit("lea %d(%%rbp), %%rax", ast.offset)
+		} else {
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+		}
 	}
 }
 
