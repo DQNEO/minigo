@@ -158,14 +158,15 @@ func (ast *AstAssignment) emit() {
 		emit("pop %%rbx")            // load address of variable
 		emit("add %%rcx , %%rbx")    // (index * size) + address
 		emit("pop %%rax")            // load RHS value
-		emit("mov %%rax, (%%rbx)")   // dereference the content of an emelment
+		reg := getReg(size)
+		emit("mov %%%s, (%%rbx)", reg)   // dereference the content of an emelment
 
 	default:
 		errorf("Unexpected type %v", ast.left)
 	}
 }
 
-func emitLsave(regSize int, loff int) {
+func getReg(regSize int) string {
 	var reg string
 	switch regSize {
 	case 1:
@@ -176,6 +177,11 @@ func emitLsave(regSize int, loff int) {
 		errorf("Unexpected reg size %d", regSize)
 
 	}
+	return reg
+}
+
+func emitLsave(regSize int, loff int) {
+	reg := getReg(regSize)
 	emit("mov %%%s, %d(%%rbp)", reg, loff)
 }
 
