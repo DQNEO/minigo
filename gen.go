@@ -72,7 +72,7 @@ func emitFuncEpilogue() {
 }
 
 func (ast *ExprNumberLiteral) emit() {
-	emit("movl	$%d, %%eax", ast.val)
+	emit("mov	$%d, %%rax", ast.val)
 }
 
 func (ast *ExprStringLiteral) emit() {
@@ -82,15 +82,15 @@ func (ast *ExprStringLiteral) emit() {
 func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		if ast.gtype.typ == G_ARRAY {
-			emit("lea %s(%%rip), %%eax", ast.varname)
+			emit("lea %s(%%rip), %%rax", ast.varname)
 		} else {
-			emit("mov %s(%%rip), %%eax", ast.varname)
+			emit("mov %s(%%rip), %%rax", ast.varname)
 		}
 	} else {
 		if ast.offset == 0 {
 			errorf("offset should not be zero for localvar %s", ast.varname)
 		}
-		emit("mov %d(%%rbp), %%eax", ast.offset)
+		emit("mov %d(%%rbp), %%rax", ast.offset)
 	}
 }
 
@@ -113,11 +113,11 @@ func (ast *ExprBinop) emit() {
 	emit("pop %%rbx")
 	emit("pop %%rax")
 	if ast.op == "+" {
-		emit("addl	%%ebx, %%eax")
+		emit("add	%%rbx, %%rax")
 	} else if ast.op == "-" {
-		emit("subl	%%ebx, %%eax")
+		emit("sub	%%rbx, %%rax")
 	} else if ast.op == "*" {
-		emit("imul	%%ebx, %%eax")
+		emit("imul	%%rbx, %%rax")
 	}
 }
 
@@ -129,7 +129,7 @@ func (ast *AstAssignment) emit() {
 		// resolve relation
 		rel := ast.left.(*Relation)
 		vr := rel.expr.(*ExprVariable)
-		emit("mov %%eax, %d(%%rbp)", vr.offset)
+		emit("mov %%rax, %d(%%rbp)", vr.offset)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
 		e := ast.left.(*ExprArrayIndex)
@@ -178,7 +178,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 		for i, val := range initvalues.values {
 			val.emit()
 			localoffset := ast.variable.offset + i * elmType.getSize()
-			emit("mov %%eax, %d(%%rbp)", localoffset)
+			emit("mov %%rax, %d(%%rbp)", localoffset)
 		}
 	} else {
 		if ast.initval == nil {
@@ -186,7 +186,7 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 			ast.initval = &ExprNumberLiteral{}
 		}
 		ast.initval.emit()
-		emit("mov %%eax, %d(%%rbp)", ast.variable.offset)
+		emit("mov %%rax, %d(%%rbp)", ast.variable.offset)
 	}
 }
 
@@ -260,7 +260,7 @@ func (funcall *ExprFuncall) emit() {
 func emitFuncdef(f *AstFuncDecl) {
 	emitFuncPrologue(f)
 	emitCompound(f.body)
-	emit("mov $0, %%eax") // return 0
+	emit("mov $0, %%rax") // return 0
 	emitFuncEpilogue()
 }
 
