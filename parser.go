@@ -256,20 +256,20 @@ func (p *parser) parsePrim() Expr {
 	switch {
 	case tok.isTypeIdent():
 		return p.parseIdentOrFuncall(tok.getIdent())
-	case tok.isTypeString():
+	case tok.isTypeString(): // string literal
 		return p.newAstString(tok.sval)
-	case tok.isTypeInt():
+	case tok.isTypeInt():    // int literal
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
 			val: ival,
 		}
-	case tok.isTypeChar():
+	case tok.isTypeChar():   // char literal
 		sval := tok.sval
 		c := sval[0]
 		return &ExprNumberLiteral{
 			val: int(c),
 		}
-	case tok.isPunct("["):
+	case tok.isPunct("["):  // array literal
 		return p.parseArrayLiteral()
 	default:
 		errorf("unable to handle %s", tok)
