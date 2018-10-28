@@ -86,7 +86,7 @@ func (p *parser) traceIn() int {
 	if !debugParser {
 		return 0
 	}
-	debugf("func %s start with %s", getCallerName(2), p.peekToken())
+	debugf("func %s is gonna read %s", getCallerName(2), p.peekToken())
 	debugNest++
 	return 0
 }
@@ -335,6 +335,7 @@ func (p *parser) parseArrayLiteral() Expr {
 }
 
 func (p *parser) parseUnaryExpr() Expr {
+	defer p.traceOut(p.traceIn())
 	return p.parsePrim()
 }
 
