@@ -172,15 +172,33 @@ func (ast *AstAssignment) emit() {
 
 
 func (s *AstIfStmt) emit() {
+	emit("# if")
 	s.cond.emit()
 	emit("test %%rax, %%rax")
-	labelfalse := fmt.Sprintf("L%d", labelNo)
-	labelNo++
-	emit("je .%s  # jump if false", labelfalse)
-	emit("# then block")
-	s.then.emit()
-	emit(".%s:", labelfalse)
-	emit("# else block")
+	if s.els != nil {
+		labelElse := fmt.Sprintf("L%d", labelNo)
+		labelNo++
+		labelEndif := fmt.Sprintf("L%d", labelNo)
+		labelNo++
+		emit("je .%s  # jump if 0", labelElse)
+		emit("# then block")
+		s.then.emit()
+		emit("jmp .%s # jump to endif", labelEndif)
+		emit("# else block")
+		emit(".%s:", labelElse)
+		s.els.emit()
+		emit("# endif")
+		emit(".%s:", labelEndif)
+	} else {
+		// no else block
+		labelEndif := fmt.Sprintf("L%d", labelNo)
+		labelNo++
+		emit("je .%s  # jump if 0", labelEndif)
+		emit("# then block")
+		s.then.emit()
+		emit("# endif")
+		emit(".%s:", labelEndif)
+	}
 
 
 }

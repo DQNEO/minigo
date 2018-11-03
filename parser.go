@@ -637,14 +637,8 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	r.then = p.parseCompoundStmt()
 	tok := p.readToken()
 	if tok.isKeyword("else") {
-		tok := p.readToken()
-		if tok.isPunct("{") {
-			r.els = &AstStmt{compound: p.parseCompoundStmt()}
-		} else if tok.isKeyword("if") {
-			r.els = &AstStmt{ifstmt: p.parseIfStmt()}
-		} else {
-			tok.errorf("Syntax error")
-		}
+		p.expect("{")
+		r.els = p.parseCompoundStmt()
 	} else {
 		p.unreadToken()
 	}

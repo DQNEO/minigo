@@ -73,7 +73,7 @@ type AstForStmt struct {
 type AstIfStmt struct {
 	cond Expr
 	then *AstCompountStmt
-	els  *AstStmt
+	els  *AstCompountStmt
 }
 
 type AstReturnStmt struct {
