@@ -122,6 +122,8 @@ func (ast *ExprBinop) emit() {
 		emit("sub	%%rbx, %%rax")
 	} else if ast.op == "*" {
 		emit("imul	%%rbx, %%rax")
+	} else {
+		errorf("Unknown binop: %s", ast.op)
 	}
 }
 
