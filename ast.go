@@ -5,6 +5,10 @@ type Expr interface {
 	dump()
 }
 
+type Stmt interface {
+	emit()
+}
+
 type ExprNumberLiteral struct {
 	val int
 }
@@ -63,9 +67,9 @@ type AstForStmt struct {
 	idents []identifier
 	list   Expr
 	// or
-	left   *AstStmt
-	middle *AstStmt
-	right  *AstStmt
+	left   Stmt
+	middle Stmt
+	right  Stmt
 
 	block *AstCompountStmt
 }
@@ -73,13 +77,14 @@ type AstForStmt struct {
 type AstIfStmt struct {
 	cond Expr
 	then *AstCompountStmt
-	els  *AstStmt
+	els  Stmt
 }
 
 type AstReturnStmt struct {
 	expr Expr
 }
 
+/*
 type AstStmt struct {
 	compound   *AstCompountStmt
 	declvar    *AstVarDecl
@@ -91,6 +96,7 @@ type AstStmt struct {
 	rtrnstmt   *AstReturnStmt
 	expr       Expr
 }
+*/
 
 type AstPackageClause struct {
 	name identifier
@@ -106,7 +112,7 @@ type AstImportDecl struct {
 
 type AstCompountStmt struct {
 	// compound
-	stmts []*AstStmt
+	stmts []Stmt
 }
 
 type AstFuncDecl struct {

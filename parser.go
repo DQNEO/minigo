@@ -654,9 +654,9 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 		if tok2.isKeyword("if") {
 			// we regard "else if" as a kind of a nested if statement
 			// else if => else { if .. { } else {} }
-			r.els = &AstStmt{ifstmt:p.parseIfStmt(),}
+			r.els = p.parseIfStmt()
 		} else if tok2.isPunct("{") {
-			r.els = &AstStmt{compound:p.parseCompoundStmt(),}
+			r.els = p.parseCompoundStmt()
 		} else {
 			tok2.errorf("Unexpected token")
 		}
@@ -674,31 +674,31 @@ func (p *parser) parseReturnStmt() *AstReturnStmt {
 }
 
 // this is in function scope
-func (p *parser) parseStmt() *AstStmt {
+func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	if tok.isKeyword("var") {
-		return &AstStmt{declvar: p.parseVarDecl(false)}
+		return p.parseVarDecl(false)
 	} else if tok.isKeyword("const") {
-		return &AstStmt{constdecl: p.parseConstDecl()}
+		return  p.parseConstDecl()
 	} else if tok.isKeyword("type") {
-		return &AstStmt{typedecl: p.parseTypeDecl()}
+		return  p.parseTypeDecl()
 	} else if tok.isKeyword("for") {
-		return &AstStmt{forstmt: p.parseForStmt()}
+		return  p.parseForStmt()
 	} else if tok.isKeyword("if") {
-		return &AstStmt{ifstmt: p.parseIfStmt()}
+		return p.parseIfStmt()
 	} else if tok.isKeyword("return") {
-		return &AstStmt{rtrnstmt: p.parseReturnStmt()}
+		return p.parseReturnStmt()
 	}
 	p.unreadToken()
 	expr1 := p.parseExpr()
 	tok2 := p.readToken()
 	if tok2.isPunct("=") {
 		expr2 := p.parseExpr()
-		return &AstStmt{assignment: &AstAssignment{
+		return &AstAssignment{
 			left:  expr1,
 			right: expr2,
-		}}
+		}
 	} else if tok2.isPunct(":=") {
 		// ShortVarDecl
 		expr2 := p.parseExpr()
@@ -707,13 +707,13 @@ func (p *parser) parseStmt() *AstStmt {
 		variable := p.newVariable(rel.name, gtype,false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
-		return &AstStmt{assignment: &AstAssignment{
+		return &AstAssignment{
 			left:  expr1,
 			right: expr2,
-		}}
+		}
 	} else {
 		p.unreadToken()
-		return &AstStmt{expr: expr1}
+		return expr1
 	}
 }
 

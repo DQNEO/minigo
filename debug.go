@@ -36,9 +36,9 @@ func (a *AstPackageClause) dump() {
 func (a *AstFuncDecl) dump() {
 	debugf("funcdef %s", a.fname)
 	debugNest++
-	for _, stmt := range a.body.stmts {
-		stmt.dump()
-	}
+	//for _, stmt := range a.body.stmts {
+		//stmt.dump()
+	//}
 	debugNest--
 }
 
@@ -76,28 +76,19 @@ func (stmt *AstIfStmt) dump() {
 	debugf("if")
 	debugNest++
 	stmt.cond.dump()
-	stmt.then.dump()
-	stmt.els.dump()
+	//stmt.then.dump()
+	//stmt.els.dump()
 	debugNest--
 }
 
+/*
 func (s *AstCompountStmt) dump() {
 	for _, stmt := range s.stmts {
 		stmt.dump()
 	}
 }
+*/
 
-func (a *AstStmt) dump() {
-	if a.declvar != nil {
-		a.declvar.dump()
-	} else if a.assignment != nil {
-		a.assignment.dump()
-	} else if a.ifstmt != nil {
-		a.ifstmt.dump()
-	} else if a.expr != nil {
-		a.expr.dump()
-	}
-}
 func (a *AstSourceFile) dump() {
 	debugf("==== Dump AstExpr Start ===")
 	a.pkg.dump()

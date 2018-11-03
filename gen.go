@@ -282,7 +282,7 @@ func emitLsave(regSize int, loff int) {
 	emit("mov %%%s, %d(%%rbp)", reg, loff)
 }
 
-func emitDeclLocalVar(ast *AstVarDecl) {
+func (ast *AstVarDecl) emit() {
 	if ast.variable.gtype.typ == G_ARRAY &&   ast.initval != nil {
 		// initialize local array
 		debugf("initialize local array")
@@ -308,26 +308,12 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 	}
 }
 
-func (stmt *AstStmt) emit() {
-	if stmt.expr != nil {
-		stmt.expr.emit()
-	} else if stmt.assignment != nil {
-		stmt.assignment.emit()
-	} else if stmt.ifstmt != nil {
-		stmt.ifstmt.emit()
-	} else if stmt.forstmt != nil {
-		stmt.forstmt.emit()
-	} else if stmt.rtrnstmt != nil {
-		stmt.rtrnstmt.emit()
-	} else if stmt.declvar != nil {
-		emitDeclLocalVar(stmt.declvar)
-	} else if stmt.constdecl != nil {
-		// nothing to do
-	} else if stmt.compound != nil {
-		stmt.compound.emit()
-	} else {
-		errorf("Unknown statement: %s", stmt)
-	}
+func (decl *AstConstDecl) emit() {
+	// nothing to do
+}
+
+func (decl *AstTypeDecl) emit() {
+	errorf("TBD")
 }
 
 func (ast *AstCompountStmt) emit() {
