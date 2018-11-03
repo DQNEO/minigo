@@ -650,8 +650,16 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	r.then = p.parseCompoundStmt()
 	tok := p.readToken()
 	if tok.isKeyword("else") {
-		p.expect("{")
-		r.els = p.parseCompoundStmt()
+		tok2 := p.readToken()
+		if tok2.isKeyword("if") {
+			// we regard "else if" as a kind of a nested if statement
+			// else if => else { if .. { } else {} }
+			r.els = &AstStmt{ifstmt:p.parseIfStmt(),}
+		} else if tok2.isPunct("{") {
+			r.els = &AstStmt{compound:p.parseCompoundStmt(),}
+		} else {
+			tok2.errorf("Unexpected token")
+		}
 	} else {
 		p.unreadToken()
 	}

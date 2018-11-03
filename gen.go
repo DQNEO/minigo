@@ -323,6 +323,8 @@ func (stmt *AstStmt) emit() {
 		emitDeclLocalVar(stmt.declvar)
 	} else if stmt.constdecl != nil {
 		// nothing to do
+	} else if stmt.compound != nil {
+		stmt.compound.emit()
 	} else {
 		errorf("Unknown statement: %s", stmt)
 	}
