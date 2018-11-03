@@ -72,11 +72,28 @@ func (a *AstTypeDecl) dump() {
 		a.name, a.gtype)
 }
 
+func (stmt *AstIfStmt) dump() {
+	debugf("if")
+	debugNest++
+	stmt.cond.dump()
+	stmt.then.dump()
+	stmt.els.dump()
+	debugNest--
+}
+
+func (s *AstCompountStmt) dump() {
+	for _, stmt := range s.stmts {
+		stmt.dump()
+	}
+}
+
 func (a *AstStmt) dump() {
 	if a.declvar != nil {
 		a.declvar.dump()
 	} else if a.assignment != nil {
 		a.assignment.dump()
+	} else if a.ifstmt != nil {
+		a.ifstmt.dump()
 	} else if a.expr != nil {
 		a.expr.dump()
 	}

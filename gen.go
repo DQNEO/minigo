@@ -170,6 +170,20 @@ func (ast *AstAssignment) emit() {
 	}
 }
 
+
+func (s *AstIfStmt) emit() {
+	s.cond.emit()
+	emit("test %%rax, %%rax")
+	labelfalse := fmt.Sprintf("L%d", labelNo)
+	labelNo++
+	emit("je .%s  # jump if false", labelfalse)
+	emit("# then block")
+	s.then.emit()
+	emit(".%s:", labelfalse)
+	emit("# else block")
+
+
+}
 func (stmt AstReturnStmt) emit() {
 	stmt.expr.emit()
 	isVoidFunc = false
@@ -220,12 +234,14 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 	}
 }
 
-func emitCompound(ast *AstCompountStmt) {
+func (ast *AstCompountStmt) emit() {
 	for _, stmt := range ast.stmts {
 		if stmt.expr != nil {
 			stmt.expr.emit()
 		} else if stmt.assignment != nil {
 			stmt.assignment.emit()
+		} else if stmt.ifstmt != nil {
+			stmt.ifstmt.emit()
 		} else if stmt.rtrnstmt != nil {
 			stmt.rtrnstmt.emit()
 		} else if stmt.declvar != nil {
@@ -293,7 +309,7 @@ var isVoidFunc bool
 func emitFuncdef(f *AstFuncDecl) {
 	isVoidFunc = true
 	emitFuncPrologue(f)
-	emitCompound(f.body)
+	f.body.emit()
 	if isVoidFunc {
 		emit("mov $0, %%rax") // return 0 for void func
 	}
