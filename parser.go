@@ -152,6 +152,8 @@ func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	switch {
+	case tok.isSemicolon():
+		return nil
 	case tok.isTypeString(): // string literal
 		return p.newAstString(tok.sval)
 	case tok.isTypeInt():    // int literal

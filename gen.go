@@ -203,8 +203,11 @@ func (s *AstIfStmt) emit() {
 
 }
 func (stmt AstReturnStmt) emit() {
-	stmt.expr.emit()
-	isVoidFunc = false
+	if stmt.expr == nil {
+		emit("mov $0, %%rax")
+	} else {
+		stmt.expr.emit()
+	}
 }
 
 func getReg(regSize int) string {
@@ -323,14 +326,10 @@ func (funcall *ExprFuncall) emit() {
 	}
 }
 
-var isVoidFunc bool
 func emitFuncdef(f *AstFuncDecl) {
-	isVoidFunc = true
 	emitFuncPrologue(f)
 	f.body.emit()
-	if isVoidFunc {
-		emit("mov $0, %%rax") // return 0 for void func
-	}
+	emit("mov $0, %%rax")
 	emitFuncEpilogue()
 }
 
