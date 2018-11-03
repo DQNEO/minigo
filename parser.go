@@ -61,7 +61,7 @@ func (p *parser) readIdent() identifier {
 func (p *parser) expectKeyword(name string) {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
-		errorf("Keyword %s expected but got %s", tok)
+		errorf("Keyword %s expected but got %s", name)
 	}
 }
 
@@ -615,6 +615,16 @@ func (p *parser) parseForStmt() *AstForStmt {
 	var r = &AstForStmt{}
 	p.enterNewScope()
 	defer p.exitScope()
+
+	// Assume C style for statement
+
+	r.left = p.parseStmt()
+	p.expect(";")
+	r.middle = p.parseStmt()
+	p.expect(";")
+	r.right = p.parseStmt()
+
+	/*
 	// Assume "range" style
 	idents := p.parseIdentList()
 	p.expect(":=")
@@ -624,6 +634,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	r.idents = idents
 	p.expectKeyword("range")
 	r.list = p.parseExpr()
+	*/
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
 	return r

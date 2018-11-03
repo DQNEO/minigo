@@ -229,9 +229,32 @@ func (s *AstIfStmt) emit() {
 		emit("# endif")
 		emit(".%s:", labelEndif)
 	}
-
-
 }
+
+func (f *AstForStmt) emit() {
+	labelBegin := fmt.Sprintf("L%d", labelNo)
+	labelNo++
+	labelEnd := fmt.Sprintf("L%d", labelNo)
+	labelNo++
+
+	if f.left != nil {
+		f.left.emit()
+	}
+	emit(".%s: # begin loop ", labelBegin)
+	if f.middle != nil {
+		f.middle.emit()
+		emit("test %%rax, %%rax")
+		emit("je .%s  # jump if false", labelEnd)
+	}
+	f.block.emit()
+	if f.right != nil {
+		f.right.emit()
+	}
+	emit("jmp .%s", labelBegin)
+	emit(".%s: # end loop", labelEnd)
+}
+
+
 func (stmt AstReturnStmt) emit() {
 	if stmt.expr == nil {
 		emit("mov $0, %%rax")
@@ -285,21 +308,29 @@ func emitDeclLocalVar(ast *AstVarDecl) {
 	}
 }
 
+func (stmt *AstStmt) emit() {
+	if stmt.expr != nil {
+		stmt.expr.emit()
+	} else if stmt.assignment != nil {
+		stmt.assignment.emit()
+	} else if stmt.ifstmt != nil {
+		stmt.ifstmt.emit()
+	} else if stmt.forstmt != nil {
+		stmt.forstmt.emit()
+	} else if stmt.rtrnstmt != nil {
+		stmt.rtrnstmt.emit()
+	} else if stmt.declvar != nil {
+		emitDeclLocalVar(stmt.declvar)
+	} else if stmt.constdecl != nil {
+		// nothing to do
+	} else {
+		errorf("Unknown statement: %s", stmt)
+	}
+}
+
 func (ast *AstCompountStmt) emit() {
 	for _, stmt := range ast.stmts {
-		if stmt.expr != nil {
-			stmt.expr.emit()
-		} else if stmt.assignment != nil {
-			stmt.assignment.emit()
-		} else if stmt.ifstmt != nil {
-			stmt.ifstmt.emit()
-		} else if stmt.rtrnstmt != nil {
-			stmt.rtrnstmt.emit()
-		} else if stmt.declvar != nil {
-			emitDeclLocalVar(stmt.declvar)
-		} else if stmt.constdecl != nil {
-			// nothing to do
-		}
+		stmt.emit()
 	}
 }
 
