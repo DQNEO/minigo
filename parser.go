@@ -356,7 +356,7 @@ func (p *parser) parseExpr() Expr {
 }
 
 var binops = []string{
-	"+", "*", "-", "==", "!=", "<", ">", "<=", "=>",
+	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=",
 }
 
 func (p *parser) parseExprInt(prior int) Expr {

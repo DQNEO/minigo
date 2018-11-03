@@ -109,7 +109,35 @@ func (ast *ExprConstVariable) emit() {
 	ast.val.emit()
 }
 
+func emit_comp(inst string, ast *ExprBinop) {
+	ast.left.emit()
+	emit("push %%rax")
+	ast.right.emit()
+	emit("pop %%rcx")
+	emit("cmp %%rax, %%rcx")
+	emit("%s %%al", inst)
+	emit("movzb %%al, %%eax")
+}
+
 func (ast *ExprBinop) emit() {
+	if ast.op == "<" {
+		emit_comp("setl", ast)
+		return
+	} else if ast.op == ">" {
+		emit_comp("setg", ast)
+		return
+	} else if ast.op == "<=" {
+		emit_comp("setle", ast)
+		return
+	} else if ast.op == ">=" {
+		emit_comp("setge", ast)
+		return
+	} else if ast.op == "!=" {
+		errorf("TBD")
+	} else if ast.op == "==" {
+		emit_comp("sete", ast)
+		return
+	}
 	ast.left.emit()
 	emit("push %%rax")
 	ast.right.emit()
