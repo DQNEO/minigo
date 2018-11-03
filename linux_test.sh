@@ -32,5 +32,6 @@ test_file var
 test_file byte
 test_file array
 test_file type
+test_file if
 
 echo "All tests passed"
