@@ -170,6 +170,11 @@ func (ast *AstAssignment) emit() {
 	}
 }
 
+func (stmt AstReturnStmt) emit() {
+	stmt.expr.emit()
+	isVoidFunc = false
+}
+
 func getReg(regSize int) string {
 	var reg string
 	switch regSize {
@@ -221,6 +226,8 @@ func emitCompound(ast *AstCompountStmt) {
 			stmt.expr.emit()
 		} else if stmt.assignment != nil {
 			stmt.assignment.emit()
+		} else if stmt.rtrnstmt != nil {
+			stmt.rtrnstmt.emit()
 		} else if stmt.declvar != nil {
 			emitDeclLocalVar(stmt.declvar)
 		} else if stmt.constdecl != nil {
@@ -282,10 +289,14 @@ func (funcall *ExprFuncall) emit() {
 	}
 }
 
+var isVoidFunc bool
 func emitFuncdef(f *AstFuncDecl) {
+	isVoidFunc = true
 	emitFuncPrologue(f)
 	emitCompound(f.body)
-	emit("mov $0, %%rax") // return 0
+	if isVoidFunc {
+		emit("mov $0, %%rax") // return 0 for void func
+	}
 	emitFuncEpilogue()
 }
 

@@ -651,6 +651,13 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	return r
 }
 
+func (p *parser) parseReturnStmt() *AstReturnStmt {
+	defer p.traceOut(p.traceIn())
+	var r *AstReturnStmt
+	r = &AstReturnStmt{expr:p.parseExpr()}
+	return r
+}
+
 // this is in function scope
 func (p *parser) parseStmt() *AstStmt {
 	defer p.traceOut(p.traceIn())
@@ -665,6 +672,8 @@ func (p *parser) parseStmt() *AstStmt {
 		return &AstStmt{forstmt: p.parseForStmt()}
 	} else if tok.isKeyword("if") {
 		return &AstStmt{ifstmt: p.parseIfStmt()}
+	} else if tok.isKeyword("return") {
+		return &AstStmt{rtrnstmt: p.parseReturnStmt()}
 	}
 	p.unreadToken()
 	expr1 := p.parseExpr()

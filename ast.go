@@ -76,6 +76,10 @@ type AstIfStmt struct {
 	els  *AstStmt
 }
 
+type AstReturnStmt struct {
+	expr Expr
+}
+
 type AstStmt struct {
 	compound   *AstCompountStmt
 	declvar    *AstVarDecl
@@ -84,6 +88,7 @@ type AstStmt struct {
 	assignment *AstAssignment
 	forstmt    *AstForStmt
 	ifstmt     *AstIfStmt
+	rtrnstmt   *AstReturnStmt
 	expr       Expr
 }
 
