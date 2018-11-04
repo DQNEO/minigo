@@ -119,6 +119,12 @@ func emit_comp(inst string, ast *ExprBinop) {
 	emit("movzb %%al, %%eax")
 }
 
+func makeLabel() string {
+	r := fmt.Sprintf("L%d", labelSeq)
+	labelSeq++
+	return r
+}
+
 func (ast *ExprBinop) emit() {
 	if ast.op == "<" {
 		emit_comp("setl", ast)
@@ -139,8 +145,7 @@ func (ast *ExprBinop) emit() {
 		emit_comp("sete", ast)
 		return
 	} else if ast.op == "&&" {
-		labelEnd := fmt.Sprintf("L%d", labelSeq)
-		labelSeq++
+		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $0, %%rax")
@@ -153,8 +158,7 @@ func (ast *ExprBinop) emit() {
 		emit(".%s:", labelEnd)
 		return
 	} else if ast.op == "||" {
-		labelEnd := fmt.Sprintf("L%d", labelSeq)
-		labelSeq++
+		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $1, %%rax")
@@ -245,10 +249,8 @@ func (s *AstIfStmt) emit() {
 	s.cond.emit()
 	emit("test %%rax, %%rax")
 	if s.els != nil {
-		labelElse := fmt.Sprintf("L%d", labelSeq)
-		labelSeq++
-		labelEndif := fmt.Sprintf("L%d", labelSeq)
-		labelSeq++
+		labelElse := makeLabel()
+		labelEndif := makeLabel()
 		emit("je .%s  # jump if 0", labelElse)
 		emit("# then block")
 		s.then.emit()
@@ -260,8 +262,7 @@ func (s *AstIfStmt) emit() {
 		emit(".%s:", labelEndif)
 	} else {
 		// no else block
-		labelEndif := fmt.Sprintf("L%d", labelSeq)
-		labelSeq++
+		labelEndif := makeLabel()
 		emit("je .%s  # jump if 0", labelEndif)
 		emit("# then block")
 		s.then.emit()
@@ -271,10 +272,8 @@ func (s *AstIfStmt) emit() {
 }
 
 func (f *AstForStmt) emit() {
-	labelBegin := fmt.Sprintf("L%d", labelSeq)
-	labelSeq++
-	labelEnd := fmt.Sprintf("L%d", labelSeq)
-	labelSeq++
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
 
 	if f.left != nil {
 		f.left.emit()
