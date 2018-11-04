@@ -673,6 +673,32 @@ func (p *parser) parseReturnStmt() *AstReturnStmt {
 	return r
 }
 
+func (p *parser) parseExpressionList(first Expr) []Expr {
+	defer p.traceOut(p.traceIn())
+	var r []Expr
+	if first == nil {
+		first = p.parseExpr()
+		// should skip "," if exists
+	}
+	r = append(r, first)
+	for {
+		tok := p.readToken()
+		if tok.isSemicolon() {
+			return r
+		} else if tok.isPunct("=") || tok.isPunct(":=")  {
+			p.unreadToken()
+			return r
+		} else if tok.isPunct(",") {
+			expr := p.parseExpr()
+			r = append(r, expr)
+			continue
+		} else {
+			tok.errorf("Unexpected token")
+		}
+	}
+	return r
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -693,14 +719,29 @@ func (p *parser) parseStmt() Stmt {
 	p.unreadToken()
 	expr1 := p.parseExpr()
 	tok2 := p.readToken()
-	if tok2.isPunct("=") {
+	if tok2.isPunct(",") {
+		p.unreadToken()
+		// Multi value assignment
+		exprs := p.parseExpressionList(expr1)
+		tok3 := p.readToken()
+		if tok3.isPunct("=") {
+			exprsRight := p.parseExpressionList(nil)
+			return &AstAssignment{
+				lefts:  exprs,
+				rights: exprsRight,
+			}
+		} else {
+			tok3.errorf("TBD")
+		}
+	} else if tok2.isPunct("=") {
+		// Single value assinment
 		expr2 := p.parseExpr()
 		return &AstAssignment{
 			lefts:  []Expr{expr1},
 			rights: []Expr{expr2},
 		}
 	} else if tok2.isPunct(":=") {
-		// ShortVarDecl
+		// Single value ShortVarDecl
 		expr2 := p.parseExpr()
 		rel := expr1.(*Relation) // a brand new rel
 		gtype := gInt // FIXME: infer type
@@ -715,6 +756,7 @@ func (p *parser) parseStmt() Stmt {
 		p.unreadToken()
 		return expr1
 	}
+	return nil
 }
 
 func (p *parser) parseCompoundStmt() *AstCompountStmt {
