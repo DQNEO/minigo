@@ -689,6 +689,21 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 	}
 }
 
+func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
+	rights := p.parseExpressionList(nil)
+	for _, e := range lefts {
+		rel := e.(*Relation) // a brand new rel
+		gtype := gInt // FIXME infer type
+		variable := p.newVariable(rel.name, gtype, false)
+		rel.expr = variable
+		p.currentScope.setVar(rel.name, variable)
+	}
+	return &AstAssignment{
+		lefts:  lefts,
+		rights: rights,
+	}
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -717,18 +732,7 @@ func (p *parser) parseStmt() Stmt {
 		if tok3.isPunct("=") {
 			return p.parseAssignment(lefts)
 		} else if tok3.isPunct(":=") {
-			rights := p.parseExpressionList(nil)
-			for _, e := range lefts {
-				rel := e.(*Relation) // a brand new rel
-				gtype := gInt
-				variable := p.newVariable(rel.name, gtype, false)
-				rel.expr = variable
-				p.currentScope.setVar(rel.name, variable)
-			}
-			return &AstAssignment{
-				lefts:  lefts,
-				rights: rights,
-			}
+			return p.parseShortAssignment(lefts)
 		} else {
 			tok3.errorf("TBD")
 		}
