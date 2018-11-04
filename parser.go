@@ -673,7 +673,8 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 			r = append(r, expr)
 			continue
 		} else {
-			tok.errorf("Unexpected token")
+			p.unreadToken()
+			return r
 		}
 	}
 	return r
@@ -731,12 +732,7 @@ func (p *parser) parseStmt() Stmt {
 			tok3.errorf("TBD")
 		}
 	} else if tok2.isPunct("=") {
-		// Single value assinment
-		expr2 := p.parseExpr()
-		return &AstAssignment{
-			lefts:  []Expr{expr1},
-			rights: []Expr{expr2},
-		}
+		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
 		expr2 := p.parseExpr()
