@@ -722,17 +722,17 @@ func (p *parser) parseStmt() Stmt {
 	if tok2.isPunct(",") {
 		p.unreadToken()
 		// Multi value assignment
-		exprs := p.parseExpressionList(expr1)
+		lefts := p.parseExpressionList(expr1)
 		tok3 := p.readToken()
 		if tok3.isPunct("=") {
-			exprsRight := p.parseExpressionList(nil)
+			rights := p.parseExpressionList(nil)
 			return &AstAssignment{
-				lefts:  exprs,
-				rights: exprsRight,
+				lefts:  lefts,
+				rights: rights,
 			}
 		} else if tok3.isPunct(":=") {
 			rights := p.parseExpressionList(nil)
-			for _, e := range exprs {
+			for _, e := range lefts {
 				rel := e.(*Relation) // a brand new rel
 				gtype := gInt
 				variable := p.newVariable(rel.name, gtype, false)
@@ -740,7 +740,7 @@ func (p *parser) parseStmt() Stmt {
 				p.currentScope.setVar(rel.name, variable)
 			}
 			return &AstAssignment{
-				lefts:  exprs,
+				lefts:  lefts,
 				rights: rights,
 			}
 		} else {
