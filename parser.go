@@ -679,6 +679,14 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	return r
 }
 
+func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
+	rights := p.parseExpressionList(nil)
+	return &AstAssignment{
+		lefts:  lefts,
+		rights: rights,
+	}
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -705,11 +713,7 @@ func (p *parser) parseStmt() Stmt {
 		lefts := p.parseExpressionList(expr1)
 		tok3 := p.readToken()
 		if tok3.isPunct("=") {
-			rights := p.parseExpressionList(nil)
-			return &AstAssignment{
-				lefts:  lefts,
-				rights: rights,
-			}
+			return p.parseAssignment(lefts)
 		} else if tok3.isPunct(":=") {
 			rights := p.parseExpressionList(nil)
 			for _, e := range lefts {
