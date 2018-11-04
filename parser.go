@@ -135,15 +135,15 @@ type Relation struct {
 	gtype *Gtype
 }
 
-var labelNo = 0
+var labelSeq = 0
 var stringLiterals []*ExprStringLiteral
 
 func (p *parser) newAstString(sval string) *ExprStringLiteral {
 	ast := &ExprStringLiteral{
 		val:    sval,
-		slabel: fmt.Sprintf("L%d", labelNo),
+		slabel: fmt.Sprintf("L%d", labelSeq),
 	}
-	labelNo++
+	labelSeq++
 	stringLiterals = append(stringLiterals, ast)
 	return ast
 }
