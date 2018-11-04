@@ -133,7 +133,8 @@ func (ast *ExprBinop) emit() {
 		emit_comp("setge", ast)
 		return
 	} else if ast.op == "!=" {
-		errorf("TBD")
+		emit_comp("setne", ast)
+		return
 	} else if ast.op == "==" {
 		emit_comp("sete", ast)
 		return

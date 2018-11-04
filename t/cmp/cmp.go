@@ -5,6 +5,10 @@ import "fmt"
 func main() {
 	var l = 1
 	var g = 2
+
+	if 1 != 1 {
+		fmt.Printf("Error\n")
+	}
 	if l < g {
 		fmt.Printf("%d\n", 1)
 	}
