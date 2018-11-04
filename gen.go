@@ -270,6 +270,8 @@ func (stmt AstReturnStmt) emit() {
 		emit("mov $0, %%rax")
 	} else {
 		stmt.expr.emit()
+		emit("leave")
+		emit("ret")
 	}
 }
 
