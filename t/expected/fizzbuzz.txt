@@ -3,13 +3,13 @@
 Fizz
 4
 Buzz
-6
+Fizz
 7
 8
-9
-10
+Fizz
+Buzz
 11
-12
+Fizz
 13
 14
 FizzBuzz

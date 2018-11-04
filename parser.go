@@ -339,6 +339,8 @@ func (p *parser) parseUnaryExpr() Expr {
 
 func priority(op string) int {
 	switch op {
+	case "&&","||":
+		return 5
 	case "==", "!=", "<", ">", ">=", "<=":
 		return 10
 	case "-", "+":
@@ -356,7 +358,7 @@ func (p *parser) parseExpr() Expr {
 }
 
 var binops = []string{
-	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=",
+	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=","&&", "||",
 }
 
 func (p *parser) parseExprInt(prior int) Expr {

@@ -138,6 +138,34 @@ func (ast *ExprBinop) emit() {
 	} else if ast.op == "==" {
 		emit_comp("sete", ast)
 		return
+	} else if ast.op == "&&" {
+		labelEnd := fmt.Sprintf("L%d", labelNo)
+		labelNo++
+		ast.left.emit()
+		emit("test %%rax, %%rax")
+		emit("mov $0, %%rax")
+		emit("je .%s", labelEnd)
+		ast.right.emit()
+		emit("test %%rax, %%rax")
+		emit("mov $0, %%rax")
+		emit("je .%s", labelEnd)
+		emit("mov $1, %%rax")
+		emit(".%s:", labelEnd)
+		return
+	} else if ast.op == "||" {
+		labelEnd := fmt.Sprintf("L%d", labelNo)
+		labelNo++
+		ast.left.emit()
+		emit("test %%rax, %%rax")
+		emit("mov $1, %%rax")
+		emit("jne .%s", labelEnd)
+		ast.right.emit()
+		emit("test %%rax, %%rax")
+		emit("mov $1, %%rax")
+		emit("jne .%s", labelEnd)
+		emit("mov $0, %%rax")
+		emit(".%s:", labelEnd)
+		return
 	}
 	ast.left.emit()
 	emit("push %%rax")

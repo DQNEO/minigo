@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func f1() {
 	var l = 1
 	var g = 2
 
@@ -31,4 +31,23 @@ func main() {
 	if g >= 2 {
 		fmt.Printf("%d\n", 6)
 	}
+}
+
+func f2() {
+	if 1 == 0 || 1 == 1 {
+		println("7")
+	} else {
+		println("ERROR")
+	}
+
+	if 1 == 1 && 1 == 0 {
+		println("ERROR")
+	} else {
+		println("8")
+	}
+}
+
+func main() {
+	f1()
+	f2()
 }
