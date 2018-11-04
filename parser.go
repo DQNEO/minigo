@@ -740,16 +740,7 @@ func (p *parser) parseStmt() Stmt {
 		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
-		rights := p.parseExpressionList(nil)
-		rel := expr1.(*Relation) // a brand new rel
-		gtype := gInt // FIXME: infer type
-		variable := p.newVariable(rel.name, gtype,false)
-		rel.expr = variable
-		p.currentScope.setVar(rel.name, variable)
-		return &AstAssignment{
-			lefts:  []Expr{expr1},
-			rights: rights,
-		}
+		return p.parseShortAssignment([]Expr{expr1})
 	} else {
 		p.unreadToken()
 		return expr1
