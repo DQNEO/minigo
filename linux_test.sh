@@ -24,15 +24,10 @@ function test_file {
     echo ok
 }
 
-test_file min
-test_file test
-test_file hello
-test_file const
-test_file var
-test_file byte
-test_file array
-test_file type
-test_file if
-test_file fizzbuzz
+for testfile in t/expected/*.txt
+do
+    name=$(basename -s .txt $testfile)
+    test_file $name
+done
 
 echo "All tests passed"
