@@ -58,9 +58,10 @@ type AstConstDecl struct {
 	variable *ExprConstVariable
 }
 
+
 type AstAssignment struct {
-	left  Expr
-	right Expr
+	lefts  []Expr
+	rights []Expr
 }
 
 type AstForStmt struct {

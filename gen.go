@@ -157,17 +157,21 @@ func (ast *ExprBinop) emit() {
 
 
 func (ast *AstAssignment) emit() {
-	ast.right.emit()
-	switch ast.left.(type) {
+	for _, right := range ast.rights {
+		right.emit()
+	}
+	for _, left := range ast.lefts {
+
+	switch left.(type) {
 	case *Relation:
 		// e.g. x = 1
 		// resolve relation
-		rel := ast.left.(*Relation)
+		rel := left.(*Relation)
 		vr := rel.expr.(*ExprVariable)
 		emitLsave(vr.gtype.getSize(), vr.offset)
 	case *ExprArrayIndex:
 		emit("push %%rax") // push RHS value
-		e := ast.left.(*ExprArrayIndex)
+		e := left.(*ExprArrayIndex)
 		// load head address of the array
 		// load index
 		// multi index * size
@@ -196,7 +200,8 @@ func (ast *AstAssignment) emit() {
 		emit("mov %%%s, (%%rbx)", reg)   // dereference the content of an emelment
 
 	default:
-		errorf("Unexpected type %v", ast.left)
+		errorf("Unexpected type %v", ast.lefts)
+	}
 	}
 }
 

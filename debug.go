@@ -45,8 +45,8 @@ func (a *AstFuncDecl) dump() {
 func (ast *AstAssignment) dump() {
 	debugf("assign")
 	debugNest++
-	ast.left.dump()
-	ast.right.dump()
+	ast.lefts[0].dump()
+	ast.rights[0].dump()
 	debugNest--
 }
 

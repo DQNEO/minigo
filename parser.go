@@ -380,7 +380,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 			if prior < prior2 {
 				right := p.parseExprInt(prior2)
 				if ast == nil {
-					tok.errorf("bad left unary expr:%v", ast)
+					tok.errorf("bad lefts unary expr:%v", ast)
 				}
 				ast = &ExprBinop{
 					op:    tok.sval,
@@ -574,8 +574,8 @@ func (p *parser) parseAssignment() *AstAssignment {
 	rexpr := p.parseExpr()
 	p.expect(";")
 	return &AstAssignment{
-		left:  vardecl.variable,
-		right: rexpr,
+		lefts:  []Expr{vardecl.variable},
+		rights: []Expr{rexpr},
 	}
 }
 
@@ -696,8 +696,8 @@ func (p *parser) parseStmt() Stmt {
 	if tok2.isPunct("=") {
 		expr2 := p.parseExpr()
 		return &AstAssignment{
-			left:  expr1,
-			right: expr2,
+			lefts:  []Expr{expr1},
+			rights: []Expr{expr2},
 		}
 	} else if tok2.isPunct(":=") {
 		// ShortVarDecl
@@ -708,8 +708,8 @@ func (p *parser) parseStmt() Stmt {
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
 		return &AstAssignment{
-			left:  expr1,
-			right: expr2,
+			lefts:  []Expr{expr1},
+			rights: []Expr{expr2},
 		}
 	} else {
 		p.unreadToken()
