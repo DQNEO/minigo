@@ -559,26 +559,6 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 	return r
 }
 
-func (p *parser) parseAssignment() *AstAssignment {
-	defer p.traceOut(p.traceIn())
-	tleft := p.readToken()
-	item := p.currentScope.get(tleft.getIdent())
-	if item == nil {
-		errorf("variable %s is not found", tleft.getIdent())
-	}
-	vardecl, ok := item.(*AstVarDecl)
-	if !ok {
-		errorf("%s is not a variable", tleft)
-	}
-	p.expect("=")
-	rexpr := p.parseExpr()
-	p.expect(";")
-	return &AstAssignment{
-		lefts:  []Expr{vardecl.variable},
-		rights: []Expr{rexpr},
-	}
-}
-
 func (p *parser) parseIdentList() []identifier {
 	defer p.traceOut(p.traceIn())
 	var r []identifier
