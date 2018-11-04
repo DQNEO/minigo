@@ -159,8 +159,13 @@ func (ast *ExprBinop) emit() {
 func (ast *AstAssignment) emit() {
 	for _, right := range ast.rights {
 		right.emit()
+		emit("push %%rax")
 	}
-	for _, left := range ast.lefts {
+
+
+	for i := len(ast.lefts) - 1; i >= 0; i-- {
+		emit("pop %%rax")
+		left := ast.lefts[i]
 
 	switch left.(type) {
 	case *Relation:
