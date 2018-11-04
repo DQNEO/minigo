@@ -23,7 +23,16 @@ func f2() {
 	fmt.Printf("%d\n", b)
 }
 
+func f3() {
+	// assign multi
+	a, b, c := 6 ,7, 8
+	fmt.Printf("%d\n", a)
+	fmt.Printf("%d\n", b)
+	fmt.Printf("%d\n", c)
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }

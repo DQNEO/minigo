@@ -730,6 +730,19 @@ func (p *parser) parseStmt() Stmt {
 				lefts:  exprs,
 				rights: exprsRight,
 			}
+		} else if tok3.isPunct(":=") {
+			rights := p.parseExpressionList(nil)
+			for _, e := range exprs {
+				rel := e.(*Relation) // a brand new rel
+				gtype := gInt
+				variable := p.newVariable(rel.name, gtype, false)
+				rel.expr = variable
+				p.currentScope.setVar(rel.name, variable)
+			}
+			return &AstAssignment{
+				lefts:  exprs,
+				rights: rights,
+			}
 		} else {
 			tok3.errorf("TBD")
 		}
