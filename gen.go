@@ -120,7 +120,7 @@ func emit_comp(inst string, ast *ExprBinop) {
 }
 
 func makeLabel() string {
-	r := fmt.Sprintf("L%d", labelSeq)
+	r := fmt.Sprintf(".L%d", labelSeq)
 	labelSeq++
 	return r
 }
@@ -149,26 +149,26 @@ func (ast *ExprBinop) emit() {
 		ast.left.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $0, %%rax")
-		emit("je .%s", labelEnd)
+		emit("je %s", labelEnd)
 		ast.right.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $0, %%rax")
-		emit("je .%s", labelEnd)
+		emit("je %s", labelEnd)
 		emit("mov $1, %%rax")
-		emit(".%s:", labelEnd)
+		emit("%s:", labelEnd)
 		return
 	} else if ast.op == "||" {
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $1, %%rax")
-		emit("jne .%s", labelEnd)
+		emit("jne %s", labelEnd)
 		ast.right.emit()
 		emit("test %%rax, %%rax")
 		emit("mov $1, %%rax")
-		emit("jne .%s", labelEnd)
+		emit("jne %s", labelEnd)
 		emit("mov $0, %%rax")
-		emit(".%s:", labelEnd)
+		emit("%s:", labelEnd)
 		return
 	}
 	ast.left.emit()
@@ -251,23 +251,23 @@ func (s *AstIfStmt) emit() {
 	if s.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je .%s  # jump if 0", labelElse)
+		emit("je %s  # jump if 0", labelElse)
 		emit("# then block")
 		s.then.emit()
-		emit("jmp .%s # jump to endif", labelEndif)
+		emit("jmp %s # jump to endif", labelEndif)
 		emit("# else block")
-		emit(".%s:", labelElse)
+		emit("%s:", labelElse)
 		s.els.emit()
 		emit("# endif")
-		emit(".%s:", labelEndif)
+		emit("%s:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je .%s  # jump if 0", labelEndif)
+		emit("je %s  # jump if 0", labelEndif)
 		emit("# then block")
 		s.then.emit()
 		emit("# endif")
-		emit(".%s:", labelEndif)
+		emit("%s:", labelEndif)
 	}
 }
 
@@ -278,18 +278,18 @@ func (f *AstForStmt) emit() {
 	if f.left != nil {
 		f.left.emit()
 	}
-	emit(".%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", labelBegin)
 	if f.middle != nil {
 		f.middle.emit()
 		emit("test %%rax, %%rax")
-		emit("je .%s  # jump if false", labelEnd)
+		emit("je %s  # jump if false", labelEnd)
 	}
 	f.block.emit()
 	if f.right != nil {
 		f.right.emit()
 	}
-	emit("jmp .%s", labelBegin)
-	emit(".%s: # end loop", labelEnd)
+	emit("jmp %s", labelBegin)
+	emit("%s: # end loop", labelEnd)
 }
 
 

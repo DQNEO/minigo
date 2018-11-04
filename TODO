@@ -5,3 +5,4 @@
 * convert Gtype as an interface?
 * emit expression of top-level var decls
 * redesign how to handle semicolon
+* git hook test pre-commit
