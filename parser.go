@@ -664,6 +664,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	for {
 		tok := p.readToken()
 		if tok.isSemicolon() {
+			p.unreadToken()
 			return r
 		} else if tok.isPunct("=") || tok.isPunct(":=")  {
 			p.unreadToken()
@@ -735,7 +736,7 @@ func (p *parser) parseStmt() Stmt {
 		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
-		expr2 := p.parseExpr()
+		rights := p.parseExpressionList(nil)
 		rel := expr1.(*Relation) // a brand new rel
 		gtype := gInt // FIXME: infer type
 		variable := p.newVariable(rel.name, gtype,false)
@@ -743,7 +744,7 @@ func (p *parser) parseStmt() Stmt {
 		p.currentScope.setVar(rel.name, variable)
 		return &AstAssignment{
 			lefts:  []Expr{expr1},
-			rights: []Expr{expr2},
+			rights: rights,
 		}
 	} else {
 		p.unreadToken()
