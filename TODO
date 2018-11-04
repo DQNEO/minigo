@@ -4,3 +4,4 @@
 * re-organize dump/debug functions
 * convert Gtype as an interface?
 * emit expression of top-level var decls
+* redesign how to handle semicolon
