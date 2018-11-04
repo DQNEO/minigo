@@ -3,8 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	var begin = 1
-	var end = 15
+	begin, end := 1, 15
 
 	for i := begin; i <= end; i = i + 1 {
 		if i == 3 || i == 6 || i == 9 || i == 12 {
