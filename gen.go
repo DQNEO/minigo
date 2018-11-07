@@ -174,15 +174,22 @@ func (ast *ExprBinop) emit() {
 	ast.left.emit()
 	emit("push %%rax")
 	ast.right.emit()
-	emit("push %%rax")
-	emit("pop %%rbx")
+	emit("mov %%rax, %%rcx")
 	emit("pop %%rax")
 	if ast.op == "+" {
-		emit("add	%%rbx, %%rax")
+		emit("add	%%rcx, %%rax")
 	} else if ast.op == "-" {
-		emit("sub	%%rbx, %%rax")
+		emit("sub	%%rcx, %%rax")
 	} else if ast.op == "*" {
-		emit("imul	%%rbx, %%rax")
+		emit("imul	%%rcx, %%rax")
+	} else if ast.op == "%" {
+		emit("mov $0, %%rdx # init %%rdx")
+		emit("div %%rcx")
+		emit("mov %%rdx, %%rax")
+	} else if ast.op == "/" {
+		emit("mov $0, %%rdx # init %%rdx")
+		emit("mov $0, %%rdx")
+		emit("div %%rcx")
 	} else {
 		errorf("Unknown binop: %s", ast.op)
 	}
