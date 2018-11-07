@@ -174,8 +174,7 @@ func (ast *ExprBinop) emit() {
 	ast.left.emit()
 	emit("push %%rax")
 	ast.right.emit()
-	emit("push %%rax")
-	emit("pop %%rcx")
+	emit("mov %%rax, %%rcx")
 	emit("pop %%rax")
 	if ast.op == "+" {
 		emit("add	%%rcx, %%rax")
