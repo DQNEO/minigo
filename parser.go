@@ -345,6 +345,8 @@ func priority(op string) int {
 		return 10
 	case "-", "+":
 		return 10
+	case "/", "%":
+		return 15
 	case "*":
 		return 20
 	default:
@@ -358,7 +360,7 @@ func (p *parser) parseExpr() Expr {
 }
 
 var binops = []string{
-	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=","&&", "||",
+	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=","&&", "||", "/", "%",
 }
 
 func (p *parser) parseExprInt(prior int) Expr {

@@ -182,6 +182,14 @@ func (ast *ExprBinop) emit() {
 		emit("sub	%%rcx, %%rax")
 	} else if ast.op == "*" {
 		emit("imul	%%rcx, %%rax")
+	} else if ast.op == "%" {
+		emit("mov $0, %%rdx # init %%rdx")
+		emit("div %%rcx")
+		emit("mov %%rdx, %%rax")
+	} else if ast.op == "/" {
+		emit("mov $0, %%rdx # init %%rdx")
+		emit("mov $0, %%rdx")
+		emit("div %%rcx")
 	} else {
 		errorf("Unknown binop: %s", ast.op)
 	}
