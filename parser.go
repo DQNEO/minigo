@@ -602,11 +602,14 @@ func (p *parser) parseForStmt() *AstForStmt {
 
 	// Assume C style for statement
 
-	r.left = p.parseStmt()
-	p.expect(";")
-	r.middle = p.parseStmt()
-	p.expect(";")
-	r.right = p.parseStmt()
+	stmt := p.parseStmt()
+	if p.peekToken().isPunct(";") {
+		r.left = stmt
+		p.expect(";")
+		r.middle = p.parseStmt()
+		p.expect(";")
+		r.right = p.parseStmt()
+	}
 
 	/*
 	// Assume "range" style
