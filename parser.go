@@ -615,8 +615,8 @@ func (p *parser) parseForStmt() *AstForStmt {
 			panic("Impleent me (I am Range Clause)")
 		} else {
 			r.initstmt = nil
-			r.poststmt = nil
 			r.condition = stmt
+			r.poststmt = nil
 		}
 	} else {
 		panic("Syntax Error")
