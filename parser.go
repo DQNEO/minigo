@@ -601,10 +601,10 @@ func (p *parser) parseForStmt() *AstForStmt {
 	p.enterNewScope()
 	defer p.exitScope()
 
-	stmt := p.parseStmt()
+	initstmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
 		// For statements with for clause
-		r.initstmt = stmt
+		r.initstmt = initstmt
 		p.expect(";")
 		r.condition = p.parseStmt()
 		p.expect(";")
@@ -615,7 +615,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 			panic("Implement me (I am Range Clause)")
 		} else {
 			r.initstmt = nil
-			r.condition = stmt
+			r.condition = initstmt
 			r.poststmt = nil
 		}
 	} else {
