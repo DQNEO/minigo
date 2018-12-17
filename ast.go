@@ -85,20 +85,6 @@ type AstReturnStmt struct {
 	expr Expr
 }
 
-/*
-type AstStmt struct {
-	compound   *AstCompountStmt
-	declvar    *AstVarDecl
-	constdecl  *AstConstDecl
-	typedecl   *AstTypeDecl
-	assignment *AstAssignment
-	forstmt    *AstForStmt
-	ifstmt     *AstIfStmt
-	rtrnstmt   *AstReturnStmt
-	expr       Expr
-}
-*/
-
 type AstPackageClause struct {
 	name identifier
 }
