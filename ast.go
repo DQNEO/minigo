@@ -98,12 +98,10 @@ type AstImportDecl struct {
 }
 
 type AstCompountStmt struct {
-	// compound
 	stmts []Stmt
 }
 
 type AstFuncDecl struct {
-	// funcdef
 	fname     identifier
 	rettype   string
 	params    []*ExprVariable
