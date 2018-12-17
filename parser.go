@@ -612,7 +612,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	} else if p.peekToken().isPunct("{") {
 		isRangeClause := false
 		if isRangeClause {
-			panic("Impleent me (I am Range Clause)")
+			panic("Implement me (I am Range Clause)")
 		} else {
 			r.initstmt = nil
 			r.condition = stmt
