@@ -594,16 +594,16 @@ func (p *parser) exitScope() {
 	p.currentScope = p.currentScope.outer
 }
 
+// https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *AstForStmt {
 	defer p.traceOut(p.traceIn())
 	var r = &AstForStmt{}
 	p.enterNewScope()
 	defer p.exitScope()
 
-	// Assume C style for statement
-
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
+		// For statements with for clause
 		r.initstmt = stmt
 		p.expect(";")
 		r.condition = p.parseStmt()
