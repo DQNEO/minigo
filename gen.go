@@ -282,18 +282,18 @@ func (f *AstForStmt) emit() {
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
-	if f.left != nil {
-		f.left.emit()
+	if f.initstmt != nil {
+		f.initstmt.emit()
 	}
 	emit("%s: # begin loop ", labelBegin)
-	if f.middle != nil {
-		f.middle.emit()
+	if f.condition != nil {
+		f.condition.emit()
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelEnd)
 	}
 	f.block.emit()
-	if f.right != nil {
-		f.right.emit()
+	if f.poststmt != nil {
+		f.poststmt.emit()
 	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)

@@ -68,9 +68,9 @@ type AstForStmt struct {
 	idents []identifier
 	list   Expr
 	// or
-	left   Stmt
-	middle Stmt
-	right  Stmt
+	initstmt  Stmt
+	condition Stmt
+	poststmt  Stmt
 
 	block *AstCompountStmt
 }

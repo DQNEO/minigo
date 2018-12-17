@@ -604,19 +604,19 @@ func (p *parser) parseForStmt() *AstForStmt {
 
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
-		r.left = stmt
+		r.initstmt = stmt
 		p.expect(";")
-		r.middle = p.parseStmt()
+		r.condition = p.parseStmt()
 		p.expect(";")
-		r.right = p.parseStmt()
+		r.poststmt = p.parseStmt()
 	} else if p.peekToken().isPunct("{") {
 		isRangeClause := false
 		if isRangeClause {
 			panic("Impleent me (I am Range Clause)")
 		} else {
-			r.left = nil
-			r.right = nil
-			r.middle = stmt
+			r.initstmt = nil
+			r.poststmt = nil
+			r.condition = stmt
 		}
 	} else {
 		panic("Syntax Error")
