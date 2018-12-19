@@ -604,7 +604,9 @@ func (p *parser) parseForStmt() *AstForStmt {
 	expr := p.parseExpr()
 	if p.peekToken().isPunct("{") {
 		// single condition
-		r.condition = expr
+		r.cls = &ForForClause{
+			condition:expr,
+		}
 	} else {
 		// for clause or range clause
 		var initstmt Stmt
@@ -633,12 +635,14 @@ func (p *parser) parseForStmt() *AstForStmt {
 			p.unreadToken()
 		}
 
+		cls := &ForForClause{}
 		// regular for cond
-		r.initstmt = initstmt
+		cls.initstmt = initstmt
 		p.expect(";")
-		r.condition = p.parseStmt()
+		cls.condition = p.parseStmt()
 		p.expect(";")
-		r.poststmt = p.parseStmt()
+		cls.poststmt = p.parseStmt()
+		r.cls = cls
 	}
 
 	p.expect("{")

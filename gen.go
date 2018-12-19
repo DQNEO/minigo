@@ -369,21 +369,22 @@ func (f *AstForStmt) emitRange() {
 }
 
 func (f *AstForStmt) emitForClause() {
+	assert(f.cls != nil , "f.cls must not be nil")
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
-	if f.initstmt != nil {
-		f.initstmt.emit()
+	if f.cls.initstmt != nil {
+		f.cls.initstmt.emit()
 	}
 	emit("%s: # begin loop ", labelBegin)
-	if f.condition != nil {
-		f.condition.emit()
+	if f.cls.condition != nil {
+		f.cls.condition.emit()
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelEnd)
 	}
 	f.block.emit()
-	if f.poststmt != nil {
-		f.poststmt.emit()
+	if f.cls.poststmt != nil {
+		f.cls.poststmt.emit()
 	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)

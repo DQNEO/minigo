@@ -70,15 +70,15 @@ type ForRangeClause struct {
 	rangeexpr Expr
 }
 
-type AstForStmt struct {
-	rng *ForRangeClause
-
-	// or
-	// ForClause
+type ForForClause struct {
 	initstmt  Stmt
 	condition Stmt
 	poststmt  Stmt
+}
 
+type AstForStmt struct {
+	rng *ForRangeClause
+	cls *ForForClause
 	block *AstCompountStmt
 }
 
