@@ -212,6 +212,9 @@ func (ast *AstAssignment) emit() {
 		// e.g. x = 1
 		// resolve relation
 		rel := left.(*Relation)
+		if rel.expr == nil {
+			errorf("left.rel.expr is nil")
+		}
 		vr := rel.expr.(*ExprVariable)
 		emitLsave(vr.gtype.getSize(), vr.offset)
 	case *ExprArrayIndex:
@@ -243,7 +246,6 @@ func (ast *AstAssignment) emit() {
 		emit("pop %%rax")            // load RHS value
 		reg := getReg(size)
 		emit("mov %%%s, (%%rbx)", reg)   // dereference the content of an emelment
-
 	default:
 		errorf("Unexpected type %v", ast.lefts)
 	}
@@ -278,7 +280,95 @@ func (s *AstIfStmt) emit() {
 	}
 }
 
-func (f *AstForStmt) emit() {
+func (f *AstForStmt) emitRange() {
+	if f.rng.indexvar == nil {
+		errorf("indexVar is nil")
+	}
+
+	emit("# for range")
+	var length int
+
+	if rel, ok := f.rng.rangeexpr.(*Relation); ok {
+		if variable, ok := rel.expr.(*ExprVariable); ok {
+			if variable.gtype.typ != G_ARRAY {
+				panic("variable should be an array")
+			}
+			emit("# range expr is %v", variable)
+			length = variable.gtype.length
+			emit("# length = %d", length)
+		} else {
+			panic("rel should be a variable")
+		}
+	} else {
+		panic("range expression should be a variable")
+	}
+
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+
+	initstmt := &AstAssignment{
+		lefts:[]Expr{
+			f.rng.indexvar,
+		},
+		rights:[]Expr{
+			&ExprNumberLiteral{
+				val: 0,
+			},
+		},
+	}
+	emit("# init index")
+	initstmt.emit() // i=0
+	var assignVar *AstAssignment
+	if f.rng.valuevar != nil {
+		assignVar = &AstAssignment{
+			lefts: []Expr{
+				f.rng.valuevar,
+			},
+			rights: []Expr{
+				&ExprArrayIndex{
+					rel: &Relation{
+						expr: f.rng.rangeexpr.(*Relation).expr.(*ExprVariable),
+					},
+					index: f.rng.indexvar,
+				},
+			},
+		}
+		assignVar.emit() // v = s[i]
+	}
+
+	emit("%s: # begin loop ", labelBegin)
+	condition := &ExprBinop{
+		op:    "<",
+		left:  f.rng.indexvar, // i
+		right: &ExprNumberLiteral{length}, // len(list)
+	}
+	condition.emit() // i < len(list)
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelEnd)
+
+	f.block.emit()
+
+	indexIncr := &AstAssignment{
+		lefts:[]Expr{
+			f.rng.indexvar, // i =
+		},
+		rights:[]Expr{
+			&ExprBinop{ // @TODO replace by a unary operator
+				op: "+",
+				left: f.rng.indexvar,
+				right: &ExprNumberLiteral{1},
+			},
+		},
+	}
+	indexIncr.emit() // i = i + 1
+	if f.rng.valuevar != nil {
+		assignVar.emit() // v = s[i]
+	}
+	emit("jmp %s", labelBegin)
+	emit("%s: # end loop", labelEnd)
+}
+
+func (f *AstForStmt) emitForClause() {
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
@@ -297,6 +387,14 @@ func (f *AstForStmt) emit() {
 	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)
+}
+
+func (f *AstForStmt) emit() {
+	if f.rng != nil {
+		f.emitRange()
+		return
+	}
+	f.emitForClause()
 }
 
 

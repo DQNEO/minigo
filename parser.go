@@ -601,38 +601,74 @@ func (p *parser) parseForStmt() *AstForStmt {
 	p.enterNewScope()
 	defer p.exitScope()
 
-	initstmt := p.parseStmt()
-	if p.peekToken().isPunct(";") {
-		// For statements with for clause
+	expr := p.parseExpr()
+	if p.peekToken().isPunct("{") {
+		// single condition
+		r.condition = expr
+	} else {
+		// for clause or range clause
+		var initstmt Stmt
+		lefts := p.parseExpressionList(expr)
+		tok2 := p.readToken()
+		if tok2.isPunct("=") {
+			if p.peekToken().isKeyword("range") {
+				return p.parseForRange(lefts)
+			} else {
+				initstmt = p.parseAssignment(lefts)
+			}
+		} else if tok2.isPunct(":=") {
+			if p.peekToken().isKeyword("range") {
+				for _, e := range lefts {
+					rel := e.(*Relation) // a brand new rel
+					gtype := gInt // FIXME infer type
+					variable := p.newVariable(rel.name, gtype, false)
+					rel.expr = variable
+					p.currentScope.setVar(rel.name, variable)
+				}
+				return p.parseForRange(lefts)
+			} else {
+				initstmt = p.parseShortAssignment(lefts)
+			}
+		} else {
+			p.unreadToken()
+		}
+
+		// regular for cond
 		r.initstmt = initstmt
 		p.expect(";")
 		r.condition = p.parseStmt()
 		p.expect(";")
 		r.poststmt = p.parseStmt()
-	} else if p.peekToken().isPunct("{") {
-		isRangeClause := false
-		if isRangeClause {
-			panic("Implement me (I am Range Clause)")
-		} else {
-			r.initstmt = nil
-			r.condition = initstmt
-			r.poststmt = nil
-		}
-	} else {
-		panic("Syntax Error")
 	}
 
-	/*
-	// Assume "range" style
-	idents := p.parseIdentList()
-	p.expect(":=")
-	for _, ident := range idents {
-		p.currentScope.setVar(ident, nil)
-	}
-	r.idents = idents
+	p.expect("{")
+	r.block = p.parseCompoundStmt()
+	return r
+}
+
+func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
 	p.expectKeyword("range")
-	r.list = p.parseExpr()
-	*/
+
+	if len(exprs) > 2 {
+		errorf("range values should be 1 or 2")
+	}
+	indexvar, ok := exprs[0].(*Relation)
+	if !ok {
+		errorf(" rng.lefts[0]. is not relation")
+	}
+	var valuevar *Relation
+	if len(exprs) == 2 {
+		valuevar = exprs[1].(*Relation)
+	}
+
+	var r = &AstForStmt{
+		rng: &ForRangeClause{
+			indexvar:indexvar,
+			valuevar:valuevar,
+		},
+	}
+
+	r.rng.rangeexpr = p.parseExpr()
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
 	return r

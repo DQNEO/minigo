@@ -64,10 +64,17 @@ type AstAssignment struct {
 	rights []Expr
 }
 
+type ForRangeClause struct {
+	indexvar *Relation
+	valuevar *Relation
+	rangeexpr Expr
+}
+
 type AstForStmt struct {
-	idents []identifier
-	list   Expr
+	rng *ForRangeClause
+
 	// or
+	// ForClause
 	initstmt  Stmt
 	condition Stmt
 	poststmt  Stmt
