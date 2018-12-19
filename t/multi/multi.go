@@ -7,7 +7,7 @@ func f1() {
 	var a int
 	var b int
 	var c int
-	a, b, c = 1 ,2, 3
+	a, b, c = 1, 2, 3
 	fmt.Printf("%d\n", a)
 	fmt.Printf("%d\n", b)
 	fmt.Printf("%d\n", c)
@@ -25,7 +25,7 @@ func f2() {
 
 func f3() {
 	// assign multi
-	a, b, c := 6 ,7, 8
+	a, b, c := 6, 7, 8
 	fmt.Printf("%d\n", a)
 	fmt.Printf("%d\n", b)
 	fmt.Printf("%d\n", c)

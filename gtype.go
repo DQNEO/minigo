@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 type GTYPE_TYPE int
+
 const (
 	G_UNKOWNE GTYPE_TYPE = iota
 	G_REL
@@ -66,5 +67,3 @@ func (gtype *Gtype) String() string {
 	}
 	return ""
 }
-
-

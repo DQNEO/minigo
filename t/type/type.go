@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var myarray [2]myint = [2]myint{3,2}
+var myarray [2]myint = [2]myint{3, 2}
 
 func main() {
 	var a myint = 1

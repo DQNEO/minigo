@@ -37,7 +37,7 @@ func (a *AstFuncDecl) dump() {
 	debugf("funcdef %s", a.fname)
 	debugNest++
 	//for _, stmt := range a.body.stmts {
-		//stmt.dump()
+	//stmt.dump()
 	//}
 	debugNest--
 }
@@ -147,7 +147,7 @@ func (ast *ExprStringLiteral) dump() {
 }
 
 func (a *Relation) dump() {
-	assert(a.expr != nil , "ident.expr is set")
+	assert(a.expr != nil, "ident.expr is set")
 	a.expr.dump()
 }
 

@@ -33,7 +33,7 @@ func (p *parser) peekToken() *Token {
 
 func (p *parser) lastToken() *Token {
 	ts := p.tokenStream
-	return ts.tokens[ts.index - 1]
+	return ts.tokens[ts.index-1]
 }
 
 func (p *parser) readToken() *Token {
@@ -131,7 +131,7 @@ type Relation struct {
 	name identifier
 
 	// either of expr or gtype
-	expr Expr
+	expr  Expr
 	gtype *Gtype
 }
 
@@ -156,119 +156,120 @@ func (p *parser) parsePrim() Expr {
 		return nil
 	case tok.isTypeString(): // string literal
 		return p.newAstString(tok.sval)
-	case tok.isTypeInt():    // int literal
+	case tok.isTypeInt(): // int literal
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
 			val: ival,
 		}
-	case tok.isTypeChar():   // char literal
+	case tok.isTypeChar(): // char literal
 		sval := tok.sval
 		c := sval[0]
 		return &ExprNumberLiteral{
 			val: int(c),
 		}
-	case tok.isPunct("["):  // array literal
+	case tok.isPunct("["): // array literal
 		return p.parseArrayLiteral()
-	case tok.isTypeIdent(): {
-		firstIdent := tok.getIdent()
-		// https://golang.org/ref/spec#QualifiedIdent
-		// read QualifiedIdent
-		tok := p.readToken()
-		var pkg identifier
-		var ident identifier
-		if tok.isPunct(":=") {
-			p.unreadToken()
-			return &Relation{
-				name: firstIdent,
-			}
-		} else if tok.isPunct(".") {
-			// Assume firstIdent is a package name
-			pkg = firstIdent
-			_, ok := p.importedNames[pkg]
-			if ok {
-				ident = p.readIdent()
-				debugf("Reference to outer entity %s.%s", pkg, ident)
-			} else {
-				//return nil
-			}
-		} else {
-			p.unreadToken()
-			pkg = ""
-			ident = firstIdent
-		}
-
-		operand := &AstOperandName{
-			pkg:   pkg,
-			ident: ident,
-		}
-
-		tok = p.readToken()
-		if tok.isPunct("(") {
-			// try funcall
-			args := p.readFuncallArgs()
-
-			if operand.pkg == "" && operand.ident == "println" {
-				// dirty hack: "println" -> "puts"
-				operand.ident = "puts"
-			} else if operand.pkg == "fmt" && operand.ident == "Printf" {
-				// dirty hack: "fmt" -> "Printf"
-				operand.ident = "printf"
-			}
-			return &ExprFuncall{
-				fname: operand.ident,
-				args:  args,
-			}
-		} else if tok.isPunct("[") {
-			// index access
-			// assure operand is array, slice, or map
+	case tok.isTypeIdent():
+		{
+			firstIdent := tok.getIdent()
+			// https://golang.org/ref/spec#QualifiedIdent
+			// read QualifiedIdent
 			tok := p.readToken()
-			if tok.isPunct(":") {
-				lowIndex := &ExprNumberLiteral{
-					val: 0,
+			var pkg identifier
+			var ident identifier
+			if tok.isPunct(":=") {
+				p.unreadToken()
+				return &Relation{
+					name: firstIdent,
 				}
-				highIndex := p.parseExpr()
-				p.expect("]")
-				return &ExprSliced{
-					ref:  operand,
-					low:  lowIndex,
-					high: highIndex,
+			} else if tok.isPunct(".") {
+				// Assume firstIdent is a package name
+				pkg = firstIdent
+				_, ok := p.importedNames[pkg]
+				if ok {
+					ident = p.readIdent()
+					debugf("Reference to outer entity %s.%s", pkg, ident)
+				} else {
+					//return nil
 				}
 			} else {
 				p.unreadToken()
-				index := p.parseExpr()
+				pkg = ""
+				ident = firstIdent
+			}
+
+			operand := &AstOperandName{
+				pkg:   pkg,
+				ident: ident,
+			}
+
+			tok = p.readToken()
+			if tok.isPunct("(") {
+				// try funcall
+				args := p.readFuncallArgs()
+
+				if operand.pkg == "" && operand.ident == "println" {
+					// dirty hack: "println" -> "puts"
+					operand.ident = "puts"
+				} else if operand.pkg == "fmt" && operand.ident == "Printf" {
+					// dirty hack: "fmt" -> "Printf"
+					operand.ident = "printf"
+				}
+				return &ExprFuncall{
+					fname: operand.ident,
+					args:  args,
+				}
+			} else if tok.isPunct("[") {
+				// index access
+				// assure operand is array, slice, or map
 				tok := p.readToken()
-				if tok.isPunct("]") {
-					rel := &Relation{
-						name: firstIdent,
+				if tok.isPunct(":") {
+					lowIndex := &ExprNumberLiteral{
+						val: 0,
 					}
-					p.tryResolve(rel)
-					return &ExprArrayIndex{
-						rel:   rel,
-						index: index,
-					}
-				} else if tok.isPunct(":") {
 					highIndex := p.parseExpr()
 					p.expect("]")
 					return &ExprSliced{
 						ref:  operand,
-						low:  index,
+						low:  lowIndex,
 						high: highIndex,
 					}
-
 				} else {
-					tok.errorf("invalid token in index access")
-				}
-			}
-		} else {
-			p.unreadToken()
-		}
+					p.unreadToken()
+					index := p.parseExpr()
+					tok := p.readToken()
+					if tok.isPunct("]") {
+						rel := &Relation{
+							name: firstIdent,
+						}
+						p.tryResolve(rel)
+						return &ExprArrayIndex{
+							rel:   rel,
+							index: index,
+						}
+					} else if tok.isPunct(":") {
+						highIndex := p.parseExpr()
+						p.expect("]")
+						return &ExprSliced{
+							ref:  operand,
+							low:  index,
+							high: highIndex,
+						}
 
-		rel := &Relation{
-			name: firstIdent,
+					} else {
+						tok.errorf("invalid token in index access")
+					}
+				}
+			} else {
+				p.unreadToken()
+			}
+
+			rel := &Relation{
+				name: firstIdent,
+			}
+			p.tryResolve(rel)
+			return rel
 		}
-		p.tryResolve(rel)
-		return rel
-	}
 	default:
 		errorf("unable to handle %s", tok)
 	}
@@ -277,7 +278,7 @@ func (p *parser) parsePrim() Expr {
 }
 
 func (p *parser) parseArrayLiteral() Expr {
-	assert(p.lastToken().isPunct("["),"[ is read")
+	assert(p.lastToken().isPunct("["), "[ is read")
 	defer p.traceOut(p.traceIn())
 	tlen := p.readToken()
 	p.expect("]")
@@ -339,7 +340,7 @@ func (p *parser) parseUnaryExpr() Expr {
 
 func priority(op string) int {
 	switch op {
-	case "&&","||":
+	case "&&", "||":
 		return 5
 	case "==", "!=", "<", ">", ">=", "<=":
 		return 10
@@ -360,7 +361,7 @@ func (p *parser) parseExpr() Expr {
 }
 
 var binops = []string{
-	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=","&&", "||", "/", "%",
+	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "/", "%",
 }
 
 func (p *parser) parseExprInt(prior int) Expr {
@@ -449,8 +450,8 @@ func (p *parser) parseType() *Gtype {
 			p.tryResolve(rel)
 			gtype = &Gtype{
 				typ:      G_REL,
-				relname:ident,
-				relation:rel,
+				relname:  ident,
+				relation: rel,
 			}
 			return gtype
 		} else if tok.isPunct("*") {
@@ -466,10 +467,10 @@ func (p *parser) parseType() *Gtype {
 				// slice
 				typ := p.parseType()
 				return &Gtype{
-					typ:       G_SLICE,
-					ptr:       typ, // element type
-					length:    0,
-					capacity:  0,
+					typ:      G_SLICE,
+					ptr:      typ, // element type
+					length:   0,
+					capacity: 0,
 				}
 			} else {
 				// array
@@ -494,7 +495,7 @@ func (p *parser) parseType() *Gtype {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
-	assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
+	assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read newName
 	newName := p.readIdent()
@@ -506,7 +507,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 		// Infer mode
 		initval = p.parseExpr()
 		if typ == nil {
-			typ = gInt  // FIXME: infer type
+			typ = gInt // FIXME: infer type
 		}
 	} else {
 		p.unreadToken()
@@ -622,7 +623,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 			if p.peekToken().isKeyword("range") {
 				for _, e := range lefts {
 					rel := e.(*Relation) // a brand new rel
-					gtype := gInt // FIXME infer type
+					gtype := gInt        // FIXME infer type
 					variable := p.newVariable(rel.name, gtype, false)
 					rel.expr = variable
 					p.currentScope.setVar(rel.name, variable)
@@ -667,8 +668,8 @@ func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
 
 	var r = &AstForStmt{
 		rng: &ForRangeClause{
-			indexvar:indexvar,
-			valuevar:valuevar,
+			indexvar: indexvar,
+			valuevar: valuevar,
 		},
 	}
 
@@ -707,7 +708,7 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 func (p *parser) parseReturnStmt() *AstReturnStmt {
 	defer p.traceOut(p.traceIn())
 	var r *AstReturnStmt
-	r = &AstReturnStmt{expr:p.parseExpr()}
+	r = &AstReturnStmt{expr: p.parseExpr()}
 	return r
 }
 
@@ -724,7 +725,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 		if tok.isSemicolon() {
 			p.unreadToken()
 			return r
-		} else if tok.isPunct("=") || tok.isPunct(":=")  {
+		} else if tok.isPunct("=") || tok.isPunct(":=") {
 			p.unreadToken()
 			return r
 		} else if tok.isPunct(",") {
@@ -751,7 +752,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		gtype := gInt // FIXME infer type
+		gtype := gInt        // FIXME infer type
 		variable := p.newVariable(rel.name, gtype, false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
@@ -769,11 +770,11 @@ func (p *parser) parseStmt() Stmt {
 	if tok.isKeyword("var") {
 		return p.parseVarDecl(false)
 	} else if tok.isKeyword("const") {
-		return  p.parseConstDecl()
+		return p.parseConstDecl()
 	} else if tok.isKeyword("type") {
-		return  p.parseTypeDecl()
+		return p.parseTypeDecl()
 	} else if tok.isKeyword("for") {
-		return  p.parseForStmt()
+		return p.parseForStmt()
 	} else if tok.isKeyword("if") {
 		return p.parseIfStmt()
 	} else if tok.isKeyword("return") {
@@ -941,7 +942,7 @@ func (p *parser) parseImportDecls() []*AstImportDecl {
 
 // read after "struct" token
 func (p *parser) parseStructDef() *AstStructDef {
-	assert(p.lastToken().isKeyword("struct"),`require "struct" is already read`)
+	assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
 	p.expect("{")
 	var fields []*StructField
@@ -989,7 +990,7 @@ func (p *parser) tryResolve(rel *Relation) {
 	relfound := p.currentScope.get(rel.name)
 	if relfound != nil {
 		switch relfound.(type) {
-		case *Gtype :
+		case *Gtype:
 			rel.gtype = relfound.(*Gtype)
 		case Expr:
 			rel.expr = relfound.(Expr)
@@ -1006,7 +1007,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	newName := p.readIdent()
 	gtype := p.parseType()
 	r := &AstTypeDecl{
-		name: newName,
+		name:  newName,
 		gtype: gtype,
 	}
 	p.currentScope.setGtype(newName, gtype)
@@ -1068,9 +1069,9 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	assert(len(tokens) > 0, "tokens should have length")
 
 	/*
-	if debugToken {
-		renderTokens(tokens)
-	}
+		if debugToken {
+			renderTokens(tokens)
+		}
 	*/
 
 	p.tokenStream = &TokenStream{

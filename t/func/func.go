@@ -11,7 +11,7 @@ func fvoid() {
 }
 
 func fvoidsemicolon() {
-	;
+
 }
 
 func fvoidreturn() {

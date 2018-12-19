@@ -195,63 +195,60 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
-
 func (ast *AstAssignment) emit() {
 	for _, right := range ast.rights {
 		right.emit()
 		emit("push %%rax")
 	}
 
-
 	for i := len(ast.lefts) - 1; i >= 0; i-- {
 		emit("pop %%rax")
 		left := ast.lefts[i]
 
-	switch left.(type) {
-	case *Relation:
-		// e.g. x = 1
-		// resolve relation
-		rel := left.(*Relation)
-		if rel.expr == nil {
-			errorf("left.rel.expr is nil")
+		switch left.(type) {
+		case *Relation:
+			// e.g. x = 1
+			// resolve relation
+			rel := left.(*Relation)
+			if rel.expr == nil {
+				errorf("left.rel.expr is nil")
+			}
+			vr := rel.expr.(*ExprVariable)
+			emitLsave(vr.gtype.getSize(), vr.offset)
+		case *ExprArrayIndex:
+			emit("push %%rax") // push RHS value
+			e := left.(*ExprArrayIndex)
+			// load head address of the array
+			// load index
+			// multi index * size
+			// calc address = head address + offset
+			// copy value to the address
+			vr := e.rel.expr.(*ExprVariable)
+			if vr.isGlobal {
+				emit("lea %s(%%rip), %%rax", vr.varname)
+			} else {
+				emit("lea %d(%%rbp), %%rax", vr.offset)
+			}
+			emit("push %%rax") // store address of variable
+			e.index.emit()
+			emit("mov %%rax, %%rcx") // index
+			elmType := vr.gtype.ptr
+			size := elmType.getSize()
+			assert(size > 0, "size > 0")
+			emit("mov $%d, %%rax", size) // size of one element
+			emit("imul %%rcx, %%rax")    // index * size
+			emit("push %%rax")           // store index * size
+			emit("pop %%rcx")            // load  index * size
+			emit("pop %%rbx")            // load address of variable
+			emit("add %%rcx , %%rbx")    // (index * size) + address
+			emit("pop %%rax")            // load RHS value
+			reg := getReg(size)
+			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
+		default:
+			errorf("Unexpected type %v", ast.lefts)
 		}
-		vr := rel.expr.(*ExprVariable)
-		emitLsave(vr.gtype.getSize(), vr.offset)
-	case *ExprArrayIndex:
-		emit("push %%rax") // push RHS value
-		e := left.(*ExprArrayIndex)
-		// load head address of the array
-		// load index
-		// multi index * size
-		// calc address = head address + offset
-		// copy value to the address
-		vr := e.rel.expr.(*ExprVariable)
-		if vr.isGlobal {
-			emit("lea %s(%%rip), %%rax", vr.varname)
-		} else {
-			emit("lea %d(%%rbp), %%rax", vr.offset)
-		}
-		emit("push %%rax") // store address of variable
-		e.index.emit()
-		emit("mov %%rax, %%rcx") // index
-		elmType := vr.gtype.ptr
-		size := elmType.getSize()
-		assert(size > 0, "size > 0")
-		emit("mov $%d, %%rax", size) // size of one element
-		emit("imul %%rcx, %%rax")    // index * size
-		emit("push %%rax")           // store index * size
-		emit("pop %%rcx")            // load  index * size
-		emit("pop %%rbx")            // load address of variable
-		emit("add %%rcx , %%rbx")    // (index * size) + address
-		emit("pop %%rax")            // load RHS value
-		reg := getReg(size)
-		emit("mov %%%s, (%%rbx)", reg)   // dereference the content of an emelment
-	default:
-		errorf("Unexpected type %v", ast.lefts)
-	}
 	}
 }
-
 
 func (s *AstIfStmt) emit() {
 	emit("# if")
@@ -307,10 +304,10 @@ func (f *AstForStmt) emitRange() {
 	labelEnd := makeLabel()
 
 	initstmt := &AstAssignment{
-		lefts:[]Expr{
+		lefts: []Expr{
 			f.rng.indexvar,
 		},
-		rights:[]Expr{
+		rights: []Expr{
 			&ExprNumberLiteral{
 				val: 0,
 			},
@@ -339,7 +336,7 @@ func (f *AstForStmt) emitRange() {
 	emit("%s: # begin loop ", labelBegin)
 	condition := &ExprBinop{
 		op:    "<",
-		left:  f.rng.indexvar, // i
+		left:  f.rng.indexvar,             // i
 		right: &ExprNumberLiteral{length}, // len(list)
 	}
 	condition.emit() // i < len(list)
@@ -349,13 +346,13 @@ func (f *AstForStmt) emitRange() {
 	f.block.emit()
 
 	indexIncr := &AstAssignment{
-		lefts:[]Expr{
+		lefts: []Expr{
 			f.rng.indexvar, // i =
 		},
-		rights:[]Expr{
+		rights: []Expr{
 			&ExprBinop{ // @TODO replace by a unary operator
-				op: "+",
-				left: f.rng.indexvar,
+				op:    "+",
+				left:  f.rng.indexvar,
 				right: &ExprNumberLiteral{1},
 			},
 		},
@@ -369,7 +366,7 @@ func (f *AstForStmt) emitRange() {
 }
 
 func (f *AstForStmt) emitForClause() {
-	assert(f.cls != nil , "f.cls must not be nil")
+	assert(f.cls != nil, "f.cls must not be nil")
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
@@ -397,7 +394,6 @@ func (f *AstForStmt) emit() {
 	}
 	f.emitForClause()
 }
-
 
 func (stmt AstReturnStmt) emit() {
 	if stmt.expr == nil {
@@ -429,19 +425,19 @@ func emitLsave(regSize int, loff int) {
 }
 
 func (ast *AstVarDecl) emit() {
-	if ast.variable.gtype.typ == G_ARRAY &&   ast.initval != nil {
+	if ast.variable.gtype.typ == G_ARRAY && ast.initval != nil {
 		// initialize local array
 		debugf("initialize local array")
-		initvalues,ok := ast.initval.(*ExprArrayLiteral)
+		initvalues, ok := ast.initval.(*ExprArrayLiteral)
 		if !ok {
 			errorf("error?")
 		}
-		arraygtype :=  ast.variable.gtype
+		arraygtype := ast.variable.gtype
 		elmType := arraygtype.ptr.relation.gtype
 		debugf("gtype:%v", elmType)
 		for i, val := range initvalues.values {
 			val.emit()
-			localoffset := ast.variable.offset + i * elmType.getSize()
+			localoffset := ast.variable.offset + i*elmType.getSize()
 			emitLsave(elmType.getSize(), localoffset)
 		}
 	} else {
@@ -482,7 +478,7 @@ func (e *ExprArrayIndex) emit() {
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
 	elmType := vr.gtype.ptr
-	size :=  elmType.getSize()
+	size := elmType.getSize()
 	assert(size > 0, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
 	emit("imul %%rcx, %%rax")    // index * size
@@ -505,12 +501,12 @@ func (funcall *ExprFuncall) emit() {
 	for i, arg := range args {
 		debugf("arg = %v", arg)
 		arg.emit()
-		emit("push %%rax  # argument no %d", i + 1)
+		emit("push %%rax  # argument no %d", i+1)
 	}
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop %%%s   # argument no %d", regs[j], j + 1)
+		emit("pop %%%s   # argument no %d", regs[j], j+1)
 	}
 	emit("mov $0, %%rax")
 	emit("call %s", fname)
@@ -566,7 +562,7 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 		elmType := variable.gtype.ptr
 		assert(elmType != nil, "elm is not nil")
 		for _, value := range arrayliteral.values {
-			assert(value !=nil, "value is set")
+			assert(value != nil, "value is set")
 			size := elmType.getSize()
 			if size == 8 {
 				emit(".quad %d", evalIntExpr(value))

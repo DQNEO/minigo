@@ -14,7 +14,6 @@ var keywords = []string{
 
 type identifier string
 
-
 type TokenType string
 
 const (
@@ -544,4 +543,3 @@ func renderTokens(tokens []*Token) {
 	debugf("==== End Render Tokens ===")
 }
 */
-

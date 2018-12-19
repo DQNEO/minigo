@@ -69,17 +69,17 @@ func newUniverseBlockScope() *scope {
 	r.setGtype("byte", gByte)
 	r.setGtype("bool", gBool)
 	r.setConst(identifier("iota"), &ExprConstVariable{})
-	r.setConst("true",  &ExprConstVariable{
-			name:  "true",
-			gtype: gBool,
-			val:   &ExprNumberLiteral{1},
+	r.setConst("true", &ExprConstVariable{
+		name:  "true",
+		gtype: gBool,
+		val:   &ExprNumberLiteral{1},
 	})
 	r.setConst("false", &ExprConstVariable{
-			name:  "false",
-			gtype: gBool,
-			val:   &ExprNumberLiteral{0},
+		name:  "false",
+		gtype: gBool,
+		val:   &ExprNumberLiteral{0},
 	})
 
-	r.setFuncDecl("len", &AstFuncDecl{fname: "len",})
+	r.setFuncDecl("len", &AstFuncDecl{fname: "len"})
 	return r
 }

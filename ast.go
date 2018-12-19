@@ -20,16 +20,16 @@ type ExprStringLiteral struct {
 
 // local or global variable
 type ExprVariable struct {
-	varname         identifier
-	gtype           *Gtype
-	offset          int // for local variable
-	isGlobal        bool
+	varname  identifier
+	gtype    *Gtype
+	offset   int // for local variable
+	isGlobal bool
 }
 
 type ExprConstVariable struct {
-	name            identifier
-	gtype           *Gtype
-	val             Expr // like ExprConstExpr ?
+	name  identifier
+	gtype *Gtype
+	val   Expr // like ExprConstExpr ?
 }
 
 type ExprFuncall struct {
@@ -58,15 +58,14 @@ type AstConstDecl struct {
 	variable *ExprConstVariable
 }
 
-
 type AstAssignment struct {
 	lefts  []Expr
 	rights []Expr
 }
 
 type ForRangeClause struct {
-	indexvar *Relation
-	valuevar *Relation
+	indexvar  *Relation
+	valuevar  *Relation
 	rangeexpr Expr
 }
 
@@ -78,8 +77,8 @@ type ForForClause struct {
 
 type AstForStmt struct {
 	// either of rng or cls is set
-	rng *ForRangeClause
-	cls *ForForClause
+	rng   *ForRangeClause
+	cls   *ForForClause
 	block *AstCompountStmt
 }
 
@@ -99,10 +98,10 @@ type AstPackageClause struct {
 
 type AstImportSpec struct {
 	packageName identifier
-	path string
+	path        string
 }
 type AstImportDecl struct {
-	specs[] *AstImportSpec
+	specs []*AstImportSpec
 }
 
 type AstCompountStmt struct {
@@ -126,9 +125,9 @@ type AstTopLevelDecl struct {
 }
 
 type AstSourceFile struct {
-	pkg          *AstPackageClause
-	imports      []*AstImportDecl
-	decls        []*AstTopLevelDecl
+	pkg     *AstPackageClause
+	imports []*AstImportDecl
+	decls   []*AstTopLevelDecl
 }
 
 type AstPackageRef struct {
@@ -138,7 +137,7 @@ type AstPackageRef struct {
 
 type AstTypeDecl struct {
 	name  identifier
-	gtype   *Gtype
+	gtype *Gtype
 }
 
 type AstInterfaceDef struct {
@@ -170,7 +169,7 @@ func (e *ExprSliced) emit() {
 
 // Expr e.g. array[2]
 type ExprArrayIndex struct {
-	rel *Relation
+	rel   *Relation
 	index Expr
 }
 

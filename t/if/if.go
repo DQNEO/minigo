@@ -29,7 +29,7 @@ func main() {
 
 	var i int
 	i = 1
-	if  i == 1 {
+	if i == 1 {
 		fmt.Printf("5\n")
 	} else if i == 2 {
 		fmt.Printf("Error\n")
@@ -38,7 +38,7 @@ func main() {
 	}
 
 	i = 2
-	if  i == 1 {
+	if i == 1 {
 		fmt.Printf("Error\n")
 	} else if i == 2 {
 		fmt.Printf("6\n")
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	i = 3
-	if  i == 1 {
+	if i == 1 {
 		fmt.Printf("Error\n")
 	} else if i == 2 {
 		fmt.Printf("Error\n")
