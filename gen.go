@@ -373,18 +373,18 @@ func (f *AstForStmt) emitForClause() {
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
-	if f.cls.initstmt != nil {
-		f.cls.initstmt.emit()
+	if f.cls.init != nil {
+		f.cls.init.emit()
 	}
 	emit("%s: # begin loop ", labelBegin)
-	if f.cls.condition != nil {
-		f.cls.condition.emit()
+	if f.cls.cond != nil {
+		f.cls.cond.emit()
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelEnd)
 	}
 	f.block.emit()
-	if f.cls.poststmt != nil {
-		f.cls.poststmt.emit()
+	if f.cls.post != nil {
+		f.cls.post.emit()
 	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)

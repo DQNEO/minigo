@@ -71,12 +71,13 @@ type ForRangeClause struct {
 }
 
 type ForForClause struct {
-	initstmt  Stmt
-	condition Stmt
-	poststmt  Stmt
+	init Stmt
+	cond Stmt
+	post Stmt
 }
 
 type AstForStmt struct {
+	// either of rng or cls is set
 	rng *ForRangeClause
 	cls *ForForClause
 	block *AstCompountStmt
