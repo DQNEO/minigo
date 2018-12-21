@@ -13,6 +13,7 @@ test: minigo.linux minigo.darwin
 
 clean:
 	rm -f minigo*
+	rm -f a.s a.out
 
 fmt:
 	gofmt -w *.go t/*/*.go
