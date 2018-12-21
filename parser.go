@@ -1063,7 +1063,6 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *AstSourceFile {
 
-	// tokenize
 	bs := NewByteStream(sourceFile)
 	tokens := tokenize(bs)
 	assert(len(tokens) > 0, "tokens should have length")
