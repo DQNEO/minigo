@@ -24,6 +24,8 @@ function test_file {
     echo ok
 }
 
+[[ -d  ./out ]] || mkdir ./out
+
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
