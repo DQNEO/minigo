@@ -15,6 +15,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	importedNames       map[identifier]bool
+	requireBlock        bool // workaround for parsing "{" as a block starter
 }
 
 type TokenStream struct {
@@ -148,6 +149,33 @@ func (p *parser) newAstString(sval string) *ExprStringLiteral {
 	return ast
 }
 
+type AstStructFieldLiteral struct {
+	key identifier
+	value Expr
+}
+
+type ExprStructLiteral struct {
+	strctname *Relation
+	fields []*AstStructFieldLiteral
+}
+
+func (e *ExprStructLiteral) emit() {
+	errorf("TBD")
+}
+
+func (e *ExprStructLiteral) dump() {
+	errorf("TBD")
+}
+
+type AstStructFieldAccess struct {
+	strct *Relation
+	fieldname identifier
+}
+
+func (a *AstStructFieldAccess) dump() {
+	errorf("TBD")
+}
+
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
@@ -182,15 +210,37 @@ func (p *parser) parsePrim() Expr {
 				name: firstIdent,
 			}
 		} else if tok.isPunct(".") {
-			// Assume firstIdent is a package name
-			pkg = firstIdent
-			_, ok := p.importedNames[pkg]
+			// package.ident or struct.field
+
+			pkg, ok := p.importedNames[firstIdent]
 			if ok {
 				ident = p.readIdent()
 				debugf("Reference to outer entity %s.%s", pkg, ident)
 			} else {
+				// struct.field
+				fieldname := p.readIdent()
+				rel := &Relation{
+					name: firstIdent,
+				}
+				p.tryResolve(rel)
+				return &AstStructFieldAccess{
+					strct: rel,
+					fieldname: fieldname,
+				}
 				//return nil
 			}
+		} else if tok.isPunct("{") {
+			// begin of if block or struct literal
+			// struct literal
+			rel := &Relation{
+				name:firstIdent,
+			}
+			p.tryResolve(rel)
+			if p.requireBlock {
+				p.unreadToken()
+				return rel
+			}
+			return p.parseStructLiteral(rel)
 		} else {
 			p.unreadToken()
 			pkg = ""
@@ -213,7 +263,13 @@ func (p *parser) parsePrim() Expr {
 			} else if operand.pkg == "fmt" && operand.ident == "Printf" {
 				// dirty hack: "fmt" -> "Printf"
 				operand.ident = "printf"
+			} else if operand.pkg == "" && operand.ident == "Printf" {
+				// dirty fix for unknown cause
+				operand.ident = "printf"
 			}
+			fname := operand.ident
+			//debugf("operand.pkg=%s", operand.pkg)
+			assert(fname != "Printf", "must not be Printf")
 			return &ExprFuncall{
 				fname: operand.ident,
 				args:  args,
@@ -326,6 +382,32 @@ func (p *parser) parseArrayLiteral() Expr {
 	r := &ExprArrayLiteral{
 		gtype:  gtype,
 		values: values,
+	}
+
+	return r
+}
+
+func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
+	assert(p.lastToken().isPunct("{"),"{ is read")
+	defer p.traceOut(p.traceIn())
+	r := &ExprStructLiteral{
+		strctname:rel,
+	}
+
+	for {
+		tok := p.readToken()
+		if tok.isPunct("}") {
+			break
+		}
+		p.expect(":")
+		assert(tok.isTypeIdent(), "field name is ident")
+		value := p.parseExpr()
+		f := &AstStructFieldLiteral{
+			key: tok.getIdent(),
+			value: value,
+		}
+		r.fields = append(r.fields, f)
+		p.expect(",")
 	}
 
 	return r
@@ -455,7 +537,7 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("*") {
 			// pointer
 		} else if tok.isKeyword("struct") {
-			_ = p.parseStructDef()
+			return p.parseStructDef()
 		} else if tok.isKeyword("interface") {
 			_ = p.parseInterfaceDef()
 		} else if tok.isPunct("[") {
@@ -600,7 +682,9 @@ func (p *parser) parseForStmt() *AstForStmt {
 	p.enterNewScope()
 	defer p.exitScope()
 
+	p.requireBlock = true
 	expr := p.parseExpr()
+	p.requireBlock = false
 	if p.peekToken().isPunct("{") {
 		// single cond
 		r.cls = &ForForClause{
@@ -670,8 +754,9 @@ func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
 			valuevar: valuevar,
 		},
 	}
-
+	p.requireBlock = true
 	r.rng.rangeexpr = p.parseExpr()
+	p.requireBlock = false
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
 	return r
@@ -682,8 +767,10 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	var r = &AstIfStmt{}
 	p.enterNewScope()
 	defer p.exitScope()
+	p.requireBlock = true
 	r.cond = p.parseExpr()
 	p.expect("{")
+	p.requireBlock = false
 	r.then = p.parseCompoundStmt()
 	tok := p.readToken()
 	if tok.isKeyword("else") {
@@ -938,27 +1025,32 @@ func (p *parser) parseImportDecls() []*AstImportDecl {
 	}
 }
 
-// read after "struct" token
-func (p *parser) parseStructDef() *AstStructDef {
+const MaxAlign = 16
+
+func (p *parser) parseStructDef() *Gtype {
 	assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
+
 	p.expect("{")
-	var fields []*StructField
+	var fields []*Gtype
 	for {
 		tok := p.readToken()
 		if tok.isPunct("}") {
 			break
 		}
 		fieldname := tok.getIdent()
-		fieldtyep := p.parseType()
-		fields = append(fields, &StructField{
-			name:  fieldname,
-			gtype: fieldtyep,
-		})
+		gtype := p.parseType()
+		fieldtype := *gtype
+		fieldtype.fieldname = fieldname
+		fieldtype.offset = 0 // will be calculated later
+		fields = append(fields, &fieldtype)
 		p.expect(";")
 	}
+	// calc offset
 	p.expect(";")
-	return &AstStructDef{
+	return &Gtype{
+		typ: G_STRUCT,
+		size: 0, // will be calculated later
 		fields: fields,
 	}
 }

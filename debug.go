@@ -7,7 +7,7 @@ func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
 	}
-	spaces := ""
+	spaces := "> "
 	for i := 0; i < debugNest; i++ {
 		spaces += "  "
 	}

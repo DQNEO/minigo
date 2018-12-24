@@ -79,6 +79,19 @@ func (ast *ExprStringLiteral) emit() {
 	emit("lea .%s(%%rip), %%rax", ast.slabel)
 }
 
+func (a *AstStructFieldAccess) emit() {
+	variable, ok := a.strct.expr.(*ExprVariable)
+	if !ok {
+		errorf("struct is not a variable")
+	}
+	strcttype := variable.gtype.relation.gtype
+	field := strcttype.getField(a.fieldname)
+
+	var offset int
+	offset = variable.offset + field.offset
+	emit("mov %d(%%rbp), %%rax", offset)
+}
+
 func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		if ast.gtype.typ == G_ARRAY {
@@ -440,7 +453,24 @@ func (ast *AstVarDecl) emit() {
 			localoffset := ast.variable.offset + i*elmType.getSize()
 			emitLsave(elmType.getSize(), localoffset)
 		}
+	} else if ast.variable.gtype.relation != nil && ast.variable.gtype.relation.gtype.typ == G_STRUCT &&   ast.initval != nil  {
+		// initialize local struct
+		debugf("initialize local struct")
+		structliteral, ok := ast.initval.(*ExprStructLiteral)
+		if !ok {
+			errorf("error?")
+		}
+		strcttyp := structliteral.strctname.gtype
+		// do assignment for each field
+		for _, field := range structliteral.fields {
+			field.value.emit()
+			fieldtype := strcttyp.getField(field.key)
+			localoffset := ast.variable.offset + fieldtype.offset
+			regSize := fieldtype.relation.gtype.getSize()
+			emitLsave(regSize, localoffset)
+		}
 	} else {
+		debugf("gtype=%v", ast.variable.gtype)
 		if ast.initval == nil {
 			// assign zero value
 			ast.initval = &ExprNumberLiteral{}

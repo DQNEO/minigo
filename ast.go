@@ -144,10 +144,6 @@ type AstInterfaceDef struct {
 	methods []identifier // for interface
 }
 
-type AstStructDef struct {
-	fields []*StructField // for struct
-}
-
 // https://golang.org/ref/spec#Operands
 type AstOperandName struct {
 	pkg   identifier
