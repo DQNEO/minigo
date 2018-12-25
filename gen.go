@@ -257,8 +257,17 @@ func (ast *AstAssignment) emit() {
 			emit("pop %%rax")            // load RHS value
 			reg := getReg(size)
 			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
+		case *AstStructFieldAccess:
+			ast,ok := left.(*AstStructFieldAccess)
+			if !ok {
+				errorf("left is not AstStructFieldAccess")
+			}
+			vr := ast.strct.expr.(*ExprVariable)
+			field := vr.gtype.relation.gtype.getField(ast.fieldname)
+			emitLsave(field.getSize(), vr.offset + field.offset)
 		default:
-			errorf("Unexpected type %v", ast.lefts)
+			left.dump()
+			errorf("Unknown case")
 		}
 	}
 }

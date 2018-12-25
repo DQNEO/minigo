@@ -172,10 +172,6 @@ type AstStructFieldAccess struct {
 	fieldname identifier
 }
 
-func (a *AstStructFieldAccess) dump() {
-	errorf("TBD")
-}
-
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()

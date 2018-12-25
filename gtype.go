@@ -80,6 +80,7 @@ func (gtype *Gtype) String() string {
 }
 
 func (strct *Gtype) getField(name identifier) *Gtype {
+	assert(strct != nil, "assume G_STRUCT type")
 	assert(strct.typ == G_STRUCT, "assume G_STRUCT type")
 	for _, field := range strct.fields {
 		if field.fieldname == name {
