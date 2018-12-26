@@ -52,6 +52,8 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
+		} else if gtype.typ == G_POINTER {
+			return ptrSize
 		} else {
 			return gtype.size
 		}
@@ -73,6 +75,9 @@ func (gtype *Gtype) String() string {
 		return "struct"
 	case G_STRUCT_FIELD:
 		return "structfield"
+	case G_POINTER:
+		elm := gtype.ptr
+		return fmt.Sprintf("*%s", elm)
 	default:
 		errorf("default: %d", gtype.typ)
 	}

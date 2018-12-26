@@ -47,7 +47,7 @@ func emitFuncPrologue(f *AstFuncDecl) {
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
-		debugf("set offset %d to lvar %s", lvar.offset, lvar.varname)
+		debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 	if localarea != 0 {
 		emit("sub $%d, %%rsp # allocate localarea", -localarea)
@@ -93,21 +93,28 @@ func (a *AstStructFieldAccess) emit() {
 }
 
 func (ast *ExprVariable) emit() {
+	if ast.gtype.typ == G_ARRAY {
+		ast.emitAddress()
+		return
+	}
 	if ast.isGlobal {
-		if ast.gtype.typ == G_ARRAY {
-			emit("lea %s(%%rip), %%rax", ast.varname)
-		} else {
-			emit("mov %s(%%rip), %%rax", ast.varname)
-		}
+		emit("mov %s(%%rip), %%rax", ast.varname)
 	} else {
 		if ast.offset == 0 {
 			errorf("offset should not be zero for localvar %s", ast.varname)
 		}
-		if ast.gtype.typ == G_ARRAY {
-			emit("lea %d(%%rbp), %%rax", ast.offset)
-		} else {
-			emit("mov %d(%%rbp), %%rax", ast.offset)
+		emit("mov %d(%%rbp), %%rax", ast.offset)
+	}
+}
+
+func (ast *ExprVariable) emitAddress() {
+	if ast.isGlobal {
+		emit("lea %s(%%rip), %%rax", ast.varname)
+	} else {
+		if ast.offset == 0 {
+			errorf("offset should not be zero for localvar %s", ast.varname)
 		}
+		emit("lea %d(%%rbp), %%rax", ast.offset)
 	}
 }
 
@@ -136,6 +143,45 @@ func makeLabel() string {
 	r := fmt.Sprintf(".L%d", labelSeq)
 	labelSeq++
 	return r
+}
+
+func (ast *ExprUop) emit() {
+	debugf("emitting ExprUop")
+	if ast.op == "&" {
+		switch ast.operand.(type) {
+		case *Relation:
+			rel := ast.operand.(*Relation)
+			vr,ok := rel.expr.(*ExprVariable)
+			if !ok {
+				errorf("rel is not an variable")
+			}
+			vr.emitAddress()
+		case *ExprStructLiteral:
+			e := ast.operand.(*ExprStructLiteral)
+			// TBI global variable
+			assert(e.offset > 0, "ExprStructLiteral has offset")
+			emit("lea %d(%%rbp), %%rax", e.offset)
+		default:
+			errorf("Unknown type: %s", ast.operand)
+		}
+	} else 	if ast.op == "*" {
+		// dereferene of a pointer
+		debugf("dereferene of a pointer")
+		rel, ok := ast.operand.(*Relation)
+		debugf("operand:%s", rel)
+		vr,ok := rel.expr.(*ExprVariable)
+		if !ok {
+			errorf("rel.expr is not a variable:%s", rel)
+		}
+		assert(ok, "operand is a rel")
+		vr.emit()
+		emit("mov (%%rax), %%rcx")
+		emit("mov %%rcx, %%rax")
+	} else {
+		errorf("TBI")
+	}
+	debugf("end of emitting ExprUop")
+
 }
 
 func (ast *ExprBinop) emit() {
@@ -209,12 +255,15 @@ func (ast *ExprBinop) emit() {
 }
 
 func (ast *AstAssignment) emit() {
+	emit("# start AstAssignment")
 	for _, right := range ast.rights {
+		emit("# emitting rhs")
 		right.emit()
 		emit("push %%rax")
 	}
 
 	for i := len(ast.lefts) - 1; i >= 0; i-- {
+		emit("# assigning to lhs")
 		emit("pop %%rax")
 		left := ast.lefts[i]
 
@@ -538,7 +587,7 @@ func (funcall *ExprFuncall) emit() {
 
 	emit("# setting arguments")
 	for i, arg := range args {
-		debugf("arg = %v", arg)
+		debugf("arg[%d] = %v", i, arg)
 		arg.emit()
 		emit("push %%rax  # argument no %d", i+1)
 	}

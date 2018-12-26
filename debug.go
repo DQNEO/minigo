@@ -159,6 +159,13 @@ func (ast *ExprBinop) dump() {
 	debugNest--
 }
 
+func (ast *ExprUop) dump() {
+	debugf("unop %s", ast.op)
+	debugNest++
+	ast.operand.dump()
+	debugNest--
+}
+
 func (a *AstStructFieldAccess) dump() {
 	debugf("%s.%s", a.strct.name, a.fieldname)
 }

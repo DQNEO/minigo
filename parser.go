@@ -157,6 +157,7 @@ type AstStructFieldLiteral struct {
 type ExprStructLiteral struct {
 	strctname *Relation
 	fields []*AstStructFieldLiteral
+	offset int
 }
 
 func (e *ExprStructLiteral) emit() {
@@ -411,6 +412,21 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 
 func (p *parser) parseUnaryExpr() Expr {
 	defer p.traceOut(p.traceIn())
+	tok := p.readToken()
+	switch {
+		case tok.isPunct("&"):
+			return &ExprUop{
+				op:tok.sval,
+				operand:p.parsePrim(),
+			}
+	case tok.isPunct("*"):
+		return &ExprUop{
+			op:tok.sval,
+			operand:p.parsePrim(),
+		}
+	default:
+		p.unreadToken()
+	}
 	return p.parsePrim()
 }
 
@@ -532,6 +548,11 @@ func (p *parser) parseType() *Gtype {
 			return gtype
 		} else if tok.isPunct("*") {
 			// pointer
+			gtype = &Gtype{
+				typ: G_POINTER,
+				ptr: p.parseType(),
+			}
+			return gtype
 		} else if tok.isKeyword("struct") {
 			return p.parseStructDef()
 		} else if tok.isKeyword("interface") {
