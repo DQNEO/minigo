@@ -4,8 +4,8 @@ import "fmt"
 
 func main() {
 	var i int = 1
-	var u user = user {
-		id: 3,
+	var u user = user{
+		id:  3,
 		age: 2,
 	}
 	fmt.Printf("%d\n", i)
@@ -20,6 +20,6 @@ func main() {
 }
 
 type user struct {
-	id int
+	id  int
 	age int
 }
