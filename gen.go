@@ -151,7 +151,7 @@ func (ast *ExprUop) emit() {
 		switch ast.operand.(type) {
 		case *Relation:
 			rel := ast.operand.(*Relation)
-			vr,ok := rel.expr.(*ExprVariable)
+			vr, ok := rel.expr.(*ExprVariable)
 			if !ok {
 				errorf("rel is not an variable")
 			}
@@ -164,12 +164,12 @@ func (ast *ExprUop) emit() {
 		default:
 			errorf("Unknown type: %s", ast.operand)
 		}
-	} else 	if ast.op == "*" {
+	} else if ast.op == "*" {
 		// dereferene of a pointer
 		debugf("dereferene of a pointer")
 		rel, ok := ast.operand.(*Relation)
 		debugf("operand:%s", rel)
-		vr,ok := rel.expr.(*ExprVariable)
+		vr, ok := rel.expr.(*ExprVariable)
 		if !ok {
 			errorf("rel.expr is not a variable:%s", rel)
 		}
@@ -307,13 +307,13 @@ func (ast *AstAssignment) emit() {
 			reg := getReg(size)
 			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 		case *AstStructFieldAccess:
-			ast,ok := left.(*AstStructFieldAccess)
+			ast, ok := left.(*AstStructFieldAccess)
 			if !ok {
 				errorf("left is not AstStructFieldAccess")
 			}
 			vr := ast.strct.expr.(*ExprVariable)
 			field := vr.gtype.relation.gtype.getField(ast.fieldname)
-			emitLsave(field.getSize(), vr.offset + field.offset)
+			emitLsave(field.getSize(), vr.offset+field.offset)
 		default:
 			left.dump()
 			errorf("Unknown case")
@@ -511,7 +511,7 @@ func (ast *AstVarDecl) emit() {
 			localoffset := ast.variable.offset + i*elmType.getSize()
 			emitLsave(elmType.getSize(), localoffset)
 		}
-	} else if ast.variable.gtype.relation != nil && ast.variable.gtype.relation.gtype.typ == G_STRUCT &&   ast.initval != nil  {
+	} else if ast.variable.gtype.relation != nil && ast.variable.gtype.relation.gtype.typ == G_STRUCT && ast.initval != nil {
 		// initialize local struct
 		debugf("initialize local struct")
 		structliteral, ok := ast.initval.(*ExprStructLiteral)

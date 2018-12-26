@@ -170,7 +170,6 @@ func (a *AstStructFieldAccess) dump() {
 	debugf("%s.%s", a.strct.name, a.fieldname)
 }
 
-
 func errorf(format string, v ...interface{}) {
 	/*
 		currentTokenIndex := ts.index - 1

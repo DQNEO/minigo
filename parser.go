@@ -150,14 +150,14 @@ func (p *parser) newAstString(sval string) *ExprStringLiteral {
 }
 
 type AstStructFieldLiteral struct {
-	key identifier
+	key   identifier
 	value Expr
 }
 
 type ExprStructLiteral struct {
 	strctname *Relation
-	fields []*AstStructFieldLiteral
-	offset int
+	fields    []*AstStructFieldLiteral
+	offset    int
 }
 
 func (e *ExprStructLiteral) emit() {
@@ -169,7 +169,7 @@ func (e *ExprStructLiteral) dump() {
 }
 
 type AstStructFieldAccess struct {
-	strct *Relation
+	strct     *Relation
 	fieldname identifier
 }
 
@@ -221,7 +221,7 @@ func (p *parser) parsePrim() Expr {
 				}
 				p.tryResolve(rel)
 				return &AstStructFieldAccess{
-					strct: rel,
+					strct:     rel,
 					fieldname: fieldname,
 				}
 				//return nil
@@ -230,7 +230,7 @@ func (p *parser) parsePrim() Expr {
 			// begin of if block or struct literal
 			// struct literal
 			rel := &Relation{
-				name:firstIdent,
+				name: firstIdent,
 			}
 			p.tryResolve(rel)
 			if p.requireBlock {
@@ -385,10 +385,10 @@ func (p *parser) parseArrayLiteral() Expr {
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
-	assert(p.lastToken().isPunct("{"),"{ is read")
+	assert(p.lastToken().isPunct("{"), "{ is read")
 	defer p.traceOut(p.traceIn())
 	r := &ExprStructLiteral{
-		strctname:rel,
+		strctname: rel,
 	}
 
 	for {
@@ -400,7 +400,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
 		f := &AstStructFieldLiteral{
-			key: tok.getIdent(),
+			key:   tok.getIdent(),
 			value: value,
 		}
 		r.fields = append(r.fields, f)
@@ -414,15 +414,15 @@ func (p *parser) parseUnaryExpr() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	switch {
-		case tok.isPunct("&"):
-			return &ExprUop{
-				op:tok.sval,
-				operand:p.parsePrim(),
-			}
+	case tok.isPunct("&"):
+		return &ExprUop{
+			op:      tok.sval,
+			operand: p.parsePrim(),
+		}
 	case tok.isPunct("*"):
 		return &ExprUop{
-			op:tok.sval,
-			operand:p.parsePrim(),
+			op:      tok.sval,
+			operand: p.parsePrim(),
 		}
 	default:
 		p.unreadToken()
@@ -1066,8 +1066,8 @@ func (p *parser) parseStructDef() *Gtype {
 	// calc offset
 	p.expect(";")
 	return &Gtype{
-		typ: G_STRUCT,
-		size: 0, // will be calculated later
+		typ:    G_STRUCT,
+		size:   0, // will be calculated later
 		fields: fields,
 	}
 }

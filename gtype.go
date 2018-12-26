@@ -23,15 +23,15 @@ const (
 
 type Gtype struct {
 	typ             GTYPE_TYPE
-	relname         identifier    // for G_REL
-	relation        *Relation     // for G_REL
-	size            int           // for scalar type like int, bool, byte, for struct
-	ptr             *Gtype        // for array, pointer
-	fields 			[]*Gtype       // for struct
-	fieldname       identifier     // for struct field
-	offset          int            // for struct field
-	length          int           // for slice, array
-	capacity        int           // for slice
+	relname         identifier // for G_REL
+	relation        *Relation  // for G_REL
+	size            int        // for scalar type like int, bool, byte, for struct
+	ptr             *Gtype     // for array, pointer
+	fields          []*Gtype   // for struct
+	fieldname       identifier // for struct field
+	offset          int        // for struct field
+	length          int        // for slice, array
+	capacity        int        // for slice
 	underlyingarray interface{}
 
 	// for fixed array
