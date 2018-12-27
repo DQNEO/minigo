@@ -161,7 +161,7 @@ type ExprStructLiteral struct {
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorf("TBD")
+	errorf("This cannot be emitted alone")
 }
 
 func (e *ExprStructLiteral) dump() {
@@ -860,11 +860,34 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 	}
 }
 
+func inferType(e Expr) *Gtype {
+	switch e.(type) {
+	case *ExprStructLiteral:
+		strct := e.(*ExprStructLiteral)
+		return &Gtype{
+			typ: G_REL,
+			relation: strct.strctname,
+		}
+	case *ExprUop:
+		uop := e.(*ExprUop)
+		if uop.op == "&" {
+			return &Gtype{
+				typ: G_POINTER,
+				ptr: inferType(uop.operand),
+			}
+		}
+	default:
+		return gInt
+	}
+	return nil
+}
+
 func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
-	for _, e := range lefts {
+	for i, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		gtype := gInt        // FIXME infer type
+		right := rights[i]
+		gtype := inferType(right)
 		variable := p.newVariable(rel.name, gtype, false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
