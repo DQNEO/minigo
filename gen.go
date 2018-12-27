@@ -32,7 +32,17 @@ func emitFuncPrologue(f *AstFuncDecl) {
 
 	// calc offset
 	var offset int
-	for i, param := range f.params {
+	var params []*ExprVariable
+	if f.receiver != nil {
+		params = []*ExprVariable{f.receiver}
+		for _, param := range f.params {
+			params = append(params, param)
+		}
+	} else {
+		params = f.params
+	}
+
+	for i, param := range params {
 		offset -= INT_SIZE
 		param.offset = offset
 		emit("push %%%s", regs[i])
@@ -601,6 +611,19 @@ func (e *ExprArrayIndex) emit() {
 	emit("pop %%rbx")            // load address of variable
 	emit("add %%rcx , %%rbx")    // (index * size) + address
 	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
+}
+
+func (methodCall *ExprMethodcall) emit() {
+	args := []Expr{methodCall.receiver}
+	for _, arg := range methodCall.args {
+		args = append(args, arg)
+	}
+
+	funcall := &ExprFuncall{
+		fname:methodCall.fname,
+		args: args,
+	}
+	funcall.emit()
 }
 
 func (funcall *ExprFuncall) emit() {

@@ -207,24 +207,35 @@ func (p *parser) parsePrim() Expr {
 				name: firstIdent,
 			}
 		} else if tok.isPunct(".") {
-			// package.ident or struct.field
+			// pkg.ident or var.field or var.method
 
 			pkg, ok := p.importedNames[firstIdent]
 			if ok {
+				// pkg.ident
 				ident = p.readIdent()
 				debugf("Reference to outer entity %s.%s", pkg, ident)
 			} else {
-				// struct.field
-				fieldname := p.readIdent()
+				// var.field or var.method
 				rel := &Relation{
 					name: firstIdent,
 				}
 				p.tryResolve(rel)
-				return &AstStructFieldAccess{
-					strct:     rel,
-					fieldname: fieldname,
+				field_or_method := p.readIdent()
+				if p.peekToken().isPunct("(") {
+					p.expect("(")
+					args := p.readFuncallArgs()
+					return &ExprMethodcall{
+						receiver: rel,
+						fname: field_or_method,
+						args:  args,
+					}
+				} else {
+					// @TODO handle funcion pointer
+					return &AstStructFieldAccess{
+						strct:     rel,
+						fieldname: field_or_method,
+					}
 				}
-				//return nil
 			}
 		} else if tok.isPunct("{") {
 			// begin of if block or struct literal
@@ -975,11 +986,29 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	p.localvars = make([]*ExprVariable, 0)
 	p.enterNewScope()
 	defer p.exitScope()
-	fname := p.readToken().getIdent()
-	p.expect("(")
+
+	var receiver *ExprVariable
 	var params []*ExprVariable
 
+	if p.peekToken().isPunct("(") {
+		p.expect("(")
+		// method call
+		tok := p.readToken()
+		pname := tok.getIdent()
+		ptype := p.parseType()
+		receiver = &ExprVariable{
+			varname: pname,
+			gtype:   ptype,
+		}
+		p.currentScope.setVar(pname, receiver)
+		p.expect(")")
+	}
 	tok := p.readToken()
+	fname := tok.getIdent()
+	p.expect("(")
+
+	tok = p.readToken()
+
 	if !tok.isPunct(")") {
 		p.unreadToken()
 		for {
@@ -1015,7 +1044,9 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	}
 	debugf("scope:%s", p.currentScope)
 	body := p.parseCompoundStmt()
+
 	r := &AstFuncDecl{
+		receiver:receiver,
 		fname:     fname,
 		rettype:   rettype,
 		params:    params,

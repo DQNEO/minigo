@@ -37,6 +37,12 @@ type ExprFuncall struct {
 	args  []Expr
 }
 
+type ExprMethodcall struct {
+	receiver Expr
+	fname identifier
+	args  []Expr
+}
+
 type ExprBinop struct {
 	op    string
 	left  Expr
@@ -109,6 +115,7 @@ type AstCompountStmt struct {
 }
 
 type AstFuncDecl struct {
+	receiver  *ExprVariable
 	fname     identifier
 	rettype   string
 	params    []*ExprVariable
