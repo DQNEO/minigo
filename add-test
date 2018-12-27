@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+set -x
+name=$1
+mkdir t/$name
+cp t/min/min.go t/$name/$name.go
+touch t/expected/$name.txt

@@ -157,7 +157,7 @@ type AstStructFieldLiteral struct {
 type ExprStructLiteral struct {
 	strctname *Relation
 	fields    []*AstStructFieldLiteral
-	offset    int
+	invisiblevar *ExprVariable // to have offfset for &T{}
 }
 
 func (e *ExprStructLiteral) emit() {
@@ -415,10 +415,19 @@ func (p *parser) parseUnaryExpr() Expr {
 	tok := p.readToken()
 	switch {
 	case tok.isPunct("&"):
-		return &ExprUop{
+		uop := &ExprUop{
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
+		// when &T{}, allocate stack memory
+		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
+			// newVariable
+			strctliteral.invisiblevar = p.newVariable("", &Gtype{
+				typ:G_REL,
+				relation:strctliteral.strctname,
+			}, false)
+		}
+		return uop
 	case tok.isPunct("*"):
 		return &ExprUop{
 			op:      tok.sval,
@@ -844,6 +853,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 
 func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
+	assert(rights[0] != nil , "rights[0] is an expr")
 	return &AstAssignment{
 		lefts:  lefts,
 		rights: rights,

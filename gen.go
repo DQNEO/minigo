@@ -84,12 +84,20 @@ func (a *AstStructFieldAccess) emit() {
 	if !ok {
 		errorf("struct is not a variable")
 	}
-	strcttype := variable.gtype.relation.gtype
-	field := strcttype.getField(a.fieldname)
-
-	var offset int
-	offset = variable.offset + field.offset
-	emit("mov %d(%%rbp), %%rax", offset)
+	switch variable.gtype.typ {
+	case G_POINTER: // pointer to struct
+		strcttype := variable.gtype.ptr.relation.gtype
+		field := strcttype.getField(a.fieldname)
+		variable.emit()
+		emit("add $%d, %%rax", field.offset)
+		emit("mov (%%rax), %%rax")
+	case G_REL: // struct
+		strcttype := variable.gtype.relation.gtype
+		field := strcttype.getField(a.fieldname)
+		emit("mov %d(%%rbp), %%rax", variable.offset + field.offset)
+	default:
+		errorf("internal error")
+	}
 }
 
 func (ast *ExprVariable) emit() {
@@ -158,9 +166,9 @@ func (ast *ExprUop) emit() {
 			vr.emitAddress()
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
-			// TBI global variable
-			assert(e.offset > 0, "ExprStructLiteral has offset")
-			emit("lea %d(%%rbp), %%rax", e.offset)
+			assert(e.invisiblevar.offset != 0, "ExprStructLiteral's invisible var has offset")
+			assignStructLiteral(e.invisiblevar, e)
+			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
 			errorf("Unknown type: %s", ast.operand)
 		}
@@ -495,6 +503,19 @@ func emitLsave(regSize int, loff int) {
 	emit("mov %%%s, %d(%%rbp)", reg, loff)
 }
 
+func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLiteral) {
+	strcttyp := structliteral.strctname.gtype
+	// do assignment for each field
+	for _, field := range structliteral.fields {
+		field.value.emit()
+		fieldtype := strcttyp.getField(field.key)
+		localoffset := variable.offset + fieldtype.offset
+		regSize := fieldtype.relation.gtype.getSize()
+		emitLsave(regSize, localoffset)
+	}
+
+}
+
 func (ast *AstVarDecl) emit() {
 	if ast.variable.gtype.typ == G_ARRAY && ast.initval != nil {
 		// initialize local array
@@ -518,15 +539,8 @@ func (ast *AstVarDecl) emit() {
 		if !ok {
 			errorf("error?")
 		}
-		strcttyp := structliteral.strctname.gtype
-		// do assignment for each field
-		for _, field := range structliteral.fields {
-			field.value.emit()
-			fieldtype := strcttyp.getField(field.key)
-			localoffset := ast.variable.offset + fieldtype.offset
-			regSize := fieldtype.relation.gtype.getSize()
-			emitLsave(regSize, localoffset)
-		}
+		assignStructLiteral(ast.variable, structliteral)
+
 	} else {
 		debugf("gtype=%v", ast.variable.gtype)
 		if ast.initval == nil {
