@@ -32,7 +32,17 @@ func emitFuncPrologue(f *AstFuncDecl) {
 
 	// calc offset
 	var offset int
-	for i, param := range f.params {
+	var params []*ExprVariable
+	if f.receiver != nil {
+		params = []*ExprVariable{f.receiver}
+		for _, param := range f.params {
+			params = append(params, param)
+		}
+	} else {
+		params = f.params
+	}
+
+	for i, param := range params {
 		offset -= INT_SIZE
 		param.offset = offset
 		emit("push %%%s", regs[i])
@@ -603,6 +613,19 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 }
 
+func (methodCall *ExprMethodcall) emit() {
+	args := []Expr{methodCall.receiver}
+	for _, arg := range methodCall.args {
+		args = append(args, arg)
+	}
+
+	funcall := &ExprFuncall{
+		fname:methodCall.fname,
+		args: args,
+	}
+	funcall.emit()
+}
+
 func (funcall *ExprFuncall) emit() {
 	fname := funcall.fname
 	emit("# funcall %s", fname)
@@ -631,7 +654,7 @@ func (funcall *ExprFuncall) emit() {
 	}
 }
 
-func emitFuncdef(f *AstFuncDecl) {
+func (f *AstFuncDecl) emit() {
 	emitFuncPrologue(f)
 	f.body.emit()
 	emit("mov $0, %%rax")
@@ -709,7 +732,7 @@ func generate(f *AstSourceFile) {
 		if decl.vardecl != nil {
 			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)
 		} else if decl.funcdecl != nil {
-			emitFuncdef(decl.funcdecl)
+			decl.funcdecl.emit()
 		}
 	}
 }

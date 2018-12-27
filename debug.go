@@ -122,6 +122,15 @@ func (ast *ExprFuncall) dump() {
 	debugNest--
 }
 
+func (ast *ExprMethodcall) dump() {
+	debugf(string(ast.fname))
+	debugNest++
+	for _, arg := range ast.args {
+		arg.dump()
+	}
+	debugNest--
+}
+
 func (ast *ExprVariable) dump() {
 	debugf("var %s", ast.varname)
 }
