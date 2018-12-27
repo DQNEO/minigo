@@ -631,7 +631,7 @@ func (funcall *ExprFuncall) emit() {
 	}
 }
 
-func emitFuncdef(f *AstFuncDecl) {
+func (f *AstFuncDecl) emit() {
 	emitFuncPrologue(f)
 	f.body.emit()
 	emit("mov $0, %%rax")
@@ -709,7 +709,7 @@ func generate(f *AstSourceFile) {
 		if decl.vardecl != nil {
 			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)
 		} else if decl.funcdecl != nil {
-			emitFuncdef(decl.funcdecl)
+			decl.funcdecl.emit()
 		}
 	}
 }
