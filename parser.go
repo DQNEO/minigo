@@ -161,7 +161,7 @@ type ExprStructLiteral struct {
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorf("TBD")
+	errorf("This cannot be emitted alone")
 }
 
 func (e *ExprStructLiteral) dump() {
@@ -610,10 +610,9 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	// "=" or Type
 	tok := p.readToken()
 	if tok.isPunct("=") {
-		// Infer mode
 		initval = p.parseExpr()
 		if typ == nil {
-			typ = gInt // FIXME: infer type
+			typ = inferType(initval)
 		}
 	} else {
 		p.unreadToken()
@@ -729,13 +728,23 @@ func (p *parser) parseForStmt() *AstForStmt {
 			}
 		} else if tok2.isPunct(":=") {
 			if p.peekToken().isKeyword("range") {
-				for _, e := range lefts {
+				assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
+				e := lefts[0]
+				rel := e.(*Relation) // a brand new rel
+				gtype := gInt // index is int
+				variable := p.newVariable(rel.name, gtype, false)
+				rel.expr = variable
+				p.currentScope.setVar(rel.name, variable)
+
+				if len(lefts) == 2 {
+					e := lefts[1]
 					rel := e.(*Relation) // a brand new rel
-					gtype := gInt        // FIXME infer type
+					gtype := inferType(rel.expr)
 					variable := p.newVariable(rel.name, gtype, false)
 					rel.expr = variable
 					p.currentScope.setVar(rel.name, variable)
 				}
+
 				return p.parseForRange(lefts)
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
@@ -860,11 +869,34 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 	}
 }
 
+func inferType(e Expr) *Gtype {
+	switch e.(type) {
+	case *ExprStructLiteral:
+		strct := e.(*ExprStructLiteral)
+		return &Gtype{
+			typ: G_REL,
+			relation: strct.strctname,
+		}
+	case *ExprUop:
+		uop := e.(*ExprUop)
+		if uop.op == "&" {
+			return &Gtype{
+				typ: G_POINTER,
+				ptr: inferType(uop.operand),
+			}
+		}
+	default:
+		return gInt
+	}
+	return nil
+}
+
 func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
-	for _, e := range lefts {
+	for i, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		gtype := gInt        // FIXME infer type
+		right := rights[i]
+		gtype := inferType(right)
 		variable := p.newVariable(rel.name, gtype, false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)

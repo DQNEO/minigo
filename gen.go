@@ -96,7 +96,7 @@ func (a *AstStructFieldAccess) emit() {
 		field := strcttype.getField(a.fieldname)
 		emit("mov %d(%%rbp), %%rax", variable.offset + field.offset)
 	default:
-		errorf("internal error")
+		errorf("internal error: bad gtype %d", variable.gtype.typ)
 	}
 }
 
@@ -264,13 +264,25 @@ func (ast *ExprBinop) emit() {
 
 func (ast *AstAssignment) emit() {
 	emit("# start AstAssignment")
-	for _, right := range ast.rights {
-		emit("# emitting rhs")
-		right.emit()
-		emit("push %%rax")
+	done := make(map[int]bool)
+	for i, right := range ast.rights {
+		switch right.(type) {
+		case *ExprStructLiteral: // assign struct literal to var
+			rel := ast.lefts[i].(*Relation)
+			vr := rel.expr.(*ExprVariable)
+			assignStructLiteral(vr, right.(*ExprStructLiteral))
+			done[i] = true
+		default:
+			emit("# emitting rhs")
+			right.emit()
+			emit("push %%rax")
+		}
 	}
 
 	for i := len(ast.lefts) - 1; i >= 0; i-- {
+		if done[i] {
+			continue
+		}
 		emit("# assigning to lhs")
 		emit("pop %%rax")
 		left := ast.lefts[i]
