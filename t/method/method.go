@@ -17,16 +17,25 @@ func f2() {
 	var u *User
 	u = &User{
 		id:1,
-		age:5,
+		age:4,
 	}
 
 	fmt.Printf("%d\n", u.getAge())
+}
+
+func f3() {
+	p := &Point{
+		x: 2,
+		y: 3,
+	}
+	fmt.Printf("%d\n", p.sum())
 }
 
 func main() {
 	f0()
 	f1()
 	f2()
+	f3()
 }
 
 func add(a myint, b myint) myint {
@@ -46,4 +55,14 @@ func (u *User) getAge() int {
 type User struct {
 	id int
 	age int
+}
+
+
+type Point struct {
+	x int
+	y int
+}
+
+func (p *Point) sum() int {
+	return p.x + p.y
 }

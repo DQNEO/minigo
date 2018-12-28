@@ -23,7 +23,6 @@ const (
 
 type Gtype struct {
 	typ             GTYPE_TYPE
-	relname         identifier // for G_REL
 	relation        *Relation  // for G_REL
 	size            int        // for scalar type like int, bool, byte, for struct
 	ptr             *Gtype     // for array, pointer
@@ -63,7 +62,7 @@ func (gtype *Gtype) getSize() int {
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
 	case G_REL:
-		return fmt.Sprintf("rel(%s)", gtype.relname)
+		return fmt.Sprintf("rel(%s)", gtype.relation.name)
 	case G_INT:
 		return "int"
 	case G_BYTE:

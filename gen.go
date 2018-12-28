@@ -24,10 +24,13 @@ func emitDataSection() {
 
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assert(gtype != nil, "gtype is not nil")
+	var typename identifier
 	if gtype.typ == G_POINTER {
-		return string(gtype.ptr.relname) + "__xx__" + string(fname)
+		typename = gtype.ptr.relation.name
+	} else {
+		typename = gtype.relation.name
 	}
-	return string(gtype.relname) + "__xx__" + string(fname)
+	return string(typename) + "__xx__" + string(fname)
 }
 
 func (f *AstFuncDecl) getUniqueName() string {

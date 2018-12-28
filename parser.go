@@ -562,7 +562,6 @@ func (p *parser) parseType() *Gtype {
 			p.tryResolve(rel)
 			gtype = &Gtype{
 				typ:      G_REL,
-				relname:  ident,
 				relation: rel,
 			}
 			return gtype
@@ -992,7 +991,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 
 	if p.peekToken().isPunct("(") {
 		p.expect("(")
-		// method call
+		// method definition
 		tok := p.readToken()
 		pname := tok.getIdent()
 		ptype := p.parseType()
