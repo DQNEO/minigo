@@ -279,7 +279,7 @@ func (p *parser) parsePrim() Expr {
 			//debugf("operand.pkg=%s", operand.pkg)
 			assert(fname != "Printf", "must not be Printf")
 			return &ExprFuncall{
-				fname: operand.ident,
+				fname: string(operand.ident),
 				args:  args,
 			}
 		} else if tok.isPunct("[") {

@@ -22,11 +22,28 @@ func emitDataSection() {
 	}
 }
 
-func emitFuncPrologue(f *AstFuncDecl) {
-	emitLabel("# f %s", f.fname)
+func getMethodUniqueName(gtype *Gtype, fname identifier) string {
+	assert(gtype != nil, "gtype is not nil")
+	if gtype.typ == G_POINTER {
+		return string(gtype.ptr.relname) + "__xx__" + string(fname)
+	}
+	return string(gtype.relname) + "__xx__" + string(fname)
+}
+
+func (f *AstFuncDecl) getUniqueName() string {
+	if f.receiver != nil {
+		// method
+		return getMethodUniqueName(f.receiver.gtype, f.fname)
+	}
+	// function
+	return string(f.fname)
+}
+
+func (f *AstFuncDecl) emitPrologue() {
+	emitLabel("# func %s", f.getUniqueName())
 	emit(".text")
-	emit(".globl	%s", f.fname)
-	emitLabel("%s:", f.fname)
+	emit(".globl	%s", f.getUniqueName())
+	emitLabel("%s:", f.getUniqueName())
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -613,6 +630,24 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 }
 
+func (ast *ExprMethodcall) getUniqueName() string {
+	var gtype *Gtype
+
+	switch ast.receiver.(type) {
+	case *Relation:
+		rel := ast.receiver.(*Relation)
+		if vr, ok := rel.expr.(*ExprVariable); ok {
+			gtype = vr.gtype
+		} else {
+			errorf("internal error")
+		}
+	default:
+		errorf("internal error")
+	}
+	debugf("ast.receiver=%v", ast.receiver)
+	return getMethodUniqueName(gtype, ast.fname)
+}
+
 func (methodCall *ExprMethodcall) emit() {
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
@@ -620,7 +655,7 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 
 	funcall := &ExprFuncall{
-		fname:methodCall.fname,
+		fname:methodCall.getUniqueName(),
 		args: args,
 	}
 	funcall.emit()
@@ -655,7 +690,7 @@ func (funcall *ExprFuncall) emit() {
 }
 
 func (f *AstFuncDecl) emit() {
-	emitFuncPrologue(f)
+	f.emitPrologue()
 	f.body.emit()
 	emit("mov $0, %%rax")
 	emitFuncEpilogue()
