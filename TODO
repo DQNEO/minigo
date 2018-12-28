@@ -1,4 +1,4 @@
-* Gtype: string, pointer, struct ,slice, map
+* Gtype: string, slice, map
 * Gtype to String()
 * Show source position on error
 * re-organize dump/debug functions
