@@ -2,10 +2,14 @@ package main
 
 import "fmt"
 
+func f0() {
+	fmt.Printf("%d\n", add(1,1))
+}
+
 func f1() {
-	var a myint = 0
-	var b int
-	b = a.add3(1)
+	var a myint = 1
+	var b myint
+	b = a.add(2)
 	fmt.Printf("%d\n", b)
 }
 
@@ -20,12 +24,17 @@ func f2() {
 }
 
 func main() {
+	f0()
 	f1()
 	f2()
 }
 
-func (x myint) add3(y int) int {
-	return 3 + y
+func add(a myint, b myint) myint {
+	return a + b
+}
+
+func (x myint) add(y myint) myint {
+	return x + y
 }
 
 type myint int
