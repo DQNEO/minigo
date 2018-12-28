@@ -639,6 +639,7 @@ func (ast *ExprMethodcall) getUniqueName() string {
 		if vr, ok := rel.expr.(*ExprVariable); ok {
 			gtype = vr.gtype
 		} else {
+			// @TODO must adapt to method chains like foo.Bar().Buz()
 			errorf("internal error")
 		}
 	default:
