@@ -19,7 +19,15 @@ const (
 	G_STRING
 	G_MAP
 	G_POINTER
+	G_INTERFACE
 )
+
+
+type signature struct {
+	fname identifier
+	paramTypes []*Gtype
+	rettype string // @FIXME must be []*Gtype
+}
 
 type Gtype struct {
 	typ             GTYPE_TYPE
@@ -32,7 +40,7 @@ type Gtype struct {
 	length          int        // for slice, array
 	capacity        int        // for slice
 	underlyingarray interface{}
-
+	methods []*signature // for interface
 	// for fixed array
 }
 
@@ -51,7 +59,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_INTERFACE {
 			return ptrSize
 		} else {
 			return gtype.size

@@ -224,6 +224,7 @@ func (p *parser) parsePrim() Expr {
 				if p.peekToken().isPunct("(") {
 					p.expect("(")
 					args := p.readFuncallArgs()
+					debugf("receiver.gtype=%v", rel.gtype)
 					return &ExprMethodcall{
 						receiver: rel,
 						fname: field_or_method,
@@ -571,11 +572,10 @@ func (p *parser) parseType() *Gtype {
 				typ: G_POINTER,
 				ptr: p.parseType(),
 			}
+			debugf("ptr=%v", gtype.ptr)
 			return gtype
 		} else if tok.isKeyword("struct") {
 			return p.parseStructDef()
-		} else if tok.isKeyword("interface") {
-			_ = p.parseInterfaceDef()
 		} else if tok.isPunct("[") {
 			// array or slice
 			tok := p.readToken()
@@ -980,33 +980,14 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	return nil
 }
 
-func (p *parser) parseFuncDef() *AstFuncDecl {
-	defer p.traceOut(p.traceIn())
-	p.localvars = make([]*ExprVariable, 0)
-	p.enterNewScope()
-	defer p.exitScope()
-
-	var receiver *ExprVariable
-	var params []*ExprVariable
-
-	if p.peekToken().isPunct("(") {
-		p.expect("(")
-		// method definition
-		tok := p.readToken()
-		pname := tok.getIdent()
-		ptype := p.parseType()
-		receiver = &ExprVariable{
-			varname: pname,
-			gtype:   ptype,
-		}
-		p.currentScope.setVar(pname, receiver)
-		p.expect(")")
-	}
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable , string) {
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
 
 	tok = p.readToken()
+
+	var params []*ExprVariable
 
 	if !tok.isPunct(")") {
 		p.unreadToken()
@@ -1033,14 +1014,41 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 
 	// read func rettype
 	tok = p.readToken()
-	var rettype string
+	var rettype string // @FIXME must be []*Gtype
 	if tok.isTypeIdent() {
 		// rettype
 		rettype = tok.sval
-		p.expect("{")
 	} else {
-		assert(tok.isPunct("{"), "begin of func body")
+		p.unreadToken()
 	}
+	return fname, params, rettype
+}
+
+func (p *parser) parseFuncDef() *AstFuncDecl {
+	defer p.traceOut(p.traceIn())
+	p.localvars = make([]*ExprVariable, 0)
+	p.enterNewScope()
+	defer p.exitScope()
+
+	var receiver *ExprVariable
+
+	if p.peekToken().isPunct("(") {
+		p.expect("(")
+		// method definition
+		tok := p.readToken()
+		pname := tok.getIdent()
+		ptype := p.parseType()
+		receiver = &ExprVariable{
+			varname: pname,
+			gtype:   ptype,
+		}
+		p.currentScope.setVar(pname, receiver)
+		p.expect(")")
+	}
+
+	fname, params, rettype := p.parseFuncSignature()
+
+	p.expect("{")
 	debugf("scope:%s", p.currentScope)
 	body := p.parseCompoundStmt()
 
@@ -1144,25 +1152,43 @@ func (p *parser) parseStructDef() *Gtype {
 	}
 }
 
-func (p *parser) parseInterfaceDef() *AstInterfaceDef {
+func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("interface")
 	p.expect("{")
-	var methods []identifier
+	var methods []*signature
 	for {
-		tok := p.readToken()
-		if tok.isPunct("}") {
+		if p.peekToken().isPunct("}") {
 			break
 		}
-		fname := tok.getIdent()
-		p.expect("(")
-		p.expect(")")
+
+		fname, params, rettype := p.parseFuncSignature()
 		p.expect(";")
-		methods = append(methods, fname)
+
+		var paramTypes []*Gtype
+		for _, param := range params {
+			paramTypes = append(paramTypes, param.gtype)
+		}
+		method := &signature{
+			fname:fname,
+			paramTypes:paramTypes,
+			rettype:rettype,
+		}
+		methods = append(methods, method)
 	}
-	p.expect(";")
-	return &AstInterfaceDef{
+	p.expect("}")
+
+	gtype := &Gtype{
+		typ: G_INTERFACE,
 		methods: methods,
 	}
+
+	p.currentScope.setGtype(newName, gtype)
+	r := &AstTypeDecl{
+		name:  newName,
+		gtype: gtype,
+	}
+	return r
 }
 
 func (p *parser) tryResolve(rel *Relation) {
@@ -1184,6 +1210,10 @@ func (p *parser) tryResolve(rel *Relation) {
 func (p *parser) parseTypeDecl() *AstTypeDecl {
 	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
+	if p.peekToken().isKeyword("interface") {
+		return p.parseInterfaceDef(newName)
+	}
+
 	gtype := p.parseType()
 	r := &AstTypeDecl{
 		name:  newName,

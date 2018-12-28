@@ -147,10 +147,6 @@ type AstTypeDecl struct {
 	gtype *Gtype
 }
 
-type AstInterfaceDef struct {
-	methods []identifier // for interface
-}
-
 // https://golang.org/ref/spec#Operands
 type AstOperandName struct {
 	pkg   identifier
