@@ -427,6 +427,10 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 			value: value,
 		}
 		r.fields = append(r.fields, f)
+		if p.peekToken().isPunct("}") {
+			p.expect("}")
+			break
+		}
 		p.expect(",")
 	}
 

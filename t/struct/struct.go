@@ -15,7 +15,7 @@ func main() {
 	u.id = 4
 	fmt.Printf("%d\n", u.id)
 
-	u.age = 5
+	u = user{id:  3, age: 5}
 	fmt.Printf("%d\n", u.age)
 }
 
