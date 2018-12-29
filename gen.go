@@ -213,7 +213,7 @@ func (ast *ExprUop) emit() {
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
 	} else {
-		errorf("TBI")
+		errorf("unable to handle uop %s", ast.op)
 	}
 	debugf("end of emitting ExprUop")
 
