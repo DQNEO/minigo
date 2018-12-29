@@ -1036,7 +1036,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable , string) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, *Gtype) {
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
@@ -1068,15 +1068,11 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable , string) {
 		}
 	}
 
-	// read func rettype
-	tok = p.readToken()
-	var rettype string // @FIXME must be []*Gtype
-	if tok.isTypeIdent() {
-		// rettype
-		rettype = tok.sval
-	} else {
-		p.unreadToken()
+	next := p.peekToken()
+	if next.isPunct("{") || next.isSemicolon() {
+		return fname, params, nil
 	}
+	rettype := p.parseType()
 	return fname, params, rettype
 }
 
