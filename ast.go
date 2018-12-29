@@ -98,6 +98,14 @@ type AstReturnStmt struct {
 	expr Expr
 }
 
+type AstIncrStmt struct {
+	operand Expr
+}
+
+type AstDecrStmt struct {
+	operand Expr
+}
+
 type AstPackageClause struct {
 	name identifier
 }

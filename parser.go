@@ -958,6 +958,14 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
+	} else if tok2.isPunct("++") {
+		return &AstIncrStmt{
+			operand:expr1,
+		}
+	} else if tok2.isPunct("--")  {
+		return &AstDecrStmt{
+			operand:expr1,
+		}
 	} else {
 		p.unreadToken()
 		return expr1
