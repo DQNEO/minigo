@@ -641,6 +641,9 @@ func (ast *ExprMethodcall) getUniqueName() string {
 		rel := ast.receiver.(*Relation)
 		if vr, ok := rel.expr.(*ExprVariable); ok {
 			gtype = vr.gtype
+			if gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE {
+				errorf("interface method call is not supported yet. (%s.%s)", gtype.relation.name, ast.fname)
+			}
 		} else {
 			// @TODO must adapt to method chains like foo.Bar().Buz()
 			errorf("internal error")
@@ -649,6 +652,7 @@ func (ast *ExprMethodcall) getUniqueName() string {
 		errorf("internal error")
 	}
 	debugf("ast.receiver=%v", ast.receiver)
+	debugf("gtype=%v", gtype)
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
