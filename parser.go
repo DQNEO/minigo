@@ -600,7 +600,11 @@ func (p *parser) parseType() *Gtype {
 			}
 		} else if tok.isPunct("]") {
 
+		} else if tok.isPunct("...") {
+			// vaargs
+			tok.errorf("TBI: VAARGS(...)")
 		} else {
+			tok.errorf("Unkonwn token")
 			p.unreadToken()
 			break
 		}
