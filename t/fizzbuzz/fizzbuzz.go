@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	begin, end := 1, 15
 
-	for i := begin; i <= end; i = i + 1 {
+	for i := begin; i <= end; i++ {
 		if i%15 == 0 {
 			fmt.Printf("FizzBuzz\n")
 		} else if i%3 == 0 {

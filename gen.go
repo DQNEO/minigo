@@ -482,19 +482,10 @@ func (f *AstForStmt) emitRange() {
 
 	f.block.emit()
 
-	indexIncr := &AstAssignment{
-		lefts: []Expr{
-			f.rng.indexvar, // i =
-		},
-		rights: []Expr{
-			&ExprBinop{ // @TODO replace by a unary operator
-				op:    "+",
-				left:  f.rng.indexvar,
-				right: &ExprNumberLiteral{1},
-			},
-		},
+	indexIncr := &AstIncrStmt{
+		operand:f.rng.indexvar,
 	}
-	indexIncr.emit() // i = i + 1
+	indexIncr.emit() // i++
 	if f.rng.valuevar != nil {
 		assignVar.emit() // v = s[i]
 	}
