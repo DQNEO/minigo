@@ -898,6 +898,31 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 	}
 }
 
+func (p *parser) parseAssignmentOperation(left Expr, assignop string) *AstAssignment {
+	var op string
+	switch assignop {
+	case "+=":
+		op = "+"
+	case "-=":
+		op = "-"
+	case "*=":
+		op = "*"
+	default:
+		errorf("internal error")
+	}
+	rights := p.parseExpressionList(nil)
+	assert(len(rights) == 1, "num of rights is 1")
+	binop := &ExprBinop{
+		op:    op,
+		left:  left,
+		right: rights[0],
+	}
+	return &AstAssignment{
+		lefts: []Expr{left},
+		rights: []Expr{binop},
+	}
+}
+
 func inferType(e Expr) *Gtype {
 	switch e.(type) {
 	case *ExprArrayLiteral:
@@ -975,6 +1000,8 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
+	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
+		return p.parseAssignmentOperation(expr1, tok2.sval)
 	} else if tok2.isPunct("++") {
 		return &AstIncrStmt{
 			operand:expr1,
