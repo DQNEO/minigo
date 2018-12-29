@@ -343,8 +343,12 @@ func (p *parser) parsePrim() Expr {
 func (p *parser) parseArrayLiteral() Expr {
 	assert(p.lastToken().isPunct("["), "[ is read")
 	defer p.traceOut(p.traceIn())
-	tlen := p.readToken()
+	var tlen *Token
+	if !p.peekToken().isPunct("]") {
+		tlen = p.readToken()
+	}
 	p.expect("]")
+
 	typ := p.parseType()
 	p.expect("{")
 	var values []Expr
@@ -376,15 +380,22 @@ func (p *parser) parseArrayLiteral() Expr {
 			errorf("unpexpected %s", tok)
 		}
 	}
-	if len(values) != tlen.getIntval() {
-		debugPrintV(values)
-		errorf("array length does not match (%d != %d)",
-			len(values), tlen.getIntval())
+
+	var length int
+	if tlen == nil {
+		length = len(values)
+	} else {
+		if len(values) != tlen.getIntval() {
+			debugPrintV(values)
+			errorf("array length does not match (%d != %d)",
+				len(values), tlen.getIntval())
+		}
+		length = tlen.getIntval()
 	}
 
 	gtype := &Gtype{
 		typ:    G_ARRAY,
-		length: len(values),
+		length: length,
 		ptr:    typ,
 	}
 
@@ -885,6 +896,8 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 
 func inferType(e Expr) *Gtype {
 	switch e.(type) {
+	case *ExprArrayLiteral:
+		return e.(*ExprArrayLiteral).gtype
 	case *ExprStructLiteral:
 		strct := e.(*ExprStructLiteral)
 		return &Gtype{
