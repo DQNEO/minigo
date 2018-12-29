@@ -179,6 +179,29 @@ func read_string() string {
 	}
 }
 
+func read_raw_string() string {
+	var chars = []byte{}
+	for {
+		c, err := getc()
+		if err != nil {
+			panic("invalid string literal")
+		}
+		if c == '\\' {
+			// @FIXME
+			chars = append(chars, c)
+			c, err = getc()
+			chars = append(chars, c)
+			continue
+		}
+		if c != '`' {
+			chars = append(chars, c)
+			continue
+		} else {
+			return string(chars)
+		}
+	}
+}
+
 func read_char() string {
 	c, err := getc()
 	if err != nil {
@@ -345,6 +368,9 @@ func tokenize(_bs *ByteStream) []*Token {
 			tok = makeToken(T_CHAR, sval)
 		case c == '"':
 			sval := read_string()
+			tok = makeToken(T_STRING, sval)
+		case c == '`':
+			sval := read_raw_string()
 			tok = makeToken(T_STRING, sval)
 		case isIn(c, []byte{' ', '\t'}):
 			skipSpace()
