@@ -208,9 +208,6 @@ func (ast *ExprUop) emit() {
 		rel, ok := ast.operand.(*Relation)
 		debugf("operand:%s", rel)
 		vr, ok := rel.expr.(*ExprVariable)
-		if !ok {
-			errorf("rel.expr is not a variable:%s", rel)
-		}
 		assert(ok, "operand is a rel")
 		vr.emit()
 		emit("mov (%%rax), %%rcx")
