@@ -896,6 +896,8 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 
 func inferType(e Expr) *Gtype {
 	switch e.(type) {
+	case *ExprArrayLiteral:
+		return e.(*ExprArrayLiteral).gtype
 	case *ExprStructLiteral:
 		strct := e.(*ExprStructLiteral)
 		return &Gtype{

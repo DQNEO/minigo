@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var garray [3]int = [3]int{1, 2, 0}
+var garray = [3]int{1, 2, 0}
 
 func f1() {
 	garray[2] = 3
@@ -12,7 +12,7 @@ func f1() {
 }
 
 func f2() {
-	var larray [4]int = [4]int{4, 5, 0, 7}
+	var larray = []int{4, 5, 0, 7}
 	larray[2] = 6
 	fmt.Printf("%d\n", larray[0])
 	fmt.Printf("%d\n", larray[1])
@@ -21,7 +21,7 @@ func f2() {
 }
 
 func f3() {
-	var lbytes [6]byte = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
+	var lbytes = []byte{'?', 'e', 'l', 'l', 'o', 10}
 	lbytes[0] = 'H'
 	fmt.Printf("%c", lbytes[0])
 	fmt.Printf("%c", lbytes[1])
