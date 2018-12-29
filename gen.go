@@ -183,6 +183,25 @@ func makeLabel() string {
 	return r
 }
 
+func (ast *AstIncrStmt) emit() {
+	emitIncrDecl("add", ast.operand)
+}
+func (ast *AstDecrStmt) emit() {
+	emitIncrDecl("sub", ast.operand)
+}
+
+func emitIncrDecl(inst string, operand Expr) {
+	rel, ok := operand.(*Relation)
+	if !ok {
+		errorf("operand should be *Relation")
+	}
+	vr, ok := rel.expr.(*ExprVariable)
+	assert(ok, "operand is a rel")
+	vr.emit()
+	emit("%s $1, %%rax", inst)
+	emitLsave(vr.gtype.getSize(), vr.offset)
+}
+
 func (ast *ExprUop) emit() {
 	debugf("emitting ExprUop")
 	if ast.op == "&" {
@@ -208,15 +227,12 @@ func (ast *ExprUop) emit() {
 		rel, ok := ast.operand.(*Relation)
 		debugf("operand:%s", rel)
 		vr, ok := rel.expr.(*ExprVariable)
-		if !ok {
-			errorf("rel.expr is not a variable:%s", rel)
-		}
 		assert(ok, "operand is a rel")
 		vr.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
 	} else {
-		errorf("TBI")
+		errorf("unable to handle uop %s", ast.op)
 	}
 	debugf("end of emitting ExprUop")
 
