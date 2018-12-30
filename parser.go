@@ -176,6 +176,7 @@ type AstStructFieldAccess struct {
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
+
 	switch {
 	case tok.isSemicolon():
 		return nil
@@ -333,9 +334,8 @@ func (p *parser) parsePrim() Expr {
 		}
 		p.tryResolve(rel)
 		return rel
-	default:
-		errorf("unable to handle %s", tok)
 	}
+
 	errorf("unable to handle %s", tok)
 	return nil
 }
