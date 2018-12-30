@@ -223,7 +223,6 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			}
 		}
 	} else if tok.isPunct("{") {
-		// begin of if block or struct literal
 		// struct literal
 		rel := &Relation{
 			name: firstIdent,
