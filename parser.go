@@ -185,14 +185,10 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	tok := p.readToken()
+
 	var pkg identifier
 	var ident identifier
-	if tok.isPunct(":=") {
-		p.unreadToken()
-		return &Relation{
-			name: firstIdent,
-		}
-	} else if tok.isPunct(".") {
+	if tok.isPunct(".") {
 		// pkg. or ident.
 		if pkg, ok := p.importedNames[firstIdent]; ok {
 			// pkg.ident
