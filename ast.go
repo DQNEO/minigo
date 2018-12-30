@@ -61,7 +61,7 @@ type AstVarDecl struct {
 }
 
 type AstConstDecl struct {
-	variable *ExprConstVariable
+	consts []*ExprConstVariable
 }
 
 type AstAssignment struct {

@@ -668,38 +668,53 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	return r
 }
 
-func (p *parser) parseConstDecl() *AstConstDecl {
-	defer p.traceOut(p.traceIn())
-	// read newName
+func (p *parser) parseConstDeclSingle() *ExprConstVariable {
 	newName := p.readIdent()
 
 	// Type or "="
-	tok := p.readToken()
 	var val Expr
-	if tok.isPunct("=") {
-		// infer mode: const x = EXPR
-		val = p.parseExpr()
-		p.expect(";")
-	} else {
-		p.unreadToken()
+	if !p.peekToken().isPunct("=") {
 		// expect Type
 		_ = p.parseType()
-		// const x T = EXPR
-		p.expect("=")
-		val = p.parseExpr()
-		p.expect(";")
 	}
 
+	p.expect("=")
+	val = p.parseExpr()
+
+	p.expect(";")
 	variable := &ExprConstVariable{
 		name: newName,
 		val:  val,
 	}
 
-	r := &AstConstDecl{
-		variable: variable,
+	p.currentScope.setConst(newName, variable)
+	return variable
+}
+
+func (p *parser) parseConstDecl() *AstConstDecl {
+	defer p.traceOut(p.traceIn())
+	// ident or "("
+	var cnsts []*ExprConstVariable
+	if p.peekToken().isPunct("(") {
+		p.readToken()
+		for {
+			// multi definitions
+			cnst := p.parseConstDeclSingle()
+			cnsts = append(cnsts, cnst)
+			if p.peekToken().isPunct(")") {
+				p.readToken()
+				break
+			}
+		}
+	} else {
+		// single definition
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle()}
 	}
 
-	p.currentScope.setConst(newName, variable)
+	r := &AstConstDecl{
+		consts: cnsts,
+	}
+
 	return r
 }
 

@@ -68,7 +68,7 @@ func (a *AstVarDecl) dump() {
 }
 
 func (a *AstConstDecl) dump() {
-	debugf("decl const %v", a.variable)
+	debugf("decl consts %v", a.consts)
 }
 
 func (a *AstTypeDecl) dump() {
