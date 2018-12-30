@@ -37,6 +37,11 @@ func (p *parser) lastToken() *Token {
 	return ts.tokens[ts.index-1]
 }
 
+// skip one token
+func (p *parser) skip() {
+	p.readToken()
+}
+
 func (p *parser) readToken() *Token {
 	ts := p.tokenStream
 	if ts.index > len(ts.tokens)-1 {
@@ -240,8 +245,9 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 		ident: ident,
 	}
 
-	tok = p.readToken()
-	if tok.isPunct("(") {
+	next := p.peekToken()
+	if next.isPunct("(") {
+		p.skip()
 		// try funcall
 		args := p.readFuncallArgs()
 
@@ -262,7 +268,8 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			fname: string(operand.ident),
 			args:  args,
 		}
-	} else if tok.isPunct("[") {
+	} else if next.isPunct("[") {
+		p.skip()
 		// index access
 		// assure operand is array, slice, or map
 		tok := p.readToken()
@@ -303,10 +310,9 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 				tok.errorf("invalid token in index access")
 			}
 		}
-	} else {
-		p.unreadToken()
 	}
 
+	// stand alone ident
 	rel := &Relation{
 		name: firstIdent,
 	}
