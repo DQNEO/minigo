@@ -173,6 +173,148 @@ type AstStructFieldAccess struct {
 	fieldname identifier
 }
 
+// expr which begins with an ident.
+// e.g. ident, ident() or ident.*, etc
+func (p *parser) parseIdentExpr(firstToken *Token) Expr {
+	firstIdent := firstToken.getIdent()
+	// https://golang.org/ref/spec#QualifiedIdent
+	// read QualifiedIdent
+	tok := p.readToken()
+	var pkg identifier
+	var ident identifier
+	if tok.isPunct(":=") {
+		p.unreadToken()
+		return &Relation{
+			name: firstIdent,
+		}
+	} else if tok.isPunct(".") {
+		// pkg.ident or var.ident
+		pkg, ok := p.importedNames[firstIdent]
+		if ok {
+			// pkg.ident
+			ident = p.readIdent()
+			debugf("Reference to outer entity %s.%s", pkg, ident)
+		} else {
+			// var.field or var.method
+			rel := &Relation{
+				name: firstIdent,
+			}
+			p.tryResolve(rel)
+			field_or_method := p.readIdent()
+			if p.peekToken().isPunct("(") {
+				p.expect("(")
+				args := p.readFuncallArgs()
+				debugf("receiver.gtype=%v", rel.gtype)
+				return &ExprMethodcall{
+					receiver: rel,
+					fname: field_or_method,
+					args:  args,
+				}
+			} else {
+				// @TODO handle funcion pointer
+				return &AstStructFieldAccess{
+					strct:     rel,
+					fieldname: field_or_method,
+				}
+			}
+		}
+	} else if tok.isPunct("{") {
+		// begin of if block or struct literal
+		// struct literal
+		rel := &Relation{
+			name: firstIdent,
+		}
+		p.tryResolve(rel)
+		if p.requireBlock {
+			p.unreadToken()
+			return rel
+		}
+		return p.parseStructLiteral(rel)
+	} else {
+		p.unreadToken()
+		pkg = ""
+		ident = firstIdent
+	}
+
+	operand := &AstOperandName{
+		pkg:   pkg,
+		ident: ident,
+	}
+
+	tok = p.readToken()
+	if tok.isPunct("(") {
+		// try funcall
+		args := p.readFuncallArgs()
+
+		if operand.pkg == "" && operand.ident == "println" {
+			// dirty hack: "println" -> "puts"
+			operand.ident = "puts"
+		} else if operand.pkg == "fmt" && operand.ident == "Printf" {
+			// dirty hack: "fmt" -> "Printf"
+			operand.ident = "printf"
+		} else if operand.pkg == "" && operand.ident == "Printf" {
+			// dirty fix for unknown cause
+			operand.ident = "printf"
+		}
+		fname := operand.ident
+		//debugf("operand.pkg=%s", operand.pkg)
+		assert(fname != "Printf", "must not be Printf")
+		return &ExprFuncall{
+			fname: string(operand.ident),
+			args:  args,
+		}
+	} else if tok.isPunct("[") {
+		// index access
+		// assure operand is array, slice, or map
+		tok := p.readToken()
+		if tok.isPunct(":") {
+			lowIndex := &ExprNumberLiteral{
+				val: 0,
+			}
+			highIndex := p.parseExpr()
+			p.expect("]")
+			return &ExprSliced{
+				ref:  operand,
+				low:  lowIndex,
+				high: highIndex,
+			}
+		} else {
+			p.unreadToken()
+			index := p.parseExpr()
+			tok := p.readToken()
+			if tok.isPunct("]") {
+				rel := &Relation{
+					name: firstIdent,
+				}
+				p.tryResolve(rel)
+				return &ExprArrayIndex{
+					rel:   rel,
+					index: index,
+				}
+			} else if tok.isPunct(":") {
+				highIndex := p.parseExpr()
+				p.expect("]")
+				return &ExprSliced{
+					ref:  operand,
+					low:  index,
+					high: highIndex,
+				}
+
+			} else {
+				tok.errorf("invalid token in index access")
+			}
+		}
+	} else {
+		p.unreadToken()
+	}
+
+	rel := &Relation{
+		name: firstIdent,
+	}
+	p.tryResolve(rel)
+	return rel
+}
+
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
@@ -196,147 +338,10 @@ func (p *parser) parsePrim() Expr {
 	case tok.isPunct("["): // array literal
 		return p.parseArrayLiteral()
 	case tok.isTypeIdent():
-		firstIdent := tok.getIdent()
-		// https://golang.org/ref/spec#QualifiedIdent
-		// read QualifiedIdent
-		tok := p.readToken()
-		var pkg identifier
-		var ident identifier
-		if tok.isPunct(":=") {
-			p.unreadToken()
-			return &Relation{
-				name: firstIdent,
-			}
-		} else if tok.isPunct(".") {
-			// pkg.ident or var.field or var.method
-
-			pkg, ok := p.importedNames[firstIdent]
-			if ok {
-				// pkg.ident
-				ident = p.readIdent()
-				debugf("Reference to outer entity %s.%s", pkg, ident)
-			} else {
-				// var.field or var.method
-				rel := &Relation{
-					name: firstIdent,
-				}
-				p.tryResolve(rel)
-				field_or_method := p.readIdent()
-				if p.peekToken().isPunct("(") {
-					p.expect("(")
-					args := p.readFuncallArgs()
-					debugf("receiver.gtype=%v", rel.gtype)
-					return &ExprMethodcall{
-						receiver: rel,
-						fname: field_or_method,
-						args:  args,
-					}
-				} else {
-					// @TODO handle funcion pointer
-					return &AstStructFieldAccess{
-						strct:     rel,
-						fieldname: field_or_method,
-					}
-				}
-			}
-		} else if tok.isPunct("{") {
-			// begin of if block or struct literal
-			// struct literal
-			rel := &Relation{
-				name: firstIdent,
-			}
-			p.tryResolve(rel)
-			if p.requireBlock {
-				p.unreadToken()
-				return rel
-			}
-			return p.parseStructLiteral(rel)
-		} else {
-			p.unreadToken()
-			pkg = ""
-			ident = firstIdent
-		}
-
-		operand := &AstOperandName{
-			pkg:   pkg,
-			ident: ident,
-		}
-
-		tok = p.readToken()
-		if tok.isPunct("(") {
-			// try funcall
-			args := p.readFuncallArgs()
-
-			if operand.pkg == "" && operand.ident == "println" {
-				// dirty hack: "println" -> "puts"
-				operand.ident = "puts"
-			} else if operand.pkg == "fmt" && operand.ident == "Printf" {
-				// dirty hack: "fmt" -> "Printf"
-				operand.ident = "printf"
-			} else if operand.pkg == "" && operand.ident == "Printf" {
-				// dirty fix for unknown cause
-				operand.ident = "printf"
-			}
-			fname := operand.ident
-			//debugf("operand.pkg=%s", operand.pkg)
-			assert(fname != "Printf", "must not be Printf")
-			return &ExprFuncall{
-				fname: string(operand.ident),
-				args:  args,
-			}
-		} else if tok.isPunct("[") {
-			// index access
-			// assure operand is array, slice, or map
-			tok := p.readToken()
-			if tok.isPunct(":") {
-				lowIndex := &ExprNumberLiteral{
-					val: 0,
-				}
-				highIndex := p.parseExpr()
-				p.expect("]")
-				return &ExprSliced{
-					ref:  operand,
-					low:  lowIndex,
-					high: highIndex,
-				}
-			} else {
-				p.unreadToken()
-				index := p.parseExpr()
-				tok := p.readToken()
-				if tok.isPunct("]") {
-					rel := &Relation{
-						name: firstIdent,
-					}
-					p.tryResolve(rel)
-					return &ExprArrayIndex{
-						rel:   rel,
-						index: index,
-					}
-				} else if tok.isPunct(":") {
-					highIndex := p.parseExpr()
-					p.expect("]")
-					return &ExprSliced{
-						ref:  operand,
-						low:  index,
-						high: highIndex,
-					}
-
-				} else {
-					tok.errorf("invalid token in index access")
-				}
-			}
-		} else {
-			p.unreadToken()
-		}
-
-		rel := &Relation{
-			name: firstIdent,
-		}
-		p.tryResolve(rel)
-		return rel
+		return p.parseIdentExpr(tok)
 	}
 
-	errorf("unable to handle %s", tok)
+	tok.errorf("unable to handle")
 	return nil
 }
 
