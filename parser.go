@@ -188,9 +188,8 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			name: firstIdent,
 		}
 	} else if tok.isPunct(".") {
-		// pkg.ident or var.ident
-		pkg, ok := p.importedNames[firstIdent]
-		if ok {
+		// pkg. or ident.
+		if pkg, ok := p.importedNames[firstIdent]; ok {
 			// pkg.ident
 			ident = p.readIdent()
 			debugf("Reference to outer entity %s.%s", pkg, ident)
