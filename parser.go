@@ -184,88 +184,71 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 	firstIdent := firstToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
-	tok := p.readToken()
+	var pkg identifier // ignored for now
+	if _, ok := p.importedNames[firstIdent]; ok {
+		pkg = firstIdent
+		p.expect(".")
+		// shift firstident
+		firstIdent = p.readIdent()
+		debugf("Reference to outer entity %s.%s", pkg, firstIdent)
+	}
 
-	var pkg identifier
-	var ident identifier
-	if tok.isPunct(".") {
-		// pkg. or ident.
-		if pkg, ok := p.importedNames[firstIdent]; ok {
-			// pkg.ident
-			ident = p.readIdent()
-			debugf("Reference to outer entity %s.%s", pkg, ident)
+	rel := &Relation{
+		name: firstIdent,
+	}
+	p.tryResolve(rel)
+
+	next := p.peekToken()
+	if next.isPunct(".") {
+		// ident.field or ident.method
+		p.skip()
+		field_or_method := p.readIdent()
+		if p.peekToken().isPunct("(") {
+			p.expect("(")
+			args := p.readFuncallArgs()
+			debugf("receiver.gtype=%v", rel.gtype)
+			return &ExprMethodcall{
+				receiver: rel,
+				fname:    field_or_method,
+				args:     args,
+			}
 		} else {
-			// var.field or var.method
-			rel := &Relation{
-				name: firstIdent,
-			}
-			p.tryResolve(rel)
-			field_or_method := p.readIdent()
-			if p.peekToken().isPunct("(") {
-				p.expect("(")
-				args := p.readFuncallArgs()
-				debugf("receiver.gtype=%v", rel.gtype)
-				return &ExprMethodcall{
-					receiver: rel,
-					fname: field_or_method,
-					args:  args,
-				}
-			} else {
-				// @TODO handle funcion pointer
-				return &AstStructFieldAccess{
-					strct:     rel,
-					fieldname: field_or_method,
-				}
+			// @TODO handle funcion pointer
+			return &AstStructFieldAccess{
+				strct:     rel,
+				fieldname: field_or_method,
 			}
 		}
-	} else if tok.isPunct("{") {
+	} else if next.isPunct("{") {
 		// struct literal
-		rel := &Relation{
-			name: firstIdent,
-		}
-		p.tryResolve(rel)
+		p.skip()
 		if p.requireBlock {
 			p.unreadToken()
 			return rel
 		}
 		return p.parseStructLiteral(rel)
-	} else {
-		p.unreadToken()
-		pkg = ""
-		ident = firstIdent
-	}
-
-	operand := &AstOperandName{
-		pkg:   pkg,
-		ident: ident,
-	}
-
-	next := p.peekToken()
-	if next.isPunct("(") {
+	} else if next.isPunct("(") {
+		// funcall or method call
 		p.skip()
-		// try funcall
 		args := p.readFuncallArgs()
+		fname := string(firstIdent)
 
-		if operand.pkg == "" && operand.ident == "println" {
-			// dirty hack: "println" -> "puts"
-			operand.ident = "puts"
-		} else if operand.pkg == "fmt" && operand.ident == "Printf" {
-			// dirty hack: "fmt" -> "Printf"
-			operand.ident = "printf"
-		} else if operand.pkg == "" && operand.ident == "Printf" {
-			// dirty fix for unknown cause
-			operand.ident = "printf"
+		// Hack :
+		if fname == "Printf" {
+			// replace Printf -> libc printf
+			fname = "printf"
+		} else if fname == "println" {
+			// replace println -> libc puts
+			fname = "puts"
 		}
-		fname := operand.ident
-		//debugf("operand.pkg=%s", operand.pkg)
-		assert(fname != "Printf", "must not be Printf")
+
 		return &ExprFuncall{
-			fname: string(operand.ident),
+			fname: fname,
 			args:  args,
 		}
 	} else if next.isPunct("[") {
-		p.skip()
 		// index access
+		p.skip()
 		// assure operand is array, slice, or map
 		tok := p.readToken()
 		if tok.isPunct(":") {
@@ -275,7 +258,7 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			highIndex := p.parseExpr()
 			p.expect("]")
 			return &ExprSliced{
-				ref:  operand,
+				ref:  nil, // TBI
 				low:  lowIndex,
 				high: highIndex,
 			}
@@ -284,10 +267,6 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			index := p.parseExpr()
 			tok := p.readToken()
 			if tok.isPunct("]") {
-				rel := &Relation{
-					name: firstIdent,
-				}
-				p.tryResolve(rel)
 				return &ExprArrayIndex{
 					rel:   rel,
 					index: index,
@@ -296,7 +275,7 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 				highIndex := p.parseExpr()
 				p.expect("]")
 				return &ExprSliced{
-					ref:  operand,
+					ref:  nil, // TBI
 					low:  index,
 					high: highIndex,
 				}
@@ -305,14 +284,13 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 				tok.errorf("invalid token in index access")
 			}
 		}
+	} else {
+		// solo ident
+		return rel
 	}
 
-	// stand alone ident
-	rel := &Relation{
-		name: firstIdent,
-	}
-	p.tryResolve(rel)
-	return rel
+	errorf("internal error")
+	return nil
 }
 
 func (p *parser) parsePrim() Expr {
@@ -1269,6 +1247,9 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 }
 
 func (p *parser) tryResolve(rel *Relation) {
+	if rel.gtype != nil || rel.expr != nil {
+		return
+	}
 	relfound := p.currentScope.get(rel.name)
 	if relfound != nil {
 		switch relfound.(type) {
