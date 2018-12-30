@@ -47,7 +47,23 @@ func f2() {
 	}
 }
 
+func f3() {
+	var flg bool
+	flg = true
+	if flg {
+		println("9")
+	}
+	if !flg {
+		println("ERROR")
+	}
+	flg = false
+	if !flg {
+		println("10")
+	}
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }

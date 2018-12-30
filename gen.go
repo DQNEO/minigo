@@ -231,6 +231,12 @@ func (ast *ExprUop) emit() {
 		vr.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
+	} else if ast.op == "!" {
+		ast.operand.emit()
+		emit("mov $0, %%rcx")
+		emit("cmp %%rax, %%rcx")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
 	} else {
 		errorf("unable to handle uop %s", ast.op)
 	}

@@ -460,6 +460,11 @@ func (p *parser) parseUnaryExpr() Expr {
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
+	case tok.isPunct("!"):
+		return &ExprUop{
+			op: tok.sval,
+			operand:p.parsePrim(),
+		}
 	default:
 		p.unreadToken()
 	}
