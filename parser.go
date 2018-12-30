@@ -213,7 +213,7 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 				args:     args,
 			}
 		} else {
-			// @TODO handle funcion pointer
+			// field access
 			return &AstStructFieldAccess{
 				strct:     rel,
 				fieldname: field_or_method,
