@@ -110,10 +110,14 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func (a *AstStructFieldAccess) emit() {
-	variable, ok := a.strct.expr.(*ExprVariable)
+	rel, ok := a.strct.(*Relation)
 	if !ok {
 		errorf("struct is not a variable")
 	}
+	assert(rel.expr != nil, "rel is a variable")
+	variable, ok := rel.expr.(*ExprVariable)
+	assert(ok, "rel is a variable")
+
 	switch variable.gtype.typ {
 	case G_POINTER: // pointer to struct
 		strcttype := variable.gtype.ptr.relation.gtype
@@ -383,7 +387,8 @@ func (ast *AstAssignment) emit() {
 			if !ok {
 				errorf("left is not AstStructFieldAccess")
 			}
-			vr := ast.strct.expr.(*ExprVariable)
+			rel := ast.strct.(*Relation)
+			vr := rel.expr.(*ExprVariable)
 			field := vr.gtype.relation.gtype.getField(ast.fieldname)
 			emitLsave(field.getSize(), vr.offset+field.offset)
 		default:

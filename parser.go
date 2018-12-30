@@ -174,14 +174,13 @@ func (e *ExprStructLiteral) dump() {
 }
 
 type AstStructFieldAccess struct {
-	strct     *Relation
+	strct     Expr
 	fieldname identifier
 }
 
 // expr which begins with an ident.
 // e.g. ident, ident() or ident.*, etc
-func (p *parser) parseIdentExpr(firstToken *Token) Expr {
-	firstIdent := firstToken.getIdent()
+func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg identifier // ignored for now
@@ -197,36 +196,18 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 		name: firstIdent,
 	}
 	p.tryResolve(rel)
+	assert(rel.gtype == nil, "rel is not a type")
 
 	next := p.peekToken()
-	if next.isPunct(".") {
-		// ident.field or ident.method
-		p.skip()
-		field_or_method := p.readIdent()
-		if p.peekToken().isPunct("(") {
-			p.expect("(")
-			args := p.readFuncallArgs()
-			debugf("receiver.gtype=%v", rel.gtype)
-			return &ExprMethodcall{
-				receiver: rel,
-				fname:    field_or_method,
-				args:     args,
-			}
-		} else {
-			// field access
-			return &AstStructFieldAccess{
-				strct:     rel,
-				fieldname: field_or_method,
-			}
-		}
-	} else if next.isPunct("{") {
-		// struct literal
-		p.skip()
+
+	var e Expr
+	if next.isPunct("{") {
 		if p.requireBlock {
-			p.unreadToken()
 			return rel
 		}
-		return p.parseStructLiteral(rel)
+		// struct literal
+		p.skip()
+		e = p.parseStructLiteral(rel)
 	} else if next.isPunct("(") {
 		// funcall or method call
 		p.skip()
@@ -242,7 +223,7 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			fname = "puts"
 		}
 
-		return &ExprFuncall{
+		e = &ExprFuncall{
 			fname: fname,
 			args:  args,
 		}
@@ -257,7 +238,7 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			}
 			highIndex := p.parseExpr()
 			p.expect("]")
-			return &ExprSliced{
+			e = &ExprSliced{
 				ref:  nil, // TBI
 				low:  lowIndex,
 				high: highIndex,
@@ -267,14 +248,14 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 			index := p.parseExpr()
 			tok := p.readToken()
 			if tok.isPunct("]") {
-				return &ExprArrayIndex{
+				e = &ExprArrayIndex{
 					rel:   rel,
 					index: index,
 				}
 			} else if tok.isPunct(":") {
 				highIndex := p.parseExpr()
 				p.expect("]")
-				return &ExprSliced{
+				e = &ExprSliced{
 					ref:  nil, // TBI
 					low:  index,
 					high: highIndex,
@@ -286,11 +267,36 @@ func (p *parser) parseIdentExpr(firstToken *Token) Expr {
 		}
 	} else {
 		// solo ident
-		return rel
+		e = rel
 	}
 
-	errorf("internal error")
-	return nil
+	next = p.peekToken()
+	if next.isPunct(".") {
+		// ident.field or ident.method
+		p.skip()
+		field_or_method := p.readIdent()
+		next = p.peekToken()
+		if next.isPunct("(") {
+			p.expect("(")
+			args := p.readFuncallArgs()
+			debugf("receiver.gtype=%v", rel.gtype)
+			e = &ExprMethodcall{
+				receiver: e,
+				fname:    field_or_method,
+				args:     args,
+			}
+		} else {
+			// field access
+			e =  &AstStructFieldAccess{
+				strct:     e,
+				fieldname: field_or_method,
+			}
+		}
+	} else if next.isPunct("["){
+		// array index
+	}
+
+	return e
 }
 
 func (p *parser) parsePrim() Expr {
@@ -316,7 +322,7 @@ func (p *parser) parsePrim() Expr {
 	case tok.isPunct("["): // array literal
 		return p.parseArrayLiteral()
 	case tok.isTypeIdent():
-		return p.parseIdentExpr(tok)
+		return p.parseIdentExpr(tok.getIdent())
 	}
 
 	tok.errorf("unable to handle")
