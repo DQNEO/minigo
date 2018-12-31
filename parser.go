@@ -136,7 +136,7 @@ func (p *parser) readFuncallArgs() []Expr {
 type Relation struct {
 	name identifier
 
-	// either of expr or gtype
+	// either of expr(var, const, funcref) or gtype
 	expr  Expr
 	gtype *Gtype
 }
@@ -1128,12 +1128,15 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
 	p.localvars = make([]*ExprVariable, 0)
+	var isMethod bool
+	outerScope := p.currentScope
 	p.enterNewScope()
 	defer p.exitScope()
 
 	var receiver *ExprVariable
 
 	if p.peekToken().isPunct("(") {
+		isMethod = true
 		p.expect("(")
 		// method definition
 		tok := p.readToken()
@@ -1151,16 +1154,23 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 
 	p.expect("{")
 	debugf("scope:%s", p.currentScope)
-	body := p.parseCompoundStmt()
 
 	r := &AstFuncDecl{
 		receiver:receiver,
 		fname:     fname,
 		rettypes:   rettypes,
 		params:    params,
-		localvars: p.localvars,
-		body:      body,
 	}
+	if !isMethod {
+		outerScope.setFunc(fname, &ExprFuncRef{
+			funcdef: r,
+		})
+	}
+
+	body := p.parseCompoundStmt()
+	r.body = body
+	r.localvars = p.localvars
+
 	p.localvars = nil
 	return r
 }

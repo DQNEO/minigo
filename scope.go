@@ -22,8 +22,8 @@ func (sc *scope) get(name identifier) interface{} {
 	return nil
 }
 
-func (sc *scope) setFuncDecl(name identifier, fdecl *AstFuncDecl) {
-	sc._set(name, fdecl)
+func (sc *scope) setFunc(name identifier, funcref *ExprFuncRef) {
+	sc._set(name, funcref)
 }
 
 func (sc *scope) setConst(name identifier, cnst *ExprConstVariable) {
@@ -82,6 +82,8 @@ func newUniverseBlockScope() *scope {
 		val:   &ExprNumberLiteral{0},
 	})
 
-	r.setFuncDecl("len", &AstFuncDecl{fname: "len"})
+	r.setFunc("len", &ExprFuncRef{
+		// @FIXME
+	})
 	return r
 }

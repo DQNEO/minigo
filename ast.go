@@ -122,6 +122,18 @@ type AstCompountStmt struct {
 	stmts []Stmt
 }
 
+type ExprFuncRef struct {
+	funcdef *AstFuncDecl
+}
+
+func (f *ExprFuncRef) emit() {
+	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
+}
+
+func (f *ExprFuncRef) dump() {
+	f.funcdef.dump()
+}
+
 type AstFuncDecl struct {
 	receiver  *ExprVariable
 	fname     identifier
