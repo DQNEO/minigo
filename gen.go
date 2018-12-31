@@ -704,17 +704,17 @@ func (methodCall *ExprMethodcall) emit() {
 		args = append(args, arg)
 	}
 
-	funcall := &ExprFuncall{
-		fname:methodCall.getUniqueName(),
-		args: args,
-	}
-	funcall.emit()
+	name := methodCall.getUniqueName()
+	emitCall(name, args)
 }
 
 func (funcall *ExprFuncall) emit() {
-	fname := funcall.fname
+	emitCall(funcall.fname, funcall.args)
+}
+
+func emitCall(fname string, args []Expr) {
+
 	emit("# funcall %s", fname)
-	args := funcall.args
 	for i, _ := range args {
 		emit("push %%%s", regs[i])
 	}
