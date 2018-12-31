@@ -249,7 +249,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 			tok := p.readToken()
 			if tok.isPunct("]") {
 				e = &ExprArrayIndex{
-					rel:   rel,
+					array:   rel,
 					index: index,
 				}
 			} else if tok.isPunct(":") {
