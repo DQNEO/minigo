@@ -196,7 +196,6 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		name: firstIdent,
 	}
 	p.tryResolve(rel)
-	assert(rel.gtype == nil, "rel is not a type")
 
 	next := p.peekToken()
 
