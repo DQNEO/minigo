@@ -352,7 +352,11 @@ func (ast *AstAssignment) emit() {
 				errorf("left.rel.expr is nil")
 			}
 			vr := rel.expr.(*ExprVariable)
-			emitLsave(vr.gtype.getSize(), vr.offset)
+			if vr.isGlobal {
+				emitGsave(vr.gtype.getSize(), vr.varname)
+			} else {
+				emitLsave(vr.gtype.getSize(), vr.offset)
+			}
 		case *ExprArrayIndex:
 			emit("push %%rax") // push RHS value
 			// load head address of the array
@@ -569,6 +573,11 @@ func getReg(regSize int) string {
 func emitLsave(regSize int, loff int) {
 	reg := getReg(regSize)
 	emit("mov %%%s, %d(%%rbp)", reg, loff)
+}
+
+func emitGsave(regSize int, varname identifier) {
+	reg := getReg(regSize)
+	emit("mov %%%s, %s(%%rip)", reg, varname)
 }
 
 func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLiteral) {

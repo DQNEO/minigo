@@ -16,4 +16,6 @@ func main() {
 	localvar := 1
 	fmt.Printf("%d\n", localvar)
 	fmt.Printf("%c\n", c)
+	a = 3
+	fmt.Printf("%d\n", a)
 }
