@@ -211,7 +211,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		// funcall or method call
 		p.skip()
 		args := p.readFuncallArgs()
-		fname := string(firstIdent)
+		fname := string(rel.name)
 
 		// Hack :
 		if fname == "Printf" {
@@ -278,7 +278,8 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	if next.isPunct(".") {
 		// https://golang.org/ref/spec#Selectors
 		p.skip()
-		field_or_method := p.readIdent()
+		ident := p.readIdent()
+
 		next = p.peekToken()
 		if next.isPunct("(") {
 			// (expr).method()
@@ -286,7 +287,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			args := p.readFuncallArgs()
 			r = &ExprMethodcall{
 				receiver: e,
-				fname:    field_or_method,
+				fname:    ident,
 				args:     args,
 			}
 		} else {
@@ -298,7 +299,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			//   array[0].field
 			r =  &AstStructFieldAccess{
 				strct:     e,
-				fieldname: field_or_method,
+				fieldname: ident,
 			}
 		}
 	} else if next.isPunct("["){
