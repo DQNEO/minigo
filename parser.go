@@ -270,33 +270,47 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		e = rel
 	}
 
-	next = p.peekToken()
+	return p.succeedingExpr(e)
+}
+
+func (p *parser) succeedingExpr(e Expr) Expr {
+	var r Expr
+	next := p.peekToken()
 	if next.isPunct(".") {
 		// ident.field or ident.method
 		p.skip()
 		field_or_method := p.readIdent()
 		next = p.peekToken()
 		if next.isPunct("(") {
+			// (expr).method()
 			p.expect("(")
 			args := p.readFuncallArgs()
-			debugf("receiver.gtype=%v", rel.gtype)
-			e = &ExprMethodcall{
+			r = &ExprMethodcall{
 				receiver: e,
 				fname:    field_or_method,
 				args:     args,
 			}
 		} else {
-			// field access
-			e =  &AstStructFieldAccess{
+			// (expr).field
+			//   strct.field
+			//   (strct.field).field
+			//   fncall().field
+			//   obj.method().field
+			//   array[0].field
+			r =  &AstStructFieldAccess{
 				strct:     e,
 				fieldname: field_or_method,
 			}
 		}
 	} else if next.isPunct("["){
-		// array index
+		// (expr)[i]
+		errorf("TBI")
+	} else {
+		r = e
 	}
 
-	return e
+	return r
+
 }
 
 func (p *parser) parsePrim() Expr {
