@@ -1060,7 +1060,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, *Gtype) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
@@ -1096,8 +1096,28 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, *Gtype) {
 	if next.isPunct("{") || next.isSemicolon() {
 		return fname, params, nil
 	}
-	rettype := p.parseType()
-	return fname, params, rettype
+
+	var rettypes []*Gtype
+	if next.isPunct("(") {
+		p.skip()
+		for {
+			rettype := p.parseType()
+			rettypes = append(rettypes, rettype)
+			next := p.peekToken()
+			if next.isPunct(")") {
+				p.skip()
+				break
+			} else if next.isPunct(",") {
+				p.skip()
+			} else {
+				next.errorf("invalid token")
+			}
+		}
+
+	} else {
+		rettypes = []*Gtype{p.parseType()}
+	}
+	return fname, params, rettypes
 }
 
 func (p *parser) parseFuncDef() *AstFuncDecl {
@@ -1122,7 +1142,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		p.expect(")")
 	}
 
-	fname, params, rettype := p.parseFuncSignature()
+	fname, params, rettypes := p.parseFuncSignature()
 
 	p.expect("{")
 	debugf("scope:%s", p.currentScope)
@@ -1131,7 +1151,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	r := &AstFuncDecl{
 		receiver:receiver,
 		fname:     fname,
-		rettype:   rettype,
+		rettypes:   rettypes,
 		params:    params,
 		localvars: p.localvars,
 		body:      body,
@@ -1238,7 +1258,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 			break
 		}
 
-		fname, params, rettype := p.parseFuncSignature()
+		fname, params, rettypes := p.parseFuncSignature()
 		p.expect(";")
 
 		var paramTypes []*Gtype
@@ -1248,7 +1268,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 		method := &signature{
 			fname:fname,
 			paramTypes:paramTypes,
-			rettype:rettype,
+			rettypes:rettypes,
 		}
 		methods = append(methods, method)
 	}

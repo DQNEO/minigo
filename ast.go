@@ -125,7 +125,7 @@ type AstCompountStmt struct {
 type AstFuncDecl struct {
 	receiver  *ExprVariable
 	fname     identifier
-	rettype   *Gtype
+	rettypes   []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
 	body      *AstCompountStmt
