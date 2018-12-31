@@ -277,7 +277,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	var r Expr
 	next := p.peekToken()
 	if next.isPunct(".") {
-		// ident.field or ident.method
+		// https://golang.org/ref/spec#Selectors
 		p.skip()
 		field_or_method := p.readIdent()
 		next = p.peekToken()
@@ -303,9 +303,11 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			}
 		}
 	} else if next.isPunct("["){
+		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
 		errorf("TBI")
 	} else {
+		// https://golang.org/ref/spec#OperandName
 		r = e
 	}
 
