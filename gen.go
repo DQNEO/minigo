@@ -712,13 +712,8 @@ func (funcall *ExprFuncall) emit() {
 	funcref,ok := funcall.rel.expr.(*ExprFuncRef)
 	if ok {
 		debugf("funcref=%v", funcref)
-		debugf("num of rettypes=%v", funcref.funcdef.rettypes)
 	} else {
-		if funcall.fname == "Printf" || funcall.fname == "println" {
-			// avoid compile check
-		} else {
-			errorf("Compiler error: func %s is not declared", funcall.fname)
-		}
+		errorf("Compiler error: func %s is not declared", funcall.fname)
 	}
 	emitCall(funcall.fname, funcall.args)
 }
