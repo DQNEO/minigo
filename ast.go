@@ -33,6 +33,7 @@ type ExprConstVariable struct {
 }
 
 type ExprFuncall struct {
+	rel *Relation
 	fname string
 	args  []Expr
 }
