@@ -26,7 +26,7 @@ const (
 type signature struct {
 	fname identifier
 	paramTypes []*Gtype
-	rettype *Gtype // @FIXME must be []*Gtype
+	rettypes []*Gtype
 }
 
 type Gtype struct {

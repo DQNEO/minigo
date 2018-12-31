@@ -546,11 +546,11 @@ func (f *AstForStmt) emit() {
 	f.emitForClause()
 }
 
-func (stmt AstReturnStmt) emit() {
-	if stmt.expr == nil {
+func (stmt *AstReturnStmt) emit() {
+	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
 	} else {
-		stmt.expr.emit()
+		stmt.exprs[0].emit()
 		emit("leave")
 		emit("ret")
 	}
