@@ -95,7 +95,7 @@ type AstIfStmt struct {
 }
 
 type AstReturnStmt struct {
-	expr Expr
+	exprs []Expr
 }
 
 type AstIncrStmt struct {

@@ -881,7 +881,12 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 func (p *parser) parseReturnStmt() *AstReturnStmt {
 	defer p.traceOut(p.traceIn())
 	var r *AstReturnStmt
-	r = &AstReturnStmt{expr: p.parseExpr()}
+	exprs := p.parseExpressionList(nil)
+	// workaround for {nil}
+	if len(exprs) == 1 && exprs[0] == nil {
+		exprs = nil
+	}
+	r = &AstReturnStmt{exprs: exprs}
 	return r
 }
 
