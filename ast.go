@@ -176,7 +176,7 @@ func (e *ExprSliced) emit() {
 
 // Expr e.g. array[2]
 type ExprArrayIndex struct {
-	rel   *Relation
+	array   Expr
 	index Expr
 }
 

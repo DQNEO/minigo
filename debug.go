@@ -176,7 +176,7 @@ func (ast *ExprUop) dump() {
 }
 
 func (a *AstStructFieldAccess) dump() {
-	debugf("%s.%s", a.strct.name, a.fieldname)
+	debugf("%s.%s", a.strct, a.fieldname)
 }
 
 func errorf(format string, v ...interface{}) {

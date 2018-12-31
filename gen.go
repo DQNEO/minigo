@@ -110,10 +110,14 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func (a *AstStructFieldAccess) emit() {
-	variable, ok := a.strct.expr.(*ExprVariable)
+	rel, ok := a.strct.(*Relation)
 	if !ok {
 		errorf("struct is not a variable")
 	}
+	assert(rel.expr != nil, "rel is a variable")
+	variable, ok := rel.expr.(*ExprVariable)
+	assert(ok, "rel is a variable")
+
 	switch variable.gtype.typ {
 	case G_POINTER: // pointer to struct
 		strcttype := variable.gtype.ptr.relation.gtype
@@ -351,13 +355,21 @@ func (ast *AstAssignment) emit() {
 			emitLsave(vr.gtype.getSize(), vr.offset)
 		case *ExprArrayIndex:
 			emit("push %%rax") // push RHS value
-			e := left.(*ExprArrayIndex)
 			// load head address of the array
 			// load index
 			// multi index * size
 			// calc address = head address + offset
 			// copy value to the address
-			vr := e.rel.expr.(*ExprVariable)
+			e := left.(*ExprArrayIndex)
+			rel, ok := e.array.(*Relation)
+			if !ok {
+				errorf("should be array variable. array expr is not supported yet")
+			}
+
+			vr, ok := rel.expr.(*ExprVariable)
+			if !ok {
+				errorf("should be array variable. ")
+			}
 			if vr.isGlobal {
 				emit("lea %s(%%rip), %%rax", vr.varname)
 			} else {
@@ -383,7 +395,8 @@ func (ast *AstAssignment) emit() {
 			if !ok {
 				errorf("left is not AstStructFieldAccess")
 			}
-			vr := ast.strct.expr.(*ExprVariable)
+			rel := ast.strct.(*Relation)
+			vr := rel.expr.(*ExprVariable)
 			field := vr.gtype.relation.gtype.getField(ast.fieldname)
 			emitLsave(field.getSize(), vr.offset+field.offset)
 		default:
@@ -466,7 +479,7 @@ func (f *AstForStmt) emitRange() {
 			},
 			rights: []Expr{
 				&ExprArrayIndex{
-					rel: &Relation{
+					array: &Relation{
 						expr: f.rng.rangeexpr.(*Relation).expr.(*ExprVariable),
 					},
 					index: f.rng.indexvar,
@@ -625,7 +638,14 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprArrayIndex) emit() {
 	emit("# emit *ExprArrayIndex")
-	vr := e.rel.expr.(*ExprVariable)
+	rel,ok := e.array.(*Relation)
+	if !ok {
+		errorf("array should be a Relation")
+	}
+	vr, ok := rel.expr.(*ExprVariable)
+	if !ok {
+		errorf("array should be a variable")
+	}
 	if vr.isGlobal {
 		emit("lea %s(%%rip), %%rax", vr.varname)
 	} else {
