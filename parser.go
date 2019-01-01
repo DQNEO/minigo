@@ -212,17 +212,8 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		p.skip()
 		args := p.readFuncallArgs()
 		fname := string(rel.name)
-
-		// Hack :
-		if fname == "Printf" {
-			// replace Printf -> libc printf
-			fname = "printf"
-		} else if fname == "println" {
-			// replace println -> libc puts
-			fname = "puts"
-		}
-
 		e = &ExprFuncall{
+			rel:rel,
 			fname: fname,
 			args:  args,
 		}

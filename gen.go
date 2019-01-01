@@ -709,10 +709,25 @@ func (methodCall *ExprMethodcall) emit() {
 }
 
 func (funcall *ExprFuncall) emit() {
+	funcref,ok := funcall.rel.expr.(*ExprFuncRef)
+	if ok {
+		debugf("funcref=%v", funcref)
+	} else {
+		errorf("Compiler error: func %s is not declared", funcall.fname)
+	}
 	emitCall(funcall.fname, funcall.args)
 }
 
 func emitCall(fname string, args []Expr) {
+
+	// Hack :
+	if fname == "Printf" {
+		// replace Printf -> libc printf
+		fname = "printf"
+	} else if fname == "println" {
+		// replace println -> libc puts
+		fname = "puts"
+	}
 
 	emit("# funcall %s", fname)
 	for i, _ := range args {
