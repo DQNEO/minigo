@@ -184,6 +184,8 @@ type AstStructFieldAccess struct {
 // expr which begins with an ident.
 // e.g. ident, ident() or ident.*, etc
 func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
+	defer p.traceOut(p.traceIn())
+
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg identifier // ignored for now
@@ -267,6 +269,8 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
+	defer p.traceOut(p.traceIn())
+
 	var r Expr
 	next := p.peekToken()
 	if next.isPunct(".") {
