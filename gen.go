@@ -708,7 +708,8 @@ func (methodCall *ExprMethodcall) emit() {
 	} else {
 		typeToBeloing = gtype
 	}
-	_, ok := typeToBeloing.methods[methodCall.fname]
+	assert(typeToBeloing.typ == G_REL, "method must belong to a named type")
+	_, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
 	if !ok {
 		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
 	}

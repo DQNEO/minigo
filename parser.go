@@ -14,9 +14,12 @@ type parser struct {
 	currentScope        *scope
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
+	namedTypes          map[identifier]methods
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 }
+
+type methods map[identifier]*ExprFuncRef
 
 type TokenStream struct {
 	tokens []*Token
@@ -1121,7 +1124,6 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
 	p.localvars = make([]*ExprVariable, 0)
 	var isMethod bool
-	outerScope := p.currentScope
 	p.enterNewScope()
 	defer p.exitScope()
 
@@ -1157,8 +1159,6 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		funcdef: r,
 	}
 
-
-
 	if isMethod {
 		var typeToBelong *Gtype
 		if receiver.gtype.typ == G_POINTER {
@@ -1166,12 +1166,16 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		} else {
 			typeToBelong = receiver.gtype
 		}
-		if typeToBelong.methods == nil {
-			typeToBelong.methods = make(map[identifier]*ExprFuncRef)
+
+		assert(typeToBelong.typ == G_REL , "methods must belong to a named type")
+		methods, ok := p.namedTypes[typeToBelong.relation.name]
+		if !ok {
+			methods = make(map[identifier]*ExprFuncRef)
+			p.namedTypes[typeToBelong.relation.name] = methods
 		}
-		typeToBelong.methods[fname] = ref
+		methods[fname] = ref
 	} else {
-		outerScope.setFunc(fname,ref)
+		p.packageBlockScope.setFunc(fname,ref)
 	}
 
 	body := p.parseCompoundStmt()
@@ -1435,4 +1439,13 @@ func (p *parser) resolve() {
 		p.tryResolve(rel)
 	}
 
+	p.resolveMethods()
+}
+
+// copy methods from p.nameTypes to gtype.methods of each type
+func (p *parser) resolveMethods() {
+	for typeName, methods := range p.namedTypes {
+		gtype := p.packageBlockScope.getGtype(typeName)
+		gtype.methods = methods
+	}
 }
