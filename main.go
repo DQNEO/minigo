@@ -9,6 +9,7 @@ var debugAst = false
 var debugToken = false
 var debugParser = false
 var debugMode = false
+var parseOnly = false
 var sourceFile string
 
 func parseOpts(args []string) {
@@ -25,7 +26,9 @@ func parseOpts(args []string) {
 		if opt == "-d" {
 			debugMode = true
 		}
-
+		if opt == "--parse-only" {
+			parseOnly = true
+		}
 		if strings.HasSuffix(opt, ".go") {
 			sourceFile = opt
 		} else if opt == "-" {
@@ -57,6 +60,9 @@ func main() {
 		astFile.dump()
 	}
 
+	if parseOnly {
+		return
+	}
 	// generate
 	generate(astFile)
 }
