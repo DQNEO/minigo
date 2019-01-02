@@ -300,6 +300,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 				strct:     e,
 				fieldname: ident,
 			}
+			return p.succeedingExpr(r)
 		}
 	} else if next.isPunct("["){
 		// https://golang.org/ref/spec#Index_expressions
