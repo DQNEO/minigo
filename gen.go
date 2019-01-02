@@ -698,7 +698,7 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-func (methodCall *ExprMethodcall) emit() {
+func (methodCall *ExprMethodcall) getFuncDef() *AstFuncDecl {
 	gtype := methodCall.receiver.getGtype()
 	debugf("gtype=%v", gtype)
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, "method must be an interface or belong to a named type")
@@ -709,26 +709,37 @@ func (methodCall *ExprMethodcall) emit() {
 		typeToBeloing = gtype
 	}
 	assert(typeToBeloing.typ == G_REL, "method must belong to a named type")
-	_, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
+	funcref, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
 	if !ok {
 		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
 	}
+
+	return funcref.funcdef
+}
+
+func (methodCall *ExprMethodcall) emit() {
+
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
 
+	methodCall.getFuncDef() // check existance
 	name := methodCall.getUniqueName()
 	emitCall(name, args)
 }
 
-func (funcall *ExprFuncall) emit() {
+func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
 	funcref,ok := funcall.rel.expr.(*ExprFuncRef)
-	if ok {
-		debugf("funcref=%v", funcref)
-	} else {
+	if !ok {
 		errorf("Compiler error: func %s is not declared", funcall.fname)
 	}
+
+	return funcref.funcdef
+}
+
+func (funcall *ExprFuncall) emit() {
+	funcall.getFuncDef() // check existance
 	emitCall(funcall.fname, funcall.args)
 }
 
