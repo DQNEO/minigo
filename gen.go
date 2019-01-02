@@ -320,14 +320,48 @@ func (ast *ExprBinop) emit() {
 
 func (ast *AstAssignment) emit() {
 	emit("# start AstAssignment")
-	done := make(map[int]bool)
+	numLeft := len(ast.lefts)
+	numRight := 0
+	for _, right := range ast.rights {
+		switch right.(type) {
+		case *ExprFuncall:
+			funcdef := right.(*ExprFuncall).getFuncDef()
+			numRight+= len(funcdef.rettypes )
+		case *ExprMethodcall:
+			funcdef := right.(*ExprMethodcall).getFuncDef()
+			numRight+= len(funcdef.rettypes )
+		default:
+			numRight++
+		}
+	}
+	if numLeft != numRight {
+		errorf("number of exprs does not match")
+	}
+
+	done := make(map[int]bool) // @FIXME this is not correct any more
 	for i, right := range ast.rights {
 		switch right.(type) {
 		case *ExprStructLiteral: // assign struct literal to var
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
 			assignStructLiteral(vr, right.(*ExprStructLiteral))
-			done[i] = true
+			done[i] = true  // @FIXME this is not correct any more
+		case *ExprFuncall:
+			funcdef := right.(*ExprFuncall).getFuncDef()
+			emit("# emitting rhs (funcall)")
+			right.emit()
+			for i, _ := range funcdef.rettypes {
+				emit("mov %s(%%rip), %%rax", retvals[i])
+				emit("push %%rax")
+			}
+		case *ExprMethodcall:
+			funcdef := right.(*ExprMethodcall).getFuncDef()
+			emit("# emitting rhs (funcall)")
+			right.emit()
+			for i, _ := range funcdef.rettypes {
+				emit("mov %s(%%rip), %%rax", retvals[i])
+				emit("push %%rax")
+			}
 		default:
 			emit("# emitting rhs")
 			right.emit()
@@ -546,14 +580,25 @@ func (f *AstForStmt) emit() {
 	f.emitForClause()
 }
 
+
+var retvals = []string{"rt1","rt2", "rt3", "rt4", "rt5", "rt6"}
+
 func (stmt *AstReturnStmt) emit() {
 	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
-	} else {
-		stmt.exprs[0].emit()
-		emit("leave")
-		emit("ret")
+		return
 	}
+
+	if len(stmt.exprs) > 7 {
+		errorf("TBI")
+	}
+
+	for i, expr := range stmt.exprs {
+		expr.emit()
+		emit("mov %%rax, %s(%%rip)", retvals[i])
+	}
+	emit("leave")
+	emit("ret")
 }
 
 func getReg(regSize int) string {
@@ -851,8 +896,18 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	}
 }
 
+func emitRetGlobals() {
+	for _, name := range retvals {
+		emitLabel(".global %s", name)
+		emitLabel("%s:", name)
+		emit(".quad 0")
+	}
+}
+
 func generate(f *AstSourceFile) {
 	emitDataSection()
+	emitRetGlobals()
+
 	for _, decl := range f.decls {
 		if decl.vardecl != nil {
 			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)

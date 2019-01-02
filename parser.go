@@ -975,7 +975,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
 	for i, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		right := rights[i]
+		right := rights[i] // @FIXME this is not correct any more
 		gtype := inferType(right)
 		variable := p.newVariable(rel.name, gtype, false)
 		rel.expr = variable
