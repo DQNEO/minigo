@@ -42,7 +42,8 @@ func (p *parser) lastToken() *Token {
 
 // skip one token
 func (p *parser) skip() {
-	p.readToken()
+	tok := p.readToken()
+	debugf("skipped %s", tok)
 }
 
 func (p *parser) readToken() *Token {
@@ -277,7 +278,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		// https://golang.org/ref/spec#Selectors
 		p.skip()
 		ident := p.readIdent()
-
+		debugf("read ident: %s", ident)
 		next = p.peekToken()
 		if next.isPunct("(") {
 			// (expr).method()
