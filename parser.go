@@ -1153,10 +1153,25 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		rettypes:   rettypes,
 		params:    params,
 	}
-	if !isMethod {
-		outerScope.setFunc(fname, &ExprFuncRef{
-			funcdef: r,
-		})
+	ref := &ExprFuncRef{
+		funcdef: r,
+	}
+
+
+
+	if isMethod {
+		var typeToBelong *Gtype
+		if receiver.gtype.typ == G_POINTER {
+			typeToBelong = receiver.gtype.ptr
+		} else {
+			typeToBelong = receiver.gtype
+		}
+		if typeToBelong.methods == nil {
+			typeToBelong.methods = make(map[identifier]*ExprFuncRef)
+		}
+		typeToBelong.methods[fname] = ref
+	} else {
+		outerScope.setFunc(fname,ref)
 	}
 
 	body := p.parseCompoundStmt()
@@ -1241,6 +1256,7 @@ func (p *parser) parseStructDef() *Gtype {
 		fieldname := tok.getIdent()
 		gtype := p.parseType()
 		fieldtype := *gtype
+		fieldtype.ptr = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = 0 // will be calculated later
 		fields = append(fields, &fieldtype)
@@ -1282,8 +1298,8 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 	p.expect("}")
 
 	gtype := &Gtype{
-		typ: G_INTERFACE,
-		methods: methods,
+		typ:      G_INTERFACE,
+		imethods: methods,
 	}
 
 	p.currentScope.setGtype(newName, gtype)

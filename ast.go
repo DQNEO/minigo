@@ -3,6 +3,7 @@ package main
 type Expr interface {
 	emit()
 	dump()
+	getGtype() *Gtype
 }
 
 type Stmt interface {

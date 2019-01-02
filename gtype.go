@@ -19,6 +19,7 @@ const (
 	G_STRING
 	G_MAP
 	G_POINTER
+	G_FUNC
 	G_INTERFACE
 )
 
@@ -40,7 +41,8 @@ type Gtype struct {
 	length          int        // for slice, array
 	capacity        int        // for slice
 	underlyingarray interface{}
-	methods []*signature // for interface
+	imethods        []*signature // for interface
+	methods map[identifier]*ExprFuncRef
 	// for fixed array
 }
 
@@ -121,4 +123,95 @@ func (strct *Gtype) calcStructOffset() {
 	}
 
 	strct.size = offset
+}
+
+func (rel *Relation) getGtype() *Gtype {
+	return rel.expr.getGtype()
+}
+
+func (e *ExprStructLiteral) getGtype() *Gtype {
+	return e.strctname.gtype
+}
+
+func (e *ExprFuncall) getGtype() *Gtype {
+	return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
+}
+
+func (e *ExprMethodcall) getGtype() *Gtype {
+	gtype := e.receiver.getGtype()
+	method := gtype.methods[e.fname]
+	return method.funcdef.rettypes[0]
+}
+
+func (e *ExprUop) getGtype() *Gtype {
+	switch e.op {
+	case "&":
+		return &Gtype{
+			typ: G_POINTER,
+			ptr: e.operand.getGtype(),
+		}
+	case "*":
+		return e.operand.getGtype().ptr
+	case "!":
+		return gBool
+	}
+	errorf("internal error")
+	return nil
+}
+
+func (f *ExprFuncRef) getGtype() *Gtype {
+	return &Gtype{
+		typ:G_FUNC,
+	}
+}
+
+func (e *ExprSliced) getGtype() *Gtype {
+	errorf("TBI")
+	return nil
+}
+
+func (e *ExprArrayIndex) getGtype() *Gtype {
+	return e.array.getGtype().ptr
+}
+
+func (e *AstStructFieldAccess) getGtype() *Gtype {
+	gstruct := e.strct.getGtype()
+	for _, field := range gstruct.fields {
+		if e.fieldname == field.fieldname {
+			return field.ptr
+		}
+	}
+	errorf("internal error")
+	return nil
+}
+
+func (e ExprArrayLiteral) getGtype() *Gtype {
+	return e.gtype
+}
+
+func (e *ExprNumberLiteral) getGtype() *Gtype {
+	return gInt
+}
+
+func (e *ExprStringLiteral) getGtype() *Gtype {
+	return gString
+}
+
+func (e *ExprVariable) getGtype() *Gtype {
+	return e.gtype
+}
+
+func (e *ExprConstVariable) getGtype() *Gtype {
+	return e.gtype
+}
+
+func (e *ExprBinop) getGtype() *Gtype {
+	switch e.op {
+	case "<",">","<=",">=","!=","==","&&", "||":
+		return gBool
+	case "+","-","*","%","/":
+		return gInt
+	}
+	errorf("internal error")
+	return nil
 }
