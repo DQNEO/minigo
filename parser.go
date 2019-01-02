@@ -14,9 +14,12 @@ type parser struct {
 	currentScope        *scope
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
+	namedTypes          map[identifier]methods
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 }
+
+type methods map[identifier]*ExprFuncRef
 
 type TokenStream struct {
 	tokens []*Token
@@ -1121,7 +1124,6 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
 	p.localvars = make([]*ExprVariable, 0)
 	var isMethod bool
-	outerScope := p.currentScope
 	p.enterNewScope()
 	defer p.exitScope()
 
@@ -1153,10 +1155,27 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		rettypes:   rettypes,
 		params:    params,
 	}
-	if !isMethod {
-		outerScope.setFunc(fname, &ExprFuncRef{
-			funcdef: r,
-		})
+	ref := &ExprFuncRef{
+		funcdef: r,
+	}
+
+	if isMethod {
+		var typeToBelong *Gtype
+		if receiver.gtype.typ == G_POINTER {
+			typeToBelong = receiver.gtype.ptr
+		} else {
+			typeToBelong = receiver.gtype
+		}
+
+		assert(typeToBelong.typ == G_REL , "methods must belong to a named type")
+		methods, ok := p.namedTypes[typeToBelong.relation.name]
+		if !ok {
+			methods = make(map[identifier]*ExprFuncRef)
+			p.namedTypes[typeToBelong.relation.name] = methods
+		}
+		methods[fname] = ref
+	} else {
+		p.packageBlockScope.setFunc(fname,ref)
 	}
 
 	body := p.parseCompoundStmt()
@@ -1241,6 +1260,7 @@ func (p *parser) parseStructDef() *Gtype {
 		fieldname := tok.getIdent()
 		gtype := p.parseType()
 		fieldtype := *gtype
+		fieldtype.ptr = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = 0 // will be calculated later
 		fields = append(fields, &fieldtype)
@@ -1282,8 +1302,8 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 	p.expect("}")
 
 	gtype := &Gtype{
-		typ: G_INTERFACE,
-		methods: methods,
+		typ:      G_INTERFACE,
+		imethods: methods,
 	}
 
 	p.currentScope.setGtype(newName, gtype)
@@ -1419,4 +1439,13 @@ func (p *parser) resolve() {
 		p.tryResolve(rel)
 	}
 
+	p.resolveMethods()
+}
+
+// copy methods from p.nameTypes to gtype.methods of each type
+func (p *parser) resolveMethods() {
+	for typeName, methods := range p.namedTypes {
+		gtype := p.packageBlockScope.getGtype(typeName)
+		gtype.methods = methods
+	}
 }

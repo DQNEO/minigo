@@ -699,6 +699,20 @@ func (ast *ExprMethodcall) getUniqueName() string {
 }
 
 func (methodCall *ExprMethodcall) emit() {
+	gtype := methodCall.receiver.getGtype()
+	debugf("gtype=%v", gtype)
+	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, "method must be an interface or belong to a named type")
+	var typeToBeloing *Gtype
+	if gtype.typ == G_POINTER {
+		typeToBeloing = gtype.ptr
+	} else {
+		typeToBeloing = gtype
+	}
+	assert(typeToBeloing.typ == G_REL, "method must belong to a named type")
+	_, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
+	if !ok {
+		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
+	}
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)

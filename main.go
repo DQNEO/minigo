@@ -44,12 +44,13 @@ func main() {
 
 	// parse
 	p := &parser{}
+	p.namedTypes = make(map[identifier]methods)
 	astFile := p.parseSourceFile(sourceFile, packageblockscope)
 
 	if debugAst {
 		astFile.dump()
 	}
-
+	debugf("methods=%v", p.namedTypes)
 	p.resolve()
 
 	if debugAst {
