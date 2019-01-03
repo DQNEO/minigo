@@ -92,5 +92,8 @@ func newUniverseBlockScope() *scope {
 	r.setFunc("Printf", &ExprFuncRef{
 		// @FIXME : should be fmt.Printf
 	})
+	r.setFunc("ReadFile", &ExprFuncRef{
+		// @FIXME : should be ioutil.ReadFile
+	})
 	return r
 }
