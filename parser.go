@@ -979,10 +979,33 @@ func inferType(e Expr) *Gtype {
 
 func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
 	rights := p.parseExpressionList(nil)
+	var rightTypes []*Gtype
+	for i, rightExpr := range rights {
+		switch rightExpr.(type) {
+		case *ExprFuncall:
+			fcall := rightExpr.(*ExprFuncall)
+			for _, gtype := range fcall.getFuncDef().rettypes {
+				rightTypes = append(rightTypes, gtype)
+			}
+		case *ExprMethodcall:
+			fcall := rightExpr.(*ExprMethodcall)
+			for _, gtype := range fcall.getFuncDef().rettypes {
+				rightTypes = append(rightTypes, gtype)
+			}
+		default:
+			gtype := inferType(rightExpr)
+			if gtype == nil {
+				errorf("rights[%d] gtype is nil", i)
+			}
+			rightTypes = append(rightTypes, gtype)
+		}
+	}
+
 	for i, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		right := rights[i] // @FIXME this is not correct any more
-		gtype := inferType(right)
+		rightType := rightTypes[i]
+		debugf("rightType=%s", rightType)
+		gtype := rightType
 		variable := p.newVariable(rel.name, gtype, false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)

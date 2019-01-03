@@ -61,7 +61,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING ||gtype.typ == G_INTERFACE {
 			return ptrSize
 		} else {
 			return gtype.size
@@ -87,8 +87,12 @@ func (gtype *Gtype) String() string {
 	case G_POINTER:
 		elm := gtype.ptr
 		return fmt.Sprintf("*%s", elm)
+	case G_SLICE:
+		return "slice"
+	case G_STRING:
+		return "string"
 	default:
-		errorf("default: %d", gtype.typ)
+		errorf("gtype.String() error: type=%d", gtype.typ)
 	}
 	return ""
 }
@@ -130,7 +134,7 @@ func (rel *Relation) getGtype() *Gtype {
 }
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
-	return e.strctname.gtype
+	return e.strctname.gtype // this can be nil while the relation is unresolved.
 }
 
 func (e *ExprFuncall) getGtype() *Gtype {

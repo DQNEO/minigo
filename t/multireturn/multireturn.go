@@ -16,4 +16,10 @@ func main() {
 	fmt.Printf("%d\n", j)
 	fmt.Printf("%d\n", k)
 	fmt.Printf("%d\n", l)
+
+	a, b, c, d := multi(6, 5, 8, 7)
+	fmt.Printf("%d\n", a)
+	fmt.Printf("%d\n", b)
+	fmt.Printf("%d\n", c)
+	fmt.Printf("%d\n", d)
 }

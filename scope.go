@@ -4,7 +4,7 @@ package main
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
-var gString = &Gtype{typ: G_SLICE,}
+var gString = &Gtype{typ: G_STRING,}
 
 const ptrSize int = 8
 
