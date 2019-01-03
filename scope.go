@@ -89,8 +89,8 @@ func newUniverseBlockScope() *scope {
 	r.setFunc("make", &ExprFuncRef{
 		// @FIXME
 	})
-	r.setFunc("println", &ExprFuncRef{
-		// @FIXME
+	r.setFunc("puts", &ExprFuncRef{
+		// No implementation thanks to the libc function.
 	})
 	r.setFunc("Printf", &ExprFuncRef{
 		// @FIXME : should be fmt.Printf
