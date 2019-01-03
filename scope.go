@@ -96,7 +96,16 @@ func newUniverseBlockScope() *scope {
 		// @FIXME : should be fmt.Printf
 	})
 	r.setFunc("ReadFile", &ExprFuncRef{
-		// @FIXME : should be ioutil.ReadFile
+		funcdef: &AstFuncDecl{
+			rettypes:[]*Gtype{
+				&Gtype{
+					typ:G_SLICE,
+				},
+				&Gtype{
+					typ:G_INTERFACE,
+				},
+			},
+		},
 	})
 	return r
 }
