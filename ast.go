@@ -10,6 +10,21 @@ type Stmt interface {
 	emit()
 }
 
+type ExprNilLiteral struct {
+}
+
+func (e *ExprNilLiteral) emit() {
+	emit("mov $0, %%rax")
+}
+
+func (e *ExprNilLiteral) dump() {
+	debugf("nil")
+}
+
+func (e *ExprNilLiteral) getGtype() *Gtype {
+	return nil
+}
+
 type ExprNumberLiteral struct {
 	val int
 }

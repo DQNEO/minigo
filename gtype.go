@@ -44,6 +44,8 @@ type Gtype struct {
 	imethods        []*signature // for interface
 	methods map[identifier]*ExprFuncRef
 	// for fixed array
+	mapKey *Gtype // for map
+	mapValue *Gtype // for map
 }
 
 func (gtype *Gtype) getSize() int {

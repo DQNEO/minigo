@@ -86,6 +86,9 @@ func newUniverseBlockScope() *scope {
 	r.setFunc("len", &ExprFuncRef{
 		// @FIXME
 	})
+	r.setFunc("make", &ExprFuncRef{
+		// @FIXME
+	})
 	r.setFunc("println", &ExprFuncRef{
 		// @FIXME
 	})

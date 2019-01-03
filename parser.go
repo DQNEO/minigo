@@ -324,6 +324,29 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 
 }
 
+func (p *parser) parseMakeExpr() Expr {
+	tok := p.readToken()
+	assert(tok.isIdent("make"), "read make")
+	p.expect("(")
+	mapType := p.parseMapType()
+	debugf("make map %s", mapType)
+	p.expect(")")
+	return &ExprNilLiteral{}
+}
+
+func (p *parser) parseMapType() *Gtype {
+	p.expectKeyword("map")
+	p.expect("[")
+	mapKey := p.parseType()
+	p.expect("]")
+	mapValue := p.parseType()
+	return &Gtype{
+		typ: G_MAP,
+		mapKey:mapKey,
+		mapValue:mapValue,
+	}
+}
+
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
@@ -346,6 +369,9 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isPunct("["): // array literal
 		return p.parseArrayLiteral()
+	case tok.isIdent("make"):
+		p.unreadToken()
+		return p.parseMakeExpr()
 	case tok.isTypeIdent():
 		return p.parseIdentExpr(tok.getIdent())
 	}
