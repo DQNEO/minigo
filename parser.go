@@ -226,48 +226,56 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		p.skip()
-		// assure operand is array, slice, or map
-		tok := p.readToken()
-		if tok.isPunct(":") {
-			lowIndex := &ExprNumberLiteral{
-				val: 0,
-			}
-			highIndex := p.parseExpr()
-			p.expect("]")
-			e = &ExprSliced{
-				ref:  nil, // TBI
-				low:  lowIndex,
-				high: highIndex,
-			}
-		} else {
-			p.unreadToken()
-			index := p.parseExpr()
-			tok := p.readToken()
-			if tok.isPunct("]") {
-				e = &ExprArrayIndex{
-					array:   rel,
-					index: index,
-				}
-			} else if tok.isPunct(":") {
-				highIndex := p.parseExpr()
-				p.expect("]")
-				e = &ExprSliced{
-					ref:  nil, // TBI
-					low:  index,
-					high: highIndex,
-				}
-
-			} else {
-				tok.errorf("invalid token in index access")
-			}
-		}
+		e = p.parseArrayIndex(rel)
 	} else {
 		// solo ident
 		e = rel
 	}
 
 	return p.succeedingExpr(e)
+}
+
+func (p *parser) parseArrayIndex(e Expr) Expr {
+	defer p.traceOut(p.traceIn())
+	p.expect("[")
+
+	var r Expr
+	// assure operand is array, slice, or map
+	tok := p.readToken()
+	if tok.isPunct(":") {
+		lowIndex := &ExprNumberLiteral{
+			val: 0,
+		}
+		highIndex := p.parseExpr()
+		p.expect("]")
+		r = &ExprSliced{
+			ref:  nil, // TBI
+			low:  lowIndex,
+			high: highIndex,
+		}
+	} else {
+		p.unreadToken()
+		index := p.parseExpr()
+		tok := p.readToken()
+		if tok.isPunct("]") {
+			r = &ExprArrayIndex{
+				array:   e,
+				index: index,
+			}
+		} else if tok.isPunct(":") {
+			highIndex := p.parseExpr()
+			p.expect("]")
+			r = &ExprSliced{
+				ref:  nil, // TBI
+				low:  index,
+				high: highIndex,
+			}
+
+		} else {
+			tok.errorf("invalid token in index access")
+		}
+	}
+	return r
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
@@ -306,7 +314,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	} else if next.isPunct("["){
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
-		errorf("TBI")
+		r = p.parseArrayIndex(e)
 	} else {
 		// https://golang.org/ref/spec#OperandName
 		r = e
