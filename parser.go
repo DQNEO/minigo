@@ -1484,6 +1484,9 @@ func (ast *AstShortAssignment) inferTypes() {
 		switch rightExpr.(type) {
 		case *ExprFuncall:
 			fcall := rightExpr.(*ExprFuncall)
+			if fcall.getFuncDef() == nil {
+				errorf("funcdef of %s is not found", fcall.fname)
+			}
 			for _, gtype := range fcall.getFuncDef().rettypes {
 				rightTypes = append(rightTypes, gtype)
 			}
