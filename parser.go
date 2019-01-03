@@ -15,6 +15,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
+	shortassignments    []*AstShortAssignment
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 }
@@ -977,43 +978,20 @@ func inferType(e Expr) *Gtype {
 	return nil
 }
 
-func (p *parser) parseShortAssignment(lefts []Expr) *AstAssignment {
+func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
 	rights := p.parseExpressionList(nil)
-	var rightTypes []*Gtype
-	for i, rightExpr := range rights {
-		switch rightExpr.(type) {
-		case *ExprFuncall:
-			fcall := rightExpr.(*ExprFuncall)
-			for _, gtype := range fcall.getFuncDef().rettypes {
-				rightTypes = append(rightTypes, gtype)
-			}
-		case *ExprMethodcall:
-			fcall := rightExpr.(*ExprMethodcall)
-			for _, gtype := range fcall.getFuncDef().rettypes {
-				rightTypes = append(rightTypes, gtype)
-			}
-		default:
-			gtype := inferType(rightExpr)
-			if gtype == nil {
-				errorf("rights[%d] gtype is nil", i)
-			}
-			rightTypes = append(rightTypes, gtype)
-		}
-	}
-
-	for i, e := range lefts {
+	for _, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
-		rightType := rightTypes[i]
-		debugf("rightType=%s", rightType)
-		gtype := rightType
-		variable := p.newVariable(rel.name, gtype, false)
+		variable := p.newVariable(rel.name, nil, false)
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
 	}
-	return &AstAssignment{
+	r := &AstShortAssignment{
 		lefts:  lefts,
 		rights: rights,
 	}
+	p.shortassignments = append(p.shortassignments, r)
+	return r
 }
 
 // this is in function scope
@@ -1460,6 +1438,40 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	return r
 }
 
+
+func (ast *AstShortAssignment) inferTypes() {
+	var rightTypes []*Gtype
+	for i, rightExpr := range ast.rights {
+		switch rightExpr.(type) {
+		case *ExprFuncall:
+			fcall := rightExpr.(*ExprFuncall)
+			for _, gtype := range fcall.getFuncDef().rettypes {
+				rightTypes = append(rightTypes, gtype)
+			}
+		case *ExprMethodcall:
+			fcall := rightExpr.(*ExprMethodcall)
+			for _, gtype := range fcall.getFuncDef().rettypes {
+				rightTypes = append(rightTypes, gtype)
+			}
+		default:
+			gtype := inferType(rightExpr)
+			if gtype == nil {
+				errorf("rights[%d] gtype is nil", i)
+			}
+			rightTypes = append(rightTypes, gtype)
+		}
+	}
+
+	for i, e := range ast.lefts {
+		rel := e.(*Relation) // a brand new rel
+		variable := rel.expr.(*ExprVariable)
+		rightType := rightTypes[i]
+		debugf("rightType=%s", rightType)
+		variable.gtype = rightType
+	}
+
+}
+
 func (p *parser) resolve() {
 	// set the universe in the background
 	universeblockscope := newUniverseBlockScope()
@@ -1469,6 +1481,9 @@ func (p *parser) resolve() {
 	}
 
 	p.resolveMethods()
+	for _, sa := range p.shortassignments {
+		sa.inferTypes()
+	}
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type

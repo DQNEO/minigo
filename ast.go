@@ -71,6 +71,19 @@ type AstAssignment struct {
 	rights []Expr
 }
 
+type AstShortAssignment struct {
+	lefts []Expr
+	rights []Expr
+}
+
+func (ast *AstShortAssignment) emit() {
+	a := &AstAssignment{
+		lefts:ast.lefts,
+		rights:ast.rights,
+	}
+	a.emit()
+}
+
 type ForRangeClause struct {
 	indexvar  *Relation
 	valuevar  *Relation

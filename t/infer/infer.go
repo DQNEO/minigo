@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 func main() {
+	f,g := getIntInt()
 	a := 1
 	b := '2'
 	c := "3"
@@ -19,9 +20,15 @@ func main() {
 	fmt.Printf("%s\n", c)
 	fmt.Printf("%d\n", d.id)
 	fmt.Printf("%d\n", e.id)
+	fmt.Printf("%d\n", f)
+	fmt.Printf("%d\n", g)
 }
 
 type User struct {
 	id int
 	age int
+}
+
+func getIntInt() (int, int) {
+	return 6,7
 }
