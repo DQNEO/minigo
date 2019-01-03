@@ -141,7 +141,6 @@ type AstPackageClause struct {
 }
 
 type AstImportSpec struct {
-	packageName identifier
 	path        string
 }
 type AstImportDecl struct {

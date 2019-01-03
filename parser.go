@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"strings"
 
 	"os"
 )
@@ -1235,9 +1236,7 @@ func (p *parser) parseImport() *AstImportDecl {
 		for {
 			tok := p.readToken()
 			if tok.isTypeString() {
-				name := identifier(tok.sval)
 				specs = append(specs, &AstImportSpec{
-					packageName: name,
 					path:        tok.sval,
 				})
 				p.expect(";")
@@ -1251,9 +1250,7 @@ func (p *parser) parseImport() *AstImportDecl {
 		if !tok.isTypeString() {
 			errorf("import expects package name")
 		}
-		name := identifier(tok.sval)
 		specs = []*AstImportSpec{{
-			packageName: name,
 			path:        tok.sval,
 		},
 		}
@@ -1464,7 +1461,15 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	p.importedNames = make(map[identifier]bool)
 	for _, importdecl := range r.imports {
 		for _, spec := range importdecl.specs {
-			p.importedNames[spec.packageName] = true
+			var pkgName identifier
+			if strings.Contains(spec.path,"/") {
+				words := strings.Split(spec.path, "/")
+				pkgName = identifier(words[len(words) -1])
+			} else {
+				pkgName = identifier(spec.path)
+			}
+
+			p.importedNames[pkgName] = true
 		}
 	}
 	debugPrintV(p.importedNames)
