@@ -1477,6 +1477,25 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	return r
 }
 
+func (p *parser) parseInternalCode(source string, astfile *AstSourceFile) {
+	bs := &ByteStream{
+		filename:  "internal",
+		source:    []byte(source),
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	tokens := tokenize(bs)
+	assert(len(tokens) > 0, "tokens should have length")
+	p.tokenStream = &TokenStream{
+		tokens: tokens,
+		index:  0,
+	}
+	decls := p.parseTopLevelDecls()
+	for _, decl := range decls {
+		astfile.decls = append(astfile.decls, decl)
+	}
+}
 
 func (ast *AstShortAssignment) inferTypes() {
 	var rightTypes []*Gtype

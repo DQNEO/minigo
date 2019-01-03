@@ -794,9 +794,6 @@ func emitCall(fname string, args []Expr) {
 	if fname == "Printf" {
 		// replace Printf -> libc printf
 		fname = "printf"
-	} else if fname == "println" {
-		// replace println -> libc puts
-		fname = "puts"
 	}
 
 	emit("# funcall %s", fname)

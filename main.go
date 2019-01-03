@@ -37,6 +37,13 @@ func parseOpts(args []string) {
 	}
 }
 
+var internalCode  = `
+const MiniGo int = 1
+func println(s string) {
+	puts(s)
+}
+`
+
 func main() {
 
 	if len(os.Args) > 1 {
@@ -54,6 +61,9 @@ func main() {
 		astFile.dump()
 	}
 	debugf("methods=%v", p.namedTypes)
+
+	p.parseInternalCode(internalCode, astFile)
+
 	p.resolve()
 
 	if debugAst {
