@@ -132,6 +132,9 @@ func (strct *Gtype) calcStructOffset() {
 }
 
 func (rel *Relation) getGtype() *Gtype {
+	if rel.expr == nil {
+		errorf("rel.expr is nil for %s", rel)
+	}
 	return rel.expr.getGtype()
 }
 
