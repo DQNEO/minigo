@@ -92,8 +92,8 @@ func newUniverseBlockScope() *scope {
 	r.setFunc("puts", &ExprFuncRef{
 		// No implementation thanks to the libc function.
 	})
-	r.setFunc("Printf", &ExprFuncRef{
-		// @FIXME : should be fmt.Printf
+	r.setFunc("printf", &ExprFuncRef{
+		// No implementation thanks to the libc function.
 	})
 	r.setFunc("ReadFile", &ExprFuncRef{
 		funcdef: &AstFuncDecl{

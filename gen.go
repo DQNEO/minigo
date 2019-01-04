@@ -790,12 +790,6 @@ func (funcall *ExprFuncall) emit() {
 
 func emitCall(fname string, args []Expr) {
 
-	// Hack :
-	if fname == "Printf" {
-		// replace Printf -> libc printf
-		fname = "printf"
-	}
-
 	emit("# funcall %s", fname)
 	for i, _ := range args {
 		emit("push %%%s", regs[i])

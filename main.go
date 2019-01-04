@@ -45,6 +45,10 @@ const MiniGo int = 1
 func println(s string) {
 	puts(s)
 }
+
+func Printf(format string, param any) {
+	printf(format, param)
+}
 `
 
 func main() {
