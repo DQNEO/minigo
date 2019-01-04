@@ -28,6 +28,17 @@ type TokenStream struct {
 	index  int
 }
 
+func NewTokenStream(bs *ByteStream) *TokenStream {
+	tokens := tokenize(bs)
+	assert(len(tokens) > 0, "tokens should have length")
+
+	return &TokenStream{
+		tokens: tokens,
+		index:  0,
+	}
+
+}
+
 func (p *parser) peekToken() *Token {
 	ts := p.tokenStream
 	if ts.index > len(ts.tokens)-1 {
@@ -1437,19 +1448,8 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *AstSourceFile {
 
 	bs := NewByteStream(sourceFile)
-	tokens := tokenize(bs)
-	assert(len(tokens) > 0, "tokens should have length")
-
-	/*
-		if debugToken {
-			renderTokens(tokens)
-		}
-	*/
-
-	p.tokenStream = &TokenStream{
-		tokens: tokens,
-		index:  0,
-	}
+	ts := NewTokenStream(bs)
+	p.tokenStream = ts
 
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
@@ -1485,12 +1485,8 @@ func (p *parser) parseInternalCode(source string, astfile *AstSourceFile) {
 		line:      1,
 		column:    0,
 	}
-	tokens := tokenize(bs)
-	assert(len(tokens) > 0, "tokens should have length")
-	p.tokenStream = &TokenStream{
-		tokens: tokens,
-		index:  0,
-	}
+	ts := NewTokenStream(bs)
+	p.tokenStream = ts
 	decls := p.parseTopLevelDecls()
 	for _, decl := range decls {
 		astfile.decls = append(astfile.decls, decl)
