@@ -11,8 +11,8 @@ var debugParser = false
 var debugMode = false
 var parseOnly = false
 
-func parseOpts(args []string) string {
-	var r string
+func parseOpts(args []string) []string {
+	var r []string
 
 	for _, opt := range args {
 		if opt == "-t" {
@@ -31,9 +31,9 @@ func parseOpts(args []string) string {
 			parseOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
-			r = opt
+			r = append(r, opt)
 		} else if opt == "-" {
-			r = "/dev/stdin"
+			return []string{"/dev/stdin"}
 		}
 	}
 
@@ -55,10 +55,10 @@ func Printf(format string, param any) {
 `
 
 func main() {
-	var sourceFile string
+	var sourceFiles []string
 
 	if len(os.Args) > 1 {
-		sourceFile = parseOpts(os.Args[1:len(os.Args)])
+		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
 	packageblockscope := newScope(nil)
@@ -66,7 +66,7 @@ func main() {
 	// parse
 	p := &parser{}
 	p.namedTypes = make(map[identifier]methods)
-	astFile := p.parseSourceFile(sourceFile, packageblockscope)
+	astFile := p.parseSourceFile(sourceFiles[0], packageblockscope)
 
 	if debugAst {
 		astFile.dump()
