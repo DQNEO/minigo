@@ -41,6 +41,8 @@ func parseOpts(args []string) []string {
 }
 
 var internalCode  = `
+package main
+
 const MiniGo int = 1
 
 // println should be a "Predeclared identifiers"
@@ -65,30 +67,39 @@ func main() {
 
 	var astFiles []*AstSourceFile
 	// parse
-	for i, sourceFile := range sourceFiles {
-		p := &parser{}
-		p.namedTypes = make(map[identifier]methods)
-		astFile := p.parseSourceFile(sourceFile, packageblockscope)
-		if i == 0 {
-			p.parseInternalCode(internalCode, astFile)
-		}
+
+	p := &parser{}
+	p.namedTypes = make(map[identifier]methods)
+
+	bs := &ByteStream{
+		filename:  "memory",
+		source:    []byte(internalCode),
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	astFile0 := p.parseSourceFile(bs, packageblockscope)
+	for _, sourceFile := range sourceFiles {
+		bs := NewByteStream(sourceFile)
+		astFile := p.parseSourceFile(bs, packageblockscope)
 
 		if debugAst {
 			astFile.dump()
 		}
 		debugf("methods=%v", p.namedTypes)
 
-		p.resolve()
 
 		if debugAst {
 			astFile.dump()
 		}
 
-		if parseOnly {
-			return
-		}
 		astFiles = append(astFiles, astFile)
 	}
 
+	p.resolve()
+	if parseOnly {
+		return
+	}
+	astFiles = append(astFiles, astFile0)
 	generateFiles(astFiles)
 }
