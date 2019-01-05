@@ -10,9 +10,10 @@ var debugToken = false
 var debugParser = false
 var debugMode = false
 var parseOnly = false
-var sourceFile string
 
-func parseOpts(args []string) {
+func parseOpts(args []string) string {
+	var r string
+
 	for _, opt := range args {
 		if opt == "-t" {
 			debugToken = true
@@ -30,11 +31,13 @@ func parseOpts(args []string) {
 			parseOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
-			sourceFile = opt
+			r = opt
 		} else if opt == "-" {
-			sourceFile = "/dev/stdin"
+			r = "/dev/stdin"
 		}
 	}
+
+	return r
 }
 
 var internalCode  = `
@@ -52,9 +55,10 @@ func Printf(format string, param any) {
 `
 
 func main() {
+	var sourceFile string
 
 	if len(os.Args) > 1 {
-		parseOpts(os.Args[1:len(os.Args)])
+		sourceFile = parseOpts(os.Args[1:len(os.Args)])
 	}
 
 	packageblockscope := newScope(nil)
