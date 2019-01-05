@@ -64,26 +64,28 @@ func main() {
 	packageblockscope := newScope(nil)
 
 	// parse
-	p := &parser{}
-	p.namedTypes = make(map[identifier]methods)
-	astFile := p.parseSourceFile(sourceFiles[0], packageblockscope)
+	for _, sourceFile := range sourceFiles {
+		p := &parser{}
+		p.namedTypes = make(map[identifier]methods)
+		astFile := p.parseSourceFile(sourceFile, packageblockscope)
 
-	if debugAst {
-		astFile.dump()
+		if debugAst {
+			astFile.dump()
+		}
+		debugf("methods=%v", p.namedTypes)
+
+		p.parseInternalCode(internalCode, astFile)
+
+		p.resolve()
+
+		if debugAst {
+			astFile.dump()
+		}
+
+		if parseOnly {
+			return
+		}
+		// generate
+		generate(astFile)
 	}
-	debugf("methods=%v", p.namedTypes)
-
-	p.parseInternalCode(internalCode, astFile)
-
-	p.resolve()
-
-	if debugAst {
-		astFile.dump()
-	}
-
-	if parseOnly {
-		return
-	}
-	// generate
-	generate(astFile)
 }
