@@ -63,6 +63,7 @@ func main() {
 
 	packageblockscope := newScope(nil)
 
+	var astFiles []*AstSourceFile
 	// parse
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
@@ -85,7 +86,10 @@ func main() {
 		if parseOnly {
 			return
 		}
-		// generate
+		astFiles = append(astFiles, astFile)
+	}
+
+	for _, astFile := range astFiles {
 		generate(astFile)
 	}
 }
