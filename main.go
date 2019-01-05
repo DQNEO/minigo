@@ -89,7 +89,5 @@ func main() {
 		astFiles = append(astFiles, astFile)
 	}
 
-	for _, astFile := range astFiles {
-		generate(astFile)
-	}
+	generateFiles(astFiles)
 }
