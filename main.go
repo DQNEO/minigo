@@ -65,17 +65,18 @@ func main() {
 
 	var astFiles []*AstSourceFile
 	// parse
-	for _, sourceFile := range sourceFiles {
+	for i, sourceFile := range sourceFiles {
 		p := &parser{}
 		p.namedTypes = make(map[identifier]methods)
 		astFile := p.parseSourceFile(sourceFile, packageblockscope)
+		if i == 0 {
+			p.parseInternalCode(internalCode, astFile)
+		}
 
 		if debugAst {
 			astFile.dump()
 		}
 		debugf("methods=%v", p.namedTypes)
-
-		p.parseInternalCode(internalCode, astFile)
 
 		p.resolve()
 
