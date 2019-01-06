@@ -530,6 +530,11 @@ func (p *parser) parseUnaryExpr() Expr {
 			op: tok.sval,
 			operand:p.parsePrim(),
 		}
+	case tok.isPunct("-"):
+		return &ExprUop{
+			op: tok.sval,
+			operand:p.parsePrim(),
+		}
 	default:
 		p.unreadToken()
 	}
@@ -1034,6 +1039,8 @@ func inferType(e Expr) *Gtype {
 				typ: G_POINTER,
 				ptr: inferType(uop.operand),
 			}
+		} else if uop.op == "-" {
+			return gInt
 		}
 	default:
 		return gInt

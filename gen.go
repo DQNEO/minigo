@@ -241,6 +241,15 @@ func (ast *ExprUop) emit() {
 		emit("cmp %%rax, %%rcx")
 		emit("sete %%al")
 		emit("movzb %%al, %%eax")
+	} else if ast.op == "-" {
+		// delegate to biop
+		// -(x) -> (-1) * (x)
+		binop := &ExprBinop{
+			op: "*",
+			left:&ExprNumberLiteral{val: -1},
+			right: ast.operand,
+		}
+		binop.emit()
 	} else {
 		errorf("unable to handle uop %s", ast.op)
 	}
