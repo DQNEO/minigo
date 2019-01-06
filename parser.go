@@ -1515,9 +1515,7 @@ func (ast *AstShortAssignment) inferTypes() {
 }
 
 func (p *parser) resolve() {
-	// set the universe in the background
-	universeblockscope := newUniverseBlockScope()
-	p.packageBlockScope.outer = universeblockscope
+	p.packageBlockScope.outer = newUniverseBlockScope()
 	for _, rel := range p.unresolvedRelations {
 		p.tryResolve(rel)
 	}
