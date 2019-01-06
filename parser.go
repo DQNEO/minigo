@@ -411,6 +411,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 }
 
 func (p *parser) parseMakeExpr() Expr {
+	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	assert(tok.isIdent("make"), "read make")
 	p.expect("(")
@@ -421,6 +422,7 @@ func (p *parser) parseMakeExpr() Expr {
 }
 
 func (p *parser) parseMapType() *Gtype {
+	defer p.traceOut(p.traceIn())
 	p.expectKeyword("map")
 	p.expect("[")
 	mapKey := p.parseType()
@@ -612,6 +614,7 @@ func priority(op string) int {
 }
 
 func (p *parser) parseExpr() Expr {
+	defer p.traceOut(p.traceIn())
 	return p.parseExprInt(-1)
 }
 
@@ -798,6 +801,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 }
 
 func (p *parser) parseConstDeclSingle() *ExprConstVariable {
+	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
 
 	// Type or "="
@@ -947,6 +951,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 }
 
 func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
+	defer p.traceOut(p.traceIn())
 	p.expectKeyword("range")
 
 	if len(exprs) > 2 {
@@ -1055,6 +1060,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 }
 
 func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
+	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	assert(rights[0] != nil , "rights[0] is an expr")
 	return &AstAssignment{
@@ -1064,6 +1070,7 @@ func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
 }
 
 func (p *parser) parseAssignmentOperation(left Expr, assignop string) *AstAssignment {
+	defer p.traceOut(p.traceIn())
 	var op string
 	switch assignop {
 	case "+=":
@@ -1115,6 +1122,7 @@ func inferType(e Expr) *Gtype {
 }
 
 func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
+	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		rel := e.(*Relation) // a brand new rel
@@ -1296,6 +1304,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 }
 
 func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
+	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
