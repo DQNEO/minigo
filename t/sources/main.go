@@ -2,10 +2,16 @@ package main
 
 import "fmt"
 
-var foo int = 3
+var var2 int = 2
 
 func main() {
-	fmt.Printf("%s\n", msg)
-	fmt.Printf("%d\n", foo)
-	fmt.Printf("%d\n", bar)
+	fmt.Printf("%s\n", const1)
+	fmt.Printf("%d\n", var2)
+	fmt.Printf("%d\n", const3)
+	func4()
+	func5() // mutuall dependent
+}
+
+func func5sub() {
+	println("5")
 }
