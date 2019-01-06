@@ -168,6 +168,7 @@ type AstFuncDecl struct {
 	fname     identifier
 	rettypes   []*Gtype
 	params    []*ExprVariable
+	isVariadic bool
 	localvars []*ExprVariable
 	body      *AstCompountStmt
 }

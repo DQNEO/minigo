@@ -126,6 +126,22 @@ func (p *parser) traceOut(_ int) {
 	debugf("func %s end", getCallerName(2))
 }
 
+type ExprVaArg struct {
+	expr Expr
+}
+
+func (*ExprVaArg) dump() {
+	panic("implement me")
+}
+
+func (*ExprVaArg) emit() {
+	panic("implement me")
+}
+
+func (*ExprVaArg) getGtype() *Gtype {
+	panic("implement me")
+}
+
 func (p *parser) readFuncallArgs() []Expr {
 	defer p.traceOut(p.traceIn())
 	var r []Expr
@@ -136,6 +152,13 @@ func (p *parser) readFuncallArgs() []Expr {
 		}
 		p.unreadToken()
 		arg := p.parseExpr()
+		if p.peekToken().isPunct("...") {
+			p.expect("...")
+			arg = &ExprVaArg{arg}
+			r = append(r, arg)
+			p.expect(")")
+			return r
+		}
 		r = append(r, arg)
 		tok = p.readToken()
 		if tok.isPunct(")") {
@@ -1117,7 +1140,7 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
@@ -1125,12 +1148,24 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 	tok = p.readToken()
 
 	var params []*ExprVariable
+	var isVariadic bool
 
 	if !tok.isPunct(")") {
 		p.unreadToken()
 		for {
 			tok := p.readToken()
 			pname := tok.getIdent()
+			if p.peekToken().isPunct("...") {
+				p.expect("...")
+				gtype := p.parseType()
+				variable := &ExprVariable{
+					varname: pname,
+					gtype : gtype,
+				}
+				params = append(params, variable)
+				p.expect(")")
+				break
+			}
 			ptype := p.parseType()
 			// assureType(tok.sval)
 			variable := &ExprVariable{
@@ -1151,7 +1186,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 
 	next := p.peekToken()
 	if next.isPunct("{") || next.isSemicolon() {
-		return fname, params, nil
+		return fname, params, isVariadic, nil
 	}
 
 	var rettypes []*Gtype
@@ -1174,7 +1209,8 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 	} else {
 		rettypes = []*Gtype{p.parseType()}
 	}
-	return fname, params, rettypes
+
+	return fname, params, isVariadic, rettypes
 }
 
 func (p *parser) parseFuncDef() *AstFuncDecl {
@@ -1201,7 +1237,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		p.expect(")")
 	}
 
-	fname, params, rettypes := p.parseFuncSignature()
+	fname, params, isVariadic, rettypes := p.parseFuncSignature()
 
 	p.expect("{")
 	debugf("scope:%s", p.currentScope)
@@ -1211,6 +1247,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 		fname:     fname,
 		rettypes:   rettypes,
 		params:    params,
+		isVariadic:isVariadic,
 	}
 	ref := &ExprFuncRef{
 		funcdef: r,
@@ -1338,7 +1375,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 			break
 		}
 
-		fname, params, rettypes := p.parseFuncSignature()
+		fname, params, isVariadic, rettypes := p.parseFuncSignature()
 		p.expect(";")
 
 		var paramTypes []*Gtype
@@ -1348,6 +1385,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 		method := &signature{
 			fname:fname,
 			paramTypes:paramTypes,
+			isVariadic: isVariadic,
 			rettypes:rettypes,
 		}
 		methods = append(methods, method)
