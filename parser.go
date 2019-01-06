@@ -395,7 +395,8 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	} else if next.isPunct("["){
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
-		r = p.parseArrayIndex(e)
+		e = p.parseArrayIndex(e)
+		return p.succeedingExpr(e)
 	} else {
 		// https://golang.org/ref/spec#OperandName
 		r = e
