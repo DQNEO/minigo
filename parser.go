@@ -211,7 +211,11 @@ func (e *ExprStructLiteral) emit() {
 }
 
 func (e *ExprStructLiteral) dump() {
-	errorf("TBD")
+	debugf("%s{", e.strctname.name)
+	for _, field := range e.fields {
+		debugf("  %v:%v", field.key, field.value)
+	}
+	debugf("}")
 }
 
 type AstStructFieldAccess struct {
@@ -477,6 +481,7 @@ func (p *parser) parseArrayLiteral() Expr {
 	for {
 		tok := p.peekToken()
 		if tok.isPunct("}") {
+			p.skip()
 			break
 		}
 
