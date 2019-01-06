@@ -1169,6 +1169,22 @@ func (p *parser) parseSwitchStmt() Stmt {
 	return r
 }
 
+type AstContinueStmt struct {
+
+}
+
+func (*AstContinueStmt) emit() {
+	panic("implement me")
+}
+
+type AstBreakStmt struct {
+
+}
+
+func (*AstBreakStmt) emit() {
+	panic("implement me")
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -1188,6 +1204,10 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("switch") {
 		p.unreadToken()
 		return p.parseSwitchStmt()
+	} else if tok.isKeyword("continue") {
+		return &AstContinueStmt{}
+	} else if tok.isKeyword("break") {
+		return &AstBreakStmt{}
 	}
 	p.unreadToken()
 	expr1 := p.parseExpr()
