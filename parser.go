@@ -19,6 +19,7 @@ type parser struct {
 	shortassignments    []*AstShortAssignment
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
+	inCase              bool // true while in reading case block
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -247,6 +248,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 			return rel
 		}
 		// struct literal
+		debugf("'{'  is regarded as struct literal starter")
 		p.skip()
 		e = p.parseStructLiteral(rel)
 	} else if next.isPunct("(") {
@@ -313,16 +315,43 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 	return r
 }
 
+type ExprTypeSwitchGuard struct {
+	expr Expr
+}
+
+func (e *ExprTypeSwitchGuard) emit() {
+	panic("implement me")
+}
+
+func (e *ExprTypeSwitchGuard) dump() {
+	panic("implement me")
+}
+
+func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
+	panic("implement me")
+}
+
 // https://golang.org/ref/spec#Type_assertions
 func (p *parser) parseTypeAssertion(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("(")
-	gtype := p.parseType()
-	p.expect(")")
-	return &ExprTypeAssertion{
-		expr: e,
-		gtype: gtype,
+	if p.peekToken().isKeyword("type") {
+		p.skip()
+		p.expect(")")
+		return &ExprTypeSwitchGuard{
+			expr:e,
+		}
+	} else {
+		gtype := p.parseType()
+		p.expect(")")
+		e = &ExprTypeAssertion{
+			expr: e,
+			gtype: gtype,
+		}
+		return p.succeedingExpr(e)
 	}
+	errorf("internal error")
+	return nil
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
@@ -1084,6 +1113,61 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
 	return r
 }
 
+type CaseStmt struct {
+	expr Expr
+	compound *AstCompountStmt
+}
+
+type AstSwitchStmt struct {
+	cond Expr
+	cases []*CaseStmt
+	dflt *AstCompountStmt
+}
+
+func (p *parser) parseSwitchStmt() Stmt {
+	defer p.traceOut(p.traceIn())
+	p.expectKeyword("switch")
+	p.requireBlock = true
+	cond := p.parseExpr()
+	p.requireBlock = false
+	p.expect("{")
+	r := &AstSwitchStmt{
+		cond:cond,
+	}
+
+	for {
+		tok := p.peekToken()
+		if tok.isKeyword("case") {
+			p.skip()
+			expr := p.parseExpr()
+			p.expect(":")
+			p.inCase = true
+			compound := p.parseCompoundStmt()
+			casestmt := &CaseStmt{
+				expr: expr,
+				compound: compound,
+			}
+			r.cases = append(r.cases, casestmt)
+			if p.lastToken().isPunct("}") {
+				p.inCase = false
+				break
+			}
+			p.inCase = false
+		} else if tok.isKeyword("default") {
+			p.skip()
+			p.expect(":")
+			p.inCase = false
+			compound := p.parseCompoundStmt()
+			r.dflt = compound
+			break
+		} else {
+			errorf("internal error")
+		}
+	}
+
+	return r
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -1100,6 +1184,9 @@ func (p *parser) parseStmt() Stmt {
 		return p.parseIfStmt()
 	} else if tok.isKeyword("return") {
 		return p.parseReturnStmt()
+	} else if tok.isKeyword("switch") {
+		p.unreadToken()
+		return p.parseSwitchStmt()
 	}
 	p.unreadToken()
 	expr1 := p.parseExpr()
@@ -1145,6 +1232,10 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	for {
 		tok := p.readToken()
 		if tok.isPunct("}") {
+			return r
+		}
+		if p.inCase && (tok.isKeyword("case") || tok.isKeyword("default")) {
+			p.unreadToken()
 			return r
 		}
 		if tok.isSemicolon() {

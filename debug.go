@@ -179,6 +179,23 @@ func (a *AstStructFieldAccess) dump() {
 	debugf("%s.%s", a.strct, a.fieldname)
 }
 
+func (stmt *AstSwitchStmt) emit() {
+	panic("implement me")
+}
+
+func (stmt *CaseStmt) dump() {
+	stmt.expr.dump()
+	//stmt.compound.dump()
+}
+
+func (stmt *AstSwitchStmt) dump() {
+	stmt.cond.dump()
+	for _, c := range stmt.cases {
+		c.dump()
+	}
+	//stmt.dflt.dump()
+}
+
 func errorf(format string, v ...interface{}) {
 	/*
 		currentTokenIndex := ts.index - 1
