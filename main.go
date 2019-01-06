@@ -40,7 +40,14 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-var internalCode  = `
+var fmtCode  = `
+package main
+
+func Printf(format string, param any) {
+	printf(format, param)
+}
+`
+var builtinCode  = `
 package main
 
 const MiniGo int = 1
@@ -49,10 +56,6 @@ const MiniGo int = 1
 // https://golang.org/ref/spec#Predeclared_identifiers
 func println(s string) {
 	puts(s)
-}
-
-func Printf(format string, param any) {
-	printf(format, param)
 }
 `
 
@@ -71,14 +74,25 @@ func main() {
 	p := &parser{}
 	p.namedTypes = make(map[identifier]methods)
 
-	bs := &ByteStream{
+	var bs *ByteStream
+	bs = &ByteStream{
 		filename:  "memory",
-		source:    []byte(internalCode),
+		source:    []byte(builtinCode),
 		nextIndex: 0,
 		line:      1,
 		column:    0,
 	}
 	astFile0 := p.parseSourceFile(bs, packageblockscope)
+
+	bs = &ByteStream{
+		filename:  "memory",
+		source:    []byte(fmtCode),
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	astFile1 := p.parseSourceFile(bs, packageblockscope)
+
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStream(sourceFile)
 		astFile := p.parseSourceFile(bs, packageblockscope)
@@ -96,6 +110,7 @@ func main() {
 		return
 	}
 	astFiles = append(astFiles, astFile0)
+	astFiles = append(astFiles, astFile1)
 
 	// generate code
 	emitDataSection()
