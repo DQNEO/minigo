@@ -105,10 +105,10 @@ func main() {
 		astFiles = append(astFiles, astFile)
 	}
 
-	p.resolve()
 	if parseOnly {
 		return
 	}
+	p.resolve()
 	astFiles = append(astFiles, astFile0)
 	astFiles = append(astFiles, astFile1)
 
