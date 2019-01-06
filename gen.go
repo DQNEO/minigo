@@ -543,7 +543,7 @@ func (f *AstForStmt) emitRange() {
 	condition := &ExprBinop{
 		op:    "<",
 		left:  f.rng.indexvar,             // i
-		right: &ExprNumberLiteral{length}, // len(list)
+		right: &ExprNumberLiteral{val:length}, // len(list)
 	}
 	condition.emit() // i < len(list)
 	emit("test %%rax, %%rax")
