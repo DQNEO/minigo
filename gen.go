@@ -455,6 +455,9 @@ func (ast *AstAssignment) emit() {
 
 func (s *AstIfStmt) emit() {
 	emit("# if")
+	if s.simplestmt != nil {
+		s.simplestmt.emit()
+	}
 	s.cond.emit()
 	emit("test %%rax, %%rax")
 	if s.els != nil {

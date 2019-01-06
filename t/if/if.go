@@ -44,8 +44,8 @@ func main() {
 		println("Error")
 	}
 
-	i = 3
-	if i == 1 {
+
+	if i = 3; i == 1 {
 		println("Error")
 	} else if i == 2 {
 		println("Error")
