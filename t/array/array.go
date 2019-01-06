@@ -12,7 +12,12 @@ func f1() {
 }
 
 func f2() {
-	var larray = []int{4, 5, 0, 7}
+	var i4 = 4
+	var i5 = 5
+	var i0 = 0
+	var i7 = 7
+
+	var larray = []int{i4, i5, i0, i7}
 	larray[2] = 6
 	fmt.Printf("%d\n", larray[0])
 	fmt.Printf("%d\n", larray[1])

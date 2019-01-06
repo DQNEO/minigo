@@ -428,22 +428,12 @@ func (p *parser) parseArrayLiteral() Expr {
 	p.expect("{")
 	var values []Expr
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("}") {
 			break
 		}
-		var v Expr
-		if tok.isTypeString() {
-			v = &ExprStringLiteral{val: tok.sval}
-		} else if tok.isTypeInt() {
-			v = &ExprNumberLiteral{val: tok.getIntval()}
-		} else if tok.isTypeChar() {
-			v = &ExprNumberLiteral{
-				val: int(tok.sval[0]),
-			}
-		} else {
-			tok.errorf("TBD")
-		}
+
+		v := p.parseExpr()
 		assert(v != nil, "v is not nil")
 		values = append(values, v)
 		tok = p.readToken()
