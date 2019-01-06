@@ -235,3 +235,21 @@ type ExprArrayLiteral struct {
 func (e ExprArrayLiteral) emit() {
 	errorf("DO NOT EMIT")
 }
+
+
+type ExprTypeAssertion struct {
+	expr Expr
+	gtype *Gtype
+}
+
+func (e *ExprTypeAssertion) emit() {
+	panic("implement me")
+}
+
+func (e *ExprTypeAssertion) dump() {
+	panic("implement me")
+}
+
+func (e *ExprTypeAssertion) getGtype() *Gtype {
+	panic("implement me")
+}

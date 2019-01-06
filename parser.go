@@ -313,14 +313,31 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 	return r
 }
 
+// https://golang.org/ref/spec#Type_assertions
+func (p *parser) parseTypeAssertion(e Expr) Expr {
+	defer p.traceOut(p.traceIn())
+	p.expect("(")
+	gtype := p.parseType()
+	p.expect(")")
+	return &ExprTypeAssertion{
+		expr: e,
+		gtype: gtype,
+	}
+}
+
 func (p *parser) succeedingExpr(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 
 	var r Expr
 	next := p.peekToken()
 	if next.isPunct(".") {
-		// https://golang.org/ref/spec#Selectors
 		p.skip()
+		if p.peekToken().isPunct("(") {
+			// type assertion
+			return p.parseTypeAssertion(e)
+		}
+
+		// https://golang.org/ref/spec#Selectors
 		ident := p.readIdent()
 		debugf("read ident: %s", ident)
 		next = p.peekToken()
