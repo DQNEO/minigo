@@ -119,6 +119,7 @@ type AstForStmt struct {
 }
 
 type AstIfStmt struct {
+	simplestmt Stmt
 	cond Expr
 	then *AstCompountStmt
 	els  Stmt

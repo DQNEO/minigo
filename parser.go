@@ -976,7 +976,18 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	p.enterNewScope()
 	defer p.exitScope()
 	p.requireBlock = true
-	r.cond = p.parseExpr()
+	stmt := p.parseStmt()
+	if p.peekToken().isPunct(";") {
+		p.skip()
+		r.simplestmt = stmt
+		r.cond = p.parseExpr()
+	} else {
+		es, ok := stmt.(*AstExprStmt)
+		if !ok {
+			errorf("internal error")
+		}
+		r.cond = es.expr
+	}
 	p.expect("{")
 	p.requireBlock = false
 	r.then = p.parseCompoundStmt()
@@ -1185,6 +1196,14 @@ func (*AstBreakStmt) emit() {
 	panic("implement me")
 }
 
+type AstExprStmt struct {
+	expr Expr
+}
+
+func (ast *AstExprStmt) emit() {
+	ast.expr.emit()
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -1241,7 +1260,9 @@ func (p *parser) parseStmt() Stmt {
 		}
 	} else {
 		p.unreadToken()
-		return expr1
+		return &AstExprStmt{
+			expr: expr1,
+		}
 	}
 	return nil
 }
