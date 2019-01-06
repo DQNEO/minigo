@@ -1445,9 +1445,8 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *AstSourceFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstSourceFile {
 
-	bs := NewByteStream(sourceFile)
 	ts := NewTokenStream(bs)
 	p.tokenStream = ts
 
@@ -1477,21 +1476,7 @@ func (p *parser) parseSourceFile(sourceFile string, packageBlockScope *scope) *A
 	return r
 }
 
-func (p *parser) parseInternalCode(source string, astfile *AstSourceFile) {
-	bs := &ByteStream{
-		filename:  "internal",
-		source:    []byte(source),
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-	ts := NewTokenStream(bs)
-	p.tokenStream = ts
-	decls := p.parseTopLevelDecls()
-	for _, decl := range decls {
-		astfile.decls = append(astfile.decls, decl)
-	}
-}
+
 
 func (ast *AstShortAssignment) inferTypes() {
 	var rightTypes []*Gtype

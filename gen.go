@@ -896,8 +896,6 @@ func emitRetGlobals() {
 }
 
 func generate(f *AstSourceFile) {
-	emitDataSection()
-	emitRetGlobals()
 
 	for _, decl := range f.decls {
 		if decl.vardecl != nil {
@@ -905,5 +903,11 @@ func generate(f *AstSourceFile) {
 		} else if decl.funcdecl != nil {
 			decl.funcdecl.emit()
 		}
+	}
+}
+
+func generateFiles(files []*AstSourceFile) {
+	for _, astFile := range files {
+		generate(astFile)
 	}
 }
