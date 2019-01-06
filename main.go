@@ -101,5 +101,9 @@ func main() {
 		return
 	}
 	astFiles = append(astFiles, astFile0)
+
+	// generate code
+	emitDataSection()
+	emitRetGlobals()
 	generateFiles(astFiles)
 }

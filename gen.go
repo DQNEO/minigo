@@ -907,9 +907,6 @@ func generate(f *AstSourceFile) {
 }
 
 func generateFiles(files []*AstSourceFile) {
-	emitDataSection()
-	emitRetGlobals()
-
 	for _, astFile := range files {
 		generate(astFile)
 	}
