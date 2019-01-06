@@ -21,6 +21,7 @@ const (
 	G_POINTER
 	G_FUNC
 	G_INTERFACE
+	G_ANY // interface{}
 )
 
 

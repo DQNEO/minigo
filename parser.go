@@ -638,6 +638,10 @@ func (p *parser) parseType() *Gtype {
 				relation: rel,
 			}
 			return gtype
+		} else if tok.isKeyword("interface") {
+			p.expect("{")
+			p.expect("}")
+			return gInterface
 		} else if tok.isPunct("*") {
 			// pointer
 			gtype = &Gtype{
