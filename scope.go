@@ -76,12 +76,12 @@ func newUniverseBlockScope() *scope {
 	r.setConst("true", &ExprConstVariable{
 		name:  "true",
 		gtype: gBool,
-		val:   &ExprNumberLiteral{1},
+		val:   &ExprNumberLiteral{val:1},
 	})
 	r.setConst("false", &ExprConstVariable{
 		name:  "false",
 		gtype: gBool,
-		val:   &ExprNumberLiteral{0},
+		val:   &ExprNumberLiteral{val:0},
 	})
 
 	r.setFunc("len", &ExprFuncRef{
