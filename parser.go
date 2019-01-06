@@ -687,6 +687,9 @@ func (p *parser) parseType() *Gtype {
 			return gtype
 		} else if tok.isKeyword("struct") {
 			return p.parseStructDef()
+		} else if tok.isKeyword("map") {
+			p.unreadToken()
+			return p.parseMapType()
 		} else if tok.isPunct("[") {
 			// array or slice
 			tok := p.readToken()
