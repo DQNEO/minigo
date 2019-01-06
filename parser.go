@@ -315,16 +315,43 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 	return r
 }
 
+type ExprTypeSwitchGuard struct {
+	expr Expr
+}
+
+func (e *ExprTypeSwitchGuard) emit() {
+	panic("implement me")
+}
+
+func (e *ExprTypeSwitchGuard) dump() {
+	panic("implement me")
+}
+
+func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
+	panic("implement me")
+}
+
 // https://golang.org/ref/spec#Type_assertions
 func (p *parser) parseTypeAssertion(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("(")
-	gtype := p.parseType()
-	p.expect(")")
-	return &ExprTypeAssertion{
-		expr: e,
-		gtype: gtype,
+	if p.peekToken().isKeyword("type") {
+		p.skip()
+		p.expect(")")
+		return &ExprTypeSwitchGuard{
+			expr:e,
+		}
+	} else {
+		gtype := p.parseType()
+		p.expect(")")
+		e = &ExprTypeAssertion{
+			expr: e,
+			gtype: gtype,
+		}
+		return p.succeedingExpr(e)
 	}
+	errorf("internal error")
+	return nil
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
