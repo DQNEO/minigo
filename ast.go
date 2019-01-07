@@ -10,19 +10,15 @@ type Stmt interface {
 	emit()
 }
 
+type Relation struct {
+	name identifier
+
+	// either of expr(var, const, funcref) or gtype
+	expr  Expr
+	gtype *Gtype
+}
+
 type ExprNilLiteral struct {
-}
-
-func (e *ExprNilLiteral) emit() {
-	emit("mov $0, %%rax")
-}
-
-func (e *ExprNilLiteral) dump() {
-	debugf("nil")
-}
-
-func (e *ExprNilLiteral) getGtype() *Gtype {
-	return nil
 }
 
 type ExprNumberLiteral struct {
@@ -92,14 +88,6 @@ type AstShortAssignment struct {
 	rights []Expr
 }
 
-func (ast *AstShortAssignment) emit() {
-	a := &AstAssignment{
-		lefts:ast.lefts,
-		rights:ast.rights,
-	}
-	a.emit()
-}
-
 type ForRangeClause struct {
 	indexvar  *Relation
 	valuevar  *Relation
@@ -157,14 +145,6 @@ type ExprFuncRef struct {
 	funcdef *AstFuncDecl
 }
 
-func (f *ExprFuncRef) emit() {
-	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
-}
-
-func (f *ExprFuncRef) dump() {
-	f.funcdef.dump()
-}
-
 type AstFuncDecl struct {
 	receiver  *ExprVariable
 	fname     identifier
@@ -211,22 +191,10 @@ type ExprSliced struct {
 	high Expr
 }
 
-func (e *ExprSliced) dump() {
-	errorf("TBD")
-}
-func (e *ExprSliced) emit() {
-	errorf("TBD")
-}
-
 // Expr e.g. array[2]
 type ExprArrayIndex struct {
 	array   Expr
 	index Expr
-}
-
-func (e *ExprArrayIndex) dump() {
-	errorf("TBD")
-
 }
 
 type ExprArrayLiteral struct {
@@ -234,24 +202,63 @@ type ExprArrayLiteral struct {
 	values []Expr
 }
 
-func (e ExprArrayLiteral) emit() {
-	errorf("DO NOT EMIT")
-}
-
-
 type ExprTypeAssertion struct {
 	expr Expr
 	gtype *Gtype
 }
 
-func (e *ExprTypeAssertion) emit() {
-	panic("implement me")
+type AstContinueStmt struct {
+
 }
 
-func (e *ExprTypeAssertion) dump() {
-	panic("implement me")
+type AstBreakStmt struct {
+
 }
 
-func (e *ExprTypeAssertion) getGtype() *Gtype {
-	panic("implement me")
+type AstExprStmt struct {
+	expr Expr
+}
+
+type AstDeferStmt struct {
+	expr Expr
+}
+
+type ExprVaArg struct {
+	expr Expr
+}
+
+type ExprConversion struct {
+	expr  Expr
+	gtype *Gtype
+}
+
+type CaseStmt struct {
+	exprs []Expr
+	compound *AstCompountStmt
+}
+
+type AstSwitchStmt struct {
+	cond Expr
+	cases []*CaseStmt
+	dflt *AstCompountStmt
+}
+
+type AstStructFieldLiteral struct {
+	key   identifier
+	value Expr
+}
+
+type ExprStructLiteral struct {
+	strctname *Relation
+	fields    []*AstStructFieldLiteral
+	invisiblevar *ExprVariable // to have offfset for &T{}
+}
+
+type AstStructFieldAccess struct {
+	strct     Expr
+	fieldname identifier
+}
+
+type ExprTypeSwitchGuard struct {
+	expr Expr
 }

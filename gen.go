@@ -742,6 +742,66 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 }
 
+func (e *ExprNilLiteral) emit() {
+	emit("mov $0, %%rax")
+}
+
+func (ast *AstShortAssignment) emit() {
+	a := &AstAssignment{
+		lefts:ast.lefts,
+		rights:ast.rights,
+	}
+	a.emit()
+}
+
+func (f *ExprFuncRef) emit() {
+	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
+}
+
+func (e *ExprSliced) emit() {
+	errorf("TBD")
+}
+
+func (e ExprArrayLiteral) emit() {
+	errorf("DO NOT EMIT")
+}
+
+func (e *ExprTypeAssertion) emit() {
+	panic("implement me")
+}
+
+func (ast *AstContinueStmt) emit() {
+	panic("implement me")
+}
+
+func (ast *AstBreakStmt) emit() {
+	panic("implement me")
+}
+
+func (ast *AstExprStmt) emit() {
+	ast.expr.emit()
+}
+
+func (ast *AstDeferStmt) emit() {
+	panic("implement me")
+}
+
+func (e *ExprVaArg) emit() {
+	panic("implement me")
+}
+
+func (e *ExprConversion) emit() {
+	panic("implement me")
+}
+
+func (e *ExprStructLiteral) emit() {
+	errorf("This cannot be emitted alone")
+}
+
+func (e *ExprTypeSwitchGuard) emit() {
+	panic("implement me")
+}
+
 func (ast *ExprMethodcall) getUniqueName() string {
 	var gtype *Gtype
 

@@ -226,3 +226,24 @@ func (e *ExprBinop) getGtype() *Gtype {
 	errorf("internal error")
 	return nil
 }
+
+func (e *ExprNilLiteral) getGtype() *Gtype {
+	return nil
+}
+
+func (e *ExprConversion) getGtype() *Gtype {
+	return e.gtype
+}
+
+func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
+	panic("implement me")
+}
+
+func (e *ExprTypeAssertion) getGtype() *Gtype {
+	panic("implement me")
+}
+
+func (e *ExprVaArg) getGtype() *Gtype {
+	panic("implement me")
+}
+

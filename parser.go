@@ -112,22 +112,6 @@ func (p *parser) traceOut(_ int) {
 	debugf("func %s end after %s", getCallerName(2), p.lastToken())
 }
 
-type ExprVaArg struct {
-	expr Expr
-}
-
-func (e *ExprVaArg) dump() {
-	panic("implement me")
-}
-
-func (e *ExprVaArg) emit() {
-	panic("implement me")
-}
-
-func (e *ExprVaArg) getGtype() *Gtype {
-	panic("implement me")
-}
-
 func (p *parser) readFuncallArgs() []Expr {
 	defer p.traceOut(p.traceIn())
 	var r []Expr
@@ -159,14 +143,6 @@ func (p *parser) readFuncallArgs() []Expr {
 
 //var outerPackages map[identifier](map[identifier]interface{})
 
-type Relation struct {
-	name identifier
-
-	// either of expr(var, const, funcref) or gtype
-	expr  Expr
-	gtype *Gtype
-}
-
 var labelSeq = 0
 var stringLiterals []*ExprStringLiteral
 
@@ -178,34 +154,6 @@ func (p *parser) newAstString(sval string) *ExprStringLiteral {
 	labelSeq++
 	stringLiterals = append(stringLiterals, ast)
 	return ast
-}
-
-type AstStructFieldLiteral struct {
-	key   identifier
-	value Expr
-}
-
-type ExprStructLiteral struct {
-	strctname *Relation
-	fields    []*AstStructFieldLiteral
-	invisiblevar *ExprVariable // to have offfset for &T{}
-}
-
-func (e *ExprStructLiteral) emit() {
-	errorf("This cannot be emitted alone")
-}
-
-func (e *ExprStructLiteral) dump() {
-	debugf("%s{", e.strctname.name)
-	for _, field := range e.fields {
-		debugf("  %v:%v", field.key, field.value)
-	}
-	debugf("}")
-}
-
-type AstStructFieldAccess struct {
-	strct     Expr
-	fieldname identifier
 }
 
 // expr which begins with an ident.
@@ -302,22 +250,6 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 		}
 	}
 	return r
-}
-
-type ExprTypeSwitchGuard struct {
-	expr Expr
-}
-
-func (e *ExprTypeSwitchGuard) emit() {
-	panic("implement me")
-}
-
-func (e *ExprTypeSwitchGuard) dump() {
-	panic("implement me")
-}
-
-func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
-	panic("implement me")
 }
 
 // https://golang.org/ref/spec#Type_assertions
@@ -419,23 +351,6 @@ func (p *parser) parseMapType() *Gtype {
 		mapKey:mapKey,
 		mapValue:mapValue,
 	}
-}
-
-type ExprConversion struct {
-	expr  Expr
-	gtype *Gtype
-}
-
-func (e *ExprConversion) emit() {
-	panic("implement me")
-}
-
-func (e *ExprConversion) dump() {
-	panic("implement me")
-}
-
-func (e *ExprConversion) getGtype() *Gtype {
-	return e.gtype
 }
 
 // https://golang.org/ref/spec#Conversions
@@ -1163,17 +1078,6 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
 	return r
 }
 
-type CaseStmt struct {
-	exprs []Expr
-	compound *AstCompountStmt
-}
-
-type AstSwitchStmt struct {
-	cond Expr
-	cases []*CaseStmt
-	dflt *AstCompountStmt
-}
-
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("switch")
@@ -1231,38 +1135,6 @@ func (p *parser) parseSwitchStmt() Stmt {
 	}
 
 	return r
-}
-
-type AstContinueStmt struct {
-
-}
-
-func (ast *AstContinueStmt) emit() {
-	panic("implement me")
-}
-
-type AstBreakStmt struct {
-
-}
-
-func (ast *AstBreakStmt) emit() {
-	panic("implement me")
-}
-
-type AstExprStmt struct {
-	expr Expr
-}
-
-func (ast *AstExprStmt) emit() {
-	ast.expr.emit()
-}
-
-type AstDeferStmt struct {
-	expr Expr
-}
-
-func (ast *AstDeferStmt) emit() {
-	panic("implement me")
 }
 
 func (p *parser) parseDeferStmt() *AstDeferStmt {

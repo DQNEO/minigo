@@ -196,6 +196,47 @@ func (stmt *AstSwitchStmt) dump() {
 	//stmt.dflt.dump()
 }
 
+func (e *ExprNilLiteral) dump() {
+	debugf("nil")
+}
+
+func (f *ExprFuncRef) dump() {
+	f.funcdef.dump()
+}
+
+func (e *ExprSliced) dump() {
+	errorf("TBD")
+}
+
+func (e *ExprArrayIndex) dump() {
+	errorf("TBD")
+
+}
+
+func (e *ExprTypeAssertion) dump() {
+	panic("implement me")
+}
+
+func (e *ExprVaArg) dump() {
+	panic("implement me")
+}
+
+func (e *ExprConversion) dump() {
+	panic("implement me")
+}
+
+func (e *ExprStructLiteral) dump() {
+	debugf("%s{", e.strctname.name)
+	for _, field := range e.fields {
+		debugf("  %v:%v", field.key, field.value)
+	}
+	debugf("}")
+}
+
+func (e *ExprTypeSwitchGuard) dump() {
+	panic("implement me")
+}
+
 func errorf(format string, v ...interface{}) {
 	/*
 		currentTokenIndex := ts.index - 1
