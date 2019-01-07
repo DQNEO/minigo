@@ -1264,6 +1264,22 @@ func (ast *AstExprStmt) emit() {
 	ast.expr.emit()
 }
 
+type AstDeferStmt struct {
+	expr Expr
+}
+
+func (ast *AstDeferStmt) emit() {
+	panic("implement me")
+}
+
+func (p *parser) parseDeferStmt() *AstDeferStmt {
+	p.expectKeyword("defer")
+	callExpr := p.parsePrim()
+	return &AstDeferStmt{
+		expr :callExpr,
+	}
+}
+
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
@@ -1287,6 +1303,9 @@ func (p *parser) parseStmt() Stmt {
 		return &AstContinueStmt{}
 	} else if tok.isKeyword("break") {
 		return &AstBreakStmt{}
+	} else if tok.isKeyword("defer") {
+		p.unreadToken()
+		return p.parseDeferStmt()
 	}
 	p.unreadToken()
 	expr1 := p.parseExpr()
