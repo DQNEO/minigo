@@ -1152,7 +1152,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
 }
 
 type CaseStmt struct {
-	expr Expr
+	exprs []Expr
 	compound *AstCompountStmt
 }
 
@@ -1177,12 +1177,24 @@ func (p *parser) parseSwitchStmt() Stmt {
 		tok := p.peekToken()
 		if tok.isKeyword("case") {
 			p.skip()
+			var exprs []Expr
 			expr := p.parseExpr()
+			exprs = append(exprs, expr)
+			for {
+				tok := p.peekToken()
+				if tok.isPunct(",") {
+					p.skip()
+					expr := p.parseExpr()
+					exprs = append(exprs, expr)
+				} else if tok.isPunct(":") {
+					break
+				}
+			}
 			p.expect(":")
 			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &CaseStmt{
-				expr: expr,
+				exprs: exprs,
 				compound: compound,
 			}
 			p.inCase--

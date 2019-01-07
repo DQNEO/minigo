@@ -184,7 +184,7 @@ func (stmt *AstSwitchStmt) emit() {
 }
 
 func (stmt *CaseStmt) dump() {
-	stmt.expr.dump()
+	//stmt.exprs.dump()
 	//stmt.compound.dump()
 }
 
