@@ -41,8 +41,7 @@ func (p *parser) lastToken() *Token {
 
 // skip one token
 func (p *parser) skip() {
-	tok := p.readToken()
-	debugf("skipped %s", tok)
+	p.readToken()
 }
 
 func (p *parser) readToken() *Token {
@@ -169,7 +168,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		p.expect(".")
 		// shift firstident
 		firstIdent = p.readIdent()
-		debugf("Reference to outer entity %s.%s", pkg, firstIdent)
+		_ = pkg
 	}
 
 	rel := &Relation{
@@ -185,7 +184,6 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 			return rel
 		}
 		// struct literal
-		debugf("'{'  is regarded as struct literal starter")
 		p.skip()
 		e = p.parseStructLiteral(rel)
 	} else if next.isPunct("(") {
@@ -289,7 +287,6 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 
 		// https://golang.org/ref/spec#Selectors
 		ident := p.readIdent()
-		debugf("read ident: %s", ident)
 		next = p.peekToken()
 		if next.isPunct("(") {
 			// (expr).method()
@@ -334,7 +331,7 @@ func (p *parser) parseMakeExpr() Expr {
 	assert(tok.isIdent("make"), "read make")
 	p.expect("(")
 	mapType := p.parseMapType()
-	debugf("make map %s", mapType)
+	_ = mapType
 	p.expect(")")
 	return &ExprNilLiteral{}
 }
@@ -645,7 +642,6 @@ func (p *parser) parseType() *Gtype {
 				typ: G_POINTER,
 				ptr: p.parseType(),
 			}
-			debugf("ptr=%v", gtype.ptr)
 			return gtype
 		} else if tok.isKeyword("struct") {
 			return p.parseStructDef()
@@ -1215,7 +1211,6 @@ func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	defer p.traceOut(p.traceIn())
 	r := &AstCompountStmt{}
 	for {
-		debugf("inCase=%d", p.inCase)
 		tok := p.readToken()
 		if tok.isPunct("}") {
 			return r
@@ -1335,7 +1330,6 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	fname, params, isVariadic, rettypes := p.parseFuncSignature()
 
 	p.expect("{")
-	debugf("scope:%s", p.currentScope)
 
 	r := &AstFuncDecl{
 		receiver:receiver,
@@ -1555,7 +1549,6 @@ func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 		errorf("TBD: unable to handle token %v", tok)
 	}
 
-	//debugAstConstructed(r)
 	return r
 }
 
@@ -1608,7 +1601,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstS
 			p.importedNames[pkgName] = true
 		}
 	}
-	debugPrintV(p.importedNames)
+
 	r.decls = p.parseTopLevelDecls()
 	return r
 }
@@ -1645,7 +1638,6 @@ func (ast *AstShortAssignment) inferTypes() {
 		rel := e.(*Relation) // a brand new rel
 		variable := rel.expr.(*ExprVariable)
 		rightType := rightTypes[i]
-		debugf("rightType=%s", rightType)
 		variable.gtype = rightType
 	}
 

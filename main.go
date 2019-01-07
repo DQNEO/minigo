@@ -100,7 +100,6 @@ func main() {
 		if debugAst {
 			astFile.dump()
 		}
-		debugf("methods=%v", p.namedTypes)
 
 		astFiles = append(astFiles, astFile)
 	}
