@@ -1541,7 +1541,7 @@ func (p *parser) parseImport() *AstImportDecl {
 		if !tok.isTypeString() {
 			errorf("import expects package name")
 		}
-		specs = []*AstImportSpec{{
+		specs = []*AstImportSpec{&AstImportSpec{
 			path:        tok.sval,
 		},
 		}
