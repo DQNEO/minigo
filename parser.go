@@ -437,6 +437,35 @@ func (p *parser) parseMapType() *Gtype {
 	}
 }
 
+type ExprConversion struct {
+	expr  Expr
+	gtype *Gtype
+}
+
+func (e *ExprConversion) emit() {
+	panic("implement me")
+}
+
+func (e *ExprConversion) dump() {
+	panic("implement me")
+}
+
+func (e *ExprConversion) getGtype() *Gtype {
+	return e.gtype
+}
+
+// https://golang.org/ref/spec#Conversions
+func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
+	defer p.traceOut(p.traceIn())
+	p.expect("(")
+	e := p.parseExpr()
+	p.expect(")")
+	return &ExprConversion{
+		expr : e,
+		gtype: gtype,
+	}
+}
+
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
@@ -460,6 +489,10 @@ func (p *parser) parsePrim() Expr {
 	case tok.isPunct("["): // array literal or type casting
 		p.unreadToken()
 		gtype := p.parseType()
+		if p.peekToken().isPunct("(") {
+			// Conversion
+			return p.parseTypeConversion(gtype)
+		}
 		return p.parseArrayLiteral(gtype)
 	case tok.isIdent("make"):
 		p.unreadToken()
