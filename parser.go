@@ -124,7 +124,7 @@ func (p *parser) traceOut(_ int) {
 		os.Exit(1)
 	}
 	debugNest--
-	debugf("func %s end", getCallerName(2))
+	debugf("func %s end after %s", getCallerName(2), p.lastToken())
 }
 
 type ExprVaArg struct {
