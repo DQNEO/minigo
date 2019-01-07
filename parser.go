@@ -581,6 +581,10 @@ func (p *parser) parseUnaryExpr() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	switch {
+	case tok.isPunct("("):
+		e := p.parseExpr()
+		p.expect(")")
+		return e
 	case tok.isPunct("&"):
 		uop := &ExprUop{
 			op:      tok.sval,
