@@ -132,15 +132,15 @@ type ExprVaArg struct {
 	expr Expr
 }
 
-func (*ExprVaArg) dump() {
+func (e *ExprVaArg) dump() {
 	panic("implement me")
 }
 
-func (*ExprVaArg) emit() {
+func (e *ExprVaArg) emit() {
 	panic("implement me")
 }
 
-func (*ExprVaArg) getGtype() *Gtype {
+func (e *ExprVaArg) getGtype() *Gtype {
 	panic("implement me")
 }
 
