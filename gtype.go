@@ -5,7 +5,7 @@ import "fmt"
 type GTYPE_TYPE int
 
 const (
-	G_UNKOWNE GTYPE_TYPE = iota
+	G_UNKOWNE = iota
 	G_REL
 	// below are primitives which are declared in the universe block
 	G_INT
