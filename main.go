@@ -68,18 +68,21 @@ func main() {
 
 	packageblockscope := newScope(nil)
 
-	var astFiles []*AstSourceFile
 	// parse
 
 	p := &parser{}
 	p.namedTypes = make(map[identifier]methods)
 
 	var bs *ByteStream
+	var astFiles []*AstSourceFile
+
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
 	astFileBuiltin := p.parseSourceFile(bs, packageblockscope)
+	astFiles = append(astFiles, astFileBuiltin)
 
 	bs = NewByteStreamFromString("fmt.memory", fmtCode)
 	astFileFmt := p.parseSourceFile(bs, packageblockscope)
+	astFiles = append(astFiles, astFileFmt)
 
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
@@ -96,11 +99,22 @@ func main() {
 		return
 	}
 	p.resolve()
-	astFiles = append(astFiles, astFileBuiltin)
-	astFiles = append(astFiles, astFileFmt)
 
-	// generate code
-	emitDataSection()
-	emitRetGlobals()
-	generateFiles(astFiles)
+	ir := ast2ir(astFiles)
+	ir.emit()
+}
+
+func ast2ir(files []*AstSourceFile) *IrRoot {
+	root := &IrRoot{}
+
+	for _, f := range files {
+		for _, decl := range f.decls {
+			if decl.vardecl != nil {
+				root.vars = append(root.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				root.funcs = append(root.funcs, decl.funcdecl)
+			}
+		}
+	}
+	return root
 }

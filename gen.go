@@ -12,16 +12,6 @@ func emitLabel(format string, v ...interface{}) {
 	fmt.Printf(format+"\n", v...)
 }
 
-func emitDataSection() {
-	emit(".data")
-
-	// put stringLiterals
-	for _, ast := range stringLiterals {
-		emitLabel(".%s:", ast.slabel)
-		emit(".string \"%s\"", ast.val)
-	}
-}
-
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assert(gtype != nil, "gtype is not nil")
 	var typename identifier
@@ -603,8 +593,6 @@ func (f *AstForStmt) emit() {
 }
 
 
-var retvals = []string{"rt1","rt2", "rt3", "rt4", "rt5", "rt6"}
-
 func (stmt *AstReturnStmt) emit() {
 	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
@@ -969,27 +957,35 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 	}
 }
 
-func emitRetGlobals() {
+type IrRoot struct {
+	vars []*AstVarDecl
+	funcs []*AstFuncDecl
+}
+
+var retvals = []string{"rt1","rt2", "rt3", "rt4", "rt5", "rt6"}
+
+func (root *IrRoot) emit() {
+
+	// generate code
+	emit(".data")
+
+	// put stringLiterals
+	for _, ast := range stringLiterals {
+		emitLabel(".%s:", ast.slabel)
+		emit(".string \"%s\"", ast.val)
+	}
+
+	// emit global vars to store return values
 	for _, name := range retvals {
 		emitLabel(".global %s", name)
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
-}
 
-func generate(f *AstSourceFile) {
-
-	for _, decl := range f.decls {
-		if decl.vardecl != nil {
-			emitGlobalDeclVar(decl.vardecl.variable, decl.vardecl.initval)
-		} else if decl.funcdecl != nil {
-			decl.funcdecl.emit()
-		}
+	for _, vardecl := range root.vars {
+		emitGlobalDeclVar(vardecl.variable, vardecl.initval)
 	}
-}
-
-func generateFiles(files []*AstSourceFile) {
-	for _, astFile := range files {
-		generate(astFile)
+	for _, funcdecl := range root.funcs {
+		funcdecl.emit()
 	}
 }
