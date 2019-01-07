@@ -86,7 +86,7 @@ func (p *parser) readIdent() identifier {
 func (p *parser) expectKeyword(name string) {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
-		errorf("Keyword %s expected but got %s", name)
+		errorf("Keyword %s expected but got %s", name, tok)
 	}
 }
 
