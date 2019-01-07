@@ -1454,7 +1454,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 func (p *parser) parseFuncDef() *AstFuncDecl {
 	defer p.traceOut(p.traceIn())
-	p.localvars = make([]*ExprVariable, 0)
+	p.localvars = nil
 	var isMethod bool
 	p.enterNewScope()
 	defer p.exitScope()
