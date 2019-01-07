@@ -36,6 +36,23 @@ type Token struct {
 
 var bs *ByteStream
 
+
+type TokenStream struct {
+	tokens []*Token
+	index  int
+}
+
+func NewTokenStream(bs *ByteStream) *TokenStream {
+	tokens := tokenize(bs)
+	assert(len(tokens) > 0, "tokens should have length")
+
+	return &TokenStream{
+		tokens: tokens,
+		index:  0,
+	}
+
+}
+
 func (tok *Token) String() string {
 	return fmt.Sprintf("\"%s\" (at %s:%d:%d)",
 		tok.sval, tok.filename, tok.line, tok.column)

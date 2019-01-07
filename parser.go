@@ -25,22 +25,6 @@ type parser struct {
 
 type methods map[identifier]*ExprFuncRef
 
-type TokenStream struct {
-	tokens []*Token
-	index  int
-}
-
-func NewTokenStream(bs *ByteStream) *TokenStream {
-	tokens := tokenize(bs)
-	assert(len(tokens) > 0, "tokens should have length")
-
-	return &TokenStream{
-		tokens: tokens,
-		index:  0,
-	}
-
-}
-
 func (p *parser) peekToken() *Token {
 	ts := p.tokenStream
 	if ts.index > len(ts.tokens)-1 {
