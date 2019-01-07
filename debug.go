@@ -15,10 +15,6 @@ func debugf(format string, v ...interface{}) {
 	fmt.Fprintf(os.Stderr, spaces+format+"\n", v...)
 }
 
-func debugPrintV(v interface{}) {
-	debugf("%v", v)
-}
-
 func (tok *Token) errorf(format string, v ...interface{}) {
 	errorf(tok.String()+": "+format, v...)
 }
