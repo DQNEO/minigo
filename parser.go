@@ -457,8 +457,10 @@ func (p *parser) parsePrim() Expr {
 		return &ExprNumberLiteral{
 			val: int(c),
 		}
-	case tok.isPunct("["): // array literal
-		return p.parseArrayLiteral()
+	case tok.isPunct("["): // array literal or type casting
+		p.unreadToken()
+		gtype := p.parseType()
+		return p.parseArrayLiteral(gtype)
 	case tok.isIdent("make"):
 		p.unreadToken()
 		return p.parseMakeExpr()
@@ -470,16 +472,9 @@ func (p *parser) parsePrim() Expr {
 	return nil
 }
 
-func (p *parser) parseArrayLiteral() Expr {
-	assert(p.lastToken().isPunct("["), "[ is read")
+func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
-	var tlen *Token
-	if !p.peekToken().isPunct("]") {
-		tlen = p.readToken()
-	}
-	p.expect("]")
-
-	typ := p.parseType()
+	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
 	p.expect("{")
 	var values []Expr
 	for {
@@ -502,22 +497,13 @@ func (p *parser) parseArrayLiteral() Expr {
 		}
 	}
 
-	var length int
-	if tlen == nil {
-		length = len(values)
+	if gtype.length == 0 {
+		gtype.length = len(values)
 	} else {
-		if len(values) != tlen.getIntval() {
-			debugPrintV(values)
+		if len(values) != gtype.length {
 			errorf("array length does not match (%d != %d)",
-				len(values), tlen.getIntval())
+				len(values), gtype.length)
 		}
-		length = tlen.getIntval()
-	}
-
-	gtype := &Gtype{
-		typ:    G_ARRAY,
-		length: length,
-		ptr:    typ,
 	}
 
 	r := &ExprArrayLiteral{
@@ -738,8 +724,8 @@ func (p *parser) parseType() *Gtype {
 				typ := p.parseType()
 				return &Gtype{
 					typ:      G_SLICE,
-					ptr:      typ, // element type
 					length:   0,
+					ptr:      typ, // element type
 					capacity: 0,
 				}
 			} else {
