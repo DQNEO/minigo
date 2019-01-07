@@ -384,6 +384,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 				fname:    ident,
 				args:     args,
 			}
+			return p.succeedingExpr(r)
 		} else {
 			// (expr).field
 			//   strct.field
