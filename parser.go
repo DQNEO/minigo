@@ -1249,7 +1249,7 @@ type AstContinueStmt struct {
 
 }
 
-func (*AstContinueStmt) emit() {
+func (ast *AstContinueStmt) emit() {
 	panic("implement me")
 }
 
@@ -1257,7 +1257,7 @@ type AstBreakStmt struct {
 
 }
 
-func (*AstBreakStmt) emit() {
+func (ast *AstBreakStmt) emit() {
 	panic("implement me")
 }
 
