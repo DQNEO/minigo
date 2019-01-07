@@ -156,7 +156,7 @@ func (p *parser) readFuncallArgs() []Expr {
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
 			p.expect("...")
-			arg = &ExprVaArg{arg}
+			arg = &ExprVaArg{expr:arg}
 			r = append(r, arg)
 			p.expect(")")
 			return r
