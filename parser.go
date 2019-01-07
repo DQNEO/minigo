@@ -921,18 +921,23 @@ func (p *parser) parseForStmt() *AstForStmt {
 	p.enterNewScope()
 	defer p.exitScope()
 
-	p.requireBlock = true
-	expr := p.parseExpr()
-	p.requireBlock = false
+	var cond Expr
+	if p.peekToken().isPunct("{") {
+		// inifinit loop : for { ... }
+	} else {
+		p.requireBlock = true
+		cond = p.parseExpr()
+		p.requireBlock = false
+	}
 	if p.peekToken().isPunct("{") {
 		// single cond
 		r.cls = &ForForClause{
-			cond: expr,
+			cond: cond,
 		}
 	} else {
 		// for clause or range clause
 		var initstmt Stmt
-		lefts := p.parseExpressionList(expr)
+		lefts := p.parseExpressionList(cond)
 		tok2 := p.readToken()
 		if tok2.isPunct("=") {
 			if p.peekToken().isKeyword("range") {
