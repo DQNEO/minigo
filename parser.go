@@ -1189,9 +1189,14 @@ type AstSwitchStmt struct {
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("switch")
-	p.requireBlock = true
-	cond := p.parseExpr()
-	p.requireBlock = false
+	var cond Expr
+	if p.peekToken().isPunct("{") {
+
+	} else {
+		p.requireBlock = true
+		cond = p.parseExpr()
+		p.requireBlock = false
+	}
 	p.expect("{")
 	r := &AstSwitchStmt{
 		cond:cond,
