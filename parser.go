@@ -19,7 +19,7 @@ type parser struct {
 	shortassignments    []*AstShortAssignment
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
-	inCase              bool // true while in reading case block
+	inCase              int // > 0  while in reading case compound stmts
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -1166,22 +1166,20 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.skip()
 			expr := p.parseExpr()
 			p.expect(":")
-			p.inCase = true
+			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &CaseStmt{
 				expr: expr,
 				compound: compound,
 			}
+			p.inCase--
 			r.cases = append(r.cases, casestmt)
 			if p.lastToken().isPunct("}") {
-				p.inCase = false
 				break
 			}
-			p.inCase = false
 		} else if tok.isKeyword("default") {
 			p.skip()
 			p.expect(":")
-			p.inCase = false
 			compound := p.parseCompoundStmt()
 			r.dflt = compound
 			break
@@ -1282,14 +1280,14 @@ func (p *parser) parseStmt() Stmt {
 
 func (p *parser) parseCompoundStmt() *AstCompountStmt {
 	defer p.traceOut(p.traceIn())
-
 	r := &AstCompountStmt{}
 	for {
+		debugf("inCase=%d", p.inCase)
 		tok := p.readToken()
 		if tok.isPunct("}") {
 			return r
 		}
-		if p.inCase && (tok.isKeyword("case") || tok.isKeyword("default")) {
+		if p.inCase > 0 && (tok.isKeyword("case") || tok.isKeyword("default")) {
 			p.unreadToken()
 			return r
 		}
