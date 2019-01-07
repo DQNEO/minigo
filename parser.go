@@ -168,7 +168,7 @@ func (p *parser) readFuncallArgs() []Expr {
 		} else if tok.isPunct(",") {
 			continue
 		} else {
-			errorf("invalid token in funcall arguments: %s", tok)
+			tok.errorf("invalid token in funcall arguments")
 		}
 	}
 }
