@@ -46,6 +46,7 @@ type ExprConstVariable struct {
 	name  identifier
 	gtype *Gtype
 	val   Expr // like ExprConstExpr ?
+	iotaIndex int  // for iota
 }
 
 type ExprFuncall struct {

@@ -20,6 +20,7 @@ type parser struct {
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
+	constSpecIndex      int
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -800,24 +801,30 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	return r
 }
 
-func (p *parser) parseConstDeclSingle() *ExprConstVariable {
+func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVariable {
 	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
 
-	// Type or "="
+	// Type or "=" or ";"
 	var val Expr
-	if !p.peekToken().isPunct("=") {
+	if !p.peekToken().isPunct("=") && !p.peekToken().isPunct(";") {
 		// expect Type
 		_ = p.parseType()
 	}
 
-	p.expect("=")
-	val = p.parseExpr()
-
+	if p.peekToken().isPunct(";") && lastExpr != nil {
+		val = lastExpr
+	} else {
+		p.expect("=")
+		val = p.parseExpr()
+	}
 	p.expect(";")
+
 	variable := &ExprConstVariable{
-		name: newName,
-		val:  val,
+		name:      newName,
+		val:       val,
+		iotaIndex: iotaIndex,
+
 	}
 
 	p.currentScope.setConst(newName, variable)
@@ -828,11 +835,16 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 	defer p.traceOut(p.traceIn())
 	// ident or "("
 	var cnsts []*ExprConstVariable
+	var iotaIndex int
+	var lastExpr Expr
+
 	if p.peekToken().isPunct("(") {
 		p.readToken()
 		for {
 			// multi definitions
-			cnst := p.parseConstDeclSingle()
+			cnst := p.parseConstDeclSingle(lastExpr, iotaIndex)
+			lastExpr = cnst.val
+			iotaIndex++
 			cnsts = append(cnsts, cnst)
 			if p.peekToken().isPunct(")") {
 				p.readToken()
@@ -841,7 +853,7 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 		}
 	} else {
 		// single definition
-		cnsts = []*ExprConstVariable{p.parseConstDeclSingle()}
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nil, 0)}
 	}
 
 	r := &AstConstDecl{

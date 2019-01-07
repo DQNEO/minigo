@@ -6,6 +6,7 @@ var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
 var gString = &Gtype{typ: G_STRING,}
+var eIota = &ExprConstVariable{}
 
 const ptrSize int = 8
 
@@ -84,6 +85,7 @@ func newUniverseBlockScope() *scope {
 		val:   &ExprNumberLiteral{val:0},
 	})
 
+	r.setConst("iota", eIota)
 	r.setFunc("len", &ExprFuncRef{
 		// @FIXME
 	})

@@ -168,7 +168,17 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	ast.val.emit()
+	assert(ast.val != nil, "const val should not be empty")
+	rel, ok := ast.val.(*Relation)
+	if ok && rel.expr == eIota {
+		// replace the iota expr by a index number
+		val := &ExprNumberLiteral{
+			val:ast.iotaIndex,
+		}
+		val.emit()
+	} else {
+		ast.val.emit()
+	}
 }
 
 func emit_comp(inst string, ast *ExprBinop) {
