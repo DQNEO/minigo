@@ -75,26 +75,14 @@ func main() {
 	p.namedTypes = make(map[identifier]methods)
 
 	var bs *ByteStream
-	bs = &ByteStream{
-		filename:  "memory",
-		source:    []byte(builtinCode),
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-	astFile0 := p.parseSourceFile(bs, packageblockscope)
+	bs = NewByteStreamFromString("builtin.memory", builtinCode)
+	astFileBuiltin := p.parseSourceFile(bs, packageblockscope)
 
-	bs = &ByteStream{
-		filename:  "memory",
-		source:    []byte(fmtCode),
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-	astFile1 := p.parseSourceFile(bs, packageblockscope)
+	bs = NewByteStreamFromString("fmt.memory", fmtCode)
+	astFileFmt := p.parseSourceFile(bs, packageblockscope)
 
 	for _, sourceFile := range sourceFiles {
-		bs := NewByteStream(sourceFile)
+		bs := NewByteStreamFromFile(sourceFile)
 		astFile := p.parseSourceFile(bs, packageblockscope)
 
 		if debugAst {
@@ -108,8 +96,8 @@ func main() {
 		return
 	}
 	p.resolve()
-	astFiles = append(astFiles, astFile0)
-	astFiles = append(astFiles, astFile1)
+	astFiles = append(astFiles, astFileBuiltin)
+	astFiles = append(astFiles, astFileFmt)
 
 	// generate code
 	emitDataSection()
