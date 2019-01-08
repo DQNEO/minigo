@@ -27,13 +27,13 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	return string(typename) + "__xx__" + string(fname)
 }
 
-// main.f1() -> mainf1
+// main.f1() -> main__f1
 func getPackagedFuncName(pkg identifier, fname string) string {
 	if pkg == "libc" {
 		return fname
 	}
 
-	return fmt.Sprintf("%s%s", pkg, fname)
+	return fmt.Sprintf("%s__%s", pkg, fname)
 }
 
 func (f *AstFuncDecl) getUniqueName() string {
