@@ -972,23 +972,25 @@ func (root *IrRoot) emit() {
 	// generate code
 	emit(".data")
 
-	// put stringLiterals
+	// declare string literals
 	for id, ast := range root.stringLiterals {
 		ast.slabel = fmt.Sprintf("S%d", id)
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.val)
 	}
 
-	// emit global vars to store return values
+	// declare global return values
 	for _, name := range retvals {
 		emitLabel(".global %s", name)
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
 
+	// declare global vars
 	for _, vardecl := range root.vars {
 		emitGlobalDeclVar(vardecl.variable, vardecl.initval)
 	}
+	// declare top level funcs
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
