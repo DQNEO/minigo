@@ -47,9 +47,26 @@ func Printf(format string, param interface{}) {
 	printf(format, param)
 }
 
-var Version int = 1
+func Sprintf(format string, param interface{}) string {
+}
+
 
 `
+var errorsCode = `
+package errors
+
+func New() {
+}
+
+`
+var ioutilCode = `
+package ioutil
+
+func ReadFile(filename string) ([]byte, error) {
+	return 0, 0
+}
+`
+
 var builtinCode  = `
 package builtin
 
@@ -93,8 +110,32 @@ func main() {
 	p.currentPackageName = "fmt"
 	astFileFmt := p.parseSourceFile(bs, fmtScope)
 	p.resolve(universe)
-	fmtFiles := []*AstSourceFile{astFileFmt}
+	fmtpkg := &stdpkg{
+		name:  "fmt",
+		files: []*AstSourceFile{astFileFmt},
+	}
 
+	bs = NewByteStreamFromString("ioutil.memory", ioutilCode)
+	ioscope := newScope(nil)
+	p.scopes["ioutil"] = ioscope
+	p.currentPackageName = "ioutil"
+	astFileIoutil := p.parseSourceFile(bs, ioscope)
+	p.resolve(universe)
+	ioupkg := &stdpkg{
+		name:  "iotuil",
+		files: []*AstSourceFile{astFileIoutil},
+	}
+
+	bs = NewByteStreamFromString("errors.memory", errorsCode)
+	escope := newScope(nil)
+	p.scopes["errors"] = escope
+	p.currentPackageName = "errors"
+	f := p.parseSourceFile(bs, escope)
+	p.resolve(universe)
+	errorspkg := &stdpkg{
+		name: "errors",
+		files: []*AstSourceFile{f},
+	}
 	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
@@ -112,17 +153,42 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(fmtFiles, astFiles, p.stringLiterals)
+	ir := ast2ir(fmtpkg, ioupkg, errorspkg,  astFiles, p.stringLiterals)
 	ir.emit()
 }
 
-func ast2ir(fmtFiles []*AstSourceFile, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+type stdpkg struct {
+	name identifier
+	files []*AstSourceFile
+}
+
+func ast2ir(fmtpkg *stdpkg,ioupkg *stdpkg, fs *stdpkg, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
 	}
 
-	for _, f := range fmtFiles {
+	for _, f := range fs.files {
+		for _, decl := range f.decls {
+			if decl.vardecl != nil {
+				root.vars = append(root.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				root.funcs = append(root.funcs, decl.funcdecl)
+			}
+		}
+	}
+
+	for _, f := range ioupkg.files {
+		for _, decl := range f.decls {
+			if decl.vardecl != nil {
+				root.vars = append(root.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				root.funcs = append(root.funcs, decl.funcdecl)
+			}
+		}
+	}
+
+	for _, f := range fmtpkg.files {
 		for _, decl := range f.decls {
 			if decl.vardecl != nil {
 				root.vars = append(root.vars, decl.vardecl)
