@@ -143,8 +143,6 @@ func (p *parser) readFuncallArgs() []Expr {
 
 //var outerPackages map[identifier](map[identifier]interface{})
 
-var labelSeq = 0
-
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
 	p.stringLiterals = append(p.stringLiterals, ast)
 }

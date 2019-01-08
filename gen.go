@@ -181,6 +181,8 @@ func emit_comp(inst string, ast *ExprBinop) {
 	emit("movzb %%al, %%eax")
 }
 
+var labelSeq = 0
+
 func makeLabel() string {
 	r := fmt.Sprintf(".L%d", labelSeq)
 	labelSeq++
