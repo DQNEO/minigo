@@ -78,6 +78,38 @@ func println(s string) {
 	puts(s)
 }
 `
+type pkgsource struct {
+	name identifier
+	code string
+}
+var pkgsources []pkgsource = []pkgsource{
+	pkgsource{
+		name: "fmt",
+		code: fmtCode,
+	},
+	pkgsource{
+		name: "ioutil",
+		code: ioutilCode,
+	},
+	pkgsource{
+		name: "errors",
+		code: errorsCode,
+	},
+}
+
+func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
+	filename := string(pkgname) + ".memory"
+	bs = NewByteStreamFromString(filename, code)
+	scp := newScope(nil)
+	p.scopes[pkgname] = scp
+	p.currentPackageName = pkgname
+	asf := p.parseSourceFile(bs, scp)
+	p.resolve(universe)
+	return &stdpkg{
+		name:  pkgname,
+		files: []*AstSourceFile{asf},
+	}
+}
 
 func main() {
 	var sourceFiles []string
@@ -104,38 +136,14 @@ func main() {
 
 	setPredeclaredIdentifiers(universe)
 
-	bs = NewByteStreamFromString("fmt.memory", fmtCode)
-	fmtScope := newScope(nil)
-	p.scopes["fmt"] = fmtScope
-	p.currentPackageName = "fmt"
-	astFileFmt := p.parseSourceFile(bs, fmtScope)
-	p.resolve(universe)
-	fmtpkg := &stdpkg{
-		name:  "fmt",
-		files: []*AstSourceFile{astFileFmt},
+	// add std packages
+	var stdpkgs []*stdpkg
+
+	for _, pkgsrc := range pkgsources {
+		pkg := parseStdPkg(p, universe, pkgsrc.name, pkgsrc.code)
+		stdpkgs = append(stdpkgs, pkg)
 	}
 
-	bs = NewByteStreamFromString("ioutil.memory", ioutilCode)
-	ioscope := newScope(nil)
-	p.scopes["ioutil"] = ioscope
-	p.currentPackageName = "ioutil"
-	astFileIoutil := p.parseSourceFile(bs, ioscope)
-	p.resolve(universe)
-	ioupkg := &stdpkg{
-		name:  "iotuil",
-		files: []*AstSourceFile{astFileIoutil},
-	}
-
-	bs = NewByteStreamFromString("errors.memory", errorsCode)
-	escope := newScope(nil)
-	p.scopes["errors"] = escope
-	p.currentPackageName = "errors"
-	f := p.parseSourceFile(bs, escope)
-	p.resolve(universe)
-	errorspkg := &stdpkg{
-		name: "errors",
-		files: []*AstSourceFile{f},
-	}
 	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
@@ -153,7 +161,7 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(fmtpkg, ioupkg, errorspkg,  astFiles, p.stringLiterals)
+	ir := ast2ir(stdpkgs,  astFiles, p.stringLiterals)
 	ir.emit()
 }
 
@@ -162,38 +170,20 @@ type stdpkg struct {
 	files []*AstSourceFile
 }
 
-func ast2ir(fmtpkg *stdpkg,ioupkg *stdpkg, fs *stdpkg, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(stdpkgs []*stdpkg, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
 	}
 
-	for _, f := range fs.files {
-		for _, decl := range f.decls {
-			if decl.vardecl != nil {
-				root.vars = append(root.vars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
-			}
-		}
-	}
-
-	for _, f := range ioupkg.files {
-		for _, decl := range f.decls {
-			if decl.vardecl != nil {
-				root.vars = append(root.vars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
-			}
-		}
-	}
-
-	for _, f := range fmtpkg.files {
-		for _, decl := range f.decls {
-			if decl.vardecl != nil {
-				root.vars = append(root.vars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
+	for _, pkg := range stdpkgs {
+		for _, f := range pkg.files {
+			for _, decl := range f.decls {
+				if decl.vardecl != nil {
+					root.vars = append(root.vars, decl.vardecl)
+				} else if decl.funcdecl != nil {
+					root.funcs = append(root.funcs, decl.funcdecl)
+				}
 			}
 		}
 	}
