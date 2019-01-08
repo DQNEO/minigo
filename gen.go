@@ -8,6 +8,10 @@ func emit(format string, v ...interface{}) {
 	fmt.Printf("\t"+format+"\n", v...)
 }
 
+func emitComment(format string, v ...interface{}) {
+	fmt.Printf("# "+format+"\n", v...)
+}
+
 func emitLabel(format string, v ...interface{}) {
 	fmt.Printf(format+"\n", v...)
 }
@@ -33,7 +37,7 @@ func (f *AstFuncDecl) getUniqueName() string {
 }
 
 func (f *AstFuncDecl) emitPrologue() {
-	emitLabel("# func %s", f.getUniqueName())
+	emitComment("FUNCTION %s", f.getUniqueName())
 	emit(".text")
 	emit(".globl	%s", f.getUniqueName())
 	emitLabel("%s:", f.getUniqueName())
@@ -972,25 +976,26 @@ func (root *IrRoot) emit() {
 	// generate code
 	emit(".data")
 
-	// declare string literals
+	emitComment("STRING LITERALS")
 	for id, ast := range root.stringLiterals {
 		ast.slabel = fmt.Sprintf("S%d", id)
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.val)
 	}
 
-	// declare global return values
+	emitComment("GLOBAL RETVALS")
 	for _, name := range retvals {
 		emitLabel(".global %s", name)
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
 
-	// declare global vars
+	emitComment("GLOBAL VARS")
 	for _, vardecl := range root.vars {
 		emitGlobalDeclVar(vardecl.variable, vardecl.initval)
 	}
-	// declare top level funcs
+
+	emitComment("FUNCTIONS")
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
