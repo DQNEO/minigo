@@ -47,9 +47,26 @@ func Printf(format string, param interface{}) {
 	printf(format, param)
 }
 
-var Version int = 1
+func Sprintf(format string, param interface{}) string {
+}
+
 
 `
+var errorsCode = `
+package errors
+
+func New() {
+}
+
+`
+var ioutilCode = `
+package ioutil
+
+func ReadFile(filename string) ([]byte, error) {
+	return 0, 0
+}
+`
+
 var builtinCode  = `
 package builtin
 
@@ -61,6 +78,38 @@ func println(s string) {
 	puts(s)
 }
 `
+type pkgsource struct {
+	name identifier
+	code string
+}
+var pkgsources []pkgsource = []pkgsource{
+	pkgsource{
+		name: "fmt",
+		code: fmtCode,
+	},
+	pkgsource{
+		name: "ioutil",
+		code: ioutilCode,
+	},
+	pkgsource{
+		name: "errors",
+		code: errorsCode,
+	},
+}
+
+func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
+	filename := string(pkgname) + ".memory"
+	bs = NewByteStreamFromString(filename, code)
+	scp := newScope(nil)
+	p.scopes[pkgname] = scp
+	p.currentPackageName = pkgname
+	asf := p.parseSourceFile(bs, scp)
+	p.resolve(universe)
+	return &stdpkg{
+		name:  pkgname,
+		files: []*AstSourceFile{asf},
+	}
+}
 
 func main() {
 	var sourceFiles []string
@@ -87,13 +136,13 @@ func main() {
 
 	setPredeclaredIdentifiers(universe)
 
-	bs = NewByteStreamFromString("fmt.memory", fmtCode)
-	fmtScope := newScope(nil)
-	p.scopes["fmt"] = fmtScope
-	p.currentPackageName = "fmt"
-	astFileFmt := p.parseSourceFile(bs, fmtScope)
-	p.resolve(universe)
-	fmtFiles := []*AstSourceFile{astFileFmt}
+	// add std packages
+	var stdpkgs []*stdpkg
+
+	for _, pkgsrc := range pkgsources {
+		pkg := parseStdPkg(p, universe, pkgsrc.name, pkgsrc.code)
+		stdpkgs = append(stdpkgs, pkg)
+	}
 
 	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
@@ -112,22 +161,29 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(fmtFiles, astFiles, p.stringLiterals)
+	ir := ast2ir(stdpkgs,  astFiles, p.stringLiterals)
 	ir.emit()
 }
 
-func ast2ir(fmtFiles []*AstSourceFile, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+type stdpkg struct {
+	name identifier
+	files []*AstSourceFile
+}
+
+func ast2ir(stdpkgs []*stdpkg, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
 	}
 
-	for _, f := range fmtFiles {
-		for _, decl := range f.decls {
-			if decl.vardecl != nil {
-				root.vars = append(root.vars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
+	for _, pkg := range stdpkgs {
+		for _, f := range pkg.files {
+			for _, decl := range f.decls {
+				if decl.vardecl != nil {
+					root.vars = append(root.vars, decl.vardecl)
+				} else if decl.funcdecl != nil {
+					root.funcs = append(root.funcs, decl.funcdecl)
+				}
 			}
 		}
 	}
