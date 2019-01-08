@@ -27,17 +27,27 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	return string(typename) + "__xx__" + string(fname)
 }
 
+// main.f1() -> mainf1
+func getPackagedFuncName(pkg identifier, fname string) string {
+	if pkg == "libc" {
+		return fname
+	}
+
+	return fmt.Sprintf("%s%s", pkg, fname)
+}
+
 func (f *AstFuncDecl) getUniqueName() string {
 	if f.receiver != nil {
 		// method
-		return string(f.pkg) + getMethodUniqueName(f.receiver.gtype, f.fname)
+		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
 	// treat main.main function as a special one
 	if f.pkg == "main" && f.fname == "main" {
 		return "main"
 	}
+
 	// other functions
-	return string(f.pkg) + string(f.fname)
+	return getPackagedFuncName(f.pkg, string(f.fname))
 }
 
 func (f *AstFuncDecl) emitPrologue() {
@@ -849,10 +859,9 @@ func (methodCall *ExprMethodcall) emit() {
 		args = append(args, arg)
 	}
 
-	def := methodCall.getFuncDef() // check existance
-	pkgPrefix := string(def.pkg)
+	decl := methodCall.getFuncDef()
 	name := methodCall.getUniqueName()
-	emitCall(pkgPrefix + name, args)
+	emitCall(getPackagedFuncName(decl.pkg, name), args)
 }
 
 func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
@@ -867,17 +876,12 @@ func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
 }
 
 func (funcall *ExprFuncall) emit() {
-	def := funcall.getFuncDef() // check existance
-	if def == nil {
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
 		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
-	var pkgPrefix string
-	if def.pkg == "libc" {
-		pkgPrefix = ""
-	} else {
-		pkgPrefix = string(def.pkg)
-	}
-	emitCall(pkgPrefix + funcall.fname, funcall.args)
+
+	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
 }
 
 func emitCall(fname string, args []Expr) {
