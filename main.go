@@ -80,6 +80,9 @@ func main() {
 	astFileBuiltin := p.parseSourceFile(bs, packageblockscope)
 	astFiles = append(astFiles, astFileBuiltin)
 
+	universe := newScope(nil)
+	setPredeclaredIdentifiers(universe)
+
 	bs = NewByteStreamFromString("fmt.memory", fmtCode)
 	astFileFmt := p.parseSourceFile(bs, packageblockscope)
 	astFiles = append(astFiles, astFileFmt)
@@ -98,7 +101,7 @@ func main() {
 	if parseOnly {
 		return
 	}
-	p.resolve()
+	p.resolve(universe)
 
 	ir := ast2ir(astFiles, p.stringLiterals)
 	ir.emit()

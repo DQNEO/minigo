@@ -67,8 +67,8 @@ func newScope(outer *scope) *scope {
 	}
 }
 
-func newUniverseBlockScope() *scope {
-	r := newScope(nil)
+// https://golang.org/ref/spec#Predeclared_identifiers
+func setPredeclaredIdentifiers(r *scope) {
 
 	r.setGtype("int", gInt)
 	r.setGtype("byte", gByte)
@@ -110,5 +110,4 @@ func newUniverseBlockScope() *scope {
 			},
 		},
 	})
-	return r
 }

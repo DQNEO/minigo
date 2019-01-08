@@ -1639,8 +1639,8 @@ func (ast *AstShortAssignment) inferTypes() {
 
 }
 
-func (p *parser) resolve() {
-	p.packageBlockScope.outer = newUniverseBlockScope()
+func (p *parser) resolve(universe *scope) {
+	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {
 		p.tryResolve(rel)
 	}
