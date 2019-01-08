@@ -43,7 +43,7 @@ func parseOpts(args []string) []string {
 var fmtCode  = `
 package main
 
-func Printf(format string, param any) {
+func Printf(format string, param interface{}) {
 	printf(format, param)
 }
 `
