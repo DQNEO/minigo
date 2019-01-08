@@ -46,6 +46,7 @@ type ExprConstVariable struct {
 }
 
 type ExprFuncall struct {
+	pkg identifier
 	rel *Relation
 	fname string
 	args  []Expr

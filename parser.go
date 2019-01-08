@@ -13,6 +13,7 @@ type parser struct {
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
+	scopes              map[identifier]*scope
 	stringLiterals []*ExprStringLiteral
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
@@ -160,13 +161,12 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		p.expect(".")
 		// shift firstident
 		firstIdent = p.readIdent()
-		_ = pkg
 	}
 
 	rel := &Relation{
 		name: firstIdent,
 	}
-	p.tryResolve(rel)
+	p.tryResolve(pkg, rel)
 
 	next := p.peekToken()
 
@@ -184,6 +184,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		args := p.readFuncallArgs()
 		fname := string(rel.name)
 		e = &ExprFuncall{
+			pkg:pkg,
 			rel:rel,
 			fname: fname,
 			args:  args,
@@ -622,7 +623,7 @@ func (p *parser) parseType() *Gtype {
 			rel := &Relation{
 				name: ident,
 			}
-			p.tryResolve(rel)
+			p.tryResolve("", rel)
 			gtype = &Gtype{
 				typ:      G_REL,
 				relation: rel,
@@ -1490,12 +1491,31 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 	return r
 }
 
-func (p *parser) tryResolve(rel *Relation) {
+func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
-	relfound := p.currentScope.get(rel.name)
-	if relfound != nil {
+
+	if pkg == "" {
+		relfound := p.currentScope.get(rel.name)
+		if relfound != nil {
+			switch relfound.(type) {
+			case *Gtype:
+				rel.gtype = relfound.(*Gtype)
+			case Expr:
+				rel.expr = relfound.(Expr)
+			default:
+				errorf("Bad type relfound %v", relfound)
+			}
+		} else {
+			p.unresolvedRelations = append(p.unresolvedRelations, rel)
+		}
+	} else {
+		// foreign package
+		relfound := p.scopes[pkg].get(rel.name)
+		if relfound == nil {
+			errorf("name %s is not found in %s package", rel.name, pkg)
+		}
 		switch relfound.(type) {
 		case *Gtype:
 			rel.gtype = relfound.(*Gtype)
@@ -1504,8 +1524,6 @@ func (p *parser) tryResolve(rel *Relation) {
 		default:
 			errorf("Bad type relfound %v", relfound)
 		}
-	} else {
-		p.unresolvedRelations = append(p.unresolvedRelations, rel)
 	}
 }
 
@@ -1642,7 +1660,7 @@ func (ast *AstShortAssignment) inferTypes() {
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {
-		p.tryResolve(rel)
+		p.tryResolve("",rel)
 	}
 
 	p.resolveMethods()

@@ -853,7 +853,7 @@ func (methodCall *ExprMethodcall) emit() {
 func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
 	funcref,ok := funcall.rel.expr.(*ExprFuncRef)
 	if !ok {
-		errorf("Compiler error: func %s is not declared", funcall.fname)
+		errorf("Compiler error: funcall %s is not related to any funcref", funcall.fname)
 	}
 
 	return funcref.funcdef

@@ -41,7 +41,7 @@ func parseOpts(args []string) []string {
 }
 
 var fmtCode  = `
-package main
+package fmt
 
 func Printf(format string, param interface{}) {
 	printf(format, param)
@@ -69,9 +69,9 @@ func main() {
 	packageblockscope := newScope(nil)
 
 	// parse
-
 	p := &parser{}
 	p.namedTypes = make(map[identifier]methods)
+	p.scopes = make(map[identifier]*scope)
 
 	var bs *ByteStream
 	var astFiles []*AstSourceFile
@@ -84,7 +84,10 @@ func main() {
 	setPredeclaredIdentifiers(universe)
 
 	bs = NewByteStreamFromString("fmt.memory", fmtCode)
-	astFileFmt := p.parseSourceFile(bs, packageblockscope)
+	fmtScope := newScope(nil)
+	p.scopes["fmt"] = fmtScope
+	astFileFmt := p.parseSourceFile(bs, fmtScope)
+	p.resolve(universe)
 	astFiles = append(astFiles, astFileFmt)
 
 	for _, sourceFile := range sourceFiles {
