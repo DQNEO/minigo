@@ -79,20 +79,23 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*AstSourceFile
 
+	universe := newScope(nil)
+
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
-	astFileBuiltin := p.parseSourceFile(bs, packageblockscope)
+	astFileBuiltin := p.parseSourceFile(bs, universe)
 	astFiles = append(astFiles, astFileBuiltin)
 
-	universe := newScope(nil)
 	setPredeclaredIdentifiers(universe)
 
 	bs = NewByteStreamFromString("fmt.memory", fmtCode)
 	fmtScope := newScope(nil)
 	p.scopes["fmt"] = fmtScope
+	p.currentPackageName = "fmt"
 	astFileFmt := p.parseSourceFile(bs, fmtScope)
 	p.resolve(universe)
 	fmtFiles := []*AstSourceFile{astFileFmt}
 
+	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := p.parseSourceFile(bs, packageblockscope)

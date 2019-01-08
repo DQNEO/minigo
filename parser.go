@@ -23,6 +23,7 @@ type parser struct {
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
 	constSpecIndex      int
+	currentPackageName  identifier
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -710,6 +711,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 
 	variable := p.newVariable(newName, typ, isGlobal)
 	r := &AstVarDecl{
+		pkg: p.currentPackageName,
 		variable: variable,
 		initval:  initval,
 	}
@@ -1329,6 +1331,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 	p.expect("{")
 
 	r := &AstFuncDecl{
+		pkg : p.currentPackageName,
 		receiver:receiver,
 		fname:     fname,
 		rettypes:   rettypes,

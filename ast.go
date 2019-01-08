@@ -71,6 +71,7 @@ type ExprUop struct {
 
 // local or global
 type AstVarDecl struct {
+	pkg identifier
 	variable *ExprVariable
 	initval  Expr
 }
@@ -147,6 +148,7 @@ type ExprFuncRef struct {
 }
 
 type AstFuncDecl struct {
+	pkg identifier
 	receiver  *ExprVariable
 	fname     identifier
 	rettypes   []*Gtype
