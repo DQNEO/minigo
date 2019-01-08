@@ -51,7 +51,7 @@ var Version int = 1
 
 `
 var builtinCode  = `
-package main
+package builtin
 
 const MiniGo int = 1
 
