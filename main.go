@@ -100,12 +100,15 @@ func main() {
 	}
 	p.resolve()
 
-	ir := ast2ir(astFiles)
+	ir := ast2ir(astFiles, p.stringLiterals)
 	ir.emit()
 }
 
-func ast2ir(files []*AstSourceFile) *IrRoot {
-	root := &IrRoot{}
+func ast2ir(files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+
+	root := &IrRoot{
+		stringLiterals:stringLiterals,
+	}
 
 	for _, f := range files {
 		for _, decl := range f.decls {

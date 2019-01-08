@@ -960,6 +960,7 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 type IrRoot struct {
 	vars []*AstVarDecl
 	funcs []*AstFuncDecl
+	stringLiterals []*ExprStringLiteral
 }
 
 var retvals = []string{"rt1","rt2", "rt3", "rt4", "rt5", "rt6"}
@@ -970,7 +971,8 @@ func (root *IrRoot) emit() {
 	emit(".data")
 
 	// put stringLiterals
-	for _, ast := range stringLiterals {
+	for id, ast := range root.stringLiterals {
+		ast.slabel = fmt.Sprintf("S%d", id)
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.val)
 	}
