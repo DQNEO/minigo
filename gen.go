@@ -971,7 +971,8 @@ func (root *IrRoot) emit() {
 	emit(".data")
 
 	// put stringLiterals
-	for _, ast := range root.stringLiterals {
+	for id, ast := range root.stringLiterals {
+		ast.slabel = fmt.Sprintf("S%d", id)
 		emitLabel(".%s:", ast.slabel)
 		emit(".string \"%s\"", ast.val)
 	}

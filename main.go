@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -106,10 +105,6 @@ func main() {
 }
 
 func ast2ir(files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
-
-	for id, stringLiteral := range stringLiterals {
-		stringLiteral.slabel = fmt.Sprintf("S%d", id)
-	}
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
