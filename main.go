@@ -46,6 +46,9 @@ package fmt
 func Printf(format string, param interface{}) {
 	printf(format, param)
 }
+
+var Version int = 1
+
 `
 var builtinCode  = `
 package main
@@ -88,7 +91,7 @@ func main() {
 	p.scopes["fmt"] = fmtScope
 	astFileFmt := p.parseSourceFile(bs, fmtScope)
 	p.resolve(universe)
-	astFiles = append(astFiles, astFileFmt)
+	fmtFiles := []*AstSourceFile{astFileFmt}
 
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
@@ -106,14 +109,24 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(astFiles, p.stringLiterals)
+	ir := ast2ir(fmtFiles, astFiles, p.stringLiterals)
 	ir.emit()
 }
 
-func ast2ir(files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(fmtFiles []*AstSourceFile, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
+	}
+
+	for _, f := range fmtFiles {
+		for _, decl := range f.decls {
+			if decl.vardecl != nil {
+				root.vars = append(root.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				root.funcs = append(root.funcs, decl.funcdecl)
+			}
+		}
 	}
 
 	for _, f := range files {
