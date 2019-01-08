@@ -24,16 +24,30 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "__xx__" + string(fname)
+	return string(typename) + "_m_" + string(fname)
+}
+
+// main.f1 -> main_p_f1
+func getPackagedFuncName(pkg identifier, fname string) string {
+	if pkg == "libc" {
+		return fname
+	}
+
+	return fmt.Sprintf("%s_p_%s", pkg, fname)
 }
 
 func (f *AstFuncDecl) getUniqueName() string {
 	if f.receiver != nil {
 		// method
-		return getMethodUniqueName(f.receiver.gtype, f.fname)
+		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
-	// function
-	return string(f.fname)
+	// treat main.main function as a special one
+	if f.pkg == "main" && f.fname == "main" {
+		return "main"
+	}
+
+	// other functions
+	return getPackagedFuncName(f.pkg, string(f.fname))
 }
 
 func (f *AstFuncDecl) emitPrologue() {
@@ -845,23 +859,29 @@ func (methodCall *ExprMethodcall) emit() {
 		args = append(args, arg)
 	}
 
-	methodCall.getFuncDef() // check existance
+	decl := methodCall.getFuncDef()
 	name := methodCall.getUniqueName()
-	emitCall(name, args)
+	emitCall(getPackagedFuncName(decl.pkg, name), args)
 }
 
 func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
-	funcref,ok := funcall.rel.expr.(*ExprFuncRef)
+	relexpr := funcall.rel.expr
+	assert(relexpr != nil, "rel.expr should not be nil")
+	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
-		errorf("Compiler error: func %s is not declared", funcall.fname)
+		errorf("Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
 	}
-
+	assert(funcref.funcdef != nil, "funcref.funcdef should not nil")
 	return funcref.funcdef
 }
 
 func (funcall *ExprFuncall) emit() {
-	funcall.getFuncDef() // check existance
-	emitCall(funcall.fname, funcall.args)
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
+		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+	}
+
+	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
 }
 
 func emitCall(fname string, args []Expr) {

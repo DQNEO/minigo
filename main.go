@@ -41,14 +41,17 @@ func parseOpts(args []string) []string {
 }
 
 var fmtCode  = `
-package main
+package fmt
 
 func Printf(format string, param interface{}) {
 	printf(format, param)
 }
+
+var Version int = 1
+
 `
 var builtinCode  = `
-package main
+package builtin
 
 const MiniGo int = 1
 
@@ -69,24 +72,30 @@ func main() {
 	packageblockscope := newScope(nil)
 
 	// parse
-
 	p := &parser{}
 	p.namedTypes = make(map[identifier]methods)
+	p.scopes = make(map[identifier]*scope)
 
 	var bs *ByteStream
 	var astFiles []*AstSourceFile
 
+	universe := newScope(nil)
+
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
-	astFileBuiltin := p.parseSourceFile(bs, packageblockscope)
+	astFileBuiltin := p.parseSourceFile(bs, universe)
 	astFiles = append(astFiles, astFileBuiltin)
 
-	universe := newScope(nil)
 	setPredeclaredIdentifiers(universe)
 
 	bs = NewByteStreamFromString("fmt.memory", fmtCode)
-	astFileFmt := p.parseSourceFile(bs, packageblockscope)
-	astFiles = append(astFiles, astFileFmt)
+	fmtScope := newScope(nil)
+	p.scopes["fmt"] = fmtScope
+	p.currentPackageName = "fmt"
+	astFileFmt := p.parseSourceFile(bs, fmtScope)
+	p.resolve(universe)
+	fmtFiles := []*AstSourceFile{astFileFmt}
 
+	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := p.parseSourceFile(bs, packageblockscope)
@@ -103,14 +112,24 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(astFiles, p.stringLiterals)
+	ir := ast2ir(fmtFiles, astFiles, p.stringLiterals)
 	ir.emit()
 }
 
-func ast2ir(files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(fmtFiles []*AstSourceFile, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
+	}
+
+	for _, f := range fmtFiles {
+		for _, decl := range f.decls {
+			if decl.vardecl != nil {
+				root.vars = append(root.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				root.funcs = append(root.funcs, decl.funcdecl)
+			}
+		}
 	}
 
 	for _, f := range files {

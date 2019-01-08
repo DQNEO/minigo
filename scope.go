@@ -92,11 +92,19 @@ func setPredeclaredIdentifiers(r *scope) {
 	r.setFunc("make", &ExprFuncRef{
 		// @FIXME
 	})
+
+	// declare libc functions
 	r.setFunc("puts", &ExprFuncRef{
-		// No implementation thanks to the libc function.
+		funcdef: &AstFuncDecl{
+			pkg: "libc",
+			// No implementation thanks to the libc function.
+		},
 	})
 	r.setFunc("printf", &ExprFuncRef{
-		// No implementation thanks to the libc function.
+		funcdef: &AstFuncDecl{
+			pkg: "libc",
+			// No implementation thanks to the libc function.
+		},
 	})
 	r.setFunc("ReadFile", &ExprFuncRef{
 		funcdef: &AstFuncDecl{
