@@ -13,6 +13,7 @@ type parser struct {
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
+	stringLiterals []*ExprStringLiteral
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
@@ -143,15 +144,14 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 var labelSeq = 0
-var stringLiterals []*ExprStringLiteral
 
-func (p *parser) newAstString(sval string) *ExprStringLiteral {
+func (p *parser) addStringLiteral(sval string) *ExprStringLiteral {
 	ast := &ExprStringLiteral{
 		val:    sval,
-		slabel: fmt.Sprintf("L%d", labelSeq),
+		slabel: fmt.Sprintf("S%d", labelSeq),
 	}
 	labelSeq++
-	stringLiterals = append(stringLiterals, ast)
+	p.stringLiterals = append(p.stringLiterals, ast)
 	return ast
 }
 
@@ -370,7 +370,7 @@ func (p *parser) parsePrim() Expr {
 	case tok.isSemicolon():
 		return nil
 	case tok.isTypeString(): // string literal
-		return p.newAstString(tok.sval)
+		return p.addStringLiteral(tok.sval)
 	case tok.isTypeInt(): // int literal
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
