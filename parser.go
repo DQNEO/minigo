@@ -144,16 +144,9 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 var labelSeq = 0
-var stringId = 0
 
-func (p *parser) addStringLiteral(sval string) *ExprStringLiteral {
-	ast := &ExprStringLiteral{
-		val:    sval,
-		slabel: fmt.Sprintf("S%d", stringId),
-	}
-	stringId++
+func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
 	p.stringLiterals = append(p.stringLiterals, ast)
-	return ast
 }
 
 // expr which begins with an ident.
@@ -371,7 +364,11 @@ func (p *parser) parsePrim() Expr {
 	case tok.isSemicolon():
 		return nil
 	case tok.isTypeString(): // string literal
-		return p.addStringLiteral(tok.sval)
+		ast := &ExprStringLiteral{
+			val:    tok.sval,
+		}
+		p.addStringLiteral(ast)
+		return ast
 	case tok.isTypeInt(): // int literal
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
