@@ -24,16 +24,16 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "__xx__" + string(fname)
+	return string(typename) + "_m_" + string(fname)
 }
 
-// main.f1() -> main__f1
+// main.f1 -> main_p_f1
 func getPackagedFuncName(pkg identifier, fname string) string {
 	if pkg == "libc" {
 		return fname
 	}
 
-	return fmt.Sprintf("%s__%s", pkg, fname)
+	return fmt.Sprintf("%s_p_%s", pkg, fname)
 }
 
 func (f *AstFuncDecl) getUniqueName() string {
