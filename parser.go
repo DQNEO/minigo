@@ -144,13 +144,14 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 var labelSeq = 0
+var stringId = 0
 
 func (p *parser) addStringLiteral(sval string) *ExprStringLiteral {
 	ast := &ExprStringLiteral{
 		val:    sval,
-		slabel: fmt.Sprintf("S%d", labelSeq),
+		slabel: fmt.Sprintf("S%d", stringId),
 	}
-	labelSeq++
+	stringId++
 	p.stringLiterals = append(p.stringLiterals, ast)
 	return ast
 }

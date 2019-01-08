@@ -100,7 +100,6 @@ func main() {
 	}
 	p.resolve()
 
-	labelSeq = 0
 	ir := ast2ir(astFiles, p.stringLiterals)
 	ir.emit()
 }
