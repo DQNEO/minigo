@@ -72,7 +72,7 @@ func (a *DeclType) dump() {
 		a.name, a.gtype)
 }
 
-func (stmt *AstIfStmt) dump() {
+func (stmt *StmtIf) dump() {
 	debugf("if")
 	debugNest++
 	stmt.cond.dump()

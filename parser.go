@@ -812,9 +812,9 @@ func (p *parser) exitScope() {
 }
 
 // https://golang.org/ref/spec#For_statements
-func (p *parser) parseForStmt() *AstForStmt {
+func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
-	var r = &AstForStmt{}
+	var r = &StmtFor{}
 	p.enterNewScope()
 	defer p.exitScope()
 
@@ -884,7 +884,7 @@ func (p *parser) parseForStmt() *AstForStmt {
 	return r
 }
 
-func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
+func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("range")
 
@@ -900,7 +900,7 @@ func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
 		valuevar = exprs[1].(*Relation)
 	}
 
-	var r = &AstForStmt{
+	var r = &StmtFor{
 		rng: &ForRangeClause{
 			indexvar: indexvar,
 			valuevar: valuevar,
@@ -914,9 +914,9 @@ func (p *parser) parseForRange(exprs []Expr) *AstForStmt {
 	return r
 }
 
-func (p *parser) parseIfStmt() *AstIfStmt {
+func (p *parser) parseIfStmt() *StmtIf {
 	defer p.traceOut(p.traceIn())
-	var r = &AstIfStmt{}
+	var r = &StmtIf{}
 	p.enterNewScope()
 	defer p.exitScope()
 	p.requireBlock = true
@@ -953,15 +953,15 @@ func (p *parser) parseIfStmt() *AstIfStmt {
 	return r
 }
 
-func (p *parser) parseReturnStmt() *AstReturnStmt {
+func (p *parser) parseReturnStmt() *StmtReturn {
 	defer p.traceOut(p.traceIn())
-	var r *AstReturnStmt
+	var r *StmtReturn
 	exprs := p.parseExpressionList(nil)
 	// workaround for {nil}
 	if len(exprs) == 1 && exprs[0] == nil {
 		exprs = nil
 	}
-	r = &AstReturnStmt{exprs: exprs}
+	r = &StmtReturn{exprs: exprs}
 	return r
 }
 
@@ -1189,11 +1189,11 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
 		return p.parseAssignmentOperation(expr1, tok2.sval)
 	} else if tok2.isPunct("++") {
-		return &AstIncrStmt{
+		return &StmtInc{
 			operand:expr1,
 		}
 	} else if tok2.isPunct("--")  {
-		return &AstDecrStmt{
+		return &StmtDec{
 			operand:expr1,
 		}
 	} else {

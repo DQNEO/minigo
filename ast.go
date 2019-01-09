@@ -101,29 +101,29 @@ type ForForClause struct {
 	post Stmt
 }
 
-type AstForStmt struct {
+type StmtFor struct {
 	// either of rng or cls is set
 	rng   *ForRangeClause
 	cls   *ForForClause
 	block *AstCompountStmt
 }
 
-type AstIfStmt struct {
+type StmtIf struct {
 	simplestmt Stmt
 	cond Expr
 	then *AstCompountStmt
 	els  Stmt
 }
 
-type AstReturnStmt struct {
+type StmtReturn struct {
 	exprs []Expr
 }
 
-type AstIncrStmt struct {
+type StmtInc struct {
 	operand Expr
 }
 
-type AstDecrStmt struct {
+type StmtDec struct {
 	operand Expr
 }
 

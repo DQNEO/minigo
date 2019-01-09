@@ -207,10 +207,10 @@ func makeLabel() string {
 	return r
 }
 
-func (ast *AstIncrStmt) emit() {
+func (ast *StmtInc) emit() {
 	emitIncrDecl("add", ast.operand)
 }
-func (ast *AstDecrStmt) emit() {
+func (ast *StmtDec) emit() {
 	emitIncrDecl("sub", ast.operand)
 }
 
@@ -473,7 +473,7 @@ func (ast *StmtAssignment) emit() {
 	}
 }
 
-func (s *AstIfStmt) emit() {
+func (s *StmtIf) emit() {
 	emit("# if")
 	if s.simplestmt != nil {
 		s.simplestmt.emit()
@@ -503,7 +503,7 @@ func (s *AstIfStmt) emit() {
 	}
 }
 
-func (f *AstForStmt) emitRange() {
+func (f *StmtFor) emitRange() {
 	if f.rng.indexvar == nil {
 		errorf("indexVar is nil")
 	}
@@ -571,7 +571,7 @@ func (f *AstForStmt) emitRange() {
 
 	f.block.emit()
 
-	indexIncr := &AstIncrStmt{
+	indexIncr := &StmtInc{
 		operand:f.rng.indexvar,
 	}
 	indexIncr.emit() // i++
@@ -582,7 +582,7 @@ func (f *AstForStmt) emitRange() {
 	emit("%s: # end loop", labelEnd)
 }
 
-func (f *AstForStmt) emitForClause() {
+func (f *StmtFor) emitForClause() {
 	assert(f.cls != nil, "f.cls must not be nil")
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
@@ -604,7 +604,7 @@ func (f *AstForStmt) emitForClause() {
 	emit("%s: # end loop", labelEnd)
 }
 
-func (f *AstForStmt) emit() {
+func (f *StmtFor) emit() {
 	if f.rng != nil {
 		f.emitRange()
 		return
@@ -613,7 +613,7 @@ func (f *AstForStmt) emit() {
 }
 
 
-func (stmt *AstReturnStmt) emit() {
+func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
 		return
