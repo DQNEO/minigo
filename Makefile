@@ -9,7 +9,7 @@ minigo.darwin: *.go stdlib.go
 	GOOS=darwin  GOARCH=amd64 go build -o minigo.darwin
 
 stdlib.go: stdlib/*/*.go
-	./build_stdlib.sh > stdlib.go
+	./concate-stdlib.sh > stdlib.go
 
 
 test: minigo.linux minigo.darwin
