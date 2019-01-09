@@ -788,7 +788,7 @@ func (ast *StmtBreak) emit() {
 	panic("implement me")
 }
 
-func (ast *AstExprStmt) emit() {
+func (ast *StmtExpr) emit() {
 	ast.expr.emit()
 }
 

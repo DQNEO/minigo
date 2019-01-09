@@ -926,7 +926,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 		r.simplestmt = stmt
 		r.cond = p.parseExpr()
 	} else {
-		es, ok := stmt.(*AstExprStmt)
+		es, ok := stmt.(*StmtExpr)
 		if !ok {
 			errorf("internal error")
 		}
@@ -1198,7 +1198,7 @@ func (p *parser) parseStmt() Stmt {
 		}
 	} else {
 		p.unreadToken()
-		return &AstExprStmt{
+		return &StmtExpr{
 			expr: expr1,
 		}
 	}

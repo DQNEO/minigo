@@ -217,7 +217,7 @@ type StmtBreak struct {
 
 }
 
-type AstExprStmt struct {
+type StmtExpr struct {
 	expr Expr
 }
 
