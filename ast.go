@@ -52,6 +52,7 @@ type ExprFuncall struct {
 }
 
 type ExprMethodcall struct {
+	tok *Token
 	receiver Expr
 	fname identifier
 	args  []Expr

@@ -17,7 +17,7 @@ func emitLabel(format string, v ...interface{}) {
 }
 
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
-	assert(gtype != nil, "gtype is not nil")
+	assertNotNil(gtype != nil, nil)
 	var typename identifier
 	if gtype.typ == G_POINTER {
 		typename = gtype.ptr.relation.name
@@ -78,9 +78,8 @@ func (f *DeclFunc) emitPrologue() {
 
 	var localarea int
 	for _, lvar := range f.localvars {
-		assert(lvar.gtype != nil, "lvar has gtype")
 		size := lvar.gtype.getSize()
-		assert(size != 0, "size is not zero")
+		assert(size != 0, nil, "size is not zero")
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
@@ -122,9 +121,9 @@ func (a *ExprStructField) emit() {
 	if !ok {
 		errorf("struct is not a variable")
 	}
-	assert(rel.expr != nil, "rel is a variable")
+	assertNotNil(rel.expr != nil, nil)
 	variable, ok := rel.expr.(*ExprVariable)
-	assert(ok, "rel is a variable")
+	assert(ok, nil,"rel is a variable")
 
 	switch variable.gtype.typ {
 	case G_POINTER: // pointer to struct
@@ -176,7 +175,7 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	assert(ast.val != nil, "const val should not be empty")
+	assertNotNil(ast.val != nil,nil)
 	rel, ok := ast.val.(*Relation)
 	if ok && rel.expr == eIota {
 		// replace the iota expr by a index number
@@ -220,7 +219,7 @@ func emitIncrDecl(inst string, operand Expr) {
 		errorf("operand should be *Relation")
 	}
 	vr, ok := rel.expr.(*ExprVariable)
-	assert(ok, "operand is a rel")
+	assert(ok, nil,"operand is a rel")
 	vr.emit()
 	emit("%s $1, %%rax", inst)
 	emitLsave(vr.gtype.getSize(), vr.offset)
@@ -239,7 +238,7 @@ func (ast *ExprUop) emit() {
 			vr.emitAddress()
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
-			assert(e.invisiblevar.offset != 0, "ExprStructLiteral's invisible var has offset")
+			assert(e.invisiblevar.offset != 0, nil,"ExprStructLiteral's invisible var has offset")
 			assignStructLiteral(e.invisiblevar, e)
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
@@ -251,7 +250,7 @@ func (ast *ExprUop) emit() {
 		rel, ok := ast.operand.(*Relation)
 		debugf("operand:%s", rel)
 		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, "operand is a rel")
+		assert(ok, nil,"operand is a rel")
 		vr.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
@@ -447,7 +446,7 @@ func (ast *StmtAssignment) emit() {
 			emit("mov %%rax, %%rcx") // index
 			elmType := vr.gtype.ptr
 			size := elmType.getSize()
-			assert(size > 0, "size > 0")
+			assert(size > 0, nil,"size > 0")
 			emit("mov $%d, %%rax", size) // size of one element
 			emit("imul %%rcx, %%rax")    // index * size
 			emit("push %%rax")           // store index * size
@@ -583,7 +582,7 @@ func (f *StmtFor) emitRange() {
 }
 
 func (f *StmtFor) emitForClause() {
-	assert(f.cls != nil, "f.cls must not be nil")
+	assertNotNil(f.cls != nil,nil)
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
@@ -742,7 +741,7 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov %%rax, %%rcx") // index
 	elmType := vr.gtype.ptr
 	size := elmType.getSize()
-	assert(size > 0, "size > 0")
+	assert(size > 0, nil,"size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
 	emit("imul %%rcx, %%rax")    // index * size
 	emit("push %%rax")           // store index * size
@@ -837,16 +836,15 @@ func (ast *ExprMethodcall) getUniqueName() string {
 
 func (methodCall *ExprMethodcall) getFuncDef() *DeclFunc {
 	gtype := methodCall.receiver.getGtype()
-	debugf("method call:%v.%v", methodCall.receiver, methodCall.fname)
-	assert(gtype != nil, "gtype should not be nil")
-	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, "method must be an interface or belong to a named type")
+	assertNotNil(gtype != nil,  methodCall.tok)
+	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, methodCall.tok,"method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
 		typeToBeloing = gtype.ptr
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.typ == G_REL, "method must belong to a named type")
+	assert(typeToBeloing.typ == G_REL, methodCall.tok,"method must belong to a named type")
 	funcref, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
 	if !ok {
 		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
@@ -869,12 +867,12 @@ func (methodCall *ExprMethodcall) emit() {
 
 func (funcall *ExprFuncall) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
-	assert(relexpr != nil, "rel.expr should not be nil")
+	assertNotNil(relexpr != nil, nil)
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
 		errorf("Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
 	}
-	assert(funcref.funcdef != nil, "funcref.funcdef should not nil")
+	assertNotNil(funcref.funcdef != nil, nil)
 	return funcref.funcdef
 }
 
@@ -949,18 +947,18 @@ func evalIntExpr(e Expr) int {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	assert(decl.variable.isGlobal, "should be global")
-	assert(decl.variable.gtype != nil, "variable has gtype")
+	assert(decl.variable.isGlobal, nil,"should be global")
+	assertNotNil(decl.variable.gtype != nil, nil)
 	emitLabel(".global %s", decl.variable.varname)
 	emitLabel("%s:", decl.variable.varname)
 
 	if decl.variable.gtype.typ == G_ARRAY {
 		arrayliteral, ok := decl.initval.(*ExprArrayLiteral)
-		assert(ok, "should be array lieteral")
+		assert(ok, nil,"should be array lieteral")
 		elmType := decl.variable.gtype.ptr
-		assert(elmType != nil, "elm is not nil")
+		assertNotNil(elmType != nil ,nil)
 		for _, value := range arrayliteral.values {
-			assert(value != nil, "value is set")
+			assertNotNil(value != nil,nil)
 			size := elmType.getSize()
 			if size == 8 {
 				emit(".quad %d", evalIntExpr(value))

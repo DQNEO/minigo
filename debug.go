@@ -152,7 +152,7 @@ func (ast *ExprStringLiteral) dump() {
 }
 
 func (a *Relation) dump() {
-	assert(a.expr != nil, "ident.expr is set")
+	assert(a.expr != nil, nil, "ident.expr is set for " + string(a.name))
 	a.expr.dump()
 }
 
@@ -245,8 +245,12 @@ func errorf(format string, v ...interface{}) {
 	panic(s)
 }
 
-func assert(cond bool, msg string) {
+func assert(cond bool, tok *Token, msg string) {
 	if !cond {
-		panic(fmt.Sprintf("assertion failed: %s", msg))
+		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok))
 	}
+}
+
+func assertNotNil(cond bool, tok *Token) {
+	assert(cond, tok, "should not be nil")
 }

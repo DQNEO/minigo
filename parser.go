@@ -28,6 +28,14 @@ type parser struct {
 
 type methods map[identifier]*ExprFuncRef
 
+func (p *parser) assert(cond bool, msg string) {
+	assert(cond, p.lastToken(), msg)
+}
+
+func (p *parser) assertNotNil(x interface{}) {
+	assertNotNil(x != nil, p.lastToken())
+}
+
 func (p *parser) peekToken() *Token {
 	ts := p.tokenStream
 	if ts.index > len(ts.tokens)-1 {
@@ -277,15 +285,16 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		}
 
 		// https://golang.org/ref/spec#Selectors
-		ident := p.readIdent()
+		tok := p.readToken()
 		next = p.peekToken()
 		if next.isPunct("(") {
 			// (expr).method()
 			p.expect("(")
 			args := p.readFuncallArgs()
 			r = &ExprMethodcall{
+				tok: tok,
 				receiver: e,
-				fname:    ident,
+				fname:    tok.getIdent(),
 				args:     args,
 			}
 			return p.succeedingExpr(r)
@@ -298,7 +307,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			//   array[0].field
 			r =  &ExprStructField{
 				strct:     e,
-				fieldname: ident,
+				fieldname: tok.getIdent(),
 			}
 			return p.succeedingExpr(r)
 		}
@@ -319,7 +328,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 func (p *parser) parseMakeExpr() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
-	assert(tok.isIdent("make"), "read make")
+	p.assert(tok.isIdent("make"), "read make")
 	p.expect("(")
 	mapType := p.parseMapType()
 	_ = mapType
@@ -409,7 +418,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 		}
 
 		v := p.parseExpr()
-		assert(v != nil, "v is not nil")
+		p.assertNotNil(v)
 		values = append(values, v)
 		tok = p.readToken()
 		if tok.isPunct(",") {
@@ -439,7 +448,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
-	assert(p.lastToken().isPunct("{"), "{ is read")
+	p.assert(p.lastToken().isPunct("{"), "{ is read")
 	defer p.traceOut(p.traceIn())
 	r := &ExprStructLiteral{
 		strctname: rel,
@@ -451,7 +460,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 			break
 		}
 		p.expect(":")
-		assert(tok.isTypeIdent(), "field name is ident")
+		p.assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
 		f := &KeyedElement{
 			key:   tok.getIdent(),
@@ -682,7 +691,7 @@ func (p *parser) parseType() *Gtype {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
-	assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
+	p.assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read newName
 	newName := p.readIdent()
@@ -698,7 +707,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	} else {
 		p.unreadToken()
 		typ = p.parseType()
-		assert(typ != nil, "has typ")
+		p.assertNotNil(typ)
 		tok := p.readToken()
 		if tok.isPunct("=") {
 			initval = p.parseExpr()
@@ -842,7 +851,7 @@ func (p *parser) parseForStmt() *StmtFor {
 			}
 		} else if tok2.isPunct(":=") {
 			if p.peekToken().isKeyword("range") {
-				assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
+				p.assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
 				e := lefts[0]
 				rel := e.(*Relation) // a brand new rel
 				gtype := gInt // index is int
@@ -994,7 +1003,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
-	assert(rights[0] != nil , "rights[0] is an expr")
+	p.assertNotNil(rights[0])
 	return &StmtAssignment{
 		lefts:  lefts,
 		rights: rights,
@@ -1015,7 +1024,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 		errorf("internal error")
 	}
 	rights := p.parseExpressionList(nil)
-	assert(len(rights) == 1, "num of rights is 1")
+	p.assert(len(rights) == 1, "num of rights is 1")
 	binop := &ExprBinop{
 		op:    op,
 		left:  left,
@@ -1347,7 +1356,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		assert(typeToBelong.typ == G_REL , "methods must belong to a named type")
+		p.assert(typeToBelong.typ == G_REL , "methods must belong to a named type")
 		methods, ok := p.namedTypes[typeToBelong.relation.name]
 		if !ok {
 			methods = make(map[identifier]*ExprFuncRef)
@@ -1423,7 +1432,7 @@ func (p *parser) parseImportDecls() []*ImportDecl {
 const MaxAlign = 16
 
 func (p *parser) parseStructDef() *Gtype {
-	assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
+	p.assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
 
 	p.expect("{")
