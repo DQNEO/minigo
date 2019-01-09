@@ -177,14 +177,7 @@ type DeclType struct {
 	gtype *Gtype
 }
 
-// https://golang.org/ref/spec#Operands
-type AstOperandName struct {
-	pkg   identifier
-	ident identifier
-}
-
 type ExprSliced struct {
-	ref  *AstOperandName
 	low  Expr
 	high Expr
 }

@@ -214,7 +214,6 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 		highIndex := p.parseExpr()
 		p.expect("]")
 		r = &ExprSliced{
-			ref:  nil, // TBI
 			low:  lowIndex,
 			high: highIndex,
 		}
@@ -231,7 +230,6 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 			highIndex := p.parseExpr()
 			p.expect("]")
 			r = &ExprSliced{
-				ref:  nil, // TBI
 				low:  index,
 				high: highIndex,
 			}
