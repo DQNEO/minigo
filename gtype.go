@@ -192,7 +192,7 @@ func (e *AstStructFieldAccess) getGtype() *Gtype {
 			return field.ptr
 		}
 	}
-	errorf("internal error")
+	errorf("field %s not found in gtype %s", e.fieldname, gstruct)
 	return nil
 }
 
