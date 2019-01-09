@@ -256,7 +256,7 @@ type ExprStructLiteral struct {
 	invisiblevar *ExprVariable // to have offfset for &T{}
 }
 
-type AstStructFieldAccess struct {
+type ExprStructField struct {
 	strct     Expr
 	fieldname identifier
 }

@@ -171,7 +171,7 @@ func (ast *ExprUop) dump() {
 	debugNest--
 }
 
-func (a *AstStructFieldAccess) dump() {
+func (a *ExprStructField) dump() {
 	debugf("%s.%s", a.strct, a.fieldname)
 }
 

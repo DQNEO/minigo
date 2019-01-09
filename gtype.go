@@ -185,7 +185,7 @@ func (e *ExprArrayIndex) getGtype() *Gtype {
 	return e.array.getGtype().ptr
 }
 
-func (e *AstStructFieldAccess) getGtype() *Gtype {
+func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
 	for _, field := range gstruct.fields {
 		if e.fieldname == field.fieldname {

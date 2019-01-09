@@ -117,7 +117,7 @@ func (ast *ExprStringLiteral) emit() {
 	emit("lea .%s(%%rip), %%rax", ast.slabel)
 }
 
-func (a *AstStructFieldAccess) emit() {
+func (a *ExprStructField) emit() {
 	rel, ok := a.strct.(*Relation)
 	if !ok {
 		errorf("struct is not a variable")
@@ -457,10 +457,10 @@ func (ast *AstAssignment) emit() {
 			emit("pop %%rax")            // load RHS value
 			reg := getReg(size)
 			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
-		case *AstStructFieldAccess:
-			ast, ok := left.(*AstStructFieldAccess)
+		case *ExprStructField:
+			ast, ok := left.(*ExprStructField)
 			if !ok {
-				errorf("left is not AstStructFieldAccess")
+				errorf("left is not ExprStructField")
 			}
 			rel := ast.strct.(*Relation)
 			vr := rel.expr.(*ExprVariable)

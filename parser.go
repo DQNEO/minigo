@@ -298,7 +298,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			//   fncall().field
 			//   obj.method().field
 			//   array[0].field
-			r =  &AstStructFieldAccess{
+			r =  &ExprStructField{
 				strct:     e,
 				fieldname: ident,
 			}
