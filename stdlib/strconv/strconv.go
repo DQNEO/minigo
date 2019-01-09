@@ -1,0 +1,6 @@
+package strconv
+
+func Atoi() {
+
+}
+
