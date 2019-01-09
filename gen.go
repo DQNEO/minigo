@@ -707,11 +707,11 @@ func (decl *DeclVar) emit() {
 }
 
 func (decl *DeclType) emit() {
-	panic("implement me")
+	// nothing to do
 }
 
 func (decl *DeclConst) emit() {
-	panic("implement me")
+	// nothing to do
 }
 
 func (ast *AstCompountStmt) emit() {
