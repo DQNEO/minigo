@@ -25,7 +25,7 @@ func dumpToken(tok *Token) {
 
 var debugNest int
 
-func (a *AstPackageClause) dump() {
+func (a *PackageClause) dump() {
 	debugf("package %s", a.name)
 }
 
@@ -89,7 +89,7 @@ func (s *StmtSatementList) dump() {
 }
 */
 
-func (a *AstFile) dump() {
+func (a *SourceFile) dump() {
 	debugf("==== Dump AstExpr Start ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {

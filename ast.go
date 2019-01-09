@@ -127,15 +127,16 @@ type StmtDec struct {
 	operand Expr
 }
 
-type AstPackageClause struct {
+type PackageClause struct {
 	name identifier
 }
 
-type AstImportSpec struct {
+type ImportSpec struct {
 	path        string
 }
-type AstImportDecl struct {
-	specs []*AstImportSpec
+
+type ImportDecl struct {
+	specs []*ImportSpec
 }
 
 type StmtSatementList struct {
@@ -157,7 +158,7 @@ type DeclFunc struct {
 	body      *StmtSatementList
 }
 
-type AstTopLevelDecl struct {
+type TopLevelDecl struct {
 	// either of followings
 	funcdecl  *DeclFunc // includes method declaration
 	vardecl   *DeclVar
@@ -165,10 +166,10 @@ type AstTopLevelDecl struct {
 	typedecl  *DeclType
 }
 
-type AstFile struct {
-	pkg     *AstPackageClause
-	imports []*AstImportDecl
-	decls   []*AstTopLevelDecl
+type SourceFile struct {
+	pkg     *PackageClause
+	imports []*ImportDecl
+	decls   []*TopLevelDecl
 }
 
 type AstPackageRef struct {

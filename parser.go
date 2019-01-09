@@ -1368,15 +1368,15 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	return r
 }
 
-func (p *parser) parseImport() *AstImportDecl {
+func (p *parser) parseImport() *ImportDecl {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
-	var specs []*AstImportSpec
+	var specs []*ImportSpec
 	if tok.isPunct("(") {
 		for {
 			tok := p.readToken()
 			if tok.isTypeString() {
-				specs = append(specs, &AstImportSpec{
+				specs = append(specs, &ImportSpec{
 					path:        tok.sval,
 				})
 				p.expect(";")
@@ -1390,28 +1390,28 @@ func (p *parser) parseImport() *AstImportDecl {
 		if !tok.isTypeString() {
 			errorf("import expects package name")
 		}
-		specs = []*AstImportSpec{&AstImportSpec{
+		specs = []*ImportSpec{&ImportSpec{
 			path:        tok.sval,
 		},
 		}
 	}
 	p.expect(";")
-	return &AstImportDecl{
+	return &ImportDecl{
 		specs: specs,
 	}
 }
 
-func (p *parser) expectPackageClause() *AstPackageClause {
+func (p *parser) expectPackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("package")
-	r := &AstPackageClause{name: p.readIdent()}
+	r := &PackageClause{name: p.readIdent()}
 	p.expect(";")
 	return r
 }
 
-func (p *parser) parseImportDecls() []*AstImportDecl {
+func (p *parser) parseImportDecls() []*ImportDecl {
 	defer p.traceOut(p.traceIn())
-	var r []*AstImportDecl
+	var r []*ImportDecl
 	for {
 		tok := p.readToken()
 		if !tok.isKeyword("import") {
@@ -1545,22 +1545,22 @@ func (p *parser) parseTypeDecl() *DeclType {
 	return r
 }
 
-func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
+func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
-	var r *AstTopLevelDecl
+	var r *TopLevelDecl
 	switch {
 	case tok.isKeyword("func"):
 		funcdecl := p.parseFuncDef()
-		r = &AstTopLevelDecl{funcdecl: funcdecl}
+		r = &TopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
 		vardecl := p.parseVarDecl(true)
-		r = &AstTopLevelDecl{vardecl: vardecl}
+		r = &TopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
 		constdecl := p.parseConstDecl()
-		r = &AstTopLevelDecl{constdecl: constdecl}
+		r = &TopLevelDecl{constdecl: constdecl}
 	case tok.isKeyword("type"):
 		typedecl := p.parseTypeDecl()
-		r = &AstTopLevelDecl{typedecl: typedecl}
+		r = &TopLevelDecl{typedecl: typedecl}
 	default:
 		errorf("TBD: unable to handle token %v", tok)
 	}
@@ -1568,9 +1568,9 @@ func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 	return r
 }
 
-func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
+func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 	defer p.traceOut(p.traceIn())
-	var r []*AstTopLevelDecl
+	var r []*TopLevelDecl
 	for {
 		tok := p.readToken()
 		if tok.isEOF() {
@@ -1591,7 +1591,7 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *SourceFile {
 
 	ts := NewTokenStream(bs)
 	p.tokenStream = ts
@@ -1599,7 +1599,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstF
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 
-	r := &AstFile{}
+	r := &SourceFile{}
 	r.pkg = p.expectPackageClause()
 	r.imports = p.parseImportDecls()
 
