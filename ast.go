@@ -165,7 +165,7 @@ type AstTopLevelDecl struct {
 	typedecl  *DeclType
 }
 
-type AstSourceFile struct {
+type AstFile struct {
 	pkg     *AstPackageClause
 	imports []*AstImportDecl
 	decls   []*AstTopLevelDecl

@@ -1591,7 +1591,7 @@ func (p *parser) parseTopLevelDecls() []*AstTopLevelDecl {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstSourceFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstFile {
 
 	ts := NewTokenStream(bs)
 	p.tokenStream = ts
@@ -1599,7 +1599,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstS
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 
-	r := &AstSourceFile{}
+	r := &AstFile{}
 	r.pkg = p.expectPackageClause()
 	r.imports = p.parseImportDecls()
 

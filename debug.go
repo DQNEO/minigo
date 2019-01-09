@@ -89,7 +89,7 @@ func (s *AstCompountStmt) dump() {
 }
 */
 
-func (a *AstSourceFile) dump() {
+func (a *AstFile) dump() {
 	debugf("==== Dump AstExpr Start ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {

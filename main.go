@@ -55,7 +55,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	p.resolve(universe)
 	return &stdpkg{
 		name:  pkgname,
-		files: []*AstSourceFile{asf},
+		files: []*AstFile{asf},
 	}
 }
 
@@ -74,7 +74,7 @@ func main() {
 	p.scopes = make(map[identifier]*scope)
 
 	var bs *ByteStream
-	var astFiles []*AstSourceFile
+	var astFiles []*AstFile
 
 	universe := newScope(nil)
 
@@ -115,10 +115,10 @@ func main() {
 
 type stdpkg struct {
 	name identifier
-	files []*AstSourceFile
+	files []*AstFile
 }
 
-func ast2ir(stdpkgs []*stdpkg, files []*AstSourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(stdpkgs []*stdpkg, files []*AstFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
 		stringLiterals:stringLiterals,
