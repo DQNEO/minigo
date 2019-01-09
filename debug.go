@@ -29,7 +29,7 @@ func (a *AstPackageClause) dump() {
 	debugf("package %s", a.name)
 }
 
-func (a *AstFuncDecl) dump() {
+func (a *DeclFunc) dump() {
 	debugf("funcdef %s", a.fname)
 	debugNest++
 	//for _, stmt := range a.body.stmts {
@@ -50,7 +50,7 @@ func (ast *AstAssignment) dump() {
 	debugNest--
 }
 
-func (a *AstVarDecl) dump() {
+func (a *DeclVar) dump() {
 	if a.initval == nil {
 		debugf("decl var %s %s",
 			a.variable.varname, a.variable.gtype)
@@ -63,11 +63,11 @@ func (a *AstVarDecl) dump() {
 	}
 }
 
-func (a *AstConstDecl) dump() {
+func (a *DeclConst) dump() {
 	debugf("decl consts %v", a.consts)
 }
 
-func (a *AstTypeDecl) dump() {
+func (a *DeclType) dump() {
 	debugf("decl type def %v gtype(%v)",
 		a.name, a.gtype)
 }

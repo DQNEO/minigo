@@ -69,13 +69,13 @@ type ExprUop struct {
 }
 
 // local or global
-type AstVarDecl struct {
+type DeclVar struct {
 	pkg identifier
 	variable *ExprVariable
 	initval  Expr
 }
 
-type AstConstDecl struct {
+type DeclConst struct {
 	consts []*ExprConstVariable
 }
 
@@ -143,10 +143,10 @@ type AstCompountStmt struct {
 }
 
 type ExprFuncRef struct {
-	funcdef *AstFuncDecl
+	funcdef *DeclFunc
 }
 
-type AstFuncDecl struct {
+type DeclFunc struct {
 	pkg identifier
 	receiver  *ExprVariable
 	fname     identifier
@@ -159,10 +159,10 @@ type AstFuncDecl struct {
 
 type AstTopLevelDecl struct {
 	// either of followings
-	funcdecl  *AstFuncDecl // includes methoddecl
-	vardecl   *AstVarDecl
-	constdecl *AstConstDecl
-	typedecl  *AstTypeDecl
+	funcdecl  *DeclFunc // includes method declaration
+	vardecl   *DeclVar
+	constdecl *DeclConst
+	typedecl  *DeclType
 }
 
 type AstSourceFile struct {
@@ -176,7 +176,7 @@ type AstPackageRef struct {
 	path string
 }
 
-type AstTypeDecl struct {
+type DeclType struct {
 	name  identifier
 	gtype *Gtype
 }

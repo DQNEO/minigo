@@ -683,7 +683,7 @@ func (p *parser) parseType() *Gtype {
 	return nil
 }
 
-func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
+func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read newName
@@ -709,7 +709,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *AstVarDecl {
 	//p.expect(";")
 
 	variable := p.newVariable(newName, typ, isGlobal)
-	r := &AstVarDecl{
+	r := &DeclVar{
 		pkg: p.currentPackageName,
 		variable: variable,
 		initval:  initval,
@@ -748,7 +748,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 	return variable
 }
 
-func (p *parser) parseConstDecl() *AstConstDecl {
+func (p *parser) parseConstDecl() *DeclConst {
 	defer p.traceOut(p.traceIn())
 	// ident or "("
 	var cnsts []*ExprConstVariable
@@ -773,7 +773,7 @@ func (p *parser) parseConstDecl() *AstConstDecl {
 		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nil, 0)}
 	}
 
-	r := &AstConstDecl{
+	r := &DeclConst{
 		consts: cnsts,
 	}
 
@@ -1301,7 +1301,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 	return fname, params, isVariadic, rettypes
 }
 
-func (p *parser) parseFuncDef() *AstFuncDecl {
+func (p *parser) parseFuncDef() *DeclFunc {
 	defer p.traceOut(p.traceIn())
 	p.localvars = nil
 	var isMethod bool
@@ -1329,7 +1329,7 @@ func (p *parser) parseFuncDef() *AstFuncDecl {
 
 	p.expect("{")
 
-	r := &AstFuncDecl{
+	r := &DeclFunc{
 		pkg : p.currentPackageName,
 		receiver:receiver,
 		fname:     fname,
@@ -1453,7 +1453,7 @@ func (p *parser) parseStructDef() *Gtype {
 	}
 }
 
-func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
+func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("interface")
 	p.expect("{")
@@ -1486,7 +1486,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *AstTypeDecl {
 	}
 
 	p.currentScope.setGtype(newName, gtype)
-	r := &AstTypeDecl{
+	r := &DeclType{
 		name:  newName,
 		gtype: gtype,
 	}
@@ -1529,7 +1529,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 }
 
-func (p *parser) parseTypeDecl() *AstTypeDecl {
+func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
 	newName := p.readIdent()
 	if p.peekToken().isKeyword("interface") {
@@ -1537,7 +1537,7 @@ func (p *parser) parseTypeDecl() *AstTypeDecl {
 	}
 
 	gtype := p.parseType()
-	r := &AstTypeDecl{
+	r := &DeclType{
 		name:  newName,
 		gtype: gtype,
 	}

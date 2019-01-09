@@ -36,7 +36,7 @@ func getPackagedFuncName(pkg identifier, fname string) string {
 	return fmt.Sprintf("%s_p_%s", pkg, fname)
 }
 
-func (f *AstFuncDecl) getUniqueName() string {
+func (f *DeclFunc) getUniqueName() string {
 	if f.receiver != nil {
 		// method
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
@@ -50,7 +50,7 @@ func (f *AstFuncDecl) getUniqueName() string {
 	return getPackagedFuncName(f.pkg, string(f.fname))
 }
 
-func (f *AstFuncDecl) emitPrologue() {
+func (f *DeclFunc) emitPrologue() {
 	emitComment("FUNCTION %s", f.getUniqueName())
 	emit(".text")
 	emit(".globl	%s", f.getUniqueName())
@@ -668,48 +668,50 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 
 }
 
-func (ast *AstVarDecl) emit() {
-	if ast.variable.gtype.typ == G_ARRAY && ast.initval != nil {
+
+// for local var
+func (decl *DeclVar) emit() {
+	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
 		// initialize local array
 		debugf("initialize local array")
-		initvalues, ok := ast.initval.(*ExprArrayLiteral)
+		initvalues, ok := decl.initval.(*ExprArrayLiteral)
 		if !ok {
 			errorf("error?")
 		}
-		arraygtype := ast.variable.gtype
+		arraygtype := decl.variable.gtype
 		elmType := arraygtype.ptr.relation.gtype
 		debugf("gtype:%v", elmType)
 		for i, val := range initvalues.values {
 			val.emit()
-			localoffset := ast.variable.offset + i*elmType.getSize()
+			localoffset := decl.variable.offset + i*elmType.getSize()
 			emitLsave(elmType.getSize(), localoffset)
 		}
-	} else if ast.variable.gtype.relation != nil && ast.variable.gtype.relation.gtype.typ == G_STRUCT && ast.initval != nil {
+	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT && decl.initval != nil {
 		// initialize local struct
 		debugf("initialize local struct")
-		structliteral, ok := ast.initval.(*ExprStructLiteral)
+		structliteral, ok := decl.initval.(*ExprStructLiteral)
 		if !ok {
 			errorf("error?")
 		}
-		assignStructLiteral(ast.variable, structliteral)
+		assignStructLiteral(decl.variable, structliteral)
 
 	} else {
-		debugf("gtype=%v", ast.variable.gtype)
-		if ast.initval == nil {
+		debugf("gtype=%v", decl.variable.gtype)
+		if decl.initval == nil {
 			// assign zero value
-			ast.initval = &ExprNumberLiteral{}
+			decl.initval = &ExprNumberLiteral{}
 		}
-		ast.initval.emit()
-		emitLsave(ast.variable.gtype.getSize(), ast.variable.offset)
+		decl.initval.emit()
+		emitLsave(decl.variable.gtype.getSize(), decl.variable.offset)
 	}
 }
 
-func (decl *AstConstDecl) emit() {
-	// nothing to do
+func (decl *DeclType) emit() {
+	panic("implement me")
 }
 
-func (decl *AstTypeDecl) emit() {
-	errorf("TBD")
+func (decl *DeclConst) emit() {
+	panic("implement me")
 }
 
 func (ast *AstCompountStmt) emit() {
@@ -833,7 +835,7 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-func (methodCall *ExprMethodcall) getFuncDef() *AstFuncDecl {
+func (methodCall *ExprMethodcall) getFuncDef() *DeclFunc {
 	gtype := methodCall.receiver.getGtype()
 	debugf("method call:%v.%v", methodCall.receiver, methodCall.fname)
 	assert(gtype != nil, "gtype should not be nil")
@@ -865,7 +867,7 @@ func (methodCall *ExprMethodcall) emit() {
 	emitCall(getPackagedFuncName(decl.pkg, name), args)
 }
 
-func (funcall *ExprFuncall) getFuncDef() *AstFuncDecl {
+func (funcall *ExprFuncall) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
 	assert(relexpr != nil, "rel.expr should not be nil")
 	funcref, ok := relexpr.(*ExprFuncRef)
@@ -912,7 +914,7 @@ func emitCall(fname string, args []Expr) {
 	}
 }
 
-func (f *AstFuncDecl) emit() {
+func (f *DeclFunc) emit() {
 	f.emitPrologue()
 	f.body.emit()
 	emit("mov $0, %%rax")
@@ -946,15 +948,16 @@ func evalIntExpr(e Expr) int {
 	return 0
 }
 
-func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
-	assert(variable.isGlobal, "should be global")
-	assert(variable.gtype != nil, "variable has gtype")
-	emitLabel(".global %s", variable.varname)
-	emitLabel("%s:", variable.varname)
-	if variable.gtype.typ == G_ARRAY {
-		arrayliteral, ok := initval.(*ExprArrayLiteral)
+func (decl *DeclVar) emitGlobal() {
+	assert(decl.variable.isGlobal, "should be global")
+	assert(decl.variable.gtype != nil, "variable has gtype")
+	emitLabel(".global %s", decl.variable.varname)
+	emitLabel("%s:", decl.variable.varname)
+
+	if decl.variable.gtype.typ == G_ARRAY {
+		arrayliteral, ok := decl.initval.(*ExprArrayLiteral)
 		assert(ok, "should be array lieteral")
-		elmType := variable.gtype.ptr
+		elmType := decl.variable.gtype.ptr
 		assert(elmType != nil, "elm is not nil")
 		for _, value := range arrayliteral.values {
 			assert(value != nil, "value is set")
@@ -968,16 +971,16 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 			}
 		}
 	} else {
-		if initval == nil {
+		if decl.initval == nil {
 			// set zero value
 			emit(".quad %d", 0)
 		} else {
 			var val int
-			switch initval.(type) {
+			switch decl.initval.(type) {
 			case *ExprNumberLiteral:
-				val = initval.(*ExprNumberLiteral).val
+				val = decl.initval.(*ExprNumberLiteral).val
 			case *ExprConstVariable:
-				val = evalIntExpr(initval)
+				val = evalIntExpr(decl.initval)
 			}
 			emit(".quad %d", val)
 		}
@@ -985,8 +988,8 @@ func emitGlobalDeclVar(variable *ExprVariable, initval Expr) {
 }
 
 type IrRoot struct {
-	vars []*AstVarDecl
-	funcs []*AstFuncDecl
+	vars []*DeclVar
+	funcs []*DeclFunc
 	stringLiterals []*ExprStringLiteral
 }
 
@@ -1013,7 +1016,7 @@ func (root *IrRoot) emit() {
 
 	emitComment("GLOBAL VARS")
 	for _, vardecl := range root.vars {
-		emitGlobalDeclVar(vardecl.variable, vardecl.initval)
+		vardecl.emitGlobal()
 	}
 
 	emitComment("FUNCTIONS")
