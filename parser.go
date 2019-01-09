@@ -993,17 +993,17 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	return r
 }
 
-func (p *parser) parseAssignment(lefts []Expr) *AstAssignment {
+func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	assert(rights[0] != nil , "rights[0] is an expr")
-	return &AstAssignment{
+	return &StmtAssignment{
 		lefts:  lefts,
 		rights: rights,
 	}
 }
 
-func (p *parser) parseAssignmentOperation(left Expr, assignop string) *AstAssignment {
+func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
 	var op string
 	switch assignop {
@@ -1023,7 +1023,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *AstAssign
 		left:  left,
 		right: rights[0],
 	}
-	return &AstAssignment{
+	return &StmtAssignment{
 		lefts: []Expr{left},
 		rights: []Expr{binop},
 	}

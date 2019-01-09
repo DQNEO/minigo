@@ -38,7 +38,7 @@ func (a *DeclFunc) dump() {
 	debugNest--
 }
 
-func (ast *AstAssignment) dump() {
+func (ast *StmtAssignment) dump() {
 	debugf("assign")
 	debugNest++
 	for _, e := range ast.lefts {

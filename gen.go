@@ -347,8 +347,8 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
-func (ast *AstAssignment) emit() {
-	emit("# start AstAssignment")
+func (ast *StmtAssignment) emit() {
+	emit("# start StmtAssignment")
 	numLeft := len(ast.lefts)
 	numRight := 0
 	for _, right := range ast.rights {
@@ -529,7 +529,7 @@ func (f *AstForStmt) emitRange() {
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
-	initstmt := &AstAssignment{
+	initstmt := &StmtAssignment{
 		lefts: []Expr{
 			f.rng.indexvar,
 		},
@@ -541,9 +541,9 @@ func (f *AstForStmt) emitRange() {
 	}
 	emit("# init index")
 	initstmt.emit() // i=0
-	var assignVar *AstAssignment
+	var assignVar *StmtAssignment
 	if f.rng.valuevar != nil {
-		assignVar = &AstAssignment{
+		assignVar = &StmtAssignment{
 			lefts: []Expr{
 				f.rng.valuevar,
 			},
@@ -757,7 +757,7 @@ func (e *ExprNilLiteral) emit() {
 }
 
 func (ast *AstShortAssignment) emit() {
-	a := &AstAssignment{
+	a := &StmtAssignment{
 		lefts:ast.lefts,
 		rights:ast.rights,
 	}

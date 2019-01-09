@@ -79,7 +79,7 @@ type DeclConst struct {
 	consts []*ExprConstVariable
 }
 
-type AstAssignment struct {
+type StmtAssignment struct {
 	lefts  []Expr
 	rights []Expr
 }
