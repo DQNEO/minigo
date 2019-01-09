@@ -306,6 +306,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			//   obj.method().field
 			//   array[0].field
 			r =  &ExprStructField{
+				tok:tok,
 				strct:     e,
 				fieldname: tok.getIdent(),
 			}
@@ -1645,6 +1646,9 @@ func (ast *StmtShortVarDecl) inferTypes() {
 			}
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)
+			debugf("receiver=%v", fcall.receiver)
+			strctfield , ok := fcall.receiver.(*ExprStructField)
+			debugf("strctfield.strct=%v, %v", strctfield.strct, ok)
 			for _, gtype := range fcall.getFuncDef().rettypes {
 				rightTypes = append(rightTypes, gtype)
 			}

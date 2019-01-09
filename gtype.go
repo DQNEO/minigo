@@ -187,6 +187,9 @@ func (e *ExprArrayIndex) getGtype() *Gtype {
 
 func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
+	assert(gstruct != gInt, e.tok, "struct should not be gInt")
+	debugf("gstruct=%v", gstruct)
+	debugf("gstruct.fields=%v", gstruct.fields)
 	for _, field := range gstruct.fields {
 		if e.fieldname == field.fieldname {
 			return field.ptr

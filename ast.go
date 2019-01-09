@@ -247,6 +247,7 @@ type ExprStructLiteral struct {
 }
 
 type ExprStructField struct {
+	tok       *Token
 	strct     Expr
 	fieldname identifier
 }
