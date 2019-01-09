@@ -1666,9 +1666,7 @@ func (p *parser) resolve(universe *scope) {
 	}
 
 	p.resolveMethods()
-	for _, sa := range p.shortassignments {
-		sa.inferTypes()
-	}
+	p.inferShortAssignmentTypes()
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
@@ -1679,5 +1677,11 @@ func (p *parser) resolveMethods() {
 			errorf("typaneme %s is not found in the package scope", typeName)
 		}
 		gtype.methods = methods
+	}
+}
+
+func (p *parser) inferShortAssignmentTypes() {
+	for _, sa := range p.shortassignments {
+		sa.inferTypes()
 	}
 }
