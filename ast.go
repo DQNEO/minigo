@@ -234,14 +234,14 @@ type ExprConversion struct {
 	gtype *Gtype
 }
 
-type CaseStmt struct {
+type ExprCaseClause struct {
 	exprs []Expr
 	compound *AstCompountStmt
 }
 
 type AstSwitchStmt struct {
 	cond Expr
-	cases []*CaseStmt
+	cases []*ExprCaseClause
 	dflt *AstCompountStmt
 }
 

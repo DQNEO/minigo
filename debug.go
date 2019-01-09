@@ -179,7 +179,7 @@ func (stmt *AstSwitchStmt) emit() {
 	panic("implement me")
 }
 
-func (stmt *CaseStmt) dump() {
+func (stmt *ExprCaseClause) dump() {
 	//stmt.exprs.dump()
 	//stmt.compound.dump()
 }

@@ -1108,7 +1108,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.expect(":")
 			p.inCase++
 			compound := p.parseCompoundStmt()
-			casestmt := &CaseStmt{
+			casestmt := &ExprCaseClause{
 				exprs: exprs,
 				compound: compound,
 			}
