@@ -780,11 +780,11 @@ func (e *ExprTypeAssertion) emit() {
 	panic("implement me")
 }
 
-func (ast *AstContinueStmt) emit() {
+func (ast *StmtContinue) emit() {
 	panic("implement me")
 }
 
-func (ast *AstBreakStmt) emit() {
+func (ast *StmtBreak) emit() {
 	panic("implement me")
 }
 

@@ -209,11 +209,11 @@ type ExprTypeAssertion struct {
 	gtype *Gtype
 }
 
-type AstContinueStmt struct {
+type StmtContinue struct {
 
 }
 
-type AstBreakStmt struct {
+type StmtBreak struct {
 
 }
 

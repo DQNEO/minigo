@@ -1159,9 +1159,9 @@ func (p *parser) parseStmt() Stmt {
 		p.unreadToken()
 		return p.parseSwitchStmt()
 	} else if tok.isKeyword("continue") {
-		return &AstContinueStmt{}
+		return &StmtContinue{}
 	} else if tok.isKeyword("break") {
-		return &AstBreakStmt{}
+		return &StmtBreak{}
 	} else if tok.isKeyword("defer") {
 		p.unreadToken()
 		return p.parseDeferStmt()
