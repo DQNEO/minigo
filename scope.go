@@ -95,19 +95,19 @@ func setPredeclaredIdentifiers(r *scope) {
 
 	// declare libc functions
 	r.setFunc("puts", &ExprFuncRef{
-		funcdef: &AstFuncDecl{
+		funcdef: &DeclFunc{
 			pkg: "libc",
 			// No implementation thanks to the libc function.
 		},
 	})
 	r.setFunc("printf", &ExprFuncRef{
-		funcdef: &AstFuncDecl{
+		funcdef: &DeclFunc{
 			pkg: "libc",
 			// No implementation thanks to the libc function.
 		},
 	})
 	r.setFunc("ReadFile", &ExprFuncRef{
-		funcdef: &AstFuncDecl{
+		funcdef: &DeclFunc{
 			rettypes:[]*Gtype{
 				&Gtype{
 					typ:G_SLICE,
