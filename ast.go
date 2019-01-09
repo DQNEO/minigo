@@ -84,7 +84,7 @@ type StmtAssignment struct {
 	rights []Expr
 }
 
-type AstShortAssignment struct {
+type StmtShortVarDecl struct {
 	lefts []Expr
 	rights []Expr
 }

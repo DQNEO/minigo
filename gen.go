@@ -756,7 +756,7 @@ func (e *ExprNilLiteral) emit() {
 	emit("mov $0, %%rax")
 }
 
-func (ast *AstShortAssignment) emit() {
+func (ast *StmtShortVarDecl) emit() {
 	a := &StmtAssignment{
 		lefts:ast.lefts,
 		rights:ast.rights,

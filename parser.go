@@ -18,7 +18,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	shortassignments    []*AstShortAssignment
+	shortassignments    []*StmtShortVarDecl
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -1055,7 +1055,7 @@ func inferType(e Expr) *Gtype {
 	return nil
 }
 
-func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
+func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
@@ -1064,7 +1064,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *AstShortAssignment {
 		rel.expr = variable
 		p.currentScope.setVar(rel.name, variable)
 	}
-	r := &AstShortAssignment{
+	r := &StmtShortVarDecl{
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1624,7 +1624,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *AstS
 
 
 
-func (ast *AstShortAssignment) inferTypes() {
+func (ast *StmtShortVarDecl) inferTypes() {
 	var rightTypes []*Gtype
 	for i, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
