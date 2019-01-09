@@ -835,7 +835,8 @@ func (ast *ExprMethodcall) getUniqueName() string {
 
 func (methodCall *ExprMethodcall) getFuncDef() *AstFuncDecl {
 	gtype := methodCall.receiver.getGtype()
-	debugf("gtype=%v", gtype)
+	debugf("method call:%v.%v", methodCall.receiver, methodCall.fname)
+	assert(gtype != nil, "gtype should not be nil")
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
