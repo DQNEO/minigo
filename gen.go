@@ -792,7 +792,7 @@ func (ast *AstExprStmt) emit() {
 	ast.expr.emit()
 }
 
-func (ast *AstDeferStmt) emit() {
+func (ast *StmtDefer) emit() {
 	panic("implement me")
 }
 

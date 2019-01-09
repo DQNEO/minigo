@@ -1131,10 +1131,10 @@ func (p *parser) parseSwitchStmt() Stmt {
 	return r
 }
 
-func (p *parser) parseDeferStmt() *AstDeferStmt {
+func (p *parser) parseDeferStmt() *StmtDefer {
 	p.expectKeyword("defer")
 	callExpr := p.parsePrim()
-	return &AstDeferStmt{
+	return &StmtDefer{
 		expr :callExpr,
 	}
 }

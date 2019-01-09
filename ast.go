@@ -221,7 +221,7 @@ type AstExprStmt struct {
 	expr Expr
 }
 
-type AstDeferStmt struct {
+type StmtDefer struct {
 	expr Expr
 }
 
