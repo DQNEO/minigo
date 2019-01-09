@@ -1084,7 +1084,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 		p.requireBlock = false
 	}
 	p.expect("{")
-	r := &AstSwitchStmt{
+	r := &StmtSwitch{
 		cond:cond,
 	}
 

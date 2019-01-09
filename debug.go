@@ -175,7 +175,7 @@ func (a *ExprStructField) dump() {
 	debugf("%s.%s", a.strct, a.fieldname)
 }
 
-func (stmt *AstSwitchStmt) emit() {
+func (stmt *StmtSwitch) emit() {
 	panic("implement me")
 }
 
@@ -184,7 +184,7 @@ func (stmt *ExprCaseClause) dump() {
 	//stmt.compound.dump()
 }
 
-func (stmt *AstSwitchStmt) dump() {
+func (stmt *StmtSwitch) dump() {
 	stmt.cond.dump()
 	for _, c := range stmt.cases {
 		c.dump()

@@ -239,7 +239,7 @@ type ExprCaseClause struct {
 	compound *AstCompountStmt
 }
 
-type AstSwitchStmt struct {
+type StmtSwitch struct {
 	cond Expr
 	cases []*ExprCaseClause
 	dflt *AstCompountStmt
