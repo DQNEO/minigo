@@ -172,11 +172,6 @@ type SourceFile struct {
 	decls   []*TopLevelDecl
 }
 
-type AstPackageRef struct {
-	name identifier
-	path string
-}
-
 type DeclType struct {
 	name  identifier
 	gtype *Gtype
