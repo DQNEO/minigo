@@ -453,7 +453,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		p.expect(":")
 		assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
-		f := &AstStructFieldLiteral{
+		f := &KeyedElement{
 			key:   tok.getIdent(),
 			value: value,
 		}

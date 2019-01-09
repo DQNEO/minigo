@@ -234,14 +234,14 @@ type StmtSwitch struct {
 	dflt *StmtSatementList
 }
 
-type AstStructFieldLiteral struct {
+type KeyedElement struct {
 	key   identifier
 	value Expr
 }
 
 type ExprStructLiteral struct {
 	strctname *Relation
-	fields    []*AstStructFieldLiteral
+	fields    []*KeyedElement
 	invisiblevar *ExprVariable // to have offfset for &T{}
 }
 
