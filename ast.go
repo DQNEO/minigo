@@ -159,7 +159,7 @@ type AstFuncDecl struct {
 
 type AstTopLevelDecl struct {
 	// either of followings
-	funcdecl  *AstFuncDecl
+	funcdecl  *AstFuncDecl // includes methoddecl
 	vardecl   *AstVarDecl
 	constdecl *AstConstDecl
 	typedecl  *AstTypeDecl
