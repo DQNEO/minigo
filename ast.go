@@ -105,13 +105,13 @@ type StmtFor struct {
 	// either of rng or cls is set
 	rng   *ForRangeClause
 	cls   *ForForClause
-	block *AstCompountStmt
+	block *StmtSatementList
 }
 
 type StmtIf struct {
 	simplestmt Stmt
 	cond Expr
-	then *AstCompountStmt
+	then *StmtSatementList
 	els  Stmt
 }
 
@@ -138,7 +138,7 @@ type AstImportDecl struct {
 	specs []*AstImportSpec
 }
 
-type AstCompountStmt struct {
+type StmtSatementList struct {
 	stmts []Stmt
 }
 
@@ -154,7 +154,7 @@ type DeclFunc struct {
 	params    []*ExprVariable
 	isVariadic bool
 	localvars []*ExprVariable
-	body      *AstCompountStmt
+	body      *StmtSatementList
 }
 
 type AstTopLevelDecl struct {
@@ -236,13 +236,13 @@ type ExprConversion struct {
 
 type ExprCaseClause struct {
 	exprs []Expr
-	compound *AstCompountStmt
+	compound *StmtSatementList
 }
 
 type StmtSwitch struct {
 	cond Expr
 	cases []*ExprCaseClause
-	dflt *AstCompountStmt
+	dflt *StmtSatementList
 }
 
 type AstStructFieldLiteral struct {

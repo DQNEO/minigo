@@ -82,7 +82,7 @@ func (stmt *StmtIf) dump() {
 }
 
 /*
-func (s *AstCompountStmt) dump() {
+func (s *StmtSatementList) dump() {
 	for _, stmt := range s.stmts {
 		stmt.dump()
 	}

@@ -1205,9 +1205,9 @@ func (p *parser) parseStmt() Stmt {
 	return nil
 }
 
-func (p *parser) parseCompoundStmt() *AstCompountStmt {
+func (p *parser) parseCompoundStmt() *StmtSatementList {
 	defer p.traceOut(p.traceIn())
-	r := &AstCompountStmt{}
+	r := &StmtSatementList{}
 	for {
 		tok := p.readToken()
 		if tok.isPunct("}") {

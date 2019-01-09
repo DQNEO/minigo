@@ -714,7 +714,7 @@ func (decl *DeclConst) emit() {
 	// nothing to do
 }
 
-func (ast *AstCompountStmt) emit() {
+func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		stmt.emit()
 	}
