@@ -1549,15 +1549,15 @@ func (p *parser) parseTopLevelDecl(tok *Token) *AstTopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	var r *AstTopLevelDecl
 	switch {
+	case tok.isKeyword("func"):
+		funcdecl := p.parseFuncDef()
+		r = &AstTopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
 		vardecl := p.parseVarDecl(true)
 		r = &AstTopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
 		constdecl := p.parseConstDecl()
 		r = &AstTopLevelDecl{constdecl: constdecl}
-	case tok.isKeyword("func"):
-		funcdecl := p.parseFuncDef()
-		r = &AstTopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("type"):
 		typedecl := p.parseTypeDecl()
 		r = &AstTopLevelDecl{typedecl: typedecl}
