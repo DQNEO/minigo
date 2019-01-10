@@ -18,7 +18,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	shortassignments    []*StmtShortVarDecl
+	shortvariabledeclarations    []Stmt // StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -1082,7 +1082,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.shortassignments = append(p.shortassignments, r)
+	p.shortvariabledeclarations = append(p.shortvariabledeclarations, r)
 	return r
 }
 
@@ -1698,7 +1698,8 @@ func (p *parser) resolveMethods() {
 }
 
 func (p *parser) inferShortAssignmentTypes() {
-	for _, sa := range p.shortassignments {
-		sa.inferTypes()
+	for _, shortvarldecl := range p.shortvariabledeclarations {
+		debugf("%v", shortvarldecl)
 	}
+
 }
