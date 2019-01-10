@@ -32,12 +32,17 @@ func (a *PackageClause) dump() {
 func (a *DeclFunc) dump() {
 	debugf("funcdef %s", a.fname)
 	debugNest++
-	//for _, stmt := range a.body.stmts {
-	//stmt.dump()
-	//}
+	for _, stmt := range a.body.stmts {
+		stmt.dump()
+	}
 	debugNest--
 }
 
+func (a *StmtShortVarDecl) dump() {
+	//for _, left := range a.lefts {
+
+	//}
+}
 func (ast *StmtAssignment) dump() {
 	debugf("assign")
 	debugNest++
@@ -90,10 +95,12 @@ func (s *StmtSatementList) dump() {
 */
 
 func (a *SourceFile) dump() {
-	debugf("==== Dump AstExpr Start ===")
+	debugf("==== AST DUMP START ===")
 	a.pkg.dump()
 	for _, imprt := range a.imports {
-		debugf("import \"%v\"", imprt.specs)
+		for _, spec := range imprt.specs {
+			debugf("import \"%s\"", spec.path)
+		}
 	}
 	for _, decl := range a.decls {
 		if decl.funcdecl != nil {
@@ -106,7 +113,7 @@ func (a *SourceFile) dump() {
 			decl.constdecl.dump()
 		}
 	}
-	debugf("==== Dump AstExpr End ===")
+	debugf("==== AST DUMP END ===")
 }
 
 func (ast *ExprFuncall) dump() {
@@ -128,7 +135,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf("var %s", ast.varname)
+	debugf("var %s T %s", ast.varname, ast.gtype)
 }
 
 func (ast *ExprConstVariable) dump() {
@@ -230,6 +237,59 @@ func (e *ExprStructLiteral) dump() {
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
+	panic("implement me")
+}
+
+func (f *StmtFor) dump() {
+	debugf("for")
+	if f.rng != nil {
+		debugNest++
+		f.rng.indexvar.dump()
+		if f.rng.valuevar != nil {
+			f.rng.valuevar.dump()
+		}
+		debugf("range")
+		f.rng.rangeexpr.dump()
+		debugNest--
+	} else if f.cls != nil {
+		debugf("for %v", f.cls)
+	}
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
+func (stmt *StmtReturn) dump() {
+	panic("implement me")
+}
+
+func (ast *StmtInc) dump() {
+	panic("implement me")
+}
+
+func (ast *StmtDec) dump() {
+	panic("implement me")
+}
+
+func (ast *StmtSatementList) dump() {
+	for _, stmt := range ast.stmts {
+		stmt.dump()
+	}
+}
+
+func (ast *StmtContinue) dump() {
+	panic("implement me")
+}
+
+func (ast *StmtBreak) dump() {
+	panic("implement me")
+}
+
+func (ast *StmtExpr) dump() {
+	ast.expr.dump()
+}
+
+func (ast *StmtDefer) dump() {
 	panic("implement me")
 }
 

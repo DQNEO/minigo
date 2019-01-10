@@ -8,6 +8,7 @@ type Expr interface {
 
 type Stmt interface {
 	emit()
+	dump()
 }
 
 type Relation struct {
