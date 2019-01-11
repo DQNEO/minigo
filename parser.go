@@ -18,7 +18,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	shortvariabledeclarations    []Inferer // StmtShortVarDecl or RangeClause
+	uninferered         []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -691,6 +691,11 @@ func (p *parser) parseType() *Gtype {
 	return nil
 }
 
+func (decl *DeclVar) infer() {
+	gtype := inferType(decl.initval)
+	decl.variable.gtype = gtype
+}
+
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	p.assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
 	defer p.traceOut(p.traceIn())
@@ -702,9 +707,6 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	tok := p.readToken()
 	if tok.isPunct("=") {
 		initval = p.parseExpr()
-		if typ == nil {
-			typ = inferType(initval)
-		}
 	} else {
 		p.unreadToken()
 		typ = p.parseType()
@@ -721,6 +723,9 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 		pkg: p.currentPackageName,
 		variable: variable,
 		initval:  initval,
+	}
+	if typ == nil {
+		p.uninferered = append(p.uninferered, r)
 	}
 	p.currentScope.setVar(newName, variable)
 	return r
@@ -891,7 +896,7 @@ func (p *parser) parseForStmt() *StmtFor {
 				}
 
 				r := p.parseForRange(lefts)
-				p.shortvariabledeclarations = append(p.shortvariabledeclarations, r.rng)
+				p.uninferered = append(p.uninferered, r.rng)
 				return r
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
@@ -1105,7 +1110,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.shortvariabledeclarations = append(p.shortvariabledeclarations, r)
+	p.uninferered = append(p.uninferered, r)
 	return r
 }
 
@@ -1706,7 +1711,7 @@ func (p *parser) resolve(universe *scope) {
 	}
 
 	p.resolveMethods()
-	p.inferShortAssignmentTypes()
+	p.inferTypes()
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
@@ -1720,8 +1725,8 @@ func (p *parser) resolveMethods() {
 	}
 }
 
-func (p *parser) inferShortAssignmentTypes() {
-	for _, shortvarldecl := range p.shortvariabledeclarations {
-		shortvarldecl.infer()
+func (p *parser) inferTypes() {
+	for _, ast := range p.uninferered {
+		ast.infer()
 	}
 }
