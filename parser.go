@@ -18,7 +18,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	shortvariabledeclarations    []Stmt // StmtShortVarDecl or RangeClause
+	shortvariabledeclarations    []Inferer // StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -1638,7 +1638,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 
 
 
-func (ast *StmtShortVarDecl) inferTypes() {
+func (ast *StmtShortVarDecl) infer() {
 	var rightTypes []*Gtype
 	for i, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
@@ -1699,7 +1699,6 @@ func (p *parser) resolveMethods() {
 
 func (p *parser) inferShortAssignmentTypes() {
 	for _, shortvarldecl := range p.shortvariabledeclarations {
-		debugf("%v", shortvarldecl)
+		shortvarldecl.infer()
 	}
-
 }
