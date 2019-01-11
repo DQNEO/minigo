@@ -827,7 +827,16 @@ func (clause *ForRangeClause) infer() {
 	if clause.valuevar != nil {
 		valuevar,ok := clause.valuevar.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
-		valuevar.gtype = gInt
+
+		collectionType := clause.rangeexpr.getGtype()
+		var elementType *Gtype
+		if collectionType.typ == G_ARRAY {
+			elementType = collectionType.ptr
+		} else if collectionType.typ == G_SLICE {
+			elementType = collectionType.ptr // @TODO is this right ?
+		}
+		debugf("for i, v (%s) := rannge %v", elementType, collectionType)
+		valuevar.gtype = elementType
 	}
 }
 
