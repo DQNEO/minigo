@@ -1073,12 +1073,13 @@ func inferType(e Expr) *Gtype {
 		return e.getGtype()
 	case *ExprUop:
 		uop := e.(*ExprUop)
-		if uop.op == "&" {
+		switch uop.op {
+		case "&" :
 			return &Gtype{
 				typ: G_POINTER,
 				ptr: inferType(uop.operand),
 			}
-		} else if uop.op == "-" {
+		case "-" :
 			return gInt
 		}
 	default:
