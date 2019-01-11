@@ -908,16 +908,18 @@ func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 		valuevar = exprs[1].(*Relation)
 	}
 
+	p.requireBlock = true
+	rangeExpr := p.parseExpr()
+	p.requireBlock = false
+	p.expect("{")
+
 	var r = &StmtFor{
 		rng: &ForRangeClause{
 			indexvar: indexvar,
 			valuevar: valuevar,
+			rangeexpr: rangeExpr,
 		},
 	}
-	p.requireBlock = true
-	r.rng.rangeexpr = p.parseExpr()
-	p.requireBlock = false
-	p.expect("{")
 	r.block = p.parseCompoundStmt()
 	return r
 }
