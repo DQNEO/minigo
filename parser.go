@@ -820,15 +820,25 @@ func (p *parser) exitScope() {
 }
 
 func (clause *ForRangeClause) infer() {
+	collectionType := clause.rangeexpr.getGtype()
+
 	indexvar,ok := clause.indexvar.expr.(*ExprVariable)
 	assert(ok, nil, "ok")
-	indexvar.gtype = gInt
+
+	var indexType *Gtype
+	switch collectionType.typ {
+	case G_ARRAY, G_SLICE:
+		indexType = gInt
+	default:
+		// @TODO consider map etc.
+		errorf("TBI")
+	}
+	indexvar.gtype = indexType
 
 	if clause.valuevar != nil {
 		valuevar,ok := clause.valuevar.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 
-		collectionType := clause.rangeexpr.getGtype()
 		var elementType *Gtype
 		if collectionType.typ == G_ARRAY {
 			elementType = collectionType.ptr
