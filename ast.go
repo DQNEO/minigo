@@ -11,6 +11,10 @@ type Stmt interface {
 	dump()
 }
 
+type Inferer interface {
+	infer()
+}
+
 type Relation struct {
 	name identifier
 

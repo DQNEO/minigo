@@ -18,7 +18,7 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	shortassignments    []*StmtShortVarDecl
+	shortvariabledeclarations    []Inferer // StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -819,6 +819,18 @@ func (p *parser) exitScope() {
 	p.currentScope = p.currentScope.outer
 }
 
+func (clause *ForRangeClause) infer() {
+	indexvar,ok := clause.indexvar.expr.(*ExprVariable)
+	assert(ok, nil, "ok")
+	indexvar.gtype = gInt
+
+	if clause.valuevar != nil {
+		valuevar,ok := clause.valuevar.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		valuevar.gtype = gInt
+	}
+}
+
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
@@ -853,23 +865,15 @@ func (p *parser) parseForStmt() *StmtFor {
 		} else if tok2.isPunct(":=") {
 			if p.peekToken().isKeyword("range") {
 				p.assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
-				e := lefts[0]
-				rel := e.(*Relation) // a brand new rel
-				gtype := gInt // index is int
-				variable := p.newVariable(rel.name, gtype, false)
-				rel.expr = variable
-				p.currentScope.setVar(rel.name, variable)
+				p.shortVarDecl(lefts[0])
 
 				if len(lefts) == 2 {
-					e := lefts[1]
-					rel := e.(*Relation) // a brand new rel
-					gtype := inferType(rel.expr)
-					variable := p.newVariable(rel.name, gtype, false)
-					rel.expr = variable
-					p.currentScope.setVar(rel.name, variable)
+					p.shortVarDecl(lefts[1])
 				}
 
-				return p.parseForRange(lefts)
+				r := p.parseForRange(lefts)
+				p.shortvariabledeclarations = append(p.shortvariabledeclarations, r.rng)
+				return r
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
 			}
@@ -1069,20 +1073,24 @@ func inferType(e Expr) *Gtype {
 	return nil
 }
 
+func (p *parser) shortVarDecl(e Expr) {
+	rel := e.(*Relation) // a brand new rel
+	variable := p.newVariable(rel.name, nil, false)
+	p.currentScope.setVar(rel.name, variable)
+	rel.expr = variable
+}
+
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
-		rel := e.(*Relation) // a brand new rel
-		variable := p.newVariable(rel.name, nil, false)
-		rel.expr = variable
-		p.currentScope.setVar(rel.name, variable)
+		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.shortassignments = append(p.shortassignments, r)
+	p.shortvariabledeclarations = append(p.shortvariabledeclarations, r)
 	return r
 }
 
@@ -1638,7 +1646,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 
 
 
-func (ast *StmtShortVarDecl) inferTypes() {
+func (ast *StmtShortVarDecl) infer() {
 	var rightTypes []*Gtype
 	for i, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
@@ -1698,7 +1706,7 @@ func (p *parser) resolveMethods() {
 }
 
 func (p *parser) inferShortAssignmentTypes() {
-	for _, sa := range p.shortassignments {
-		sa.inferTypes()
+	for _, shortvarldecl := range p.shortvariabledeclarations {
+		shortvarldecl.infer()
 	}
 }
