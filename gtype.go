@@ -169,6 +169,8 @@ func (e *ExprUop) getGtype() *Gtype {
 		return e.operand.getGtype().ptr
 	case "!":
 		return gBool
+	case "-" :
+		return gInt
 	}
 	errorf("internal error")
 	return nil
