@@ -1070,12 +1070,17 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 func inferType(e Expr) *Gtype {
 	switch e.(type) {
 	case *Relation:
-		//rel := e.(*Relation)
-		return gInt
+		rel := e.(*Relation)
+		gtype := rel.getGtype()
+		if gtype == nil {
+			debugf("gtype is nil. conver it to gInt for now")
+			return gInt
+		} else {
+			return gtype
+		}
 	default:
 		return e.getGtype()
 	}
-	return nil
 }
 
 func (p *parser) shortVarDecl(e Expr) {
