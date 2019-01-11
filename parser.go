@@ -865,18 +865,10 @@ func (p *parser) parseForStmt() *StmtFor {
 		} else if tok2.isPunct(":=") {
 			if p.peekToken().isKeyword("range") {
 				p.assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
-				e := lefts[0]
-				rel := e.(*Relation) // a brand new rel
-				variable := p.newVariable(rel.name, nil, false)
-				p.currentScope.setVar(rel.name, variable)
-				rel.expr = variable
+				p.shortVarDecl(lefts[0])
 
 				if len(lefts) == 2 {
-					e := lefts[1]
-					rel := e.(*Relation) // a brand new rel
-					variable := p.newVariable(rel.name, nil, false)
-					p.currentScope.setVar(rel.name, variable)
-					rel.expr = variable
+					p.shortVarDecl(lefts[1])
 				}
 
 				r := p.parseForRange(lefts)
@@ -1081,14 +1073,18 @@ func inferType(e Expr) *Gtype {
 	return nil
 }
 
+func (p *parser) shortVarDecl(e Expr) {
+	rel := e.(*Relation) // a brand new rel
+	variable := p.newVariable(rel.name, nil, false)
+	p.currentScope.setVar(rel.name, variable)
+	rel.expr = variable
+}
+
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
-		rel := e.(*Relation) // a brand new rel
-		variable := p.newVariable(rel.name, nil, false)
-		rel.expr = variable
-		p.currentScope.setVar(rel.name, variable)
+		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
 		lefts:  lefts,
