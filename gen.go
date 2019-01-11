@@ -78,6 +78,9 @@ func (f *DeclFunc) emitPrologue() {
 
 	var localarea int
 	for _, lvar := range f.localvars {
+		if lvar.gtype == nil {
+			debugf("%s has nil gtype ", lvar)
+		}
 		size := lvar.gtype.getSize()
 		assert(size != 0, nil, "size is not zero")
 		loff := align(size, 8)

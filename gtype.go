@@ -51,6 +51,7 @@ type Gtype struct {
 }
 
 func (gtype *Gtype) getSize() int {
+	assertNotNil(gtype != nil, nil)
 	if gtype.typ == G_REL {
 		if gtype.relation.gtype == nil {
 			errorf("relation not resolved: %s", gtype.relation)
