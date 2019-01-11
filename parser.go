@@ -1069,14 +1069,8 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 
 func inferType(e Expr) *Gtype {
 	switch e.(type) {
-	case *ExprNumberLiteral,*ExprStringLiteral,*ExprArrayLiteral:
+	case *ExprNumberLiteral,*ExprStringLiteral,*ExprArrayLiteral,*ExprStructLiteral:
 		return e.getGtype()
-	case *ExprStructLiteral:
-		strct := e.(*ExprStructLiteral)
-		return &Gtype{
-			typ: G_REL,
-			relation: strct.strctname,
-		}
 	case *ExprUop:
 		uop := e.(*ExprUop)
 		if uop.op == "&" {

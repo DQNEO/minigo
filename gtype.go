@@ -142,7 +142,10 @@ func (rel *Relation) getGtype() *Gtype {
 }
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
-	return e.strctname.gtype // this can be nil while the relation is unresolved.
+	return &Gtype{
+		typ: G_REL,
+		relation: e.strctname,
+	}
 }
 
 func (e *ExprFuncall) getGtype() *Gtype {
