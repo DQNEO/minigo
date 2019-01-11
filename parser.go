@@ -819,6 +819,18 @@ func (p *parser) exitScope() {
 	p.currentScope = p.currentScope.outer
 }
 
+func (clause *ForRangeClause) infer() {
+	indexvar,ok := clause.indexvar.expr.(*ExprVariable)
+	assert(ok, nil, "ok")
+	indexvar.gtype = gInt
+
+	if clause.valuevar != nil {
+		valuevar,ok := clause.valuevar.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		valuevar.gtype = gInt
+	}
+}
+
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
@@ -855,21 +867,21 @@ func (p *parser) parseForStmt() *StmtFor {
 				p.assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
 				e := lefts[0]
 				rel := e.(*Relation) // a brand new rel
-				gtype := gInt // index is int
-				variable := p.newVariable(rel.name, gtype, false)
-				rel.expr = variable
+				variable := p.newVariable(rel.name, nil, false)
 				p.currentScope.setVar(rel.name, variable)
+				rel.expr = variable
 
 				if len(lefts) == 2 {
 					e := lefts[1]
 					rel := e.(*Relation) // a brand new rel
-					gtype := inferType(rel.expr)
-					variable := p.newVariable(rel.name, gtype, false)
-					rel.expr = variable
+					variable := p.newVariable(rel.name, nil, false)
 					p.currentScope.setVar(rel.name, variable)
+					rel.expr = variable
 				}
 
-				return p.parseForRange(lefts)
+				r := p.parseForRange(lefts)
+				p.shortvariabledeclarations = append(p.shortvariabledeclarations, r.rng)
+				return r
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
 			}
