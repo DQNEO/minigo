@@ -54,7 +54,7 @@ func NewTokenStream(bs *ByteStream) *TokenStream {
 }
 
 func (tok *Token) String() string {
-	return fmt.Sprintf("\"%s\" (at %s:%d:%d)",
+	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
 		tok.sval, tok.filename, tok.line, tok.column)
 }
 
