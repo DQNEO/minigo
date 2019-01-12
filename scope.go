@@ -103,16 +103,4 @@ func setPredeclaredIdentifiers(r *scope) {
 			// No implementation thanks to the libc function.
 		},
 	})
-	r.setFunc("ReadFile", &ExprFuncRef{
-		funcdef: &DeclFunc{
-			rettypes: []*Gtype{
-				&Gtype{
-					typ: G_SLICE,
-				},
-				&Gtype{
-					typ: G_INTERFACE,
-				},
-			},
-		},
-	})
 }
