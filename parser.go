@@ -1274,13 +1274,13 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 	fname := tok.getIdent()
 	p.expect("(")
 
-	tok = p.readToken()
-
 	var params []*ExprVariable
 	var isVariadic bool
 
-	if !tok.isPunct(")") {
-		p.unreadToken()
+	tok = p.peekToken()
+	if tok.isPunct(")") {
+		p.skip()
+	} else {
 		for {
 			tok := p.readToken()
 			pname := tok.getIdent()
