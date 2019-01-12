@@ -1475,11 +1475,13 @@ func (p *parser) parseStructDef() *Gtype {
 	p.expect("{")
 	var fields []*Gtype
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("}") {
+			p.skip()
 			break
 		}
 		fieldname := tok.getIdent()
+		p.skip()
 		gtype := p.parseType()
 		fieldtype := *gtype
 		fieldtype.ptr = gtype
