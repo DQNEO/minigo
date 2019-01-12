@@ -709,11 +709,11 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isPunct("=") {
+		p.skip()
 		initval = p.parseExpr()
 	} else {
-		p.unreadToken()
 		typ = p.parseType()
 		p.assertNotNil(typ)
 		tok := p.readToken()
