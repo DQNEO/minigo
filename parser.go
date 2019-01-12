@@ -992,8 +992,9 @@ func (p *parser) parseIfStmt() *StmtIf {
 	p.expect("{")
 	p.requireBlock = false
 	r.then = p.parseCompoundStmt()
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isKeyword("else") {
+		p.skip()
 		tok2 := p.peekToken()
 		if tok2.isKeyword("if") {
 			// we regard "else if" as a kind of a nested if statement
@@ -1005,8 +1006,6 @@ func (p *parser) parseIfStmt() *StmtIf {
 		} else {
 			tok2.errorf("Unexpected token")
 		}
-	} else {
-		p.unreadToken()
 	}
 	return r
 }
