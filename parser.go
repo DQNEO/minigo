@@ -818,11 +818,11 @@ func (p *parser) parseIdentList() []identifier {
 			tok.errorf("Ident expected")
 		}
 
-		tok = p.readToken()
+		tok = p.peekToken()
 		if tok.isPunct(",") {
+			p.skip()
 			continue
 		} else {
-			p.unreadToken()
 			return r
 		}
 	}
