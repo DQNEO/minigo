@@ -216,8 +216,9 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 
 	var r Expr
 	// assure operand is array, slice, or map
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isPunct(":") {
+		p.skip()
 		lowIndex := &ExprNumberLiteral{
 			val: 0,
 		}
@@ -228,7 +229,6 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 			high: highIndex,
 		}
 	} else {
-		p.unreadToken()
 		index := p.parseExpr()
 		tok := p.readToken()
 		if tok.isPunct("]") {
