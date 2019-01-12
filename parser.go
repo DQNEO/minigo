@@ -1034,19 +1034,17 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	}
 	r = append(r, first)
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isSemicolon() {
-			p.unreadToken()
 			return r
 		} else if tok.isPunct("=") || tok.isPunct(":=") {
-			p.unreadToken()
 			return r
 		} else if tok.isPunct(",") {
+			p.skip()
 			expr := p.parseExpr()
 			r = append(r, expr)
 			continue
 		} else {
-			p.unreadToken()
 			return r
 		}
 	}
