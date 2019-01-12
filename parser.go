@@ -646,6 +646,7 @@ func (p *parser) parseType() *Gtype {
 			}
 			return gtype
 		} else if tok.isKeyword("struct") {
+			p.unreadToken()
 			return p.parseStructDef()
 		} else if tok.isKeyword("map") {
 			p.unreadToken()
@@ -1460,8 +1461,8 @@ func (p *parser) parseImportDecls() []*ImportDecl {
 const MaxAlign = 16
 
 func (p *parser) parseStructDef() *Gtype {
-	p.assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("struct")
 
 	p.expect("{")
 	var fields []*Gtype
