@@ -1517,7 +1517,8 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.expectKeyword("interface")
 
 	p.expect("{")
-	var methods []*signature
+	var methods map[identifier]*signature
+	methods = make(map[identifier]*signature)
 	for {
 		if p.peekToken().isPunct("}") {
 			break
@@ -1536,7 +1537,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			isVariadic: isVariadic,
 			rettypes:   rettypes,
 		}
-		methods = append(methods, method)
+		methods[fname] = method
 	}
 	p.expect("}")
 
@@ -1709,7 +1710,7 @@ func (ast *StmtShortVarDecl) infer() {
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)
 			debugf("receiver=%v", fcall.receiver)
-			for _, gtype := range fcall.getFuncDef().rettypes {
+			for _, gtype := range fcall.getRettypes() {
 				rightTypes = append(rightTypes, gtype)
 			}
 		case *ExprTypeAssertion:

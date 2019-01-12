@@ -359,8 +359,8 @@ func (ast *StmtAssignment) emit() {
 			funcdef := right.(*ExprFuncall).getFuncDef()
 			numRight += len(funcdef.rettypes)
 		case *ExprMethodcall:
-			funcdef := right.(*ExprMethodcall).getFuncDef()
-			numRight += len(funcdef.rettypes)
+			rettypes := right.(*ExprMethodcall).getRettypes()
+			numRight += len(rettypes)
 		default:
 			numRight++
 		}
@@ -387,10 +387,10 @@ func (ast *StmtAssignment) emit() {
 				emit("push %%rax")
 			}
 		case *ExprMethodcall:
-			funcdef := right.(*ExprMethodcall).getFuncDef()
+			rettypes := right.(*ExprMethodcall).getRettypes()
 			emit("# emitting rhs (funcall)")
 			right.emit()
-			for i, _ := range funcdef.rettypes {
+			for i, _ := range rettypes {
 				emit("mov %s(%%rip), %%rax", retvals[i])
 				emit("push %%rax")
 			}
@@ -836,7 +836,21 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-func (methodCall *ExprMethodcall) getFuncDef() *DeclFunc {
+func (methodCall *ExprMethodcall) getPkgName() identifier {
+	origType := methodCall.getOrigType()
+	if origType.typ == G_INTERFACE {
+		errorf("TBI")
+	} else {
+		funcref, ok := origType.methods[methodCall.fname]
+		if !ok {
+			errorf("method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+		}
+		return funcref.funcdef.pkg
+	}
+	return ""
+}
+
+func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(gtype != nil, methodCall.tok)
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
@@ -847,12 +861,24 @@ func (methodCall *ExprMethodcall) getFuncDef() *DeclFunc {
 		typeToBeloing = gtype
 	}
 	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
-	funcref, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
-	if !ok {
-		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
-	}
+	debugf("typeToBeloing = %s", typeToBeloing)
+	origType := typeToBeloing.relation.gtype
+	debugf("origType = %v", origType)
+	return origType
+}
 
-	return funcref.funcdef
+
+func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
+	origType := methodCall.getOrigType()
+	if origType.typ == G_INTERFACE {
+		return origType.imethods[methodCall.fname].rettypes
+	} else {
+		funcref, ok := origType.methods[methodCall.fname]
+		if !ok {
+			errorf("method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+		}
+		return funcref.funcdef.rettypes
+	}
 }
 
 func (methodCall *ExprMethodcall) emit() {
@@ -862,9 +888,9 @@ func (methodCall *ExprMethodcall) emit() {
 		args = append(args, arg)
 	}
 
-	decl := methodCall.getFuncDef()
+	pkgname := methodCall.getPkgName()
 	name := methodCall.getUniqueName()
-	emitCall(getPackagedFuncName(decl.pkg, name), args)
+	emitCall(getPackagedFuncName(pkgname, name), args)
 }
 
 func (funcall *ExprFuncall) getFuncDef() *DeclFunc {

@@ -44,7 +44,7 @@ type Gtype struct {
 	length          int        // for slice, array
 	capacity        int        // for slice
 	underlyingarray interface{}
-	imethods        []*signature // for interface
+	imethods        map[identifier]*signature // for interface
 	methods         map[identifier]*ExprFuncRef
 	// for fixed array
 	mapKey   *Gtype // for map
@@ -98,6 +98,8 @@ func (gtype *Gtype) String() string {
 		return "slice"
 	case G_STRING:
 		return "string"
+	case G_INTERFACE:
+		return "interface"
 	default:
 		errorf("gtype.String() error: type=%d", gtype.typ)
 	}
