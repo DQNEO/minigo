@@ -1399,6 +1399,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 func (p *parser) parseImport() *ImportDecl {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("import")
 	tok := p.readToken()
 	var specs []*ImportSpec
 	if tok.isPunct("(") {
@@ -1445,14 +1446,10 @@ func (p *parser) parsePackageClause() *PackageClause {
 func (p *parser) parseImportDecls() []*ImportDecl {
 	defer p.traceOut(p.traceIn())
 	var r []*ImportDecl
-	for {
-		tok := p.readToken()
-		if !tok.isKeyword("import") {
-			p.unreadToken()
-			return r
-		}
+	for p.peekToken().isKeyword("import") {
 		r = append(r, p.parseImport())
 	}
+	return r
 }
 
 const MaxAlign = 16
