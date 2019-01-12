@@ -703,6 +703,8 @@ func (decl *DeclVar) infer() {
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("var")
+
 	// read newName
 	newName := p.readIdent()
 	var typ *Gtype
@@ -774,6 +776,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 
 func (p *parser) parseConstDecl() *DeclConst {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("const")
 	// ident or "("
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
@@ -1172,7 +1175,7 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isKeyword("var") {
 		return p.parseVarDecl(false)
 	} else if tok.isKeyword("const") {
@@ -1180,23 +1183,25 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("type") {
 		return p.parseTypeDecl()
 	} else if tok.isKeyword("for") {
+		p.skip()
 		return p.parseForStmt()
 	} else if tok.isKeyword("if") {
+		p.skip()
 		return p.parseIfStmt()
 	} else if tok.isKeyword("return") {
+		p.skip()
 		return p.parseReturnStmt()
 	} else if tok.isKeyword("switch") {
-		p.unreadToken()
 		return p.parseSwitchStmt()
 	} else if tok.isKeyword("continue") {
+		p.skip()
 		return &StmtContinue{}
 	} else if tok.isKeyword("break") {
+		p.skip()
 		return &StmtBreak{}
 	} else if tok.isKeyword("defer") {
-		p.unreadToken()
 		return p.parseDeferStmt()
 	}
-	p.unreadToken()
 	expr1 := p.parseExpr()
 	tok2 := p.readToken()
 	if tok2.isPunct(",") {
@@ -1564,6 +1569,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("type")
+
 	newName := p.readIdent()
 	if p.peekToken().isKeyword("interface") {
 		return p.parseInterfaceDef(newName)
@@ -1585,15 +1592,12 @@ func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
-		p.expectKeyword("var")
 		vardecl := p.parseVarDecl(true)
 		return &TopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
-		p.expectKeyword("const")
 		constdecl := p.parseConstDecl()
 		return &TopLevelDecl{constdecl: constdecl}
 	case tok.isKeyword("type"):
-		p.expectKeyword("type")
 		typedecl := p.parseTypeDecl()
 		return &TopLevelDecl{typedecl: typedecl}
 	}
