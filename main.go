@@ -109,19 +109,19 @@ func main() {
 	}
 	p.resolve(universe)
 
-	ir := ast2ir(stdpkgs,  astFiles, p.stringLiterals)
+	ir := ast2ir(stdpkgs, astFiles, p.stringLiterals)
 	ir.emit()
 }
 
 type stdpkg struct {
-	name identifier
+	name  identifier
 	files []*SourceFile
 }
 
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
-		stringLiterals:stringLiterals,
+		stringLiterals: stringLiterals,
 	}
 
 	for _, pkg := range stdpkgs {

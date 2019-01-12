@@ -14,7 +14,7 @@ type parser struct {
 	packageBlockScope   *scope
 	currentScope        *scope
 	scopes              map[identifier]*scope
-	stringLiterals []*ExprStringLiteral
+	stringLiterals      []*ExprStringLiteral
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
@@ -22,7 +22,7 @@ type parser struct {
 	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
-	inCase              int // > 0  while in reading case compound stmts
+	inCase              int  // > 0  while in reading case compound stmts
 	constSpecIndex      int
 	currentPackageName  identifier
 }
@@ -135,7 +135,7 @@ func (p *parser) readFuncallArgs() []Expr {
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
 			p.expect("...")
-			arg = &ExprVaArg{expr:arg}
+			arg = &ExprVaArg{expr: arg}
 			r = append(r, arg)
 			p.expect(")")
 			return r
@@ -194,7 +194,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		args := p.readFuncallArgs()
 		fname := string(rel.name)
 		e = &ExprFuncall{
-			rel:rel,
+			rel:   rel,
 			fname: fname,
 			args:  args,
 		}
@@ -232,7 +232,7 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 		tok := p.readToken()
 		if tok.isPunct("]") {
 			r = &ExprArrayIndex{
-				array:   e,
+				array: e,
 				index: index,
 			}
 		} else if tok.isPunct(":") {
@@ -258,13 +258,13 @@ func (p *parser) parseTypeAssertion(e Expr) Expr {
 		p.skip()
 		p.expect(")")
 		return &ExprTypeSwitchGuard{
-			expr:e,
+			expr: e,
 		}
 	} else {
 		gtype := p.parseType()
 		p.expect(")")
 		e = &ExprTypeAssertion{
-			expr: e,
+			expr:  e,
 			gtype: gtype,
 		}
 		return p.succeedingExpr(e)
@@ -293,7 +293,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			p.expect("(")
 			args := p.readFuncallArgs()
 			r = &ExprMethodcall{
-				tok: tok,
+				tok:      tok,
 				receiver: e,
 				fname:    tok.getIdent(),
 				args:     args,
@@ -306,14 +306,14 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			//   fncall().field
 			//   obj.method().field
 			//   array[0].field
-			r =  &ExprStructField{
-				tok:tok,
+			r = &ExprStructField{
+				tok:       tok,
 				strct:     e,
 				fieldname: tok.getIdent(),
 			}
 			return p.succeedingExpr(r)
 		}
-	} else if next.isPunct("["){
+	} else if next.isPunct("[") {
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
 		e = p.parseArrayIndex(e)
@@ -346,9 +346,9 @@ func (p *parser) parseMapType() *Gtype {
 	p.expect("]")
 	mapValue := p.parseType()
 	return &Gtype{
-		typ: G_MAP,
-		mapKey:mapKey,
-		mapValue:mapValue,
+		typ:      G_MAP,
+		mapKey:   mapKey,
+		mapValue: mapValue,
 	}
 }
 
@@ -359,7 +359,7 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	e := p.parseExpr()
 	p.expect(")")
 	return &ExprConversion{
-		expr : e,
+		expr:  e,
 		gtype: gtype,
 	}
 }
@@ -373,7 +373,7 @@ func (p *parser) parsePrim() Expr {
 		return nil
 	case tok.isTypeString(): // string literal
 		ast := &ExprStringLiteral{
-			val:    tok.sval,
+			val: tok.sval,
 		}
 		p.addStringLiteral(ast)
 		return ast
@@ -496,8 +496,8 @@ func (p *parser) parseUnaryExpr() Expr {
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
 			strctliteral.invisiblevar = p.newVariable("", &Gtype{
-				typ:G_REL,
-				relation:strctliteral.strctname,
+				typ:      G_REL,
+				relation: strctliteral.strctname,
 			}, false)
 		}
 		return uop
@@ -508,13 +508,13 @@ func (p *parser) parseUnaryExpr() Expr {
 		}
 	case tok.isPunct("!"):
 		return &ExprUop{
-			op: tok.sval,
-			operand:p.parsePrim(),
+			op:      tok.sval,
+			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
 		return &ExprUop{
-			op: tok.sval,
-			operand:p.parsePrim(),
+			op:      tok.sval,
+			operand: p.parsePrim(),
 		}
 	default:
 		p.unreadToken()
@@ -700,7 +700,7 @@ func (decl *DeclVar) infer() {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
-	p.assert(p.lastToken().isKeyword("var"),"last token is \"var\"")
+	p.assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read newName
 	newName := p.readIdent()
@@ -723,14 +723,14 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 
 	variable := p.newVariable(newName, typ, isGlobal)
 	r := &DeclVar{
-		pkg: p.currentPackageName,
+		pkg:      p.currentPackageName,
 		variable: variable,
 		initval:  initval,
 	}
 	if typ == nil {
 		if isGlobal {
 			variable.gtype = &Gtype{
-				typ: G_DEPENDENT,
+				typ:          G_DEPENDENT,
 				dependendson: initval,
 			}
 			p.globaluninferred = append(p.globaluninferred, variable)
@@ -765,7 +765,6 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		name:      newName,
 		val:       val,
 		iotaIndex: iotaIndex,
-
 	}
 
 	p.currentScope.setConst(newName, variable)
@@ -838,7 +837,7 @@ func (p *parser) exitScope() {
 func (clause *ForRangeClause) infer() {
 	collectionType := clause.rangeexpr.getGtype()
 
-	indexvar,ok := clause.indexvar.expr.(*ExprVariable)
+	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
 	assert(ok, nil, "ok")
 
 	var indexType *Gtype
@@ -852,7 +851,7 @@ func (clause *ForRangeClause) infer() {
 	indexvar.gtype = indexType
 
 	if clause.valuevar != nil {
-		valuevar,ok := clause.valuevar.expr.(*ExprVariable)
+		valuevar, ok := clause.valuevar.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 
 		var elementType *Gtype
@@ -899,7 +898,7 @@ func (p *parser) parseForStmt() *StmtFor {
 			}
 		} else if tok2.isPunct(":=") {
 			if p.peekToken().isKeyword("range") {
-				p.assert(len(lefts) == 1 || len(lefts) == 2 , "lefts is not empty")
+				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
 				p.shortVarDecl(lefts[0])
 
 				if len(lefts) == 2 {
@@ -954,8 +953,8 @@ func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 
 	var r = &StmtFor{
 		rng: &ForRangeClause{
-			indexvar: indexvar,
-			valuevar: valuevar,
+			indexvar:  indexvar,
+			valuevar:  valuevar,
 			rangeexpr: rangeExpr,
 		},
 	}
@@ -1073,7 +1072,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 		right: rights[0],
 	}
 	return &StmtAssignment{
-		lefts: []Expr{left},
+		lefts:  []Expr{left},
 		rights: []Expr{binop},
 	}
 }
@@ -1087,14 +1086,14 @@ func (p *parser) shortVarDecl(e Expr) {
 
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
-	p.assert(p.lastToken().isPunct(":="),"last token")
+	p.assert(p.lastToken().isPunct(":="), "last token")
 	lastToken := p.lastToken()
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
-		tok: lastToken, // ":="
+		tok:    lastToken, // ":="
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1115,7 +1114,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 	}
 	p.expect("{")
 	r := &StmtSwitch{
-		cond:cond,
+		cond: cond,
 	}
 
 	for {
@@ -1139,7 +1138,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &ExprCaseClause{
-				exprs: exprs,
+				exprs:    exprs,
 				compound: compound,
 			}
 			p.inCase--
@@ -1165,7 +1164,7 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 	p.expectKeyword("defer")
 	callExpr := p.parsePrim()
 	return &StmtDefer{
-		expr :callExpr,
+		expr: callExpr,
 	}
 }
 
@@ -1220,11 +1219,11 @@ func (p *parser) parseStmt() Stmt {
 		return p.parseAssignmentOperation(expr1, tok2.sval)
 	} else if tok2.isPunct("++") {
 		return &StmtInc{
-			operand:expr1,
+			operand: expr1,
 		}
-	} else if tok2.isPunct("--")  {
+	} else if tok2.isPunct("--") {
 		return &StmtDec{
-			operand:expr1,
+			operand: expr1,
 		}
 	} else {
 		p.unreadToken()
@@ -1278,7 +1277,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				gtype := p.parseType()
 				variable := &ExprVariable{
 					varname: pname,
-					gtype : gtype,
+					gtype:   gtype,
 				}
 				params = append(params, variable)
 				p.expect(")")
@@ -1360,12 +1359,12 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	p.expect("{")
 
 	r := &DeclFunc{
-		pkg : p.currentPackageName,
-		receiver:receiver,
-		fname:     fname,
+		pkg:        p.currentPackageName,
+		receiver:   receiver,
+		fname:      fname,
 		rettypes:   rettypes,
-		params:    params,
-		isVariadic:isVariadic,
+		params:     params,
+		isVariadic: isVariadic,
 	}
 	ref := &ExprFuncRef{
 		funcdef: r,
@@ -1379,7 +1378,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.typ == G_REL , "methods must belong to a named type")
+		p.assert(typeToBelong.typ == G_REL, "methods must belong to a named type")
 		methods, ok := p.namedTypes[typeToBelong.relation.name]
 		if !ok {
 			methods = make(map[identifier]*ExprFuncRef)
@@ -1387,7 +1386,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		}
 		methods[fname] = ref
 	} else {
-		p.packageBlockScope.setFunc(fname,ref)
+		p.packageBlockScope.setFunc(fname, ref)
 	}
 
 	body := p.parseCompoundStmt()
@@ -1407,7 +1406,7 @@ func (p *parser) parseImport() *ImportDecl {
 			tok := p.readToken()
 			if tok.isTypeString() {
 				specs = append(specs, &ImportSpec{
-					path:        tok.sval,
+					path: tok.sval,
 				})
 				p.expect(";")
 			} else if tok.isPunct(")") {
@@ -1421,7 +1420,7 @@ func (p *parser) parseImport() *ImportDecl {
 			errorf("import expects package name")
 		}
 		specs = []*ImportSpec{&ImportSpec{
-			path:        tok.sval,
+			path: tok.sval,
 		},
 		}
 	}
@@ -1501,10 +1500,10 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			paramTypes = append(paramTypes, param.gtype)
 		}
 		method := &signature{
-			fname:fname,
-			paramTypes:paramTypes,
+			fname:      fname,
+			paramTypes: paramTypes,
 			isVariadic: isVariadic,
-			rettypes:rettypes,
+			rettypes:   rettypes,
 		}
 		methods = append(methods, method)
 	}
@@ -1635,9 +1634,9 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	for _, importdecl := range r.imports {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
-			if strings.Contains(spec.path,"/") {
+			if strings.Contains(spec.path, "/") {
 				words := strings.Split(spec.path, "/")
-				pkgName = identifier(words[len(words) -1])
+				pkgName = identifier(words[len(words)-1])
 			} else {
 				pkgName = identifier(spec.path)
 			}
@@ -1649,8 +1648,6 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	r.decls = p.parseTopLevelDecls()
 	return r
 }
-
-
 
 func (ast *StmtShortVarDecl) infer() {
 	debugf("infering %s", ast.tok)
@@ -1668,7 +1665,7 @@ func (ast *StmtShortVarDecl) infer() {
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)
 			debugf("receiver=%v", fcall.receiver)
-			strctfield , ok := fcall.receiver.(*ExprStructField)
+			strctfield, ok := fcall.receiver.(*ExprStructField)
 			debugf("strctfield.strct=%v, %v", strctfield.strct, ok)
 			for _, gtype := range fcall.getFuncDef().rettypes {
 				rightTypes = append(rightTypes, gtype)
@@ -1694,7 +1691,7 @@ func (ast *StmtShortVarDecl) infer() {
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {
-		p.tryResolve("",rel)
+		p.tryResolve("", rel)
 	}
 
 	p.resolveMethods()
@@ -1725,7 +1722,7 @@ func (variable *ExprVariable) infer() {
 		return
 	}
 
-	rel,ok := e.(*Relation)
+	rel, ok := e.(*Relation)
 	if !ok {
 		errorf("NG %#v", e)
 	}

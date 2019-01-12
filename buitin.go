@@ -1,6 +1,6 @@
 package main
 
-var builtinCode  = `
+var builtinCode = `
 package builtin
 
 const MiniGo int = 1

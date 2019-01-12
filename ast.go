@@ -44,23 +44,23 @@ type ExprVariable struct {
 }
 
 type ExprConstVariable struct {
-	name  identifier
-	gtype *Gtype
-	val   Expr // like ExprConstExpr ?
+	name      identifier
+	gtype     *Gtype
+	val       Expr // like ExprConstExpr ?
 	iotaIndex int  // for iota
 }
 
 type ExprFuncall struct {
-	rel *Relation
+	rel   *Relation
 	fname string
 	args  []Expr
 }
 
 type ExprMethodcall struct {
-	tok *Token
+	tok      *Token
 	receiver Expr
-	fname identifier
-	args  []Expr
+	fname    identifier
+	args     []Expr
 }
 
 type ExprBinop struct {
@@ -76,7 +76,7 @@ type ExprUop struct {
 
 // local or global
 type DeclVar struct {
-	pkg identifier
+	pkg      identifier
 	variable *ExprVariable
 	initval  Expr
 }
@@ -91,8 +91,8 @@ type StmtAssignment struct {
 }
 
 type StmtShortVarDecl struct {
-	tok *Token
-	lefts []Expr
+	tok    *Token
+	lefts  []Expr
 	rights []Expr
 }
 
@@ -117,9 +117,9 @@ type StmtFor struct {
 
 type StmtIf struct {
 	simplestmt Stmt
-	cond Expr
-	then *StmtSatementList
-	els  Stmt
+	cond       Expr
+	then       *StmtSatementList
+	els        Stmt
 }
 
 type StmtReturn struct {
@@ -139,7 +139,7 @@ type PackageClause struct {
 }
 
 type ImportSpec struct {
-	path        string
+	path string
 }
 
 type ImportDecl struct {
@@ -155,14 +155,14 @@ type ExprFuncRef struct {
 }
 
 type DeclFunc struct {
-	pkg identifier
-	receiver  *ExprVariable
-	fname     identifier
+	pkg        identifier
+	receiver   *ExprVariable
+	fname      identifier
 	rettypes   []*Gtype
-	params    []*ExprVariable
+	params     []*ExprVariable
 	isVariadic bool
-	localvars []*ExprVariable
-	body      *StmtSatementList
+	localvars  []*ExprVariable
+	body       *StmtSatementList
 }
 
 type TopLevelDecl struct {
@@ -191,7 +191,7 @@ type ExprSliced struct {
 
 // Expr e.g. array[2]
 type ExprArrayIndex struct {
-	array   Expr
+	array Expr
 	index Expr
 }
 
@@ -201,16 +201,14 @@ type ExprArrayLiteral struct {
 }
 
 type ExprTypeAssertion struct {
-	expr Expr
+	expr  Expr
 	gtype *Gtype
 }
 
 type StmtContinue struct {
-
 }
 
 type StmtBreak struct {
-
 }
 
 type StmtExpr struct {
@@ -231,14 +229,14 @@ type ExprConversion struct {
 }
 
 type ExprCaseClause struct {
-	exprs []Expr
+	exprs    []Expr
 	compound *StmtSatementList
 }
 
 type StmtSwitch struct {
-	cond Expr
+	cond  Expr
 	cases []*ExprCaseClause
-	dflt *StmtSatementList
+	dflt  *StmtSatementList
 }
 
 type KeyedElement struct {
@@ -247,8 +245,8 @@ type KeyedElement struct {
 }
 
 type ExprStructLiteral struct {
-	strctname *Relation
-	fields    []*KeyedElement
+	strctname    *Relation
+	fields       []*KeyedElement
 	invisiblevar *ExprVariable // to have offfset for &T{}
 }
 

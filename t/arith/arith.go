@@ -20,8 +20,8 @@ func uop_minus() {
 }
 
 func paren() {
-	x := 3 * ( 1 + 1 )
-	y := (1 + 1) * 3 - (1 - 2)
+	x := 3 * (1 + 1)
+	y := (1+1)*3 - (1 - 2)
 	fmt.Printf("%d\n", x)
 	fmt.Printf("%d\n", y)
 }

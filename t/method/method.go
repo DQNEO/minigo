@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func f0() {
-	fmt.Printf("%d\n", add(1,1))
+	fmt.Printf("%d\n", add(1, 1))
 }
 
 func f1() {
@@ -16,8 +16,8 @@ func f1() {
 func f2() {
 	var u *User
 	u = &User{
-		id:1,
-		age:4,
+		id:  1,
+		age: 4,
 	}
 
 	fmt.Printf("%d\n", u.getAge())
@@ -53,10 +53,9 @@ func (u *User) getAge() int {
 }
 
 type User struct {
-	id int
+	id  int
 	age int
 }
-
 
 type Point struct {
 	x int

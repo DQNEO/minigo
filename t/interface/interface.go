@@ -15,8 +15,8 @@ func f2() {
 	//var s summer
 	var s *Point
 	s = &Point{
-		x:2,
-		y:3,
+		x: 2,
+		y: 3,
 	}
 	fmt.Printf("%d\n", s.sum())
 }

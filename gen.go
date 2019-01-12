@@ -126,7 +126,7 @@ func (a *ExprStructField) emit() {
 	}
 	assertNotNil(rel.expr != nil, nil)
 	variable, ok := rel.expr.(*ExprVariable)
-	assert(ok, nil,"rel is a variable")
+	assert(ok, nil, "rel is a variable")
 
 	switch variable.gtype.typ {
 	case G_POINTER: // pointer to struct
@@ -138,7 +138,7 @@ func (a *ExprStructField) emit() {
 	case G_REL: // struct
 		strcttype := variable.gtype.relation.gtype
 		field := strcttype.getField(a.fieldname)
-		emit("mov %d(%%rbp), %%rax", variable.offset + field.offset)
+		emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
 	default:
 		errorf("internal error: bad gtype %d", variable.gtype.typ)
 	}
@@ -178,12 +178,12 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	assertNotNil(ast.val != nil,nil)
+	assertNotNil(ast.val != nil, nil)
 	rel, ok := ast.val.(*Relation)
 	if ok && rel.expr == eIota {
 		// replace the iota expr by a index number
 		val := &ExprNumberLiteral{
-			val:ast.iotaIndex,
+			val: ast.iotaIndex,
 		}
 		val.emit()
 	} else {
@@ -222,7 +222,7 @@ func emitIncrDecl(inst string, operand Expr) {
 		errorf("operand should be *Relation")
 	}
 	vr, ok := rel.expr.(*ExprVariable)
-	assert(ok, nil,"operand is a rel")
+	assert(ok, nil, "operand is a rel")
 	vr.emit()
 	emit("%s $1, %%rax", inst)
 	emitLsave(vr.gtype.getSize(), vr.offset)
@@ -241,7 +241,7 @@ func (ast *ExprUop) emit() {
 			vr.emitAddress()
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
-			assert(e.invisiblevar.offset != 0, nil,"ExprStructLiteral's invisible var has offset")
+			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
 			assignStructLiteral(e.invisiblevar, e)
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
@@ -253,7 +253,7 @@ func (ast *ExprUop) emit() {
 		rel, ok := ast.operand.(*Relation)
 		debugf("operand:%s", rel)
 		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil,"operand is a rel")
+		assert(ok, nil, "operand is a rel")
 		vr.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
@@ -267,8 +267,8 @@ func (ast *ExprUop) emit() {
 		// delegate to biop
 		// -(x) -> (-1) * (x)
 		binop := &ExprBinop{
-			op: "*",
-			left:&ExprNumberLiteral{val: -1},
+			op:    "*",
+			left:  &ExprNumberLiteral{val: -1},
 			right: ast.operand,
 		}
 		binop.emit()
@@ -357,10 +357,10 @@ func (ast *StmtAssignment) emit() {
 		switch right.(type) {
 		case *ExprFuncall:
 			funcdef := right.(*ExprFuncall).getFuncDef()
-			numRight+= len(funcdef.rettypes )
+			numRight += len(funcdef.rettypes)
 		case *ExprMethodcall:
 			funcdef := right.(*ExprMethodcall).getFuncDef()
-			numRight+= len(funcdef.rettypes )
+			numRight += len(funcdef.rettypes)
 		default:
 			numRight++
 		}
@@ -376,7 +376,7 @@ func (ast *StmtAssignment) emit() {
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
 			assignStructLiteral(vr, right.(*ExprStructLiteral))
-			done[i] = true  // @FIXME this is not correct any more
+			done[i] = true // @FIXME this is not correct any more
 		case *ExprFuncall:
 			funcdef := right.(*ExprFuncall).getFuncDef()
 			emit("# emitting rhs (funcall)")
@@ -449,7 +449,7 @@ func (ast *StmtAssignment) emit() {
 			emit("mov %%rax, %%rcx") // index
 			elmType := vr.gtype.ptr
 			size := elmType.getSize()
-			assert(size > 0, nil,"size > 0")
+			assert(size > 0, nil, "size > 0")
 			emit("mov $%d, %%rax", size) // size of one element
 			emit("imul %%rcx, %%rax")    // index * size
 			emit("push %%rax")           // store index * size
@@ -564,8 +564,8 @@ func (f *StmtFor) emitRange() {
 	emit("%s: # begin loop ", labelBegin)
 	condition := &ExprBinop{
 		op:    "<",
-		left:  f.rng.indexvar,             // i
-		right: &ExprNumberLiteral{val:length}, // len(list)
+		left:  f.rng.indexvar,                  // i
+		right: &ExprNumberLiteral{val: length}, // len(list)
 	}
 	condition.emit() // i < len(list)
 	emit("test %%rax, %%rax")
@@ -574,7 +574,7 @@ func (f *StmtFor) emitRange() {
 	f.block.emit()
 
 	indexIncr := &StmtInc{
-		operand:f.rng.indexvar,
+		operand: f.rng.indexvar,
 	}
 	indexIncr.emit() // i++
 	if f.rng.valuevar != nil {
@@ -585,7 +585,7 @@ func (f *StmtFor) emitRange() {
 }
 
 func (f *StmtFor) emitForClause() {
-	assertNotNil(f.cls != nil,nil)
+	assertNotNil(f.cls != nil, nil)
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
@@ -613,7 +613,6 @@ func (f *StmtFor) emit() {
 	}
 	f.emitForClause()
 }
-
 
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
@@ -670,7 +669,6 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 
 }
 
-
 // for local var
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
@@ -726,7 +724,7 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprArrayIndex) emit() {
 	emit("# emit *ExprArrayIndex")
-	rel,ok := e.array.(*Relation)
+	rel, ok := e.array.(*Relation)
 	if !ok {
 		errorf("array should be a Relation")
 	}
@@ -744,7 +742,7 @@ func (e *ExprArrayIndex) emit() {
 	emit("mov %%rax, %%rcx") // index
 	elmType := vr.gtype.ptr
 	size := elmType.getSize()
-	assert(size > 0, nil,"size > 0")
+	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
 	emit("imul %%rcx, %%rax")    // index * size
 	emit("push %%rax")           // store index * size
@@ -760,8 +758,8 @@ func (e *ExprNilLiteral) emit() {
 
 func (ast *StmtShortVarDecl) emit() {
 	a := &StmtAssignment{
-		lefts:ast.lefts,
-		rights:ast.rights,
+		lefts:  ast.lefts,
+		rights: ast.rights,
 	}
 	a.emit()
 }
@@ -839,15 +837,15 @@ func (ast *ExprMethodcall) getUniqueName() string {
 
 func (methodCall *ExprMethodcall) getFuncDef() *DeclFunc {
 	gtype := methodCall.receiver.getGtype()
-	assertNotNil(gtype != nil,  methodCall.tok)
-	assert(gtype.typ == G_REL || gtype.typ == G_POINTER ||gtype.typ == G_INTERFACE, methodCall.tok,"method must be an interface or belong to a named type")
+	assertNotNil(gtype != nil, methodCall.tok)
+	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
 		typeToBeloing = gtype.ptr
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.typ == G_REL, methodCall.tok,"method must belong to a named type")
+	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
 	funcref, ok := typeToBeloing.relation.gtype.methods[methodCall.fname]
 	if !ok {
 		errorf("method %s is not found in type %s", methodCall.fname, typeToBeloing)
@@ -950,18 +948,18 @@ func evalIntExpr(e Expr) int {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	assert(decl.variable.isGlobal, nil,"should be global")
+	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
 	emitLabel(".global %s", decl.variable.varname)
 	emitLabel("%s:", decl.variable.varname)
 
 	if decl.variable.gtype.typ == G_ARRAY {
 		arrayliteral, ok := decl.initval.(*ExprArrayLiteral)
-		assert(ok, nil,"should be array lieteral")
+		assert(ok, nil, "should be array lieteral")
 		elmType := decl.variable.gtype.ptr
-		assertNotNil(elmType != nil ,nil)
+		assertNotNil(elmType != nil, nil)
 		for _, value := range arrayliteral.values {
-			assertNotNil(value != nil,nil)
+			assertNotNil(value != nil, nil)
 			size := elmType.getSize()
 			if size == 8 {
 				emit(".quad %d", evalIntExpr(value))
@@ -989,12 +987,12 @@ func (decl *DeclVar) emitGlobal() {
 }
 
 type IrRoot struct {
-	vars []*DeclVar
-	funcs []*DeclFunc
+	vars           []*DeclVar
+	funcs          []*DeclFunc
 	stringLiterals []*ExprStringLiteral
 }
 
-var retvals = []string{"rt1","rt2", "rt3", "rt4", "rt5", "rt6"}
+var retvals = []string{"rt1", "rt2", "rt3", "rt4", "rt5", "rt6"}
 
 func (root *IrRoot) emit() {
 

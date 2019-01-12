@@ -36,7 +36,6 @@ type Token struct {
 
 var bs *ByteStream
 
-
 type TokenStream struct {
 	tokens []*Token
 	index  int
@@ -44,7 +43,7 @@ type TokenStream struct {
 
 func NewTokenStream(bs *ByteStream) *TokenStream {
 	tokens := tokenize(bs)
-	assert(len(tokens) > 0, nil,"tokens should have length")
+	assert(len(tokens) > 0, nil, "tokens should have length")
 
 	return &TokenStream{
 		tokens: tokens,

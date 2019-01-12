@@ -5,7 +5,7 @@ var gInterface = &Gtype{typ: G_ANY, size: 8}
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
-var gString = &Gtype{typ: G_STRING,}
+var gString = &Gtype{typ: G_STRING}
 var eIota = &ExprConstVariable{}
 
 const ptrSize int = 8
@@ -77,12 +77,12 @@ func setPredeclaredIdentifiers(r *scope) {
 	r.setConst("true", &ExprConstVariable{
 		name:  "true",
 		gtype: gBool,
-		val:   &ExprNumberLiteral{val:1},
+		val:   &ExprNumberLiteral{val: 1},
 	})
 	r.setConst("false", &ExprConstVariable{
 		name:  "false",
 		gtype: gBool,
-		val:   &ExprNumberLiteral{val:0},
+		val:   &ExprNumberLiteral{val: 0},
 	})
 
 	r.setConst("iota", eIota)
@@ -108,12 +108,12 @@ func setPredeclaredIdentifiers(r *scope) {
 	})
 	r.setFunc("ReadFile", &ExprFuncRef{
 		funcdef: &DeclFunc{
-			rettypes:[]*Gtype{
+			rettypes: []*Gtype{
 				&Gtype{
-					typ:G_SLICE,
+					typ: G_SLICE,
 				},
 				&Gtype{
-					typ:G_INTERFACE,
+					typ: G_INTERFACE,
 				},
 			},
 		},

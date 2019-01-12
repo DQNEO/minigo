@@ -5,7 +5,7 @@ import "fmt"
 // for range test
 func main() {
 	var array1 [3]int = [3]int{9, 9, 9}
-	var array2 [3]byte = [3]byte{'4','6', '8'}
+	var array2 [3]byte = [3]byte{'4', '6', '8'}
 
 	for i := range array1 {
 		fmt.Printf("%d\n", i)

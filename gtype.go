@@ -5,7 +5,7 @@ import "fmt"
 type GTYPE_TYPE int
 
 const (
-	G_UNKOWNE = iota
+	G_UNKOWNE   = iota
 	G_DEPENDENT // depends on other expression
 	G_REL
 	// below are primitives which are declared in the universe block
@@ -25,12 +25,11 @@ const (
 	G_ANY // interface{}
 )
 
-
 type signature struct {
-	fname identifier
+	fname      identifier
 	paramTypes []*Gtype
 	isVariadic bool
-	rettypes []*Gtype
+	rettypes   []*Gtype
 }
 
 type Gtype struct {
@@ -46,15 +45,15 @@ type Gtype struct {
 	capacity        int        // for slice
 	underlyingarray interface{}
 	imethods        []*signature // for interface
-	methods map[identifier]*ExprFuncRef
+	methods         map[identifier]*ExprFuncRef
 	// for fixed array
-	mapKey *Gtype // for map
+	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
 }
 
 func (gtype *Gtype) getSize() int {
 	assertNotNil(gtype != nil, nil)
-	assert(gtype.typ != G_DEPENDENT, nil,"type should be inferred")
+	assert(gtype.typ != G_DEPENDENT, nil, "type should be inferred")
 	if gtype.typ == G_REL {
 		if gtype.relation.gtype == nil {
 			errorf("relation not resolved: %s", gtype.relation)
@@ -69,7 +68,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING ||gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
 			return ptrSize
 		} else {
 			return gtype.size
@@ -106,8 +105,8 @@ func (gtype *Gtype) String() string {
 }
 
 func (strct *Gtype) getField(name identifier) *Gtype {
-	assertNotNil(strct != nil,nil)
-	assert(strct.typ == G_STRUCT, nil,"assume G_STRUCT type")
+	assertNotNil(strct != nil, nil)
+	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type")
 	for _, field := range strct.fields {
 		if field.fieldname == name {
 			return field
@@ -118,7 +117,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.typ == G_STRUCT, nil,"assume G_STRUCT type")
+	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type")
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
@@ -146,7 +145,7 @@ func (rel *Relation) getGtype() *Gtype {
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
 	return &Gtype{
-		typ: G_REL,
+		typ:      G_REL,
 		relation: e.strctname,
 	}
 }
@@ -172,7 +171,7 @@ func (e *ExprUop) getGtype() *Gtype {
 		return e.operand.getGtype().ptr
 	case "!":
 		return gBool
-	case "-" :
+	case "-":
 		return gInt
 	}
 	errorf("internal error")
@@ -181,7 +180,7 @@ func (e *ExprUop) getGtype() *Gtype {
 
 func (f *ExprFuncRef) getGtype() *Gtype {
 	return &Gtype{
-		typ:G_FUNC,
+		typ: G_FUNC,
 	}
 }
 
@@ -240,9 +239,9 @@ func (e *ExprConstVariable) getGtype() *Gtype {
 
 func (e *ExprBinop) getGtype() *Gtype {
 	switch e.op {
-	case "<",">","<=",">=","!=","==","&&", "||":
+	case "<", ">", "<=", ">=", "!=", "==", "&&", "||":
 		return gBool
-	case "+","-","*","%","/":
+	case "+", "-", "*", "%", "/":
 		return gInt
 	}
 	errorf("internal error")
@@ -268,4 +267,3 @@ func (e *ExprTypeAssertion) getGtype() *Gtype {
 func (e *ExprVaArg) getGtype() *Gtype {
 	panic("implement me")
 }
-
