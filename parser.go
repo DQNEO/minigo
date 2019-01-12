@@ -129,11 +129,11 @@ func (p *parser) readFuncallArgs() []Expr {
 	defer p.traceOut(p.traceIn())
 	var r []Expr
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct(")") {
+			p.skip()
 			return r
 		}
-		p.unreadToken()
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
 			p.expect("...")
@@ -143,10 +143,12 @@ func (p *parser) readFuncallArgs() []Expr {
 			return r
 		}
 		r = append(r, arg)
-		tok = p.readToken()
+		tok = p.peekToken()
 		if tok.isPunct(")") {
+			p.skip()
 			return r
 		} else if tok.isPunct(",") {
+			p.skip()
 			continue
 		} else {
 			tok.errorf("invalid token in funcall arguments")
