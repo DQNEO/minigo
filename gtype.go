@@ -262,7 +262,7 @@ func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
 }
 
 func (e *ExprTypeAssertion) getGtype() *Gtype {
-	panic("implement me")
+	return e.gtype
 }
 
 func (e *ExprVaArg) getGtype() *Gtype {
