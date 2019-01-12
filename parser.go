@@ -1207,9 +1207,8 @@ func (p *parser) parseStmt() Stmt {
 	}
 
 	expr1 := p.parseExpr()
-	tok2 := p.readToken()
+	tok2 := p.peekToken()
 	if tok2.isPunct(",") {
-		p.unreadToken()
 		// Multi value assignment
 		lefts := p.parseExpressionList(expr1)
 		tok3 := p.readToken()
@@ -1221,22 +1220,26 @@ func (p *parser) parseStmt() Stmt {
 			tok3.errorf("TBD")
 		}
 	} else if tok2.isPunct("=") {
+		p.skip()
 		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
+		p.skip()
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
 	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
+		p.skip()
 		return p.parseAssignmentOperation(expr1, tok2.sval)
 	} else if tok2.isPunct("++") {
+		p.skip()
 		return &StmtInc{
 			operand: expr1,
 		}
 	} else if tok2.isPunct("--") {
+		p.skip()
 		return &StmtDec{
 			operand: expr1,
 		}
 	} else {
-		p.unreadToken()
 		return &StmtExpr{
 			expr: expr1,
 		}
