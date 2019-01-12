@@ -1623,9 +1623,7 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *SourceFile {
 
-	ts := NewTokenStream(bs)
-	p.tokenStream = ts
-
+	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 
