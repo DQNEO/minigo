@@ -1626,12 +1626,11 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 
-	r := &SourceFile{}
-	r.pkg = p.expectPackageClause()
-	r.imports = p.parseImportDecls()
+	pkg := p.expectPackageClause()
+	imports := p.parseImportDecls()
 
 	p.importedNames = make(map[identifier]bool)
-	for _, importdecl := range r.imports {
+	for _, importdecl := range imports {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
 			if strings.Contains(spec.path, "/") {
@@ -1645,8 +1644,13 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 		}
 	}
 
-	r.decls = p.parseTopLevelDecls()
-	return r
+	decls := p.parseTopLevelDecls()
+
+	return &SourceFile{
+		pkg: pkg,
+		imports: imports,
+		decls: decls,
+	}
 }
 
 func (ast *StmtShortVarDecl) infer() {
