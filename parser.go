@@ -894,14 +894,16 @@ func (p *parser) parseForStmt() *StmtFor {
 		// for clause or range clause
 		var initstmt Stmt
 		lefts := p.parseExpressionList(cond)
-		tok2 := p.readToken()
+		tok2 := p.peekToken()
 		if tok2.isPunct("=") {
+			p.skip()
 			if p.peekToken().isKeyword("range") {
 				return p.parseForRange(lefts)
 			} else {
 				initstmt = p.parseAssignment(lefts)
 			}
 		} else if tok2.isPunct(":=") {
+			p.skip()
 			if p.peekToken().isKeyword("range") {
 				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
 				p.shortVarDecl(lefts[0])
@@ -916,8 +918,6 @@ func (p *parser) parseForStmt() *StmtFor {
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
 			}
-		} else {
-			p.unreadToken()
 		}
 
 		cls := &ForForClause{}
