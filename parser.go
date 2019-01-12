@@ -78,18 +78,20 @@ func (p *parser) readIdent() identifier {
 	return tok.getIdent()
 }
 
-func (p *parser) expectKeyword(name string) {
+func (p *parser) expectKeyword(name string) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
 		errorf("Keyword %s expected but got %s", name, tok)
 	}
+	return tok
 }
 
-func (p *parser) expect(punct string) {
+func (p *parser) expect(punct string) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
 		errorf("punct '%s' expected but got '%s'", punct, tok)
 	}
+	return tok
 }
 
 func getCallerName(n int) string {
@@ -1433,8 +1435,7 @@ func (p *parser) parseImport() *ImportDecl {
 
 func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("package")
-	tokPkg := p.lastToken()
+	tokPkg := p.expectKeyword("package")
 	name := p.readIdent()
 	p.expect(";")
 	return &PackageClause{
