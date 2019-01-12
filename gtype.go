@@ -197,6 +197,7 @@ func (e *ExprArrayIndex) getGtype() *Gtype {
 
 func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
+	assertNotNil(gstruct != nil, e.tok)
 	assert(gstruct != gInt, e.tok, "struct should not be gInt")
 	debugf("gstruct=%v", gstruct)
 
