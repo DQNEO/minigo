@@ -1714,6 +1714,10 @@ func (ast *StmtShortVarDecl) infer() {
 			for _, gtype := range fcall.getFuncDef().rettypes {
 				rightTypes = append(rightTypes, gtype)
 			}
+		case *ExprTypeAssertion:
+			assertion := rightExpr.(*ExprTypeAssertion)
+			rightTypes = append(rightTypes, assertion.gtype)
+			rightTypes = append(rightTypes, gBool)
 		default:
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
