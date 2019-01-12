@@ -1433,9 +1433,13 @@ func (p *parser) parseImport() *ImportDecl {
 func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("package")
-	r := &PackageClause{name: p.readIdent()}
+	tokPkg := p.lastToken()
+	name := p.readIdent()
 	p.expect(";")
-	return r
+	return &PackageClause{
+		tok: tokPkg,
+		name: name,
+	}
 }
 
 func (p *parser) parseImportDecls() []*ImportDecl {

@@ -135,6 +135,7 @@ type StmtDec struct {
 }
 
 type PackageClause struct {
+	tok *Token
 	name identifier
 }
 
