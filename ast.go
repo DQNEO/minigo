@@ -144,6 +144,7 @@ type ImportSpec struct {
 }
 
 type ImportDecl struct {
+	tok *Token
 	specs []*ImportSpec
 }
 

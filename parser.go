@@ -1401,7 +1401,8 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 func (p *parser) parseImport() *ImportDecl {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("import")
+	tokImport := p.expectKeyword("import")
+
 	tok := p.readToken()
 	var specs []*ImportSpec
 	if tok.isPunct("(") {
@@ -1429,6 +1430,7 @@ func (p *parser) parseImport() *ImportDecl {
 	}
 	p.expect(";")
 	return &ImportDecl{
+		tok: tokImport,
 		specs: specs,
 	}
 }
