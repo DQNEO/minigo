@@ -588,13 +588,6 @@ func (p *parser) parseExprInt(prior int) Expr {
 			} else {
 				return ast
 			}
-			/*
-				} else if tok.sval == "," || tok.sval == ")" ||
-					tok.sval == "{" || tok.sval == "}" ||
-					tok.isPunct(";") || tok.isPunct(":") { // end of funcall argument
-					p.unreadToken()
-					return ast
-			*/
 		} else {
 			return ast
 		}
