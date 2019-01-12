@@ -230,13 +230,15 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 		}
 	} else {
 		index := p.parseExpr()
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("]") {
+			p.skip()
 			r = &ExprArrayIndex{
 				array: e,
 				index: index,
 			}
 		} else if tok.isPunct(":") {
+			p.skip()
 			highIndex := p.parseExpr()
 			p.expect("]")
 			r = &ExprSliced{
