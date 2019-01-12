@@ -38,26 +38,23 @@ func (p *parser) assertNotNil(x interface{}) {
 }
 
 func (p *parser) peekToken() *Token {
-	ts := p.tokenStream
-	if ts.index > len(ts.tokens)-1 {
+	if p.tokenStream.isEnd() {
 		return makeToken("EOF", "")
 	}
-	r := ts.tokens[ts.index]
+	r := p.tokenStream.tokens[p.tokenStream.index]
 	return r
 }
 
 func (p *parser) lastToken() *Token {
-	ts := p.tokenStream
-	return ts.tokens[ts.index-1]
+	return p.tokenStream.tokens[p.tokenStream.index-1]
 }
 
 // skip one token
 func (p *parser) skip() {
-	ts := p.tokenStream
-	if ts.index > len(ts.tokens)-1 {
+	if p.tokenStream.isEnd() {
 		return
 	}
-	ts.index++
+	p.tokenStream.index++
 }
 
 func (p *parser) readToken() *Token {
