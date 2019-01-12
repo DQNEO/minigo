@@ -256,6 +256,7 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 func (p *parser) parseTypeAssertion(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("(")
+
 	if p.peekToken().isKeyword("type") {
 		p.skip()
 		p.expect(")")
@@ -333,6 +334,7 @@ func (p *parser) parseMakeExpr() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	p.assert(tok.isIdent("make"), "read make")
+
 	p.expect("(")
 	mapType := p.parseMapType()
 	_ = mapType
@@ -343,6 +345,7 @@ func (p *parser) parseMakeExpr() Expr {
 func (p *parser) parseMapType() *Gtype {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("map")
+
 	p.expect("[")
 	mapKey := p.parseType()
 	p.expect("]")
@@ -357,9 +360,11 @@ func (p *parser) parseMapType() *Gtype {
 // https://golang.org/ref/spec#Conversions
 func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
+
 	p.expect("(")
 	e := p.parseExpr()
 	p.expect(")")
+
 	return &ExprConversion{
 		expr:  e,
 		gtype: gtype,
@@ -416,6 +421,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
 	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
 	p.expect("{")
+
 	var values []Expr
 	for {
 		tok := p.peekToken()
@@ -487,6 +493,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 
 func (p *parser) parseUnaryExpr() Expr {
 	defer p.traceOut(p.traceIn())
+
 	tok := p.readToken()
 	switch {
 	case tok.isPunct("("):
@@ -770,6 +777,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 func (p *parser) parseConstDecl() *DeclConst {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("const")
+
 	// ident or "("
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
@@ -1045,6 +1053,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+
 	rights := p.parseExpressionList(nil)
 	p.assertNotNil(rights[0])
 	return &StmtAssignment{
@@ -1055,6 +1064,7 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 
 func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+
 	var op string
 	switch assignop {
 	case "+=":
@@ -1089,6 +1099,7 @@ func (p *parser) shortVarDecl(e Expr) {
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
 	separator := p.expect(":=")
+
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		p.shortVarDecl(e)
@@ -1105,6 +1116,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("switch")
+
 	var cond Expr
 	if p.peekToken().isPunct("{") {
 
@@ -1162,7 +1174,9 @@ func (p *parser) parseSwitchStmt() Stmt {
 }
 
 func (p *parser) parseDeferStmt() *StmtDefer {
+	defer p.traceOut(p.traceIn())
 	p.expectKeyword("defer")
+
 	callExpr := p.parsePrim()
 	return &StmtDefer{
 		expr: callExpr,
@@ -1172,6 +1186,7 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
+
 	tok := p.peekToken()
 	if tok.isKeyword("var") {
 		return p.parseVarDecl(false)
@@ -1240,6 +1255,7 @@ func (p *parser) parseStmt() Stmt {
 
 func (p *parser) parseCompoundStmt() *StmtSatementList {
 	defer p.traceOut(p.traceIn())
+
 	r := &StmtSatementList{}
 	for {
 		tok := p.peekToken()
@@ -1262,6 +1278,7 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 
 func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
 	defer p.traceOut(p.traceIn())
+
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
@@ -1337,6 +1354,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 func (p *parser) parseFuncDef() *DeclFunc {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("func")
+
 	p.localvars = nil
 	var isMethod bool
 	p.enterNewScope()
@@ -1441,6 +1459,7 @@ func (p *parser) parseImport() *ImportDecl {
 func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	tokPkg := p.expectKeyword("package")
+
 	name := p.readIdent()
 	p.expect(";")
 	return &PackageClause{
@@ -1494,6 +1513,7 @@ func (p *parser) parseStructDef() *Gtype {
 func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("interface")
+
 	p.expect("{")
 	var methods []*signature
 	for {
@@ -1589,6 +1609,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 // TopLevelDecl  = Declaration | FunctionDecl | MethodDecl .
 func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
+
 	switch {
 	case nextToken.isKeyword("func"):
 		funcdecl := p.parseFuncDef()
@@ -1610,6 +1631,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 
 func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 	defer p.traceOut(p.traceIn())
+
 	var r []*TopLevelDecl
 	for {
 		tok := p.peekToken()
