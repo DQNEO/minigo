@@ -1333,6 +1333,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 func (p *parser) parseFuncDef() *DeclFunc {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("func")
 	p.localvars = nil
 	var isMethod bool
 	p.enterNewScope()
@@ -1581,7 +1582,6 @@ func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	switch {
 	case tok.isKeyword("func"):
-		p.expectKeyword("func")
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
