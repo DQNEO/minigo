@@ -17,7 +17,7 @@ type parser struct {
 	stringLiterals      []*ExprStringLiteral
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
-	namedTypes          map[identifier]methods
+	methods             map[identifier]methods
 	globaluninferred    []*ExprVariable
 	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
@@ -1404,10 +1404,10 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		}
 
 		p.assert(typeToBelong.typ == G_REL, "methods must belong to a named type")
-		methods, ok := p.namedTypes[typeToBelong.relation.name]
+		methods, ok := p.methods[typeToBelong.relation.name]
 		if !ok {
 			methods = make(map[identifier]*ExprFuncRef)
-			p.namedTypes[typeToBelong.relation.name] = methods
+			p.methods[typeToBelong.relation.name] = methods
 		}
 		methods[fname] = ref
 	} else {
@@ -1746,7 +1746,7 @@ func (p *parser) resolve(universe *scope) {
 
 // copy methods from p.nameTypes to gtype.methods of each type
 func (p *parser) resolveMethods() {
-	for typeName, methods := range p.namedTypes {
+	for typeName, methods := range p.methods {
 		gtype := p.packageBlockScope.getGtype(typeName)
 		if gtype == nil {
 			errorf("typaneme %s is not found in the package scope", typeName)

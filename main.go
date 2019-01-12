@@ -70,7 +70,7 @@ func main() {
 
 	// parse
 	p := &parser{}
-	p.namedTypes = make(map[identifier]methods)
+	p.methods = make(map[identifier]methods)
 	p.scopes = make(map[identifier]*scope)
 
 	var bs *ByteStream
