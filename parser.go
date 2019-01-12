@@ -1579,29 +1579,27 @@ func (p *parser) parseTypeDecl() *DeclType {
 
 func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
-	var r *TopLevelDecl
 	switch {
 	case tok.isKeyword("func"):
 		p.expectKeyword("func")
 		funcdecl := p.parseFuncDef()
-		r = &TopLevelDecl{funcdecl: funcdecl}
+		return &TopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
 		p.expectKeyword("var")
 		vardecl := p.parseVarDecl(true)
-		r = &TopLevelDecl{vardecl: vardecl}
+		return &TopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
 		p.expectKeyword("const")
 		constdecl := p.parseConstDecl()
-		r = &TopLevelDecl{constdecl: constdecl}
+		return &TopLevelDecl{constdecl: constdecl}
 	case tok.isKeyword("type"):
 		p.expectKeyword("type")
 		typedecl := p.parseTypeDecl()
-		r = &TopLevelDecl{typedecl: typedecl}
-	default:
-		errorf("TBD: unable to handle token %v", tok)
+		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	return r
+	errorf("TBD: unable to handle token %v", tok)
+	return nil
 }
 
 func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
