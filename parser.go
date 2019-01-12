@@ -1250,18 +1250,18 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 	defer p.traceOut(p.traceIn())
 	r := &StmtSatementList{}
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("}") {
+			p.skip()
 			return r
 		}
 		if p.inCase > 0 && (tok.isKeyword("case") || tok.isKeyword("default")) {
-			p.unreadToken()
 			return r
 		}
 		if tok.isSemicolon() {
+			p.skip()
 			continue
 		}
-		p.unreadToken()
 		stmt := p.parseStmt()
 		r.stmts = append(r.stmts, stmt)
 	}
