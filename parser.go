@@ -561,9 +561,8 @@ func (p *parser) parseExprInt(prior int) Expr {
 		return nil
 	}
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isSemicolon() {
-			p.unreadToken()
 			return ast
 		}
 
@@ -571,6 +570,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		if in_array(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
+				p.skip()
 				right := p.parseExprInt(prior2)
 				if ast == nil {
 					tok.errorf("bad lefts unary expr:%v", ast)
@@ -583,7 +583,6 @@ func (p *parser) parseExprInt(prior int) Expr {
 
 				continue
 			} else {
-				p.unreadToken()
 				return ast
 			}
 			/*
@@ -594,9 +593,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 					return ast
 			*/
 		} else {
-			p.unreadToken()
 			return ast
-			tok.errorf("Unexpected")
 		}
 	}
 
