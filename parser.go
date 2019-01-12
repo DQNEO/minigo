@@ -1587,24 +1587,24 @@ func (p *parser) parseTypeDecl() *DeclType {
 
 // https://golang.org/ref/spec#TopLevelDecl
 // TopLevelDecl  = Declaration | FunctionDecl | MethodDecl .
-func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
+func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	switch {
-	case tok.isKeyword("func"):
+	case nextToken.isKeyword("func"):
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
-	case tok.isKeyword("var"):
+	case nextToken.isKeyword("var"):
 		vardecl := p.parseVarDecl(true)
 		return &TopLevelDecl{vardecl: vardecl}
-	case tok.isKeyword("const"):
+	case nextToken.isKeyword("const"):
 		constdecl := p.parseConstDecl()
 		return &TopLevelDecl{constdecl: constdecl}
-	case tok.isKeyword("type"):
+	case nextToken.isKeyword("type"):
 		typedecl := p.parseTypeDecl()
 		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	errorf("TBD: unable to handle token %v", tok)
+	errorf("TBD: unable to handle token %v", nextToken)
 	return nil
 }
 
