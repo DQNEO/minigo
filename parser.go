@@ -1430,7 +1430,7 @@ func (p *parser) parseImport() *ImportDecl {
 	}
 }
 
-func (p *parser) expectPackageClause() *PackageClause {
+func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("package")
 	r := &PackageClause{name: p.readIdent()}
@@ -1626,7 +1626,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 
-	pkg := p.expectPackageClause()
+	pkg := p.parsePackageClause()
 	imports := p.parseImportDecls()
 
 	p.importedNames = make(map[identifier]bool)
