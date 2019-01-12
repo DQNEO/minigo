@@ -18,7 +18,8 @@ type parser struct {
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	namedTypes          map[identifier]methods
-	uninferered         []Inferer // VarDecl, StmtShortVarDecl or RangeClause
+	globaluninferred    []*ExprVariable
+	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int // > 0  while in reading case compound stmts
@@ -691,8 +692,10 @@ func (p *parser) parseType() *Gtype {
 	return nil
 }
 
+// local decl infer
 func (decl *DeclVar) infer() {
-	gtype := inferType(decl.initval)
+	gtype := decl.initval.getGtype()
+	assertNotNil(gtype != nil, nil)
 	decl.variable.gtype = gtype
 }
 
@@ -725,7 +728,15 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 		initval:  initval,
 	}
 	if typ == nil {
-		p.uninferered = append(p.uninferered, r)
+		if isGlobal {
+			variable.gtype = &Gtype{
+				typ: G_DEPENDENT,
+				dependendson: initval,
+			}
+			p.globaluninferred = append(p.globaluninferred, variable)
+		} else {
+			p.localuninferred = append(p.localuninferred, r)
+		}
 	}
 	p.currentScope.setVar(newName, variable)
 	return r
@@ -896,7 +907,7 @@ func (p *parser) parseForStmt() *StmtFor {
 				}
 
 				r := p.parseForRange(lefts)
-				p.uninferered = append(p.uninferered, r.rng)
+				p.localuninferred = append(p.localuninferred, r.rng)
 				return r
 			} else {
 				initstmt = p.parseShortAssignment(lefts)
@@ -1067,22 +1078,6 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 	}
 }
 
-func inferType(e Expr) *Gtype {
-	switch e.(type) {
-	case *Relation:
-		rel := e.(*Relation)
-		gtype := rel.getGtype()
-		if gtype == nil {
-			debugf("gtype is nil. conver it to gInt for now")
-			return gInt
-		} else {
-			return gtype
-		}
-	default:
-		return e.getGtype()
-	}
-}
-
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
 	variable := p.newVariable(rel.name, nil, false)
@@ -1100,7 +1095,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.uninferered = append(p.uninferered, r)
+	p.localuninferred = append(p.localuninferred, r)
 	return r
 }
 
@@ -1677,7 +1672,7 @@ func (ast *StmtShortVarDecl) infer() {
 				rightTypes = append(rightTypes, gtype)
 			}
 		default:
-			gtype := inferType(rightExpr)
+			gtype := rightExpr.getGtype()
 			if gtype == nil {
 				errorf("rights[%d] gtype is nil", i)
 			}
@@ -1715,8 +1710,34 @@ func (p *parser) resolveMethods() {
 	}
 }
 
+//  infer recursively all the types of global variables
+func (variable *ExprVariable) infer() {
+	if variable.gtype.typ != G_DEPENDENT {
+		// done
+		return
+	}
+	e := variable.gtype.dependendson
+	dependType := e.getGtype()
+	if dependType.typ != G_DEPENDENT {
+		variable.gtype = dependType
+		return
+	}
+
+	rel,ok := e.(*Relation)
+	if !ok {
+		errorf("NG %#v", e)
+	}
+	vr, ok := rel.expr.(*ExprVariable)
+	vr.infer() // recursive call
+	variable.gtype = e.getGtype()
+}
+
 func (p *parser) inferTypes() {
-	for _, ast := range p.uninferered {
+	for _, variable := range p.globaluninferred {
+		variable.infer()
+	}
+
+	for _, ast := range p.localuninferred {
 		ast.infer()
 	}
 }

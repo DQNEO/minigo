@@ -6,6 +6,7 @@ type GTYPE_TYPE int
 
 const (
 	G_UNKOWNE = iota
+	G_DEPENDENT // depends on other expression
 	G_REL
 	// below are primitives which are declared in the universe block
 	G_INT
@@ -34,6 +35,7 @@ type signature struct {
 
 type Gtype struct {
 	typ             GTYPE_TYPE
+	dependendson    Expr       // for G_DEPENDENT
 	relation        *Relation  // for G_REL
 	size            int        // for scalar type like int, bool, byte, for struct
 	ptr             *Gtype     // for array, pointer
@@ -52,6 +54,7 @@ type Gtype struct {
 
 func (gtype *Gtype) getSize() int {
 	assertNotNil(gtype != nil, nil)
+	assert(gtype.typ != G_DEPENDENT, nil,"type should be inferred")
 	if gtype.typ == G_REL {
 		if gtype.relation.gtype == nil {
 			errorf("relation not resolved: %s", gtype.relation)
