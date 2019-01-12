@@ -900,7 +900,7 @@ func (p *parser) parseForStmt() *StmtFor {
 		if tok2.isPunct("=") {
 			p.skip()
 			if p.peekToken().isKeyword("range") {
-				return p.parseForRange(lefts)
+				return p.parseForRange(lefts, false)
 			} else {
 				initstmt = p.parseAssignment(lefts)
 			}
@@ -914,8 +914,7 @@ func (p *parser) parseForStmt() *StmtFor {
 					p.shortVarDecl(lefts[1])
 				}
 
-				r := p.parseForRange(lefts)
-				p.localuninferred = append(p.localuninferred, r.rng)
+				r := p.parseForRange(lefts, true)
 				return r
 			} else {
 				p.unreadToken()
@@ -938,7 +937,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	return r
 }
 
-func (p *parser) parseForRange(exprs []Expr) *StmtFor {
+func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("range")
 
@@ -965,6 +964,9 @@ func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 			valuevar:  valuevar,
 			rangeexpr: rangeExpr,
 		},
+	}
+	if infer {
+		p.localuninferred = append(p.localuninferred, r.rng)
 	}
 	r.block = p.parseCompoundStmt()
 	return r
