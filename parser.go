@@ -1698,7 +1698,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 func (ast *StmtShortVarDecl) infer() {
 	debugf("infering %s", ast.tok)
 	var rightTypes []*Gtype
-	for i, rightExpr := range ast.rights {
+	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
 		case *ExprFuncall:
 			fcall := rightExpr.(*ExprFuncall)
@@ -1721,7 +1721,7 @@ func (ast *StmtShortVarDecl) infer() {
 		default:
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
-				errorf("rights[%d] gtype is nil", i)
+				errorf("rightExpr %T gtype is nil", rightExpr)
 			}
 			rightTypes = append(rightTypes, gtype)
 		}
