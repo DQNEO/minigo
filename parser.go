@@ -1585,6 +1585,8 @@ func (p *parser) parseTypeDecl() *DeclType {
 	return r
 }
 
+// https://golang.org/ref/spec#TopLevelDecl
+// TopLevelDecl  = Declaration | FunctionDecl | MethodDecl .
 func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	switch {
