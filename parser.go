@@ -1622,14 +1622,15 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *SourceFile {
 
+	// initialize parser's status per file
 	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
+	p.importedNames = make(map[identifier]bool)
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
 
-	p.importedNames = make(map[identifier]bool)
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
