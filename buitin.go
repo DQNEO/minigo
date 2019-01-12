@@ -10,4 +10,8 @@ const MiniGo int = 1
 func println(s string) {
 	puts(s)
 }
+
+func len(x interface{}) int {
+}
+
 `

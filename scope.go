@@ -86,9 +86,6 @@ func setPredeclaredIdentifiers(r *scope) {
 	})
 
 	r.setConst("iota", eIota)
-	r.setFunc("len", &ExprFuncRef{
-		// @FIXME
-	})
 	r.setFunc("make", &ExprFuncRef{
 		// @FIXME
 	})
