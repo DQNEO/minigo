@@ -53,17 +53,17 @@ func (p *parser) lastToken() *Token {
 
 // skip one token
 func (p *parser) skip() {
-	p.readToken()
+	ts := p.tokenStream
+	if ts.index > len(ts.tokens)-1 {
+		return
+	}
+	ts.index++
 }
 
 func (p *parser) readToken() *Token {
-	ts := p.tokenStream
-	if ts.index > len(ts.tokens)-1 {
-		return makeToken("EOF", "")
-	}
-	r := ts.tokens[ts.index]
-	ts.index++
-	return r
+	tok := p.peekToken()
+	p.skip()
+	return tok
 }
 
 func (p *parser) unreadToken() {
