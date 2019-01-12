@@ -191,6 +191,8 @@ func (e *ExprSliced) getGtype() *Gtype {
 }
 
 func (e *ExprArrayIndex) getGtype() *Gtype {
+	debugf("array=%T", e.array)
+	assertNotNil(e.array.getGtype() != nil, nil)
 	return e.array.getGtype().ptr
 }
 
@@ -198,8 +200,17 @@ func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
 	assert(gstruct != gInt, e.tok, "struct should not be gInt")
 	debugf("gstruct=%v", gstruct)
-	debugf("gstruct.fields=%v", gstruct.fields)
-	for _, field := range gstruct.fields {
+
+	var strctType *Gtype
+	if gstruct.typ == G_POINTER {
+		strctType = gstruct.ptr
+	} else {
+		strctType = gstruct
+	}
+
+	fields := strctType.relation.gtype.fields
+	debugf("fields=%v", fields)
+	for _, field := range fields {
 		if e.fieldname == field.fieldname {
 			return field.ptr
 		}

@@ -1087,11 +1087,14 @@ func (p *parser) shortVarDecl(e Expr) {
 
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
+	p.assert(p.lastToken().isPunct(":="),"last token")
+	lastToken := p.lastToken()
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
+		tok: lastToken, // ":="
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1652,6 +1655,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 
 
 func (ast *StmtShortVarDecl) infer() {
+	debugf("infering %s", ast.tok)
 	var rightTypes []*Gtype
 	for i, rightExpr := range ast.rights {
 		switch rightExpr.(type) {

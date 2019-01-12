@@ -91,6 +91,7 @@ type StmtAssignment struct {
 }
 
 type StmtShortVarDecl struct {
+	tok *Token
 	lefts []Expr
 	rights []Expr
 }
