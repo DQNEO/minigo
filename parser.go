@@ -187,7 +187,6 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 			return rel
 		}
 		// struct literal
-		p.skip()
 		e = p.parseStructLiteral(rel)
 	} else if next.isPunct("(") {
 		// funcall or method call
@@ -456,8 +455,9 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
-	p.assert(p.lastToken().isPunct("{"), "{ is read")
 	defer p.traceOut(p.traceIn())
+	p.expect("{")
+
 	r := &ExprStructLiteral{
 		strctname: rel,
 	}
