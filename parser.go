@@ -1635,6 +1635,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
 
+	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
@@ -1648,6 +1649,8 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 			p.importedNames[pkgName] = true
 		}
 	}
+
+	// @TODO import external decls here
 
 	topLevelDecls := p.parseTopLevelDecls()
 
