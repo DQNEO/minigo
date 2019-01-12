@@ -52,6 +52,10 @@ func NewTokenStream(bs *ByteStream) *TokenStream {
 
 }
 
+func (ts *TokenStream) isEnd() bool {
+	return ts.index > len(ts.tokens)-1
+}
+
 func (tok *Token) String() string {
 	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
 		tok.sval, tok.filename, tok.line, tok.column)

@@ -38,32 +38,29 @@ func (p *parser) assertNotNil(x interface{}) {
 }
 
 func (p *parser) peekToken() *Token {
-	ts := p.tokenStream
-	if ts.index > len(ts.tokens)-1 {
+	if p.tokenStream.isEnd() {
 		return makeToken("EOF", "")
 	}
-	r := ts.tokens[ts.index]
+	r := p.tokenStream.tokens[p.tokenStream.index]
 	return r
 }
 
 func (p *parser) lastToken() *Token {
-	ts := p.tokenStream
-	return ts.tokens[ts.index-1]
+	return p.tokenStream.tokens[p.tokenStream.index-1]
 }
 
 // skip one token
 func (p *parser) skip() {
-	p.readToken()
+	if p.tokenStream.isEnd() {
+		return
+	}
+	p.tokenStream.index++
 }
 
 func (p *parser) readToken() *Token {
-	ts := p.tokenStream
-	if ts.index > len(ts.tokens)-1 {
-		return makeToken("EOF", "")
-	}
-	r := ts.tokens[ts.index]
-	ts.index++
-	return r
+	tok := p.peekToken()
+	p.skip()
+	return tok
 }
 
 func (p *parser) unreadToken() {
@@ -129,11 +126,11 @@ func (p *parser) readFuncallArgs() []Expr {
 	defer p.traceOut(p.traceIn())
 	var r []Expr
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct(")") {
+			p.skip()
 			return r
 		}
-		p.unreadToken()
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
 			p.expect("...")
@@ -143,10 +140,12 @@ func (p *parser) readFuncallArgs() []Expr {
 			return r
 		}
 		r = append(r, arg)
-		tok = p.readToken()
+		tok = p.peekToken()
 		if tok.isPunct(")") {
+			p.skip()
 			return r
 		} else if tok.isPunct(",") {
+			p.skip()
 			continue
 		} else {
 			tok.errorf("invalid token in funcall arguments")
@@ -188,7 +187,6 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 			return rel
 		}
 		// struct literal
-		p.skip()
 		e = p.parseStructLiteral(rel)
 	} else if next.isPunct("(") {
 		// funcall or method call
@@ -217,8 +215,9 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 
 	var r Expr
 	// assure operand is array, slice, or map
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isPunct(":") {
+		p.skip()
 		lowIndex := &ExprNumberLiteral{
 			val: 0,
 		}
@@ -229,15 +228,16 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 			high: highIndex,
 		}
 	} else {
-		p.unreadToken()
 		index := p.parseExpr()
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("]") {
+			p.skip()
 			r = &ExprArrayIndex{
 				array: e,
 				index: index,
 			}
 		} else if tok.isPunct(":") {
+			p.skip()
 			highIndex := p.parseExpr()
 			p.expect("]")
 			r = &ExprSliced{
@@ -256,6 +256,7 @@ func (p *parser) parseArrayIndex(e Expr) Expr {
 func (p *parser) parseTypeAssertion(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("(")
+
 	if p.peekToken().isKeyword("type") {
 		p.skip()
 		p.expect(")")
@@ -333,6 +334,7 @@ func (p *parser) parseMakeExpr() Expr {
 	defer p.traceOut(p.traceIn())
 	tok := p.readToken()
 	p.assert(tok.isIdent("make"), "read make")
+
 	p.expect("(")
 	mapType := p.parseMapType()
 	_ = mapType
@@ -343,6 +345,7 @@ func (p *parser) parseMakeExpr() Expr {
 func (p *parser) parseMapType() *Gtype {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("map")
+
 	p.expect("[")
 	mapKey := p.parseType()
 	p.expect("]")
@@ -357,9 +360,11 @@ func (p *parser) parseMapType() *Gtype {
 // https://golang.org/ref/spec#Conversions
 func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
+
 	p.expect("(")
 	e := p.parseExpr()
 	p.expect(")")
+
 	return &ExprConversion{
 		expr:  e,
 		gtype: gtype,
@@ -368,30 +373,33 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
-	tok := p.readToken()
+	tok := p.peekToken()
 
 	switch {
 	case tok.isSemicolon():
+		p.skip()
 		return nil
 	case tok.isTypeString(): // string literal
+		p.skip()
 		ast := &ExprStringLiteral{
 			val: tok.sval,
 		}
 		p.addStringLiteral(ast)
 		return ast
 	case tok.isTypeInt(): // int literal
+		p.skip()
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
 			val: ival,
 		}
 	case tok.isTypeChar(): // char literal
+		p.skip()
 		sval := tok.sval
 		c := sval[0]
 		return &ExprNumberLiteral{
 			val: int(c),
 		}
 	case tok.isPunct("["): // array literal or type casting
-		p.unreadToken()
 		gtype := p.parseType()
 		if p.peekToken().isPunct("(") {
 			// Conversion
@@ -399,9 +407,9 @@ func (p *parser) parsePrim() Expr {
 		}
 		return p.parseArrayLiteral(gtype)
 	case tok.isIdent("make"):
-		p.unreadToken()
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
+		p.skip()
 		return p.parseIdentExpr(tok.getIdent())
 	}
 
@@ -413,6 +421,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
 	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
 	p.expect("{")
+
 	var values []Expr
 	for {
 		tok := p.peekToken()
@@ -452,8 +461,9 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
-	p.assert(p.lastToken().isPunct("{"), "{ is read")
 	defer p.traceOut(p.traceIn())
+	p.expect("{")
+
 	r := &ExprStructLiteral{
 		strctname: rel,
 	}
@@ -483,6 +493,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 
 func (p *parser) parseUnaryExpr() Expr {
 	defer p.traceOut(p.traceIn())
+
 	tok := p.readToken()
 	switch {
 	case tok.isPunct("("):
@@ -560,9 +571,8 @@ func (p *parser) parseExprInt(prior int) Expr {
 		return nil
 	}
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isSemicolon() {
-			p.unreadToken()
 			return ast
 		}
 
@@ -570,6 +580,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		if in_array(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
+				p.skip()
 				right := p.parseExprInt(prior2)
 				if ast == nil {
 					tok.errorf("bad lefts unary expr:%v", ast)
@@ -582,20 +593,10 @@ func (p *parser) parseExprInt(prior int) Expr {
 
 				continue
 			} else {
-				p.unreadToken()
 				return ast
 			}
-			/*
-				} else if tok.sval == "," || tok.sval == ")" ||
-					tok.sval == "{" || tok.sval == "}" ||
-					tok.isPunct(";") || tok.isPunct(":") { // end of funcall argument
-					p.unreadToken()
-					return ast
-			*/
 		} else {
-			p.unreadToken()
 			return ast
-			tok.errorf("Unexpected")
 		}
 	}
 
@@ -652,6 +653,7 @@ func (p *parser) parseType() *Gtype {
 			}
 			return gtype
 		} else if tok.isKeyword("struct") {
+			p.unreadToken()
 			return p.parseStructDef()
 		} else if tok.isKeyword("map") {
 			p.unreadToken()
@@ -685,8 +687,6 @@ func (p *parser) parseType() *Gtype {
 			tok.errorf("TBI: VAARGS(...)")
 		} else {
 			tok.errorf("Unkonwn token")
-			p.unreadToken()
-			break
 		}
 
 	}
@@ -702,18 +702,19 @@ func (decl *DeclVar) infer() {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
-	p.assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("var")
+
 	// read newName
 	newName := p.readIdent()
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isPunct("=") {
+		p.skip()
 		initval = p.parseExpr()
 	} else {
-		p.unreadToken()
 		typ = p.parseType()
 		p.assertNotNil(typ)
 		tok := p.readToken()
@@ -775,6 +776,8 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 
 func (p *parser) parseConstDecl() *DeclConst {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("const")
+
 	// ident or "("
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
@@ -817,11 +820,11 @@ func (p *parser) parseIdentList() []identifier {
 			tok.errorf("Ident expected")
 		}
 
-		tok = p.readToken()
+		tok = p.peekToken()
 		if tok.isPunct(",") {
+			p.skip()
 			continue
 		} else {
-			p.unreadToken()
 			return r
 		}
 	}
@@ -870,6 +873,8 @@ func (clause *ForRangeClause) infer() {
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("for")
+
 	var r = &StmtFor{}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -891,14 +896,16 @@ func (p *parser) parseForStmt() *StmtFor {
 		// for clause or range clause
 		var initstmt Stmt
 		lefts := p.parseExpressionList(cond)
-		tok2 := p.readToken()
+		tok2 := p.peekToken()
 		if tok2.isPunct("=") {
+			p.skip()
 			if p.peekToken().isKeyword("range") {
 				return p.parseForRange(lefts)
 			} else {
 				initstmt = p.parseAssignment(lefts)
 			}
 		} else if tok2.isPunct(":=") {
+			p.skip()
 			if p.peekToken().isKeyword("range") {
 				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
 				p.shortVarDecl(lefts[0])
@@ -911,10 +918,9 @@ func (p *parser) parseForStmt() *StmtFor {
 				p.localuninferred = append(p.localuninferred, r.rng)
 				return r
 			} else {
+				p.unreadToken()
 				initstmt = p.parseShortAssignment(lefts)
 			}
-		} else {
-			p.unreadToken()
 		}
 
 		cls := &ForForClause{}
@@ -966,6 +972,8 @@ func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 
 func (p *parser) parseIfStmt() *StmtIf {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("if")
+
 	var r = &StmtIf{}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -985,26 +993,28 @@ func (p *parser) parseIfStmt() *StmtIf {
 	p.expect("{")
 	p.requireBlock = false
 	r.then = p.parseCompoundStmt()
-	tok := p.readToken()
+	tok := p.peekToken()
 	if tok.isKeyword("else") {
-		tok2 := p.readToken()
+		p.skip()
+		tok2 := p.peekToken()
 		if tok2.isKeyword("if") {
 			// we regard "else if" as a kind of a nested if statement
 			// else if => else { if .. { } else {} }
 			r.els = p.parseIfStmt()
 		} else if tok2.isPunct("{") {
+			p.skip()
 			r.els = p.parseCompoundStmt()
 		} else {
 			tok2.errorf("Unexpected token")
 		}
-	} else {
-		p.unreadToken()
 	}
 	return r
 }
 
 func (p *parser) parseReturnStmt() *StmtReturn {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("return")
+
 	var r *StmtReturn
 	exprs := p.parseExpressionList(nil)
 	// workaround for {nil}
@@ -1024,19 +1034,17 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	}
 	r = append(r, first)
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isSemicolon() {
-			p.unreadToken()
 			return r
 		} else if tok.isPunct("=") || tok.isPunct(":=") {
-			p.unreadToken()
 			return r
 		} else if tok.isPunct(",") {
+			p.skip()
 			expr := p.parseExpr()
 			r = append(r, expr)
 			continue
 		} else {
-			p.unreadToken()
 			return r
 		}
 	}
@@ -1045,6 +1053,7 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+
 	rights := p.parseExpressionList(nil)
 	p.assertNotNil(rights[0])
 	return &StmtAssignment{
@@ -1055,6 +1064,7 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 
 func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+
 	var op string
 	switch assignop {
 	case "+=":
@@ -1088,14 +1098,14 @@ func (p *parser) shortVarDecl(e Expr) {
 
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
-	p.assert(p.lastToken().isPunct(":="), "last token")
-	lastToken := p.lastToken()
+	separator := p.expect(":=")
+
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
-		tok:    lastToken, // ":="
+		tok:    separator,
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1106,6 +1116,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("switch")
+
 	var cond Expr
 	if p.peekToken().isPunct("{") {
 
@@ -1163,7 +1174,9 @@ func (p *parser) parseSwitchStmt() Stmt {
 }
 
 func (p *parser) parseDeferStmt() *StmtDefer {
+	defer p.traceOut(p.traceIn())
 	p.expectKeyword("defer")
+
 	callExpr := p.parsePrim()
 	return &StmtDefer{
 		expr: callExpr,
@@ -1173,7 +1186,8 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 // this is in function scope
 func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(p.traceIn())
-	tok := p.readToken()
+
+	tok := p.peekToken()
 	if tok.isKeyword("var") {
 		return p.parseVarDecl(false)
 	} else if tok.isKeyword("const") {
@@ -1187,25 +1201,25 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("return") {
 		return p.parseReturnStmt()
 	} else if tok.isKeyword("switch") {
-		p.unreadToken()
 		return p.parseSwitchStmt()
 	} else if tok.isKeyword("continue") {
+		p.expectKeyword("continue")
 		return &StmtContinue{}
 	} else if tok.isKeyword("break") {
+		p.expectKeyword("break")
 		return &StmtBreak{}
 	} else if tok.isKeyword("defer") {
-		p.unreadToken()
 		return p.parseDeferStmt()
 	}
-	p.unreadToken()
+
 	expr1 := p.parseExpr()
-	tok2 := p.readToken()
+	tok2 := p.peekToken()
 	if tok2.isPunct(",") {
-		p.unreadToken()
 		// Multi value assignment
 		lefts := p.parseExpressionList(expr1)
-		tok3 := p.readToken()
+		tok3 := p.peekToken()
 		if tok3.isPunct("=") {
+			p.skip()
 			return p.parseAssignment(lefts)
 		} else if tok3.isPunct(":=") {
 			return p.parseShortAssignment(lefts)
@@ -1213,22 +1227,25 @@ func (p *parser) parseStmt() Stmt {
 			tok3.errorf("TBD")
 		}
 	} else if tok2.isPunct("=") {
+		p.skip()
 		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
 	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
+		p.skip()
 		return p.parseAssignmentOperation(expr1, tok2.sval)
 	} else if tok2.isPunct("++") {
+		p.skip()
 		return &StmtInc{
 			operand: expr1,
 		}
 	} else if tok2.isPunct("--") {
+		p.skip()
 		return &StmtDec{
 			operand: expr1,
 		}
 	} else {
-		p.unreadToken()
 		return &StmtExpr{
 			expr: expr1,
 		}
@@ -1238,20 +1255,21 @@ func (p *parser) parseStmt() Stmt {
 
 func (p *parser) parseCompoundStmt() *StmtSatementList {
 	defer p.traceOut(p.traceIn())
+
 	r := &StmtSatementList{}
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("}") {
+			p.skip()
 			return r
 		}
 		if p.inCase > 0 && (tok.isKeyword("case") || tok.isKeyword("default")) {
-			p.unreadToken()
 			return r
 		}
 		if tok.isSemicolon() {
+			p.skip()
 			continue
 		}
-		p.unreadToken()
 		stmt := p.parseStmt()
 		r.stmts = append(r.stmts, stmt)
 	}
@@ -1260,17 +1278,18 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 
 func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
 	defer p.traceOut(p.traceIn())
+
 	tok := p.readToken()
 	fname := tok.getIdent()
 	p.expect("(")
 
-	tok = p.readToken()
-
 	var params []*ExprVariable
 	var isVariadic bool
 
-	if !tok.isPunct(")") {
-		p.unreadToken()
+	tok = p.peekToken()
+	if tok.isPunct(")") {
+		p.skip()
+	} else {
 		for {
 			tok := p.readToken()
 			pname := tok.getIdent()
@@ -1334,6 +1353,8 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 func (p *parser) parseFuncDef() *DeclFunc {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("func")
+
 	p.localvars = nil
 	var isMethod bool
 	p.enterNewScope()
@@ -1438,6 +1459,7 @@ func (p *parser) parseImport() *ImportDecl {
 func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	tokPkg := p.expectKeyword("package")
+
 	name := p.readIdent()
 	p.expect(";")
 	return &PackageClause{
@@ -1458,17 +1480,19 @@ func (p *parser) parseImportDecls() []*ImportDecl {
 const MaxAlign = 16
 
 func (p *parser) parseStructDef() *Gtype {
-	p.assert(p.lastToken().isKeyword("struct"), `require "struct" is already read`)
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("struct")
 
 	p.expect("{")
 	var fields []*Gtype
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isPunct("}") {
+			p.skip()
 			break
 		}
 		fieldname := tok.getIdent()
+		p.skip()
 		gtype := p.parseType()
 		fieldtype := *gtype
 		fieldtype.ptr = gtype
@@ -1489,6 +1513,7 @@ func (p *parser) parseStructDef() *Gtype {
 func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	defer p.traceOut(p.traceIn())
 	p.expectKeyword("interface")
+
 	p.expect("{")
 	var methods []*signature
 	for {
@@ -1564,6 +1589,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("type")
+
 	newName := p.readIdent()
 	if p.peekToken().isKeyword("interface") {
 		return p.parseInterfaceDef(newName)
@@ -1578,39 +1605,42 @@ func (p *parser) parseTypeDecl() *DeclType {
 	return r
 }
 
-func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
+// https://golang.org/ref/spec#TopLevelDecl
+// TopLevelDecl  = Declaration | FunctionDecl | MethodDecl .
+func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
-	var r *TopLevelDecl
+
 	switch {
-	case tok.isKeyword("func"):
+	case nextToken.isKeyword("func"):
 		funcdecl := p.parseFuncDef()
-		r = &TopLevelDecl{funcdecl: funcdecl}
-	case tok.isKeyword("var"):
+		return &TopLevelDecl{funcdecl: funcdecl}
+	case nextToken.isKeyword("var"):
 		vardecl := p.parseVarDecl(true)
-		r = &TopLevelDecl{vardecl: vardecl}
-	case tok.isKeyword("const"):
+		return &TopLevelDecl{vardecl: vardecl}
+	case nextToken.isKeyword("const"):
 		constdecl := p.parseConstDecl()
-		r = &TopLevelDecl{constdecl: constdecl}
-	case tok.isKeyword("type"):
+		return &TopLevelDecl{constdecl: constdecl}
+	case nextToken.isKeyword("type"):
 		typedecl := p.parseTypeDecl()
-		r = &TopLevelDecl{typedecl: typedecl}
-	default:
-		errorf("TBD: unable to handle token %v", tok)
+		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	return r
+	errorf("TBD: unable to handle token %v", nextToken)
+	return nil
 }
 
 func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 	defer p.traceOut(p.traceIn())
+
 	var r []*TopLevelDecl
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isEOF() {
 			return r
 		}
 
 		if tok.isPunct(";") {
+			p.skip()
 			continue
 		}
 		ast := p.parseTopLevelDecl(tok)
