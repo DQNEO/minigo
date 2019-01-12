@@ -910,6 +910,7 @@ func (p *parser) parseForStmt() *StmtFor {
 				p.localuninferred = append(p.localuninferred, r.rng)
 				return r
 			} else {
+				p.unreadToken()
 				initstmt = p.parseShortAssignment(lefts)
 			}
 		}
@@ -1087,14 +1088,13 @@ func (p *parser) shortVarDecl(e Expr) {
 
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	defer p.traceOut(p.traceIn())
-	p.assert(p.lastToken().isPunct(":="), "last token")
-	lastToken := p.lastToken()
+	separator := p.expect(":=")
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
 		p.shortVarDecl(e)
 	}
 	r := &StmtShortVarDecl{
-		tok:    lastToken, // ":="
+		tok:    separator,
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1202,8 +1202,9 @@ func (p *parser) parseStmt() Stmt {
 	if tok2.isPunct(",") {
 		// Multi value assignment
 		lefts := p.parseExpressionList(expr1)
-		tok3 := p.readToken()
+		tok3 := p.peekToken()
 		if tok3.isPunct("=") {
+			p.skip()
 			return p.parseAssignment(lefts)
 		} else if tok3.isPunct(":=") {
 			return p.parseShortAssignment(lefts)
@@ -1214,7 +1215,6 @@ func (p *parser) parseStmt() Stmt {
 		p.skip()
 		return p.parseAssignment([]Expr{expr1})
 	} else if tok2.isPunct(":=") {
-		p.skip()
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
 	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
