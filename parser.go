@@ -369,30 +369,33 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 
 func (p *parser) parsePrim() Expr {
 	defer p.traceOut(p.traceIn())
-	tok := p.readToken()
+	tok := p.peekToken()
 
 	switch {
 	case tok.isSemicolon():
+		p.skip()
 		return nil
 	case tok.isTypeString(): // string literal
+		p.skip()
 		ast := &ExprStringLiteral{
 			val: tok.sval,
 		}
 		p.addStringLiteral(ast)
 		return ast
 	case tok.isTypeInt(): // int literal
+		p.skip()
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
 			val: ival,
 		}
 	case tok.isTypeChar(): // char literal
+		p.skip()
 		sval := tok.sval
 		c := sval[0]
 		return &ExprNumberLiteral{
 			val: int(c),
 		}
 	case tok.isPunct("["): // array literal or type casting
-		p.unreadToken()
 		gtype := p.parseType()
 		if p.peekToken().isPunct("(") {
 			// Conversion
@@ -400,9 +403,9 @@ func (p *parser) parsePrim() Expr {
 		}
 		return p.parseArrayLiteral(gtype)
 	case tok.isIdent("make"):
-		p.unreadToken()
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
+		p.skip()
 		return p.parseIdentExpr(tok.getIdent())
 	}
 
