@@ -209,6 +209,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 	return p.succeedingExpr(e)
 }
 
+// https://golang.org/ref/spec#Index_expressions
 func (p *parser) parseIndexExpr(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("[")
