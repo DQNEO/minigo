@@ -196,10 +196,10 @@ func (e *ExprArrayIndex) getGtype() *Gtype {
 }
 
 func (e *ExprStructField) getGtype() *Gtype {
+	debugf("e.strct =  %T, %s", e.strct, e.strct)
 	gstruct := e.strct.getGtype()
 	assertNotNil(gstruct != nil, e.tok)
 	assert(gstruct != gInt, e.tok, "struct should not be gInt")
-	debugf("gstruct=%v", gstruct)
 
 	var strctType *Gtype
 	if gstruct.typ == G_POINTER {

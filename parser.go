@@ -841,7 +841,7 @@ func (p *parser) exitScope() {
 
 func (clause *ForRangeClause) infer() {
 	collectionType := clause.rangeexpr.getGtype()
-
+	debugf("collectionType = %s", collectionType)
 	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
 	assert(ok, nil, "ok")
 
@@ -865,7 +865,7 @@ func (clause *ForRangeClause) infer() {
 		} else if collectionType.typ == G_SLICE {
 			elementType = collectionType.ptr // @TODO is this right ?
 		}
-		debugf("for i, v (%s) := rannge %v", elementType, collectionType)
+		debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType
 	}
 }
@@ -1779,6 +1779,7 @@ func (p *parser) inferTypes() {
 	}
 
 	for _, ast := range p.localuninferred {
+		debugf("> inferring local statement %T", ast)
 		ast.infer()
 	}
 }
