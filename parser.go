@@ -686,8 +686,6 @@ func (p *parser) parseType() *Gtype {
 			tok.errorf("TBI: VAARGS(...)")
 		} else {
 			tok.errorf("Unkonwn token")
-			p.unreadToken()
-			break
 		}
 
 	}
