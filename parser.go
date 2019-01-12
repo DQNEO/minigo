@@ -233,9 +233,9 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 		tok := p.peekToken()
 		if tok.isPunct("]") {
 			p.skip()
-			r = &ExprArrayIndex{
-				array: e,
-				index: index,
+			r = &ExprIndex{
+				collection: e,
+				index:      index,
 			}
 		} else if tok.isPunct(":") {
 			p.skip()

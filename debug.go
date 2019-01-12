@@ -211,7 +211,7 @@ func (e *ExprSliced) dump() {
 	errorf("TBD")
 }
 
-func (e *ExprArrayIndex) dump() {
+func (e *ExprIndex) dump() {
 	errorf("TBD")
 
 }

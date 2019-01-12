@@ -192,9 +192,9 @@ type ExprSliced struct {
 }
 
 // Expr e.g. array[2]
-type ExprArrayIndex struct {
-	array Expr
-	index Expr
+type ExprIndex struct {
+	collection Expr
+	index      Expr
 }
 
 type ExprArrayLiteral struct {

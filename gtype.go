@@ -191,10 +191,10 @@ func (e *ExprSliced) getGtype() *Gtype {
 	return nil
 }
 
-func (e *ExprArrayIndex) getGtype() *Gtype {
-	debugf("array=%T", e.array)
-	assertNotNil(e.array.getGtype() != nil, nil)
-	return e.array.getGtype().ptr
+func (e *ExprIndex) getGtype() *Gtype {
+	debugf("array=%T", e.collection)
+	assertNotNil(e.collection.getGtype() != nil, nil)
+	return e.collection.getGtype().ptr
 }
 
 func (e *ExprStructField) getGtype() *Gtype {

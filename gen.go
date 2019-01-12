@@ -423,15 +423,15 @@ func (ast *StmtAssignment) emit() {
 			} else {
 				emitLsave(vr.gtype.getSize(), vr.offset)
 			}
-		case *ExprArrayIndex:
+		case *ExprIndex:
 			emit("push %%rax") // push RHS value
 			// load head address of the array
 			// load index
 			// multi index * size
 			// calc address = head address + offset
 			// copy value to the address
-			e := left.(*ExprArrayIndex)
-			rel, ok := e.array.(*Relation)
+			e := left.(*ExprIndex)
+			rel, ok := e.collection.(*Relation)
 			if !ok {
 				errorf("should be array variable. array expr is not supported yet")
 			}
@@ -551,8 +551,8 @@ func (f *StmtFor) emitRange() {
 				f.rng.valuevar,
 			},
 			rights: []Expr{
-				&ExprArrayIndex{
-					array: &Relation{
+				&ExprIndex{
+					collection: &Relation{
 						expr: f.rng.rangeexpr.(*Relation).expr.(*ExprVariable),
 					},
 					index: f.rng.indexvar,
@@ -723,9 +723,9 @@ func (ast *StmtSatementList) emit() {
 
 var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-func (e *ExprArrayIndex) emit() {
-	emit("# emit *ExprArrayIndex")
-	rel, ok := e.array.(*Relation)
+func (e *ExprIndex) emit() {
+	emit("# emit *ExprIndex")
+	rel, ok := e.collection.(*Relation)
 	if !ok {
 		errorf("array should be a Relation")
 	}
