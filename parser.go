@@ -702,7 +702,6 @@ func (decl *DeclVar) infer() {
 }
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
-	p.assert(p.lastToken().isKeyword("var"), "last token is \"var\"")
 	defer p.traceOut(p.traceIn())
 	// read newName
 	newName := p.readIdent()
@@ -1583,15 +1582,19 @@ func (p *parser) parseTopLevelDecl(tok *Token) *TopLevelDecl {
 	var r *TopLevelDecl
 	switch {
 	case tok.isKeyword("func"):
+		p.expectKeyword("func")
 		funcdecl := p.parseFuncDef()
 		r = &TopLevelDecl{funcdecl: funcdecl}
 	case tok.isKeyword("var"):
+		p.expectKeyword("var")
 		vardecl := p.parseVarDecl(true)
 		r = &TopLevelDecl{vardecl: vardecl}
 	case tok.isKeyword("const"):
+		p.expectKeyword("const")
 		constdecl := p.parseConstDecl()
 		r = &TopLevelDecl{constdecl: constdecl}
 	case tok.isKeyword("type"):
+		p.expectKeyword("type")
 		typedecl := p.parseTypeDecl()
 		r = &TopLevelDecl{typedecl: typedecl}
 	default:
@@ -1605,12 +1608,13 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 	defer p.traceOut(p.traceIn())
 	var r []*TopLevelDecl
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isEOF() {
 			return r
 		}
 
 		if tok.isPunct(";") {
+			p.skip()
 			continue
 		}
 		ast := p.parseTopLevelDecl(tok)
