@@ -872,6 +872,8 @@ func (clause *ForRangeClause) infer() {
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("for")
+
 	var r = &StmtFor{}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -968,6 +970,8 @@ func (p *parser) parseForRange(exprs []Expr) *StmtFor {
 
 func (p *parser) parseIfStmt() *StmtIf {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("if")
+
 	var r = &StmtIf{}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -989,12 +993,13 @@ func (p *parser) parseIfStmt() *StmtIf {
 	r.then = p.parseCompoundStmt()
 	tok := p.readToken()
 	if tok.isKeyword("else") {
-		tok2 := p.readToken()
+		tok2 := p.peekToken()
 		if tok2.isKeyword("if") {
 			// we regard "else if" as a kind of a nested if statement
 			// else if => else { if .. { } else {} }
 			r.els = p.parseIfStmt()
 		} else if tok2.isPunct("{") {
+			p.skip()
 			r.els = p.parseCompoundStmt()
 		} else {
 			tok2.errorf("Unexpected token")
@@ -1007,6 +1012,8 @@ func (p *parser) parseIfStmt() *StmtIf {
 
 func (p *parser) parseReturnStmt() *StmtReturn {
 	defer p.traceOut(p.traceIn())
+	p.expectKeyword("return")
+
 	var r *StmtReturn
 	exprs := p.parseExpressionList(nil)
 	// workaround for {nil}
@@ -1183,25 +1190,23 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("type") {
 		return p.parseTypeDecl()
 	} else if tok.isKeyword("for") {
-		p.skip()
 		return p.parseForStmt()
 	} else if tok.isKeyword("if") {
-		p.skip()
 		return p.parseIfStmt()
 	} else if tok.isKeyword("return") {
-		p.skip()
 		return p.parseReturnStmt()
 	} else if tok.isKeyword("switch") {
 		return p.parseSwitchStmt()
 	} else if tok.isKeyword("continue") {
-		p.skip()
+		p.expectKeyword("continue")
 		return &StmtContinue{}
 	} else if tok.isKeyword("break") {
-		p.skip()
+		p.expectKeyword("break")
 		return &StmtBreak{}
 	} else if tok.isKeyword("defer") {
 		return p.parseDeferStmt()
 	}
+
 	expr1 := p.parseExpr()
 	tok2 := p.readToken()
 	if tok2.isPunct(",") {
