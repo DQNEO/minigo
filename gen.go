@@ -369,7 +369,8 @@ func (ast *StmtAssignment) emit() {
 		errorf("number of exprs does not match")
 	}
 
-	done := make(map[int]bool) // @FIXME this is not correct any more
+	var done map[int]bool
+	done = make(map[int]bool) // @FIXME this is not correct any more
 	for i, right := range ast.rights {
 		switch right.(type) {
 		case *ExprStructLiteral: // assign struct literal to var
