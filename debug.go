@@ -96,13 +96,13 @@ func (s *StmtSatementList) dump() {
 
 func (a *SourceFile) dump() {
 	debugf("==== AST DUMP START ===")
-	a.pkg.dump()
-	for _, imprt := range a.imports {
+	a.packageClause.dump()
+	for _, imprt := range a.importDecls {
 		for _, spec := range imprt.specs {
 			debugf("import \"%s\"", spec.path)
 		}
 	}
-	for _, decl := range a.decls {
+	for _, decl := range a.topLevelDecls {
 		if decl.funcdecl != nil {
 			decl.funcdecl.dump()
 		} else if decl.typedecl != nil {

@@ -174,9 +174,9 @@ type TopLevelDecl struct {
 }
 
 type SourceFile struct {
-	pkg     *PackageClause
-	imports []*ImportDecl
-	decls   []*TopLevelDecl
+	packageClause *PackageClause
+	importDecls   []*ImportDecl
+	topLevelDecls []*TopLevelDecl
 }
 
 type DeclType struct {
