@@ -197,12 +197,20 @@ func (e *ExprIndex) getGtype() *Gtype {
 	//debugf("collection=%T", e.collection)
 	assertNotNil(e.collection.getGtype() != nil, nil)
 	//debugf("collection.gtype=%v", e.collection.getGtype())
-	if e.collection.getGtype().typ == G_MAP {
+	gtype := e.collection.getGtype()
+	if gtype.typ == G_REL {
+		gtype = gtype.relation.gtype
+	}
+
+	if gtype.typ == G_MAP {
 		// map value
-		return e.collection.getGtype().mapValue
+		return gtype.mapValue
+	} else if gtype.typ == G_STRING {
+		// "hello"[i]
+		return gByte
 	} else {
 		// array element
-		return e.collection.getGtype().ptr
+		return gtype.ptr
 	}
 }
 
