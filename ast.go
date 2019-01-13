@@ -51,6 +51,7 @@ type ExprConstVariable struct {
 }
 
 type ExprFuncall struct {
+	tok   *Token
 	rel   *Relation
 	fname string
 	args  []Expr

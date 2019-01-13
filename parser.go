@@ -194,6 +194,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		args := p.readFuncallArgs()
 		fname := string(rel.name)
 		e = &ExprFuncall{
+			tok:   next,
 			rel:   rel,
 			fname: fname,
 			args:  args,
