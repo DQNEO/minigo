@@ -861,9 +861,9 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 		typeToBeloing = gtype
 	}
 	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
-	debugf("typeToBeloing = %s", typeToBeloing)
+	//debugf("typeToBeloing = %s", typeToBeloing)
 	origType := typeToBeloing.relation.gtype
-	debugf("origType = %v", origType)
+	//debugf("origType = %v", origType)
 	return origType
 }
 

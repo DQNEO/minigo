@@ -844,7 +844,7 @@ func (p *parser) exitScope() {
 
 func (clause *ForRangeClause) infer() {
 	collectionType := clause.rangeexpr.getGtype()
-	debugf("collectionType = %s", collectionType)
+	//debugf("collectionType = %s", collectionType)
 	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
 	assert(ok, nil, "ok")
 
@@ -868,7 +868,7 @@ func (clause *ForRangeClause) infer() {
 		} else if collectionType.typ == G_SLICE {
 			elementType = collectionType.ptr // @TODO is this right ?
 		}
-		debugf("for i, v %s := rannge %v", elementType, collectionType)
+		//debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType
 	}
 }
@@ -1698,7 +1698,6 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 }
 
 func (ast *StmtShortVarDecl) infer() {
-	debugf("infering %s", ast.tok)
 	var rightTypes []*Gtype
 	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
@@ -1718,7 +1717,6 @@ func (ast *StmtShortVarDecl) infer() {
 			}
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)
-			debugf("receiver=%v", fcall.receiver)
 			for _, gtype := range fcall.getRettypes() {
 				rightTypes = append(rightTypes, gtype)
 			}
@@ -1731,7 +1729,7 @@ func (ast *StmtShortVarDecl) infer() {
 			gtype := e.getGtype()
 			assertNotNil(gtype != nil, e.tok)
 			rightTypes = append(rightTypes, gtype)
-			debugf("rightExpr.gtype=%s", gtype)
+			//debugf("rightExpr.gtype=%s", gtype)
 			secondGtype := rightExpr.(*ExprIndex).getSecondGtype()
 			if secondGtype != nil {
 				rightTypes = append(rightTypes, secondGtype)
@@ -1805,9 +1803,7 @@ func (p *parser) inferTypes() {
 	for _, variable := range p.globaluninferred {
 		variable.infer()
 	}
-
 	for _, ast := range p.localuninferred {
-		debugf("> inferring local statement %T", ast)
 		ast.infer()
 	}
 }
