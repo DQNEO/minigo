@@ -19,22 +19,22 @@ func (sc *scope) get(name identifier) interface{} {
 }
 
 func (sc *scope) setFunc(name identifier, funcref *ExprFuncRef) {
-	sc._set(name, funcref)
+	sc.set(name, funcref)
 }
 
 func (sc *scope) setConst(name identifier, cnst *ExprConstVariable) {
-	sc._set(name, cnst)
+	sc.set(name, cnst)
 }
 
 func (sc *scope) setVar(name identifier, variable *ExprVariable) {
-	sc._set(name, variable)
+	sc.set(name, variable)
 }
 
 func (sc *scope) setGtype(name identifier, gtype *Gtype) {
-	sc._set(name, gtype)
+	sc.set(name, gtype)
 }
 
-func (sc *scope) _set(name identifier, v interface{}) {
+func (sc *scope) set(name identifier, v interface{}) {
 	if v == nil {
 		panic("nil cannot be set")
 	}

@@ -12,9 +12,16 @@ var eIota = &ExprConstVariable{
 
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
+	predeclareNil(universe)
 	predeclareTypes(universe)
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
+}
+
+// Zero value:
+// nil
+func predeclareNil(universe *scope) {
+	universe.set("nil", &ExprNilLiteral{})
 }
 
 // Types:
