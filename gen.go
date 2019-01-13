@@ -480,6 +480,15 @@ func (ast *StmtAssignment) emit() {
 			vr := rel.expr.(*ExprVariable)
 			field := vr.gtype.relation.gtype.getField(ast.fieldname)
 			emitLsave(field.getSize(), vr.offset+field.offset)
+		case *ExprUop: // *x = 5
+			uop := left.(*ExprUop)
+			assert(uop.op == "*", uop.tok, "uop op should be *")
+			emit("push %%rax")
+			uop.operand.emit()
+			emit("mov %%rax, %%rcx")
+			emit("pop %%rax")
+			reg := getReg(uop.operand.getGtype().getSize())
+			emit("mov %%%s, (%%rcx)", reg)
 		default:
 			left.dump()
 			errorf("Unknown case %T", left)
