@@ -216,6 +216,8 @@ func (ast *StmtDec) emit() {
 	emitIncrDecl("sub", ast.operand)
 }
 
+// https://golang.org/ref/spec#IncDecStmt
+// As with an assignment, the operand must be addressable or a map index expression.
 func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
 	emit("%s $1, %%rax", inst)
