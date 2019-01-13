@@ -227,8 +227,8 @@ type ExprVaArg struct {
 }
 
 type ExprConversion struct {
-	expr  Expr
 	gtype *Gtype
+	expr  Expr
 }
 
 type ExprCaseClause struct {

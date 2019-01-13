@@ -368,8 +368,8 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	p.expect(")")
 
 	return &ExprConversion{
-		expr:  e,
 		gtype: gtype,
+		expr:  e,
 	}
 }
 
