@@ -10,12 +10,19 @@ var eIota = &ExprConstVariable{}
 
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
+	predeclareTypes(universe)
+	predeclareConsts(universe)
+	predeclareLibcFuncs(universe)
+}
 
+func predeclareTypes(universe *scope) {
 	universe.setGtype("int", gInt)
 	universe.setGtype("byte", gByte)
 	universe.setGtype("bool", gBool)
 	universe.setGtype("string", gString)
+}
 
+func predeclareConsts(universe *scope) {
 	universe.setConst("true", &ExprConstVariable{
 		name:  "true",
 		gtype: gBool,
@@ -28,8 +35,9 @@ func setPredeclaredIdentifiers(universe *scope) {
 	})
 
 	universe.setConst("iota", eIota)
+}
 
-	// declare libc functions
+func predeclareLibcFuncs(universe *scope) {
 	universe.setFunc("puts", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
@@ -43,4 +51,3 @@ func setPredeclaredIdentifiers(universe *scope) {
 		},
 	})
 }
-
