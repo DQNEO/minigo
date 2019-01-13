@@ -68,7 +68,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_SLICE || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
 			return ptrSize
 		} else {
 			return gtype.size
