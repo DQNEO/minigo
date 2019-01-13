@@ -969,7 +969,7 @@ func evalIntExpr(e Expr) int {
 
 		}
 	default:
-		errorf("unkown type %v", e)
+		errorf("unkown type %T", e)
 	}
 	return 0
 }
