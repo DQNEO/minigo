@@ -1726,10 +1726,9 @@ func (ast *StmtShortVarDecl) infer() {
 			rightTypes = append(rightTypes, assertion.gtype)
 			rightTypes = append(rightTypes, gBool)
 		case *ExprIndex:
-			gtype := rightExpr.getGtype()
-			if gtype == nil {
-				errorf("rightExpr %T gtype is nil", rightExpr)
-			}
+			e := rightExpr.(*ExprIndex)
+			gtype := e.getGtype()
+			assertNotNil(gtype != nil, e.tok)
 			rightTypes = append(rightTypes, gtype)
 			debugf("rightExpr.gtype=%s", gtype)
 			secondGtype := rightExpr.(*ExprIndex).getSecondGtype()
