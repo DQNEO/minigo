@@ -99,7 +99,7 @@ func (gtype *Gtype) String() string {
 	case G_STRING:
 		return "string"
 	case G_INTERFACE:
-		return "interface"
+		return fmt.Sprintf("interface {%s}", gtype.imethods)
 	case G_MAP:
 		return "map"
 	default:
