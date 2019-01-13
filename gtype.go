@@ -169,12 +169,21 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 	// I don't know why. mabye management of gtypes is broken
 	pgtype := gp.packageBlockScope.getGtype(gtype.relation.name)
 	assertNotNil(pgtype != nil, e.tok)
-	method, ok := pgtype.methods[e.fname]
-	if !ok {
-		errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+	if pgtype.typ == G_INTERFACE {
+		methodsig, ok := pgtype.imethods[e.fname]
+		if !ok {
+			errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+		}
+		assertNotNil(methodsig != nil, e.tok)
+		return methodsig.rettypes[0]
+	} else {
+		method, ok := pgtype.methods[e.fname]
+		if !ok {
+			errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+		}
+		assertNotNil(method != nil, e.tok)
+		return method.funcdef.rettypes[0]
 	}
-	assertNotNil(method != nil, e.tok)
-	return method.funcdef.rettypes[0]
 }
 
 func (e *ExprUop) getGtype() *Gtype {
