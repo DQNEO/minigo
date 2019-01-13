@@ -18,4 +18,6 @@ func println(s string) {
 	puts(s)
 }
 
+func recover() interface{} {
+}
 `
