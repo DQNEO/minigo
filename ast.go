@@ -195,6 +195,7 @@ type ExprSliced struct {
 
 // Expr e.g. array[2]
 type ExprIndex struct {
+	tok        *Token
 	collection Expr
 	index      Expr
 }

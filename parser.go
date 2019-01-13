@@ -235,6 +235,7 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 		if tok.isPunct("]") {
 			p.skip()
 			r = &ExprIndex{
+				tok: tok,
 				collection: e,
 				index:      index,
 			}
