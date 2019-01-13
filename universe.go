@@ -26,6 +26,7 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("byte", gByte)
 	universe.setGtype("int", gInt)
 	universe.setGtype("string", gString)
+	universe.setGtype("uint8", gByte)
 }
 
 // Constants:
