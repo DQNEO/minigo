@@ -2,6 +2,27 @@ package main
 
 import "fmt"
 
+func incr() {
+	var u user = user{
+		id:  0,
+		age: 5,
+	}
+
+	//u.age = u.age + 1
+	u.age++
+	fmt.Printf("%d\n", u.age)
+}
+
+func decr() {
+	var u user = user{
+		id:  0,
+		age: 8,
+	}
+
+	u.age--
+	fmt.Printf("%d\n", u.age)
+}
+
 func main() {
 	var i int = 1
 	var u user = user{
@@ -18,8 +39,8 @@ func main() {
 	u = user{id: 3, age: 5}
 	fmt.Printf("%d\n", u.age)
 
-	u.age = u.age + 1
-	fmt.Printf("%d\n", u.age)
+	incr()
+	decr()
 }
 
 type user struct {

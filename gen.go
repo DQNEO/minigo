@@ -217,15 +217,24 @@ func (ast *StmtDec) emit() {
 }
 
 func emitIncrDecl(inst string, operand Expr) {
-	rel, ok := operand.(*Relation)
-	if !ok {
-		errorf("operand should be *Relation but got %T", operand)
-	}
-	vr, ok := rel.expr.(*ExprVariable)
-	assert(ok, nil, "operand is a rel")
-	vr.emit()
+	operand.emit()
 	emit("%s $1, %%rax", inst)
-	emitLsave(vr.gtype.getSize(), vr.offset)
+
+	switch operand.(type) {
+	case *Relation:
+		rel := operand.(*Relation)
+		vr, ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "operand is a rel")
+		emitLsave(operand.getGtype().getSize(), vr.offset)
+	case *ExprStructField:
+		ast := operand.(*ExprStructField)
+		rel := ast.strct.(*Relation)
+		vr := rel.expr.(*ExprVariable)
+		field := vr.gtype.relation.gtype.getField(ast.fieldname)
+		emitLsave(field.getSize(), vr.offset+field.offset)
+	default:
+		errorf("internal error")
+	}
 }
 
 func (ast *ExprUop) emit() {
