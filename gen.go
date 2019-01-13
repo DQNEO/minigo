@@ -482,7 +482,7 @@ func (ast *StmtAssignment) emit() {
 			emitLsave(field.getSize(), vr.offset+field.offset)
 		default:
 			left.dump()
-			errorf("Unknown case")
+			errorf("Unknown case %T", left)
 		}
 	}
 }
