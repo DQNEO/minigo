@@ -22,9 +22,9 @@ func setPredeclaredIdentifiers(universe *scope) {
 // int int8 int16 int32 int64 rune string
 // uint uint8 uint16 uint32 uint64 uintptr
 func predeclareTypes(universe *scope) {
-	universe.setGtype("int", gInt)
-	universe.setGtype("byte", gByte)
 	universe.setGtype("bool", gBool)
+	universe.setGtype("byte", gByte)
+	universe.setGtype("int", gInt)
 	universe.setGtype("string", gString)
 }
 
