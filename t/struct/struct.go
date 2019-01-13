@@ -17,6 +17,9 @@ func main() {
 
 	u = user{id: 3, age: 5}
 	fmt.Printf("%d\n", u.age)
+
+	u.age = u.age + 1
+	fmt.Printf("%d\n", u.age)
 }
 
 type user struct {
