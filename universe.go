@@ -9,34 +9,34 @@ var gString = &Gtype{typ: G_STRING}
 var eIota = &ExprConstVariable{}
 
 // https://golang.org/ref/spec#Predeclared_identifiers
-func setPredeclaredIdentifiers(r *scope) {
+func setPredeclaredIdentifiers(universe *scope) {
 
-	r.setGtype("int", gInt)
-	r.setGtype("byte", gByte)
-	r.setGtype("bool", gBool)
-	r.setGtype("string", gString)
+	universe.setGtype("int", gInt)
+	universe.setGtype("byte", gByte)
+	universe.setGtype("bool", gBool)
+	universe.setGtype("string", gString)
 
-	r.setConst("true", &ExprConstVariable{
+	universe.setConst("true", &ExprConstVariable{
 		name:  "true",
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 1},
 	})
-	r.setConst("false", &ExprConstVariable{
+	universe.setConst("false", &ExprConstVariable{
 		name:  "false",
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 0},
 	})
 
-	r.setConst("iota", eIota)
+	universe.setConst("iota", eIota)
 
 	// declare libc functions
-	r.setFunc("puts", &ExprFuncRef{
+	universe.setFunc("puts", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
 			// No implementation thanks to the libc function.
 		},
 	})
-	r.setFunc("printf", &ExprFuncRef{
+	universe.setFunc("printf", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
 			// No implementation thanks to the libc function.
