@@ -161,6 +161,7 @@ func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 func (e *ExprMethodcall) getGtype() *Gtype {
 	gtype := e.receiver.getGtype()
 	method := gtype.methods[e.fname]
+	assertNotNil(method != nil, e.tok)
 	return method.funcdef.rettypes[0]
 }
 
