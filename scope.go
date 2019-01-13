@@ -73,6 +73,7 @@ func setPredeclaredIdentifiers(r *scope) {
 	r.setGtype("int", gInt)
 	r.setGtype("byte", gByte)
 	r.setGtype("bool", gBool)
+	r.setGtype("string", gString)
 
 	r.setConst("true", &ExprConstVariable{
 		name:  "true",
