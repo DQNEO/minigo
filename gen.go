@@ -802,7 +802,7 @@ func (e *ExprVaArg) emit() {
 }
 
 func (e *ExprConversion) emit() {
-	panic("implement me")
+	e.expr.emit()
 }
 
 func (e *ExprStructLiteral) emit() {
