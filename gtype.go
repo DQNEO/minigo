@@ -100,6 +100,8 @@ func (gtype *Gtype) String() string {
 		return "string"
 	case G_INTERFACE:
 		return "interface"
+	case G_MAP:
+		return "map"
 	default:
 		errorf("gtype.String() error: type=%d", gtype.typ)
 	}
@@ -192,13 +194,30 @@ func (e *ExprSliced) getGtype() *Gtype {
 }
 
 func (e *ExprIndex) getGtype() *Gtype {
-	debugf("array=%T", e.collection)
+	//debugf("collection=%T", e.collection)
 	assertNotNil(e.collection.getGtype() != nil, nil)
-	return e.collection.getGtype().ptr
+	//debugf("collection.gtype=%v", e.collection.getGtype())
+	if e.collection.getGtype().typ == G_MAP {
+		// map value
+		return e.collection.getGtype().mapValue
+	} else {
+		// array element
+		return e.collection.getGtype().ptr
+	}
+}
+
+func (e *ExprIndex) getSecondGtype() *Gtype {
+	assertNotNil(e.collection.getGtype() != nil, nil)
+	if e.collection.getGtype().typ == G_MAP {
+		// map
+		return gBool
+	}
+
+	return nil
 }
 
 func (e *ExprStructField) getGtype() *Gtype {
-	debugf("e.strct =  %T, %s", e.strct, e.strct)
+	//debugf("e.strct =  %T, %s", e.strct, e.strct)
 	gstruct := e.strct.getGtype()
 	assertNotNil(gstruct != nil, e.tok)
 	assert(gstruct != gInt, e.tok, "struct should not be gInt")
@@ -211,7 +230,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	}
 
 	fields := strctType.relation.gtype.fields
-	debugf("fields=%v", fields)
+	//debugf("fields=%v", fields)
 	for _, field := range fields {
 		if e.fieldname == field.fieldname {
 			return field.ptr

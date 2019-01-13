@@ -1718,6 +1718,17 @@ func (ast *StmtShortVarDecl) infer() {
 			assertion := rightExpr.(*ExprTypeAssertion)
 			rightTypes = append(rightTypes, assertion.gtype)
 			rightTypes = append(rightTypes, gBool)
+		case *ExprIndex:
+			gtype := rightExpr.getGtype()
+			if gtype == nil {
+				errorf("rightExpr %T gtype is nil", rightExpr)
+			}
+			rightTypes = append(rightTypes, gtype)
+			debugf("rightExpr.gtype=%s", gtype)
+			secondGtype := rightExpr.(*ExprIndex).getSecondGtype()
+			if secondGtype != nil {
+				rightTypes = append(rightTypes, secondGtype)
+			}
 		default:
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
@@ -1727,6 +1738,10 @@ func (ast *StmtShortVarDecl) infer() {
 		}
 	}
 
+	if len(ast.lefts) > len(rightTypes) {
+		// @TODO this check is too loose.
+		errorf("number of lhs and rhs does not match")
+	}
 	for i, e := range ast.lefts {
 		rel := e.(*Relation) // a brand new rel
 		variable := rel.expr.(*ExprVariable)
