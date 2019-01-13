@@ -193,7 +193,7 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		p.skip()
 		args := p.readFuncallArgs()
 		fname := string(rel.name)
-		e = &ExprFuncall{
+		e = &ExprFuncallOrConversion{
 			tok:   next,
 			rel:   rel,
 			fname: fname,
@@ -1701,13 +1701,19 @@ func (ast *StmtShortVarDecl) infer() {
 	var rightTypes []*Gtype
 	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
-		case *ExprFuncall:
-			fcall := rightExpr.(*ExprFuncall)
-			if fcall.getFuncDef() == nil {
-				errorf("funcdef of %s is not found", fcall.fname)
-			}
-			for _, gtype := range fcall.getFuncDef().rettypes {
-				rightTypes = append(rightTypes, gtype)
+		case *ExprFuncallOrConversion:
+			fcallOrConversion := rightExpr.(*ExprFuncallOrConversion)
+			if fcallOrConversion.rel.gtype != nil {
+				// Conversion
+				rightTypes = append(rightTypes, fcallOrConversion.rel.gtype)
+			} else {
+				fcall := fcallOrConversion
+				if fcall.getFuncDef() == nil {
+					errorf("funcdef of %s is not found", fcall.fname)
+				}
+				for _, gtype := range fcall.getFuncDef().rettypes {
+					rightTypes = append(rightTypes, gtype)
+				}
 			}
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)

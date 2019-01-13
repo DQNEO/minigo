@@ -355,8 +355,8 @@ func (ast *StmtAssignment) emit() {
 	numRight := 0
 	for _, right := range ast.rights {
 		switch right.(type) {
-		case *ExprFuncall:
-			funcdef := right.(*ExprFuncall).getFuncDef()
+		case *ExprFuncallOrConversion:
+			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
 			numRight += len(funcdef.rettypes)
 		case *ExprMethodcall:
 			rettypes := right.(*ExprMethodcall).getRettypes()
@@ -378,8 +378,8 @@ func (ast *StmtAssignment) emit() {
 			vr := rel.expr.(*ExprVariable)
 			assignStructLiteral(vr, right.(*ExprStructLiteral))
 			done[i] = true // @FIXME this is not correct any more
-		case *ExprFuncall:
-			funcdef := right.(*ExprFuncall).getFuncDef()
+		case *ExprFuncallOrConversion:
+			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
 			emit("# emitting rhs (funcall)")
 			right.emit()
 			for i, _ := range funcdef.rettypes {
@@ -893,7 +893,7 @@ func (methodCall *ExprMethodcall) emit() {
 	emitCall(getPackagedFuncName(pkgname, name), args)
 }
 
-func (funcall *ExprFuncall) getFuncDef() *DeclFunc {
+func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
 	assertNotNil2(relexpr, funcall.tok, funcall.rel)
 	funcref, ok := relexpr.(*ExprFuncRef)
@@ -904,7 +904,7 @@ func (funcall *ExprFuncall) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
-func (funcall *ExprFuncall) emit() {
+func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef() // check existance
 	if decl == nil {
 		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)

@@ -154,7 +154,7 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 	}
 }
 
-func (e *ExprFuncall) getGtype() *Gtype {
+func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 	return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
 }
 

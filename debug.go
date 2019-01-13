@@ -116,7 +116,7 @@ func (a *SourceFile) dump() {
 	debugf("==== AST DUMP END ===")
 }
 
-func (ast *ExprFuncall) dump() {
+func (ast *ExprFuncallOrConversion) dump() {
 	debugf(string(ast.fname))
 	debugNest++
 	for _, arg := range ast.args {
