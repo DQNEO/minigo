@@ -23,4 +23,8 @@ func println(s string) {
 
 func recover() interface{} {
 }
+
+type error interface {
+	Error() string
+}
 `
