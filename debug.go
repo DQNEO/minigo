@@ -305,6 +305,12 @@ func errorf(format string, v ...interface{}) {
 	panic(s)
 }
 
+func assertNotNil2(x interface{}, tok *Token, parent interface{}) {
+	if x == nil {
+		panic(fmt.Sprintf("Not Nil assertion failed: %s\n%#v", tok, parent))
+	}
+}
+
 func assert(cond bool, tok *Token, msg string) {
 	if !cond {
 		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok))
