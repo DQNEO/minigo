@@ -2,6 +2,16 @@ package main
 
 import "fmt"
 
+func assign() {
+	var u *User
+	u = &User{
+		id:  0,
+		age: 4,
+	}
+	//u.age = 5
+	fmt.Printf("%d\n", u.age)
+}
+
 func main() {
 	var u *User
 	u = &User{
@@ -17,6 +27,7 @@ func main() {
 	}
 	fmt.Printf("%d\n", u.id)
 	fmt.Printf("%d\n", u.age)
+	assign()
 }
 
 type User struct {

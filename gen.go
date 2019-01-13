@@ -472,14 +472,18 @@ func (ast *StmtAssignment) emit() {
 			reg := getReg(size)
 			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 		case *ExprStructField:
-			ast, ok := left.(*ExprStructField)
-			if !ok {
-				errorf("left is not ExprStructField")
+			ast := left.(*ExprStructField)
+			rel,ok := ast.strct.(*Relation)
+			assert(ok, ast.tok, "should be *Relation")
+			vr, ok := rel.expr.(*ExprVariable)
+			assert(ok, ast.tok, "should be *ExprVariable")
+			assert(vr.gtype.typ == G_REL || vr.gtype.typ == G_POINTER , ast.tok,"expect G_REL|G_POINTER , but got " + vr.gtype.String())
+			if vr.gtype.typ == G_REL {
+				field := vr.gtype.relation.gtype.getField(ast.fieldname)
+				emitLsave(field.getSize(), vr.offset+field.offset)
+			} else if vr.gtype.typ == G_POINTER {
+				errorf("TBI")
 			}
-			rel := ast.strct.(*Relation)
-			vr := rel.expr.(*ExprVariable)
-			field := vr.gtype.relation.gtype.getField(ast.fieldname)
-			emitLsave(field.getSize(), vr.offset+field.offset)
 		case *ExprUop: // *x = 5
 			uop := left.(*ExprUop)
 			assert(uop.op == "*", uop.tok, "uop op should be *")
