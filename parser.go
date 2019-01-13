@@ -465,9 +465,10 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 	defer p.traceOut(p.traceIn())
-	p.expect("{")
+	ptok := p.expect("{")
 
 	r := &ExprStructLiteral{
+		tok:ptok,
 		strctname: rel,
 	}
 

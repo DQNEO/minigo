@@ -251,6 +251,7 @@ type KeyedElement struct {
 }
 
 type ExprStructLiteral struct {
+	tok *Token
 	strctname    *Relation
 	fields       []*KeyedElement
 	invisiblevar *ExprVariable // to have offfset for &T{}
