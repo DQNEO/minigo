@@ -159,14 +159,14 @@ func (ast *ExprVariable) emit() {
 	}
 }
 
-func (ast *ExprVariable) emitAddress() {
-	if ast.isGlobal {
-		emit("lea %s(%%rip), %%rax", ast.varname)
+func (vr *ExprVariable) emitAddress() {
+	if vr.isGlobal {
+		emit("lea %s(%%rip), %%rax", vr.varname)
 	} else {
-		if ast.offset == 0 {
-			errorf("offset should not be zero for localvar %s", ast.varname)
+		if vr.offset == 0 {
+			errorf("offset should not be zero for localvar %s", vr.varname)
 		}
-		emit("lea %d(%%rbp), %%rax", ast.offset)
+		emit("lea %d(%%rbp), %%rax", vr.offset)
 	}
 }
 
