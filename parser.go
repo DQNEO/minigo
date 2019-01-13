@@ -854,7 +854,7 @@ func (clause *ForRangeClause) infer() {
 		indexType = gInt
 	default:
 		// @TODO consider map etc.
-		errorf("TBI")
+		errorf("TBI %s", clause.tok)
 	}
 	indexvar.gtype = indexType
 
@@ -942,7 +942,7 @@ func (p *parser) parseForStmt() *StmtFor {
 
 func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("range")
+	tokRange := p.expectKeyword("range")
 
 	if len(exprs) > 2 {
 		errorf("range values should be 1 or 2")
@@ -963,6 +963,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 
 	var r = &StmtFor{
 		rng: &ForRangeClause{
+			tok:tokRange,
 			indexvar:  indexvar,
 			valuevar:  valuevar,
 			rangeexpr: rangeExpr,

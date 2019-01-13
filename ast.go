@@ -99,6 +99,7 @@ type StmtShortVarDecl struct {
 }
 
 type ForRangeClause struct {
+	tok *Token
 	indexvar  *Relation
 	valuevar  *Relation
 	rangeexpr Expr
