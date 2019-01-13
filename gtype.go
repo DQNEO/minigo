@@ -160,7 +160,18 @@ func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 
 func (e *ExprMethodcall) getGtype() *Gtype {
 	gtype := e.receiver.getGtype()
-	method := gtype.methods[e.fname]
+	if gtype.typ == G_POINTER {
+		gtype = gtype.ptr
+	}
+
+	// refetch gtype from the package block scope
+	// I don't know why. mabye management of gtypes is broken
+	pgtype := gp.packageBlockScope.getGtype(gtype.relation.name)
+	assertNotNil(pgtype != nil, e.tok)
+	method, ok := pgtype.methods[e.fname]
+	if !ok {
+		errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+	}
 	assertNotNil(method != nil, e.tok)
 	return method.funcdef.rettypes[0]
 }
