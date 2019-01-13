@@ -67,7 +67,7 @@ func (p *parser) unreadToken() {
 	p.tokenStream.index--
 }
 
-func (p *parser) readIdent() identifier {
+func (p *parser) expectIdent() identifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
 		errorf("Identifier expected, but got %s", tok)
@@ -133,8 +133,11 @@ func (p *parser) readFuncallArgs() []Expr {
 		}
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
-			p.expect("...")
-			arg = &ExprVaArg{expr: arg}
+			ptok := p.expect("...")
+			arg = &ExprVaArg{
+				tok: ptok,
+				expr: arg,
+			}
 			r = append(r, arg)
 			p.expect(")")
 			return r
@@ -161,9 +164,10 @@ func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
 
 // expr which begins with an ident.
 // e.g. ident, ident() or ident.*, etc
-func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
+func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	defer p.traceOut(p.traceIn())
 
+	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg identifier // ignored for now
@@ -171,10 +175,11 @@ func (p *parser) parseIdentExpr(firstIdent identifier) Expr {
 		pkg = firstIdent
 		p.expect(".")
 		// shift firstident
-		firstIdent = p.readIdent()
+		firstIdent = p.expectIdent()
 	}
 
 	rel := &Relation{
+		tok: firstIdentToken,
 		name: firstIdent,
 	}
 	p.tryResolve(pkg, rel)
@@ -221,11 +226,13 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 	if tok.isPunct(":") {
 		p.skip()
 		lowIndex := &ExprNumberLiteral{
+			tok:tok,
 			val: 0,
 		}
 		highIndex := p.parseExpr()
 		p.expect("]")
 		r = &ExprSliced{
+			tok: tok,
 			low:  lowIndex,
 			high: highIndex,
 		}
@@ -244,6 +251,7 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 			highIndex := p.parseExpr()
 			p.expect("]")
 			r = &ExprSliced{
+				tok:tok,
 				low:  index,
 				high: highIndex,
 			}
@@ -262,14 +270,16 @@ func (p *parser) parseTypeAssertion(e Expr) Expr {
 
 	if p.peekToken().isKeyword("type") {
 		p.skip()
-		p.expect(")")
+		ptok := p.expect(")")
 		return &ExprTypeSwitchGuard{
+			tok:ptok,
 			expr: e,
 		}
 	} else {
 		gtype := p.parseType()
-		p.expect(")")
+		ptok := p.expect(")")
 		e = &ExprTypeAssertion{
+			tok:ptok,
 			expr:  e,
 			gtype: gtype,
 		}
@@ -342,7 +352,9 @@ func (p *parser) parseMakeExpr() Expr {
 	mapType := p.parseMapType()
 	_ = mapType
 	p.expect(")")
-	return &ExprNilLiteral{}
+	return &ExprNilLiteral{
+		tok:tok,
+	}
 }
 
 func (p *parser) parseMapType() *Gtype {
@@ -364,11 +376,12 @@ func (p *parser) parseMapType() *Gtype {
 func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
 
-	p.expect("(")
+	ptok := p.expect("(")
 	e := p.parseExpr()
 	p.expect(")")
 
 	return &ExprConversion{
+		tok:ptok,
 		gtype: gtype,
 		expr:  e,
 	}
@@ -385,6 +398,7 @@ func (p *parser) parsePrim() Expr {
 	case tok.isTypeString(): // string literal
 		p.skip()
 		ast := &ExprStringLiteral{
+			tok: tok,
 			val: tok.sval,
 		}
 		p.addStringLiteral(ast)
@@ -393,6 +407,7 @@ func (p *parser) parsePrim() Expr {
 		p.skip()
 		ival := tok.getIntval()
 		return &ExprNumberLiteral{
+			tok: tok,
 			val: ival,
 		}
 	case tok.isTypeChar(): // char literal
@@ -400,6 +415,7 @@ func (p *parser) parsePrim() Expr {
 		sval := tok.sval
 		c := sval[0]
 		return &ExprNumberLiteral{
+			tok: tok,
 			val: int(c),
 		}
 	case tok.isPunct("["): // array literal or type casting
@@ -413,7 +429,7 @@ func (p *parser) parsePrim() Expr {
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
 		p.skip()
-		return p.parseIdentExpr(tok.getIdent())
+		return p.parseIdentExpr(tok)
 	}
 
 	tok.errorf("unable to handle")
@@ -423,7 +439,7 @@ func (p *parser) parsePrim() Expr {
 func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 	defer p.traceOut(p.traceIn())
 	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
-	p.expect("{")
+	ptok := p.expect("{")
 
 	var values []Expr
 	for {
@@ -456,6 +472,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 	}
 
 	r := &ExprArrayLiteral{
+		tok: ptok,
 		gtype:  gtype,
 		values: values,
 	}
@@ -481,6 +498,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		p.assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
 		f := &KeyedElement{
+			tok:tok,
 			key:   tok.getIdent(),
 			value: value,
 		}
@@ -506,6 +524,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		return e
 	case tok.isPunct("&"):
 		uop := &ExprUop{
+			tok:tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
@@ -520,16 +539,19 @@ func (p *parser) parseUnaryExpr() Expr {
 		return uop
 	case tok.isPunct("*"):
 		return &ExprUop{
+			tok:tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("!"):
 		return &ExprUop{
+			tok:tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
 		return &ExprUop{
+			tok:tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
@@ -590,6 +612,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 					tok.errorf("bad lefts unary expr:%v", ast)
 				}
 				ast = &ExprBinop{
+					tok:tok,
 					op:    tok.sval,
 					left:  ast,
 					right: right,
@@ -637,6 +660,7 @@ func (p *parser) parseType() *Gtype {
 			ident := tok.getIdent()
 			// unresolved
 			rel := &Relation{
+				tok:tok,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -710,7 +734,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	p.expectKeyword("var")
 
 	// read newName
-	newName := p.readIdent()
+	newName := p.expectIdent()
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
@@ -751,7 +775,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 
 func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVariable {
 	defer p.traceOut(p.traceIn())
-	newName := p.readIdent()
+	newName := p.expectIdent()
 
 	// Type or "=" or ";"
 	var val Expr
@@ -983,9 +1007,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 
 func (p *parser) parseIfStmt() *StmtIf {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("if")
+	ptok := p.expectKeyword("if")
 
-	var r = &StmtIf{}
+	var r = &StmtIf{
+		tok:ptok,
+	}
 	p.enterNewScope()
 	defer p.exitScope()
 	p.requireBlock = true
@@ -1024,16 +1050,17 @@ func (p *parser) parseIfStmt() *StmtIf {
 
 func (p *parser) parseReturnStmt() *StmtReturn {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("return")
+	ptok := p.expectKeyword("return")
 
-	var r *StmtReturn
 	exprs := p.parseExpressionList(nil)
 	// workaround for {nil}
 	if len(exprs) == 1 && exprs[0] == nil {
 		exprs = nil
 	}
-	r = &StmtReturn{exprs: exprs}
-	return r
+	return &StmtReturn{
+		tok:ptok,
+		exprs: exprs,
+	}
 }
 
 func (p *parser) parseExpressionList(first Expr) []Expr {
@@ -1064,10 +1091,12 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+	ptok := p.lastToken()
 
 	rights := p.parseExpressionList(nil)
 	p.assertNotNil(rights[0])
 	return &StmtAssignment{
+		tok:ptok,
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1075,6 +1104,7 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 
 func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
 	defer p.traceOut(p.traceIn())
+	ptok := p.lastToken()
 
 	var op string
 	switch assignop {
@@ -1090,11 +1120,13 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 	rights := p.parseExpressionList(nil)
 	p.assert(len(rights) == 1, "num of rights is 1")
 	binop := &ExprBinop{
+		tok:ptok,
 		op:    op,
 		left:  left,
 		right: rights[0],
 	}
 	return &StmtAssignment{
+		tok:ptok,
 		lefts:  []Expr{left},
 		rights: []Expr{binop},
 	}
@@ -1126,7 +1158,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("switch")
+	ptok := p.expectKeyword("switch")
 
 	var cond Expr
 	if p.peekToken().isPunct("{") {
@@ -1138,6 +1170,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 	}
 	p.expect("{")
 	r := &StmtSwitch{
+		tok: ptok,
 		cond: cond,
 	}
 
@@ -1158,10 +1191,11 @@ func (p *parser) parseSwitchStmt() Stmt {
 					break
 				}
 			}
-			p.expect(":")
+			ptok := p.expect(":")
 			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &ExprCaseClause{
+				tok:ptok,
 				exprs:    exprs,
 				compound: compound,
 			}
@@ -1186,10 +1220,11 @@ func (p *parser) parseSwitchStmt() Stmt {
 
 func (p *parser) parseDeferStmt() *StmtDefer {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("defer")
+	ptok := p.expectKeyword("defer")
 
 	callExpr := p.parsePrim()
 	return &StmtDefer{
+		tok:ptok,
 		expr: callExpr,
 	}
 }
@@ -1214,11 +1249,15 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("switch") {
 		return p.parseSwitchStmt()
 	} else if tok.isKeyword("continue") {
-		p.expectKeyword("continue")
-		return &StmtContinue{}
+		ptok := p.expectKeyword("continue")
+		return &StmtContinue{
+			tok: ptok,
+		}
 	} else if tok.isKeyword("break") {
-		p.expectKeyword("break")
-		return &StmtBreak{}
+		ptok := p.expectKeyword("break")
+		return &StmtBreak{
+			tok: ptok,
+		}
 	} else if tok.isKeyword("defer") {
 		return p.parseDeferStmt()
 	}
@@ -1249,15 +1288,18 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok2.isPunct("++") {
 		p.skip()
 		return &StmtInc{
+			tok:tok2,
 			operand: expr1,
 		}
 	} else if tok2.isPunct("--") {
 		p.skip()
 		return &StmtDec{
+			tok:tok2,
 			operand: expr1,
 		}
 	} else {
 		return &StmtExpr{
+			tok:tok2,
 			expr: expr1,
 		}
 	}
@@ -1267,7 +1309,9 @@ func (p *parser) parseStmt() Stmt {
 func (p *parser) parseCompoundStmt() *StmtSatementList {
 	defer p.traceOut(p.traceIn())
 
-	r := &StmtSatementList{}
+	r := &StmtSatementList{
+		tok: p.lastToken(),
+	}
 	for {
 		tok := p.peekToken()
 		if tok.isPunct("}") {
@@ -1308,6 +1352,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				variable := &ExprVariable{
+					tok:tok,
 					varname: pname,
 					gtype:   gtype,
 				}
@@ -1318,6 +1363,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 			ptype := p.parseType()
 			// assureType(tok.sval)
 			variable := &ExprVariable{
+				tok:tok,
 				varname: pname,
 				gtype:   ptype,
 			}
@@ -1364,7 +1410,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 func (p *parser) parseFuncDef() *DeclFunc {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("func")
+	ptok := p.expectKeyword("func")
 
 	p.localvars = nil
 	var isMethod bool
@@ -1381,6 +1427,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		pname := tok.getIdent()
 		ptype := p.parseType()
 		receiver = &ExprVariable{
+			tok:tok,
 			varname: pname,
 			gtype:   ptype,
 		}
@@ -1390,9 +1437,10 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	fname, params, isVariadic, rettypes := p.parseFuncSignature()
 
-	p.expect("{")
+	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
+		tok : ptok,
 		pkg:        p.currentPackageName,
 		receiver:   receiver,
 		fname:      fname,
@@ -1401,6 +1449,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		isVariadic: isVariadic,
 	}
 	ref := &ExprFuncRef{
+		tok : ptok2,
 		funcdef: r,
 	}
 
@@ -1442,6 +1491,7 @@ func (p *parser) parseImport() *ImportDecl {
 			tok := p.readToken()
 			if tok.isTypeString() {
 				specs = append(specs, &ImportSpec{
+					tok: tok,
 					path: tok.sval,
 				})
 				p.expect(";")
@@ -1456,6 +1506,7 @@ func (p *parser) parseImport() *ImportDecl {
 			errorf("import expects package name")
 		}
 		specs = []*ImportSpec{&ImportSpec{
+			tok:tok,
 			path: tok.sval,
 		},
 		}
@@ -1471,7 +1522,7 @@ func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(p.traceIn())
 	tokPkg := p.expectKeyword("package")
 
-	name := p.readIdent()
+	name := p.expectIdent()
 	p.expect(";")
 	return &PackageClause{
 		tok: tokPkg,
@@ -1601,15 +1652,16 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("type")
+	ptok := p.expectKeyword("type")
 
-	newName := p.readIdent()
+	newName := p.expectIdent()
 	if p.peekToken().isKeyword("interface") {
 		return p.parseInterfaceDef(newName)
 	}
 
 	gtype := p.parseType()
 	r := &DeclType{
+		tok: ptok,
 		name:  newName,
 		gtype: gtype,
 	}

@@ -16,6 +16,7 @@ type Inferer interface {
 }
 
 type Relation struct {
+	tok *Token
 	name identifier
 
 	// either of expr(var, const, funcref) or gtype
@@ -24,19 +25,23 @@ type Relation struct {
 }
 
 type ExprNilLiteral struct {
+	tok *Token
 }
 
 type ExprNumberLiteral struct {
+	tok *Token
 	val int
 }
 
 type ExprStringLiteral struct {
+	tok *Token
 	val    string
 	slabel string
 }
 
 // local or global variable
 type ExprVariable struct {
+	tok *Token
 	varname  identifier
 	gtype    *Gtype
 	offset   int // for local variable
@@ -44,6 +49,7 @@ type ExprVariable struct {
 }
 
 type ExprConstVariable struct {
+	tok *Token
 	name      identifier
 	gtype     *Gtype
 	val       Expr // like ExprConstExpr ?
@@ -66,28 +72,33 @@ type ExprMethodcall struct {
 }
 
 type ExprBinop struct {
+	tok *Token
 	op    string
 	left  Expr
 	right Expr
 }
 
 type ExprUop struct {
+	tok *Token
 	op      string
 	operand Expr
 }
 
 // local or global
 type DeclVar struct {
+	tok *Token
 	pkg      identifier
 	variable *ExprVariable
 	initval  Expr
 }
 
 type DeclConst struct {
+	tok *Token
 	consts []*ExprConstVariable
 }
 
 type StmtAssignment struct {
+	tok *Token
 	lefts  []Expr
 	rights []Expr
 }
@@ -106,12 +117,14 @@ type ForRangeClause struct {
 }
 
 type ForForClause struct {
+	tok *Token
 	init Stmt
 	cond Stmt
 	post Stmt
 }
 
 type StmtFor struct {
+	tok *Token
 	// either of rng or cls is set
 	rng   *ForRangeClause
 	cls   *ForForClause
@@ -119,6 +132,7 @@ type StmtFor struct {
 }
 
 type StmtIf struct {
+	tok *Token
 	simplestmt Stmt
 	cond       Expr
 	then       *StmtSatementList
@@ -126,14 +140,17 @@ type StmtIf struct {
 }
 
 type StmtReturn struct {
+	tok *Token
 	exprs []Expr
 }
 
 type StmtInc struct {
+	tok *Token
 	operand Expr
 }
 
 type StmtDec struct {
+	tok *Token
 	operand Expr
 }
 
@@ -143,6 +160,7 @@ type PackageClause struct {
 }
 
 type ImportSpec struct {
+	tok *Token
 	path string
 }
 
@@ -152,14 +170,17 @@ type ImportDecl struct {
 }
 
 type StmtSatementList struct {
+	tok *Token
 	stmts []Stmt
 }
 
 type ExprFuncRef struct {
+	tok *Token
 	funcdef *DeclFunc
 }
 
 type DeclFunc struct {
+	tok *Token
 	pkg        identifier
 	receiver   *ExprVariable
 	fname      identifier
@@ -171,6 +192,7 @@ type DeclFunc struct {
 }
 
 type TopLevelDecl struct {
+	tok *Token
 	// either of followings
 	funcdecl  *DeclFunc // includes method declaration
 	vardecl   *DeclVar
@@ -185,11 +207,13 @@ type SourceFile struct {
 }
 
 type DeclType struct {
+	tok *Token
 	name  identifier
 	gtype *Gtype
 }
 
 type ExprSliced struct {
+	tok *Token
 	low  Expr
 	high Expr
 }
@@ -202,50 +226,61 @@ type ExprIndex struct {
 }
 
 type ExprArrayLiteral struct {
+	tok *Token
 	gtype  *Gtype
 	values []Expr
 }
 
 type ExprTypeAssertion struct {
+	tok *Token
 	expr  Expr
 	gtype *Gtype
 }
 
 type StmtContinue struct {
+	tok *Token
 }
 
 type StmtBreak struct {
+	tok *Token
 }
 
 type StmtExpr struct {
+	tok *Token
 	expr Expr
 }
 
 type StmtDefer struct {
+	tok *Token
 	expr Expr
 }
 
 type ExprVaArg struct {
+	tok *Token
 	expr Expr
 }
 
 type ExprConversion struct {
+	tok *Token
 	gtype *Gtype
 	expr  Expr
 }
 
 type ExprCaseClause struct {
+	tok *Token
 	exprs    []Expr
 	compound *StmtSatementList
 }
 
 type StmtSwitch struct {
+	tok *Token
 	cond  Expr
 	cases []*ExprCaseClause
 	dflt  *StmtSatementList
 }
 
 type KeyedElement struct {
+	tok *Token
 	key   identifier
 	value Expr
 }
@@ -264,5 +299,6 @@ type ExprStructField struct {
 }
 
 type ExprTypeSwitchGuard struct {
+	tok *Token
 	expr Expr
 }

@@ -56,7 +56,7 @@ func (gtype *Gtype) getSize() int {
 	assert(gtype.typ != G_DEPENDENT, nil, "type should be inferred")
 	if gtype.typ == G_REL {
 		if gtype.relation.gtype == nil {
-			errorf("relation not resolved: %s", gtype.relation)
+			errorf("relation not resolved: %s", gtype)
 		}
 		return gtype.relation.gtype.getSize()
 	} else {
@@ -79,7 +79,7 @@ func (gtype *Gtype) getSize() int {
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
 	case G_REL:
-		return fmt.Sprintf("rel(%s)", gtype.relation.name)
+		return fmt.Sprintf("G_REL(\"%s\")", gtype.relation.name)
 	case G_INT:
 		return "int"
 	case G_BYTE:
