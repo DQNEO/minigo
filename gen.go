@@ -219,7 +219,7 @@ func (ast *StmtDec) emit() {
 func emitIncrDecl(inst string, operand Expr) {
 	rel, ok := operand.(*Relation)
 	if !ok {
-		errorf("operand should be *Relation")
+		errorf("operand should be *Relation but got %T", operand)
 	}
 	vr, ok := rel.expr.(*ExprVariable)
 	assert(ok, nil, "operand is a rel")
