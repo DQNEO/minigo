@@ -1,6 +1,6 @@
 package strconv
 
-func Atoi() {
+func Atoi() (int , error) {
 
 }
 
