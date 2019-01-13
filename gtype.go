@@ -127,6 +127,7 @@ func (strct *Gtype) calcStructOffset() {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
+			assert(align > 0 , nil, "field size should be > 0: filed=" + fieldtype.String())
 		} else {
 			align = MaxAlign
 		}
