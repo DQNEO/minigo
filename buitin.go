@@ -17,6 +17,9 @@ func len(x interface{}) int {
 func make(x interface{}) interface{} {
 }
 
+func panic(x interface{}) {
+}
+
 func println(s string) {
 	puts(s)
 }
