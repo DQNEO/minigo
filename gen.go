@@ -989,7 +989,13 @@ func (decl *DeclVar) emitGlobal() {
 			assertNotNil(value != nil, nil)
 			size := elmType.getSize()
 			if size == 8 {
-				emit(".quad %d", evalIntExpr(value))
+				if value.getGtype().typ == G_STRING {
+					stringLiteral, ok :=value.(*ExprStringLiteral)
+					assert(ok, nil, "ok")
+					emit(".quad .%s", stringLiteral.slabel)
+				} else {
+					emit(".quad %d", evalIntExpr(value))
+				}
 			} else if size == 1 {
 				emit(".byte %d", evalIntExpr(value))
 			} else {
