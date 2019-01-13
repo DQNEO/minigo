@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -e
 make >/dev/null
-./minigo.darwin "$@"
+./minigo.darwin "$@" > out/a.s
+./as
