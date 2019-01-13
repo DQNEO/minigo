@@ -86,9 +86,6 @@ func setPredeclaredIdentifiers(r *scope) {
 	})
 
 	r.setConst("iota", eIota)
-	r.setFunc("make", &ExprFuncRef{
-		// @FIXME
-	})
 
 	// declare libc functions
 	r.setFunc("puts", &ExprFuncRef{
