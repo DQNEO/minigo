@@ -33,7 +33,7 @@ func getPackagedFuncName(pkg identifier, fname string) string {
 		return fname
 	}
 
-	return fmt.Sprintf("%s_p_%s", pkg, fname)
+	return fmt.Sprintf("%s_pkg_%s", pkg, fname)
 }
 
 func (f *DeclFunc) getUniqueName() string {
