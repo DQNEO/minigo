@@ -726,23 +726,11 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprIndex) emit() {
 	emit("# emit *ExprIndex")
-	rel, ok := e.collection.(*Relation)
-	if !ok {
-		errorf("array should be a Relation")
-	}
-	vr, ok := rel.expr.(*ExprVariable)
-	if !ok {
-		errorf("array should be a variable")
-	}
-	if vr.isGlobal {
-		emit("lea %s(%%rip), %%rax", vr.varname)
-	} else {
-		emit("lea %d(%%rbp), %%rax", vr.offset)
-	}
+	e.collection.emit()
 	emit("push %%rax") // store address of variable
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
-	elmType := vr.gtype.ptr
+	elmType := e.collection.getGtype().ptr
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
