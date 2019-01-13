@@ -10,6 +10,7 @@ var debugToken = false
 var debugParser = false
 var debugMode = false
 var parseOnly = false
+var resolveOnly = false
 
 func parseOpts(args []string) []string {
 	var r []string
@@ -29,6 +30,9 @@ func parseOpts(args []string) []string {
 		}
 		if opt == "--parse-only" {
 			parseOnly = true
+		}
+		if opt == "--resolve-only" {
+			resolveOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
 			r = append(r, opt)
@@ -111,6 +115,9 @@ func main() {
 		return
 	}
 	p.resolve(universe)
+	if resolveOnly {
+		return
+	}
 
 	ir := ast2ir(stdpkgs, astFiles, p.stringLiterals)
 	ir.emit()
