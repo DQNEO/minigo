@@ -59,6 +59,8 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	}
 }
 
+var gp *parser // for debug
+
 func main() {
 	var sourceFiles []string
 
@@ -70,6 +72,7 @@ func main() {
 
 	// parse
 	p := &parser{}
+	gp = p
 	p.methods = make(map[identifier]methods)
 	p.scopes = make(map[identifier]*scope)
 
