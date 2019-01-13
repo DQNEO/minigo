@@ -12,7 +12,7 @@ stdlib.go: stdlib/*/*.go
 
 
 test: all
-	./parse *.go
+	./resolve *.go
 	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go ./linux_test.sh
 
 parse: all
