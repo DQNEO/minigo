@@ -17,6 +17,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 	predeclareLibcFuncs(universe)
 }
 
+// Types:
+// bool byte complex64 complex128 error float32 float64
+// int int8 int16 int32 int64 rune string
+// uint uint8 uint16 uint32 uint64 uintptr
 func predeclareTypes(universe *scope) {
 	universe.setGtype("int", gInt)
 	universe.setGtype("byte", gByte)
@@ -24,6 +28,8 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("string", gString)
 }
 
+// Constants:
+// true false iota
 func predeclareConsts(universe *scope) {
 	universe.setConst("true", &ExprConstVariable{
 		name:  "true",
