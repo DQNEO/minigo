@@ -852,6 +852,8 @@ func (clause *ForRangeClause) infer() {
 	switch collectionType.typ {
 	case G_ARRAY, G_SLICE:
 		indexType = gInt
+	case G_MAP:
+		indexType = collectionType.mapKey
 	default:
 		// @TODO consider map etc.
 		errorf("TBI %s", clause.tok)
@@ -867,6 +869,8 @@ func (clause *ForRangeClause) infer() {
 			elementType = collectionType.ptr
 		} else if collectionType.typ == G_SLICE {
 			elementType = collectionType.ptr // @TODO is this right ?
+		} else if collectionType.typ == G_MAP {
+			elementType = collectionType.mapValue
 		}
 		//debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType
