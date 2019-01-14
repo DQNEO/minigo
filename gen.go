@@ -472,26 +472,8 @@ func (ast *StmtAssignment) emit() {
 			reg := getReg(size)
 			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 		case *ExprStructField:
-			ast := left.(*ExprStructField)
-			rel,ok := ast.strct.(*Relation)
-			assert(ok, ast.tok, "should be *Relation")
-			vr, ok := rel.expr.(*ExprVariable)
-			assert(ok, ast.tok, "should be *ExprVariable")
-			assert(vr.gtype.typ == G_REL || vr.gtype.typ == G_POINTER , ast.tok,"expect G_REL|G_POINTER , but got " + vr.gtype.String())
-			if vr.gtype.typ == G_REL {
-				field := vr.gtype.relation.gtype.getField(ast.fieldname)
-				emitLsave(field.getSize(), vr.offset+field.offset)
-			} else if vr.gtype.typ == G_POINTER {
-				field := vr.gtype.ptr.relation.gtype.getField(ast.fieldname)
-				emit("push %%rax # rhs")
-				emit("# assigning to a struct pointer field")
-				vr.emit()
-				emit("mov %%rax, %%rcx")
-				emit("add $%d, %%rcx", field.offset)
-				emit("pop %%rax  # rhs")
-				reg := getReg(field.getSize())
-				emit("mov %%%s, (%%rcx)", reg)
-			}
+			e := left.(*ExprStructField)
+			e.emitLsave()
 		case *ExprUop: // *x = 5
 			uop := left.(*ExprUop)
 			assert(uop.op == "*", uop.tok, "uop op should be *")
@@ -506,6 +488,29 @@ func (ast *StmtAssignment) emit() {
 			errorf("Unknown case %T", left)
 		}
 	}
+}
+
+func (e *ExprStructField) emitLsave() {
+	rel,ok := e.strct.(*Relation)
+	assert(ok, e.tok, "should be *Relation")
+	vr, ok := rel.expr.(*ExprVariable)
+	assert(ok, e.tok, "should be *ExprVariable")
+	assert(vr.gtype.typ == G_REL || vr.gtype.typ == G_POINTER , e.tok,"expect G_REL|G_POINTER , but got " + vr.gtype.String())
+	if vr.gtype.typ == G_REL {
+		field := vr.gtype.relation.gtype.getField(e.fieldname)
+		emitLsave(field.getSize(), vr.offset+field.offset)
+	} else if vr.gtype.typ == G_POINTER {
+		field := vr.gtype.ptr.relation.gtype.getField(e.fieldname)
+		emit("push %%rax # rhs")
+		emit("# assigning to a struct pointer field")
+		vr.emit()
+		emit("mov %%rax, %%rcx")
+		emit("add $%d, %%rcx", field.offset)
+		emit("pop %%rax  # rhs")
+		reg := getReg(field.getSize())
+		emit("mov %%%s, (%%rcx)", reg)
+	}
+
 }
 
 func (s *StmtIf) emit() {
