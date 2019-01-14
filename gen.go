@@ -228,7 +228,11 @@ func emitIncrDecl(inst string, operand Expr) {
 		rel := left.(*Relation)
 		vr, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "operand is a rel")
-		emitLsave(left.getGtype().getSize(), vr.offset)
+		if vr.isGlobal {
+			emitGsave(vr.gtype.getSize(), vr.varname)
+		} else {
+			emitLsave(vr.getGtype().getSize(), vr.offset)
+		}
 	case *ExprStructField:
 		ast := left.(*ExprStructField)
 		ast.emitLsave()
