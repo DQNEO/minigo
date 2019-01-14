@@ -557,22 +557,7 @@ func (f *StmtFor) emitRange() {
 	}
 
 	emit("# for range")
-	var length int
-
-	if rel, ok := f.rng.rangeexpr.(*Relation); ok {
-		if variable, ok := rel.expr.(*ExprVariable); ok {
-			if variable.gtype.typ != G_ARRAY {
-				panic("variable should be an array")
-			}
-			emit("# range expr is %v", variable)
-			length = variable.gtype.length
-			emit("# length = %d", length)
-		} else {
-			panic("rel should be a variable")
-		}
-	} else {
-		errorf("range expression should be a variable, but got %T %s", f.rng.rangeexpr, f.rng.tok)
-	}
+	length := f.rng.rangeexpr.getGtype().length
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
@@ -597,9 +582,7 @@ func (f *StmtFor) emitRange() {
 			},
 			rights: []Expr{
 				&ExprIndex{
-					collection: &Relation{
-						expr: f.rng.rangeexpr.(*Relation).expr.(*ExprVariable),
-					},
+					collection: f.rng.rangeexpr,
 					index: f.rng.indexvar,
 				},
 			},
