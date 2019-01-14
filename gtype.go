@@ -263,7 +263,8 @@ func (e *ExprStructField) getGtype() *Gtype {
 	//debugf("fields=%v", fields)
 	for _, field := range fields {
 		if e.fieldname == field.fieldname {
-			return field.ptr
+			//return field.ptr
+			return field
 		}
 	}
 	return nil
