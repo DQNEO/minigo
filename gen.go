@@ -231,6 +231,8 @@ func emitIncrDecl(inst string, operand Expr) {
 	case *ExprStructField:
 		ast := operand.(*ExprStructField)
 		ast.emitLsave()
+	case *ExprIndex:
+		operand.(*ExprIndex).emitSave()
 	default:
 		errorf("internal error")
 	}
