@@ -695,7 +695,7 @@ func (p *parser) parseType() *Gtype {
 				return &Gtype{
 					typ:      G_SLICE,
 					length:   0,
-					ptr:      typ, // element type
+					ptr:      typ, // underlying array
 					capacity: 0,
 				}
 			} else {
