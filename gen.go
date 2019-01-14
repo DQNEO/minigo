@@ -230,10 +230,7 @@ func emitIncrDecl(inst string, operand Expr) {
 		emitLsave(operand.getGtype().getSize(), vr.offset)
 	case *ExprStructField:
 		ast := operand.(*ExprStructField)
-		rel := ast.strct.(*Relation)
-		vr := rel.expr.(*ExprVariable)
-		field := vr.gtype.relation.gtype.getField(ast.fieldname)
-		emitLsave(field.getSize(), vr.offset+field.offset)
+		ast.emitLsave()
 	default:
 		errorf("internal error")
 	}

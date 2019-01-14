@@ -27,6 +27,11 @@ func assign() {
 	}
 	u.age = 5
 	fmt.Printf("%d\n", u.age)
+	u.age++
+	fmt.Printf("%d\n", u.age)
+	u.age = 8
+	u.age--
+	fmt.Printf("%d\n", u.age)
 }
 
 func main() {
