@@ -223,20 +223,7 @@ func emitIncrDecl(inst string, operand Expr) {
 	emit("%s $1, %%rax", inst)
 
 	left := operand
-	switch left.(type) {
-	case *Relation:
-		rel := left.(*Relation)
-		rel.emitSave()
-	case *ExprStructField:
-		ast := left.(*ExprStructField)
-		ast.emitLsave()
-	case *ExprIndex:
-		left.(*ExprIndex).emitSave()
-	case *ExprUop:
-		left.(*ExprUop).emitSave()
-	default:
-		errorf("internal error")
-	}
+	emitSave(left)
 }
 
 // e.g. *x = 1, or *x++
@@ -445,25 +432,26 @@ func (ast *StmtAssignment) emit() {
 		emit("pop %%rax")
 		left := ast.lefts[i]
 
-		// Each left-hand side operand must be addressable,
-		// a map index expression,
-		// or (for = assignments only) the blank identifier.
-		switch left.(type) {
-		case *Relation:
-			rel := left.(*Relation)
-			rel.emitSave()
-		case *ExprIndex:
-			e := left.(*ExprIndex)
-			e.emitSave()
-		case *ExprStructField:
-			e := left.(*ExprStructField)
-			e.emitLsave()
-		case *ExprUop:
-			left.(*ExprUop).emitSave()
-		default:
-			left.dump()
-			errorf("Unknown case %T", left)
-		}
+		emitSave(left)
+	}
+}
+
+// Each left-hand side operand must be addressable,
+// a map index expression,
+// or (for = assignments only) the blank identifier.
+func emitSave(left Expr) {
+	switch left.(type) {
+	case *Relation:
+		left.(*Relation).emitSave()
+	case *ExprIndex:
+		left.(*ExprIndex).emitSave()
+	case *ExprStructField:
+		left.(*ExprStructField).emitLsave()
+	case *ExprUop:
+		left.(*ExprUop).emitSave()
+	default:
+		left.dump()
+		errorf("Unknown case %T", left)
 	}
 }
 
