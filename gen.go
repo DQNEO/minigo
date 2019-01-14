@@ -704,9 +704,19 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 	for _, field := range structliteral.fields {
 		switch field.value.(type) {
 		case *ExprArrayLiteral:
-			errorf("TBI")
+			initvalues := field.value.(*ExprArrayLiteral)
+			fieldtype := strcttyp.getField(field.key)
+			arraygtype := fieldtype
+			elmType := arraygtype.ptr.relation.gtype
+			debugf("gtype:%v", elmType)
+			for i, val := range initvalues.values {
+				val.emit()
+				localoffset := variable.offset + fieldtype.offset +  i*elmType.getSize()
+				emitLsave(elmType.getSize(), localoffset)
+			}
 		default:
 			field.value.emit()
+
 			fieldtype := strcttyp.getField(field.key)
 			localoffset := variable.offset + fieldtype.offset
 			regSize := fieldtype.getSize()
