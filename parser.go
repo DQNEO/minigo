@@ -905,9 +905,11 @@ func (clause *ForRangeClause) infer() {
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("for")
+	ptok := p.expectKeyword("for")
 
-	var r = &StmtFor{}
+	var r = &StmtFor{
+		tok:ptok,
+	}
 	p.enterNewScope()
 	defer p.exitScope()
 
@@ -991,6 +993,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.expect("{")
 
 	var r = &StmtFor{
+		tok: tokRange,
 		rng: &ForRangeClause{
 			tok:tokRange,
 			indexvar:  indexvar,
