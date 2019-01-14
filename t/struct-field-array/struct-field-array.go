@@ -11,7 +11,9 @@ func structfield() {
 
 	fmt.Printf("%d\n", bilbo.id)
 	fmt.Printf("%d\n", bilbo.age)
-	fmt.Printf("%d\n", bilbo.items)
+	fmt.Printf("%d\n", bilbo.items[0])
+	fmt.Printf("%d\n", bilbo.items[1])
+	fmt.Printf("%d\n", bilbo.items[2])
 }
 
 type Hobbit struct {

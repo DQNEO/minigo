@@ -138,7 +138,11 @@ func (a *ExprStructField) emit() {
 	case G_REL: // struct
 		strcttype := variable.gtype.relation.gtype
 		field := strcttype.getField(a.fieldname)
-		emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+		if field.typ == G_ARRAY {
+			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
+		} else {
+			emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+		}
 	default:
 		errorf("internal error: bad gtype %d", variable.gtype.typ)
 	}
