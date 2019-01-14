@@ -232,18 +232,23 @@ func emitIncrDecl(inst string, operand Expr) {
 		ast.emitLsave()
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
-	case *ExprUop: // *x++
-		uop := left.(*ExprUop)
-		assert(uop.op == "*", uop.tok, "uop op should be *")
-		emit("push %%rax")
-		uop.operand.emit()
-		emit("mov %%rax, %%rcx")
-		emit("pop %%rax")
-		reg := getReg(uop.operand.getGtype().getSize())
-		emit("mov %%%s, (%%rcx)", reg)
+	case *ExprUop:
+		left.(*ExprUop).emitSave()
 	default:
 		errorf("internal error")
 	}
+}
+
+// e.g. *x = 1, or *x++
+func (uop *ExprUop) emitSave() {
+	assert(uop.op == "*", uop.tok, "uop op should be *")
+	emit("push %%rax")
+	uop.operand.emit()
+	emit("mov %%rax, %%rcx")
+	emit("pop %%rax")
+	reg := getReg(uop.operand.getGtype().getSize())
+	emit("mov %%%s, (%%rcx)", reg)
+
 }
 
 // e.g. x = 1
@@ -453,15 +458,8 @@ func (ast *StmtAssignment) emit() {
 		case *ExprStructField:
 			e := left.(*ExprStructField)
 			e.emitLsave()
-		case *ExprUop: // *x = 5
-			uop := left.(*ExprUop)
-			assert(uop.op == "*", uop.tok, "uop op should be *")
-			emit("push %%rax")
-			uop.operand.emit()
-			emit("mov %%rax, %%rcx")
-			emit("pop %%rax")
-			reg := getReg(uop.operand.getGtype().getSize())
-			emit("mov %%%s, (%%rcx)", reg)
+		case *ExprUop:
+			left.(*ExprUop).emitSave()
 		default:
 			left.dump()
 			errorf("Unknown case %T", left)
