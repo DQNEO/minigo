@@ -567,7 +567,7 @@ func (f *StmtFor) emitRange() {
 			panic("rel should be a variable")
 		}
 	} else {
-		panic("range expression should be a variable")
+		errorf("range expression should be a variable, but got %T %s", f.rng.rangeexpr, f.rng.tok)
 	}
 
 	labelBegin := makeLabel()
