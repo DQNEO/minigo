@@ -552,9 +552,8 @@ func (s *StmtIf) emit() {
 }
 
 func (f *StmtFor) emitRange() {
-	if f.rng.indexvar == nil {
-		errorf("indexVar is nil")
-	}
+	assertNotNil(f.rng.indexvar != nil, f.tok)
+	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY, f.tok, "rangeexpr should be G_ARRAY")
 
 	emit("# for range")
 	length := f.rng.rangeexpr.getGtype().length
