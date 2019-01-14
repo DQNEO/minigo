@@ -432,42 +432,8 @@ func (ast *StmtAssignment) emit() {
 				emitLsave(vr.gtype.getSize(), vr.offset)
 			}
 		case *ExprIndex:
-			emit("push %%rax") // push RHS value
-			// load head address of the array
-			// load index
-			// multi index * size
-			// calc address = head address + offset
-			// copy value to the address
 			e := left.(*ExprIndex)
-			rel, ok := e.collection.(*Relation)
-			if !ok {
-				errorf("should be array variable. array expr is not supported yet")
-			}
-
-			vr, ok := rel.expr.(*ExprVariable)
-			if !ok {
-				errorf("should be array variable. ")
-			}
-			if vr.isGlobal {
-				emit("lea %s(%%rip), %%rax", vr.varname)
-			} else {
-				emit("lea %d(%%rbp), %%rax", vr.offset)
-			}
-			emit("push %%rax") // store address of variable
-			e.index.emit()
-			emit("mov %%rax, %%rcx") // index
-			elmType := vr.gtype.ptr
-			size := elmType.getSize()
-			assert(size > 0, nil, "size > 0")
-			emit("mov $%d, %%rax", size) // size of one element
-			emit("imul %%rcx, %%rax")    // index * size
-			emit("push %%rax")           // store index * size
-			emit("pop %%rcx")            // load  index * size
-			emit("pop %%rbx")            // load address of variable
-			emit("add %%rcx , %%rbx")    // (index * size) + address
-			emit("pop %%rax")            // load RHS value
-			reg := getReg(size)
-			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
+			e.emitSave()
 		case *ExprStructField:
 			e := left.(*ExprStructField)
 			e.emitLsave()
@@ -485,6 +451,45 @@ func (ast *StmtAssignment) emit() {
 			errorf("Unknown case %T", left)
 		}
 	}
+}
+
+func (e *ExprIndex)emitSave() {
+	emit("push %%rax") // push RHS value
+
+	// load head address of the array
+	// load index
+	// multi index * size
+	// calc address = head address + offset
+	// copy value to the address
+	rel, ok := e.collection.(*Relation)
+	if !ok {
+		errorf("should be array variable. array expr is not supported yet")
+	}
+
+	vr, ok := rel.expr.(*ExprVariable)
+	if !ok {
+		errorf("should be array variable. ")
+	}
+	if vr.isGlobal {
+		emit("lea %s(%%rip), %%rax", vr.varname)
+	} else {
+		emit("lea %d(%%rbp), %%rax", vr.offset)
+	}
+	emit("push %%rax") // store address of variable
+	e.index.emit()
+	emit("mov %%rax, %%rcx") // index
+	elmType := vr.gtype.ptr
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax", size) // size of one element
+	emit("imul %%rcx, %%rax")    // index * size
+	emit("push %%rax")           // store index * size
+	emit("pop %%rcx")            // load  index * size
+	emit("pop %%rbx")            // load address of variable
+	emit("add %%rcx , %%rbx")    // (index * size) + address
+	emit("pop %%rax")            // load RHS value
+	reg := getReg(size)
+	emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 }
 
 func (e *ExprStructField) emitLsave() {
