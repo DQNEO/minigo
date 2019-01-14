@@ -482,7 +482,15 @@ func (ast *StmtAssignment) emit() {
 				field := vr.gtype.relation.gtype.getField(ast.fieldname)
 				emitLsave(field.getSize(), vr.offset+field.offset)
 			} else if vr.gtype.typ == G_POINTER {
-				errorf("TBI")
+				field := vr.gtype.ptr.relation.gtype.getField(ast.fieldname)
+				emit("push %%rax # rhs")
+				emit("# assigning to a struct pointer field")
+				vr.emit()
+				emit("mov %%rax, %%rcx")
+				emit("add $%d, %%rcx", field.offset)
+				emit("pop %%rax  # rhs")
+				reg := getReg(field.getSize())
+				emit("mov %%%s, (%%rcx)", reg)
 			}
 		case *ExprUop: // *x = 5
 			uop := left.(*ExprUop)

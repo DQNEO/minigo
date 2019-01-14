@@ -8,7 +8,7 @@ func assign() {
 		id:  0,
 		age: 4,
 	}
-	//u.age = 5
+	u.age = 5
 	fmt.Printf("%d\n", u.age)
 }
 
