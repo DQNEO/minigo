@@ -222,17 +222,18 @@ func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
 	emit("%s $1, %%rax", inst)
 
-	switch operand.(type) {
+	left := operand
+	switch left.(type) {
 	case *Relation:
-		rel := operand.(*Relation)
+		rel := left.(*Relation)
 		vr, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "operand is a rel")
-		emitLsave(operand.getGtype().getSize(), vr.offset)
+		emitLsave(left.getGtype().getSize(), vr.offset)
 	case *ExprStructField:
-		ast := operand.(*ExprStructField)
+		ast := left.(*ExprStructField)
 		ast.emitLsave()
 	case *ExprIndex:
-		operand.(*ExprIndex).emitSave()
+		left.(*ExprIndex).emitSave()
 	default:
 		errorf("internal error")
 	}
