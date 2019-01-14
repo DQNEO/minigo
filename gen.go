@@ -226,13 +226,7 @@ func emitIncrDecl(inst string, operand Expr) {
 	switch left.(type) {
 	case *Relation:
 		rel := left.(*Relation)
-		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "operand is a rel")
-		if vr.isGlobal {
-			emitGsave(vr.gtype.getSize(), vr.varname)
-		} else {
-			emitLsave(vr.getGtype().getSize(), vr.offset)
-		}
+		rel.emitSave()
 	case *ExprStructField:
 		ast := left.(*ExprStructField)
 		ast.emitLsave()
@@ -240,6 +234,19 @@ func emitIncrDecl(inst string, operand Expr) {
 		left.(*ExprIndex).emitSave()
 	default:
 		errorf("internal error")
+	}
+}
+
+// e.g. x = 1
+func (rel *Relation) emitSave() {
+	if rel.expr == nil {
+		errorf("left.rel.expr is nil")
+	}
+	vr := rel.expr.(*ExprVariable)
+	if vr.isGlobal {
+		emitGsave(vr.gtype.getSize(), vr.varname)
+	} else {
+		emitLsave(vr.gtype.getSize(), vr.offset)
 	}
 }
 
@@ -426,18 +433,8 @@ func (ast *StmtAssignment) emit() {
 
 		switch left.(type) {
 		case *Relation:
-			// e.g. x = 1
-			// resolve relation
 			rel := left.(*Relation)
-			if rel.expr == nil {
-				errorf("left.rel.expr is nil")
-			}
-			vr := rel.expr.(*ExprVariable)
-			if vr.isGlobal {
-				emitGsave(vr.gtype.getSize(), vr.varname)
-			} else {
-				emitLsave(vr.gtype.getSize(), vr.offset)
-			}
+			rel.emitSave()
 		case *ExprIndex:
 			e := left.(*ExprIndex)
 			e.emitSave()
