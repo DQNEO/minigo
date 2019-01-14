@@ -138,7 +138,11 @@ func (a *ExprStructField) emit() {
 	case G_REL: // struct
 		strcttype := variable.gtype.relation.gtype
 		field := strcttype.getField(a.fieldname)
-		emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+		if field.typ == G_ARRAY {
+			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
+		} else {
+			emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+		}
 	default:
 		errorf("internal error: bad gtype %d", variable.gtype.typ)
 	}
@@ -702,12 +706,27 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 	strcttyp := structliteral.strctname.gtype
 	// do assignment for each field
 	for _, field := range structliteral.fields {
-		field.value.emit()
-		fieldtype := strcttyp.getField(field.key)
-		localoffset := variable.offset + fieldtype.offset
-		regSize := fieldtype.getSize()
-		assert(regSize > 0, structliteral.tok, fieldtype.String())
-		emitLsave(regSize, localoffset)
+		switch field.value.(type) {
+		case *ExprArrayLiteral:
+			initvalues := field.value.(*ExprArrayLiteral)
+			fieldtype := strcttyp.getField(field.key)
+			arraygtype := fieldtype
+			elmType := arraygtype.ptr.relation.gtype
+			debugf("gtype:%v", elmType)
+			for i, val := range initvalues.values {
+				val.emit()
+				localoffset := variable.offset + fieldtype.offset +  i*elmType.getSize()
+				emitLsave(elmType.getSize(), localoffset)
+			}
+		default:
+			field.value.emit()
+
+			fieldtype := strcttyp.getField(field.key)
+			localoffset := variable.offset + fieldtype.offset
+			regSize := fieldtype.getSize()
+			assert(regSize > 0, structliteral.tok, fieldtype.String())
+			emitLsave(regSize, localoffset)
+		}
 	}
 
 }

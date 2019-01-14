@@ -1557,7 +1557,7 @@ func (p *parser) parseStructDef() *Gtype {
 		p.skip()
 		gtype := p.parseType()
 		fieldtype := *gtype
-		fieldtype.ptr = gtype
+		//fieldtype.ptr = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = 0 // will be calculated later
 		fields = append(fields, &fieldtype)
