@@ -702,12 +702,17 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 	strcttyp := structliteral.strctname.gtype
 	// do assignment for each field
 	for _, field := range structliteral.fields {
-		field.value.emit()
-		fieldtype := strcttyp.getField(field.key)
-		localoffset := variable.offset + fieldtype.offset
-		regSize := fieldtype.getSize()
-		assert(regSize > 0, structliteral.tok, fieldtype.String())
-		emitLsave(regSize, localoffset)
+		switch field.value.(type) {
+		case *ExprArrayLiteral:
+			errorf("TBI")
+		default:
+			field.value.emit()
+			fieldtype := strcttyp.getField(field.key)
+			localoffset := variable.offset + fieldtype.offset
+			regSize := fieldtype.getSize()
+			assert(regSize > 0, structliteral.tok, fieldtype.String())
+			emitLsave(regSize, localoffset)
+		}
 	}
 
 }
