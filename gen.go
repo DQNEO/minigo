@@ -828,7 +828,7 @@ func (ast *StmtDefer) emit() {
 }
 
 func (e *ExprVaArg) emit() {
-	panic("implement me")
+	panic("implement me " + e.tok.String())
 }
 
 func (e *ExprConversion) emit() {
@@ -953,7 +953,12 @@ func emitCall(fname string, args []Expr) {
 	emit("# setting arguments")
 	for i, arg := range args {
 		debugf("arg[%d] = %v", i, arg)
-		arg.emit()
+		if _, ok := arg.(*ExprVaArg); ok {
+			// skip VaArg for now
+			emit("mov $0, %%rax")
+		} else {
+			arg.emit()
+		}
 		emit("push %%rax  # argument no %d", i+1)
 	}
 
