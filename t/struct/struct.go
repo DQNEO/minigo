@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func incr() {
-	var u user = user{
+	var u User = User{
 		id:  0,
 		age: 5,
 	}
@@ -14,7 +14,7 @@ func incr() {
 }
 
 func decr() {
-	var u user = user{
+	var u User = User{
 		id:  0,
 		age: 8,
 	}
@@ -25,7 +25,7 @@ func decr() {
 
 func main() {
 	var i int = 1
-	var u user = user{
+	var u User = User{
 		id:  3,
 		age: 2,
 	}
@@ -36,14 +36,14 @@ func main() {
 	u.id = 4
 	fmt.Printf("%d\n", u.id)
 
-	u = user{id: 3, age: 5}
+	u = User{id: 3, age: 5}
 	fmt.Printf("%d\n", u.age)
 
 	incr()
 	decr()
 }
 
-type user struct {
+type User struct {
 	id  int
 	age int
 }

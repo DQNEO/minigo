@@ -23,6 +23,11 @@ func f2() {
 	fmt.Printf("%d\n", larray[1])
 	fmt.Printf("%d\n", larray[2])
 	fmt.Printf("%d\n", larray[3])
+	larray[3]++
+	fmt.Printf("%d\n", larray[3])
+	larray[3] = 10
+	larray[3]--
+	fmt.Printf("%d\n", larray[3])
 }
 
 func f3() {

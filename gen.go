@@ -222,20 +222,32 @@ func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
 	emit("%s $1, %%rax", inst)
 
-	switch operand.(type) {
-	case *Relation:
-		rel := operand.(*Relation)
-		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "operand is a rel")
-		emitLsave(operand.getGtype().getSize(), vr.offset)
-	case *ExprStructField:
-		ast := operand.(*ExprStructField)
-		rel := ast.strct.(*Relation)
-		vr := rel.expr.(*ExprVariable)
-		field := vr.gtype.relation.gtype.getField(ast.fieldname)
-		emitLsave(field.getSize(), vr.offset+field.offset)
-	default:
-		errorf("internal error")
+	left := operand
+	emitSave(left)
+}
+
+// e.g. *x = 1, or *x++
+func (uop *ExprUop) emitSave() {
+	assert(uop.op == "*", uop.tok, "uop op should be *")
+	emit("push %%rax")
+	uop.operand.emit()
+	emit("mov %%rax, %%rcx")
+	emit("pop %%rax")
+	reg := getReg(uop.operand.getGtype().getSize())
+	emit("mov %%%s, (%%rcx)", reg)
+
+}
+
+// e.g. x = 1
+func (rel *Relation) emitSave() {
+	if rel.expr == nil {
+		errorf("left.rel.expr is nil")
+	}
+	vr := rel.expr.(*ExprVariable)
+	if vr.isGlobal {
+		emitGsave(vr.gtype.getSize(), vr.varname)
+	} else {
+		emitLsave(vr.gtype.getSize(), vr.offset)
 	}
 }
 
@@ -420,71 +432,89 @@ func (ast *StmtAssignment) emit() {
 		emit("pop %%rax")
 		left := ast.lefts[i]
 
-		switch left.(type) {
-		case *Relation:
-			// e.g. x = 1
-			// resolve relation
-			rel := left.(*Relation)
-			if rel.expr == nil {
-				errorf("left.rel.expr is nil")
-			}
-			vr := rel.expr.(*ExprVariable)
-			if vr.isGlobal {
-				emitGsave(vr.gtype.getSize(), vr.varname)
-			} else {
-				emitLsave(vr.gtype.getSize(), vr.offset)
-			}
-		case *ExprIndex:
-			emit("push %%rax") // push RHS value
-			// load head address of the array
-			// load index
-			// multi index * size
-			// calc address = head address + offset
-			// copy value to the address
-			e := left.(*ExprIndex)
-			rel, ok := e.collection.(*Relation)
-			if !ok {
-				errorf("should be array variable. array expr is not supported yet")
-			}
-
-			vr, ok := rel.expr.(*ExprVariable)
-			if !ok {
-				errorf("should be array variable. ")
-			}
-			if vr.isGlobal {
-				emit("lea %s(%%rip), %%rax", vr.varname)
-			} else {
-				emit("lea %d(%%rbp), %%rax", vr.offset)
-			}
-			emit("push %%rax") // store address of variable
-			e.index.emit()
-			emit("mov %%rax, %%rcx") // index
-			elmType := vr.gtype.ptr
-			size := elmType.getSize()
-			assert(size > 0, nil, "size > 0")
-			emit("mov $%d, %%rax", size) // size of one element
-			emit("imul %%rcx, %%rax")    // index * size
-			emit("push %%rax")           // store index * size
-			emit("pop %%rcx")            // load  index * size
-			emit("pop %%rbx")            // load address of variable
-			emit("add %%rcx , %%rbx")    // (index * size) + address
-			emit("pop %%rax")            // load RHS value
-			reg := getReg(size)
-			emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
-		case *ExprStructField:
-			ast, ok := left.(*ExprStructField)
-			if !ok {
-				errorf("left is not ExprStructField")
-			}
-			rel := ast.strct.(*Relation)
-			vr := rel.expr.(*ExprVariable)
-			field := vr.gtype.relation.gtype.getField(ast.fieldname)
-			emitLsave(field.getSize(), vr.offset+field.offset)
-		default:
-			left.dump()
-			errorf("Unknown case")
-		}
+		emitSave(left)
 	}
+}
+
+// Each left-hand side operand must be addressable,
+// a map index expression,
+// or (for = assignments only) the blank identifier.
+func emitSave(left Expr) {
+	switch left.(type) {
+	case *Relation:
+		left.(*Relation).emitSave()
+	case *ExprIndex:
+		left.(*ExprIndex).emitSave()
+	case *ExprStructField:
+		left.(*ExprStructField).emitLsave()
+	case *ExprUop:
+		left.(*ExprUop).emitSave()
+	default:
+		left.dump()
+		errorf("Unknown case %T", left)
+	}
+}
+
+func (e *ExprIndex)emitSave() {
+	emit("push %%rax") // push RHS value
+
+	// load head address of the array
+	// load index
+	// multi index * size
+	// calc address = head address + offset
+	// copy value to the address
+	rel, ok := e.collection.(*Relation)
+	if !ok {
+		errorf("should be array variable. array expr is not supported yet")
+	}
+
+	vr, ok := rel.expr.(*ExprVariable)
+	if !ok {
+		errorf("should be array variable. ")
+	}
+	if vr.isGlobal {
+		emit("lea %s(%%rip), %%rax", vr.varname)
+	} else {
+		emit("lea %d(%%rbp), %%rax", vr.offset)
+	}
+	emit("push %%rax") // store address of variable
+	e.index.emit()
+	emit("mov %%rax, %%rcx") // index
+	elmType := vr.gtype.ptr
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax", size) // size of one element
+	emit("imul %%rcx, %%rax")    // index * size
+	emit("push %%rax")           // store index * size
+	emit("pop %%rcx")            // load  index * size
+	emit("pop %%rbx")            // load address of variable
+	emit("add %%rcx , %%rbx")    // (index * size) + address
+	emit("pop %%rax")            // load RHS value
+	reg := getReg(size)
+	emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
+}
+
+func (e *ExprStructField) emitLsave() {
+	rel,ok := e.strct.(*Relation)
+	assert(ok, e.tok, "should be *Relation")
+	vr, ok := rel.expr.(*ExprVariable)
+	assert(ok, e.tok, "should be *ExprVariable")
+	assert(vr.gtype.typ == G_REL || vr.gtype.typ == G_POINTER , e.tok,"expect G_REL|G_POINTER , but got " + vr.gtype.String())
+	if vr.gtype.typ == G_REL {
+		field := vr.gtype.relation.gtype.getField(e.fieldname)
+		emitLsave(field.getSize(), vr.offset+field.offset)
+	} else if vr.gtype.typ == G_POINTER {
+		field := vr.gtype.ptr.relation.gtype.getField(e.fieldname)
+		emit("push %%rax # rhs")
+		emit("# assigning to a struct pointer field")
+		vr.emit()
+		emit("mov %%rax, %%rcx")
+		emit("add $%d, %%rcx", field.offset)
+		emit("pop %%rax  # rhs")
+		reg := getReg(field.getSize())
+		emit("mov %%%s, (%%rcx)", reg)
+	}
+
 }
 
 func (s *StmtIf) emit() {

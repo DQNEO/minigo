@@ -34,6 +34,8 @@ func testmixed() {
 	fmt.Printf("%d\n", *j)
 	i = 8
 	fmt.Printf("%d\n", *j)
+	*j = 9
+	fmt.Printf("%d\n", i)
 }
 
 func main() {
