@@ -22,7 +22,19 @@ func global() {
 	j--
 	fmt.Printf("%d\n", j)
 }
+
+func pointerderef() {
+	var a int = 6
+	var b *int = &a
+	*b++
+	fmt.Printf("%d\n", a)
+	*b = 9
+	*b--
+	fmt.Printf("%d\n", *b)
+}
+
 func main() {
 	local()
 	global()
+	pointerderef()
 }

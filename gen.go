@@ -232,6 +232,15 @@ func emitIncrDecl(inst string, operand Expr) {
 		ast.emitLsave()
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
+	case *ExprUop: // *x++
+		uop := left.(*ExprUop)
+		assert(uop.op == "*", uop.tok, "uop op should be *")
+		emit("push %%rax")
+		uop.operand.emit()
+		emit("mov %%rax, %%rcx")
+		emit("pop %%rax")
+		reg := getReg(uop.operand.getGtype().getSize())
+		emit("mov %%%s, (%%rcx)", reg)
 	default:
 		errorf("internal error")
 	}
@@ -431,6 +440,9 @@ func (ast *StmtAssignment) emit() {
 		emit("pop %%rax")
 		left := ast.lefts[i]
 
+		// Each left-hand side operand must be addressable,
+		// a map index expression,
+		// or (for = assignments only) the blank identifier.
 		switch left.(type) {
 		case *Relation:
 			rel := left.(*Relation)
