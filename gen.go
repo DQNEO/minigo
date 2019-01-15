@@ -710,7 +710,7 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 			fieldtype := strcttyp.getField(field.key)
 			localoffset := variable.offset + fieldtype.offset
 			regSize := fieldtype.getSize()
-			assert(regSize > 0, structliteral.tok, fieldtype.String())
+			assert(0 < regSize && regSize <= 8, structliteral.tok, fieldtype.String())
 			emitLsave(regSize, localoffset)
 		}
 	}
