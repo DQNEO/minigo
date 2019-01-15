@@ -701,8 +701,8 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("*") {
 			// pointer
 			gtype = &Gtype{
-				typ: G_POINTER,
-				ptr: p.parseType(),
+				typ:      G_POINTER,
+				origType: p.parseType(),
 			}
 			return gtype
 		} else if tok.isKeyword("struct") {
@@ -1484,7 +1484,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	if isMethod {
 		var typeToBelong *Gtype
 		if receiver.gtype.typ == G_POINTER {
-			typeToBelong = receiver.gtype.ptr
+			typeToBelong = receiver.gtype.origType
 		} else {
 			typeToBelong = receiver.gtype
 		}
@@ -1585,7 +1585,7 @@ func (p *parser) parseStructDef() *Gtype {
 		p.skip()
 		gtype := p.parseType()
 		fieldtype := *gtype
-		//fieldtype.ptr = gtype
+		//fieldtype.origType = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = 0 // will be calculated later
 		fields = append(fields, &fieldtype)

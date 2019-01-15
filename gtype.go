@@ -33,18 +33,18 @@ type signature struct {
 }
 
 type Gtype struct {
-	typ             GTYPE_TYPE
-	dependendson    Expr       // for G_DEPENDENT
-	relation        *Relation  // for G_REL
-	size            int        // for scalar type like int, bool, byte, for struct
-	ptr             *Gtype     // for pointer
-	fields          []*Gtype   // for struct
-	fieldname       identifier // for struct field
-	offset          int        // for struct field
-	length          int        // for array
-	elementType     *Gtype     // for array, slice
-	imethods        map[identifier]*signature // for interface
-	methods         map[identifier]*ExprFuncRef
+	typ          GTYPE_TYPE
+	dependendson Expr                      // for G_DEPENDENT
+	relation     *Relation                 // for G_REL
+	size         int                       // for scalar type like int, bool, byte, for struct
+	origType     *Gtype                    // for pointer
+	fields       []*Gtype                  // for struct
+	fieldname    identifier                // for struct field
+	offset       int                       // for struct field
+	length       int                       // for array
+	elementType  *Gtype                    // for array, slice
+	imethods     map[identifier]*signature // for interface
+	methods      map[identifier]*ExprFuncRef
 	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
@@ -94,7 +94,7 @@ func (gtype *Gtype) String() string {
 	case G_STRUCT_FIELD:
 		return "structfield"
 	case G_POINTER:
-		origType := gtype.ptr
+		origType := gtype.origType
 		return fmt.Sprintf("*%s", origType)
 	case G_SLICE:
 		return "slice"
@@ -164,7 +164,7 @@ func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 func (e *ExprMethodcall) getGtype() *Gtype {
 	gtype := e.receiver.getGtype()
 	if gtype.typ == G_POINTER {
-		gtype = gtype.ptr
+		gtype = gtype.origType
 	}
 
 	// refetch gtype from the package block scope
@@ -192,11 +192,11 @@ func (e *ExprUop) getGtype() *Gtype {
 	switch e.op {
 	case "&":
 		return &Gtype{
-			typ: G_POINTER,
-			ptr: e.operand.getGtype(),
+			typ:      G_POINTER,
+			origType: e.operand.getGtype(),
 		}
 	case "*":
-		return e.operand.getGtype().ptr
+		return e.operand.getGtype().origType
 	case "!":
 		return gBool
 	case "-":
@@ -258,7 +258,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 
 	var strctType *Gtype
 	if gstruct.typ == G_POINTER {
-		strctType = gstruct.ptr
+		strctType = gstruct.origType
 	} else {
 		strctType = gstruct
 	}
@@ -267,7 +267,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	//debugf("fields=%v", fields)
 	for _, field := range fields {
 		if e.fieldname == field.fieldname {
-			//return field.ptr
+			//return field.origType
 			return field
 		}
 	}

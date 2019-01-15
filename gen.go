@@ -20,7 +20,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
 	if gtype.typ == G_POINTER {
-		typename = gtype.ptr.relation.name
+		typename = gtype.origType.relation.name
 	} else {
 		typename = gtype.relation.name
 	}
@@ -130,7 +130,7 @@ func (a *ExprStructField) emit() {
 
 	switch variable.gtype.typ {
 	case G_POINTER: // pointer to struct
-		strcttype := variable.gtype.ptr.relation.gtype
+		strcttype := variable.gtype.origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		variable.emit()
 		emit("add $%d, %%rax", field.offset)
@@ -513,7 +513,7 @@ func (e *ExprStructField) emitLsave() {
 		field := vr.gtype.relation.gtype.getField(e.fieldname)
 		emitLsave(field.getSize(), vr.offset+field.offset)
 	} else if vr.gtype.typ == G_POINTER {
-		field := vr.gtype.ptr.relation.gtype.getField(e.fieldname)
+		field := vr.gtype.origType.relation.gtype.getField(e.fieldname)
 		emit("push %%rax # rhs")
 		emit("# assigning to a struct pointer field")
 		vr.emit()
@@ -983,7 +983,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
-		typeToBeloing = gtype.ptr
+		typeToBeloing = gtype.origType
 	} else {
 		typeToBeloing = gtype
 	}
