@@ -37,13 +37,11 @@ type Gtype struct {
 	dependendson    Expr       // for G_DEPENDENT
 	relation        *Relation  // for G_REL
 	size            int        // for scalar type like int, bool, byte, for struct
-	ptr             *Gtype     // for array, pointer
+	ptr             *Gtype     // for array,slice, pointer
 	fields          []*Gtype   // for struct
 	fieldname       identifier // for struct field
 	offset          int        // for struct field
-	length          int        // for slice, array
-	capacity        int        // for slice
-	underlyingarray interface{}
+	length          int        // for array
 	imethods        map[identifier]*signature // for interface
 	methods         map[identifier]*ExprFuncRef
 	// for fixed array
@@ -61,6 +59,7 @@ func (gtype *Gtype) getSize() int {
 		return gtype.relation.gtype.getSize()
 	} else {
 		if gtype.typ == G_ARRAY {
+			assertNotNil(gtype.ptr != nil, nil)
 			return gtype.length * gtype.ptr.getSize()
 		} else if gtype.typ == G_STRUCT {
 			// @TODO consider the case of real zero e.g. struct{}
@@ -68,8 +67,10 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_SLICE || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
 			return ptrSize
+		} else if gtype.typ == G_SLICE {
+			return ptrSize + 8 /* len */ + 8 /* cap */
 		} else {
 			return gtype.size
 		}
@@ -230,6 +231,8 @@ func (e *ExprIndex) getGtype() *Gtype {
 	} else if gtype.typ == G_STRING {
 		// "hello"[i]
 		return gByte
+	} else if gtype.typ == G_SLICE {
+		return gtype.ptr
 	} else {
 		// array element
 		return gtype.ptr

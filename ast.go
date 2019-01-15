@@ -215,6 +215,7 @@ type DeclType struct {
 // https://golang.org/ref/spec#Slice_expressions
 type ExprSlice struct {
 	tok *Token
+	collection Expr
 	low  Expr
 	high Expr
 }

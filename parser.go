@@ -225,14 +225,27 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 	tok := p.peekToken()
 	if tok.isPunct(":") {
 		p.skip()
+		// A missing low index defaults to zero
 		lowIndex := &ExprNumberLiteral{
 			tok:tok,
 			val: 0,
 		}
-		highIndex := p.parseExpr()
-		p.expect("]")
+		var highIndex Expr
+		tok := p.peekToken()
+		if tok.isPunct("]") {
+			p.skip()
+			// a missing high index defaults to the length of the sliced operand:
+			highIndex = &ExprNumberLiteral{
+				tok:tok,
+				val: e.getGtype().length,
+			}
+		} else {
+			highIndex = p.parseExpr()
+			p.expect("]")
+		}
 		r = &ExprSlice{
 			tok: tok,
+			collection: e,
 			low:  lowIndex,
 			high: highIndex,
 		}
@@ -248,10 +261,22 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 			}
 		} else if tok.isPunct(":") {
 			p.skip()
-			highIndex := p.parseExpr()
-			p.expect("]")
+			var highIndex Expr
+			tok := p.peekToken()
+			if tok.isPunct("]") {
+				p.skip()
+				// a missing high index defaults to the length of the sliced operand:
+				highIndex = &ExprNumberLiteral{
+					tok:tok,
+					val: e.getGtype().length,
+				}
+			} else {
+				highIndex = p.parseExpr()
+				p.expect("]")
+			}
 			r = &ExprSlice{
 				tok:tok,
+				collection: e,
 				low:  index,
 				high: highIndex,
 			}
@@ -694,9 +719,7 @@ func (p *parser) parseType() *Gtype {
 				typ := p.parseType()
 				return &Gtype{
 					typ:      G_SLICE,
-					length:   0,
-					ptr:      typ, // underlying array
-					capacity: 0,
+					ptr: typ,
 				}
 			} else {
 				// array
@@ -893,7 +916,7 @@ func (clause *ForRangeClause) infer() {
 		if collectionType.typ == G_ARRAY {
 			elementType = collectionType.ptr
 		} else if collectionType.typ == G_SLICE {
-			elementType = collectionType.ptr // @TODO is this right ?
+			elementType = collectionType.ptr
 		} else if collectionType.typ == G_MAP {
 			elementType = collectionType.mapValue
 		}

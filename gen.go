@@ -400,6 +400,11 @@ func (ast *StmtAssignment) emit() {
 	done = make(map[int]bool) // @FIXME this is not correct any more
 	for i, right := range ast.rights {
 		switch right.(type) {
+		case *ExprSlice: // x = a[n:m]
+			rel := ast.lefts[i].(*Relation)
+			vr := rel.expr.(*ExprVariable)
+			assignToSlice(vr, right.(*ExprSlice))
+			done[i] = true // @FIXME this is not correct any more
 		case *ExprStructLiteral: // assign struct literal to var
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
@@ -713,6 +718,46 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 
 }
 
+func assignToSlice(variable *ExprVariable, e *ExprSlice) {
+	emit("# assign to a slice")
+	emit("#   emit address of the array")
+	e.collection.emit()
+	emit("push %%rax") // head of the array
+	emit("#   emit low index")
+	e.low.emit()
+	emit("mov %%rax, %%rcx") // low index
+	elmType := e.collection.getGtype().ptr
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax", size) // size of one element
+	emit("imul %%rcx, %%rax")    // index * size
+	emit("pop %%rcx") // head of the array
+	emit("add %%rcx , %%rax")    // (index * size) + address
+
+	emitLsave(ptrSize, variable.offset)
+	emit("#   calc and set len")
+	calcLen := &ExprBinop{
+		op: "-",
+		left: e.high,
+		right: e.low,
+	}
+	calcLen.emit()
+	emitLsave(ptrSize, variable.offset + ptrSize)
+	offsetForLen := 8
+
+	emit("#   calc and set cap")
+	calcCap := &ExprBinop{
+		op:"-",
+		left: &ExprNumberLiteral{
+			val:		e.collection.getGtype().length,
+		},
+		right:e.low,
+	}
+	calcCap.emit()
+	emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+}
+
+
 // for local var
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
@@ -738,6 +783,21 @@ func (decl *DeclVar) emit() {
 			errorf("error?")
 		}
 		assignStructLiteral(decl.variable, structliteral)
+	} else if decl.variable.gtype.typ == G_SLICE {
+		emit("# initialize local slice")
+		if decl.initval == nil {
+			emit("mov $0, %%rax") // nil pointer
+			// initialize with zero values
+			emitLsave(ptrSize, decl.variable.offset)
+			emit("mov $0, %%rax") // len
+			emitLsave(ptrSize, decl.variable.offset + ptrSize)
+			offsetForLen := 8
+			emit("mov $0, %%rax") // cap
+			emitLsave(ptrSize, decl.variable.offset + ptrSize + offsetForLen)
+		} else {
+			// initalize with values
+			errorf("TBI")
+		}
 
 	} else {
 		debugf("gtype=%v", decl.variable.gtype)
@@ -768,20 +828,58 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprIndex) emit() {
 	emit("# emit *ExprIndex")
-	e.collection.emit()
-	emit("push %%rax") // store address of variable
-	e.index.emit()
-	emit("mov %%rax, %%rcx") // index
-	elmType := e.collection.getGtype().ptr
-	size := elmType.getSize()
-	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax", size) // size of one element
-	emit("imul %%rcx, %%rax")    // index * size
-	emit("push %%rax")           // store index * size
-	emit("pop %%rcx")            // load  index * size
-	emit("pop %%rbx")            // load address of variable
-	emit("add %%rcx , %%rbx")    // (index * size) + address
-	emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
+	if e.collection.getGtype().typ == G_ARRAY {
+		elmType := e.collection.getGtype().ptr
+
+		e.collection.emit()
+		emit("push %%rax") // store address of variable
+
+		e.index.emit()
+		emit("mov %%rax, %%rcx") // index
+
+		size := elmType.getSize()
+		assert(size > 0, nil, "size > 0")
+		emit("mov $%d, %%rax", size) // size of one element
+		emit("imul %%rcx, %%rax")    // index * size
+		emit("push %%rax")           // store index * size
+		emit("pop %%rcx")            // load  index * size
+		emit("pop %%rbx")            // load address of variable
+		emit("add %%rcx , %%rbx")    // (index * size) + address
+		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
+	} else if e.collection.getGtype().typ == G_SLICE {
+		elmType := e.collection.getGtype().ptr
+		emit("# emit address of the low index")
+		e.collection.emit()
+		emit("push %%rax") // store low address
+
+		switch e.collection.(type) {
+		case *Relation:
+			rel := e.collection.(*Relation)
+			vr, ok := rel.expr.(*ExprVariable)
+			assert(ok, e.tok, "collection should be a variable")
+			assert(!vr.isGlobal,e.tok, "global var is not supporeted")
+			emit("mov %d(%%rbp), %%rax # len of slice", vr.offset + ptrSize)
+		default:
+			errorf("TBI: we suppose e.collection is a variable")
+		}
+
+		// array index = low + slice index
+		e.index.emit() // slice index
+		emit("mov %%rax, %%rcx")
+
+		size := elmType.getSize()
+		assert(size > 0, nil, "size > 0")
+		emit("mov $%d, %%rax", size) // size of one element
+		emit("imul %%rcx, %%rax")    // index * size
+		emit("push %%rax")           // store index * size
+		emit("pop %%rcx")            // load  index * size
+		emit("pop %%rbx")            // load address of head element
+		emit("add %%rcx , %%rbx")    // (index * size) + address
+		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
+
+	} else {
+		errorf("TBI")
+	}
 }
 
 func (e *ExprNilLiteral) emit() {
