@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
+
 const INT_SIZE = 8 // not like 8cc
 
 func emit(format string, v ...interface{}) {
@@ -821,8 +823,6 @@ func (ast *StmtSatementList) emit() {
 		stmt.emit()
 	}
 }
-
-var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 func (e *ExprIndex) emit() {
 	emit("# emit *ExprIndex")
