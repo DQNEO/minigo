@@ -1,7 +1,6 @@
 # Slice
 * assigns slice expr to any lhs (other than variable)
 * raise out of range error on slice index
-* initialize a slice with value
 
 # Others
 * Gtype: string, slice, map
