@@ -793,19 +793,14 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 // for local var
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
-		// initialize local array
-		debugf("initialize local array")
 		assignToLocalArray(decl.variable, decl.initval)
 	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT && decl.initval != nil {
-		// initialize local struct
-		debugf("initialize local struct")
 		structliteral, ok := decl.initval.(*ExprStructLiteral)
 		if !ok {
 			errorf("error?")
 		}
 		assignStructLiteral(decl.variable, structliteral)
 	} else if decl.variable.gtype.typ == G_SLICE {
-		emit("# initialize local slice")
 		if decl.initval == nil {
 			assignToSlice(decl.variable, nil)
 			return
@@ -831,7 +826,6 @@ func (decl *DeclVar) emit() {
 		}
 
 	} else {
-		debugf("gtype=%v", decl.variable.gtype)
 		if decl.initval == nil {
 			// assign zero value
 			decl.initval = &ExprNumberLiteral{}
@@ -1080,7 +1074,7 @@ func emitCall(fname string, args []Expr) {
 
 	emit("# setting arguments")
 	for i, arg := range args {
-		debugf("arg[%d] = %v", i, arg)
+		//debugf("arg[%d] = %v", i, arg)
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
