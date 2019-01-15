@@ -213,8 +213,10 @@ func (f *ExprFuncRef) getGtype() *Gtype {
 }
 
 func (e *ExprSlice) getGtype() *Gtype {
-	errorf("TBI")
-	return nil
+	return &Gtype{
+		typ: G_SLICE,
+		elementType:e.collection.getGtype().elementType,
+	}
 }
 
 func (e *ExprIndex) getGtype() *Gtype {

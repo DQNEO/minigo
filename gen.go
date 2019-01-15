@@ -402,6 +402,11 @@ func (ast *StmtAssignment) emit() {
 	done = make(map[int]bool) // @FIXME this is not correct any more
 	for i, right := range ast.rights {
 		switch right.(type) {
+		case *ExprSliceLiteral: // x = []int{1,2}
+			rel := ast.lefts[i].(*Relation)
+			vr := rel.expr.(*ExprVariable)
+			assignToSlice(vr, right)
+			done[i] = true // @FIXME this is not correct any more
 		case *ExprSlice: // x = a[n:m]
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
@@ -734,6 +739,19 @@ func assignToSlice(variable *ExprVariable, rhs Expr) {
 	}
 
 	switch rhs.(type) {
+	case *ExprSliceLiteral:
+		lit := rhs.(*ExprSliceLiteral)
+		// initialize a hidden array
+		arrayLiteral := &ExprArrayLiteral{
+			gtype:  lit.invisiblevar.gtype,
+			values: lit.values,
+		}
+		assignToLocalArray(lit.invisiblevar, arrayLiteral)
+		assignToSlice(variable, &ExprSlice{
+			collection: lit.invisiblevar,
+			low:        &ExprNumberLiteral{val: 0},
+			high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
+		})
 	case  *ExprSlice:
 		e := rhs.(*ExprSlice)
 		emit("# assign to a slice")
@@ -773,7 +791,7 @@ func assignToSlice(variable *ExprVariable, rhs Expr) {
 		calcCap.emit()
 		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
 	default:
-		errorf("TBI")
+		errorf("TBI %T", rhs)
 	}
 }
 
@@ -806,30 +824,8 @@ func (decl *DeclVar) emit() {
 		}
 		assignStructLiteral(decl.variable, structliteral)
 	} else if decl.variable.gtype.typ == G_SLICE {
-		if decl.initval == nil {
-			assignToSlice(decl.variable, nil)
-			return
-		}
-
-		assert(decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
-		switch decl.initval.(type) {
-		case *ExprSliceLiteral:
-			lit := decl.initval.(*ExprSliceLiteral)
-			// initialize a hidden array
-			arrayLiteral := &ExprArrayLiteral{
-				gtype:  lit.invisiblevar.gtype,
-				values: lit.values,
-			}
-			assignToLocalArray(lit.invisiblevar, arrayLiteral)
-			assignToSlice(decl.variable, &ExprSlice{
-				collection: lit.invisiblevar,
-				low:        &ExprNumberLiteral{val: 0},
-				high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
-			})
-		default:
-			errorf("TBI")
-		}
-
+		assert(decl.initval == nil || decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
+		assignToSlice(decl.variable, decl.initval)
 	} else {
 		if decl.initval == nil {
 			// assign zero value
