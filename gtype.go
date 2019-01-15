@@ -37,11 +37,12 @@ type Gtype struct {
 	dependendson    Expr       // for G_DEPENDENT
 	relation        *Relation  // for G_REL
 	size            int        // for scalar type like int, bool, byte, for struct
-	ptr             *Gtype     // for array,slice, pointer
+	ptr             *Gtype     // for pointer
 	fields          []*Gtype   // for struct
 	fieldname       identifier // for struct field
 	offset          int        // for struct field
 	length          int        // for array
+	elementType     *Gtype     // for array, slice
 	imethods        map[identifier]*signature // for interface
 	methods         map[identifier]*ExprFuncRef
 	// for fixed array
@@ -59,8 +60,8 @@ func (gtype *Gtype) getSize() int {
 		return gtype.relation.gtype.getSize()
 	} else {
 		if gtype.typ == G_ARRAY {
-			assertNotNil(gtype.ptr != nil, nil)
-			return gtype.length * gtype.ptr.getSize()
+			assertNotNil(gtype.elementType != nil, nil)
+			return gtype.length * gtype.elementType.getSize()
 		} else if gtype.typ == G_STRUCT {
 			// @TODO consider the case of real zero e.g. struct{}
 			if gtype.size == 0 {
@@ -86,15 +87,15 @@ func (gtype *Gtype) String() string {
 	case G_BYTE:
 		return "byte"
 	case G_ARRAY:
-		elm := gtype.ptr
+		elm := gtype.elementType
 		return fmt.Sprintf("[]%s", elm)
 	case G_STRUCT:
 		return "struct"
 	case G_STRUCT_FIELD:
 		return "structfield"
 	case G_POINTER:
-		elm := gtype.ptr
-		return fmt.Sprintf("*%s", elm)
+		origType := gtype.ptr
+		return fmt.Sprintf("*%s", origType)
 	case G_SLICE:
 		return "slice"
 	case G_STRING:
@@ -232,10 +233,10 @@ func (e *ExprIndex) getGtype() *Gtype {
 		// "hello"[i]
 		return gByte
 	} else if gtype.typ == G_SLICE {
-		return gtype.ptr
+		return gtype.elementType
 	} else {
 		// array element
-		return gtype.ptr
+		return gtype.elementType
 	}
 }
 

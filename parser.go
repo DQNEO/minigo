@@ -719,7 +719,7 @@ func (p *parser) parseType() *Gtype {
 				typ := p.parseType()
 				return &Gtype{
 					typ:      G_SLICE,
-					ptr: typ,
+					elementType: typ,
 				}
 			} else {
 				// array
@@ -728,7 +728,7 @@ func (p *parser) parseType() *Gtype {
 				return &Gtype{
 					typ:    G_ARRAY,
 					length: tok.getIntval(),
-					ptr:    typ,
+					elementType:    typ,
 				}
 			}
 		} else if tok.isPunct("]") {
@@ -914,11 +914,13 @@ func (clause *ForRangeClause) infer() {
 
 		var elementType *Gtype
 		if collectionType.typ == G_ARRAY {
-			elementType = collectionType.ptr
+			elementType = collectionType.elementType
 		} else if collectionType.typ == G_SLICE {
-			elementType = collectionType.ptr
+			elementType = collectionType.elementType
 		} else if collectionType.typ == G_MAP {
 			elementType = collectionType.mapValue
+		} else {
+			errorf("internal error")
 		}
 		//debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType

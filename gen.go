@@ -489,7 +489,7 @@ func (e *ExprIndex)emitSave() {
 	emit("push %%rax") // store address of variable
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
-	elmType := vr.gtype.ptr
+	elmType := vr.gtype.elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
@@ -698,8 +698,7 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 			initvalues := field.value.(*ExprArrayLiteral)
 			fieldtype := strcttyp.getField(field.key)
 			arraygtype := fieldtype
-			elmType := arraygtype.ptr.relation.gtype
-			debugf("gtype:%v", elmType)
+			elmType := arraygtype.elementType.relation.gtype
 			for i, val := range initvalues.values {
 				val.emit()
 				localoffset := variable.offset + fieldtype.offset +  i*elmType.getSize()
@@ -726,7 +725,7 @@ func assignToSlice(variable *ExprVariable, e *ExprSlice) {
 	emit("#   emit low index")
 	e.low.emit()
 	emit("mov %%rax, %%rcx") // low index
-	elmType := e.collection.getGtype().ptr
+	elmType := e.collection.getGtype().elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element
@@ -768,8 +767,7 @@ func (decl *DeclVar) emit() {
 			errorf("error?")
 		}
 		arraygtype := decl.variable.gtype
-		elmType := arraygtype.ptr.relation.gtype
-		debugf("gtype:%v", elmType)
+		elmType := arraygtype.elementType.relation.gtype
 		for i, val := range initvalues.values {
 			val.emit()
 			localoffset := decl.variable.offset + i*elmType.getSize()
@@ -829,7 +827,7 @@ var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 func (e *ExprIndex) emit() {
 	emit("# emit *ExprIndex")
 	if e.collection.getGtype().typ == G_ARRAY {
-		elmType := e.collection.getGtype().ptr
+		elmType := e.collection.getGtype().elementType
 
 		e.collection.emit()
 		emit("push %%rax") // store address of variable
@@ -847,7 +845,7 @@ func (e *ExprIndex) emit() {
 		emit("add %%rcx , %%rbx")    // (index * size) + address
 		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 	} else if e.collection.getGtype().typ == G_SLICE {
-		elmType := e.collection.getGtype().ptr
+		elmType := e.collection.getGtype().elementType
 		emit("# emit address of the low index")
 		e.collection.emit()
 		emit("push %%rax") // store low address
@@ -1117,7 +1115,7 @@ func (decl *DeclVar) emitGlobal() {
 	if decl.variable.gtype.typ == G_ARRAY {
 		arrayliteral, ok := decl.initval.(*ExprArrayLiteral)
 		assert(ok, nil, "should be array lieteral")
-		elmType := decl.variable.gtype.ptr
+		elmType := decl.variable.gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for _, value := range arrayliteral.values {
 			assertNotNil(value != nil, nil)
