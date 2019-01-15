@@ -89,7 +89,7 @@ func (f *DeclFunc) emitPrologue() {
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
-		debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
+		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 	if localarea != 0 {
 		emit("sub $%d, %%rsp # allocate localarea", -localarea)
@@ -258,7 +258,7 @@ func (rel *Relation) emitSave() {
 }
 
 func (ast *ExprUop) emit() {
-	debugf("emitting ExprUop")
+	//debugf("emitting ExprUop")
 	if ast.op == "&" {
 		switch ast.operand.(type) {
 		case *Relation:
@@ -278,9 +278,9 @@ func (ast *ExprUop) emit() {
 		}
 	} else if ast.op == "*" {
 		// dereferene of a pointer
-		debugf("dereferene of a pointer")
+		//debugf("dereferene of a pointer")
 		rel, ok := ast.operand.(*Relation)
-		debugf("operand:%s", rel)
+		//debugf("operand:%s", rel)
 		vr, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "operand is a rel")
 		vr.emit()
@@ -304,7 +304,7 @@ func (ast *ExprUop) emit() {
 	} else {
 		errorf("unable to handle uop %s", ast.op)
 	}
-	debugf("end of emitting ExprUop")
+	//debugf("end of emitting ExprUop")
 
 }
 
@@ -984,8 +984,8 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	default:
 		errorf("internal error")
 	}
-	debugf("ast.receiver=%v", ast.receiver)
-	debugf("gtype=%v", gtype)
+	//debugf("ast.receiver=%v", ast.receiver)
+	//debugf("gtype=%v", gtype)
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
