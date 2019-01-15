@@ -212,7 +212,8 @@ type DeclType struct {
 	gtype *Gtype
 }
 
-type ExprSliced struct {
+// https://golang.org/ref/spec#Slice_expressions
+type ExprSlice struct {
 	tok *Token
 	low  Expr
 	high Expr

@@ -210,7 +210,7 @@ func (f *ExprFuncRef) getGtype() *Gtype {
 	}
 }
 
-func (e *ExprSliced) getGtype() *Gtype {
+func (e *ExprSlice) getGtype() *Gtype {
 	errorf("TBI")
 	return nil
 }

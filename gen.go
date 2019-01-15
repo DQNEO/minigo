@@ -800,7 +800,7 @@ func (f *ExprFuncRef) emit() {
 	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
 }
 
-func (e *ExprSliced) emit() {
+func (e *ExprSlice) emit() {
 	errorf("TBD")
 }
 

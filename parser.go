@@ -231,7 +231,7 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 		}
 		highIndex := p.parseExpr()
 		p.expect("]")
-		r = &ExprSliced{
+		r = &ExprSlice{
 			tok: tok,
 			low:  lowIndex,
 			high: highIndex,
@@ -250,7 +250,7 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 			p.skip()
 			highIndex := p.parseExpr()
 			p.expect("]")
-			r = &ExprSliced{
+			r = &ExprSlice{
 				tok:tok,
 				low:  index,
 				high: highIndex,
