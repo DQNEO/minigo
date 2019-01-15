@@ -405,7 +405,7 @@ func (ast *StmtAssignment) emit() {
 		case *ExprSlice: // x = a[n:m]
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
-			assignToSlice(vr, right.(*ExprSlice))
+			assignToSlice(vr, right)
 			done[i] = true // @FIXME this is not correct any more
 		case *ExprStructLiteral: // assign struct literal to var
 			rel := ast.lefts[i].(*Relation)
@@ -720,8 +720,8 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 
 }
 
-func assignToSlice(variable *ExprVariable, e *ExprSlice) {
-	if e == nil {
+func assignToSlice(variable *ExprVariable, rhs Expr) {
+	if rhs == nil {
 		emit("mov $0, %%rax") // nil pointer
 		// initialize with zero values
 		emitLsave(ptrSize, variable.offset)
@@ -733,43 +733,48 @@ func assignToSlice(variable *ExprVariable, e *ExprSlice) {
 		return
 	}
 
+	switch rhs.(type) {
+	case  *ExprSlice:
+		e := rhs.(*ExprSlice)
+		emit("# assign to a slice")
+		emit("#   emit address of the array")
+		e.collection.emit()
+		emit("push %%rax") // head of the array
+		emit("#   emit low index")
+		e.low.emit()
+		emit("mov %%rax, %%rcx") // low index
+		elmType := e.collection.getGtype().elementType
+		size := elmType.getSize()
+		assert(size > 0, nil, "size > 0")
+		emit("mov $%d, %%rax", size) // size of one element
+		emit("imul %%rcx, %%rax")    // index * size
+		emit("pop %%rcx") // head of the array
+		emit("add %%rcx , %%rax")    // (index * size) + address
 
-	emit("# assign to a slice")
-	emit("#   emit address of the array")
-	e.collection.emit()
-	emit("push %%rax") // head of the array
-	emit("#   emit low index")
-	e.low.emit()
-	emit("mov %%rax, %%rcx") // low index
-	elmType := e.collection.getGtype().elementType
-	size := elmType.getSize()
-	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax", size) // size of one element
-	emit("imul %%rcx, %%rax")    // index * size
-	emit("pop %%rcx") // head of the array
-	emit("add %%rcx , %%rax")    // (index * size) + address
+		emitLsave(ptrSize, variable.offset)
+		emit("#   calc and set len")
+		calcLen := &ExprBinop{
+			op:    "-",
+			left:  e.high,
+			right: e.low,
+		}
+		calcLen.emit()
+		emitLsave(ptrSize, variable.offset + ptrSize)
+		offsetForLen := 8
 
-	emitLsave(ptrSize, variable.offset)
-	emit("#   calc and set len")
-	calcLen := &ExprBinop{
-		op: "-",
-		left: e.high,
-		right: e.low,
+		emit("#   calc and set cap")
+		calcCap := &ExprBinop{
+			op:"-",
+			left: &ExprNumberLiteral{
+				val: e.collection.getGtype().length,
+			},
+			right: e.low,
+		}
+		calcCap.emit()
+		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+	default:
+		errorf("TBI")
 	}
-	calcLen.emit()
-	emitLsave(ptrSize, variable.offset + ptrSize)
-	offsetForLen := 8
-
-	emit("#   calc and set cap")
-	calcCap := &ExprBinop{
-		op:"-",
-		left: &ExprNumberLiteral{
-			val:		e.collection.getGtype().length,
-		},
-		right:e.low,
-	}
-	calcCap.emit()
-	emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
 }
 
 
