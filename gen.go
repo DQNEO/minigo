@@ -721,6 +721,19 @@ func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLitera
 }
 
 func assignToSlice(variable *ExprVariable, e *ExprSlice) {
+	if e == nil {
+		emit("mov $0, %%rax") // nil pointer
+		// initialize with zero values
+		emitLsave(ptrSize, variable.offset)
+		emit("mov $0, %%rax") // len
+		emitLsave(ptrSize, variable.offset + ptrSize)
+		offsetForLen := 8
+		emit("mov $0, %%rax") // cap
+		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		return
+	}
+
+
 	emit("# assign to a slice")
 	emit("#   emit address of the array")
 	e.collection.emit()
@@ -794,33 +807,27 @@ func (decl *DeclVar) emit() {
 	} else if decl.variable.gtype.typ == G_SLICE {
 		emit("# initialize local slice")
 		if decl.initval == nil {
-			emit("mov $0, %%rax") // nil pointer
-			// initialize with zero values
-			emitLsave(ptrSize, decl.variable.offset)
-			emit("mov $0, %%rax") // len
-			emitLsave(ptrSize, decl.variable.offset + ptrSize)
-			offsetForLen := 8
-			emit("mov $0, %%rax") // cap
-			emitLsave(ptrSize, decl.variable.offset + ptrSize + offsetForLen)
-		} else {
-			assert(decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
-			switch decl.initval.(type) {
-			case *ExprSliceLiteral:
-				lit := decl.initval.(*ExprSliceLiteral)
-				arrayLiteral := &ExprArrayLiteral{
-					gtype: lit.invisiblevar.gtype,
-					values: lit.values,
-				}
-				assignToLocalArray(lit.invisiblevar, arrayLiteral)
-				assignToSlice(decl.variable, &ExprSlice{
-					collection:lit.invisiblevar,
-					low: &ExprNumberLiteral{val:0},
-					high:&ExprNumberLiteral{val:lit.invisiblevar.gtype.length},
-				})
-			default:
-				errorf("TBI")
-			}
+			assignToSlice(decl.variable, nil)
+			return
+		}
 
+		assert(decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
+		switch decl.initval.(type) {
+		case *ExprSliceLiteral:
+			lit := decl.initval.(*ExprSliceLiteral)
+			// initialize a hidden array
+			arrayLiteral := &ExprArrayLiteral{
+				gtype:  lit.invisiblevar.gtype,
+				values: lit.values,
+			}
+			assignToLocalArray(lit.invisiblevar, arrayLiteral)
+			assignToSlice(decl.variable, &ExprSlice{
+				collection: lit.invisiblevar,
+				low:        &ExprNumberLiteral{val: 0},
+				high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
+			})
+		default:
+			errorf("TBI")
 		}
 
 	} else {
