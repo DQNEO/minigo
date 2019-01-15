@@ -271,7 +271,7 @@ func (ast *ExprUop) emit() {
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
-			assignStructLiteral(e.invisiblevar, e)
+			assignToStruct(e.invisiblevar, e)
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
 			errorf("Unknown type: %s", ast.operand)
@@ -415,7 +415,7 @@ func (ast *StmtAssignment) emit() {
 		case *ExprStructLiteral: // assign struct literal to var
 			rel := ast.lefts[i].(*Relation)
 			vr := rel.expr.(*ExprVariable)
-			assignStructLiteral(vr, right.(*ExprStructLiteral))
+			assignToStruct(vr, right.(*ExprStructLiteral))
 			done[i] = true // @FIXME this is not correct any more
 		case *ExprFuncallOrConversion:
 			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
@@ -696,7 +696,7 @@ func emitGsave(regSize int, varname identifier) {
 	emit("mov %%%s, %s(%%rip)", reg, varname)
 }
 
-func assignStructLiteral(variable *ExprVariable, structliteral *ExprStructLiteral) {
+func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 	strcttyp := structliteral.strctname.gtype
 	// do assignment for each field
 	for _, field := range structliteral.fields {
@@ -822,7 +822,7 @@ func (decl *DeclVar) emit() {
 		if !ok {
 			errorf("error?")
 		}
-		assignStructLiteral(decl.variable, structliteral)
+		assignToStruct(decl.variable, structliteral)
 	} else if decl.variable.gtype.typ == G_SLICE {
 		assert(decl.initval == nil || decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
 		assignToSlice(decl.variable, decl.initval)
