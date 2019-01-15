@@ -206,7 +206,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		e = p.parseIndexExpr(rel)
+		e = p.parseIndexOrSliceExpr(rel)
 	} else {
 		// solo ident
 		e = rel
@@ -216,7 +216,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 }
 
 // https://golang.org/ref/spec#Index_expressions
-func (p *parser) parseIndexExpr(e Expr) Expr {
+func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("[")
 
@@ -332,7 +332,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	} else if next.isPunct("[") {
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
-		e = p.parseIndexExpr(e)
+		e = p.parseIndexOrSliceExpr(e)
 		return p.succeedingExpr(e)
 	} else {
 		// https://golang.org/ref/spec#OperandName
