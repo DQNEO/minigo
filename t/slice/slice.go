@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func f1() {
 	var array [3]int = [3]int{1,2,3}
 	fmt.Printf("%d\n", array[0] - 1) // 1
 
@@ -27,4 +27,29 @@ func main() {
 
 	slice = array[2:] // {3}
 	fmt.Printf("%d\n", slice[0] + 7)
+}
+
+func f2() {
+
+	var slice []int = []int{1,2,3}
+	fmt.Printf("%d\n", slice[2] + 8)
+
+	/*
+	var bilbo = Hobbit{
+		id:0,
+		items:nil,
+	}
+	bilbo.items = []int{1,2,3}
+	fmt.Printf("%d\n", bilbo.items[2])
+	*/
+}
+
+func main() {
+	f1()
+	f2()
+}
+
+type Hobbit struct {
+	id int
+	items []int
 }

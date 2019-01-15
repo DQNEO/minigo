@@ -760,22 +760,29 @@ func assignToSlice(variable *ExprVariable, e *ExprSlice) {
 }
 
 
+// copy each element
+func assignToLocalArray(lhs Expr, rhs Expr) {
+	initvalues, ok :=rhs.(*ExprArrayLiteral)
+	if !ok {
+		errorf("not supported")
+	}
+
+	variable,ok := lhs.(*ExprVariable)
+	assert(ok, nil, "expect variable in lhs")
+	elmSize := lhs.getGtype().elementType.relation.gtype.getSize()
+	for i, val := range initvalues.values {
+		val.emit()
+		localoffset := variable.offset + i*elmSize
+		emitLsave(elmSize, localoffset)
+	}
+}
+
 // for local var
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
 		// initialize local array
 		debugf("initialize local array")
-		initvalues, ok := decl.initval.(*ExprArrayLiteral)
-		if !ok {
-			errorf("error?")
-		}
-		arraygtype := decl.variable.gtype
-		elmType := arraygtype.elementType.relation.gtype
-		for i, val := range initvalues.values {
-			val.emit()
-			localoffset := decl.variable.offset + i*elmType.getSize()
-			emitLsave(elmType.getSize(), localoffset)
-		}
+		assignToLocalArray(decl.variable, decl.initval)
 	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT && decl.initval != nil {
 		// initialize local struct
 		debugf("initialize local struct")
@@ -796,8 +803,24 @@ func (decl *DeclVar) emit() {
 			emit("mov $0, %%rax") // cap
 			emitLsave(ptrSize, decl.variable.offset + ptrSize + offsetForLen)
 		} else {
-			// initalize with values
-			errorf("TBI")
+			assert(decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
+			switch decl.initval.(type) {
+			case *ExprSliceLiteral:
+				lit := decl.initval.(*ExprSliceLiteral)
+				arrayLiteral := &ExprArrayLiteral{
+					gtype: lit.invisiblevar.gtype,
+					values: lit.values,
+				}
+				assignToLocalArray(lit.invisiblevar, arrayLiteral)
+				assignToSlice(decl.variable, &ExprSlice{
+					collection:lit.invisiblevar,
+					low: &ExprNumberLiteral{val:0},
+					high:&ExprNumberLiteral{val:lit.invisiblevar.gtype.length},
+				})
+			default:
+				errorf("TBI")
+			}
+
 		}
 
 	} else {
