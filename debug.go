@@ -207,7 +207,7 @@ func (f *ExprFuncRef) dump() {
 	f.funcdef.dump()
 }
 
-func (e *ExprSliced) dump() {
+func (e *ExprSlice) dump() {
 	errorf("TBD")
 }
 

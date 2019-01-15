@@ -206,7 +206,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		e = p.parseIndexExpr(rel)
+		e = p.parseIndexOrSliceExpr(rel)
 	} else {
 		// solo ident
 		e = rel
@@ -216,7 +216,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 }
 
 // https://golang.org/ref/spec#Index_expressions
-func (p *parser) parseIndexExpr(e Expr) Expr {
+func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
 	p.expect("[")
 
@@ -225,14 +225,27 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 	tok := p.peekToken()
 	if tok.isPunct(":") {
 		p.skip()
+		// A missing low index defaults to zero
 		lowIndex := &ExprNumberLiteral{
 			tok:tok,
 			val: 0,
 		}
-		highIndex := p.parseExpr()
-		p.expect("]")
-		r = &ExprSliced{
+		var highIndex Expr
+		tok := p.peekToken()
+		if tok.isPunct("]") {
+			p.skip()
+			// a missing high index defaults to the length of the sliced operand:
+			highIndex = &ExprNumberLiteral{
+				tok:tok,
+				val: e.getGtype().length,
+			}
+		} else {
+			highIndex = p.parseExpr()
+			p.expect("]")
+		}
+		r = &ExprSlice{
 			tok: tok,
+			collection: e,
 			low:  lowIndex,
 			high: highIndex,
 		}
@@ -248,10 +261,22 @@ func (p *parser) parseIndexExpr(e Expr) Expr {
 			}
 		} else if tok.isPunct(":") {
 			p.skip()
-			highIndex := p.parseExpr()
-			p.expect("]")
-			r = &ExprSliced{
+			var highIndex Expr
+			tok := p.peekToken()
+			if tok.isPunct("]") {
+				p.skip()
+				// a missing high index defaults to the length of the sliced operand:
+				highIndex = &ExprNumberLiteral{
+					tok:tok,
+					val: e.getGtype().length,
+				}
+			} else {
+				highIndex = p.parseExpr()
+				p.expect("]")
+			}
+			r = &ExprSlice{
 				tok:tok,
+				collection: e,
 				low:  index,
 				high: highIndex,
 			}
@@ -332,7 +357,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 	} else if next.isPunct("[") {
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
-		e = p.parseIndexExpr(e)
+		e = p.parseIndexOrSliceExpr(e)
 		return p.succeedingExpr(e)
 	} else {
 		// https://golang.org/ref/spec#OperandName
@@ -418,13 +443,47 @@ func (p *parser) parsePrim() Expr {
 			tok: tok,
 			val: int(c),
 		}
-	case tok.isPunct("["): // array literal or type casting
+	case tok.isPunct("["): // array literal, slice literal or type casting
 		gtype := p.parseType()
-		if p.peekToken().isPunct("(") {
+		tok := p.peekToken()
+		if tok.isPunct("(") {
 			// Conversion
 			return p.parseTypeConversion(gtype)
 		}
-		return p.parseArrayLiteral(gtype)
+
+		values := p.parseArrayLiteral()
+		switch gtype.typ {
+		case G_ARRAY:
+			if gtype.typ == G_ARRAY {
+				if gtype.length == 0 {
+					gtype.length = len(values)
+				} else {
+					if len(values) != gtype.length {
+						errorf("array length does not match (%d != %d)",
+							len(values), gtype.length)
+					}
+				}
+			}
+
+			return &ExprArrayLiteral{
+				tok: tok,
+				gtype:  gtype,
+				values: values,
+			}
+		case G_SLICE:
+			return &ExprSliceLiteral{
+				tok: tok,
+				gtype:  gtype,
+				values: values,
+				invisiblevar: p.newVariable("", &Gtype{
+					typ: G_ARRAY,
+					elementType:gtype.elementType,
+					length:len(values),
+				}, false),
+			}
+		default:
+			errorf("internal error %s", tok)
+		}
 	case tok.isIdent("make"):
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
@@ -436,10 +495,11 @@ func (p *parser) parsePrim() Expr {
 	return nil
 }
 
-func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
+// for now, this is suppose to be either of
+// array literal or slice literal
+func (p *parser) parseArrayLiteral() []Expr {
 	defer p.traceOut(p.traceIn())
-	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
-	ptok := p.expect("{")
+	p.expect("{")
 
 	var values []Expr
 	for {
@@ -462,22 +522,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 		}
 	}
 
-	if gtype.length == 0 {
-		gtype.length = len(values)
-	} else {
-		if len(values) != gtype.length {
-			errorf("array length does not match (%d != %d)",
-				len(values), gtype.length)
-		}
-	}
-
-	r := &ExprArrayLiteral{
-		tok: ptok,
-		gtype:  gtype,
-		values: values,
-	}
-
-	return r
+	return values
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
@@ -676,8 +721,8 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("*") {
 			// pointer
 			gtype = &Gtype{
-				typ: G_POINTER,
-				ptr: p.parseType(),
+				typ:      G_POINTER,
+				origType: p.parseType(),
 			}
 			return gtype
 		} else if tok.isKeyword("struct") {
@@ -694,9 +739,7 @@ func (p *parser) parseType() *Gtype {
 				typ := p.parseType()
 				return &Gtype{
 					typ:      G_SLICE,
-					length:   0,
-					ptr:      typ, // element type
-					capacity: 0,
+					elementType: typ,
 				}
 			} else {
 				// array
@@ -705,7 +748,7 @@ func (p *parser) parseType() *Gtype {
 				return &Gtype{
 					typ:    G_ARRAY,
 					length: tok.getIntval(),
-					ptr:    typ,
+					elementType:    typ,
 				}
 			}
 		} else if tok.isPunct("]") {
@@ -891,11 +934,13 @@ func (clause *ForRangeClause) infer() {
 
 		var elementType *Gtype
 		if collectionType.typ == G_ARRAY {
-			elementType = collectionType.ptr
+			elementType = collectionType.elementType
 		} else if collectionType.typ == G_SLICE {
-			elementType = collectionType.ptr // @TODO is this right ?
+			elementType = collectionType.elementType
 		} else if collectionType.typ == G_MAP {
 			elementType = collectionType.mapValue
+		} else {
+			errorf("internal error")
 		}
 		//debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType
@@ -1459,7 +1504,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	if isMethod {
 		var typeToBelong *Gtype
 		if receiver.gtype.typ == G_POINTER {
-			typeToBelong = receiver.gtype.ptr
+			typeToBelong = receiver.gtype.origType
 		} else {
 			typeToBelong = receiver.gtype
 		}
@@ -1560,7 +1605,7 @@ func (p *parser) parseStructDef() *Gtype {
 		p.skip()
 		gtype := p.parseType()
 		fieldtype := *gtype
-		//fieldtype.ptr = gtype
+		//fieldtype.origType = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = 0 // will be calculated later
 		fields = append(fields, &fieldtype)

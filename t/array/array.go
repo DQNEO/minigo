@@ -17,7 +17,7 @@ func f2() {
 	var i0 = 0
 	var i7 = 7
 
-	var larray = []int{i4, i5, i0, i7}
+	var larray = [4]int{i4, i5, i0, i7}
 	larray[2] = 6
 	fmt.Printf("%d\n", larray[0])
 	fmt.Printf("%d\n", larray[1])
@@ -31,7 +31,7 @@ func f2() {
 }
 
 func f3() {
-	var lbytes = []byte{'?', 'e', 'l', 'l', 'o', 10}
+	var lbytes = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
 	lbytes[0] = 'H'
 	fmt.Printf("%c", lbytes[0])
 	fmt.Printf("%c", lbytes[1])

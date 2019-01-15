@@ -33,19 +33,18 @@ type signature struct {
 }
 
 type Gtype struct {
-	typ             GTYPE_TYPE
-	dependendson    Expr       // for G_DEPENDENT
-	relation        *Relation  // for G_REL
-	size            int        // for scalar type like int, bool, byte, for struct
-	ptr             *Gtype     // for array, pointer
-	fields          []*Gtype   // for struct
-	fieldname       identifier // for struct field
-	offset          int        // for struct field
-	length          int        // for slice, array
-	capacity        int        // for slice
-	underlyingarray interface{}
-	imethods        map[identifier]*signature // for interface
-	methods         map[identifier]*ExprFuncRef
+	typ          GTYPE_TYPE
+	dependendson Expr                      // for G_DEPENDENT
+	relation     *Relation                 // for G_REL
+	size         int                       // for scalar type like int, bool, byte, for struct
+	origType     *Gtype                    // for pointer
+	fields       []*Gtype                  // for struct
+	fieldname    identifier                // for struct field
+	offset       int                       // for struct field
+	length       int                       // for array
+	elementType  *Gtype                    // for array, slice
+	imethods     map[identifier]*signature // for interface
+	methods      map[identifier]*ExprFuncRef
 	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
@@ -61,15 +60,18 @@ func (gtype *Gtype) getSize() int {
 		return gtype.relation.gtype.getSize()
 	} else {
 		if gtype.typ == G_ARRAY {
-			return gtype.length * gtype.ptr.getSize()
+			assertNotNil(gtype.elementType != nil, nil)
+			return gtype.length * gtype.elementType.getSize()
 		} else if gtype.typ == G_STRUCT {
 			// @TODO consider the case of real zero e.g. struct{}
 			if gtype.size == 0 {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_SLICE || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
 			return ptrSize
+		} else if gtype.typ == G_SLICE {
+			return ptrSize + 8 /* len */ + 8 /* cap */
 		} else {
 			return gtype.size
 		}
@@ -85,15 +87,15 @@ func (gtype *Gtype) String() string {
 	case G_BYTE:
 		return "byte"
 	case G_ARRAY:
-		elm := gtype.ptr
+		elm := gtype.elementType
 		return fmt.Sprintf("[]%s", elm)
 	case G_STRUCT:
 		return "struct"
 	case G_STRUCT_FIELD:
 		return "structfield"
 	case G_POINTER:
-		elm := gtype.ptr
-		return fmt.Sprintf("*%s", elm)
+		origType := gtype.origType
+		return fmt.Sprintf("*%s", origType)
 	case G_SLICE:
 		return "slice"
 	case G_STRING:
@@ -162,7 +164,7 @@ func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 func (e *ExprMethodcall) getGtype() *Gtype {
 	gtype := e.receiver.getGtype()
 	if gtype.typ == G_POINTER {
-		gtype = gtype.ptr
+		gtype = gtype.origType
 	}
 
 	// refetch gtype from the package block scope
@@ -190,11 +192,11 @@ func (e *ExprUop) getGtype() *Gtype {
 	switch e.op {
 	case "&":
 		return &Gtype{
-			typ: G_POINTER,
-			ptr: e.operand.getGtype(),
+			typ:      G_POINTER,
+			origType: e.operand.getGtype(),
 		}
 	case "*":
-		return e.operand.getGtype().ptr
+		return e.operand.getGtype().origType
 	case "!":
 		return gBool
 	case "-":
@@ -210,9 +212,11 @@ func (f *ExprFuncRef) getGtype() *Gtype {
 	}
 }
 
-func (e *ExprSliced) getGtype() *Gtype {
-	errorf("TBI")
-	return nil
+func (e *ExprSlice) getGtype() *Gtype {
+	return &Gtype{
+		typ: G_SLICE,
+		elementType:e.collection.getGtype().elementType,
+	}
 }
 
 func (e *ExprIndex) getGtype() *Gtype {
@@ -230,9 +234,11 @@ func (e *ExprIndex) getGtype() *Gtype {
 	} else if gtype.typ == G_STRING {
 		// "hello"[i]
 		return gByte
+	} else if gtype.typ == G_SLICE {
+		return gtype.elementType
 	} else {
 		// array element
-		return gtype.ptr
+		return gtype.elementType
 	}
 }
 
@@ -254,7 +260,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 
 	var strctType *Gtype
 	if gstruct.typ == G_POINTER {
-		strctType = gstruct.ptr
+		strctType = gstruct.origType
 	} else {
 		strctType = gstruct
 	}
@@ -263,7 +269,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	//debugf("fields=%v", fields)
 	for _, field := range fields {
 		if e.fieldname == field.fieldname {
-			//return field.ptr
+			//return field.origType
 			return field
 		}
 	}

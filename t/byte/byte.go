@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var hello = []byte{'h', 'e', 'l', 'l', 'o'}
+var hello = [5]byte{'h', 'e', 'l', 'l', 'o'}
 
 func ghello() {
 	fmt.Printf("%c", hello[0])
@@ -17,7 +17,7 @@ func ghello() {
 }
 
 func lworld() {
-	var world = []byte{'w', 'o', 'r', 'l', 'd'}
+	var world  = [5]byte{'w', 'o', 'r', 'l', 'd'}
 	fmt.Printf("%c", world[0])
 	fmt.Printf("%c", world[1])
 	fmt.Printf("%c", world[2])
