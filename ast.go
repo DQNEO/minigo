@@ -233,6 +233,28 @@ type ExprArrayLiteral struct {
 	values []Expr
 }
 
+// https://golang.org/ref/spec#Composite_literals
+// A slice literal describes the entire underlying array literal.
+// A slice literal has the form []T{x1, x2, … xn}
+type ExprSliceLiteral struct {
+	tok *Token
+	gtype  *Gtype
+	values []Expr
+	invisiblevar *ExprVariable // the underlying array
+}
+
+func (e *ExprSliceLiteral) emit() {
+	panic("implement me")
+}
+
+func (e *ExprSliceLiteral) dump() {
+	panic("implement me")
+}
+
+func (e *ExprSliceLiteral) getGtype() *Gtype {
+	return e.gtype
+}
+
 type ExprTypeAssertion struct {
 	tok *Token
 	expr  Expr

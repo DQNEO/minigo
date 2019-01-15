@@ -443,13 +443,47 @@ func (p *parser) parsePrim() Expr {
 			tok: tok,
 			val: int(c),
 		}
-	case tok.isPunct("["): // array literal or type casting
+	case tok.isPunct("["): // array literal, slice literal or type casting
 		gtype := p.parseType()
-		if p.peekToken().isPunct("(") {
+		tok := p.peekToken()
+		if tok.isPunct("(") {
 			// Conversion
 			return p.parseTypeConversion(gtype)
 		}
-		return p.parseArrayLiteral(gtype)
+
+		values := p.parseArrayLiteral()
+		switch gtype.typ {
+		case G_ARRAY:
+			if gtype.typ == G_ARRAY {
+				if gtype.length == 0 {
+					gtype.length = len(values)
+				} else {
+					if len(values) != gtype.length {
+						errorf("array length does not match (%d != %d)",
+							len(values), gtype.length)
+					}
+				}
+			}
+
+			return &ExprArrayLiteral{
+				tok: tok,
+				gtype:  gtype,
+				values: values,
+			}
+		case G_SLICE:
+			return &ExprSliceLiteral{
+				tok: tok,
+				gtype:  gtype,
+				values: values,
+				invisiblevar: p.newVariable("", &Gtype{
+					typ: G_ARRAY,
+					elementType:gtype.elementType,
+					length:len(values),
+				}, false),
+			}
+		default:
+			errorf("internal error %s", tok)
+		}
 	case tok.isIdent("make"):
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
@@ -461,10 +495,11 @@ func (p *parser) parsePrim() Expr {
 	return nil
 }
 
-func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
+// for now, this is suppose to be either of
+// array literal or slice literal
+func (p *parser) parseArrayLiteral() []Expr {
 	defer p.traceOut(p.traceIn())
-	gtype.typ = G_ARRAY // convert []T from slice to 0 length array
-	ptok := p.expect("{")
+	p.expect("{")
 
 	var values []Expr
 	for {
@@ -487,22 +522,7 @@ func (p *parser) parseArrayLiteral(gtype *Gtype) Expr {
 		}
 	}
 
-	if gtype.length == 0 {
-		gtype.length = len(values)
-	} else {
-		if len(values) != gtype.length {
-			errorf("array length does not match (%d != %d)",
-				len(values), gtype.length)
-		}
-	}
-
-	r := &ExprArrayLiteral{
-		tok: ptok,
-		gtype:  gtype,
-		values: values,
-	}
-
-	return r
+	return values
 }
 
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
