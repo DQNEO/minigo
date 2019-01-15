@@ -697,6 +697,30 @@ func emitGsave(regSize int, varname identifier) {
 }
 
 func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
+	// initializes with zero values
+	for _, fieldtype := range variable.gtype.relation.gtype.fields {
+		//debugf("%#v", fieldtype)
+		switch fieldtype.typ {
+		case G_ARRAY:
+			elmSize := fieldtype.elementType.getSize()
+			for i := 0; i < fieldtype.length; i++ {
+				emit("mov $0, %%rax")
+				localoffset := variable.offset + fieldtype.offset +  i* elmSize
+				emitLsave(elmSize, localoffset)
+			}
+		default:
+			emit("mov $0, %%rax")
+			regSize := fieldtype.getSize()
+			assert(0 < regSize && regSize <= 8, variable.tok, fieldtype.String())
+			localoffset := variable.offset + fieldtype.offset
+			emitLsave(regSize, localoffset)
+		}
+	}
+
+	if structliteral == nil {
+		return
+	}
+
 	strcttyp := structliteral.strctname.gtype
 	// do assignment for each field
 	for _, field := range structliteral.fields {
@@ -705,11 +729,11 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 			initvalues := field.value.(*ExprArrayLiteral)
 			fieldtype := strcttyp.getField(field.key)
 			arraygtype := fieldtype
-			elmType := arraygtype.elementType.relation.gtype
+			elmSize := arraygtype.elementType.relation.gtype.getSize()
 			for i, val := range initvalues.values {
 				val.emit()
-				localoffset := variable.offset + fieldtype.offset +  i*elmType.getSize()
-				emitLsave(elmType.getSize(), localoffset)
+				localoffset := variable.offset + fieldtype.offset +  i*elmSize
+				emitLsave(elmSize, localoffset)
 			}
 		default:
 			field.value.emit()
@@ -817,12 +841,16 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
 		assignToLocalArray(decl.variable, decl.initval)
-	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT && decl.initval != nil {
-		structliteral, ok := decl.initval.(*ExprStructLiteral)
-		if !ok {
-			errorf("error?")
+	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
+		if decl.initval == nil {
+			assignToStruct(decl.variable, nil)
+		} else {
+			structliteral, ok := decl.initval.(*ExprStructLiteral)
+			if !ok {
+				errorf("error?")
+			}
+			assignToStruct(decl.variable, structliteral)
 		}
-		assignToStruct(decl.variable, structliteral)
 	} else if decl.variable.gtype.typ == G_SLICE {
 		assert(decl.initval == nil || decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
 		assignToSlice(decl.variable, decl.initval)
