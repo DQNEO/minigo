@@ -432,9 +432,9 @@ func (ast *StmtAssignment) emit() {
 		if done[i] {
 			continue
 		}
-		emit("# assigning to lhs")
-		emit("pop %%rax")
 		left := ast.lefts[i]
+		emit("# assigning to lhs %T", left)
+		emit("pop %%rax")
 
 		emitSave(left)
 	}
