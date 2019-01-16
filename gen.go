@@ -433,6 +433,16 @@ func (ast *StmtAssignment) emit() {
 				emit("mov %s(%%rip), %%rax", retvals[i])
 				emit("push %%rax")
 			}
+		case *Relation:
+			rel := ast.lefts[i].(*Relation)
+			if right.getGtype().typ == G_ARRAY {
+				assignToLocalArray(rel, right)
+				done[i] = true // @FIXME this is not correct any more
+			} else {
+				emit("# emitting rhs")
+				right.emit()
+				emit("push %%rax")
+			}
 		default:
 			emit("# emitting rhs")
 			right.emit()
@@ -838,6 +848,9 @@ func setValuesToArray(headOffset int, arrayType *Gtype, arrayLiteral *ExprArrayL
 
 // copy each element
 func assignToLocalArray(lhs Expr, rhs Expr) {
+	if rel, ok := lhs.(*Relation); ok {
+		lhs = rel.expr
+	}
 	variable,ok := lhs.(*ExprVariable)
 	assert(ok, nil, "expect variable in lhs")
 	headOffset := variable.offset
@@ -848,12 +861,23 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 		return
 	}
 
-	arrayLiteral, ok :=rhs.(*ExprArrayLiteral)
-	if !ok {
-		errorf("not supported")
+	switch rhs.(type) {
+	case *Relation:
+		rel := rhs.(*Relation)
+		arrayVariable,ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		elmSize := arrayType.elementType.getSize()
+		for i := 0; i < arrayType.length; i++ {
+			emit("mov %d(%%rbp), %%rax", arrayVariable.offset + i*elmSize)
+			localoffset := headOffset + i*elmSize
+			emitLsave(elmSize, localoffset)
+		}
+	case *ExprArrayLiteral:
+		arrayLiteral := rhs.(*ExprArrayLiteral)
+		setValuesToArray(headOffset, arrayType, arrayLiteral)
+	default:
+		errorf("no supporetd %T", rhs)
 	}
-
-	setValuesToArray(headOffset, arrayType, arrayLiteral)
 }
 
 // primitive types like int,bool,byte
