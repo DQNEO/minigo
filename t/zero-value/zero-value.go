@@ -47,6 +47,10 @@ func primitives() {
 	if !bol {
 		fmt.Printf("%d\n", 17)
 	}
+	var slice []int
+	if slice == nil {
+		fmt.Printf("%d\n", 18)
+	}
 }
 
 func main() {

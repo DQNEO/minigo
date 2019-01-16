@@ -742,6 +742,7 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 
 func assignToSlice(variable *ExprVariable, rhs Expr) {
 	if rhs == nil {
+		emit("# initialize slice with a zero value")
 		emit("mov $0, %%rax") // nil pointer
 		// initialize with zero values
 		emitLsave(ptrSize, variable.offset)
@@ -947,7 +948,7 @@ func (e *ExprIndex) emit() {
 }
 
 func (e *ExprNilLiteral) emit() {
-	emit("mov $0, %%rax")
+	emit("mov $0, %%rax # nil literal")
 }
 
 func (ast *StmtShortVarDecl) emit() {
