@@ -702,9 +702,8 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 		//debugf("%#v", fieldtype)
 		switch fieldtype.typ {
 		case G_ARRAY:
-			arrayType := fieldtype
-			headOffset := variable.offset + arrayType.offset
-			initArray(headOffset, arrayType)
+			headOffset := variable.offset + fieldtype.offset
+			initArray(headOffset, fieldtype)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
@@ -725,13 +724,8 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 		case *ExprArrayLiteral:
 			initvalues := field.value.(*ExprArrayLiteral)
 			fieldtype := strcttyp.getField(field.key)
-			arraygtype := fieldtype
-			elmSize := arraygtype.elementType.relation.gtype.getSize()
-			for i, val := range initvalues.values {
-				val.emit()
-				localoffset := variable.offset + fieldtype.offset +  i*elmSize
-				emitLsave(elmSize, localoffset)
-			}
+			headOffset := variable.offset + fieldtype.offset
+			setValuesToArray(headOffset, fieldtype, initvalues)
 		default:
 			field.value.emit()
 
@@ -824,7 +818,15 @@ func initArray(headOffset int, arrayType *Gtype) {
 		localoffset := headOffset + i*elmSize
 		emitLsave(elmSize, localoffset)
 	}
+}
 
+func setValuesToArray(headOffset int, arrayType *Gtype, arrayLiteral *ExprArrayLiteral) {
+	elmSize := arrayType.elementType.getSize()
+	for i, val := range arrayLiteral.values {
+		val.emit()
+		localoffset := headOffset + i*elmSize
+		emitLsave(elmSize, localoffset)
+	}
 }
 
 // copy each element
@@ -839,17 +841,12 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 		return
 	}
 
-	initvalues, ok :=rhs.(*ExprArrayLiteral)
+	arrayLiteral, ok :=rhs.(*ExprArrayLiteral)
 	if !ok {
 		errorf("not supported")
 	}
 
-	elmSize := arrayType.elementType.getSize()
-	for i, val := range initvalues.values {
-		val.emit()
-		localoffset := headOffset + i*elmSize
-		emitLsave(elmSize, localoffset)
-	}
+	setValuesToArray(headOffset, arrayType, arrayLiteral)
 }
 
 // for local var
