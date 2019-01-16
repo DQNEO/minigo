@@ -407,9 +407,7 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(lhs, right)
 			done[i] = true // @FIXME this is not correct any more
 		case *ExprStructLiteral: // assign struct literal to var
-			rel := ast.lefts[i].(*Relation)
-			vr := rel.expr.(*ExprVariable)
-			assignToStruct(vr, right.(*ExprStructLiteral))
+			assignToStruct(lhs, right.(*ExprStructLiteral))
 			done[i] = true // @FIXME this is not correct any more
 		case *ExprFuncallOrConversion:
 			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
@@ -428,12 +426,11 @@ func (ast *StmtAssignment) emit() {
 				emit("push %%rax")
 			}
 		case *Relation:
-			rel := ast.lefts[i].(*Relation)
 			if right.getGtype().typ == G_ARRAY {
-				assignToLocalArray(rel, right)
+				assignToLocalArray(lhs, right)
 				done[i] = true // @FIXME this is not correct any more
 			} else if right.getGtype().typ == G_SLICE {
-				assignToSlice(rel.expr, right)
+				assignToSlice(lhs, right)
 				done[i] = true // @FIXME this is not correct any more
 			} else {
 				emit("# emitting rhs")
@@ -704,6 +701,9 @@ func emitGsave(regSize int, varname identifier) {
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
+	if rel, ok := lhs.(*Relation); ok {
+		lhs = rel.expr
+	}
 	variable, ok := lhs.(*ExprVariable)
 	assert(ok, nil, "lhs should be a variable")
 	structliteral, ok := rhs.(*ExprStructLiteral)
