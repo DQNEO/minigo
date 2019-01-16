@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func strct() {
 	var h = Hobbit{}
 	fmt.Printf("%d\n", h.id + 1) // 0
 	fmt.Printf("%d\n", h.age + 2) // 0
@@ -22,6 +22,10 @@ func main() {
 	var h4 Hobbit
 	fmt.Printf("%d\n", h4.id + 7) // 0
 	fmt.Printf("%d\n", h4.age + 8) // 0
+}
+
+func main() {
+	strct()
 }
 
 type Hobbit struct {
