@@ -433,6 +433,19 @@ func (ast *StmtAssignment) emit() {
 				emit("mov %s(%%rip), %%rax", retvals[i])
 				emit("push %%rax")
 			}
+		case *Relation:
+			rel := ast.lefts[i].(*Relation)
+			if right.getGtype().typ == G_ARRAY {
+				assignToLocalArray(rel, right)
+				done[i] = true // @FIXME this is not correct any more
+			} else if right.getGtype().typ == G_SLICE {
+				assignToSlice(rel.expr, right)
+				done[i] = true // @FIXME this is not correct any more
+			} else {
+				emit("# emitting rhs")
+				right.emit()
+				emit("push %%rax")
+			}
 		default:
 			emit("# emitting rhs")
 			right.emit()
@@ -696,7 +709,12 @@ func emitGsave(regSize int, varname identifier) {
 	emit("mov %%%s, %s(%%rip)", reg, varname)
 }
 
-func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
+func assignToStruct(lhs Expr, rhs Expr) {
+	variable, ok := lhs.(*ExprVariable)
+	assert(ok, nil, "lhs should be a variable")
+	structliteral, ok := rhs.(*ExprStructLiteral)
+	assert(ok || rhs == nil, nil, "invalid rhs")
+
 	// initializes with zero values
 	for _, fieldtype := range variable.gtype.relation.gtype.fields {
 		//debugf("%#v", fieldtype)
@@ -740,7 +758,14 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 
 }
 
-func assignToSlice(variable *ExprVariable, rhs Expr) {
+func assignToSlice(lhs Expr, rhs Expr) {
+	if rel, ok := lhs.(*Relation); ok {
+		lhs = rel.expr
+	}
+	variable,ok := lhs.(*ExprVariable)
+	assert(ok, nil, "expect variable in lhs")
+
+	assert(rhs == nil || rhs.getGtype().typ == G_SLICE, variable.tok, "should be a slice literal")
 	if rhs == nil {
 		emit("# initialize slice with a zero value")
 		emit("mov $0, %%rax") // nil pointer
@@ -755,6 +780,21 @@ func assignToSlice(variable *ExprVariable, rhs Expr) {
 	}
 
 	switch rhs.(type) {
+	case *Relation:
+		rel := rhs.(*Relation)
+		rvariable, ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		// copy address
+		rvariable.emit()
+		emitLsave(ptrSize, variable.offset)
+		// copy len
+		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize)
+		emitLsave(ptrSize, variable.offset + ptrSize)
+		offsetForLen := 8
+		// copy cap
+		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
+		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		return
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		// initialize a hidden array
@@ -832,6 +872,9 @@ func setValuesToArray(headOffset int, arrayType *Gtype, arrayLiteral *ExprArrayL
 
 // copy each element
 func assignToLocalArray(lhs Expr, rhs Expr) {
+	if rel, ok := lhs.(*Relation); ok {
+		lhs = rel.expr
+	}
 	variable,ok := lhs.(*ExprVariable)
 	assert(ok, nil, "expect variable in lhs")
 	headOffset := variable.offset
@@ -842,12 +885,35 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 		return
 	}
 
-	arrayLiteral, ok :=rhs.(*ExprArrayLiteral)
-	if !ok {
-		errorf("not supported")
+	switch rhs.(type) {
+	case *Relation:
+		rel := rhs.(*Relation)
+		arrayVariable,ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		elmSize := arrayType.elementType.getSize()
+		for i := 0; i < arrayType.length; i++ {
+			emit("mov %d(%%rbp), %%rax", arrayVariable.offset + i*elmSize)
+			localoffset := headOffset + i*elmSize
+			emitLsave(elmSize, localoffset)
+		}
+	case *ExprArrayLiteral:
+		arrayLiteral := rhs.(*ExprArrayLiteral)
+		setValuesToArray(headOffset, arrayType, arrayLiteral)
+	default:
+		errorf("no supporetd %T", rhs)
 	}
+}
 
-	setValuesToArray(headOffset, arrayType, arrayLiteral)
+// primitive types like int,bool,byte
+func assignToPrimitive(lhs Expr, rhs Expr) {
+	if rhs == nil {
+		// assign zero value
+		rhs = &ExprNumberLiteral{}
+	}
+	rhs.emit()
+	variable, ok := lhs.(*ExprVariable)
+	assert(ok, nil, "")
+	emitLsave(variable.getGtype().getSize(), variable.offset)
 }
 
 // for local var
@@ -855,25 +921,12 @@ func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY {
 		assignToLocalArray(decl.variable, decl.initval)
 	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
-		if decl.initval == nil {
-			assignToStruct(decl.variable, nil)
-		} else {
-			structliteral, ok := decl.initval.(*ExprStructLiteral)
-			if !ok {
-				errorf("error?")
-			}
-			assignToStruct(decl.variable, structliteral)
-		}
+		assignToStruct(decl.variable, decl.initval)
 	} else if decl.variable.gtype.typ == G_SLICE {
-		assert(decl.initval == nil || decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
 		assignToSlice(decl.variable, decl.initval)
 	} else {
-		if decl.initval == nil {
-			// assign zero value
-			decl.initval = &ExprNumberLiteral{}
-		}
-		decl.initval.emit()
-		emitLsave(decl.variable.gtype.getSize(), decl.variable.offset)
+		// numeric
+		assignToPrimitive(decl.variable, decl.initval)
 	}
 }
 

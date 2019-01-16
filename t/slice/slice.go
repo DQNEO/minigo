@@ -39,7 +39,14 @@ func f2() {
 
 	var slice2 []int
 	slice2 = []int{4,5,6}
-	fmt.Printf("%d\n", slice2[2] + 7)
+	fmt.Printf("%d\n", slice2[2] + 7) // 6
+
+	var slice3 []int = slice2
+	fmt.Printf("%d\n", slice3[2] + 8) // 6
+
+	var slice4 []int
+	slice4 = slice3
+	fmt.Printf("%d\n", slice4[2] + 9) // 6
 
 	/*
 

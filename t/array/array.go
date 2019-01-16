@@ -43,8 +43,23 @@ func f3() {
 	fmt.Printf("%s", lbytes)
 }
 
+func assign() {
+	var a [3]int = [3]int{10,11,12}
+	var b [3]int = a
+	a[1] = 99
+	fmt.Printf("%d\n", b[0])
+	fmt.Printf("%d\n", b[1])
+	fmt.Printf("%d\n", b[2])
+	var c [3]int
+	c = b
+	fmt.Printf("%d\n", c[0] + 3)
+	fmt.Printf("%d\n", c[1] + 3)
+	fmt.Printf("%d\n", c[2] + 3)
+}
+
 func main() {
 	f1()
 	f2()
+	assign()
 	f3()
 }
