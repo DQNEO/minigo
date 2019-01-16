@@ -438,6 +438,9 @@ func (ast *StmtAssignment) emit() {
 			if right.getGtype().typ == G_ARRAY {
 				assignToLocalArray(rel, right)
 				done[i] = true // @FIXME this is not correct any more
+			} else if right.getGtype().typ == G_SLICE {
+				assignToSlice(rel.expr, right)
+				done[i] = true // @FIXME this is not correct any more
 			} else {
 				emit("# emitting rhs")
 				right.emit()
@@ -755,7 +758,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 }
 
-func assignToSlice(variable *ExprVariable, rhs Expr) {
+func assignToSlice(lhs Expr, rhs Expr) {
+	if rel, ok := lhs.(*Relation); ok {
+		lhs = rel.expr
+	}
+	variable,ok := lhs.(*ExprVariable)
+	assert(ok, nil, "expect variable in lhs")
+
 	assert(rhs == nil || rhs.getGtype().typ == G_SLICE, variable.tok, "should be a slice literal")
 	if rhs == nil {
 		emit("# initialize slice with a zero value")
@@ -771,6 +780,21 @@ func assignToSlice(variable *ExprVariable, rhs Expr) {
 	}
 
 	switch rhs.(type) {
+	case *Relation:
+		rel := rhs.(*Relation)
+		rvariable, ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "ok")
+		// copy address
+		rvariable.emit()
+		emitLsave(ptrSize, variable.offset)
+		// copy len
+		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize)
+		emitLsave(ptrSize, variable.offset + ptrSize)
+		offsetForLen := 8
+		// copy cap
+		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
+		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		return
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		// initialize a hidden array
