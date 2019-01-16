@@ -38,9 +38,21 @@ func array() {
 	fmt.Printf("%d\n", array3[1] + 14) // 0
 }
 
+func primitives() {
+	var i int
+	fmt.Printf("%d\n", i + 15) // 0
+	var b byte
+	fmt.Printf("%d\n", b + 16) // 0
+	var bol bool
+	if !bol {
+		fmt.Printf("%d\n", 17)
+	}
+}
+
 func main() {
 	strct()
 	array()
+	primitives()
 }
 
 type Hobbit struct {
