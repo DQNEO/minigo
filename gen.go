@@ -822,15 +822,26 @@ func assignToSlice(variable *ExprVariable, rhs Expr) {
 
 // copy each element
 func assignToLocalArray(lhs Expr, rhs Expr) {
+	variable,ok := lhs.(*ExprVariable)
+	assert(ok, nil, "expect variable in lhs")
+	headOffset := variable.offset
+	elmSize := lhs.getGtype().elementType.relation.gtype.getSize()
+
+	for i := 0; i < lhs.getGtype().length; i++ {
+		emit("mov $0, %%rax")
+		localoffset := headOffset + i*elmSize
+		emitLsave(elmSize, localoffset)
+	}
+
+	if rhs == nil {
+		return
+	}
+
 	initvalues, ok :=rhs.(*ExprArrayLiteral)
 	if !ok {
 		errorf("not supported")
 	}
 
-	variable,ok := lhs.(*ExprVariable)
-	assert(ok, nil, "expect variable in lhs")
-	headOffset := variable.offset
-	elmSize := lhs.getGtype().elementType.relation.gtype.getSize()
 	for i, val := range initvalues.values {
 		val.emit()
 		localoffset := headOffset + i*elmSize
@@ -840,7 +851,7 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 
 // for local var
 func (decl *DeclVar) emit() {
-	if decl.variable.gtype.typ == G_ARRAY && decl.initval != nil {
+	if decl.variable.gtype.typ == G_ARRAY {
 		assignToLocalArray(decl.variable, decl.initval)
 	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
 		if decl.initval == nil {

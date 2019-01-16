@@ -24,8 +24,23 @@ func strct() {
 	fmt.Printf("%d\n", h4.age + 8) // 0
 }
 
+func array() {
+	var array1 [2]int
+	fmt.Printf("%d\n", array1[0] + 9) // 0
+	fmt.Printf("%d\n", array1[1] + 10) // 0
+
+	var array2 [2]int = [2]int{}
+	fmt.Printf("%d\n", array2[0] + 11) // 0
+	fmt.Printf("%d\n", array2[1] + 12) // 0
+
+	var array3 [2]int = [2]int{3}
+	fmt.Printf("%d\n", array3[0] + 10) // 3
+	fmt.Printf("%d\n", array3[1] + 14) // 0
+}
+
 func main() {
 	strct()
+	array()
 }
 
 type Hobbit struct {

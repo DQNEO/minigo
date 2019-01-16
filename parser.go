@@ -458,7 +458,7 @@ func (p *parser) parsePrim() Expr {
 				if gtype.length == 0 {
 					gtype.length = len(values)
 				} else {
-					if len(values) != gtype.length {
+					if gtype.length < len(values)  {
 						errorf("array length does not match (%d != %d)",
 							len(values), gtype.length)
 					}
