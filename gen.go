@@ -829,10 +829,11 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 
 	variable,ok := lhs.(*ExprVariable)
 	assert(ok, nil, "expect variable in lhs")
+	headOffset := variable.offset
 	elmSize := lhs.getGtype().elementType.relation.gtype.getSize()
 	for i, val := range initvalues.values {
 		val.emit()
-		localoffset := variable.offset + i*elmSize
+		localoffset := headOffset + i*elmSize
 		emitLsave(elmSize, localoffset)
 	}
 }
