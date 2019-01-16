@@ -696,7 +696,12 @@ func emitGsave(regSize int, varname identifier) {
 	emit("mov %%%s, %s(%%rip)", reg, varname)
 }
 
-func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
+func assignToStruct(lhs Expr, rhs Expr) {
+	variable, ok := lhs.(*ExprVariable)
+	assert(ok, nil, "lhs should be a variable")
+	structliteral, ok := rhs.(*ExprStructLiteral)
+	assert(ok || rhs == nil, nil, "invalid rhs")
+
 	// initializes with zero values
 	for _, fieldtype := range variable.gtype.relation.gtype.fields {
 		//debugf("%#v", fieldtype)
@@ -741,6 +746,7 @@ func assignToStruct(variable *ExprVariable, structliteral *ExprStructLiteral) {
 }
 
 func assignToSlice(variable *ExprVariable, rhs Expr) {
+	assert(rhs == nil || rhs.getGtype().typ == G_SLICE, variable.tok, "should be a slice literal")
 	if rhs == nil {
 		emit("# initialize slice with a zero value")
 		emit("mov $0, %%rax") // nil pointer
@@ -850,30 +856,29 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 	setValuesToArray(headOffset, arrayType, arrayLiteral)
 }
 
+// primitive types like int,bool,byte
+func assignToPrimitive(lhs Expr, rhs Expr) {
+	if rhs == nil {
+		// assign zero value
+		rhs = &ExprNumberLiteral{}
+	}
+	rhs.emit()
+	variable, ok := lhs.(*ExprVariable)
+	assert(ok, nil, "")
+	emitLsave(variable.getGtype().getSize(), variable.offset)
+}
+
 // for local var
 func (decl *DeclVar) emit() {
 	if decl.variable.gtype.typ == G_ARRAY {
 		assignToLocalArray(decl.variable, decl.initval)
 	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
-		if decl.initval == nil {
-			assignToStruct(decl.variable, nil)
-		} else {
-			structliteral, ok := decl.initval.(*ExprStructLiteral)
-			if !ok {
-				errorf("error?")
-			}
-			assignToStruct(decl.variable, structliteral)
-		}
+		assignToStruct(decl.variable, decl.initval)
 	} else if decl.variable.gtype.typ == G_SLICE {
-		assert(decl.initval == nil || decl.initval.getGtype().typ == G_SLICE, decl.tok, "should be a slice literal")
 		assignToSlice(decl.variable, decl.initval)
 	} else {
-		if decl.initval == nil {
-			// assign zero value
-			decl.initval = &ExprNumberLiteral{}
-		}
-		decl.initval.emit()
-		emitLsave(decl.variable.gtype.getSize(), decl.variable.offset)
+		// numeric
+		assignToPrimitive(decl.variable, decl.initval)
 	}
 }
 
