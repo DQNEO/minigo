@@ -401,16 +401,10 @@ func (ast *StmtAssignment) emit() {
 	var done map[int]bool
 	done = make(map[int]bool) // @FIXME this is not correct any more
 	for i, right := range ast.rights {
+		lhs := ast.lefts[i]
 		switch right.(type) {
-		case *ExprSliceLiteral: // x = []int{1,2}
-			rel := ast.lefts[i].(*Relation)
-			vr := rel.expr.(*ExprVariable)
-			assignToSlice(vr, right)
-			done[i] = true // @FIXME this is not correct any more
-		case *ExprSlice: // x = a[n:m]
-			rel := ast.lefts[i].(*Relation)
-			vr := rel.expr.(*ExprVariable)
-			assignToSlice(vr, right)
+		case *ExprSliceLiteral, *ExprSlice: // x = []int{1,2}
+			assignToSlice(lhs, right)
 			done[i] = true // @FIXME this is not correct any more
 		case *ExprStructLiteral: // assign struct literal to var
 			rel := ast.lefts[i].(*Relation)
