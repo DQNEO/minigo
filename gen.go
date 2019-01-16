@@ -1000,6 +1000,7 @@ func (e *ExprNilLiteral) emit() {
 
 func (ast *StmtShortVarDecl) emit() {
 	a := &StmtAssignment{
+		tok:ast.tok,
 		lefts:  ast.lefts,
 		rights: ast.rights,
 	}
