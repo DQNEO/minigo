@@ -114,6 +114,7 @@ func emitFuncEpilogue() {
 	emit("")
 	emit("leave")
 	emit("ret")
+	emit("")
 }
 
 func (ast *ExprNumberLiteral) emit() {
