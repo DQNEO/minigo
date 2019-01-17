@@ -56,7 +56,6 @@ func (f *DeclFunc) getUniqueName() string {
 func (f *DeclFunc) emitPrologue() {
 	uniquName := f.getUniqueName()
 	emitComment("FUNCTION %s", uniquName)
-	emit(".text")
 	if f.getUniqueName() == "main" {
 		emit(".global	%s", f.getUniqueName())
 	}
@@ -1337,6 +1336,7 @@ func (root *IrRoot) emit() {
 	}
 
 	emitComment("FUNCTIONS")
+	emit(".text")
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
