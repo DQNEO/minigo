@@ -778,15 +778,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 func initLocalSlice(offset int) {
 	emit("# initialize slice with a zero value")
-	emit("mov $0, %%rax") // nil pointer
-	// initialize with zero values
-	emitLsave(ptrSize, offset)
-	emit("mov $0, %%rax") // len
-	emitLsave(ptrSize, offset + ptrSize)
-	offsetForLen := 8
-	emit("mov $0, %%rax") // cap
-	emitLsave(ptrSize, offset + ptrSize + offsetForLen)
+	emit("push $0")
+	emit("push $0")
+	emit("push $0")
+	saveSlice(offset)
 }
+
+const offsetForLen = 8
 
 func assignToSlice(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
@@ -808,7 +806,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		initLocalSlice(targetOffset)
 		return
 	}
-	offsetForLen := 8
 
 	switch rhs.(type) {
 	case *Relation:
@@ -886,13 +883,16 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		errorf("TBI %T", rhs)
 	}
 
+	saveSlice(targetOffset)
+}
+
+func saveSlice(targetOffset int) {
 	emit("pop %%rax")
 	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
 	emit("pop %%rax")
 	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
 	emit("pop %%rax")
 	emit("mov %%rax, %d(%%rbp)", targetOffset)
-
 }
 
 func initArray(headOffset int, arrayType *Gtype) {
