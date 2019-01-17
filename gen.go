@@ -1327,6 +1327,8 @@ func (root *IrRoot) emit() {
 	for id, ast := range root.stringLiterals {
 		ast.slabel = fmt.Sprintf("S%d", id)
 		emitLabel(".%s:", ast.slabel)
+		// https://sourceware.org/binutils/docs-2.30/as/String.html#String
+		// the assembler marks the end of each string with a 0 byte.
 		emit(".string \"%s\"", ast.val)
 	}
 
