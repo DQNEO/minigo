@@ -888,7 +888,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*ExprConversion)
 		assert(conversion.gtype.typ == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().typ == G_STRING, rhs.token(), "must be a string type]")
+		assert(conversion.expr.getGtype().typ == G_STRING ||conversion.expr.getGtype().relation.gtype.typ == G_STRING , rhs.token(), "must be a string type, but got " + conversion.expr.getGtype().String())
 		stringVarname,ok := conversion.expr.(*Relation)
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
