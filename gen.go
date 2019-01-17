@@ -882,7 +882,19 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		}
 		calcCap.emit()
 		emit("push %%rax")
-
+	case *ExprConversion:
+		// https://golang.org/ref/spec#Conversions
+		// Converting a value of a string type to a slice of bytes type
+		// yields a slice whose successive elements are the bytes of the string.
+		//
+		// see also https://blog.golang.org/strings
+		conversion := rhs.(*ExprConversion)
+		assert(conversion.gtype.typ == G_SLICE, rhs.token(), "must be a slice of bytes")
+		assert(conversion.expr.getGtype().relation.gtype.typ == G_STRING, rhs.token(), "must be a string type]")
+		stringVarname,ok := conversion.expr.(*Relation)
+		assert(ok, rhs.token(), "ok")
+		stringVariable := stringVarname.expr.(*ExprVariable)
+		errorf("TBI offset = %v", stringVariable.offset)
 	default:
 		errorf("TBI %T %s", rhs, rhs.token())
 	}
