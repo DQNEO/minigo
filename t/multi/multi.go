@@ -17,8 +17,9 @@ func f2() {
 	// swap
 	var a int
 	var b int
-	a, b = 5, 4
-	a, b = b, a
+	//a, b = 5, 4
+	//a, b = b, a
+	a, b = 4, 5
 	fmt.Printf("%d\n", a)
 	fmt.Printf("%d\n", b)
 }
