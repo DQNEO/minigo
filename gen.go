@@ -412,10 +412,6 @@ func (ast *StmtAssignment) emit() {
 	for rightIndex, right := range ast.rights {
 		left := ast.lefts[rightIndex]
 		switch right.(type) {
-		case *ExprSliceLiteral, *ExprSlice: // x = []int{1,2}
-			assignToSlice(left, right)
-		case *ExprStructLiteral: // assign struct literal to var
-			assignToStruct(left, right.(*ExprStructLiteral))
 		case *ExprFuncallOrConversion:
 			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
 			emit("# emitting rhs (funcall)")
@@ -442,14 +438,15 @@ func (ast *StmtAssignment) emit() {
 			}
 		default:
 			rightType := right.getGtype()
-			if rightType.typ == G_ARRAY {
-				assignToLocalArray(left, right)
-			} else if rightType.typ == G_SLICE {
-				assignToSlice(left, right)
-			} else if rightType.typ == G_REL && rightType.relation.gtype.typ == G_STRUCT {
+			switch {
+			case rightType.typ == G_ARRAY:
+					assignToLocalArray(left, right)
+			case rightType.typ == G_SLICE:
+					assignToSlice(left, right)
+			case rightType.typ == G_REL && rightType.relation.gtype.typ == G_STRUCT:
 					assignToStruct(left, right)
-			} else {
-				// primitive
+			default:
+				// suppose primitive
 				emit("# emitting rhs")
 				right.emit()
 				emitSave(left)
