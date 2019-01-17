@@ -514,6 +514,21 @@ func (e *ExprIndex)emitSave() {
 	emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 }
 
+func (e *ExprStructField) getOffset() int {
+	var vr *ExprVariable
+	if rel,ok := e.strct.(*Relation) ; ok {
+		vr, ok = rel.expr.(*ExprVariable)
+		assert(ok, e.tok, "should be *ExprVariable")
+	} else {
+		var ok bool
+		vr, ok = e.strct.(*ExprVariable)
+		assert(ok, e.tok, "should be *ExprVariable")
+	}
+	assert(vr.gtype.typ == G_REL, e.tok,"expect G_REL|G_POINTER , but got " + vr.gtype.String())
+	field := vr.gtype.relation.gtype.getField(e.fieldname)
+	return vr.offset+field.offset
+}
+
 func (e *ExprStructField) emitLsave() {
 	rel,ok := e.strct.(*Relation)
 	assert(ok, e.tok, "should be *Relation")
@@ -712,16 +727,17 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	// initializes with zero values
 	for _, fieldtype := range variable.gtype.relation.gtype.fields {
 		//debugf("%#v", fieldtype)
+		localOffset := variable.offset + fieldtype.offset
 		switch fieldtype.typ {
 		case G_ARRAY:
-			headOffset := variable.offset + fieldtype.offset
-			initArray(headOffset, fieldtype)
+			initArray(localOffset, fieldtype)
+		case G_SLICE:
+			initLocalSlice(localOffset)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, variable.tok, fieldtype.String())
-			localoffset := variable.offset + fieldtype.offset
-			emitLsave(regSize, localoffset)
+			emitLsave(regSize, localOffset)
 		}
 	}
 
@@ -732,62 +748,86 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	strcttyp := structliteral.strctname.gtype
 	// do assignment for each field
 	for _, field := range structliteral.fields {
-		switch field.value.(type) {
-		case *ExprArrayLiteral:
-			initvalues := field.value.(*ExprArrayLiteral)
+		fieldtype := strcttyp.getField(field.key)
+		localOffset := variable.offset + fieldtype.offset
+
+		switch  {
+		case fieldtype.typ == G_ARRAY:
+			initvalues,ok := field.value.(*ExprArrayLiteral)
+			assert(ok,nil,"ok")
 			fieldtype := strcttyp.getField(field.key)
-			headOffset := variable.offset + fieldtype.offset
-			setValuesToArray(headOffset, fieldtype, initvalues)
+			setValuesToArray(localOffset, fieldtype, initvalues)
+		case fieldtype.typ == G_SLICE:
+			left := &ExprStructField{
+				tok:variable.tok,
+				strct:lhs,
+				fieldname:field.key,
+			}
+			assignToSlice(left, field.value)
+
 		default:
 			field.value.emit()
 
-			fieldtype := strcttyp.getField(field.key)
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, structliteral.tok, fieldtype.String())
-
-			localoffset := variable.offset + fieldtype.offset
-			emitLsave(regSize, localoffset)
+			emitLsave(regSize, localOffset)
 		}
 	}
 
+}
+
+func initLocalSlice(offset int) {
+	emit("# initialize slice with a zero value")
+	emit("mov $0, %%rax") // nil pointer
+	// initialize with zero values
+	emitLsave(ptrSize, offset)
+	emit("mov $0, %%rax") // len
+	emitLsave(ptrSize, offset + ptrSize)
+	offsetForLen := 8
+	emit("mov $0, %%rax") // cap
+	emitLsave(ptrSize, offset + ptrSize + offsetForLen)
 }
 
 func assignToSlice(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	variable,ok := lhs.(*ExprVariable)
-	assert(ok, nil, "expect variable in lhs")
+	var targetOffset int
+	switch lhs.(type) {
+	case *ExprVariable:
+		targetOffset = lhs.(*ExprVariable).offset
+	case *ExprStructField:
+		targetOffset = lhs.(*ExprStructField).getOffset()
+	default:
+		errorf("unkonwn type %T", lhs)
+	}
 
-	assert(rhs == nil || rhs.getGtype().typ == G_SLICE, variable.tok, "should be a slice literal")
+	debugf("rhs=%s", rhs)
+	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
-		emit("# initialize slice with a zero value")
-		emit("mov $0, %%rax") // nil pointer
-		// initialize with zero values
-		emitLsave(ptrSize, variable.offset)
-		emit("mov $0, %%rax") // len
-		emitLsave(ptrSize, variable.offset + ptrSize)
-		offsetForLen := 8
-		emit("mov $0, %%rax") // cap
-		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		initLocalSlice(targetOffset)
 		return
 	}
 
 	switch rhs.(type) {
 	case *Relation:
 		rel := rhs.(*Relation)
+		if _, ok := rel.expr.(*ExprNilLiteral); ok {
+			// already initialied above
+			return
+		}
 		rvariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 		// copy address
 		rvariable.emit()
-		emitLsave(ptrSize, variable.offset)
+		emitLsave(ptrSize, targetOffset)
 		// copy len
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize)
-		emitLsave(ptrSize, variable.offset + ptrSize)
+		emitLsave(ptrSize, targetOffset + ptrSize)
 		offsetForLen := 8
 		// copy cap
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
-		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		emitLsave(ptrSize, targetOffset + ptrSize + offsetForLen)
 		return
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
@@ -797,7 +837,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			values: lit.values,
 		}
 		assignToLocalArray(lit.invisiblevar, arrayLiteral)
-		assignToSlice(variable, &ExprSlice{
+		assignToSlice(lhs, &ExprSlice{
 			collection: lit.invisiblevar,
 			low:        &ExprNumberLiteral{val: 0},
 			high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
@@ -819,7 +859,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("pop %%rcx") // head of the array
 		emit("add %%rcx , %%rax")    // (index * size) + address
 
-		emitLsave(ptrSize, variable.offset)
+		emitLsave(ptrSize, targetOffset)
 		emit("#   calc and set len")
 		calcLen := &ExprBinop{
 			op:    "-",
@@ -827,7 +867,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcLen.emit()
-		emitLsave(ptrSize, variable.offset + ptrSize)
+		emitLsave(ptrSize, targetOffset + ptrSize)
 		offsetForLen := 8
 
 		emit("#   calc and set cap")
@@ -839,7 +879,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcCap.emit()
-		emitLsave(ptrSize, variable.offset + ptrSize + offsetForLen)
+		emitLsave(ptrSize, targetOffset + ptrSize + offsetForLen)
 	default:
 		errorf("TBI %T", rhs)
 	}

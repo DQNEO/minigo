@@ -46,16 +46,24 @@ func f2() {
 
 	var slice4 []int
 	slice4 = slice3
-	fmt.Printf("%d\n", slice4[2] + 9) // 6
+	fmt.Printf("%d\n", slice4[2] /* 6 */ + 9)
 
-	/*
-
-	var bilbo = Hobbit{
+	bilbo := Hobbit{
 		id:0,
 		items:nil,
 	}
+	if bilbo.items == nil {
+		fmt.Printf("%d\n", 16)
+	}
+
+	bilbo = Hobbit{
+		id:0,
+		items:[]int{1,2,3},
+	}
+
+	/*
+
 	bilbo.items = []int{1,2,3}
-	fmt.Printf("%d\n", bilbo.items[2])
 	*/
 }
 
