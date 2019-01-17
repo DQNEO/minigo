@@ -882,7 +882,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 
 	default:
-		errorf("TBI %T", rhs)
+		errorf("TBI %T %s", rhs, rhs.token())
 	}
 
 	saveSlice(targetOffset)

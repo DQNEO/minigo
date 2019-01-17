@@ -1800,6 +1800,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	topLevelDecls := p.parseTopLevelDecls()
 
 	return &SourceFile{
+		tok:           packageClause.tok,
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
