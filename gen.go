@@ -942,6 +942,18 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 			localoffset := headOffset + i*elmSize
 			emitLsave(elmSize, localoffset)
 		}
+	case *ExprStructField:
+		strctField := rhs.(*ExprStructField)
+		fieldType := strctField.getGtype()
+		assert(fieldType.typ == G_ARRAY, nil, "should be array")
+		elmSize := arrayType.elementType.getSize()
+		for i := 0; i < arrayType.length; i++ {
+			emit("mov %d(%%rbp), %%rax", strctField.getOffset() + i*elmSize)
+			localoffset := headOffset + i*elmSize
+			emitLsave(elmSize, localoffset)
+		}
+
+
 	case *ExprArrayLiteral:
 		arrayLiteral := rhs.(*ExprArrayLiteral)
 		setValuesToArray(headOffset, arrayType, arrayLiteral)

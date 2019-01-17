@@ -57,9 +57,25 @@ func assign() {
 	fmt.Printf("%d\n", c[2] + 3)
 }
 
+func assignStrctField() {
+	bilbo := Hobbit{
+		dishes: [3]int{1, 2, 3},
+	}
+	var dishes [3]int
+	dishes = bilbo.dishes
+	//bilbo.dishes[2] = 0
+	fmt.Printf("%d\n", dishes[2] + 13) // 16
+}
+
 func main() {
 	f1()
 	f2()
 	assign()
+	assignStrctField()
 	f3()
+}
+
+type Hobbit struct {
+	id int
+	dishes [3]int
 }
