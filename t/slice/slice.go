@@ -35,18 +35,18 @@ func f1() {
 func f2() {
 
 	var slice []int = []int{1, 2, 3}
-	fmt.Printf("%d\n", slice[2]+9)
+	fmt.Printf("%d\n", slice[2]+9) // 12
 
 	var slice2 []int
 	slice2 = []int{4, 5, 6}
-	fmt.Printf("%d\n", slice2[2]+7) // 6
+	fmt.Printf("%d\n", slice2[2]+7) // 13
 
 	var slice3 []int = slice2
-	fmt.Printf("%d\n", slice3[2]+8) // 6
+	fmt.Printf("%d\n", slice3[2]+8) // 14
 
 	var slice4 []int
 	slice4 = slice3
-	fmt.Printf("%d\n", slice4[2] /* 6 */ +9)
+	fmt.Printf("%d\n", slice4[2] +9) //15
 
 	bilbo := Hobbit{
 		id:    0,
@@ -67,9 +67,18 @@ func f2() {
 
 }
 
+func f3() {
+	var array [3]int = [3]int{1, 2, 3}
+	var slice = array[1:3]
+	slice[1] = 19
+	fmt.Printf("%d\n", slice[1]) // 19
+	fmt.Printf("%d\n", array[2] + 1) // 20
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }
 
 type Hobbit struct {

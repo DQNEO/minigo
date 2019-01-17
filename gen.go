@@ -81,21 +81,23 @@ func (f *DeclFunc) emitPrologue() {
 		emit("push %%%s", RegsForCall[i])
 	}
 
+	emit("# Allocating stiack memory for localvars")
 	var localarea int
 	for _, lvar := range f.localvars {
 		if lvar.gtype == nil {
 			debugf("%s has nil gtype ", lvar)
 		}
 		size := lvar.gtype.getSize()
-		assert(size != 0, nil, "size is not zero")
+		assert(size != 0, lvar.token(), "size is not zero")
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
+		emit("# offset %d for variable \"%s\" of %s", offset, lvar.varname, lvar.gtype)
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 	if localarea != 0 {
-		emit("sub $%d, %%rsp # allocate localarea", -localarea)
+		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
 	emit("")
@@ -451,8 +453,9 @@ func (ast *StmtAssignment) emit() {
 				assignToStruct(left, right)
 			default:
 				// suppose primitive
-				emit("# emitting rhs")
+				emit("# evaluating rhs")
 				right.emit()
+				emit("# saving it to lhs")
 				emitSave(left)
 			}
 		}
@@ -487,24 +490,19 @@ func (e *ExprIndex) emitSave() {
 	// multi index * size
 	// calc address = head address + offset
 	// copy value to the address
-	rel, ok := e.collection.(*Relation)
-	if !ok {
-		errorf("should be array variable. array expr is not supported yet")
+
+	collectionType := e.collection.getGtype()
+	switch {
+	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
+		e.collection.emit() // head address
+	default:
+		errorf("TBI %s", e.tok)
 	}
 
-	vr, ok := rel.expr.(*ExprVariable)
-	if !ok {
-		errorf("should be array variable. ")
-	}
-	if vr.isGlobal {
-		emit("lea %s(%%rip), %%rax", vr.varname)
-	} else {
-		emit("lea %d(%%rbp), %%rax", vr.offset)
-	}
-	emit("push %%rax") // store address of variable
+	emit("push %%rax") // stash head address of collection
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
-	elmType := vr.gtype.elementType
+	elmType := collectionType.elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax", size) // size of one element

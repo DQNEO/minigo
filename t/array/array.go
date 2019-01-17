@@ -63,7 +63,7 @@ func assignStrctField() {
 	}
 	var dishes [3]int
 	dishes = bilbo.dishes
-	//bilbo.dishes[2] = 0
+	bilbo.dishes[2] = 0
 	fmt.Printf("%d\n", dishes[2]+13) // 16
 }
 

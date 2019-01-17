@@ -88,7 +88,7 @@ func (gtype *Gtype) String() string {
 		return "byte"
 	case G_ARRAY:
 		elm := gtype.elementType
-		return fmt.Sprintf("[]%s", elm)
+		return fmt.Sprintf("[%d]%s", gtype.length, elm)
 	case G_STRUCT:
 		return "struct"
 	case G_STRUCT_FIELD:
