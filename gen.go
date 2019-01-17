@@ -821,14 +821,15 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(ok, nil, "ok")
 		// copy address
 		rvariable.emit()
-		emit("mov %%rax, %d(%%rbp)", targetOffset)
+		emit("push %%rax")
+
 		// copy len
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize)
-		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
+		emit("push %%rax")
+
 		// copy cap
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
-		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
-		return
+		emit("push %%rax")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		// initialize a hidden array
@@ -842,6 +843,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			low:        &ExprNumberLiteral{val: 0},
 			high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
 		})
+		return
 	case  *ExprSlice:
 		e := rhs.(*ExprSlice)
 		emit("# assign to a slice")
@@ -858,8 +860,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("imul %%rcx, %%rax")    // index * size
 		emit("pop %%rcx") // head of the array
 		emit("add %%rcx , %%rax")    // (index * size) + address
+		emit("push %%rax")
 
-		emit("mov %%rax, %d(%%rbp)", targetOffset)
 		emit("#   calc and set len")
 		calcLen := &ExprBinop{
 			op:    "-",
@@ -867,8 +869,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcLen.emit()
-		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
-		offsetForLen := 8
+		emit("push %%rax")
 
 		emit("#   calc and set cap")
 		calcCap := &ExprBinop{
@@ -879,10 +880,19 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcCap.emit()
-		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
+		emit("push %%rax")
+
 	default:
 		errorf("TBI %T", rhs)
 	}
+
+	emit("pop %%rax")
+	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
+	emit("pop %%rax")
+	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
+	emit("pop %%rax")
+	emit("mov %%rax, %d(%%rbp)", targetOffset)
+
 }
 
 func initArray(headOffset int, arrayType *Gtype) {
