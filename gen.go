@@ -11,7 +11,7 @@ func emit(format string, v ...interface{}) {
 }
 
 func emitComment(format string, v ...interface{}) {
-	fmt.Printf("# "+format+"\n", v...)
+	fmt.Printf("/* "+format+" */\n", v...)
 }
 
 func emitLabel(format string, v ...interface{}) {
@@ -55,7 +55,7 @@ func (f *DeclFunc) getUniqueName() string {
 
 func (f *DeclFunc) emitPrologue() {
 	uniquName := f.getUniqueName()
-	emitComment("FUNCTION %s", uniquName)
+	emitComment("func %s.%s()", f.pkg, f.fname)
 	if f.getUniqueName() == "main" {
 		emit(".global	%s", f.getUniqueName())
 	}
@@ -98,7 +98,7 @@ func (f *DeclFunc) emitPrologue() {
 		emit("sub $%d, %%rsp # allocate localarea", -localarea)
 	}
 
-	emit("# end of prologue")
+	emit("# function body")
 }
 
 func align(n int, m int) int {
