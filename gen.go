@@ -380,15 +380,26 @@ func (ast *ExprBinop) emit() {
 
 func (ast *StmtAssignment) emit() {
 	emit("# start StmtAssignment")
+	// the right hand operand is a single multi-valued expression
+	// such as a function call, a channel or map operation, or a type assertion.
+	// The number of operands on the left hand side must match the number of values.
+	singleValueMode := (len(ast.rights) > 1)
+
 	numLeft := len(ast.lefts)
 	numRight := 0
 	for _, right := range ast.rights {
 		switch right.(type) {
 		case *ExprFuncallOrConversion:
-			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
-			numRight += len(funcdef.rettypes)
+			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
+			if singleValueMode && len(rettypes) > 1 {
+				errorf("multivalue is not allowed")
+			}
+			numRight += len(rettypes)
 		case *ExprMethodcall:
 			rettypes := right.(*ExprMethodcall).getRettypes()
+			if singleValueMode && len(rettypes) > 1 {
+				errorf("multivalue is not allowed")
+			}
 			numRight += len(rettypes)
 		default:
 			numRight++
@@ -398,62 +409,51 @@ func (ast *StmtAssignment) emit() {
 		errorf("number of exprs does not match")
 	}
 
-	var done map[int]bool
-	done = make(map[int]bool) // @FIXME this is not correct any more
-	for i, right := range ast.rights {
-		lhs := ast.lefts[i]
+	for rightIndex, right := range ast.rights {
+		left := ast.lefts[rightIndex]
 		switch right.(type) {
-		case *ExprSliceLiteral, *ExprSlice: // x = []int{1,2}
-			assignToSlice(lhs, right)
-			done[i] = true // @FIXME this is not correct any more
-		case *ExprStructLiteral: // assign struct literal to var
-			assignToStruct(lhs, right.(*ExprStructLiteral))
-			done[i] = true // @FIXME this is not correct any more
 		case *ExprFuncallOrConversion:
-			funcdef := right.(*ExprFuncallOrConversion).getFuncDef()
+			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
 			emit("# emitting rhs (funcall)")
 			right.emit()
-			for i, _ := range funcdef.rettypes {
-				emit("mov %s(%%rip), %%rax", retvals[i])
+			for i, _ := range rettypes {
+				emit("mov %s(%%rip), %%rax", retvals[len(rettypes) - 1 - i])
 				emit("push %%rax")
+			}
+			for _, left := range ast.lefts {
+				emit("pop %%rax")
+				emitSave(left)
 			}
 		case *ExprMethodcall:
 			rettypes := right.(*ExprMethodcall).getRettypes()
 			emit("# emitting rhs (funcall)")
 			right.emit()
 			for i, _ := range rettypes {
-				emit("mov %s(%%rip), %%rax", retvals[i])
+				emit("mov %s(%%rip), %%rax", retvals[len(rettypes) - 1 - i])
 				emit("push %%rax")
 			}
-		case *Relation:
-			if right.getGtype().typ == G_ARRAY {
-				assignToLocalArray(lhs, right)
-				done[i] = true // @FIXME this is not correct any more
-			} else if right.getGtype().typ == G_SLICE {
-				assignToSlice(lhs, right)
-				done[i] = true // @FIXME this is not correct any more
-			} else {
-				emit("# emitting rhs")
-				right.emit()
-				emit("push %%rax")
+			for _, left := range ast.lefts {
+				emit("pop %%rax")
+				emitSave(left)
 			}
 		default:
-			emit("# emitting rhs")
-			right.emit()
-			emit("push %%rax")
+			rightType := right.getGtype()
+			switch {
+			case rightType.typ == G_ARRAY:
+					assignToLocalArray(left, right)
+			case rightType.typ == G_SLICE:
+					assignToSlice(left, right)
+			case rightType.typ == G_REL && rightType.relation.gtype.typ == G_STRUCT:
+					assignToStruct(left, right)
+			default:
+				// suppose primitive
+				emit("# emitting rhs")
+				right.emit()
+				emitSave(left)
+			}
 		}
 	}
 
-	for i := len(ast.lefts) - 1; i >= 0; i-- {
-		if done[i] {
-			continue
-		}
-		left := ast.lefts[i]
-		emit("# assigning to lhs %T", left)
-		emit("pop %%rax")
-
-		emitSave(left)
-	}
 }
 
 // Each left-hand side operand must be addressable,
@@ -1000,6 +1000,7 @@ func (e *ExprNilLiteral) emit() {
 
 func (ast *StmtShortVarDecl) emit() {
 	a := &StmtAssignment{
+		tok:ast.tok,
 		lefts:  ast.lefts,
 		rights: ast.rights,
 	}
