@@ -98,7 +98,7 @@ func (f *DeclFunc) emitPrologue() {
 		emit("sub $%d, %%rsp # allocate localarea", -localarea)
 	}
 
-	emit("# function body")
+	emit("")
 }
 
 func align(n int, m int) int {
@@ -111,7 +111,7 @@ func align(n int, m int) int {
 }
 
 func emitFuncEpilogue() {
-	emit("#")
+	emit("")
 	emit("leave")
 	emit("ret")
 }
