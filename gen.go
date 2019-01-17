@@ -43,6 +43,7 @@ func (f *DeclFunc) getUniqueName() string {
 		// method
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
+
 	// treat main.main function as a special one
 	if f.pkg == "main" && f.fname == "main" {
 		return "main"
@@ -53,10 +54,13 @@ func (f *DeclFunc) getUniqueName() string {
 }
 
 func (f *DeclFunc) emitPrologue() {
-	emitComment("FUNCTION %s", f.getUniqueName())
+	uniquName := f.getUniqueName()
+	emitComment("FUNCTION %s", uniquName)
 	emit(".text")
-	emit(".global	%s", f.getUniqueName())
-	emitLabel("%s:", f.getUniqueName())
+	if f.getUniqueName() == "main" {
+		emit(".global	%s", f.getUniqueName())
+	}
+	emitLabel("%s:", uniquName)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
