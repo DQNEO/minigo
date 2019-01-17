@@ -5,7 +5,6 @@ var gInterface = &Gtype{typ: G_ANY, size: 8}
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8}
-var gString = &Gtype{typ: G_STRING}
 var eIota = &ExprConstVariable{
 	name: "iota",
 }
@@ -32,7 +31,7 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("bool", gBool)
 	universe.setGtype("byte", gByte)
 	universe.setGtype("int", gInt)
-	universe.setGtype("string", gString)
+	universe.setGtype("string", &Gtype{typ: G_STRING, length: 0})
 	universe.setGtype("uint8", gByte)
 }
 

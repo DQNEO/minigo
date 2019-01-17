@@ -888,11 +888,16 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*ExprConversion)
 		assert(conversion.gtype.typ == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().relation.gtype.typ == G_STRING, rhs.token(), "must be a string type]")
+		assert(conversion.expr.getGtype().typ == G_STRING, rhs.token(), "must be a string type]")
 		stringVarname,ok := conversion.expr.(*Relation)
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
-		errorf("TBI offset = %v", stringVariable.offset)
+		stringVariable.emit()
+		emit("push %%rax")
+		strlen := stringVariable.getGtype().length
+		emit("push $%d", strlen) // len
+		emit("push $%d", strlen) // cap
+
 	default:
 		errorf("TBI %T %s", rhs, rhs.token())
 	}
@@ -1313,10 +1318,15 @@ func (decl *DeclVar) emitGlobal() {
 			switch decl.initval.(type) {
 			case *ExprNumberLiteral:
 				val = decl.initval.(*ExprNumberLiteral).val
+				emit(".quad %d", val)
 			case *ExprConstVariable:
 				val = evalIntExpr(decl.initval)
+				emit(".quad %d", val)
+			case *ExprStringLiteral:
+				stringLiteral := decl.initval.(*ExprStringLiteral)
+				emit(".quad .%s", stringLiteral.slabel)
+				decl.variable.gtype.length = len(stringLiteral.val)
 			}
-			emit(".quad %d", val)
 		}
 	}
 }

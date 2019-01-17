@@ -41,7 +41,7 @@ type Gtype struct {
 	fields       []*Gtype                  // for struct
 	fieldname    identifier                // for struct field
 	offset       int                       // for struct field
-	length       int                       // for array
+	length       int                       // for array, string(len without the terminating \0)
 	elementType  *Gtype                    // for array, slice
 	imethods     map[identifier]*signature // for interface
 	methods      map[identifier]*ExprFuncRef
@@ -285,7 +285,10 @@ func (e *ExprNumberLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprStringLiteral) getGtype() *Gtype {
-	return gString
+	return &Gtype{
+		typ: G_STRING,
+		length: len(e.val),
+	}
 }
 
 func (e *ExprVariable) getGtype() *Gtype {
