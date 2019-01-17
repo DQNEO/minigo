@@ -800,6 +800,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		targetOffset = lhs.(*ExprVariable).offset
 	case *ExprStructField:
 		targetOffset = lhs.(*ExprStructField).getOffset()
+	case *ExprIndex:
+		errorf("TBI %s", lhs.token())
 	default:
 		errorf("unkonwn type %T", lhs)
 	}
