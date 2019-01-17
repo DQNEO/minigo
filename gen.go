@@ -1009,32 +1009,18 @@ func (e *ExprIndex) emit() {
 	} else if e.collection.getGtype().typ == G_SLICE {
 		elmType := e.collection.getGtype().elementType
 		emit("# emit address of the low index")
-		e.collection.emit()
-		emit("push %%rax") // store low address
+		e.collection.emit() // eval pointer value
+		emit("push %%rax") // store head address
 
-		switch e.collection.(type) {
-		case *Relation:
-			rel := e.collection.(*Relation)
-			vr, ok := rel.expr.(*ExprVariable)
-			assert(ok, e.tok, "collection should be a variable")
-			assert(!vr.isGlobal,e.tok, "global var is not supporeted")
-			emit("mov %d(%%rbp), %%rax # len of slice", vr.offset + ptrSize)
-		default:
-			errorf("TBI: we suppose e.collection is a variable")
-		}
-
-		// array index = low + slice index
-		e.index.emit() // slice index
+		e.index.emit() // index
 		emit("mov %%rax, %%rcx")
 
 		size := elmType.getSize()
 		assert(size > 0, nil, "size > 0")
 		emit("mov $%d, %%rax", size) // size of one element
-		emit("imul %%rcx, %%rax")    // index * size
-		emit("push %%rax")           // store index * size
-		emit("pop %%rcx")            // load  index * size
-		emit("pop %%rbx")            // load address of head element
-		emit("add %%rcx , %%rbx")    // (index * size) + address
+		emit("imul %%rcx, %%rax")    // set e.index * size => %rax
+		emit("pop %%rbx")            // load head address
+		emit("add %%rax , %%rbx")    // (e.index * size) + head address
 		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 
 	} else {

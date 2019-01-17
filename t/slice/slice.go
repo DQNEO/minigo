@@ -61,10 +61,10 @@ func f2() {
 		items:[]int{1,2,3},
 	}
 
-	/*
+	fmt.Printf("%d\n", bilbo.items[2] + 14) // 17
+	bilbo.items = []int{15,16,17,18}
+	fmt.Printf("%d\n", bilbo.items[3]) // 18
 
-	bilbo.items = []int{1,2,3}
-	*/
 }
 
 func main() {
