@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var regs = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
+var RegsForCall = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 const INT_SIZE = 8 // not like 8cc
 
@@ -75,7 +75,7 @@ func (f *DeclFunc) emitPrologue() {
 	for i, param := range params {
 		offset -= INT_SIZE
 		param.offset = offset
-		emit("push %%%s", regs[i])
+		emit("push %%%s", RegsForCall[i])
 	}
 
 	var localarea int
@@ -1199,7 +1199,7 @@ func emitCall(fname string, args []Expr) {
 
 	emit("# funcall %s", fname)
 	for i, _ := range args {
-		emit("push %%%s", regs[i])
+		emit("push %%%s", RegsForCall[i])
 	}
 
 	emit("# setting arguments")
@@ -1216,14 +1216,14 @@ func emitCall(fname string, args []Expr) {
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop %%%s   # argument no %d", regs[j], j+1)
+		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 	emit("mov $0, %%rax")
 	emit("call %s", fname)
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop %%%s", regs[j])
+		emit("pop %%%s", RegsForCall[j])
 	}
 }
 
