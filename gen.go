@@ -808,6 +808,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		initLocalSlice(targetOffset)
 		return
 	}
+	offsetForLen := 8
 
 	switch rhs.(type) {
 	case *Relation:
@@ -820,14 +821,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(ok, nil, "ok")
 		// copy address
 		rvariable.emit()
-		emitLsave(ptrSize, targetOffset)
+		emit("mov %%rax, %d(%%rbp)", targetOffset)
 		// copy len
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize)
-		emitLsave(ptrSize, targetOffset + ptrSize)
-		offsetForLen := 8
+		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
 		// copy cap
 		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
-		emitLsave(ptrSize, targetOffset + ptrSize + offsetForLen)
+		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
 		return
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
@@ -859,7 +859,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("pop %%rcx") // head of the array
 		emit("add %%rcx , %%rax")    // (index * size) + address
 
-		emitLsave(ptrSize, targetOffset)
+		emit("mov %%rax, %d(%%rbp)", targetOffset)
 		emit("#   calc and set len")
 		calcLen := &ExprBinop{
 			op:    "-",
@@ -867,7 +867,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcLen.emit()
-		emitLsave(ptrSize, targetOffset + ptrSize)
+		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
 		offsetForLen := 8
 
 		emit("#   calc and set cap")
@@ -879,7 +879,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			right: e.low,
 		}
 		calcCap.emit()
-		emitLsave(ptrSize, targetOffset + ptrSize + offsetForLen)
+		emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
 	default:
 		errorf("TBI %T", rhs)
 	}
