@@ -835,12 +835,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			values: lit.values,
 		}
 		assignToLocalArray(lit.invisiblevar, arrayLiteral)
-		assignToSlice(lhs, &ExprSlice{
-			collection: lit.invisiblevar,
-			low:        &ExprNumberLiteral{val: 0},
-			high:       &ExprNumberLiteral{val: lit.invisiblevar.gtype.length},
-		})
-		return
+		lit.invisiblevar.emitAddress()
+		emit("push %%rax")
+		emit("push $%d", lit.invisiblevar.gtype.length) // len
+		emit("push $%d", lit.invisiblevar.gtype.length) // cap
 	case  *ExprSlice:
 		e := rhs.(*ExprSlice)
 		emit("# assign to a slice")
