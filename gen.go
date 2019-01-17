@@ -1261,7 +1261,6 @@ func evalIntExpr(e Expr) int {
 func (decl *DeclVar) emitGlobal() {
 	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
-	emitLabel(".global %s", decl.variable.varname)
 	emitLabel("%s:", decl.variable.varname)
 
 	if decl.variable.gtype.typ == G_ARRAY {
@@ -1325,7 +1324,6 @@ func (root *IrRoot) emit() {
 
 	emitComment("GLOBAL RETVALS")
 	for _, name := range retvals {
-		emitLabel(".global %s", name)
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
