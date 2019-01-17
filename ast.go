@@ -16,7 +16,7 @@ type Inferer interface {
 }
 
 type Relation struct {
-	tok *Token
+	tok  *Token
 	name identifier
 
 	// either of expr(var, const, funcref) or gtype
@@ -34,14 +34,14 @@ type ExprNumberLiteral struct {
 }
 
 type ExprStringLiteral struct {
-	tok *Token
+	tok    *Token
 	val    string
 	slabel string
 }
 
 // local or global variable
 type ExprVariable struct {
-	tok *Token
+	tok      *Token
 	varname  identifier
 	gtype    *Gtype
 	offset   int // for local variable
@@ -49,7 +49,7 @@ type ExprVariable struct {
 }
 
 type ExprConstVariable struct {
-	tok *Token
+	tok       *Token
 	name      identifier
 	gtype     *Gtype
 	val       Expr // like ExprConstExpr ?
@@ -72,21 +72,21 @@ type ExprMethodcall struct {
 }
 
 type ExprBinop struct {
-	tok *Token
+	tok   *Token
 	op    string
 	left  Expr
 	right Expr
 }
 
 type ExprUop struct {
-	tok *Token
+	tok     *Token
 	op      string
 	operand Expr
 }
 
 // local or global
 type DeclVar struct {
-	tok *Token
+	tok      *Token
 	pkg      identifier
 	varname  *Relation
 	variable *ExprVariable
@@ -94,12 +94,12 @@ type DeclVar struct {
 }
 
 type DeclConst struct {
-	tok *Token
+	tok    *Token
 	consts []*ExprConstVariable
 }
 
 type StmtAssignment struct {
-	tok *Token
+	tok    *Token
 	lefts  []Expr
 	rights []Expr
 }
@@ -111,14 +111,14 @@ type StmtShortVarDecl struct {
 }
 
 type ForRangeClause struct {
-	tok *Token
+	tok       *Token
 	indexvar  *Relation
 	valuevar  *Relation
 	rangeexpr Expr
 }
 
 type ForForClause struct {
-	tok *Token
+	tok  *Token
 	init Stmt
 	cond Stmt
 	post Stmt
@@ -133,7 +133,7 @@ type StmtFor struct {
 }
 
 type StmtIf struct {
-	tok *Token
+	tok        *Token
 	simplestmt Stmt
 	cond       Expr
 	then       *StmtSatementList
@@ -141,47 +141,47 @@ type StmtIf struct {
 }
 
 type StmtReturn struct {
-	tok *Token
+	tok   *Token
 	exprs []Expr
 }
 
 type StmtInc struct {
-	tok *Token
+	tok     *Token
 	operand Expr
 }
 
 type StmtDec struct {
-	tok *Token
+	tok     *Token
 	operand Expr
 }
 
 type PackageClause struct {
-	tok *Token
+	tok  *Token
 	name identifier
 }
 
 type ImportSpec struct {
-	tok *Token
+	tok  *Token
 	path string
 }
 
 type ImportDecl struct {
-	tok *Token
+	tok   *Token
 	specs []*ImportSpec
 }
 
 type StmtSatementList struct {
-	tok *Token
+	tok   *Token
 	stmts []Stmt
 }
 
 type ExprFuncRef struct {
-	tok *Token
+	tok     *Token
 	funcdef *DeclFunc
 }
 
 type DeclFunc struct {
-	tok *Token
+	tok        *Token
 	pkg        identifier
 	receiver   *ExprVariable
 	fname      identifier
@@ -208,17 +208,17 @@ type SourceFile struct {
 }
 
 type DeclType struct {
-	tok *Token
+	tok   *Token
 	name  identifier
 	gtype *Gtype
 }
 
 // https://golang.org/ref/spec#Slice_expressions
 type ExprSlice struct {
-	tok *Token
+	tok        *Token
 	collection Expr
-	low  Expr
-	high Expr
+	low        Expr
+	high       Expr
 }
 
 // Expr e.g. array[2]
@@ -229,7 +229,7 @@ type ExprIndex struct {
 }
 
 type ExprArrayLiteral struct {
-	tok *Token
+	tok    *Token
 	gtype  *Gtype
 	values []Expr
 }
@@ -238,9 +238,9 @@ type ExprArrayLiteral struct {
 // A slice literal describes the entire underlying array literal.
 // A slice literal has the form []T{x1, x2, … xn}
 type ExprSliceLiteral struct {
-	tok *Token
-	gtype  *Gtype
-	values []Expr
+	tok          *Token
+	gtype        *Gtype
+	values       []Expr
 	invisiblevar *ExprVariable // the underlying array
 }
 
@@ -257,7 +257,7 @@ func (e *ExprSliceLiteral) getGtype() *Gtype {
 }
 
 type ExprTypeAssertion struct {
-	tok *Token
+	tok   *Token
 	expr  Expr
 	gtype *Gtype
 }
@@ -271,47 +271,47 @@ type StmtBreak struct {
 }
 
 type StmtExpr struct {
-	tok *Token
+	tok  *Token
 	expr Expr
 }
 
 type StmtDefer struct {
-	tok *Token
+	tok  *Token
 	expr Expr
 }
 
 type ExprVaArg struct {
-	tok *Token
+	tok  *Token
 	expr Expr
 }
 
 type ExprConversion struct {
-	tok *Token
+	tok   *Token
 	gtype *Gtype
 	expr  Expr
 }
 
 type ExprCaseClause struct {
-	tok *Token
+	tok      *Token
 	exprs    []Expr
 	compound *StmtSatementList
 }
 
 type StmtSwitch struct {
-	tok *Token
+	tok   *Token
 	cond  Expr
 	cases []*ExprCaseClause
 	dflt  *StmtSatementList
 }
 
 type KeyedElement struct {
-	tok *Token
+	tok   *Token
 	key   identifier
 	value Expr
 }
 
 type ExprStructLiteral struct {
-	tok *Token
+	tok          *Token
 	strctname    *Relation
 	fields       []*KeyedElement
 	invisiblevar *ExprVariable // to have offfset for &T{}
@@ -324,6 +324,6 @@ type ExprStructField struct {
 }
 
 type ExprTypeSwitchGuard struct {
-	tok *Token
+	tok  *Token
 	expr Expr
 }

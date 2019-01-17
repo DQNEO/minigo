@@ -17,7 +17,7 @@ func ghello() {
 }
 
 func lworld() {
-	var world  = [5]byte{'w', 'o', 'r', 'l', 'd'}
+	var world = [5]byte{'w', 'o', 'r', 'l', 'd'}
 	fmt.Printf("%c", world[0])
 	fmt.Printf("%c", world[1])
 	fmt.Printf("%c", world[2])

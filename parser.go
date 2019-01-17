@@ -135,7 +135,7 @@ func (p *parser) readFuncallArgs() []Expr {
 		if p.peekToken().isPunct("...") {
 			ptok := p.expect("...")
 			arg = &ExprVaArg{
-				tok: ptok,
+				tok:  ptok,
 				expr: arg,
 			}
 			r = append(r, arg)
@@ -179,7 +179,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	}
 
 	rel := &Relation{
-		tok: firstIdentToken,
+		tok:  firstIdentToken,
 		name: firstIdent,
 	}
 	p.tryResolve(pkg, rel)
@@ -227,7 +227,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 		p.skip()
 		// A missing low index defaults to zero
 		lowIndex := &ExprNumberLiteral{
-			tok:tok,
+			tok: tok,
 			val: 0,
 		}
 		var highIndex Expr
@@ -236,7 +236,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 			p.skip()
 			// a missing high index defaults to the length of the sliced operand:
 			highIndex = &ExprNumberLiteral{
-				tok:tok,
+				tok: tok,
 				val: e.getGtype().length,
 			}
 		} else {
@@ -244,10 +244,10 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 			p.expect("]")
 		}
 		r = &ExprSlice{
-			tok: tok,
+			tok:        tok,
 			collection: e,
-			low:  lowIndex,
-			high: highIndex,
+			low:        lowIndex,
+			high:       highIndex,
 		}
 	} else {
 		index := p.parseExpr()
@@ -255,7 +255,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 		if tok.isPunct("]") {
 			p.skip()
 			r = &ExprIndex{
-				tok: tok,
+				tok:        tok,
 				collection: e,
 				index:      index,
 			}
@@ -267,7 +267,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 				p.skip()
 				// a missing high index defaults to the length of the sliced operand:
 				highIndex = &ExprNumberLiteral{
-					tok:tok,
+					tok: tok,
 					val: e.getGtype().length,
 				}
 			} else {
@@ -275,10 +275,10 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 				p.expect("]")
 			}
 			r = &ExprSlice{
-				tok:tok,
+				tok:        tok,
 				collection: e,
-				low:  index,
-				high: highIndex,
+				low:        index,
+				high:       highIndex,
 			}
 
 		} else {
@@ -297,14 +297,14 @@ func (p *parser) parseTypeAssertion(e Expr) Expr {
 		p.skip()
 		ptok := p.expect(")")
 		return &ExprTypeSwitchGuard{
-			tok:ptok,
+			tok:  ptok,
 			expr: e,
 		}
 	} else {
 		gtype := p.parseType()
 		ptok := p.expect(")")
 		e = &ExprTypeAssertion{
-			tok:ptok,
+			tok:   ptok,
 			expr:  e,
 			gtype: gtype,
 		}
@@ -378,7 +378,7 @@ func (p *parser) parseMakeExpr() Expr {
 	_ = mapType
 	p.expect(")")
 	return &ExprNilLiteral{
-		tok:tok,
+		tok: tok,
 	}
 }
 
@@ -406,7 +406,7 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	p.expect(")")
 
 	return &ExprConversion{
-		tok:ptok,
+		tok:   ptok,
 		gtype: gtype,
 		expr:  e,
 	}
@@ -458,7 +458,7 @@ func (p *parser) parsePrim() Expr {
 				if gtype.length == 0 {
 					gtype.length = len(values)
 				} else {
-					if gtype.length < len(values)  {
+					if gtype.length < len(values) {
 						errorf("array length does not match (%d != %d)",
 							len(values), gtype.length)
 					}
@@ -466,19 +466,19 @@ func (p *parser) parsePrim() Expr {
 			}
 
 			return &ExprArrayLiteral{
-				tok: tok,
+				tok:    tok,
 				gtype:  gtype,
 				values: values,
 			}
 		case G_SLICE:
 			return &ExprSliceLiteral{
-				tok: tok,
+				tok:    tok,
 				gtype:  gtype,
 				values: values,
 				invisiblevar: p.newVariable("", &Gtype{
-					typ: G_ARRAY,
-					elementType:gtype.elementType,
-					length:len(values),
+					typ:         G_ARRAY,
+					elementType: gtype.elementType,
+					length:      len(values),
 				}, false),
 			}
 		default:
@@ -530,7 +530,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 	ptok := p.expect("{")
 
 	r := &ExprStructLiteral{
-		tok:ptok,
+		tok:       ptok,
 		strctname: rel,
 	}
 
@@ -543,7 +543,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		p.assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
 		f := &KeyedElement{
-			tok:tok,
+			tok:   tok,
 			key:   tok.getIdent(),
 			value: value,
 		}
@@ -569,7 +569,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		return e
 	case tok.isPunct("&"):
 		uop := &ExprUop{
-			tok:tok,
+			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
@@ -584,19 +584,19 @@ func (p *parser) parseUnaryExpr() Expr {
 		return uop
 	case tok.isPunct("*"):
 		return &ExprUop{
-			tok:tok,
+			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("!"):
 		return &ExprUop{
-			tok:tok,
+			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
 		return &ExprUop{
-			tok:tok,
+			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
@@ -657,7 +657,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 					tok.errorf("bad lefts unary expr:%v", ast)
 				}
 				ast = &ExprBinop{
-					tok:tok,
+					tok:   tok,
 					op:    tok.sval,
 					left:  ast,
 					right: right,
@@ -705,7 +705,7 @@ func (p *parser) parseType() *Gtype {
 			ident := tok.getIdent()
 			// unresolved
 			rel := &Relation{
-				tok:tok,
+				tok:  tok,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -738,7 +738,7 @@ func (p *parser) parseType() *Gtype {
 				// slice
 				typ := p.parseType()
 				return &Gtype{
-					typ:      G_SLICE,
+					typ:         G_SLICE,
 					elementType: typ,
 				}
 			} else {
@@ -746,9 +746,9 @@ func (p *parser) parseType() *Gtype {
 				p.expect("]")
 				typ := p.parseType()
 				return &Gtype{
-					typ:    G_ARRAY,
-					length: tok.getIntval(),
-					elementType:    typ,
+					typ:         G_ARRAY,
+					length:      tok.getIntval(),
+					elementType: typ,
 				}
 			}
 		} else if tok.isPunct("]") {
@@ -797,11 +797,11 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 
 	variable := p.newVariable(newName, typ, isGlobal)
 	r := &DeclVar{
-		pkg:      p.currentPackageName,
-		varname:  &Relation{
+		pkg: p.currentPackageName,
+		varname: &Relation{
 			expr: variable,
 		},
-		variable:variable,
+		variable: variable,
 		initval:  initval,
 	}
 	if typ == nil {
@@ -956,7 +956,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	ptok := p.expectKeyword("for")
 
 	var r = &StmtFor{
-		tok:ptok,
+		tok: ptok,
 	}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -1043,7 +1043,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	var r = &StmtFor{
 		tok: tokRange,
 		rng: &ForRangeClause{
-			tok:tokRange,
+			tok:       tokRange,
 			indexvar:  indexvar,
 			valuevar:  valuevar,
 			rangeexpr: rangeExpr,
@@ -1061,7 +1061,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	ptok := p.expectKeyword("if")
 
 	var r = &StmtIf{
-		tok:ptok,
+		tok: ptok,
 	}
 	p.enterNewScope()
 	defer p.exitScope()
@@ -1109,7 +1109,7 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 		exprs = nil
 	}
 	return &StmtReturn{
-		tok:ptok,
+		tok:   ptok,
 		exprs: exprs,
 	}
 }
@@ -1147,7 +1147,7 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	rights := p.parseExpressionList(nil)
 	p.assertNotNil(rights[0])
 	return &StmtAssignment{
-		tok:ptok,
+		tok:    ptok,
 		lefts:  lefts,
 		rights: rights,
 	}
@@ -1171,13 +1171,13 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 	rights := p.parseExpressionList(nil)
 	p.assert(len(rights) == 1, "num of rights is 1")
 	binop := &ExprBinop{
-		tok:ptok,
+		tok:   ptok,
 		op:    op,
 		left:  left,
 		right: rights[0],
 	}
 	return &StmtAssignment{
-		tok:ptok,
+		tok:    ptok,
 		lefts:  []Expr{left},
 		rights: []Expr{binop},
 	}
@@ -1221,7 +1221,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 	}
 	p.expect("{")
 	r := &StmtSwitch{
-		tok: ptok,
+		tok:  ptok,
 		cond: cond,
 	}
 
@@ -1246,7 +1246,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &ExprCaseClause{
-				tok:ptok,
+				tok:      ptok,
 				exprs:    exprs,
 				compound: compound,
 			}
@@ -1275,7 +1275,7 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 
 	callExpr := p.parsePrim()
 	return &StmtDefer{
-		tok:ptok,
+		tok:  ptok,
 		expr: callExpr,
 	}
 }
@@ -1339,18 +1339,18 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok2.isPunct("++") {
 		p.skip()
 		return &StmtInc{
-			tok:tok2,
+			tok:     tok2,
 			operand: expr1,
 		}
 	} else if tok2.isPunct("--") {
 		p.skip()
 		return &StmtDec{
-			tok:tok2,
+			tok:     tok2,
 			operand: expr1,
 		}
 	} else {
 		return &StmtExpr{
-			tok:tok2,
+			tok:  tok2,
 			expr: expr1,
 		}
 	}
@@ -1403,7 +1403,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				variable := &ExprVariable{
-					tok:tok,
+					tok:     tok,
 					varname: pname,
 					gtype:   gtype,
 				}
@@ -1414,7 +1414,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 			ptype := p.parseType()
 			// assureType(tok.sval)
 			variable := &ExprVariable{
-				tok:tok,
+				tok:     tok,
 				varname: pname,
 				gtype:   ptype,
 			}
@@ -1478,7 +1478,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		pname := tok.getIdent()
 		ptype := p.parseType()
 		receiver = &ExprVariable{
-			tok:tok,
+			tok:     tok,
 			varname: pname,
 			gtype:   ptype,
 		}
@@ -1491,7 +1491,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
-		tok : ptok,
+		tok:        ptok,
 		pkg:        p.currentPackageName,
 		receiver:   receiver,
 		fname:      fname,
@@ -1500,7 +1500,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		isVariadic: isVariadic,
 	}
 	ref := &ExprFuncRef{
-		tok : ptok2,
+		tok:     ptok2,
 		funcdef: r,
 	}
 
@@ -1542,7 +1542,7 @@ func (p *parser) parseImport() *ImportDecl {
 			tok := p.readToken()
 			if tok.isTypeString() {
 				specs = append(specs, &ImportSpec{
-					tok: tok,
+					tok:  tok,
 					path: tok.sval,
 				})
 				p.expect(";")
@@ -1557,14 +1557,14 @@ func (p *parser) parseImport() *ImportDecl {
 			errorf("import expects package name")
 		}
 		specs = []*ImportSpec{&ImportSpec{
-			tok:tok,
+			tok:  tok,
 			path: tok.sval,
 		},
 		}
 	}
 	p.expect(";")
 	return &ImportDecl{
-		tok: tokImport,
+		tok:   tokImport,
 		specs: specs,
 	}
 }
@@ -1576,7 +1576,7 @@ func (p *parser) parsePackageClause() *PackageClause {
 	name := p.expectIdent()
 	p.expect(";")
 	return &PackageClause{
-		tok: tokPkg,
+		tok:  tokPkg,
 		name: name,
 	}
 }
@@ -1712,7 +1712,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 
 	gtype := p.parseType()
 	r := &DeclType{
-		tok: ptok,
+		tok:   ptok,
 		name:  newName,
 		gtype: gtype,
 	}

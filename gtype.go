@@ -129,7 +129,7 @@ func (strct *Gtype) calcStructOffset() {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
-			assert(align > 0 , nil, "field size should be > 0: filed=" + fieldtype.String())
+			assert(align > 0, nil, "field size should be > 0: filed="+fieldtype.String())
 		} else {
 			align = MaxAlign
 		}
@@ -214,8 +214,8 @@ func (f *ExprFuncRef) getGtype() *Gtype {
 
 func (e *ExprSlice) getGtype() *Gtype {
 	return &Gtype{
-		typ: G_SLICE,
-		elementType:e.collection.getGtype().elementType,
+		typ:         G_SLICE,
+		elementType: e.collection.getGtype().elementType,
 	}
 }
 

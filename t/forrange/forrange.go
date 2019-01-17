@@ -21,9 +21,9 @@ func f1() {
 
 func f2() {
 	bilbo := Hobbit{
-		id: 1,
-		age: 111,
-		items: [3]int{9,10,11},
+		id:    1,
+		age:   111,
+		items: [3]int{9, 10, 11},
 	}
 	for _, v := range bilbo.items {
 		fmt.Printf("%d\n", v)
@@ -35,9 +35,8 @@ func main() {
 	f2()
 }
 
-
 type Hobbit struct {
-	id int
-	age int
+	id    int
+	age   int
 	items [3]int
 }

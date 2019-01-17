@@ -44,7 +44,7 @@ func f3() {
 }
 
 func assign() {
-	var a [3]int = [3]int{10,11,12}
+	var a [3]int = [3]int{10, 11, 12}
 	var b [3]int = a
 	a[1] = 99
 	fmt.Printf("%d\n", b[0])
@@ -52,9 +52,9 @@ func assign() {
 	fmt.Printf("%d\n", b[2])
 	var c [3]int
 	c = b
-	fmt.Printf("%d\n", c[0] + 3)
-	fmt.Printf("%d\n", c[1] + 3)
-	fmt.Printf("%d\n", c[2] + 3)
+	fmt.Printf("%d\n", c[0]+3)
+	fmt.Printf("%d\n", c[1]+3)
+	fmt.Printf("%d\n", c[2]+3)
 }
 
 func assignStrctField() {
@@ -64,7 +64,7 @@ func assignStrctField() {
 	var dishes [3]int
 	dishes = bilbo.dishes
 	//bilbo.dishes[2] = 0
-	fmt.Printf("%d\n", dishes[2] + 13) // 16
+	fmt.Printf("%d\n", dishes[2]+13) // 16
 }
 
 func main() {
@@ -76,6 +76,6 @@ func main() {
 }
 
 type Hobbit struct {
-	id int
+	id     int
 	dishes [3]int
 }

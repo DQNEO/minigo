@@ -1,6 +1,5 @@
 package main
 
-
 const ptrSize int = 8
 
 type scope struct {
