@@ -55,7 +55,7 @@ func (f *DeclFunc) getUniqueName() string {
 
 func (f *DeclFunc) emitPrologue() {
 	uniquName := f.getUniqueName()
-	emitComment("func %s.%s()", f.pkg, f.fname)
+	//emitComment("func %s.%s()", f.pkg, f.fname)
 	if f.getUniqueName() == "main" {
 		emit(".global	%s", f.getUniqueName())
 	}
@@ -1316,6 +1316,7 @@ func (root *IrRoot) emit() {
 	// generate code
 	emit(".data")
 
+	emit("")
 	emitComment("STRING LITERALS")
 	for id, ast := range root.stringLiterals {
 		ast.slabel = fmt.Sprintf("S%d", id)
@@ -1323,17 +1324,20 @@ func (root *IrRoot) emit() {
 		emit(".string \"%s\"", ast.val)
 	}
 
+	emit("")
 	emitComment("GLOBAL RETVALS")
 	for _, name := range retvals {
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
 
+	emit("")
 	emitComment("GLOBAL VARS")
 	for _, vardecl := range root.vars {
 		vardecl.emitGlobal()
 	}
 
+	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
 	for _, funcdecl := range root.funcs {
