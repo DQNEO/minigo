@@ -441,13 +441,13 @@ func (ast *StmtAssignment) emit() {
 				emitSave(left)
 			}
 		default:
-			rightType := right.getGtype()
+			gtype := right.getGtype()
 			switch {
-			case rightType.typ == G_ARRAY:
+			case gtype.typ == G_ARRAY:
 					assignToLocalArray(left, right)
-			case rightType.typ == G_SLICE:
+			case gtype.typ == G_SLICE:
 					assignToSlice(left, right)
-			case rightType.typ == G_REL && rightType.relation.gtype.typ == G_STRUCT:
+			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 					assignToStruct(left, right)
 			default:
 				// suppose primitive
@@ -979,12 +979,13 @@ func assignToPrimitive(lhs Expr, rhs Expr) {
 // for local var
 func (decl *DeclVar) emit() {
 	gtype := decl.variable.gtype
+
 	if gtype.typ == G_ARRAY {
 		assignToLocalArray(decl.varname, decl.initval)
-	} else if gtype.relation != nil && gtype.relation.gtype.typ == G_STRUCT {
-		assignToStruct(decl.varname, decl.initval)
 	} else if gtype.typ == G_SLICE {
 		assignToSlice(decl.varname, decl.initval)
+	} else if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT {
+		assignToStruct(decl.varname, decl.initval)
 	} else {
 		// numeric
 		assignToPrimitive(decl.varname, decl.initval)
