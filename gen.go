@@ -55,7 +55,7 @@ func (f *DeclFunc) getUniqueName() string {
 func (f *DeclFunc) emitPrologue() {
 	emitComment("FUNCTION %s", f.getUniqueName())
 	emit(".text")
-	emit(".globl	%s", f.getUniqueName())
+	emit(".global	%s", f.getUniqueName())
 	emitLabel("%s:", f.getUniqueName())
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
