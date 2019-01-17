@@ -784,7 +784,7 @@ func initLocalSlice(offset int) {
 	saveSlice(offset)
 }
 
-const offsetForLen = 8
+const sliceOffsetForLen = 8
 
 func assignToSlice(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
@@ -825,7 +825,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 
 		// copy cap
-		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize + offsetForLen)
+		emit("mov %d(%%rbp), %%rax", rvariable.offset + ptrSize +sliceOffsetForLen)
 		emit("push %%rax")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
@@ -886,7 +886,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 
 func saveSlice(targetOffset int) {
 	emit("pop %%rax")
-	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize + offsetForLen)
+	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize +sliceOffsetForLen)
 	emit("pop %%rax")
 	emit("mov %%rax, %d(%%rbp)", targetOffset + ptrSize)
 	emit("pop %%rax")
