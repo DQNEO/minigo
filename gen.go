@@ -26,7 +26,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "_m_" + string(fname)
+	return string(typename) + "." + string(fname)
 }
 
 // main.f1 -> main.f1
