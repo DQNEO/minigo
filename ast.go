@@ -88,6 +88,7 @@ type ExprUop struct {
 type DeclVar struct {
 	tok *Token
 	pkg      identifier
+	varname  *Relation
 	variable *ExprVariable
 	initval  Expr
 }

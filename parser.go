@@ -798,7 +798,10 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	variable := p.newVariable(newName, typ, isGlobal)
 	r := &DeclVar{
 		pkg:      p.currentPackageName,
-		variable: variable,
+		varname:  &Relation{
+			expr: variable,
+		},
+		variable:variable,
 		initval:  initval,
 	}
 	if typ == nil {

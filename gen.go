@@ -969,22 +969,25 @@ func assignToPrimitive(lhs Expr, rhs Expr) {
 		rhs = &ExprNumberLiteral{}
 	}
 	rhs.emit()
-	variable, ok := lhs.(*ExprVariable)
+	rel, ok := lhs.(*Relation)
+	assert(ok, nil, "")
+	variable, ok := rel.expr.(*ExprVariable)
 	assert(ok, nil, "")
 	emitLsave(variable.getGtype().getSize(), variable.offset)
 }
 
 // for local var
 func (decl *DeclVar) emit() {
-	if decl.variable.gtype.typ == G_ARRAY {
-		assignToLocalArray(decl.variable, decl.initval)
-	} else if decl.variable.gtype.relation != nil && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
-		assignToStruct(decl.variable, decl.initval)
-	} else if decl.variable.gtype.typ == G_SLICE {
-		assignToSlice(decl.variable, decl.initval)
+	gtype := decl.variable.gtype
+	if gtype.typ == G_ARRAY {
+		assignToLocalArray(decl.varname, decl.initval)
+	} else if gtype.relation != nil && gtype.relation.gtype.typ == G_STRUCT {
+		assignToStruct(decl.varname, decl.initval)
+	} else if gtype.typ == G_SLICE {
+		assignToSlice(decl.varname, decl.initval)
 	} else {
 		// numeric
-		assignToPrimitive(decl.variable, decl.initval)
+		assignToPrimitive(decl.varname, decl.initval)
 	}
 }
 
