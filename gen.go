@@ -444,11 +444,11 @@ func (ast *StmtAssignment) emit() {
 			gtype := right.getGtype()
 			switch {
 			case gtype.typ == G_ARRAY:
-					assignToLocalArray(left, right)
+				assignToLocalArray(left, right)
 			case gtype.typ == G_SLICE:
-					assignToSlice(left, right)
+				assignToSlice(left, right)
 			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
-					assignToStruct(left, right)
+				assignToStruct(left, right)
 			default:
 				// suppose primitive
 				emit("# emitting rhs")
@@ -962,33 +962,26 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 	}
 }
 
-// primitive types like int,bool,byte
-func assignToPrimitive(lhs Expr, rhs Expr) {
-	if rhs == nil {
-		// assign zero value
-		rhs = &ExprNumberLiteral{}
-	}
-	rhs.emit()
-	rel, ok := lhs.(*Relation)
-	assert(ok, nil, "")
-	variable, ok := rel.expr.(*ExprVariable)
-	assert(ok, nil, "")
-	emitLsave(variable.getGtype().getSize(), variable.offset)
-}
 
 // for local var
 func (decl *DeclVar) emit() {
 	gtype := decl.variable.gtype
-
-	if gtype.typ == G_ARRAY {
+	switch {
+	case gtype.typ == G_ARRAY:
 		assignToLocalArray(decl.varname, decl.initval)
-	} else if gtype.typ == G_SLICE {
+	case gtype.typ == G_SLICE:
 		assignToSlice(decl.varname, decl.initval)
-	} else if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT {
+	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 		assignToStruct(decl.varname, decl.initval)
-	} else {
-		// numeric
-		assignToPrimitive(decl.varname, decl.initval)
+	default:
+		// primitive types like int,bool,byte
+		rhs := decl.initval
+		if rhs == nil {
+			// assign zero value
+			rhs = &ExprNumberLiteral{}
+		}
+		rhs.emit()
+		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset)
 	}
 }
 
