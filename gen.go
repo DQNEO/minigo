@@ -1274,10 +1274,11 @@ func (funcall *ExprFuncallOrConversion) emit() {
 func emitCall(fname string, args []Expr) {
 
 	emit("# funcall %s", fname)
+	/*
 	for i, _ := range args {
 		emit("push %%%s", RegsForCall[i])
 	}
-
+	*/
 	emit("# setting arguments")
 	for i, arg := range args {
 		//debugf("arg[%d] = %v", i, arg)
@@ -1294,13 +1295,16 @@ func emitCall(fname string, args []Expr) {
 		j := len(args) - 1 - i
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
+
 	emit("mov $0, %%rax")
 	emit("call %s", fname)
 
+	/*
 	for i, _ := range args {
 		j := len(args) - 1 - i
 		emit("pop %%%s", RegsForCall[j])
 	}
+	*/
 }
 
 func (f *DeclFunc) emit() {
