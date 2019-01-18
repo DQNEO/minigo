@@ -794,7 +794,7 @@ func (p *parser) parseType() *Gtype {
 // local decl infer
 func (decl *DeclVar) infer() {
 	gtype := decl.initval.getGtype()
-	assertNotNil(gtype != nil, nil)
+	assertNotNil(gtype != nil, decl.initval.token())
 	decl.variable.gtype = gtype
 }
 
