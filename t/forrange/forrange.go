@@ -30,9 +30,27 @@ func f2() {
 	}
 }
 
+/*
+func f3() {
+	var slice = []int{112,113,114}
+	for _, v := range slice {
+		fmt.Printf("%d\n", v - 100)
+	}
+}
+*/
+
+func f4() {
+	var slice []int
+	for i := range slice {
+		fmt.Printf("error %d\n", i)
+	}
+}
+
 func main() {
 	f1()
 	f2()
+	//f3()
+	f4()
 }
 
 type Hobbit struct {

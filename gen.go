@@ -586,10 +586,9 @@ func (s *StmtIf) emit() {
 
 func (f *StmtFor) emitRange() {
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY, f.rng.tok, "rangeexpr should be G_ARRAY")
+	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 
 	emit("# for range")
-	length := f.rng.rangeexpr.getGtype().length
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
@@ -623,6 +622,11 @@ func (f *StmtFor) emitRange() {
 	}
 
 	emit("%s: # begin loop ", labelBegin)
+	var length int
+	if f.rng.rangeexpr.getGtype().typ == G_ARRAY {
+		length = f.rng.rangeexpr.getGtype().length
+	}
+
 	condition := &ExprBinop{
 		op:    "<",
 		left:  f.rng.indexvar,                  // i
