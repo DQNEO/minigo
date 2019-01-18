@@ -422,26 +422,36 @@ func (ast *StmtAssignment) emit() {
 		case *ExprFuncallOrConversion:
 			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
 			emit("# emitting rhs (funcall)")
-			right.emit()
-			for i, _ := range rettypes {
-				emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-				emit("push %%rax")
-			}
-			for _, left := range ast.lefts {
-				emit("pop %%rax")
+			if len(rettypes) == 1 {
+				right.emit()
 				emitSave(left)
+			} else {
+				right.emit()
+				for i, _ := range rettypes {
+					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
+					emit("push %%rax")
+				}
+				for _, left := range ast.lefts {
+					emit("pop %%rax")
+					emitSave(left)
+				}
 			}
 		case *ExprMethodcall:
 			rettypes := right.(*ExprMethodcall).getRettypes()
-			emit("# emitting rhs (funcall)")
-			right.emit()
-			for i, _ := range rettypes {
-				emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-				emit("push %%rax")
-			}
-			for _, left := range ast.lefts {
-				emit("pop %%rax")
+			emit("# emitting rhs (method)")
+			if len(rettypes) == 1 {
+				right.emit()
 				emitSave(left)
+			} else {
+				right.emit()
+				for i, _ := range rettypes {
+					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
+					emit("push %%rax")
+				}
+				for _, left := range ast.lefts {
+					emit("pop %%rax")
+					emitSave(left)
+				}
 			}
 		default:
 			gtype := right.getGtype()
