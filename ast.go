@@ -313,7 +313,7 @@ type StmtSwitch struct {
 
 type KeyedElement struct {
 	tok   *Token
-	key   identifier
+	key   identifier // should be Expr ?
 	value Expr
 }
 
@@ -328,6 +328,18 @@ type ExprStructField struct {
 	tok       *Token
 	strct     Expr
 	fieldname identifier
+}
+
+type MapElement struct {
+	tok   *Token
+	key   Expr
+	value Expr
+}
+
+type ExprMapLiteral struct {
+	tok *Token
+	gtype *Gtype
+	elements []*MapElement
 }
 
 type ExprTypeSwitchGuard struct {
@@ -382,3 +394,4 @@ func (node *KeyedElement) token() *Token            { return node.tok }
 func (node *ExprStructLiteral) token() *Token       { return node.tok }
 func (node *ExprStructField) token() *Token         { return node.tok }
 func (node *ExprTypeSwitchGuard) token() *Token     { return node.tok }
+func (node *ExprMapLiteral) token() *Token          { return node.tok }

@@ -443,6 +443,32 @@ func (p *parser) parsePrim() Expr {
 			tok: tok,
 			val: int(c),
 		}
+	case tok.isKeyword("map"): // map literal
+		ptok := tok
+		gtype := p.parseType()
+		p.expect("{")
+		var elements []*MapElement
+		for {
+			if p.peekToken().isPunct("}") {
+				p.skip()
+				break
+			}
+			key := p.parseExpr()
+			p.expect(":")
+			value := p.parseExpr()
+			p.expect(",")
+			element := &MapElement{
+				tok: key.token(),
+				key:key,
+				value:value,
+			}
+			elements = append(elements, element)
+		}
+		return &ExprMapLiteral{
+			tok: ptok,
+			gtype: gtype,
+			elements: elements,
+		}
 	case tok.isPunct("["): // array literal, slice literal or type casting
 		gtype := p.parseType()
 		tok := p.peekToken()

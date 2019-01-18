@@ -13,14 +13,12 @@ do
     echo ""
 done
 
-echo "var pkgsources []pkgsource = []pkgsource{"
+echo "var pkgMap map[identifier]string = map[identifier]string{"
+
 for dir in stdlib/*
 do
     basename=${dir##*/}
-    echo -e "\tpkgsource{"
-    echo -e "\t\tname: \"$basename\","
-    echo -e "\t\tcode: ${basename}Code,"
-    echo -e "\t},"
+    echo -e "\t\"$basename\": ${basename}Code,"
 done
 
 

@@ -297,6 +297,10 @@ func (ast *StmtDefer) dump() {
 	panic("implement me")
 }
 
+func (e *ExprMapLiteral) dump() {
+	panic("implement me")
+}
+
 func errorf(format string, v ...interface{}) {
 	/*
 		currentTokenIndex := ts.index - 1

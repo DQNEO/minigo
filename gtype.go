@@ -329,3 +329,8 @@ func (e *ExprTypeAssertion) getGtype() *Gtype {
 func (e *ExprVaArg) getGtype() *Gtype {
 	panic("implement me")
 }
+
+func (e *ExprMapLiteral) getGtype() *Gtype {
+	return e.gtype
+}
+

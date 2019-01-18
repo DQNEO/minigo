@@ -1121,6 +1121,11 @@ func (e *ExprTypeSwitchGuard) emit() {
 	panic("implement me")
 }
 
+func (e *ExprMapLiteral) emit() {
+	panic("implement me")
+}
+
+
 func (ast *ExprMethodcall) getUniqueName() string {
 	var gtype *Gtype
 

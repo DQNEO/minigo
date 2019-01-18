@@ -94,8 +94,8 @@ func main() {
 	// add std packages
 	var stdpkgs []*stdpkg
 
-	for _, pkgsrc := range pkgsources {
-		pkg := parseStdPkg(p, universe, pkgsrc.name, pkgsrc.code)
+	for pkgName, pkgCode := range pkgMap {
+		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		stdpkgs = append(stdpkgs, pkg)
 	}
 
