@@ -3,3 +3,4 @@
 /minigo*
 a.go
 /stdlib.go
+/csamples/*.s
