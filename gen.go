@@ -1218,11 +1218,31 @@ func emitBuiltinLen(args []Expr) {
 	case gtype.typ == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
 	case gtype.typ == G_SLICE:
-		rel,ok := arg.(*Relation)
-		assert(ok, arg.token(), "ok")
-		variable ,ok := rel.expr.(*ExprVariable)
-		assert(ok, arg.token(), "ok")
-		emit("mov %d(%%rbp), %%rax", variable.offset + ptrSize)
+		var headOffset int
+		switch arg.(type) {
+		case *Relation:
+			rel := arg.(*Relation)
+			variable, ok := rel.expr.(*ExprVariable)
+			assert(ok, arg.token(), "ok")
+			headOffset = variable.offset
+			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
+		case *ExprStructField:
+			headOffset = arg.(*ExprStructField).getOffset()
+			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
+		case *ExprSliceLiteral:
+			length := len(arg.(*ExprSliceLiteral).values)
+			emit("mov $%d, %%rax", length)
+		case *ExprSlice:
+			sliceExpr := arg.(*ExprSlice)
+			uop := &ExprBinop{
+				op:"-",
+				left: sliceExpr.high,
+				right: sliceExpr.low,
+			}
+			uop.emit()
+		default:
+			errorf("TBI", arg.token())
+		}
 	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING :
 		errorf("TBI %s", arg.token())
 	case gtype.typ == G_MAP:

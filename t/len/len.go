@@ -22,6 +22,21 @@ func f1() {
 	fmt.Printf("%d\n", len(d)) // 6
 }
 
+
+func f2() {
+	type Hobbit struct {
+		id int
+		items []int
+	}
+	var h Hobbit
+	h.items = []int{1}
+	fmt.Printf("%d\n", len(h.items) + 6) // 7
+	fmt.Printf("%d\n", len([]byte{'a','b'}) + 6) //8
+	var array [10]int
+	fmt.Printf("%d\n", len(array[2:7]) + 4) // 9
+}
+
 func main() {
 	f1()
+	f2()
 }
