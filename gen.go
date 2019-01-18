@@ -256,6 +256,7 @@ func (rel *Relation) emitSave() {
 		errorf("left.rel.expr is nil")
 	}
 	vr := rel.expr.(*ExprVariable)
+	assert(0 <= vr.gtype.getSize() && vr.gtype.getSize() <= 8, rel.token(), "invalid size")
 	if vr.isGlobal {
 		emitGsave(vr.gtype.getSize(), vr.varname)
 	} else {
