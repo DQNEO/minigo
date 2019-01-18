@@ -808,7 +808,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		errorf("unkonwn type %T", lhs)
 	}
 
-	debugf("rhs=%s", rhs)
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
 		initLocalSlice(targetOffset)
