@@ -92,11 +92,11 @@ func main() {
 	setPredeclaredIdentifiers(universe)
 
 	// add std packages
-	var stdpkgs []*stdpkg
+	var compiledPackages map[identifier]*stdpkg = make(map[identifier]*stdpkg)
 
 	for pkgName, pkgCode := range pkgMap {
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		stdpkgs = append(stdpkgs, pkg)
+		compiledPackages[pkgName] = pkg
 	}
 
 	p.currentPackageName = "main"
@@ -119,7 +119,15 @@ func main() {
 		return
 	}
 
-	ir := ast2ir(stdpkgs, astFiles, p.stringLiterals)
+	var importedPackages []*stdpkg
+	for importedName := range p.importedNames {
+		compiledPkg, ok := compiledPackages[importedName]
+		if !ok {
+			errorf("package not found")
+		}
+		importedPackages = append(importedPackages, compiledPkg)
+	}
+	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 	ir.emit()
 }
 
