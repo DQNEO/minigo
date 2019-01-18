@@ -9,12 +9,21 @@ var eIota = &ExprConstVariable{
 	name: "iota",
 }
 
+var builinLen = &DeclFunc{
+	rettypes: []*Gtype{gInt},
+}
+
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
 	predeclareNil(universe)
 	predeclareTypes(universe)
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
+
+
+	universe.setFunc("len", &ExprFuncRef{
+		funcdef: builinLen,
+	})
 }
 
 // Zero value:

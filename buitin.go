@@ -11,9 +11,6 @@ package builtin
 
 const MiniGo int = 1
 
-func len(x interface{}) int {
-}
-
 func make(x interface{}) interface{} {
 }
 

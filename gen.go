@@ -1211,12 +1211,38 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
+func emitBuiltinLen(args []Expr) {
+	assert(len(args) == 1, nil, "invalid arguments for len()")
+	arg := args[0]
+	gtype := arg.getGtype()
+	switch {
+	case gtype.typ == G_ARRAY:
+		emit("mov $%d, %%rax", gtype.length)
+	case gtype.typ == G_SLICE:
+		rel,ok := arg.(*Relation)
+		assert(ok, arg.token(), "ok")
+		variable ,ok := rel.expr.(*ExprVariable)
+		assert(ok, arg.token(), "ok")
+		emit("mov %d(%%rbp), %%rax", variable.offset + ptrSize)
+	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING :
+		errorf("TBI %s", arg.token())
+	case gtype.typ == G_MAP:
+		errorf("TBI %s", arg.token())
+	default:
+		errorf("TBI %s", arg.token())
+	}
+}
+
 func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef() // check existance
 	if decl == nil {
 		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
 
+	if decl == builinLen {
+		emitBuiltinLen(funcall.args)
+		return
+	}
 	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
 }
 
