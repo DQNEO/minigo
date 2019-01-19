@@ -5,10 +5,12 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 int f1() {
     int fd;
     fd = open("/etc/hosts", O_RDONLY);
+    close(fd);
     return fd;
 }
 
