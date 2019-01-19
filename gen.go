@@ -88,7 +88,7 @@ func (f *DeclFunc) emitPrologue() {
 			debugf("%s has nil gtype ", lvar)
 		}
 		size := lvar.gtype.getSize()
-		assert(size != 0, lvar.token(), "size is not zero")
+		assert(size != 0, lvar.token(), "size should  not be zero:" + lvar.gtype.String())
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
