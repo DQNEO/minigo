@@ -2,17 +2,12 @@
 set -e
 PATH="/usr/lib/go-1.10/bin:$PATH"
 
-as_file="./out/a.s"
-executable="./out/a.out"
-prog_name="minigo.linux"
-actual=out/actual.txt
+prog_name=minigo.linux
 
-function do_test {
-    ./${prog_name} $src > $as_file
-    gcc -no-pie -o $executable $as_file
-    $executable > $actual
-    diff -u $actual $expected
-}
+as_file=out/a.s
+obj_file=out/a.o
+bin_file=out/a.out
+actual=out/actual.txt
 
 function test_file {
     local basename=$1
@@ -20,7 +15,13 @@ function test_file {
     local expected=t/expected/${basename}.txt
     rm -f $actual
     echo -n "test_file $src  ... "
-    do_test ./${prog_name} $src
+    ./${prog_name} $src > $as_file
+    as -o $obj_file $as_file
+    # gave up direct invocation of "ld"
+    # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
+    gcc -no-pie -o $bin_file $obj_file
+    $bin_file > $actual
+    diff -u $actual $expected
     echo ok
 }
 
