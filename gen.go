@@ -633,15 +633,15 @@ func (f *StmtFor) emitRange() {
 	}
 
 	emit("%s: # begin loop ", labelBegin)
-	var length int
-	if f.rng.rangeexpr.getGtype().typ == G_ARRAY {
-		length = f.rng.rangeexpr.getGtype().length
-	}
 
 	condition := &ExprBinop{
 		op:    "<",
 		left:  f.rng.indexvar,                  // i
-		right: &ExprNumberLiteral{val: length}, // len(list)
+		// @TODO
+		// The range expression x is evaluated once before beginning the loop
+		right: &ExprLen{
+			arg: f.rng.rangeexpr,
+		},
 	}
 	condition.emit() // i < len(list)
 	emit("test %%rax, %%rax")
@@ -1226,9 +1226,25 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
-func emitBuiltinLen(args []Expr) {
-	assert(len(args) == 1, nil, "invalid arguments for len()")
-	arg := args[0]
+type ExprLen struct {
+	tok *Token
+	arg Expr
+}
+
+func (e *ExprLen) token() *Token {
+	panic("implement me")
+}
+
+func (e *ExprLen) dump() {
+	panic("implement me")
+}
+
+func (e *ExprLen) getGtype() *Gtype {
+	return gInt
+}
+
+func (e *ExprLen) emit() {
+	arg := e.arg
 	gtype := arg.getGtype()
 	switch {
 	case gtype.typ == G_ARRAY:
@@ -1274,8 +1290,15 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
 
+	// len()
 	if decl == builinLen {
-		emitBuiltinLen(funcall.args)
+		assert(len(funcall.args) == 1, nil, "invalid arguments for len()")
+		arg := funcall.args[0]
+		exprLen := &ExprLen{
+			tok:arg.token(),
+			arg: arg,
+		}
+		exprLen.emit()
 		return
 	}
 	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
