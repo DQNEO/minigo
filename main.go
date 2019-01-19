@@ -64,6 +64,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 }
 
 var gp *parser // for debug
+var importOS bool
 
 func main() {
 	var sourceFiles []string
@@ -127,6 +128,7 @@ func main() {
 		}
 		importedPackages = append(importedPackages, compiledPkg)
 	}
+	_, importOS = p.importedNames["os"]
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 	ir.emit()
 }

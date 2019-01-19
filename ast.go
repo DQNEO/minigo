@@ -196,6 +196,7 @@ type DeclFunc struct {
 	isVariadic bool
 	localvars  []*ExprVariable
 	body       *StmtSatementList
+	isMainMain bool
 }
 
 type TopLevelDecl struct {

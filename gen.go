@@ -44,8 +44,8 @@ func (f *DeclFunc) getUniqueName() string {
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
 
-	// treat main.main function as a special one
-	if f.pkg == "main" && f.fname == "main" {
+	// main.main => main
+	if f.isMainMain {
 		return "main"
 	}
 
@@ -54,6 +54,9 @@ func (f *DeclFunc) getUniqueName() string {
 }
 
 func (f *DeclFunc) emitPrologue() {
+	if f.isMainMain {
+		emit("# main.main")
+	}
 	uniquName := f.getUniqueName()
 	//emitComment("func %s.%s()", f.pkg, f.fname)
 	if f.getUniqueName() == "main" {
@@ -101,6 +104,18 @@ func (f *DeclFunc) emitPrologue() {
 	}
 
 	emit("")
+	if f.isMainMain {
+		if importOS {
+			emit("# set Args")
+			emit("mov %%rsi, Args(%%rip)") // set pointer (**argv)
+			emit("lea Args(%%rip), %%rax")
+			emit("add $8, %%rax")
+			emit("mov %%rdi, (%%rax)")     // set len (argc)
+			emit("add $8, %%rax")
+			emit("mov %%rdi, (%%rax)")     // set cap (argc)
+		}
+
+	}
 }
 
 func align(n int, m int) int {
@@ -1244,6 +1259,7 @@ func (e *ExprLen) getGtype() *Gtype {
 }
 
 func (e *ExprLen) emit() {
+	emit("# emit len()")
 	arg := e.arg
 	gtype := arg.getGtype()
 	switch {
@@ -1256,8 +1272,14 @@ func (e *ExprLen) emit() {
 			rel := arg.(*Relation)
 			variable, ok := rel.expr.(*ExprVariable)
 			assert(ok, arg.token(), "ok")
-			headOffset = variable.offset
-			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
+			if variable.isGlobal {
+				emit("lea %s(%%rip), %%rcx", variable.varname)
+				emit("add $8, %%rcx")
+				emit("mov (%%rcx), %%rax")
+			} else {
+				headOffset = variable.offset
+				emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
+			}
 		case *ExprStructField:
 			headOffset = arg.(*ExprStructField).getOffset()
 			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
@@ -1401,6 +1423,14 @@ func (decl *DeclVar) emitGlobal() {
 				errorf("Unexpected size %d", size)
 			}
 		}
+	} else if decl.variable.gtype.typ == G_SLICE {
+		if decl.initval == nil {
+			emit(".quad %d", 0)
+			emit(".quad %d", 0)
+			emit(".quad %d", 0)
+		} else {
+			errorf("TBI %s", decl.token())
+		}
 	} else {
 		if decl.initval == nil {
 			// set zero value
@@ -1453,8 +1483,8 @@ func (root *IrRoot) emit() {
 		emit(".quad 0")
 	}
 
-	emit("")
 	emitComment("GLOBAL VARS")
+	emit("")
 	for _, vardecl := range root.vars {
 		vardecl.emitGlobal()
 	}
