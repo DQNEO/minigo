@@ -1,4 +1,5 @@
-# Run this on Linux
+# This Makefile can run on both of Linux and MacOS
+
 BIN_FILES := $(patsubst %.c,%.bin,$(wildcard *.c))
 AS_FILES := $(patsubst %.c,%.s,$(wildcard *.c))
 
