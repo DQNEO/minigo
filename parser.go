@@ -505,7 +505,7 @@ func (p *parser) parsePrim() Expr {
 					typ:         G_ARRAY,
 					elementType: gtype.elementType,
 					length:      len(values),
-				}, false),
+				}),
 			}
 		default:
 			errorf("internal error %s", tok)
@@ -605,7 +605,7 @@ func (p *parser) parseUnaryExpr() Expr {
 			strctliteral.invisiblevar = p.newVariable("", &Gtype{
 				typ:      G_REL,
 				relation: strctliteral.strctname,
-			}, false)
+			})
 		}
 		return uop
 	case tok.isPunct("*"):
@@ -701,19 +701,20 @@ func (p *parser) parseExprInt(prior int) Expr {
 	return ast
 }
 
-func (p *parser) newVariable(varname identifier, gtype *Gtype, isGlobal bool) *ExprVariable {
+func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	var variable *ExprVariable
-	if isGlobal {
+	if p.isGlobal() {
 		variable = &ExprVariable{
 			varname:  varname,
 			gtype:    gtype,
-			isGlobal: true,
+			isGlobal: p.isGlobal(),
 		}
 		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
 			varname: varname,
 			gtype:   gtype,
+			isGlobal: p.isGlobal(),
 		}
 		p.localvars = append(p.localvars, variable)
 	}
@@ -801,7 +802,7 @@ func (decl *DeclVar) infer() {
 	decl.variable.gtype = gtype
 }
 
-func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
+func (p *parser) parseVarDecl() *DeclVar {
 	defer p.traceOut(p.traceIn())
 	ptok := p.expectKeyword("var")
 
@@ -824,7 +825,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	}
 	//p.expect(";")
 
-	variable := p.newVariable(newName, typ, isGlobal)
+	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
 		tok: ptok,
 		pkg: p.currentPackageName,
@@ -835,7 +836,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 		initval:  initval,
 	}
 	if typ == nil {
-		if isGlobal {
+		if p.isGlobal() {
 			variable.gtype = &Gtype{
 				typ:          G_DEPENDENT,
 				dependendson: initval,
@@ -1215,7 +1216,8 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
-	variable := p.newVariable(rel.name, nil, false)
+	assert(p.isGlobal() == false,  e.token(), "should not be in global scope")
+	variable := p.newVariable(rel.name, nil)
 	p.currentScope.setVar(rel.name, variable)
 	rel.expr = variable
 }
@@ -1316,7 +1318,7 @@ func (p *parser) parseStmt() Stmt {
 
 	tok := p.peekToken()
 	if tok.isKeyword("var") {
-		return p.parseVarDecl(false)
+		return p.parseVarDecl()
 	} else if tok.isKeyword("const") {
 		return p.parseConstDecl()
 	} else if tok.isKeyword("type") {
@@ -1764,7 +1766,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
 	case nextToken.isKeyword("var"):
-		vardecl := p.parseVarDecl(true)
+		vardecl := p.parseVarDecl()
 		return &TopLevelDecl{vardecl: vardecl}
 	case nextToken.isKeyword("const"):
 		constdecl := p.parseConstDecl()
@@ -1796,6 +1798,10 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 		r = append(r, ast)
 	}
 	return r
+}
+
+func (p *parser) isGlobal() bool {
+	return p.currentScope == p.packageBlockScope
 }
 
 // https://golang.org/ref/spec#Source_file_organization
