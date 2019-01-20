@@ -1390,9 +1390,21 @@ func evalIntExpr(e Expr) int {
 	return 0
 }
 
+// gloabal var which should be initialized with zeros
+// https://en.wikipedia.org/wiki/.bss
+func (decl *DeclVar) emitBss() {
+	// https://sourceware.org/binutils/docs-2.30/as/Lcomm.html#Lcomm
+	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
+}
+
 func (decl *DeclVar) emitGlobal() {
 	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
+
+	if decl.initval == nil {
+		decl.emitBss()
+		return
+	}
 	emitLabel("%s:", decl.variable.varname)
 
 	if decl.variable.gtype.typ == G_ARRAY {
@@ -1418,18 +1430,8 @@ func (decl *DeclVar) emitGlobal() {
 			}
 		}
 	} else if decl.variable.gtype.typ == G_SLICE {
-		if decl.initval == nil {
-			emit(".quad %d", 0)
-			emit(".quad %d", 0)
-			emit(".quad %d", 0)
-		} else {
-			errorf("TBI %s", decl.token())
-		}
+		errorf("TBI %s", decl.token())
 	} else {
-		if decl.initval == nil {
-			// set zero value
-			emit(".quad %d", 0)
-		} else {
 			var val int
 			switch decl.initval.(type) {
 			case *ExprNumberLiteral:
@@ -1443,7 +1445,6 @@ func (decl *DeclVar) emitGlobal() {
 				emit(".quad .%s", stringLiteral.slabel)
 				decl.variable.gtype.length = len(stringLiteral.val)
 			}
-		}
 	}
 }
 
