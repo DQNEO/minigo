@@ -800,7 +800,7 @@ func (decl *DeclVar) infer() {
 
 func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 	defer p.traceOut(p.traceIn())
-	p.expectKeyword("var")
+	ptok := p.expectKeyword("var")
 
 	// read newName
 	newName := p.expectIdent()
@@ -823,6 +823,7 @@ func (p *parser) parseVarDecl(isGlobal bool) *DeclVar {
 
 	variable := p.newVariable(newName, typ, isGlobal)
 	r := &DeclVar{
+		tok: ptok,
 		pkg: p.currentPackageName,
 		varname: &Relation{
 			expr: variable,
