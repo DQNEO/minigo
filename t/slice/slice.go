@@ -75,10 +75,18 @@ func f3() {
 	fmt.Printf("%d\n", array[2] + 1) // 20
 }
 
+var gslice = []int{1,3,5}
+
+func f4() {
+	gslice[1] = 21
+	fmt.Printf("%d\n", gslice[1]) // 21
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }
 
 type Hobbit struct {

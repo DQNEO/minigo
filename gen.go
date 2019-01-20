@@ -1405,6 +1405,7 @@ func (decl *DeclVar) emitGlobal() {
 		decl.emitBss()
 		return
 	}
+
 	emitLabel("%s:", decl.variable.varname)
 
 	if decl.variable.gtype.typ == G_ARRAY {
@@ -1430,7 +1431,29 @@ func (decl *DeclVar) emitGlobal() {
 			}
 		}
 	} else if decl.variable.gtype.typ == G_SLICE {
-		errorf("TBI %s", decl.token())
+		switch decl.initval.(type) {
+		case *ExprSliceLiteral:
+			// initialize a hidden array
+			lit := decl.initval.(*ExprSliceLiteral)
+			lit.invisiblevar.varname = "$hiddenArray$" + decl.variable.varname
+			emit(".quad %s", lit.invisiblevar.varname) // address of the hidden array
+			emit(".quad %d", lit.invisiblevar.gtype.length) // len
+			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
+			arrayLiteral := &ExprArrayLiteral{
+				gtype:  lit.invisiblevar.gtype,
+				values: lit.values,
+			}
+			arrayDecl := &DeclVar{
+				tok:decl.token(),
+				variable:lit.invisiblevar,
+				initval:arrayLiteral,
+			}
+			arrayDecl.emitGlobal()
+
+
+		default:
+			errorf("TBI %s", decl.token())
+		}
 	} else {
 			var val int
 			switch decl.initval.(type) {
