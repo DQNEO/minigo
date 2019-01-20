@@ -8,9 +8,10 @@ import (
 const MYBUFSIZ = 1024
 const O_RDONLY = 0
 
+var buf [1024]byte
+
 func main() {
 	var fd int
-	var buf [1024]byte
 
 	fname := os.Args[1]
 	fd = open(fname, O_RDONLY)
