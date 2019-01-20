@@ -36,7 +36,13 @@ func f2() {
 	fmt.Printf("%d\n", len(array[2:7]) + 4) // 9
 }
 
+func f3() {
+	var array = [...]int{1,2,3,4,5,6,7,8,9,0}
+	fmt.Printf("%d\n", len(array))
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }

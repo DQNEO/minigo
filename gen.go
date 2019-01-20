@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var RegsForCall = []string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
+var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 const INT_SIZE = 8 // not like 8cc
 
@@ -1454,7 +1454,7 @@ type IrRoot struct {
 	stringLiterals []*ExprStringLiteral
 }
 
-var retvals = []string{"rt1", "rt2", "rt3", "rt4", "rt5", "rt6"}
+var retvals = [...]string{"rt1", "rt2", "rt3", "rt4", "rt5", "rt6"}
 
 func (root *IrRoot) emit() {
 

@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var garray = [3]int{1, 2, 0}
+var garray = [...]int{1, 2, 0}
 
 func f1() {
 	garray[2] = 3
@@ -17,7 +17,7 @@ func f2() {
 	var i0 = 0
 	var i7 = 7
 
-	var larray = [4]int{i4, i5, i0, i7}
+	var larray = [...]int{i4, i5, i0, i7}
 	larray[2] = 6
 	fmt.Printf("%d\n", larray[0])
 	fmt.Printf("%d\n", larray[1])

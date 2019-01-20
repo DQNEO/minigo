@@ -760,6 +760,9 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("[") {
 			// array or slice
 			tok := p.readToken()
+			// @TODO consider "..." case.
+			// The notation ... specifies an array length
+			// equal to the maximum element index plus one.
 			if tok.isPunct("]") {
 				// slice
 				typ := p.parseType()
