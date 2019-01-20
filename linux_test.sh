@@ -6,13 +6,13 @@ prog_name=minigo.linux
 
 as_file=out/a.s
 obj_file=out/a.o
-bin_file=out/a.out
 actual=out/actual.txt
 
 function test_file {
     local basename=$1
     local src=t/$basename/${basename}.go
     local expected=t/expected/${basename}.txt
+    local bin_file=out/${basename}.bin
     rm -f $actual
     echo -n "test_file $src  ... "
     ./${prog_name} $src > $as_file
@@ -20,7 +20,7 @@ function test_file {
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
-    $bin_file > $actual
+    $bin_file /etc/lsb-release > $actual
     diff -u $actual $expected
     echo ok
 }
