@@ -107,14 +107,10 @@ func (f *DeclFunc) emitPrologue() {
 	if f.isMainMain {
 		if importOS {
 			emit("# set Args")
-			emit("mov %%rsi, Args(%%rip)") // set pointer (**argv)
-			emit("lea Args(%%rip), %%rax")
-			emit("add $8, %%rax")
-			emit("mov %%rdi, (%%rax)")     // set len (argc)
-			emit("add $8, %%rax")
-			emit("mov %%rdi, (%%rax)")     // set cap (argc)
+			emit("mov %%rsi, Args(%%rip)")       // set pointer (**argv)
+			emit("mov %%rdi, 8+Args(%%rip)")     // set len (argc)
+			emit("mov %%rdi, 8+Args(%%rip)")     // set cap (argc)
 		}
-
 	}
 }
 
@@ -1273,9 +1269,7 @@ func (e *ExprLen) emit() {
 			variable, ok := rel.expr.(*ExprVariable)
 			assert(ok, arg.token(), "ok")
 			if variable.isGlobal {
-				emit("lea %s(%%rip), %%rcx", variable.varname)
-				emit("add $8, %%rcx")
-				emit("mov (%%rcx), %%rax")
+				emit("mov %d+%s(%%rip), %%rax", ptrSize, variable.varname)
 			} else {
 				headOffset = variable.offset
 				emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
