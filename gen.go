@@ -6,6 +6,14 @@ var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 const INT_SIZE = 8 // not like 8cc
 
+var hiddenArrayId = 1;
+
+func getHidddenArrayId() int {
+	r := hiddenArrayId
+	hiddenArrayId++
+	return r
+}
+
 func emit(format string, v ...interface{}) {
 	fmt.Printf("\t"+format+"\n", v...)
 }
@@ -143,6 +151,32 @@ func (ast *ExprStringLiteral) emit() {
 	emit("lea .%s(%%rip), %%rax", ast.slabel)
 }
 
+func loadStructField(strct Expr, field *Gtype, offset int) {
+	switch strct.(type) {
+	case *Relation:
+		rel := strct.(*Relation)
+		assertNotNil(rel.expr != nil, nil)
+		variable, ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "rel is a variable")
+		if field.typ == G_ARRAY {
+			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
+		} else {
+			if variable.isGlobal {
+				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset + offset)
+			} else {
+				emit("mov %d(%%rbp), %%rax", variable.offset + field.offset + offset)
+			}
+		}
+	case *ExprStructField:
+		a := strct.(*ExprStructField)
+		strcttype := a.strct.getGtype().relation.gtype
+		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
+		field2 := strcttype.getField(a.fieldname)
+		loadStructField(a.strct, field2, offset + field.offset)
+	}
+
+}
+
 func (a *ExprStructField) emit() {
 	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
@@ -155,25 +189,7 @@ func (a *ExprStructField) emit() {
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
-
-		rel, ok := a.strct.(*Relation)
-		if !ok {
-			errorf("struct is not a variable")
-		}
-		assertNotNil(rel.expr != nil, nil)
-		variable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "rel is a variable")
-
-
-		if field.typ == G_ARRAY {
-			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
-		} else {
-			if variable.isGlobal {
-				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset)
-			} else {
-				emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
-			}
-		}
+		loadStructField(a.strct, field, 0)
 	default:
 		errorf("internal error: bad gtype %s", a.strct.getGtype())
 	}
@@ -1421,21 +1437,11 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func (decl *DeclVar) emitGlobal() {
-	assert(decl.variable.isGlobal, nil, "should be global")
-	assertNotNil(decl.variable.gtype != nil, nil)
-
-	if decl.initval == nil {
-		decl.emitBss()
-		return
-	}
-
-	emitLabel("%s:", decl.variable.varname)
-
-	if decl.variable.gtype.typ == G_ARRAY {
-		arrayliteral, ok := decl.initval.(*ExprArrayLiteral)
+func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, containerName string) {
+	if gtype.typ == G_ARRAY {
+		arrayliteral, ok := right.(*ExprArrayLiteral)
 		assert(ok, nil, "should be array lieteral")
-		elmType := decl.variable.gtype.elementType
+		elmType := right.getGtype().elementType
 		assertNotNil(elmType != nil, nil)
 		for _, value := range arrayliteral.values {
 			assertNotNil(value != nil, nil)
@@ -1454,12 +1460,12 @@ func (decl *DeclVar) emitGlobal() {
 				errorf("Unexpected size %d", size)
 			}
 		}
-	} else if decl.variable.gtype.typ == G_SLICE {
-		switch decl.initval.(type) {
+	} else if gtype.typ == G_SLICE {
+		switch right.(type) {
 		case *ExprSliceLiteral:
 			// initialize a hidden array
-			lit := decl.initval.(*ExprSliceLiteral)
-			lit.invisiblevar.varname = "$hiddenArray$" + decl.variable.varname
+			lit := right.(*ExprSliceLiteral)
+			lit.invisiblevar.varname = identifier(fmt.Sprintf("$hiddenArray$%d", getHidddenArrayId()))
 			emit(".quad %s", lit.invisiblevar.varname) // address of the hidden array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
@@ -1468,7 +1474,7 @@ func (decl *DeclVar) emitGlobal() {
 				values: lit.values,
 			}
 			arrayDecl := &DeclVar{
-				tok:decl.token(),
+				tok:ptok,
 				variable:lit.invisiblevar,
 				initval:arrayLiteral,
 			}
@@ -1476,46 +1482,67 @@ func (decl *DeclVar) emitGlobal() {
 
 
 		default:
-			errorf("TBI %s", decl.token())
+			errorf("TBI %s", ptok)
 		}
-	} else if decl.variable.gtype.typ == G_REL && decl.variable.gtype.relation.gtype == gBool {
-		val := evalIntExpr(decl.initval)
-		emit(".quad %d", val)
-	} else if decl.variable.gtype.typ == G_REL && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
-		decl.variable.gtype.relation.gtype.calcStructOffset()
-		for _, field := range decl.variable.gtype.relation.gtype.fields {
+	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
+		if right == nil {
+			// zero value
+			emit(".quad %d # %s %s", 0, gtype, containerName)
+			return
+		}
+		val := evalIntExpr(right)
+		emit(".quad %d # %s %s", val, gtype, containerName)
+	} else if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT {
+		gtype := right.getGtype()
+		//containerName = containerName + "." + string(gtype.relation.name)
+		gtype.relation.gtype.calcStructOffset()
+		structLiteral, ok := right.(*ExprStructLiteral)
+		assert(ok, nil, "ok")
+		for _, field := range gtype.relation.gtype.fields {
 			//size := field.getSize()
-			structLiteral, ok := decl.initval.(*ExprStructLiteral)
-			assert(ok, nil, "ok")
 			//debugf("%#v", structLiteral)
 			value := structLiteral.lookup(field.fieldname)
-			if value == nil {
-
-				emit(".quad 0 # %s", field.fieldname)
-			} else {
-
-				emit(".quad %d # %s" , evalIntExpr(value), field.fieldname)
-			}
+			gtype := field
+			emitGlobalDeclInit(ptok, gtype, value, containerName + "." + string(field.fieldname))
 		}
 	} else {
-			var val int
-			switch decl.initval.(type) {
-			case *ExprNumberLiteral:
-				val = decl.initval.(*ExprNumberLiteral).val
-				emit(".quad %d", val)
-			case *ExprConstVariable:
-				val = evalIntExpr(decl.initval)
-				emit(".quad %d", val)
-			case *ExprStringLiteral:
-				stringLiteral := decl.initval.(*ExprStringLiteral)
-				emit(".quad .%s", stringLiteral.slabel)
-				decl.variable.gtype.length = len(stringLiteral.val)
-			case *Relation:
-				emit(".quad 0") // TBI
-			default:
-				errorf("TBI %T", decl.initval)
-			}
+		var val int
+		switch right.(type) {
+		case nil:
+			emit(".quad %d # %s %s zero value", 0, gtype, containerName)
+		case *ExprNumberLiteral:
+			val = right.(*ExprNumberLiteral).val
+			emit(".quad %d # %s %s", val, gtype, containerName)
+		case *ExprConstVariable:
+			val = evalIntExpr(right)
+			emit(".quad %d", val)
+		case *ExprStringLiteral:
+			stringLiteral := right.(*ExprStringLiteral)
+			emit(".quad .%s", stringLiteral.slabel)
+			right.getGtype().length = len(stringLiteral.val)
+		case *Relation:
+			emit(".quad 0") // TBI
+		default:
+			errorf("TBI %T", right)
+		}
 	}
+}
+
+func (decl *DeclVar) emitGlobal() {
+	assert(decl.variable.isGlobal, nil, "should be global")
+	assertNotNil(decl.variable.gtype != nil, nil)
+
+	if decl.initval == nil {
+		decl.emitBss()
+		return
+	}
+
+	ptok := decl.token()
+	gtype := decl.variable.gtype
+	right := decl.initval
+
+	emitLabel("%s: # %s", decl.variable.varname, gtype)
+	emitGlobalDeclInit(ptok, gtype, right, "")
 }
 
 type IrRoot struct {
