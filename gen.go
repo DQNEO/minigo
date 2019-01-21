@@ -144,25 +144,27 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func (a *ExprStructField) emit() {
-	rel, ok := a.strct.(*Relation)
-	if !ok {
-		errorf("struct is not a variable")
-	}
-	assertNotNil(rel.expr != nil, nil)
-	variable, ok := rel.expr.(*ExprVariable)
-	assert(ok, nil, "rel is a variable")
-
 	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
-		variable.emit()
+		a.strct.emit()
 		emit("add $%d, %%rax", field.offset)
 		emit("mov (%%rax), %%rax")
 	case G_REL: // struct
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
+
+		rel, ok := a.strct.(*Relation)
+		if !ok {
+			errorf("struct is not a variable")
+		}
+		assertNotNil(rel.expr != nil, nil)
+		variable, ok := rel.expr.(*ExprVariable)
+		assert(ok, nil, "rel is a variable")
+
+
 		if field.typ == G_ARRAY {
 			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
 		} else {
@@ -173,7 +175,7 @@ func (a *ExprStructField) emit() {
 			}
 		}
 	default:
-		errorf("internal error: bad gtype %d", variable.gtype.typ)
+		errorf("internal error: bad gtype %s", a.strct.getGtype())
 	}
 }
 
