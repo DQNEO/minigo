@@ -12,13 +12,28 @@ func eval() {
 		fmt.Printf("4\n")
 	}
 
-	fmt.Printf("%d\n", gstruct.parent_id) // 5
-	fmt.Printf("%d\n", gstruct.id) // 6
-	fmt.Printf("%d\n", gstruct.age + 7) // 7
+	fmt.Printf("%d\n", gstruct.gint)  // 5
+	fmt.Printf("%c\n", gstruct.gchar) // 6
+	if gstruct.gtrue {
+		fmt.Printf("7\n")
+	}
+	if !gstruct.gfalse {
+		fmt.Printf("8\n")
+	}
 
-	fmt.Printf("%d\n", garray[0]) // 8
-	fmt.Printf("%d\n", garray[1]) // 9
-	fmt.Printf("%d\n", garray[2]) // 10
+	fmt.Printf("%d\n", garray[0]) // 9
+	fmt.Printf("%d\n", garray[1]) // 10
+	fmt.Printf("%d\n", garray[2]) // 11
+
+}
+
+func evalnested() {
+	// nested data
+	fmt.Printf("%d\n", gstruct.inner.gint) // 12
+	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 13
+	if gstruct.inner.inner.gtrue == true {
+		fmt.Printf("14\n")
+	}
 }
 
 func assign() {
@@ -27,6 +42,7 @@ func assign() {
 
 func main() {
 	eval()
+	evalnested()
 	assign()
 }
 
@@ -36,15 +52,42 @@ var gchar byte = '2'
 var gtrue bool = true
 var gfalse bool = false
 
-var gstruct = Hobbit{
-	parent_id:5,
-	id:6,
+var gstruct = MyStruct{
+	gint:5,
+	gchar:'6',
+	gtrue:true,
+	gfalse:false,
+	inner: MyInnerStruct{
+		gint:12,
+		gtrue: true,
+		inner: MyInnerInnerStruct{
+			gtrue:true,
+			gchar:13,
+		},
+	},
 }
 
-type Hobbit struct {
-	id int
-	age int
-	parent_id int
+type MyStruct struct {
+	gint int
+	gchar byte
+	gtrue bool
+	gfalse bool
+	inner MyInnerStruct
 }
 
-var garray [3]int = [...]int{8,9,10}
+type MyInnerStruct struct {
+	gint int
+	gchar byte
+	gtrue bool
+	gfalse bool
+	inner MyInnerInnerStruct
+}
+
+type MyInnerInnerStruct struct {
+	gint int
+	gchar byte
+	gtrue bool
+	gfalse bool
+}
+
+var garray [3]int = [...]int{9,10,11}
