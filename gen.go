@@ -1472,6 +1472,8 @@ func (decl *DeclVar) emitGlobal() {
 				stringLiteral := decl.initval.(*ExprStringLiteral)
 				emit(".quad .%s", stringLiteral.slabel)
 				decl.variable.gtype.length = len(stringLiteral.val)
+			default:
+				errorf("TBI %s", decl.variable.gtype)
 			}
 	}
 }
