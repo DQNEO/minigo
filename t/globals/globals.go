@@ -16,6 +16,9 @@ func eval() {
 	fmt.Printf("%d\n", gstruct.id) // 6
 	fmt.Printf("%d\n", gstruct.age + 7) // 7
 
+	fmt.Printf("%d\n", garray[0]) // 8
+	fmt.Printf("%d\n", garray[1]) // 9
+	fmt.Printf("%d\n", garray[2]) // 10
 }
 
 func assign() {
@@ -43,3 +46,5 @@ type Hobbit struct {
 	age int
 	parent_id int
 }
+
+var garray [3]int = [...]int{8,9,10}
