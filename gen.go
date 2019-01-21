@@ -1389,6 +1389,8 @@ func evalIntExpr(e Expr) int {
 			return evalIntExpr(binop.left) * evalIntExpr(binop.right)
 
 		}
+	case *ExprConstVariable:
+		return evalIntExpr(e.(*ExprConstVariable).val)
 	default:
 		errorf("unkown type %T", e)
 	}
@@ -1459,6 +1461,9 @@ func (decl *DeclVar) emitGlobal() {
 		default:
 			errorf("TBI %s", decl.token())
 		}
+	} else if decl.variable.gtype.typ == G_REL && decl.variable.gtype.relation.gtype == gBool {
+		val := evalIntExpr(decl.initval)
+		emit(".quad %d", val)
 	} else {
 			var val int
 			switch decl.initval.(type) {
@@ -1472,8 +1477,10 @@ func (decl *DeclVar) emitGlobal() {
 				stringLiteral := decl.initval.(*ExprStringLiteral)
 				emit(".quad .%s", stringLiteral.slabel)
 				decl.variable.gtype.length = len(stringLiteral.val)
+			case *Relation:
+				emit(".quad 0") // TBI
 			default:
-				errorf("TBI %s", decl.variable.gtype)
+				errorf("TBI %T", decl.initval)
 			}
 	}
 }

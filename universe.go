@@ -4,7 +4,7 @@ package main
 var gInterface = &Gtype{typ: G_ANY, size: 8}
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
-var gBool = &Gtype{typ: G_BOOL, size: 8}
+var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
 var eIota = &ExprConstVariable{
 	name: "iota",
 }

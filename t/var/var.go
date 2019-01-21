@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-var a = b
+var a = 1 // @TODO try a = b when possible
 var b = 1
 var c = '2'
 
