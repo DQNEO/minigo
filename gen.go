@@ -152,15 +152,15 @@ func (a *ExprStructField) emit() {
 	variable, ok := rel.expr.(*ExprVariable)
 	assert(ok, nil, "rel is a variable")
 
-	switch variable.gtype.typ {
+	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
-		strcttype := variable.gtype.origType.relation.gtype
+		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		variable.emit()
 		emit("add $%d, %%rax", field.offset)
 		emit("mov (%%rax), %%rax")
 	case G_REL: // struct
-		strcttype := variable.gtype.relation.gtype
+		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
 		if field.typ == G_ARRAY {
