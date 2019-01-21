@@ -161,11 +161,16 @@ func (a *ExprStructField) emit() {
 		emit("mov (%%rax), %%rax")
 	case G_REL: // struct
 		strcttype := variable.gtype.relation.gtype
+		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
 		if field.typ == G_ARRAY {
 			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
 		} else {
-			emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+			if variable.isGlobal {
+				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset)
+			} else {
+				emit("mov %d(%%rbp), %%rax", variable.offset+field.offset)
+			}
 		}
 	default:
 		errorf("internal error: bad gtype %d", variable.gtype.typ)
@@ -1404,6 +1409,16 @@ func (decl *DeclVar) emitBss() {
 	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
 }
 
+func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
+	for _, field := range e.fields {
+		if field.key == fieldname {
+			return field.value
+		}
+	}
+
+	return nil
+}
+
 func (decl *DeclVar) emitGlobal() {
 	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
@@ -1464,6 +1479,22 @@ func (decl *DeclVar) emitGlobal() {
 	} else if decl.variable.gtype.typ == G_REL && decl.variable.gtype.relation.gtype == gBool {
 		val := evalIntExpr(decl.initval)
 		emit(".quad %d", val)
+	} else if decl.variable.gtype.typ == G_REL && decl.variable.gtype.relation.gtype.typ == G_STRUCT {
+		decl.variable.gtype.relation.gtype.calcStructOffset()
+		for _, field := range decl.variable.gtype.relation.gtype.fields {
+			//size := field.getSize()
+			structLiteral, ok := decl.initval.(*ExprStructLiteral)
+			assert(ok, nil, "ok")
+			//debugf("%#v", structLiteral)
+			value := structLiteral.lookup(field.fieldname)
+			if value == nil {
+
+				emit(".quad 0 # %s", field.fieldname)
+			} else {
+
+				emit(".quad %d # %s" , evalIntExpr(value), field.fieldname)
+			}
+		}
 	} else {
 			var val int
 			switch decl.initval.(type) {

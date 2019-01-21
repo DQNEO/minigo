@@ -1646,7 +1646,7 @@ func (p *parser) parseStructDef() *Gtype {
 		fieldtype := *gtype
 		//fieldtype.origType = gtype
 		fieldtype.fieldname = fieldname
-		fieldtype.offset = 0 // will be calculated later
+		fieldtype.offset = undefinedSize // will be calculated later
 		fields = append(fields, &fieldtype)
 		p.expect(";")
 	}
@@ -1654,7 +1654,7 @@ func (p *parser) parseStructDef() *Gtype {
 	p.expect(";")
 	return &Gtype{
 		typ:    G_STRUCT,
-		size:   0, // will be calculated later
+		size:   undefinedSize, // will be calculated later
 		fields: fields,
 	}
 }

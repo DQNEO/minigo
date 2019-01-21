@@ -4,6 +4,8 @@ import "fmt"
 
 type GTYPE_TYPE int
 
+const undefinedSize = -1
+
 const (
 	G_UNKOWNE   = iota
 	G_DEPENDENT // depends on other expression
@@ -64,7 +66,7 @@ func (gtype *Gtype) getSize() int {
 			return gtype.length * gtype.elementType.getSize()
 		} else if gtype.typ == G_STRUCT {
 			// @TODO consider the case of real zero e.g. struct{}
-			if gtype.size == 0 {
+			if gtype.size == undefinedSize {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
