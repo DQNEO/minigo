@@ -114,7 +114,7 @@ func (f *DeclFunc) emitPrologue() {
 			emit("# set Args")
 			emit("mov %%rsi, Args(%%rip)")       // set pointer (**argv)
 			emit("mov %%rdi, 8+Args(%%rip)")     // set len (argc)
-			emit("mov %%rdi, 8+Args(%%rip)")     // set cap (argc)
+			emit("mov %%rdi, 16+Args(%%rip)")     // set cap (argc)
 		}
 	}
 }
