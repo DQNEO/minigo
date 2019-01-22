@@ -36,6 +36,13 @@ func evalnested() {
 	}
 }
 
+/*
+func evalnestedarary() {
+	var i int = gpoints[2].Y // TBI
+	fmt.Printf("%d\n", i + 9) //15
+}
+*/
+
 func assign() {
 
 }
@@ -43,6 +50,7 @@ func assign() {
 func main() {
 	eval()
 	evalnested()
+	// evalnestedarary() // TBI
 	assign()
 }
 
@@ -64,6 +72,22 @@ var gstruct = MyStruct{
 			gtrue:true,
 			gchar:13,
 		},
+	},
+}
+
+var garray [3]int = [...]int{9,10,11}
+var gpoints [3]Point = [...]Point{
+	Point{
+		X:1,
+		Y:2,
+	},
+	Point{
+		X:3,
+		Y:4,
+	},
+	Point{
+		X:5,
+		Y:6,
 	},
 }
 
@@ -90,4 +114,7 @@ type MyInnerInnerStruct struct {
 	gfalse bool
 }
 
-var garray [3]int = [...]int{9,10,11}
+type Point struct {
+	X int
+	Y int
+}

@@ -174,6 +174,8 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset + field.offset)
+	default:
+		errorf("TBI %s", strct.token())
 	}
 
 }
