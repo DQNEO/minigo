@@ -152,6 +152,7 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
+	emit("# loadStructField")
 	switch strct.(type) {
 	case *Relation:
 		rel := strct.(*Relation)
@@ -178,6 +179,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 }
 
 func (a *ExprStructField) emit() {
+	emit("# ExprStructField.emit()")
 	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
