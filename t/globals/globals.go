@@ -36,9 +36,15 @@ func evalnested() {
 	}
 }
 
+var garrayommittied [16]int = [16]int{3}
+
 func evalnestedarary() {
 	var i int = gpoints[2].Y
 	fmt.Printf("%d\n", i + 9) //15
+
+	fmt.Printf("%d\n", len(garrayommittied)) // 16
+	fmt.Printf("%d\n", garrayommittied[0] + 14) // 17
+	fmt.Printf("%d\n", garrayommittied[15] + 18) // 18
 }
 
 func assign() {
@@ -89,6 +95,22 @@ var gpoints [3]Point = [...]Point{
 	},
 }
 
+var gpolygon Polygon = Polygon{
+	line2: [...]Point{
+		Point{
+			X:1,
+			Y:2,
+		},
+		Point{
+			X:3,
+			Y:4,
+		},
+		Point{
+			X:5,
+			Y:6,
+		},
+	},
+}
 type MyStruct struct {
 	gint int
 	gchar byte
@@ -110,6 +132,11 @@ type MyInnerInnerStruct struct {
 	gchar byte
 	gtrue bool
 	gfalse bool
+}
+
+type Polygon struct {
+	line1 [3]Point
+	line2 [3]Point
 }
 
 type Point struct {

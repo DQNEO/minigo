@@ -1459,35 +1459,45 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, containerName string) {
+func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , value /* nullable */ Expr, containerName string) {
 	if gtype.typ == G_ARRAY {
-		arrayliteral, ok := right.(*ExprArrayLiteral)
-		assert(ok, nil, "should be array lieteral")
-		elmType := right.getGtype().elementType
+		arrayliteral, ok := value.(*ExprArrayLiteral)
+		var values []Expr
+		if ok {
+			values = arrayliteral.values
+		}
+		assert(ok || arrayliteral == nil, ptok, fmt.Sprintf("*ExprArrayLiteral expected, but got %T", value))
+		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
-		for i, value := range arrayliteral.values {
-			assertNotNil(value != nil, nil)
-			size := elmType.getSize()
-			if size == 8 {
-				if value.getGtype().typ == G_STRING {
-					stringLiteral, ok := value.(*ExprStringLiteral)
-					assert(ok, nil, "ok")
-					emit(".quad .%s", stringLiteral.slabel)
-				} else {
-					emit(".quad %d", evalIntExpr(value))
-				}
-			} else if size == 1 {
-				emit(".byte %d", evalIntExpr(value))
+		for i := 0; i < gtype.length; i++ {
+			selector := fmt.Sprintf("%s[%d]", containerName, i)
+			if i >= len(values) {
+				// zero value
+				emitGlobalDeclInit(ptok, elmType, nil, selector)
 			} else {
-				emitGlobalDeclInit(ptok, gtype.elementType, value,
-					fmt.Sprintf("%s[%d]", containerName, i))
+				value := arrayliteral.values[i]
+				assertNotNil(value != nil, nil)
+				size := elmType.getSize()
+				if size == 8 {
+					if value.getGtype().typ == G_STRING {
+						stringLiteral, ok := value.(*ExprStringLiteral)
+						assert(ok, nil, "ok")
+						emit(".quad .%s # %s", stringLiteral.slabel)
+					} else {
+						emit(".quad %d # %s %s", evalIntExpr(value),  value.getGtype(), selector)
+					}
+				} else if size == 1 {
+					emit(".byte %d", evalIntExpr(value))
+				} else {
+					emitGlobalDeclInit(ptok, gtype.elementType, value, selector)
+				}
 			}
 		}
 	} else if gtype.typ == G_SLICE {
-		switch right.(type) {
+		switch value.(type) {
 		case *ExprSliceLiteral:
 			// initialize a hidden array
-			lit := right.(*ExprSliceLiteral)
+			lit := value.(*ExprSliceLiteral)
 			lit.invisiblevar.varname = identifier(fmt.Sprintf("$hiddenArray$%d", getHidddenArrayId()))
 			emit(".quad %s", lit.invisiblevar.varname) // address of the hidden array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
@@ -1508,45 +1518,50 @@ func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, 
 			TBI(ptok,"unable to handle %s", gtype)
 		}
 	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
-		if right == nil {
+		if value == nil {
 			// zero value
 			emit(".quad %d # %s %s", 0, gtype, containerName)
 			return
 		}
-		val := evalIntExpr(right)
+		val := evalIntExpr(value)
 		emit(".quad %d # %s %s", val, gtype, containerName)
 	} else if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT {
-		gtype := right.getGtype()
-		//containerName = containerName + "." + string(gtype.relation.name)
+		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
-		structLiteral, ok := right.(*ExprStructLiteral)
-		assert(ok, nil, "ok")
 		for _, field := range gtype.relation.gtype.fields {
-			//size := field.getSize()
-			//debugf("%#v", structLiteral)
+			if value == nil {
+				emitGlobalDeclInit(ptok, field, nil, containerName + "." + string(field.fieldname))
+				continue
+			}
+			structLiteral, ok := value.(*ExprStructLiteral)
+			assert(ok, nil, "ok:" +containerName)
 			value := structLiteral.lookup(field.fieldname)
+			if value == nil {
+				// zero value
+				//continue
+			}
 			gtype := field
 			emitGlobalDeclInit(ptok, gtype, value, containerName + "." + string(field.fieldname))
 		}
 	} else {
 		var val int
-		switch right.(type) {
+		switch value.(type) {
 		case nil:
 			emit(".quad %d # %s %s zero value", 0, gtype, containerName)
 		case *ExprNumberLiteral:
-			val = right.(*ExprNumberLiteral).val
+			val = value.(*ExprNumberLiteral).val
 			emit(".quad %d # %s %s", val, gtype, containerName)
 		case *ExprConstVariable:
-			val = evalIntExpr(right)
-			emit(".quad %d", val)
+			val = evalIntExpr(value)
+			emit(".quad %d # %s ", val, gtype)
 		case *ExprStringLiteral:
-			stringLiteral := right.(*ExprStringLiteral)
+			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
-			right.getGtype().length = len(stringLiteral.val)
+			value.getGtype().length = len(stringLiteral.val)
 		case *Relation:
 			emit(".quad 0 # TBI") // TBI
 		default:
-			TBI(ptok, "unable to handle %T", right)
+			TBI(ptok, "unable to handle %T", value)
 		}
 	}
 }
