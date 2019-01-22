@@ -168,13 +168,21 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 				emit("mov %d(%%rbp), %%rax", variable.offset + field.offset + offset)
 			}
 		}
-	case *ExprStructField:
+	case *ExprStructField: // strct.field.field
 		a := strct.(*ExprStructField)
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset + field.offset)
+	case *ExprIndex: // array[1].field
+		indexExpr := strct.(*ExprIndex)
+		loadCollectIndex(indexExpr.collection, indexExpr.index, offset + field.offset)
 	default:
+		// funcall().field
+		// methodcall().field
+		// *ptr.field
+		// (MyStruct{}).field
+		// (&MyStruct{}).field
 		TBI(strct.token(), "unable to handle %T", strct)
 	}
 
@@ -1071,15 +1079,13 @@ func (ast *StmtSatementList) emit() {
 	}
 }
 
-func (e *ExprIndex) emit() {
-	emit("# emit *ExprIndex")
-	if e.collection.getGtype().typ == G_ARRAY {
-		elmType := e.collection.getGtype().elementType
-
-		e.collection.emit()
+func loadCollectIndex(array Expr, index Expr, offset int) {
+	if array.getGtype().typ == G_ARRAY {
+		elmType := array.getGtype().elementType
+		array.emit()
 		emit("push %%rax") // store address of variable
 
-		e.index.emit()
+		index.emit()
 		emit("mov %%rax, %%rcx") // index
 
 		size := elmType.getSize()
@@ -1090,14 +1096,17 @@ func (e *ExprIndex) emit() {
 		emit("pop %%rcx")            // load  index * size
 		emit("pop %%rbx")            // load address of variable
 		emit("add %%rcx , %%rbx")    // (index * size) + address
+		if offset > 0 {
+			emit("add $%d,  %%rbx", offset)
+		}
 		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
-	} else if e.collection.getGtype().typ == G_SLICE {
-		elmType := e.collection.getGtype().elementType
+	} else if array.getGtype().typ == G_SLICE {
+		elmType := array.getGtype().elementType
 		emit("# emit address of the low index")
-		e.collection.emit() // eval pointer value
+		array.emit() // eval pointer value
 		emit("push %%rax")  // store head address
 
-		e.index.emit() // index
+		index.emit() // index
 		emit("mov %%rax, %%rcx")
 
 		size := elmType.getSize()
@@ -1106,11 +1115,20 @@ func (e *ExprIndex) emit() {
 		emit("imul %%rcx, %%rax")    // set e.index * size => %rax
 		emit("pop %%rbx")            // load head address
 		emit("add %%rax , %%rbx")    // (e.index * size) + head address
+		if offset > 0 {
+			emit("add $%d,  %%rbx", offset)
+		}
 		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 
 	} else {
-		TBI(e.token(), "unable to handle %s", e.collection.getGtype())
+		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
+
+}
+
+func (e *ExprIndex) emit() {
+	emit("# emit *ExprIndex")
+	loadCollectIndex(e.collection, e.index, 0)
 }
 
 func (e *ExprNilLiteral) emit() {

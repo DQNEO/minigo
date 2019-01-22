@@ -36,12 +36,10 @@ func evalnested() {
 	}
 }
 
-/*
 func evalnestedarary() {
-	var i int = gpoints[2].Y // TBI
+	var i int = gpoints[2].Y
 	fmt.Printf("%d\n", i + 9) //15
 }
-*/
 
 func assign() {
 
@@ -50,7 +48,7 @@ func assign() {
 func main() {
 	eval()
 	evalnested()
-	// evalnestedarary() // TBI
+	evalnestedarary()
 	assign()
 }
 
