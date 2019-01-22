@@ -216,8 +216,11 @@ func (e *ExprSlice) dump() {
 }
 
 func (e *ExprIndex) dump() {
-	errorf("TBD")
-
+	debugf("ExprIndex;")
+	debugNest++
+	e.collection.dump()
+	e.index.dump()
+	debugNest--
 }
 
 func (e *ExprTypeAssertion) dump() {
