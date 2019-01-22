@@ -148,7 +148,7 @@ func (strct *Gtype) calcStructOffset() {
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {
-		errorf("rel.expr is nil for %s", rel)
+		errorft(rel.token(), "rel.expr is nil for %s", rel)
 	}
 	return rel.expr.getGtype()
 }
@@ -177,14 +177,14 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 	if pgtype.typ == G_INTERFACE {
 		methodsig, ok := pgtype.imethods[e.fname]
 		if !ok {
-			errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(methodsig != nil, e.tok)
 		return methodsig.rettypes[0]
 	} else {
 		method, ok := pgtype.methods[e.fname]
 		if !ok {
-			errorf("method %s not found in %s %s", e.fname, gtype, e.tok)
+			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(method != nil, e.tok)
 		return method.funcdef.rettypes[0]

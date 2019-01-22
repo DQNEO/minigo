@@ -195,7 +195,7 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field, 0)
 	default:
-		errorf("internal error: bad gtype %s", a.strct.getGtype())
+		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype())
 	}
 }
 
@@ -208,7 +208,7 @@ func (ast *ExprVariable) emit() {
 		emit("mov %s(%%rip), %%rax", ast.varname)
 	} else {
 		if ast.offset == 0 {
-			errorf("offset should not be zero for localvar %s", ast.varname)
+			errorft(ast.token(),"offset should not be zero for localvar %s", ast.varname)
 		}
 		emit("mov %d(%%rbp), %%rax", ast.offset)
 	}
@@ -219,7 +219,7 @@ func (vr *ExprVariable) emitAddress() {
 		emit("lea %s(%%rip), %%rax", vr.varname)
 	} else {
 		if vr.offset == 0 {
-			errorf("offset should not be zero for localvar %s", vr.varname)
+			errorft(vr.token(), "offset should not be zero for localvar %s", vr.varname)
 		}
 		emit("lea %d(%%rbp), %%rax", vr.offset)
 	}
@@ -227,7 +227,7 @@ func (vr *ExprVariable) emitAddress() {
 
 func (rel *Relation) emit() {
 	if rel.expr == nil {
-		errorf("rel.expr is nil: %s", rel.name)
+		errorft(rel.token(),"rel.expr is nil: %s", rel.name)
 	}
 	rel.expr.emit()
 }
@@ -296,7 +296,7 @@ func (uop *ExprUop) emitSave() {
 // e.g. x = 1
 func (rel *Relation) emitSave() {
 	if rel.expr == nil {
-		errorf("left.rel.expr is nil")
+		errorft(rel.token(), "left.rel.expr is nil")
 	}
 	vr := rel.expr.(*ExprVariable)
 	assert(0 <= vr.gtype.getSize() && vr.gtype.getSize() <= 8, rel.token(), "invalid size")
@@ -315,7 +315,7 @@ func (ast *ExprUop) emit() {
 			rel := ast.operand.(*Relation)
 			vr, ok := rel.expr.(*ExprVariable)
 			if !ok {
-				errorf("rel is not an variable")
+				errorft(ast.token(), "rel is not an variable")
 			}
 			vr.emitAddress()
 		case *ExprStructLiteral:
@@ -324,7 +324,7 @@ func (ast *ExprUop) emit() {
 			assignToStruct(e.invisiblevar, e)
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
-			errorf("Unknown type: %s", ast.operand)
+			errorft(ast.token(), "Unknown type: %s", ast.operand)
 		}
 	} else if ast.op == "*" {
 		// dereferene of a pointer
@@ -352,7 +352,7 @@ func (ast *ExprUop) emit() {
 		}
 		binop.emit()
 	} else {
-		errorf("unable to handle uop %s", ast.op)
+		errorft(ast.token(), "unable to handle uop %s", ast.op)
 	}
 	//debugf("end of emitting ExprUop")
 
@@ -424,7 +424,7 @@ func (ast *ExprBinop) emit() {
 		emit("mov $0, %%rdx")
 		emit("div %%rcx")
 	} else {
-		errorf("Unknown binop: %s", ast.op)
+		errorft(ast.token(), "Unknown binop: %s", ast.op)
 	}
 }
 
@@ -442,13 +442,13 @@ func (ast *StmtAssignment) emit() {
 		case *ExprFuncallOrConversion:
 			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
 			if singleValueMode && len(rettypes) > 1 {
-				errorf("multivalue is not allowed")
+				errorft(ast.token(), "multivalue is not allowed")
 			}
 			numRight += len(rettypes)
 		case *ExprMethodcall:
 			rettypes := right.(*ExprMethodcall).getRettypes()
 			if singleValueMode && len(rettypes) > 1 {
-				errorf("multivalue is not allowed")
+				errorft(ast.token(), "multivalue is not allowed")
 			}
 			numRight += len(rettypes)
 		default:
@@ -456,7 +456,7 @@ func (ast *StmtAssignment) emit() {
 		}
 	}
 	if numLeft != numRight {
-		errorf("number of exprs does not match")
+		errorft(ast.token(), "number of exprs does not match")
 	}
 
 	for rightIndex, right := range ast.rights {
@@ -532,7 +532,7 @@ func emitSave(left Expr) {
 		left.(*ExprUop).emitSave()
 	default:
 		left.dump()
-		errorf("Unknown case %T", left)
+		errorft(left.token(), "Unknown case %T", left)
 	}
 }
 
@@ -859,7 +859,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *ExprIndex:
 		TBI(lhs.token(), "Unable to assign to *ExprIndex")
 	default:
-		errorf("unkonwn type %T", lhs)
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
@@ -1031,7 +1031,7 @@ func assignToLocalArray(lhs Expr, rhs Expr) {
 		arrayLiteral := rhs.(*ExprArrayLiteral)
 		setValuesToArray(headOffset, arrayType, arrayLiteral)
 	default:
-		errorf("no supporetd %T", rhs)
+		errorft(rhs.token(), "no supporetd %T", rhs)
 	}
 }
 
@@ -1131,11 +1131,11 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e *ExprSlice) emit() {
-	errorf("TBD")
+	TBI(e.token(), "")
 }
 
 func (e ExprArrayLiteral) emit() {
-	errorf("DO NOT EMIT")
+	errorft(e.token(),"DO NOT EMIT")
 }
 
 func (e *ExprTypeAssertion) emit() {
@@ -1167,15 +1167,15 @@ func (e *ExprConversion) emit() {
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorf("This cannot be emitted alone")
+	errorft(e.token(),"This cannot be emitted alone")
 }
 
 func (e *ExprTypeSwitchGuard) emit() {
-	panic("implement me")
+	TBI(e.token(), "")
 }
 
 func (e *ExprMapLiteral) emit() {
-	panic("implement me")
+	TBI(e.token(), "")
 }
 
 
@@ -1188,14 +1188,14 @@ func (ast *ExprMethodcall) getUniqueName() string {
 		if vr, ok := rel.expr.(*ExprVariable); ok {
 			gtype = vr.gtype
 			if gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE {
-				errorf("interface method call is not supported yet. (%s.%s)", gtype.relation.name, ast.fname)
+				TBI(ast.token(), "interface method call is not supported yet. (%s.%s)", gtype.relation.name, ast.fname)
 			}
 		} else {
 			// @TODO must adapt to method chains like foo.Bar().Buz()
-			errorf("internal error")
+			TBI(ast.token(), "")
 		}
 	default:
-		errorf("internal error")
+		TBI(ast.token(), "unable to handle %T", ast.receiver)
 	}
 	//debugf("ast.receiver=%v", ast.receiver)
 	//debugf("gtype=%v", gtype)
@@ -1209,7 +1209,7 @@ func (methodCall *ExprMethodcall) getPkgName() identifier {
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
 		if !ok {
-			errorf("method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
 		}
 		return funcref.funcdef.pkg
 	}
@@ -1240,7 +1240,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
 		if !ok {
-			errorf("method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
 		}
 		return funcref.funcdef.rettypes
 	}
@@ -1263,7 +1263,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	assertNotNil2(relexpr, funcall.tok, funcall.rel)
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
-		errorf("Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
+		errorft(funcall.token(),"Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
 	}
 	assertNotNil(funcref.funcdef != nil, nil)
 	return funcref.funcdef
@@ -1335,7 +1335,7 @@ func (e *ExprLen) emit() {
 func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef() // check existance
 	if decl == nil {
-		errorf("funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
 
 	// len()
@@ -1402,7 +1402,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		errorf("variable cannot be inteppreted at compile time")
+		errorft(e.token(), "variable cannot be inteppreted at compile time")
 	case *Relation:
 		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
@@ -1419,7 +1419,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprConstVariable:
 		return evalIntExpr(e.(*ExprConstVariable).val)
 	default:
-		errorf("unkown type %T", e)
+		errorft(e.token(), "unkown type %T", e)
 	}
 	return 0
 }

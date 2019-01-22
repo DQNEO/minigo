@@ -70,7 +70,7 @@ func (p *parser) unreadToken() {
 func (p *parser) expectIdent() identifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
-		errorf("Identifier expected, but got %s", tok)
+		errorft(tok, "Identifier expected, but got %s", tok)
 	}
 	return tok.getIdent()
 }
@@ -78,7 +78,7 @@ func (p *parser) expectIdent() identifier {
 func (p *parser) expectKeyword(name string) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
-		errorf("Keyword %s expected but got %s", name, tok)
+		errorft(tok, "Keyword %s expected but got %s", name, tok)
 	}
 	return tok
 }
@@ -86,7 +86,7 @@ func (p *parser) expectKeyword(name string) *Token {
 func (p *parser) expect(punct string) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
-		errorf("punct '%s' expected but got '%s'", punct, tok)
+		errorft(tok, "punct '%s' expected but got '%s'", punct, tok)
 	}
 	return tok
 }
@@ -151,7 +151,7 @@ func (p *parser) readFuncallArgs() []Expr {
 			p.skip()
 			continue
 		} else {
-			tok.errorf("invalid token in funcall arguments")
+			errorft(tok, "invalid token in funcall arguments")
 		}
 	}
 }
@@ -282,7 +282,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 			}
 
 		} else {
-			tok.errorf("invalid token in index access")
+			errorft(tok, "invalid token in index access")
 		}
 	}
 	return r
@@ -291,7 +291,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 // https://golang.org/ref/spec#Type_assertions
 func (p *parser) parseTypeAssertion(e Expr) Expr {
 	defer p.traceOut(p.traceIn())
-	p.expect("(")
+	ptok := p.expect("(")
 
 	if p.peekToken().isKeyword("type") {
 		p.skip()
@@ -310,7 +310,7 @@ func (p *parser) parseTypeAssertion(e Expr) Expr {
 		}
 		return p.succeedingExpr(e)
 	}
-	errorf("internal error")
+	errorft(ptok, "internal error")
 	return nil
 }
 
@@ -485,7 +485,7 @@ func (p *parser) parsePrim() Expr {
 					gtype.length = len(values)
 				} else {
 					if gtype.length < len(values) {
-						errorf("array length does not match (%d != %d)",
+						errorft(tok, "array length does not match (%d != %d)",
 							len(values), gtype.length)
 					}
 				}
@@ -508,7 +508,7 @@ func (p *parser) parsePrim() Expr {
 				}),
 			}
 		default:
-			errorf("internal error %s", tok)
+			errorft(tok, "internal error")
 		}
 	case tok.isIdent("make"):
 		return p.parseMakeExpr()
@@ -517,7 +517,7 @@ func (p *parser) parsePrim() Expr {
 		return p.parseIdentExpr(tok)
 	}
 
-	tok.errorf("unable to handle")
+	errorft(tok, "unable to handle")
 	return nil
 }
 
@@ -544,7 +544,7 @@ func (p *parser) parseArrayLiteral() []Expr {
 		} else if tok.isPunct("}") {
 			break
 		} else {
-			errorf("unpexpected %s", tok)
+			errorft(tok, "unpexpected token")
 		}
 	}
 
@@ -680,7 +680,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 				p.skip()
 				right := p.parseExprInt(prior2)
 				if ast == nil {
-					tok.errorf("bad lefts unary expr:%v", ast)
+					errorft(tok, "bad lefts unary expr:%v", ast)
 				}
 				ast = &ExprBinop{
 					tok:   tok,
@@ -725,6 +725,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 func (p *parser) parseType() *Gtype {
 	defer p.traceOut(p.traceIn())
 	var gtype *Gtype
+	ptok := p.peekToken()
 
 	for {
 		tok := p.readToken()
@@ -787,11 +788,11 @@ func (p *parser) parseType() *Gtype {
 			// vaargs
 			TBI(tok, "VAARGS is not supported yet")
 		} else {
-			tok.errorf("Unkonwn token")
+			errorft(tok, "Unkonwn token")
 		}
 
 	}
-	errorf("Unkown type")
+	errorft(ptok, "Unkown type")
 	return nil
 }
 
@@ -922,7 +923,7 @@ func (p *parser) parseIdentList() []identifier {
 			r = append(r, tok.getIdent())
 		} else if len(r) == 0 {
 			// at least one ident is needed
-			tok.errorf("Ident expected")
+			errorft(tok, "Ident expected")
 		}
 
 		tok = p.peekToken()
@@ -974,7 +975,7 @@ func (clause *ForRangeClause) infer() {
 		} else if collectionType.typ == G_MAP {
 			elementType = collectionType.mapValue
 		} else {
-			errorf("internal error")
+			errorft(clause.token(), "internal error")
 		}
 		//debugf("for i, v %s := rannge %v", elementType, collectionType)
 		valuevar.gtype = elementType
@@ -1055,11 +1056,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	tokRange := p.expectKeyword("range")
 
 	if len(exprs) > 2 {
-		errorf("range values should be 1 or 2")
+		errorft(tokRange, "range values should be 1 or 2")
 	}
 	indexvar, ok := exprs[0].(*Relation)
 	if !ok {
-		errorf(" rng.lefts[0]. is not relation")
+		errorft(tokRange, " rng.lefts[0]. is not relation")
 	}
 	var valuevar *Relation
 	if len(exprs) == 2 {
@@ -1105,7 +1106,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	} else {
 		es, ok := stmt.(*StmtExpr)
 		if !ok {
-			errorf("internal error")
+			errorft(stmt.token(), "internal error")
 		}
 		r.cond = es.expr
 	}
@@ -1124,7 +1125,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 			p.skip()
 			r.els = p.parseCompoundStmt()
 		} else {
-			tok2.errorf("Unexpected token")
+			errorft(tok2, "Unexpected token")
 		}
 	}
 	return r
@@ -1197,7 +1198,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 	case "*=":
 		op = "*"
 	default:
-		errorf("internal error")
+		errorft(ptok, "internal error")
 	}
 	rights := p.parseExpressionList(nil)
 	p.assert(len(rights) == 1, "num of rights is 1")
@@ -1294,7 +1295,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			r.dflt = compound
 			break
 		} else {
-			errorf("internal error")
+			errorft(tok, "internal error")
 		}
 	}
 
@@ -1357,7 +1358,7 @@ func (p *parser) parseStmt() Stmt {
 		} else if tok3.isPunct(":=") {
 			return p.parseShortAssignment(lefts)
 		} else {
-			tok3.errorf("TBD")
+			TBI(tok3, "")
 		}
 	} else if tok2.isPunct("=") {
 		p.skip()
@@ -1457,7 +1458,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				break
 			}
 			if !tok.isPunct(",") {
-				errorf("Invalid token %s", tok)
+				errorft(tok, "Invalid token")
 			}
 		}
 	}
@@ -1480,7 +1481,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 			} else if next.isPunct(",") {
 				p.skip()
 			} else {
-				next.errorf("invalid token")
+				errorft(next, "invalid token")
 			}
 		}
 
@@ -1585,12 +1586,12 @@ func (p *parser) parseImport() *ImportDecl {
 			} else if tok.isPunct(")") {
 				break
 			} else {
-				errorf("invalid import path %s", tok)
+				errorft(tok, "invalid import path")
 			}
 		}
 	} else {
 		if !tok.isTypeString() {
-			errorf("import expects package name")
+			errorft(tok, "import expects package name")
 		}
 		specs = []*ImportSpec{&ImportSpec{
 			tok:  tok,
@@ -1715,7 +1716,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 			case Expr:
 				rel.expr = relfound.(Expr)
 			default:
-				errorf("Bad type relfound %v", relfound)
+				errorft(rel.token(), "Bad type relfound %v", relfound)
 			}
 		} else {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
@@ -1724,7 +1725,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		// foreign package
 		relfound := p.scopes[pkg].get(rel.name)
 		if relfound == nil {
-			errorf("name %s is not found in %s package", rel.name, pkg)
+			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}
 		switch relfound.(type) {
 		case *Gtype:
@@ -1732,7 +1733,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		case Expr:
 			rel.expr = relfound.(Expr)
 		default:
-			errorf("Bad type relfound %v", relfound)
+			errorft(rel.token(), "Bad type relfound %T", relfound)
 		}
 	}
 }
@@ -1776,7 +1777,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	errorf("TBD: unable to handle token %v", nextToken)
+	TBI(nextToken, "")
 	return nil
 }
 
@@ -1859,7 +1860,7 @@ func (ast *StmtShortVarDecl) infer() {
 			} else {
 				fcall := fcallOrConversion
 				if fcall.getFuncDef() == nil {
-					errorf("funcdef of %s is not found", fcall.fname)
+					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
 				}
 				for _, gtype := range fcall.getFuncDef().rettypes {
 					rightTypes = append(rightTypes, gtype)
@@ -1887,7 +1888,7 @@ func (ast *StmtShortVarDecl) infer() {
 		default:
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
-				errorf("rightExpr %T gtype is nil", rightExpr)
+				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
 			}
 			rightTypes = append(rightTypes, gtype)
 		}
@@ -1895,7 +1896,7 @@ func (ast *StmtShortVarDecl) infer() {
 
 	if len(ast.lefts) > len(rightTypes) {
 		// @TODO this check is too loose.
-		errorf("number of lhs and rhs does not match %s", ast.tok)
+		errorft(ast.tok, "number of lhs and rhs does not match")
 	}
 	for i, e := range ast.lefts {
 		rel := e.(*Relation) // a brand new rel
@@ -1942,7 +1943,7 @@ func (variable *ExprVariable) infer() {
 
 	rel, ok := e.(*Relation)
 	if !ok {
-		errorf("NG %#v", e)
+		errorft(e.token(), "unexpected type %T", e)
 	}
 	vr, ok := rel.expr.(*ExprVariable)
 	vr.infer() // recursive call

@@ -19,10 +19,6 @@ func warnf(format string, v ...interface{}) {
 	fmt.Fprintf(os.Stderr, spaces+format+"\n", v...)
 }
 
-func (tok *Token) errorf(format string, v ...interface{}) {
-	errorf(tok.String()+": "+format, v...)
-}
-
 func dumpToken(tok *Token) {
 	debugf(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
 }
@@ -212,7 +208,7 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	errorf("TBD")
+	TBI(e.token(),"")
 }
 
 func (e *ExprIndex) dump() {
@@ -306,7 +302,12 @@ func (e *ExprMapLiteral) dump() {
 
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
-	errorf(format + tok.String(), v...)
+	errorft(tok, "(To Be Implemented) " + format, v...)
+}
+
+// errorf with a position token
+func errorft(tok *Token, format string, v ...interface{}) {
+	errorf(format + "\n " + tok.String(), v...)
 }
 
 func errorf(format string, v ...interface{}) {

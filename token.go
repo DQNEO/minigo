@@ -79,7 +79,7 @@ func (tok *Token) isIdent(s string) bool {
 
 func (tok *Token) getIdent() identifier {
 	if !tok.isTypeIdent() {
-		errorf("tok %s is not ident", tok)
+		errorft(tok, "ident expeced, but got %v", tok)
 	}
 	return identifier(tok.sval)
 }
