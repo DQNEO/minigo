@@ -785,7 +785,7 @@ func (p *parser) parseType() *Gtype {
 
 		} else if tok.isPunct("...") {
 			// vaargs
-			tok.errorf("TBI: VAARGS(...)")
+			TBI(tok, "VAARGS is not supported yet")
 		} else {
 			tok.errorf("Unkonwn token")
 		}
@@ -958,7 +958,7 @@ func (clause *ForRangeClause) infer() {
 		indexType = collectionType.mapKey
 	default:
 		// @TODO consider map etc.
-		errorf("TBI %s", clause.tok)
+		TBI(clause.tok, "unable to handle %s", collectionType)
 	}
 	indexvar.gtype = indexType
 

@@ -175,7 +175,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset + field.offset)
 	default:
-		errorf("TBI %s", strct.token())
+		TBI(strct.token(), "unable to handle %T", strct)
 	}
 
 }
@@ -550,7 +550,7 @@ func (e *ExprIndex) emitSave() {
 	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
 		e.collection.emit() // head address
 	default:
-		errorf("TBI %s", e.tok)
+		TBI(e.token(), "unable to handle %s", collectionType)
 	}
 
 	emit("push %%rax") // stash head address of collection
@@ -740,7 +740,7 @@ func (stmt *StmtReturn) emit() {
 	}
 
 	if len(stmt.exprs) > 7 {
-		errorf("TBI")
+		TBI(stmt.token(), "too many number of arguments")
 	}
 
 	for i, expr := range stmt.exprs {
@@ -857,7 +857,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *ExprStructField:
 		targetOffset = lhs.(*ExprStructField).getOffset()
 	case *ExprIndex:
-		errorf("TBI %s", lhs.token())
+		TBI(lhs.token(), "Unable to assign to *ExprIndex")
 	default:
 		errorf("unkonwn type %T", lhs)
 	}
@@ -956,7 +956,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $%d", strlen) // cap
 
 	default:
-		errorf("TBI %T %s", rhs, rhs.token())
+		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
 
 	saveSlice(targetOffset)
@@ -1109,7 +1109,7 @@ func (e *ExprIndex) emit() {
 		emit("mov (%%rbx), %%rax")   // dereference the content of an emelment
 
 	} else {
-		errorf("TBI")
+		TBI(e.token(), "unable to handle %s", e.collection.getGtype())
 	}
 }
 
@@ -1205,7 +1205,7 @@ func (ast *ExprMethodcall) getUniqueName() string {
 func (methodCall *ExprMethodcall) getPkgName() identifier {
 	origType := methodCall.getOrigType()
 	if origType.typ == G_INTERFACE {
-		errorf("TBI")
+		TBI(methodCall.token(), "G_INTERFACE is not supported yet")
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
 		if !ok {
@@ -1321,14 +1321,14 @@ func (e *ExprLen) emit() {
 			}
 			uop.emit()
 		default:
-			errorf("TBI", arg.token())
+			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING :
-		errorf("TBI %s", arg.token())
+		TBI(arg.token(), "unable to handle %s", gtype)
 	case gtype.typ == G_MAP:
-		errorf("TBI %s", arg.token())
+		TBI(arg.token(), "unable to handle %s", gtype)
 	default:
-		errorf("TBI %s", arg.token())
+		TBI(arg.token(), "unable to handle %s", gtype)
 	}
 }
 
@@ -1487,7 +1487,7 @@ func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, 
 
 
 		default:
-			errorf("TBI %s", ptok)
+			TBI(ptok,"unable to handle %s", gtype)
 		}
 	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
 		if right == nil {
@@ -1526,9 +1526,9 @@ func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, 
 			emit(".quad .%s", stringLiteral.slabel)
 			right.getGtype().length = len(stringLiteral.val)
 		case *Relation:
-			emit(".quad 0") // TBI
+			emit(".quad 0 # TBI") // TBI
 		default:
-			errorf("TBI %T", right)
+			TBI(ptok, "unable to handle %T", right)
 		}
 	}
 }

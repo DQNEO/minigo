@@ -304,6 +304,11 @@ func (e *ExprMapLiteral) dump() {
 	panic("implement me")
 }
 
+// States "To Be Implemented"
+func TBI(tok *Token, format string, v ...interface{}) {
+	errorf(format + tok.String(), v...)
+}
+
 func errorf(format string, v ...interface{}) {
 	/*
 		currentTokenIndex := ts.index - 1
