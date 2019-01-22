@@ -1445,7 +1445,7 @@ func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, 
 		assert(ok, nil, "should be array lieteral")
 		elmType := right.getGtype().elementType
 		assertNotNil(elmType != nil, nil)
-		for _, value := range arrayliteral.values {
+		for i, value := range arrayliteral.values {
 			assertNotNil(value != nil, nil)
 			size := elmType.getSize()
 			if size == 8 {
@@ -1459,7 +1459,8 @@ func emitGlobalDeclInit(ptok *Token, /* left type */ gtype *Gtype , right Expr, 
 			} else if size == 1 {
 				emit(".byte %d", evalIntExpr(value))
 			} else {
-				errorf("Unexpected size %d", size)
+				emitGlobalDeclInit(ptok, gtype.elementType, value,
+					fmt.Sprintf("%s[%d]", containerName, i))
 			}
 		}
 	} else if gtype.typ == G_SLICE {
