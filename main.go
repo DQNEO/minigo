@@ -105,10 +105,6 @@ func main() {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := p.parseSourceFile(bs, packageblockscope)
 
-		if debugAst {
-			astFile.dump()
-		}
-
 		astFiles = append(astFiles, astFile)
 	}
 
@@ -118,6 +114,10 @@ func main() {
 	p.resolve(universe)
 	if resolveOnly {
 		return
+	}
+
+	if debugAst {
+		astFiles[len(astFiles) -1].dump()
 	}
 
 	var importedPackages []*stdpkg
