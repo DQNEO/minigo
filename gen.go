@@ -307,11 +307,15 @@ func (rel *Relation) emitSave() {
 		errorft(rel.token(), "left.rel.expr is nil")
 	}
 	vr := rel.expr.(*ExprVariable)
-	assert(0 <= vr.gtype.getSize() && vr.gtype.getSize() <= 8, rel.token(), "invalid size")
+	vr.emitOffsetSave(vr.getGtype().getSize(), 0)
+}
+
+func (vr *ExprVariable) emitOffsetSave(size int, offset int) {
+	assert(0 <= size && size <= 8, vr.token(), "invalid size")
 	if vr.isGlobal {
-		emitGsave(vr.gtype.getSize(), vr.varname, 0)
+		emitGsave(size, vr.varname, offset)
 	} else {
-		emitLsave(vr.gtype.getSize(), vr.offset)
+		emitLsave(size, vr.offset + offset)
 	}
 }
 
@@ -996,21 +1000,17 @@ func assignToArray(lhs Expr, rhs Expr) {
 	}
 	variable, ok := lhs.(*ExprVariable)
 	assert(ok, nil, "expect variable in lhs")
-	headOffset := variable.offset
 
 	arrayType := lhs.getGtype()
 	elmSize := arrayType.elementType.getSize()
-	for i := 0; i < arrayType.length; i++ {
-		emit("mov $0, %%rax")
-		if variable.isGlobal {
-				emitGsave(elmSize, variable.varname, i*elmSize)
-		} else {
-				localoffset := variable.offset + i*elmSize
-				emitLsave(elmSize, localoffset)
-		}
-	}
 
 	if rhs == nil {
+		// assign zero values
+		for i := 0; i < arrayType.length; i++ {
+			emit("mov $0, %%rax")
+			offsetByIndex := i*elmSize
+			variable.emitOffsetSave(elmSize, offsetByIndex)
+		}
 		return
 	}
 
@@ -1020,31 +1020,24 @@ func assignToArray(lhs Expr, rhs Expr) {
 		arrayVariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 		for i := 0; i < arrayType.length; i++ {
-			emit("mov %d(%%rbp), %%rax", arrayVariable.offset+ i*elmSize)
-			if variable.isGlobal {
-				emitGsave(elmSize, variable.varname, i*elmSize)
-			} else {
-				localoffset := variable.offset + i*elmSize
-				emitLsave(elmSize, localoffset)
-			}
+			offsetByIndex := i*elmSize
+			emit("mov %d(%%rbp), %%rax", arrayVariable.offset+ offsetByIndex)
+			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
 	case *ExprStructField:
 		strctField := rhs.(*ExprStructField)
 		fieldType := strctField.getGtype()
 		assert(fieldType.typ == G_ARRAY, nil, "should be array")
 		for i := 0; i < arrayType.length; i++ {
-			emit("mov %d(%%rbp), %%rax", strctField.getOffset()+ i*elmSize)
-			if variable.isGlobal {
-				emitGsave(elmSize, variable.varname, i*elmSize)
-			} else {
-				localoffset := variable.offset + i*elmSize
-				emitLsave(elmSize, localoffset)
-			}
+			offsetByIndex := i*elmSize
+			emit("mov %d(%%rbp), %%rax", strctField.getOffset()+ offsetByIndex)
+			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
 
 	case *ExprArrayLiteral:
 		arrayLiteral := rhs.(*ExprArrayLiteral)
 		for i := 0; i < arrayType.length; i++ {
+			offsetByIndex := i*elmSize
 			if i >= len(arrayLiteral.values) {
 				// zero value
 				emit("mov $0, %%rax")
@@ -1053,15 +1046,10 @@ func assignToArray(lhs Expr, rhs Expr) {
 				val.emit()
 			}
 
-			if variable.isGlobal {
-				emitGsave(elmSize, variable.varname, i*elmSize)
-			} else {
-				localoffset := headOffset + i*elmSize
-				emitLsave(elmSize, localoffset)
-			}
+			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
 	default:
-		errorft(rhs.token(), "no supporetd %T", rhs)
+		TBI(rhs.token(), "no supporetd %T", rhs)
 	}
 }
 
