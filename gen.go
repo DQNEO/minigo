@@ -828,7 +828,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			initvalues, ok := field.value.(*ExprArrayLiteral)
 			assert(ok, nil, "ok")
 			fieldtype := strcttyp.getField(field.key)
-			setValuesToArray(localOffset, fieldtype, initvalues)
+			arrayType := fieldtype
+			elmSize := arrayType.elementType.getSize()
+			for i, val := range initvalues.values {
+				val.emit()
+				localoffset := localOffset + i*elmSize
+				emitLsave(elmSize, localoffset)
+			}
 		case fieldtype.typ == G_SLICE:
 			left := &ExprStructField{
 				tok:       variable.tok,
@@ -983,16 +989,6 @@ func saveSlice(targetOffset int) {
 	emit("mov %%rax, %d(%%rbp)", targetOffset)
 }
 
-
-func setValuesToArray(headOffset int, arrayType *Gtype, arrayLiteral *ExprArrayLiteral) {
-	elmSize := arrayType.elementType.getSize()
-	for i, val := range arrayLiteral.values {
-		val.emit()
-		localoffset := headOffset + i*elmSize
-		emitLsave(elmSize, localoffset)
-	}
-}
-
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
@@ -1048,7 +1044,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 	case *ExprArrayLiteral:
 		arrayLiteral := rhs.(*ExprArrayLiteral)
-		//setValuesToArray(headOffset, arrayType, arrayLiteral)
 		for i, val := range arrayLiteral.values {
 			val.emit()
 			if variable.isGlobal {
