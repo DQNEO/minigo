@@ -582,7 +582,12 @@ func (e *ExprIndex) emitSave() {
 	emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
 }
 
-func (e *ExprStructField) getOffset() int {
+func (e *ExprVariable) getLocalOffset() int {
+	assert(e.isGlobal == false, e.token(), "should be local")
+	return e.offset
+}
+
+func (e *ExprStructField) getLocalOffset() int {
 	var vr *ExprVariable
 	if rel, ok := e.strct.(*Relation); ok {
 		vr, ok = rel.expr.(*ExprVariable)
@@ -594,7 +599,7 @@ func (e *ExprStructField) getOffset() int {
 	}
 	assert(vr.gtype.typ == G_REL, e.tok, "expect G_REL|G_POINTER , but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
-	return vr.offset + field.offset
+	return vr.getLocalOffset() + field.offset
 }
 
 func (e *ExprStructField) emitLsave() {
@@ -875,9 +880,9 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	var targetOffset int
 	switch lhs.(type) {
 	case *ExprVariable:
-		targetOffset = lhs.(*ExprVariable).offset
+		targetOffset = lhs.(*ExprVariable).getLocalOffset()
 	case *ExprStructField:
-		targetOffset = lhs.(*ExprStructField).getOffset()
+		targetOffset = lhs.(*ExprStructField).getLocalOffset()
 	case *ExprIndex:
 		TBI(lhs.token(), "Unable to assign to *ExprIndex")
 	default:
@@ -1019,16 +1024,18 @@ func assignToArray(lhs Expr, rhs Expr) {
 		rel := rhs.(*Relation)
 		arrayVariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
+
 		for i := 0; i < arrayType.length; i++ {
 			offsetByIndex := i*elmSize
-			emit("mov %d(%%rbp), %%rax", arrayVariable.offset+ offsetByIndex)
+			emit("mov %d(%%rbp), %%rax", arrayVariable.getLocalOffset() + offsetByIndex)
 			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
 	case *ExprStructField:
 		strctField := rhs.(*ExprStructField)
+
 		for i := 0; i < arrayType.length; i++ {
 			offsetByIndex := i*elmSize
-			emit("mov %d(%%rbp), %%rax", strctField.getOffset()+ offsetByIndex)
+			emit("mov %d(%%rbp), %%rax", strctField.getLocalOffset()+ offsetByIndex)
 			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
 
@@ -1333,7 +1340,7 @@ func (e *ExprLen) emit() {
 				emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
 			}
 		case *ExprStructField:
-			headOffset = arg.(*ExprStructField).getOffset()
+			headOffset = arg.(*ExprStructField).getLocalOffset()
 			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
 		case *ExprSliceLiteral:
 			length := len(arg.(*ExprSliceLiteral).values)
