@@ -450,7 +450,8 @@ func (ast *ExprBinop) emit() {
 }
 
 func (ast *StmtAssignment) emit() {
-	emit("# start StmtAssignment")
+	emit("")
+	emit("# Assignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
@@ -830,6 +831,7 @@ func emitGload(regSize int, varname identifier, offset int) {
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
+	emit("# assignToStruct")
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
@@ -841,12 +843,20 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	// initializes with zero values
 	for _, fieldtype := range variable.getGtype().relation.gtype.fields {
 		//debugf("%#v", fieldtype)
-		localOffset := variable.offset + fieldtype.offset
 		switch fieldtype.typ {
 		case G_ARRAY:
-			//initArray(localOffset, fieldtype)
+			arrayType := fieldtype
+			elmSize := arrayType.elementType.getSize()
+			for i := 0; i < arrayType.length ; i ++ {
+				emit("mov $0, %%rax")
+				variable.emitOffsetSave(elmSize, fieldtype.offset + i*elmSize)
+			}
 		case G_SLICE:
-			initLocalSlice(localOffset)
+			if variable.isGlobal {
+				initGlobalSlice(variable.varname, fieldtype.offset)
+			} else {
+				initLocalSlice(variable.offset + fieldtype.offset)
+			}
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
@@ -863,7 +873,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	// do assignment for each field
 	for _, field := range structliteral.fields {
 		fieldtype := strcttyp.getField(field.key)
-		localOffset := variable.offset + fieldtype.offset
 
 		switch {
 		case fieldtype.typ == G_ARRAY:
@@ -874,8 +883,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			elmSize := arrayType.elementType.getSize()
 			for i, val := range initvalues.values {
 				val.emit()
-				localoffset := localOffset + i*elmSize
-				emitLsave(elmSize, localoffset)
+				variable.emitOffsetSave(elmSize, fieldtype.offset + i*elmSize)
 			}
 		case fieldtype.typ == G_SLICE:
 			left := &ExprStructField{
@@ -896,17 +904,26 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 }
 
+func initGlobalSlice(varname identifier, offset int) {
+	emit("# initialize slice with a zero value")
+	emit("push $0")
+	emit("push $0")
+	emit("push $0")
+	saveGlobalSlice(varname, offset)
+}
+
 func initLocalSlice(offset int) {
 	emit("# initialize slice with a zero value")
 	emit("push $0")
 	emit("push $0")
 	emit("push $0")
-	saveSlice(offset)
+	saveLocalSlice(offset)
 }
 
 const sliceOffsetForLen = 8
 
 func assignToSlice(lhs Expr, rhs Expr) {
+	emit("# assignToSlice")
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
@@ -1019,10 +1036,20 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
 
-	saveSlice(targetOffset)
+	saveLocalSlice(targetOffset)
 }
 
-func saveSlice(targetOffset int) {
+func saveGlobalSlice(varname identifier, offset int) {
+	//offset := 0
+	emit("pop %%rax")
+	emit("mov %%rax, %s+%d(%%rip)", varname, offset + ptrSize+sliceOffsetForLen)
+	emit("pop %%rax")
+	emit("mov %%rax, %s+%d(%%rip)", varname, offset + ptrSize)
+	emit("pop %%rax")
+	emit("mov %%rax, %s+%d(%%rip)", varname, offset)
+}
+
+func saveLocalSlice(targetOffset int) {
 	emit("pop %%rax")
 	emit("mov %%rax, %d(%%rbp)", targetOffset+ptrSize+sliceOffsetForLen)
 	emit("pop %%rax")
@@ -1033,6 +1060,7 @@ func saveSlice(targetOffset int) {
 
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
+	emit("# assignToArray")
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}

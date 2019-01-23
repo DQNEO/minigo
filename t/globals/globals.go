@@ -73,9 +73,20 @@ func assign1() {
 
 	fmt.Printf("%d\n", gpoint.X) // 26
 	fmt.Printf("%d\n", gpoint.Y) // 27
+
 }
 
 func assign2() {
+	gstructhasslice = StructHasSlice{}
+	//fmt.Printf("%d\n", len(gstructhasslice.slice) + 28) // 28
+
+	gstructhasarray = StructHasArray{
+		array: [2]int{28,29},
+	}
+	//fmt.Printf("%d\n", gstructhasarray.array[0]) // 28
+
+	/*
+	*/
 	/*
 	gstruct = MyStruct{
 		gint:5,
@@ -194,6 +205,10 @@ var gpolygon Polygon = Polygon{
 	},
 }
 
+var gstructhasarray StructHasArray
+
+var gstructhasslice StructHasSlice
+
 type MyStruct struct {
 	gint int
 	gchar byte
@@ -220,6 +235,14 @@ type MyInnerInnerStruct struct {
 type Polygon struct {
 	line1 [3]Point
 	line2 [3]Point
+}
+
+type StructHasArray struct {
+	array [2]int
+}
+
+type StructHasSlice struct {
+	slice []int
 }
 
 type Point struct {
