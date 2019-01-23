@@ -1031,23 +1031,24 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	saveLocalSlice(targetOffset)
 }
 
+
 func saveGlobalSlice(varname identifier, offset int) {
 	//offset := 0
 	emit("pop %%rax")
-	emit("mov %%rax, %s+%d(%%rip)", varname, offset + ptrSize+sliceOffsetForLen)
+	emitGsave(8, varname, offset + ptrSize + sliceOffsetForLen)
 	emit("pop %%rax")
-	emit("mov %%rax, %s+%d(%%rip)", varname, offset + ptrSize)
+	emitGsave(8, varname, offset + ptrSize)
 	emit("pop %%rax")
-	emit("mov %%rax, %s+%d(%%rip)", varname, offset)
+	emitGsave(8, varname, offset)
 }
 
-func saveLocalSlice(targetOffset int) {
+func saveLocalSlice(offset int) {
 	emit("pop %%rax")
-	emit("mov %%rax, %d(%%rbp)", targetOffset+ptrSize+sliceOffsetForLen)
+	emitLsave(8, offset + ptrSize + sliceOffsetForLen)
 	emit("pop %%rax")
-	emit("mov %%rax, %d(%%rbp)", targetOffset+ptrSize)
+	emitLsave(8, offset + ptrSize)
 	emit("pop %%rax")
-	emit("mov %%rax, %d(%%rbp)", targetOffset)
+	emitLsave(8, offset)
 }
 
 // copy each element
