@@ -552,7 +552,9 @@ func emitSave(left Expr) {
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
 	case *ExprStructField:
-		left.(*ExprStructField).emitLsave()
+		structfield := left.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitOffsetSave(structfield.strct, 8, fieldType.offset)
 	case *ExprUop:
 		left.(*ExprUop).emitSave()
 	default:
