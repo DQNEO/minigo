@@ -125,25 +125,27 @@ func assign5() {
 	fmt.Printf("%d\n", gpoints[2].Y) // 31
 	fmt.Printf("%d\n", gpoints[1].X + 4) // 32
 }
-	/*
 
+func assign6() {
 	gpolygon = Polygon{
 		line2: [...]Point{
 			Point{
-				X:1,
-				Y:2,
+				X: 1,
+				Y: 2,
 			},
 			Point{
-				X:3,
-				Y:4,
+				X: 3,
+				Y: 33,
 			},
 			Point{
-				X:5,
-				Y:6,
+				X: 5,
+				Y: 6,
 			},
 		},
 	}
-	*/
+
+	fmt.Printf("%d\n", gpolygon.line2[1].Y) // 33
+}
 
 
 
@@ -157,6 +159,7 @@ func main() {
 	assign3()
 	assign4()
 	assign5()
+	assign6()
 }
 
 
