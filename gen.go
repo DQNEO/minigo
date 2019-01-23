@@ -827,37 +827,38 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	variable, ok := lhs.(*ExprVariable)
-	assert(ok, nil, "lhs should be a variable")
+	variable := lhs
 	structliteral, ok := rhs.(*ExprStructLiteral)
-	assert(ok || rhs == nil, nil, "invalid rhs")
+	assert(ok || rhs == nil, nil, fmt.Sprintf("invalid rhs: %T", rhs ))
 
 	// initializes with zero values
 	for _, fieldtype := range variable.getGtype().relation.gtype.fields {
 		//debugf("%#v", fieldtype)
-		switch fieldtype.typ {
-		case G_ARRAY:
+		switch  {
+		case fieldtype.typ == G_ARRAY:
 			arrayType := fieldtype
 			elmSize := arrayType.elementType.getSize()
 			for i := 0; i < arrayType.length ; i ++ {
 				emit("mov $0, %%rax")
-				variable.emitOffsetSave(elmSize, fieldtype.offset + i*elmSize)
+				emitOffsetSave(variable, elmSize, fieldtype.offset + i*elmSize)
 			}
-		case G_SLICE:
+		case fieldtype.typ == G_SLICE:
 			emit("# initialize slice with a zero value")
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
 			emitSaveSlice(variable, fieldtype.offset)
+		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
+			//TBI(variable.token(), "")
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-			variable.emitOffsetSave(regSize, fieldtype.offset)
+			emitOffsetSave(variable, regSize, fieldtype.offset)
 		}
 	}
 
-	if structliteral == nil {
+	if rhs == nil {
 		return
 	}
 
@@ -875,28 +876,53 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			elmSize := arrayType.elementType.getSize()
 			for i, val := range initvalues.values {
 				val.emit()
-				variable.emitOffsetSave(elmSize, fieldtype.offset + i*elmSize)
+				emitOffsetSave(variable, elmSize, fieldtype.offset + i*elmSize)
 			}
 		case fieldtype.typ == G_SLICE:
 			left := &ExprStructField{
-				tok:       variable.tok,
+				tok:       variable.token(),
 				strct:     lhs,
 				fieldname: field.key,
 			}
 			assignToSlice(left, field.value)
-
+		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
+			left := &ExprStructField{
+				tok:       variable.token(),
+				strct:     lhs,
+				fieldname: field.key,
+			}
+			assignToStruct(left, field.value)
 		default:
 			field.value.emit()
 
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-			variable.emitOffsetSave(regSize, fieldtype.offset)
+			emitOffsetSave(variable, regSize, fieldtype.offset)
 		}
 	}
 
 }
 
 const sliceOffsetForLen = 8
+
+func emitOffsetSave(lhs Expr, size int, offset int) {
+	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		emitOffsetSave(rel.expr, size, offset)
+	case *ExprVariable:
+		variable := lhs.(*ExprVariable)
+		variable.emitOffsetSave(size, offset)
+	case *ExprStructField:
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitOffsetSave(structfield.strct, size, fieldType.offset + offset)
+	case *ExprIndex:
+		TBI(lhs.token(), "Unable to assign to %T", lhs)
+	default:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
+	}
+}
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
 	switch lhs.(type) {
@@ -1063,36 +1089,52 @@ func assignToArray(lhs Expr, rhs Expr) {
 	assert(ok, nil, "expect variable in lhs")
 
 	arrayType := lhs.getGtype()
-	elmSize := arrayType.elementType.getSize()
+	elementType := arrayType.elementType
+	elmSize := elementType.getSize()
 	assert(rhs == nil || rhs.getGtype().typ == G_ARRAY, nil, "rhs should be array")
 	for i := 0; i < arrayType.length; i++ {
 		offsetByIndex := i*elmSize
-		switch rhs.(type) {
-		case nil:
-			// assign zero values
-			emit("mov $0, %%rax")
-		case *ExprArrayLiteral:
-			arrayLiteral := rhs.(*ExprArrayLiteral)
-			if i >= len(arrayLiteral.values) {
-				// zero value
-				emit("mov $0, %%rax")
-			} else {
-				val := arrayLiteral.values[i]
-				val.emit()
+		switch {
+		case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+			left := &ExprIndex{
+				tok: lhs.token(),
+				collection:lhs,
+				index: &ExprNumberLiteral{val:i},
 			}
-		case *Relation:
-			rel := rhs.(*Relation)
-			arrayVariable, ok := rel.expr.(*ExprVariable)
-			assert(ok, nil, "ok")
-			arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
-		case *ExprStructField:
-			strctField := rhs.(*ExprStructField)
-			strctField.emitOffsetLoad(elmSize, offsetByIndex)
-		default:
-			TBI(rhs.token(), "no supporetd %T", rhs)
-		}
+			right := &ExprIndex{
+				tok: rhs.token(),
+				collection:rhs,
+				index: &ExprNumberLiteral{val:i},
+			}
+			assignToStruct(left, right)
+		default: // prrimitive type
+			switch rhs.(type) {
+			case nil:
+				// assign zero values
+				emit("mov $0, %%rax")
+			case *ExprArrayLiteral:
+				arrayLiteral := rhs.(*ExprArrayLiteral)
+				if i >= len(arrayLiteral.values) {
+					// zero value
+					emit("mov $0, %%rax")
+				} else {
+					val := arrayLiteral.values[i]
+					val.emit()
+				}
+			case *Relation:
+				rel := rhs.(*Relation)
+				arrayVariable, ok := rel.expr.(*ExprVariable)
+				assert(ok, nil, "ok")
+				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
+			case *ExprStructField:
+				strctField := rhs.(*ExprStructField)
+				strctField.emitOffsetLoad(elmSize, offsetByIndex)
+			default:
+				TBI(rhs.token(), "no supporetd %T", rhs)
+			}
 
-		variable.emitOffsetSave(elmSize, offsetByIndex)
+			variable.emitOffsetSave(elmSize, offsetByIndex)
+		}
 	}
 }
 

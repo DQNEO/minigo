@@ -87,24 +87,25 @@ func assign3() {
 	}
 	fmt.Printf("%d\n", gstructhasarray.array[1]) // 29
 }
-	/*
-	*/
-	/*
+
+func assign4() {
 	gstruct = MyStruct{
-		gint:5,
-		gchar:'6',
-		gtrue:true,
-		gfalse:false,
+		gint:   5,
+		gchar:  '6',
+		gtrue:  true,
+		gfalse: false,
 		inner: MyInnerStruct{
-			gint:12,
+			gint:  12,
 			gtrue: true,
 			inner: MyInnerInnerStruct{
-				gtrue:true,
-				gchar:13,
+				gtrue: true,
+				gchar: 30,
 			},
 		},
 	}
-
+	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 30
+}
+	/*
 	gpoints = [...]Point{
 		Point{
 			X:1,
@@ -139,6 +140,8 @@ func assign3() {
 	*/
 
 
+
+
 func main() {
 	eval()
 	evalnested()
@@ -146,6 +149,7 @@ func main() {
 	assign1()
 	assign2()
 	assign3()
+	assign4()
 }
 
 
