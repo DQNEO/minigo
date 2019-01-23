@@ -1008,10 +1008,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 	arrayType := lhs.getGtype()
 	elmSize := arrayType.elementType.getSize()
-	if rhs != nil {
-		rightType := rhs.getGtype()
-		assert(rightType.typ == G_ARRAY, nil, "rhs should be array")
-	}
+	assert(rhs == nil || rhs.getGtype().typ == G_ARRAY, nil, "rhs should be array")
 	switch rhs.(type) {
 	case nil:
 		// assign zero values
