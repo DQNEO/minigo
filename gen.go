@@ -844,11 +844,11 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				variable.emitOffsetSave(elmSize, fieldtype.offset + i*elmSize)
 			}
 		case G_SLICE:
-			if variable.isGlobal {
-				initGlobalSlice(variable.varname, fieldtype.offset)
-			} else {
-				initLocalSlice(variable.offset + fieldtype.offset)
-			}
+			emit("# initialize slice with a zero value")
+			emit("push $0")
+			emit("push $0")
+			emit("push $0")
+			emitSaveSlice(variable, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
@@ -896,44 +896,36 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 }
 
-func initGlobalSlice(varname identifier, offset int) {
-	emit("# initialize slice with a zero value")
-	emit("push $0")
-	emit("push $0")
-	emit("push $0")
-	saveGlobalSlice(varname, offset)
-}
-
-func initLocalSlice(offset int) {
-	emit("# initialize slice with a zero value")
-	emit("push $0")
-	emit("push $0")
-	emit("push $0")
-	saveLocalSlice(offset)
-}
-
 const sliceOffsetForLen = 8
 
-func assignToSlice(lhs Expr, rhs Expr) {
-	emit("# assignToSlice")
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
-	var targetOffset int
+func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		emitSaveSlice(rel.expr, offset)
 	case *ExprVariable:
-		targetOffset = lhs.(*ExprVariable).getLocalOffset()
+		variable := lhs.(*ExprVariable)
+		variable.saveSlice(offset)
 	case *ExprStructField:
-		targetOffset = lhs.(*ExprStructField).getLocalOffset()
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitSaveSlice(structfield.strct, fieldType.offset + offset)
 	case *ExprIndex:
-		TBI(lhs.token(), "Unable to assign to *ExprIndex")
+		TBI(lhs.token(), "Unable to assign to %T", lhs)
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
+}
 
+func assignToSlice(lhs Expr, rhs Expr) {
+	emit("# assignToSlice")
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
-		initLocalSlice(targetOffset)
+		emit("# initialize slice with a zero value")
+		emit("push $0")
+		emit("push $0")
+		emit("push $0")
+		emitSaveSlice(lhs, 0)
 		return
 	}
 
@@ -1028,28 +1020,19 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
 
-	saveLocalSlice(targetOffset)
+	emitSaveSlice(lhs, 0)
 }
 
 
-func saveGlobalSlice(varname identifier, offset int) {
-	//offset := 0
+func (variable *ExprVariable) saveSlice(offset int) {
 	emit("pop %%rax")
-	emitGsave(8, varname, offset + ptrSize + sliceOffsetForLen)
+	variable.emitOffsetSave(8, offset + ptrSize + sliceOffsetForLen)
 	emit("pop %%rax")
-	emitGsave(8, varname, offset + ptrSize)
+	variable.emitOffsetSave(8, offset + ptrSize)
 	emit("pop %%rax")
-	emitGsave(8, varname, offset)
+	variable.emitOffsetSave(8, offset)
 }
 
-func saveLocalSlice(offset int) {
-	emit("pop %%rax")
-	emitLsave(8, offset + ptrSize + sliceOffsetForLen)
-	emit("pop %%rax")
-	emitLsave(8, offset + ptrSize)
-	emit("pop %%rax")
-	emitLsave(8, offset)
-}
 
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
