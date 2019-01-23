@@ -851,7 +851,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-			emitLsave(regSize, localOffset)
+			variable.emitOffsetSave(regSize, fieldtype.offset)
 		}
 	}
 
@@ -889,8 +889,8 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			field.value.emit()
 
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, structliteral.token(), fieldtype.String())
-			emitLsave(regSize, localOffset)
+			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
+			variable.emitOffsetSave(regSize, fieldtype.offset)
 		}
 	}
 

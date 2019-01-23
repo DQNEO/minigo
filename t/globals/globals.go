@@ -47,14 +47,14 @@ func evalnestedarary() {
 	fmt.Printf("%d\n", garrayommittied[15] + 18) // 18
 }
 
-func assign() {
+func assign1() {
 	gint = 19
 	gchar = 20
 	gtrue = false
 	gfalse = true
-	garray = [3]int{23,24}
+	garray = [3]int{23, 24}
 
-	fmt.Printf("%d\n", gint) // 19
+	fmt.Printf("%d\n", gint)  // 19
 	fmt.Printf("%d\n", gchar) // 20
 	if !gtrue {
 		fmt.Printf("21\n") //21
@@ -63,10 +63,19 @@ func assign() {
 		fmt.Printf("22\n") // 22
 	}
 
-	fmt.Printf("%d\n", garray[0]) // 23
-	fmt.Printf("%d\n", garray[1]) // 24
-	fmt.Printf("%d\n", garray[2] + 25) // 25
+	fmt.Printf("%d\n", garray[0])    // 23
+	fmt.Printf("%d\n", garray[1])    // 24
+	fmt.Printf("%d\n", garray[2]+25) // 25
+	gpoint = Point{
+		X:26,
+		Y:27,
+	}
 
+	fmt.Printf("%d\n", gpoint.X) // 26
+	fmt.Printf("%d\n", gpoint.Y) // 27
+}
+
+func assign2() {
 	/*
 	gstruct = MyStruct{
 		gint:5,
@@ -121,7 +130,8 @@ func main() {
 	eval()
 	evalnested()
 	evalnestedarary()
-	assign()
+	assign1()
+	assign2()
 }
 
 
@@ -146,6 +156,12 @@ var gstruct = MyStruct{
 }
 
 var garray [3]int = [...]int{9,10,11}
+
+var gpoint Point = Point{
+	X:2,
+	Y:4,
+}
+
 var gpoints [3]Point = [...]Point{
 	Point{
 		X:1,
