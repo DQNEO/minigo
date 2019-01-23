@@ -160,7 +160,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		variable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "rel is a variable")
 		if field.typ == G_ARRAY {
-			emit("lea %d(%%rbp), %%rax", variable.offset+field.offset)
+			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
 				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset + offset)
@@ -209,7 +209,7 @@ func (a *ExprStructField) emit() {
 
 func (ast *ExprVariable) emit() {
 	if ast.gtype.typ == G_ARRAY {
-		ast.emitAddress()
+		ast.emitAddress(0)
 		return
 	}
 	if ast.isGlobal {
@@ -222,14 +222,14 @@ func (ast *ExprVariable) emit() {
 	}
 }
 
-func (vr *ExprVariable) emitAddress() {
+func (vr *ExprVariable) emitAddress(offset int) {
 	if vr.isGlobal {
-		emit("lea %s(%%rip), %%rax", vr.varname)
+		emit("lea %s+%d(%%rip), %%rax", vr.varname, offset)
 	} else {
 		if vr.offset == 0 {
 			errorft(vr.token(), "offset should not be zero for localvar %s", vr.varname)
 		}
-		emit("lea %d(%%rbp), %%rax", vr.offset)
+		emit("lea %d(%%rbp), %%rax", vr.offset + offset)
 	}
 }
 
@@ -338,7 +338,7 @@ func (ast *ExprUop) emit() {
 			if !ok {
 				errorft(ast.token(), "rel is not an variable")
 			}
-			vr.emitAddress()
+			vr.emitAddress(0)
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
@@ -976,7 +976,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			values: lit.values,
 		}
 		assignToArray(lit.invisiblevar, arrayLiteral)
-		lit.invisiblevar.emitAddress()
+		lit.invisiblevar.emitAddress(0)
 		emit("push %%rax")
 		emit("push $%d", lit.invisiblevar.gtype.length) // len
 		emit("push $%d", lit.invisiblevar.gtype.length) // cap
@@ -1133,9 +1133,11 @@ func (ast *StmtSatementList) emit() {
 }
 
 func loadCollectIndex(array Expr, index Expr, offset int) {
+	emit("# loadCollectIndex")
 	if array.getGtype().typ == G_ARRAY {
 		elmType := array.getGtype().elementType
-		array.emit()
+		emit("# array.emit()")
+		array.emit() // emit address
 		emit("push %%rax") // store address of variable
 
 		index.emit()

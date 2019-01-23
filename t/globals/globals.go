@@ -78,13 +78,15 @@ func assign1() {
 
 func assign2() {
 	gstructhasslice = StructHasSlice{}
-	fmt.Printf("%d\n", len(gstructhasslice.slice) + 28) // 28
+	fmt.Printf("%d\n", len(gstructhasslice.slice)+28) // 28
+}
 
+func assign3() {
 	gstructhasarray = StructHasArray{
 		array: [2]int{28,29},
 	}
-	//fmt.Printf("%d\n", gstructhasarray.array[0]) // 28
-
+	fmt.Printf("%d\n", gstructhasarray.array[1]) // 29
+}
 	/*
 	*/
 	/*
@@ -135,7 +137,7 @@ func assign2() {
 		},
 	}
 	*/
-}
+
 
 func main() {
 	eval()
@@ -143,6 +145,7 @@ func main() {
 	evalnestedarary()
 	assign1()
 	assign2()
+	assign3()
 }
 
 
