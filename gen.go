@@ -1044,8 +1044,15 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 	case *ExprArrayLiteral:
 		arrayLiteral := rhs.(*ExprArrayLiteral)
-		for i, val := range arrayLiteral.values {
-			val.emit()
+		for i := 0; i < arrayType.length; i++ {
+			if i >= len(arrayLiteral.values) {
+				// zero value
+				emit("mov $0, %%rax")
+			} else {
+				val := arrayLiteral.values[i]
+				val.emit()
+			}
+
 			if variable.isGlobal {
 				emitGsave(elmSize, variable.varname, i*elmSize)
 			} else {
