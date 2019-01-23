@@ -319,6 +319,15 @@ func (vr *ExprVariable) emitOffsetSave(size int, offset int) {
 	}
 }
 
+func (vr *ExprVariable) emitOffsetLoad(size int, offset int) {
+	assert(0 <= size && size <= 8, vr.token(), "invalid size")
+	if vr.isGlobal {
+		emitGload(size, vr.varname, offset)
+	} else {
+		emitLload(size, vr.offset + offset)
+	}
+}
+
 func (ast *ExprUop) emit() {
 	//debugf("emitting ExprUop")
 	if ast.op == "&" {
@@ -602,6 +611,16 @@ func (e *ExprStructField) getLocalOffset() int {
 	return vr.getLocalOffset() + field.offset
 }
 
+func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
+	rel, ok := e.strct.(*Relation)
+	assert(ok, e.tok, "should be *Relation")
+	vr, ok := rel.expr.(*ExprVariable)
+	assert(ok, e.tok, "should be *ExprVariable")
+	assert(vr.gtype.typ == G_REL, e.tok, "expect G_REL, but got "+vr.gtype.String())
+	field := vr.gtype.relation.gtype.getField(e.fieldname)
+	vr.emitOffsetLoad(size, field.offset + offset)
+}
+
 func (e *ExprStructField) emitLsave() {
 	rel, ok := e.strct.(*Relation)
 	assert(ok, e.tok, "should be *Relation")
@@ -793,6 +812,20 @@ func emitGsave(regSize int, varname identifier, offset int) {
 		emit("mov %%%s, %s+%d(%%rip)", reg, varname, offset)
 	} else {
 		emit("mov %%%s, %s(%%rip)", reg, varname)
+	}
+}
+
+func emitLload(regSize int, loff int) {
+	reg := getReg(regSize)
+	emit("mov %d(%%rbp), %%%s", loff, reg)
+}
+
+func emitGload(regSize int, varname identifier, offset int) {
+	reg := getReg(regSize)
+	if offset != 0 {
+		emit("mov %s+%d(%%rip), %%%s", varname, reg, offset)
+	} else {
+		emit("mov %s(%%rip), %%%s", varname, reg)
 	}
 }
 
@@ -1028,10 +1061,10 @@ func assignToArray(lhs Expr, rhs Expr) {
 			rel := rhs.(*Relation)
 			arrayVariable, ok := rel.expr.(*ExprVariable)
 			assert(ok, nil, "ok")
-			emit("mov %d(%%rbp), %%rax", arrayVariable.getLocalOffset()+offsetByIndex)
+			arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
 		case *ExprStructField:
 			strctField := rhs.(*ExprStructField)
-			emit("mov %d(%%rbp), %%rax", strctField.getLocalOffset()+offsetByIndex)
+			strctField.emitOffsetLoad(elmSize, offsetByIndex)
 		default:
 			TBI(rhs.token(), "no supporetd %T", rhs)
 		}
