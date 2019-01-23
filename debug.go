@@ -307,7 +307,11 @@ func TBI(tok *Token, format string, v ...interface{}) {
 
 // errorf with a position token
 func errorft(tok *Token, format string, v ...interface{}) {
-	errorf(format + "\n " + tok.String(), v...)
+	var tokString string
+	if tok != nil {
+		tokString = tok.String()
+	}
+	errorf(format + "\n " + tokString, v...)
 }
 
 func errorf(format string, v ...interface{}) {
