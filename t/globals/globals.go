@@ -105,21 +105,27 @@ func assign4() {
 	}
 	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 30
 }
-	/*
+
+func assign5() {
 	gpoints = [...]Point{
 		Point{
-			X:1,
-			Y:2,
+			X:26,
+			Y:27,
 		},
 		Point{
-			X:3,
-			Y:4,
+			X:28,
+			Y:29,
 		},
 		Point{
-			X:5,
-			Y:6,
+			X:30,
+			Y:31,
 		},
 	}
+
+	fmt.Printf("%d\n", gpoints[2].Y) // 31
+	fmt.Printf("%d\n", gpoints[1].X + 4) // 32
+}
+	/*
 
 	gpolygon = Polygon{
 		line2: [...]Point{
@@ -150,6 +156,7 @@ func main() {
 	assign2()
 	assign3()
 	assign4()
+	assign5()
 }
 
 

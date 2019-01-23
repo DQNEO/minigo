@@ -575,21 +575,21 @@ func (e *ExprIndex) emitSave() {
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
 
-	emit("push %%rax") // stash head address of collection
+	emit("push %%rax # stash head address of collection")
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
 	elmType := collectionType.elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax", size) // size of one element
-	emit("imul %%rcx, %%rax")    // index * size
-	emit("push %%rax")           // store index * size
-	emit("pop %%rcx")            // load  index * size
-	emit("pop %%rbx")            // load address of variable
-	emit("add %%rcx , %%rbx")    // (index * size) + address
-	emit("pop %%rax")            // load RHS value
+	emit("mov $%d, %%rax # size of one element", size)
+	emit("imul %%rcx, %%rax # index * size" )
+	emit("push %%rax # store index * size")
+	emit("pop %%rcx # oad  index * size")
+	emit("pop %%rbx # load address of variable")
+	emit("add %%rcx , %%rbx # (index * size) + address")
+	emit("pop %%rax # load RHS value")
 	reg := getReg(size)
-	emit("mov %%%s, (%%rbx)", reg) // dereference the content of an emelment
+	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
 }
 
 func (e *ExprVariable) getLocalOffset() int {
@@ -827,12 +827,10 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	variable := lhs
-	structliteral, ok := rhs.(*ExprStructLiteral)
-	assert(ok || rhs == nil, nil, fmt.Sprintf("invalid rhs: %T", rhs ))
-
+	assert(rhs == nil || (rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_STRUCT),
+		lhs.token(),"rhs should be struct type")
 	// initializes with zero values
-	for _, fieldtype := range variable.getGtype().relation.gtype.fields {
+	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
 		//debugf("%#v", fieldtype)
 		switch  {
 		case fieldtype.typ == G_ARRAY:
@@ -840,31 +838,36 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			elmSize := arrayType.elementType.getSize()
 			for i := 0; i < arrayType.length ; i ++ {
 				emit("mov $0, %%rax")
-				emitOffsetSave(variable, elmSize, fieldtype.offset + i*elmSize)
+				emitOffsetSave(lhs, elmSize, fieldtype.offset + i*elmSize)
 			}
 		case fieldtype.typ == G_SLICE:
 			emit("# initialize slice with a zero value")
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
-			emitSaveSlice(variable, fieldtype.offset)
+			emitSaveSlice(lhs, fieldtype.offset)
 		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
 			//TBI(variable.token(), "")
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-			emitOffsetSave(variable, regSize, fieldtype.offset)
+			assert(0 < regSize && regSize <= 8, lhs.token(), fieldtype.String())
+			emitOffsetSave(lhs, regSize, fieldtype.offset)
 		}
 	}
 
 	if rhs == nil {
 		return
 	}
+	variable := lhs
 
+	structliteral, ok := rhs.(*ExprStructLiteral)
+	assert(ok || rhs == nil, nil, fmt.Sprintf("invalid rhs: %T", rhs ))
 	strcttyp := structliteral.strctname.gtype
+
 	// do assignment for each field
 	for _, field := range structliteral.fields {
+		emit("# .%s", field.key)
 		fieldtype := strcttyp.getField(field.key)
 
 		switch {
@@ -918,7 +921,9 @@ func emitOffsetSave(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		emitOffsetSave(structfield.strct, size, fieldType.offset + offset)
 	case *ExprIndex:
-		TBI(lhs.token(), "Unable to assign to %T", lhs)
+		indexExpr := lhs.(*ExprIndex)
+		emitCollectIndexSave(indexExpr.collection, indexExpr.index, offset)
+
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
@@ -1092,22 +1097,22 @@ func assignToArray(lhs Expr, rhs Expr) {
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
 	assert(rhs == nil || rhs.getGtype().typ == G_ARRAY, nil, "rhs should be array")
+	switch {
+	case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+		//TBI
+		for i := 0; i < arrayType.length; i++ {
+			left := &ExprIndex{
+				collection:lhs,
+				index:&ExprNumberLiteral{val:i,},
+			}
+			arrayLiteral, ok := rhs.(*ExprArrayLiteral)
+			assert(ok, nil, "ok")
+			assignToStruct(left, arrayLiteral.values[i])
+		}
+		return
+	default: // prrimitive type
 	for i := 0; i < arrayType.length; i++ {
 		offsetByIndex := i*elmSize
-		switch {
-		case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
-			left := &ExprIndex{
-				tok: lhs.token(),
-				collection:lhs,
-				index: &ExprNumberLiteral{val:i},
-			}
-			right := &ExprIndex{
-				tok: rhs.token(),
-				collection:rhs,
-				index: &ExprNumberLiteral{val:i},
-			}
-			assignToStruct(left, right)
-		default: // prrimitive type
 			switch rhs.(type) {
 			case nil:
 				// assign zero values
@@ -1172,6 +1177,34 @@ func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		stmt.emit()
 	}
+}
+
+func emitCollectIndexSave(array Expr, index Expr, offset int) {
+	assert(array.getGtype().typ == G_ARRAY, array.token(), "should be array")
+	elmType := array.getGtype().elementType
+	emit("push %%rax # STACK 1 : the value") // stash value
+
+	emit("# array.emit()")
+	array.emit() // emit address
+	emit("push %%rax # STACK 2") // store address of variable
+
+	index.emit()
+	emit("mov %%rax, %%rcx") // index
+
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax    # size of one element", size)
+	emit("imul %%rcx, %%rax # index * size")
+	emit("push %%rax        # STACK 3 : store index * size")
+	emit("pop %%rcx         # STACK 3: load  index * size")
+	emit("pop %%rbx         # STACK 2 : load address of variable")
+	emit("add %%rcx , %%rbx # (index * size) + address")
+	if offset > 0 {
+		emit("add $%d,  %%rbx # offset", offset)
+	}
+	emit("pop %%rax # STACK 1: restore the value")
+	emit("mov %%rax, (%%rbx) # save the value")
+	emit("")
 }
 
 func loadCollectIndex(array Expr, index Expr, offset int) {
