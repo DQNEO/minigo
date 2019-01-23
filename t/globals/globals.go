@@ -78,7 +78,7 @@ func assign1() {
 
 func assign2() {
 	gstructhasslice = StructHasSlice{}
-	//fmt.Printf("%d\n", len(gstructhasslice.slice) + 28) // 28
+	fmt.Printf("%d\n", len(gstructhasslice.slice) + 28) // 28
 
 	gstructhasarray = StructHasArray{
 		array: [2]int{28,29},

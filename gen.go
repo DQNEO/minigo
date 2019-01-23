@@ -819,7 +819,7 @@ func emitLload(regSize int, loff int) {
 
 func emitGload(regSize int, varname identifier, offset int) {
 	reg := getReg(regSize)
-	emit("mov %s+%d(%%rip), %%%s", varname, reg, offset)
+	emit("mov %s+%d(%%rip), %%%s", varname, offset, reg)
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
@@ -897,6 +897,25 @@ func assignToStruct(lhs Expr, rhs Expr) {
 }
 
 const sliceOffsetForLen = 8
+
+func emitOffsetLoad(lhs Expr, size int, offset int) {
+	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		emitOffsetLoad(rel.expr, size, offset)
+	case *ExprVariable:
+		variable := lhs.(*ExprVariable)
+		variable.emitOffsetLoad(size, offset)
+	case *ExprStructField:
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitOffsetLoad(structfield.strct, size, fieldType.offset + offset)
+	case *ExprIndex:
+		TBI(lhs.token(), "Unable to assign to %T", lhs)
+	default:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
+	}
+}
 
 func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
@@ -1346,22 +1365,15 @@ func (e *ExprLen) emit() {
 	case gtype.typ == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
 	case gtype.typ == G_SLICE:
-		var headOffset int
 		switch arg.(type) {
 		case *Relation:
-			rel := arg.(*Relation)
-			variable, ok := rel.expr.(*ExprVariable)
-			assert(ok, arg.token(), "ok")
-			if variable.isGlobal {
-				emit("mov %d+%s(%%rip), %%rax", ptrSize, variable.varname)
-			} else {
-				headOffset = variable.offset
-				emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
-			}
+			emit("# Relation")
+			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprStructField:
-			headOffset = arg.(*ExprStructField).getLocalOffset()
-			emit("mov %d(%%rbp), %%rax", headOffset + ptrSize)
+			emit("# ExprStructField")
+			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
+			emit("# ExprSliceLiteral")
 			length := len(arg.(*ExprSliceLiteral).values)
 			emit("mov $%d, %%rax", length)
 		case *ExprSlice:
