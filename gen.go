@@ -839,7 +839,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	assert(ok || rhs == nil, nil, "invalid rhs")
 
 	// initializes with zero values
-	for _, fieldtype := range variable.gtype.relation.gtype.fields {
+	for _, fieldtype := range variable.getGtype().relation.gtype.fields {
 		//debugf("%#v", fieldtype)
 		localOffset := variable.offset + fieldtype.offset
 		switch fieldtype.typ {
@@ -850,7 +850,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, variable.tok, fieldtype.String())
+			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
 			emitLsave(regSize, localOffset)
 		}
 	}
@@ -889,7 +889,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			field.value.emit()
 
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, structliteral.tok, fieldtype.String())
+			assert(0 < regSize && regSize <= 8, structliteral.token(), fieldtype.String())
 			emitLsave(regSize, localOffset)
 		}
 	}
