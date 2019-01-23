@@ -1003,18 +1003,18 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 	arrayType := lhs.getGtype()
 	elmSize := arrayType.elementType.getSize()
-
-	if rhs == nil {
+	if rhs != nil {
+		rightType := rhs.getGtype()
+		assert(rightType.typ == G_ARRAY, nil, "rhs should be array")
+	}
+	switch rhs.(type) {
+	case nil:
 		// assign zero values
 		for i := 0; i < arrayType.length; i++ {
 			emit("mov $0, %%rax")
 			offsetByIndex := i*elmSize
 			variable.emitOffsetSave(elmSize, offsetByIndex)
 		}
-		return
-	}
-
-	switch rhs.(type) {
 	case *Relation:
 		rel := rhs.(*Relation)
 		arrayVariable, ok := rel.expr.(*ExprVariable)
@@ -1026,8 +1026,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 		}
 	case *ExprStructField:
 		strctField := rhs.(*ExprStructField)
-		fieldType := strctField.getGtype()
-		assert(fieldType.typ == G_ARRAY, nil, "should be array")
 		for i := 0; i < arrayType.length; i++ {
 			offsetByIndex := i*elmSize
 			emit("mov %d(%%rbp), %%rax", strctField.getOffset()+ offsetByIndex)
