@@ -1009,37 +1009,14 @@ func assignToArray(lhs Expr, rhs Expr) {
 	arrayType := lhs.getGtype()
 	elmSize := arrayType.elementType.getSize()
 	assert(rhs == nil || rhs.getGtype().typ == G_ARRAY, nil, "rhs should be array")
-	switch rhs.(type) {
-	case nil:
-		// assign zero values
-		for i := 0; i < arrayType.length; i++ {
+	for i := 0; i < arrayType.length; i++ {
+		offsetByIndex := i*elmSize
+		switch rhs.(type) {
+		case nil:
+			// assign zero values
 			emit("mov $0, %%rax")
-			offsetByIndex := i*elmSize
-			variable.emitOffsetSave(elmSize, offsetByIndex)
-		}
-	case *Relation:
-		rel := rhs.(*Relation)
-		arrayVariable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
-
-		for i := 0; i < arrayType.length; i++ {
-			offsetByIndex := i*elmSize
-			emit("mov %d(%%rbp), %%rax", arrayVariable.getLocalOffset() + offsetByIndex)
-			variable.emitOffsetSave(elmSize, offsetByIndex)
-		}
-	case *ExprStructField:
-		strctField := rhs.(*ExprStructField)
-
-		for i := 0; i < arrayType.length; i++ {
-			offsetByIndex := i*elmSize
-			emit("mov %d(%%rbp), %%rax", strctField.getLocalOffset()+ offsetByIndex)
-			variable.emitOffsetSave(elmSize, offsetByIndex)
-		}
-
-	case *ExprArrayLiteral:
-		arrayLiteral := rhs.(*ExprArrayLiteral)
-		for i := 0; i < arrayType.length; i++ {
-			offsetByIndex := i*elmSize
+		case *ExprArrayLiteral:
+			arrayLiteral := rhs.(*ExprArrayLiteral)
 			if i >= len(arrayLiteral.values) {
 				// zero value
 				emit("mov $0, %%rax")
@@ -1047,11 +1024,19 @@ func assignToArray(lhs Expr, rhs Expr) {
 				val := arrayLiteral.values[i]
 				val.emit()
 			}
-
-			variable.emitOffsetSave(elmSize, offsetByIndex)
+		case *Relation:
+			rel := rhs.(*Relation)
+			arrayVariable, ok := rel.expr.(*ExprVariable)
+			assert(ok, nil, "ok")
+			emit("mov %d(%%rbp), %%rax", arrayVariable.getLocalOffset()+offsetByIndex)
+		case *ExprStructField:
+			strctField := rhs.(*ExprStructField)
+			emit("mov %d(%%rbp), %%rax", strctField.getLocalOffset()+offsetByIndex)
+		default:
+			TBI(rhs.token(), "no supporetd %T", rhs)
 		}
-	default:
-		TBI(rhs.token(), "no supporetd %T", rhs)
+
+		variable.emitOffsetSave(elmSize, offsetByIndex)
 	}
 }
 
