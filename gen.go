@@ -120,7 +120,7 @@ func (f *DeclFunc) emitPrologue() {
 	if f.isMainMain {
 		if importOS {
 			emit("# set Args")
-			emit("mov %%rsi, Args(%%rip)")       // set pointer (**argv)
+			emit("mov %%rsi, 0+Args(%%rip)")       // set pointer (**argv)
 			emit("mov %%rdi, 8+Args(%%rip)")     // set len (argc)
 			emit("mov %%rdi, 16+Args(%%rip)")     // set cap (argc)
 		}
@@ -809,11 +809,7 @@ func emitLsave(regSize int, loff int) {
 
 func emitGsave(regSize int, varname identifier, offset int) {
 	reg := getReg(regSize)
-	if offset != 0 {
-		emit("mov %%%s, %s+%d(%%rip)", reg, varname, offset)
-	} else {
-		emit("mov %%%s, %s(%%rip)", reg, varname)
-	}
+	emit("mov %%%s, %s+%d(%%rip)", reg, varname, offset)
 }
 
 func emitLload(regSize int, loff int) {
@@ -823,11 +819,7 @@ func emitLload(regSize int, loff int) {
 
 func emitGload(regSize int, varname identifier, offset int) {
 	reg := getReg(regSize)
-	if offset != 0 {
-		emit("mov %s+%d(%%rip), %%%s", varname, reg, offset)
-	} else {
-		emit("mov %s(%%rip), %%%s", varname, reg)
-	}
+	emit("mov %s+%d(%%rip), %%%s", varname, reg, offset)
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
