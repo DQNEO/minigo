@@ -29,8 +29,8 @@ func f1() {
 		id:  3,
 		age: 2,
 		p: point{
-			x:8,
-			y:7,
+			x: 8,
+			y: 7,
 		},
 	}
 	fmt.Printf("%d\n", i)
@@ -53,8 +53,8 @@ func f2() {
 		id:  3,
 		age: 2,
 		p: point{
-			x:8,
-			y:9,
+			x: 8,
+			y: 9,
 		},
 	}
 
@@ -68,10 +68,11 @@ func main() {
 	f1()
 	f2()
 }
+
 type User struct {
 	id  int
 	age int
-	p point
+	p   point
 }
 
 type point struct {

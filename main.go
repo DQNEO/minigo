@@ -117,7 +117,7 @@ func main() {
 	}
 
 	if debugAst {
-		astFiles[len(astFiles) -1].dump()
+		astFiles[len(astFiles)-1].dump()
 	}
 
 	var importedPackages []*stdpkg

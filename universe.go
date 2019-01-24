@@ -20,7 +20,6 @@ func setPredeclaredIdentifiers(universe *scope) {
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
 
-
 	universe.setFunc("len", &ExprFuncRef{
 		funcdef: builinLen,
 	})
@@ -76,14 +75,14 @@ func predeclareLibcFuncs(universe *scope) {
 	})
 	universe.setFunc("open", &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: "libc",
+			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc("read", &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: "libc",
+			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})

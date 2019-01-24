@@ -29,7 +29,7 @@ func eval() {
 
 func evalnested() {
 	// nested data
-	fmt.Printf("%d\n", gstruct.inner.gint) // 12
+	fmt.Printf("%d\n", gstruct.inner.gint)        // 12
 	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 13
 	if gstruct.inner.inner.gtrue == true {
 		fmt.Printf("14\n")
@@ -40,11 +40,11 @@ var garrayommittied [16]int = [16]int{3}
 
 func evalnestedarary() {
 	var i int = gpoints[2].Y
-	fmt.Printf("%d\n", i + 9) //15
+	fmt.Printf("%d\n", i+9) //15
 
-	fmt.Printf("%d\n", len(garrayommittied)) // 16
-	fmt.Printf("%d\n", garrayommittied[0] + 14) // 17
-	fmt.Printf("%d\n", garrayommittied[15] + 18) // 18
+	fmt.Printf("%d\n", len(garrayommittied))   // 16
+	fmt.Printf("%d\n", garrayommittied[0]+14)  // 17
+	fmt.Printf("%d\n", garrayommittied[15]+18) // 18
 }
 
 func assign1() {
@@ -67,8 +67,8 @@ func assign1() {
 	fmt.Printf("%d\n", garray[1])    // 24
 	fmt.Printf("%d\n", garray[2]+25) // 25
 	gpoint = Point{
-		X:26,
-		Y:27,
+		X: 26,
+		Y: 27,
 	}
 
 	fmt.Printf("%d\n", gpoint.X) // 26
@@ -83,7 +83,7 @@ func assign2() {
 
 func assign3() {
 	gstructhasarray = StructHasArray{
-		array: [2]int{28,29},
+		array: [2]int{28, 29},
 	}
 	fmt.Printf("%d\n", gstructhasarray.array[1]) // 29
 }
@@ -109,21 +109,21 @@ func assign4() {
 func assign5() {
 	gpoints = [...]Point{
 		Point{
-			X:26,
-			Y:27,
+			X: 26,
+			Y: 27,
 		},
 		Point{
-			X:28,
-			Y:29,
+			X: 28,
+			Y: 29,
 		},
 		Point{
-			X:30,
-			Y:31,
+			X: 30,
+			Y: 31,
 		},
 	}
 
-	fmt.Printf("%d\n", gpoints[2].Y) // 31
-	fmt.Printf("%d\n", gpoints[1].X + 4) // 32
+	fmt.Printf("%d\n", gpoints[2].Y)   // 31
+	fmt.Printf("%d\n", gpoints[1].X+4) // 32
 }
 
 func assign6() {
@@ -147,9 +147,6 @@ func assign6() {
 	fmt.Printf("%d\n", gpolygon.line2[1].Y) // 33
 }
 
-
-
-
 func main() {
 	eval()
 	evalnested()
@@ -162,62 +159,61 @@ func main() {
 	assign6()
 }
 
-
 var gint int = 1
 var gchar byte = '2'
 var gtrue bool = true
 var gfalse bool = false
 
 var gstruct = MyStruct{
-	gint:5,
-	gchar:'6',
-	gtrue:true,
-	gfalse:false,
+	gint:   5,
+	gchar:  '6',
+	gtrue:  true,
+	gfalse: false,
 	inner: MyInnerStruct{
-		gint:12,
+		gint:  12,
 		gtrue: true,
 		inner: MyInnerInnerStruct{
-			gtrue:true,
-			gchar:13,
+			gtrue: true,
+			gchar: 13,
 		},
 	},
 }
 
-var garray [3]int = [...]int{9,10,11}
+var garray [3]int = [...]int{9, 10, 11}
 
 var gpoint Point = Point{
-	X:2,
-	Y:4,
+	X: 2,
+	Y: 4,
 }
 
 var gpoints [3]Point = [...]Point{
 	Point{
-		X:1,
-		Y:2,
+		X: 1,
+		Y: 2,
 	},
 	Point{
-		X:3,
-		Y:4,
+		X: 3,
+		Y: 4,
 	},
 	Point{
-		X:5,
-		Y:6,
+		X: 5,
+		Y: 6,
 	},
 }
 
 var gpolygon Polygon = Polygon{
 	line2: [...]Point{
 		Point{
-			X:1,
-			Y:2,
+			X: 1,
+			Y: 2,
 		},
 		Point{
-			X:3,
-			Y:4,
+			X: 3,
+			Y: 4,
 		},
 		Point{
-			X:5,
-			Y:6,
+			X: 5,
+			Y: 6,
 		},
 	},
 }
@@ -227,25 +223,25 @@ var gstructhasarray StructHasArray
 var gstructhasslice StructHasSlice
 
 type MyStruct struct {
-	gint int
-	gchar byte
-	gtrue bool
+	gint   int
+	gchar  byte
+	gtrue  bool
 	gfalse bool
-	inner MyInnerStruct
+	inner  MyInnerStruct
 }
 
 type MyInnerStruct struct {
-	gint int
-	gchar byte
-	gtrue bool
+	gint   int
+	gchar  byte
+	gtrue  bool
 	gfalse bool
-	inner MyInnerInnerStruct
+	inner  MyInnerInnerStruct
 }
 
 type MyInnerInnerStruct struct {
-	gint int
-	gchar byte
-	gtrue bool
+	gint   int
+	gchar  byte
+	gtrue  bool
 	gfalse bool
 }
 

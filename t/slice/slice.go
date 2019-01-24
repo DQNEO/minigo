@@ -46,7 +46,7 @@ func f2() {
 
 	var slice4 []int
 	slice4 = slice3
-	fmt.Printf("%d\n", slice4[2] +9) //15
+	fmt.Printf("%d\n", slice4[2]+9) //15
 
 	bilbo := Hobbit{
 		id:    0,
@@ -71,11 +71,11 @@ func f3() {
 	var array [3]int = [3]int{1, 2, 3}
 	var slice = array[1:3]
 	slice[1] = 19
-	fmt.Printf("%d\n", slice[1]) // 19
-	fmt.Printf("%d\n", array[2] + 1) // 20
+	fmt.Printf("%d\n", slice[1])   // 19
+	fmt.Printf("%d\n", array[2]+1) // 20
 }
 
-var gslice = []int{1,3,5}
+var gslice = []int{1, 3, 5}
 
 func f4() {
 	gslice[1] = 21

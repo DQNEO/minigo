@@ -74,7 +74,7 @@ func (gtype *Gtype) getSize() int {
 			return ptrSize
 		} else if gtype.typ == G_SLICE {
 			intSize := 8
-			return ptrSize + intSize * 2
+			return ptrSize + intSize*2
 		} else {
 			return gtype.size
 		}
@@ -289,7 +289,7 @@ func (e *ExprNumberLiteral) getGtype() *Gtype {
 
 func (e *ExprStringLiteral) getGtype() *Gtype {
 	return &Gtype{
-		typ: G_STRING,
+		typ:    G_STRING,
 		length: len(e.val),
 	}
 }
@@ -336,4 +336,3 @@ func (e *ExprVaArg) getGtype() *Gtype {
 func (e *ExprMapLiteral) getGtype() *Gtype {
 	return e.gtype
 }
-

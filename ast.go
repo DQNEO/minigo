@@ -338,8 +338,8 @@ type MapElement struct {
 }
 
 type ExprMapLiteral struct {
-	tok *Token
-	gtype *Gtype
+	tok      *Token
+	gtype    *Gtype
 	elements []*MapElement
 }
 

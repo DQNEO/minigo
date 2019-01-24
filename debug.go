@@ -208,7 +208,7 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	TBI(e.token(),"")
+	TBI(e.token(), "")
 }
 
 func (e *ExprIndex) dump() {
@@ -302,7 +302,7 @@ func (e *ExprMapLiteral) dump() {
 
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
-	errorft(tok, "(To Be Implemented) " + format, v...)
+	errorft(tok, "(To Be Implemented) "+format, v...)
 }
 
 // errorf with a position token
@@ -311,7 +311,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	if tok != nil {
 		tokString = tok.String()
 	}
-	errorf(format + "\n " + tokString, v...)
+	errorf(format+"\n "+tokString, v...)
 }
 
 func errorf(format string, v ...interface{}) {

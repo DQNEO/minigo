@@ -31,12 +31,11 @@ func f2() {
 }
 
 func f3() {
-	var slice = []int{112,113,114}
+	var slice = []int{112, 113, 114}
 	for _, v := range slice {
-		fmt.Printf("%d\n", v - 100)
+		fmt.Printf("%d\n", v-100)
 	}
 }
-
 
 func f4() {
 	var slice []int

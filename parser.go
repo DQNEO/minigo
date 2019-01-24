@@ -458,15 +458,15 @@ func (p *parser) parsePrim() Expr {
 			value := p.parseExpr()
 			p.expect(",")
 			element := &MapElement{
-				tok: key.token(),
-				key:key,
-				value:value,
+				tok:   key.token(),
+				key:   key,
+				value: value,
 			}
 			elements = append(elements, element)
 		}
 		return &ExprMapLiteral{
-			tok: ptok,
-			gtype: gtype,
+			tok:      ptok,
+			gtype:    gtype,
 			elements: elements,
 		}
 	case tok.isPunct("["): // array literal, slice literal or type casting
@@ -712,8 +712,8 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
-			varname: varname,
-			gtype:   gtype,
+			varname:  varname,
+			gtype:    gtype,
 			isGlobal: p.isGlobal(),
 		}
 		p.localvars = append(p.localvars, variable)
@@ -1217,7 +1217,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
-	assert(p.isGlobal() == false,  e.token(), "should not be in global scope")
+	assert(p.isGlobal() == false, e.token(), "should not be in global scope")
 	variable := p.newVariable(rel.name, nil)
 	p.currentScope.setVar(rel.name, variable)
 	rel.expr = variable
