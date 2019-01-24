@@ -609,26 +609,6 @@ func (e *ExprIndex) emitSave() {
 	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
 }
 
-func (e *ExprVariable) getLocalOffset() int {
-	assert(e.isGlobal == false, e.token(), "should be local")
-	return e.offset
-}
-
-func (e *ExprStructField) getLocalOffset() int {
-	var vr *ExprVariable
-	if rel, ok := e.strct.(*Relation); ok {
-		vr, ok = rel.expr.(*ExprVariable)
-		assert(ok, e.tok, "should be *ExprVariable")
-	} else {
-		var ok bool
-		vr, ok = e.strct.(*ExprVariable)
-		assert(ok, e.tok, "should be *ExprVariable")
-	}
-	assert(vr.gtype.typ == G_REL, e.tok, "expect G_REL|G_POINTER , but got "+vr.gtype.String())
-	field := vr.gtype.relation.gtype.getField(e.fieldname)
-	return vr.getLocalOffset() + field.offset
-}
-
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	rel, ok := e.strct.(*Relation)
 	assert(ok, e.tok, "should be *Relation")
@@ -637,29 +617,6 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	assert(vr.gtype.typ == G_REL, e.tok, "expect G_REL, but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
 	vr.emitOffsetLoad(size, field.offset + offset)
-}
-
-func (e *ExprStructField) emitLsave() {
-	rel, ok := e.strct.(*Relation)
-	assert(ok, e.tok, "should be *Relation")
-	vr, ok := rel.expr.(*ExprVariable)
-	assert(ok, e.tok, "should be *ExprVariable")
-	assert(vr.gtype.typ == G_REL || vr.gtype.typ == G_POINTER, e.tok, "expect G_REL|G_POINTER , but got "+vr.gtype.String())
-	if vr.gtype.typ == G_REL {
-		field := vr.gtype.relation.gtype.getField(e.fieldname)
-		emitLsave(field.getSize(), vr.offset+field.offset)
-	} else if vr.gtype.typ == G_POINTER {
-		field := vr.gtype.origType.relation.gtype.getField(e.fieldname)
-		emit("push %%rax # rhs")
-		emit("# assigning to a struct pointer field")
-		vr.emit()
-		emit("mov %%rax, %%rcx")
-		emit("add $%d, %%rcx", field.offset)
-		emit("pop %%rax  # rhs")
-		reg := getReg(field.getSize())
-		emit("mov %%%s, (%%rcx)", reg)
-	}
-
 }
 
 func (s *StmtIf) emit() {
