@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 make >/dev/null
-./minigo.darwin --parse-only "$@"
+./minigo --parse-only "$@"
 
