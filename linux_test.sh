@@ -4,8 +4,6 @@ PATH="/usr/lib/go-1.10/bin:$PATH"
 
 prog_name=minigo.linux
 
-as_file=out/a.s
-obj_file=out/a.o
 actual=out/actual.txt
 
 function test_file {
@@ -13,6 +11,8 @@ function test_file {
     local src=t/$basename/${basename}.go
     local expected=t/expected/${basename}.txt
     local bin_file=out/${basename}.bin
+    local as_file=out/${basename}.s
+    local obj_file=out/${basename}.o
     rm -f $actual
     echo -n "test_file $src  ... "
     ./${prog_name} $src > $as_file
