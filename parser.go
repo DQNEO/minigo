@@ -705,6 +705,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	var variable *ExprVariable
 	if p.isGlobal() {
 		variable = &ExprVariable{
+			tok: p.lastToken(),
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
@@ -712,6 +713,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
+			tok: p.lastToken(),
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
