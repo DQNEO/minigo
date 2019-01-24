@@ -73,8 +73,7 @@ func (gtype *Gtype) getSize() int {
 		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
 			return ptrSize
 		} else if gtype.typ == G_SLICE {
-			intSize := 8
-			return ptrSize + intSize*2
+			return ptrSize + IntSize + IntSize
 		} else {
 			return gtype.size
 		}
