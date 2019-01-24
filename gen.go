@@ -294,6 +294,7 @@ func emitIncrDecl(inst string, operand Expr) {
 
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSave() {
+	emit("# *ExprUop.emitSave()")
 	assert(uop.op == "*", uop.tok, "uop op should be *")
 	emit("push %%rax")
 	uop.operand.emit()
@@ -314,7 +315,18 @@ func (rel *Relation) emitSave() {
 }
 
 func (vr *ExprVariable) emitOffsetSave(size int, offset int) {
+	emit("# ExprVariable.emitOffsetSave")
 	assert(0 <= size && size <= 8, vr.token(), "invalid size")
+	if vr.getGtype().typ == G_POINTER && offset > 0 {
+		assert(vr.getGtype().typ == G_POINTER, vr.token(), "")
+		emit("push %%rax # save the value")
+		vr.emit()
+		emit("mov %%rax, %%rcx")
+		emit("add $%d, %%rcx", offset)
+		emit("pop %%rax")
+		emit("mov %%rax, (%%rcx)")
+		return
+	}
 	if vr.isGlobal {
 		emitGsave(size, vr.varname, offset)
 	} else {
@@ -534,7 +546,7 @@ func (ast *StmtAssignment) emit() {
 				// suppose primitive
 				emit("# evaluating rhs")
 				right.emit()
-				emit("# saving it to lhs")
+				emit("# saving %%rax to lhs")
 				emitSave(left)
 			}
 		}
