@@ -4,7 +4,7 @@ import "fmt"
 
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-const INT_SIZE = 8 // not like 8cc
+const IntSize = 8 // not like 8cc
 
 var hiddenArrayId = 1
 
@@ -90,7 +90,7 @@ func (f *DeclFunc) emitPrologue() {
 		if i == 0 {
 			emit("# Allocating stack for params")
 		}
-		offset -= INT_SIZE
+		offset -= IntSize
 		param.offset = offset
 		emit("push %%%s", RegsForCall[i])
 	}
