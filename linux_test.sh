@@ -1,21 +1,16 @@
 #!/bin/bash
 set -e
-PATH="/usr/lib/go-1.10/bin:$PATH"
-
-prog_name=minigo.linux
 
 actual=out/actual.txt
 
 function test_file {
     local basename=$1
-    local src=t/$basename/${basename}.go
     local expected=t/expected/${basename}.txt
     local bin_file=out/${basename}.bin
     local as_file=out/${basename}.s
     local obj_file=out/${basename}.o
     rm -f $actual
-    echo -n "test_file $src  ... "
-    ./${prog_name} $src > $as_file
+    echo -n "test_file $as_file  ... "
     as -o $obj_file $as_file
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
