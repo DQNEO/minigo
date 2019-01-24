@@ -23,7 +23,7 @@ $ docker run --rm -it -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 After entering container, you can make and run it.
 
 ```
-root@40823f69850c:/mnt# make
-root@40823f69850c:/mnt# ./minigo.linux t/hello.go |./as
+root@3d19df4a8fa6:/mnt# ./minigo t/hello/hello.go  > out/a.s
+root@3d19df4a8fa6:/mnt# ./as
 hello world
 ```
