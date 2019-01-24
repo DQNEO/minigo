@@ -9,7 +9,7 @@ stdlib.go: stdlib/*/*.go
 test: all
 	./resolve *.go
 	./compile.sh
-	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go ./linux_test.sh
+	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential ./linux_test.sh
 
 parse: all
 	./parse *.go
