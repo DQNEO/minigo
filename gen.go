@@ -225,14 +225,14 @@ func (ast *ExprVariable) emit() {
 	}
 }
 
-func (vr *ExprVariable) emitAddress(offset int) {
-	if vr.isGlobal {
-		emit("lea %s+%d(%%rip), %%rax", vr.varname, offset)
+func (variable *ExprVariable) emitAddress(offset int) {
+	if variable.isGlobal {
+		emit("lea %s+%d(%%rip), %%rax", variable.varname, offset)
 	} else {
-		if vr.offset == 0 {
-			errorft(vr.token(), "offset should not be zero for localvar %s", vr.varname)
+		if variable.offset == 0 {
+			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
-		emit("lea %d(%%rbp), %%rax", vr.offset + offset)
+		emit("lea %d(%%rbp), %%rax", variable.offset + offset)
 	}
 }
 
@@ -310,36 +310,36 @@ func (rel *Relation) emitSave() {
 	if rel.expr == nil {
 		errorft(rel.token(), "left.rel.expr is nil")
 	}
-	vr := rel.expr.(*ExprVariable)
-	vr.emitOffsetSave(vr.getGtype().getSize(), 0)
+	variable := rel.expr.(*ExprVariable)
+	variable.emitOffsetSave(variable.getGtype().getSize(), 0)
 }
 
-func (vr *ExprVariable) emitOffsetSave(size int, offset int) {
+func (variable *ExprVariable) emitOffsetSave(size int, offset int) {
 	emit("# ExprVariable.emitOffsetSave")
-	assert(0 <= size && size <= 8, vr.token(), "invalid size")
-	if vr.getGtype().typ == G_POINTER && offset > 0 {
-		assert(vr.getGtype().typ == G_POINTER, vr.token(), "")
+	assert(0 <= size && size <= 8, variable.token(), "invalid size")
+	if variable.getGtype().typ == G_POINTER && offset > 0 {
+		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
 		emit("push %%rax # save the value")
-		vr.emit()
+		variable.emit()
 		emit("mov %%rax, %%rcx")
 		emit("add $%d, %%rcx", offset)
 		emit("pop %%rax")
 		emit("mov %%rax, (%%rcx)")
 		return
 	}
-	if vr.isGlobal {
-		emitGsave(size, vr.varname, offset)
+	if variable.isGlobal {
+		emitGsave(size, variable.varname, offset)
 	} else {
-		emitLsave(size, vr.offset + offset)
+		emitLsave(size, variable.offset + offset)
 	}
 }
 
-func (vr *ExprVariable) emitOffsetLoad(size int, offset int) {
-	assert(0 <= size && size <= 8, vr.token(), "invalid size")
-	if vr.isGlobal {
-		emitGload(size, vr.varname, offset)
+func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
+	assert(0 <= size && size <= 8, variable.token(), "invalid size")
+	if variable.isGlobal {
+		emitGload(size, variable.varname, offset)
 	} else {
-		emitLload(size, vr.offset + offset)
+		emitLload(size, variable.offset + offset)
 	}
 }
 
