@@ -575,6 +575,10 @@ func emitSave(left Expr) {
 	}
 }
 
+func (e *ExprIndex) emitSaveMap() {
+	// @TODO
+}
+
 func (e *ExprIndex) emitSave() {
 	emit("push %%rax") // push RHS value
 
@@ -588,6 +592,9 @@ func (e *ExprIndex) emitSave() {
 	switch {
 	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
 		e.collection.emit() // head address
+	case collectionType.typ == G_MAP:
+		e.emitSaveMap()
+		return
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
@@ -967,6 +974,30 @@ func emitSaveSlice(lhs Expr, offset int) {
 	}
 }
 
+func assignToMap(lhs Expr, rhs Expr) {
+	emit("# assignToMap")
+	if rhs == nil {
+		emit("# initialize slice with a zero value")
+		emit("push $0")
+		emit("push $0")
+		emit("push $0")
+		emitSaveSlice(lhs, 0)
+		return
+	}
+	switch rhs.(type) {
+	case *ExprMapLiteral:
+		// @TODO
+		lit := rhs.(*ExprMapLiteral)
+		length := len(lit.elements)
+		emit("push %%rax")
+		emit("push $%d", length) // len
+		emit("push $%d", length) // cap
+	default:
+		TBI(rhs.token(), "unable to handle %T", rhs)
+	}
+	emitSaveSlice(lhs, 0)
+}
+
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
@@ -1153,6 +1184,8 @@ func (decl *DeclVar) emit() {
 		assignToSlice(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 		assignToStruct(decl.varname, decl.initval)
+	case gtype.typ == G_MAP:
+		assignToMap(decl.varname, decl.initval)
 	default:
 		// primitive types like int,bool,byte
 		rhs := decl.initval
@@ -1251,7 +1284,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
 	} else {
-		TBI(array.token(), "unable to handle %s", array.getGtype())
+		emit("mov $0, %%rax")
 	}
 
 }
@@ -1463,9 +1496,20 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING:
-		TBI(arg.token(), "unable to handle %s", gtype)
 	case gtype.typ == G_MAP:
+		switch arg.(type) {
+		case *Relation:
+			emit("# Relation")
+			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprStructField:
+			emit("# ExprStructField")
+			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprMapLiteral:
+			TBI(arg.token(), "unable to handle %T", arg)
+		default:
+			TBI(arg.token(), "unable to handle %T", arg)
+		}
+	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
@@ -1638,6 +1682,11 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		default:
 			TBI(ptok, "unable to handle %s", gtype)
 		}
+	} else if gtype.typ == G_MAP {
+		// @TODO
+		emit(".quad 0")
+		emit(".quad 0")
+		emit(".quad 0")
 	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
 		if value == nil {
 			// zero value

@@ -74,6 +74,8 @@ func (gtype *Gtype) getSize() int {
 			return ptrSize
 		} else if gtype.typ == G_SLICE {
 			return ptrSize + IntSize + IntSize
+		} else if gtype.typ == G_MAP {
+			return ptrSize + IntSize + IntSize
 		} else {
 			return gtype.size
 		}
