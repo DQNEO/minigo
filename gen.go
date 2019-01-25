@@ -665,7 +665,7 @@ func (f *StmtFor) emitMapRange() {
 		name:"",
 		expr: f.rng.invisibleMapCounter,
 	}
-	// i = 0
+	// counter = 0
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
 			mapCounter,
@@ -679,6 +679,8 @@ func (f *StmtFor) emitMapRange() {
 	emit("# init index")
 	initstmt.emit()
 
+	emit("mov heap+0(%%rip), %%rax") // key=heap[0]
+	f.rng.indexvar.emitSave()
 
 	// v = s[i]
 	/*
@@ -701,7 +703,7 @@ func (f *StmtFor) emitMapRange() {
 
 	emit("%s: # begin loop ", labelBegin)
 
-	// i < len(list)
+	// counter < len(list)
 	condition := &ExprBinop{
 		op:   "<",
 		left: mapCounter, // i
@@ -717,11 +719,16 @@ func (f *StmtFor) emitMapRange() {
 
 	f.block.emit()
 
-	// i++
+	// counter++
 	indexIncr := &StmtInc{
 		operand: mapCounter,
 	}
 	indexIncr.emit()
+	emit("lea heap+0(%%rip), %%rcx")
+	emit("imul $8, %%rax")
+	emit("add %%rax, %%rcx")
+	emit("mov (%%rcx), %%rax")
+	f.rng.indexvar.emitSave()
 
 	// v = s[i]
 	/*
@@ -1075,8 +1082,19 @@ func assignToMap(lhs Expr, rhs Expr) {
 	switch rhs.(type) {
 	case *ExprMapLiteral:
 		// @TODO
+		emit("# map literal")
 		lit := rhs.(*ExprMapLiteral)
 		length := len(lit.elements)
+		for i, element := range lit.elements {
+			// alloc key
+			// alloc value
+			// alloc array
+			element.key.emit()
+			//emit("mov $%d, %%rax", i)
+			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i*8)
+		}
+		emit("lea %s+0(%%rip), %%rax", PseudHeap)
+
 		emit("push %%rax")
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
@@ -1881,6 +1899,7 @@ func (root *IrRoot) emit() {
 		vardecl.emitGlobal()
 	}
 
+	emit(".lcomm %s, 128 # bytes", PseudHeap)
 	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
@@ -1888,3 +1907,5 @@ func (root *IrRoot) emit() {
 		funcdecl.emit()
 	}
 }
+
+const PseudHeap = "heap"
