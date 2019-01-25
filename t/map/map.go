@@ -12,9 +12,9 @@ func f1() {
 
 func f2() {
 	var lmap map[int]int = map[int]int{
-		4:3,
-		5:9,
-		6:25,
+		4:7,
+		5:8,
+		6:9,
 	}
 	fmt.Printf("%d\n", len(lmap)) // 3
 	for i := range lmap {
@@ -22,17 +22,30 @@ func f2() {
 	}
 }
 
+func f22() {
+	var lmap map[int]int = map[int]int{
+		7:8,
+		9:10,
+		11:12,
+	}
+	for i,v := range lmap {
+		fmt.Printf("%d\n", i)
+		fmt.Printf("%d\n", v)
+	}
+}
+
 func f3() {
 	var lmap map[string]int
 	value := lmap["hello"]
-	fmt.Printf("%d\n", value + 7) // 7
+	fmt.Printf("%d\n", value + 13)
 	//lmap["x"] = 1
 	value = lmap["hello"]
-	fmt.Printf("%d\n", value + 8) // 8
+	fmt.Printf("%d\n", value + 14)
 }
 
 func main() {
 	f1()
 	f2()
+	f22()
 	f3()
 }

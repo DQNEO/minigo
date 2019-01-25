@@ -679,8 +679,13 @@ func (f *StmtFor) emitMapRange() {
 	emit("# init index")
 	initstmt.emit()
 
-	emit("mov heap+0(%%rip), %%rax") // key=heap[0]
+	emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0) // key=heap[0]
 	f.rng.indexvar.emitSave()
+
+	if f.rng.valuevar != nil {
+		emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0+8) // value=heap[..]
+		f.rng.valuevar.emitSave()
+	}
 
 	// v = s[i]
 	/*
@@ -724,18 +729,24 @@ func (f *StmtFor) emitMapRange() {
 		operand: mapCounter,
 	}
 	indexIncr.emit()
-	emit("lea heap+0(%%rip), %%rcx")
-	emit("imul $8, %%rax")
+	emit("imul $16, %%rax")
+
+	// i = next_index
+	emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 0)
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
 	f.rng.indexvar.emitSave()
 
-	// v = s[i]
-	/*
 	if f.rng.valuevar != nil {
-		assignVar.emit()
+		mapCounter.emit()
+		emit("imul $16, %%rax")
+
+		emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 8)
+		emit("add %%rax, %%rcx")
+		emit("mov (%%rcx), %%rax")
+		f.rng.valuevar.emitSave()
 	}
-	*/
+
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)
 }
@@ -1090,8 +1101,10 @@ func assignToMap(lhs Expr, rhs Expr) {
 			// alloc value
 			// alloc array
 			element.key.emit()
-			//emit("mov $%d, %%rax", i)
-			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i*8)
+			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8)
+
+			element.value.emit()
+			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8 + 8)
 		}
 		emit("lea %s+0(%%rip), %%rax", PseudHeap)
 
