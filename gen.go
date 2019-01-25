@@ -1101,6 +1101,17 @@ func assignToMap(lhs Expr, rhs Expr) {
 			// alloc value
 			// alloc array
 			element.key.emit()
+			/*
+			emit("push %%rax") // save key
+			emit("# malloc 8 bytes for int")
+			  // malloc is:
+			  // check if there is a enough space for the request.
+			  // return falsy value if not.
+			  // emit("emit address, %%rax").
+			  // move cursor to the head of fresh land.
+			emit("pop %%rcx") // restore key
+			emit("mov %%rax, (%%rcx)")
+			*/
 			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8)
 
 			element.value.emit()
