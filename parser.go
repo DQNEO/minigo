@@ -1073,11 +1073,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	rangeExpr := p.parseExpr()
 	p.requireBlock = false
 	p.expect("{")
-
 	var r = &StmtFor{
 		tok: tokRange,
 		rng: &ForRangeClause{
 			tok:       tokRange,
+			invisibleMapCounter :p.newVariable("", gInt),
 			indexvar:  indexvar,
 			valuevar:  valuevar,
 			rangeexpr: rangeExpr,

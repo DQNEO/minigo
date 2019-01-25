@@ -17,6 +17,9 @@ func f2() {
 		"piyo":2,
 	}
 	fmt.Printf("%d\n", len(lmap)) // 3
+	for i := range lmap {
+		fmt.Printf("%d\n", i)
+	}
 }
 
 func f3() {

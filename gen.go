@@ -656,11 +656,91 @@ func (s *StmtIf) emit() {
 	}
 }
 
-func (f *StmtFor) emitRange() {
-	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
+func (f *StmtFor) emitMapRange() {
 
-	emit("# for range")
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+
+	mapCounter := &Relation{
+		name:"",
+		expr: f.rng.invisibleMapCounter,
+	}
+	// i = 0
+	initstmt := &StmtAssignment{
+		lefts: []Expr{
+			mapCounter,
+		},
+		rights: []Expr{
+			&ExprNumberLiteral{
+				val: 0,
+			},
+		},
+	}
+	emit("# init index")
+	initstmt.emit()
+
+
+	// v = s[i]
+	/*
+	var assignVar *StmtAssignment
+	if f.rng.valuevar != nil {
+		assignVar = &StmtAssignment{
+			lefts: []Expr{
+				f.rng.valuevar,
+			},
+			rights: []Expr{
+				&ExprIndex{
+					collection: f.rng.rangeexpr,
+					index:      f.rng.indexvar,
+				},
+			},
+		}
+		assignVar.emit()
+	}
+	*/
+
+	emit("%s: # begin loop ", labelBegin)
+
+	// i < len(list)
+	condition := &ExprBinop{
+		op:   "<",
+		left: mapCounter, // i
+		// @TODO
+		// The range expression x is evaluated once before beginning the loop
+		right: &ExprLen{
+			arg: f.rng.rangeexpr, // len(expr)
+		},
+	}
+	condition.emit()
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelEnd)
+
+	f.block.emit()
+
+	// i++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+	indexIncr.emit()
+
+	// v = s[i]
+	/*
+	if f.rng.valuevar != nil {
+		assignVar.emit()
+	}
+	*/
+	emit("jmp %s", labelBegin)
+	emit("%s: # end loop", labelEnd)
+}
+
+func (f *StmtFor) emitRange() {
+	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+	if f.rng.rangeexpr.getGtype().typ == G_MAP {
+		f.emitMapRange()
+		return
+	}
+	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
