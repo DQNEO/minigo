@@ -575,8 +575,34 @@ func emitSave(left Expr) {
 	}
 }
 
-func (e *ExprIndex) emitSaveMap() {
-	// @TODO
+// m[k] = v
+// append key and value to the tail of map data, and increment length
+func (e *ExprIndex) emitMapSet() {
+	e.collection.emit() // emit pointer address
+	emit("push %%rax # stash head address of mapData")
+
+	//emit len of the map
+	elen := &ExprLen{
+		arg: e.collection,
+	}
+	elen.emit()
+	emit("imul $%d, %%rax", 2 * 8)
+	emit("pop %%rcx") // head of map data
+	emit("add %%rax, %%rcx") // tail of map data
+
+	e.index.emit()
+	emit("mov %%rax, (%%rcx) #") // save key
+
+
+	emit("pop %%rax") // rhs
+
+	// save value
+	emit("mov %%rax, %d(%%rcx) #", 8)
+
+	// map len++
+	elen.emit()
+	emit("add $1, %%rax")
+	emitOffsetSave(e.collection, IntSize, ptrSize)
 }
 
 func (e *ExprIndex) emitSave() {
@@ -593,7 +619,7 @@ func (e *ExprIndex) emitSave() {
 	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
 		e.collection.emit() // head address
 	case collectionType.typ == G_MAP:
-		e.emitSaveMap()
+		e.emitMapSet()
 		return
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
@@ -1119,7 +1145,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		}
 		emit("lea %s+0(%%rip), %%rax", PseudHeap)
 
-		emit("push %%rax")
+		emit("push %%rax") // address (head of the heap)
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
 	default:
