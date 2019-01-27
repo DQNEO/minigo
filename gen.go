@@ -1448,6 +1448,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// r13 loop counter
 
 		// rax: found value (zero if not found)
+		// rcx: ok (1:found or 0:not found)
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1470,6 +1471,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("movzb %%al, %%eax")
 		emit("test %%rax, %%rax")
 		emit("mov $0, %%rax") // key not found. set zero value.
+		emit("mov $0, %%rcx") // ok = false
 		emit("jne %s  # jump if false", labelEnd)
 
 		// check if index matches
@@ -1484,8 +1486,9 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelIncr)
 
-		// when index matchex, set the value
+		// Value found!
 		emit("mov 8(%%rcx), %%rax") // set the found value
+		emit("mov $1, %%rcx") // ok = true
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
