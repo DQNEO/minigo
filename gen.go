@@ -576,9 +576,9 @@ func emitSave(left Expr) {
 }
 
 // m[k] = v
-// append key and value to the tail of map data, and increment length
+// append key and value to the tail of map data, and increment its length
 func (e *ExprIndex) emitMapSet() {
-	e.collection.emit() // emit pointer address
+	e.collection.emit() // emit pointer address to %rax
 	emit("push %%rax # stash head address of mapData")
 
 	//emit len of the map
@@ -586,23 +586,23 @@ func (e *ExprIndex) emitMapSet() {
 		arg: e.collection,
 	}
 	elen.emit()
-	emit("imul $%d, %%rax", 2 * 8)
-	emit("pop %%rcx") // head of map data
-	emit("add %%rax, %%rcx") // tail of map data
+	emit("imul $%d, %%rax", 2 * 8) // distance from head to tail
+	emit("pop %%rcx") // head
+	emit("add %%rax, %%rcx") // now rcx is the tail address
 
 	e.index.emit()
-	emit("mov %%rax, (%%rcx) #") // save key
+	emit("mov %%rax, (%%rcx) #") // save key to the tail
 
 
 	emit("pop %%rax") // rhs
 
 	// save value
-	emit("mov %%rax, %d(%%rcx) #", 8)
+	emit("mov %%rax, %d(%%rcx) #", 8) // save value data to the tail+8
 
 	// map len++
 	elen.emit()
 	emit("add $1, %%rax")
-	emitOffsetSave(e.collection, IntSize, ptrSize)
+	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 }
 
 func (e *ExprIndex) emitSave() {
@@ -1439,10 +1439,68 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		}
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
-	} else {
-		emit("mov $0, %%rax")
-	}
+	} else if array.getGtype().typ == G_MAP {
+		// e.g. x[key]
+		emit("# emit map index expr")
+		emit("mov $0, %%r15 # clear answer")
+		_map := array
+		emit("# emit mapData head address")
+		_map.emit()
+		emit("mov %%rax, %%r10") // copy head address
+		emitOffsetLoad(_map, IntSize, IntSize)
+		emit("mov %%rax, %%r11") // copy len
+		index.emit()
+		emit("mov %%rax, %%r12") // index value
 
+		emit("mov $0, %%r13 # init loop counter") // i = 0
+
+		labelBegin := makeLabel()
+		labelEnd := makeLabel()
+		emit("%s: # begin loop ", labelBegin)
+
+		labelIncr := makeLabel()
+		// break if i < len
+		emit("cmp %%r13, %%r11") // i < len
+		emit("setl %%al")
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("jne %s  # jump if false", labelEnd)
+
+		// check if index matches
+		emit("mov %%r13, %%rax")  // i
+		emit("imul $16, %%rax") // i * 16
+		emit("mov %%r10, %%rcx") // head
+		emit("add %%rax, %%rcx") // head + i * 16
+		emit("mov (%%rcx), %%rdx") // emit index value
+		emit("cmp %%r12, %%rdx")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("je %s  # jump if false", labelIncr)
+
+		// when index matchex, set the value
+		emit("mov 8(%%rcx), %%r15") // emit value value
+		emit("jmp %s", labelEnd)
+
+		emit("%s: # incr", labelIncr)
+		emit("add $1, %%r13") // i++
+		emit("jmp %s", labelBegin)
+
+		emit("%s: # end loop", labelEnd)
+
+		emit("mov %%r15, %%rax # set answer")
+
+		/* set register values to a global array for debug
+		emit("mov %%r10, debug+0(%%rip)")
+		emit("mov %%r11, debug+8(%%rip)")
+		emit("mov %%r12, debug+16(%%rip)")
+		emit("mov %%r13, debug+24(%%rip)")
+		emit("mov %%r15, debug+40(%%rip)")
+		*/
+
+	} else {
+		TBI(array.token(), "unable to handle %s", array.getGtype())
+	}
 }
 
 func (e *ExprIndex) emit() {

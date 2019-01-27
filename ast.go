@@ -230,7 +230,7 @@ type ExprSlice struct {
 	high       Expr
 }
 
-// Expr e.g. array[2]
+// Expr e.g. array[2], myap["foo"]
 type ExprIndex struct {
 	tok        *Token
 	collection Expr
