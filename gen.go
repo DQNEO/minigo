@@ -575,6 +575,36 @@ func emitSave(left Expr) {
 	}
 }
 
+// m[k] = v
+// append key and value to the tail of map data, and increment its length
+func (e *ExprIndex) emitMapSet() {
+	e.collection.emit() // emit pointer address to %rax
+	emit("push %%rax # stash head address of mapData")
+
+	//emit len of the map
+	elen := &ExprLen{
+		arg: e.collection,
+	}
+	elen.emit()
+	emit("imul $%d, %%rax", 2 * 8) // distance from head to tail
+	emit("pop %%rcx") // head
+	emit("add %%rax, %%rcx") // now rcx is the tail address
+
+	e.index.emit()
+	emit("mov %%rax, (%%rcx) #") // save key to the tail
+
+
+	emit("pop %%rax") // rhs
+
+	// save value
+	emit("mov %%rax, %d(%%rcx) #", 8) // save value data to the tail+8
+
+	// map len++
+	elen.emit()
+	emit("add $1, %%rax")
+	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
+}
+
 func (e *ExprIndex) emitSave() {
 	emit("push %%rax") // push RHS value
 
@@ -588,6 +618,9 @@ func (e *ExprIndex) emitSave() {
 	switch {
 	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
 		e.collection.emit() // head address
+	case collectionType.typ == G_MAP:
+		e.emitMapSet()
+		return
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
@@ -649,18 +682,19 @@ func (s *StmtIf) emit() {
 	}
 }
 
-func (f *StmtFor) emitRange() {
-	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
-
-	emit("# for range")
+func (f *StmtFor) emitMapRange() {
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
+	mapCounter := &Relation{
+		name:"",
+		expr: f.rng.invisibleMapCounter,
+	}
+	// counter = 0
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
-			f.rng.indexvar,
+			mapCounter,
 		},
 		rights: []Expr{
 			&ExprNumberLiteral{
@@ -669,7 +703,18 @@ func (f *StmtFor) emitRange() {
 		},
 	}
 	emit("# init index")
-	initstmt.emit() // i=0
+	initstmt.emit()
+
+	emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0) // key=heap[0]
+	f.rng.indexvar.emitSave()
+
+	if f.rng.valuevar != nil {
+		emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0+8) // value=heap[..]
+		f.rng.valuevar.emitSave()
+	}
+
+	// v = s[i]
+	/*
 	var assignVar *StmtAssignment
 	if f.rng.valuevar != nil {
 		assignVar = &StmtAssignment{
@@ -683,32 +728,126 @@ func (f *StmtFor) emitRange() {
 				},
 			},
 		}
-		assignVar.emit() // v = s[i]
+		assignVar.emit()
+	}
+	*/
+
+	emit("%s: # begin loop ", labelBegin)
+
+	// counter < len(list)
+	condition := &ExprBinop{
+		op:   "<",
+		left: mapCounter, // i
+		// @TODO
+		// The range expression x is evaluated once before beginning the loop
+		right: &ExprLen{
+			arg: f.rng.rangeexpr, // len(expr)
+		},
+	}
+	condition.emit()
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelEnd)
+
+	f.block.emit()
+
+	// counter++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+	indexIncr.emit()
+	emit("imul $16, %%rax")
+
+	// i = next_index
+	emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 0)
+	emit("add %%rax, %%rcx")
+	emit("mov (%%rcx), %%rax")
+	f.rng.indexvar.emitSave()
+
+	if f.rng.valuevar != nil {
+		mapCounter.emit()
+		emit("imul $16, %%rax")
+
+		emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 8)
+		emit("add %%rax, %%rcx")
+		emit("mov (%%rcx), %%rax")
+		f.rng.valuevar.emitSave()
+	}
+
+	emit("jmp %s", labelBegin)
+	emit("%s: # end loop", labelEnd)
+}
+
+func (f *StmtFor) emitRange() {
+	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+	if f.rng.rangeexpr.getGtype().typ == G_MAP {
+		f.emitMapRange()
+		return
+	}
+	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
+
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+
+	// i = 0
+	initstmt := &StmtAssignment{
+		lefts: []Expr{
+			f.rng.indexvar,
+		},
+		rights: []Expr{
+			&ExprNumberLiteral{
+				val: 0,
+			},
+		},
+	}
+	emit("# init index")
+	initstmt.emit()
+
+
+	// v = s[i]
+	var assignVar *StmtAssignment
+	if f.rng.valuevar != nil {
+		assignVar = &StmtAssignment{
+			lefts: []Expr{
+				f.rng.valuevar,
+			},
+			rights: []Expr{
+				&ExprIndex{
+					collection: f.rng.rangeexpr,
+					index:      f.rng.indexvar,
+				},
+			},
+		}
+		assignVar.emit()
 	}
 
 	emit("%s: # begin loop ", labelBegin)
 
+	// i < len(list)
 	condition := &ExprBinop{
 		op:   "<",
 		left: f.rng.indexvar, // i
 		// @TODO
 		// The range expression x is evaluated once before beginning the loop
 		right: &ExprLen{
-			arg: f.rng.rangeexpr,
+			arg: f.rng.rangeexpr, // len(expr)
 		},
 	}
-	condition.emit() // i < len(list)
+	condition.emit()
 	emit("test %%rax, %%rax")
 	emit("je %s  # jump if false", labelEnd)
 
 	f.block.emit()
 
+	// i++
 	indexIncr := &StmtInc{
 		operand: f.rng.indexvar,
 	}
-	indexIncr.emit() // i++
+	indexIncr.emit()
+
+	// v = s[i]
 	if f.rng.valuevar != nil {
-		assignVar.emit() // v = s[i]
+		assignVar.emit()
 	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)
@@ -967,6 +1106,54 @@ func emitSaveSlice(lhs Expr, offset int) {
 	}
 }
 
+func assignToMap(lhs Expr, rhs Expr) {
+	emit("# assignToMap")
+	if rhs == nil {
+		emit("# initialize slice with a zero value")
+		emit("push $0")
+		emit("push $0")
+		emit("push $0")
+		emitSaveSlice(lhs, 0)
+		return
+	}
+	switch rhs.(type) {
+	case *ExprMapLiteral:
+		// @TODO
+		emit("# map literal")
+		lit := rhs.(*ExprMapLiteral)
+		length := len(lit.elements)
+		for i, element := range lit.elements {
+			// alloc key
+			// alloc value
+			// alloc array
+			element.key.emit()
+			/*
+			emit("push %%rax") // save key
+			emit("# malloc 8 bytes for int")
+			  // malloc is:
+			  // check if there is a enough space for the request.
+			  // return falsy value if not.
+			  // emit("emit address, %%rax").
+			  // move cursor to the head of fresh land.
+			emit("pop %%rcx") // restore key
+			emit("mov %%rax, (%%rcx)")
+			*/
+			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8)
+
+			element.value.emit()
+			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8 + 8)
+		}
+		emit("lea %s+0(%%rip), %%rax", PseudHeap)
+
+		emit("push %%rax") // address (head of the heap)
+		emit("push $%d", length) // len
+		emit("push $%d", length) // cap
+	default:
+		TBI(rhs.token(), "unable to handle %T", rhs)
+	}
+	emitSaveSlice(lhs, 0)
+}
+
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
@@ -1153,6 +1340,8 @@ func (decl *DeclVar) emit() {
 		assignToSlice(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 		assignToStruct(decl.varname, decl.initval)
+	case gtype.typ == G_MAP:
+		assignToMap(decl.varname, decl.initval)
 	default:
 		// primitive types like int,bool,byte
 		rhs := decl.initval
@@ -1250,10 +1439,68 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		}
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
+	} else if array.getGtype().typ == G_MAP {
+		// e.g. x[key]
+		emit("# emit map index expr")
+		emit("mov $0, %%r15 # clear answer")
+		_map := array
+		emit("# emit mapData head address")
+		_map.emit()
+		emit("mov %%rax, %%r10") // copy head address
+		emitOffsetLoad(_map, IntSize, IntSize)
+		emit("mov %%rax, %%r11") // copy len
+		index.emit()
+		emit("mov %%rax, %%r12") // index value
+
+		emit("mov $0, %%r13 # init loop counter") // i = 0
+
+		labelBegin := makeLabel()
+		labelEnd := makeLabel()
+		emit("%s: # begin loop ", labelBegin)
+
+		labelIncr := makeLabel()
+		// break if i < len
+		emit("cmp %%r13, %%r11") // i < len
+		emit("setl %%al")
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("jne %s  # jump if false", labelEnd)
+
+		// check if index matches
+		emit("mov %%r13, %%rax")  // i
+		emit("imul $16, %%rax") // i * 16
+		emit("mov %%r10, %%rcx") // head
+		emit("add %%rax, %%rcx") // head + i * 16
+		emit("mov (%%rcx), %%rdx") // emit index value
+		emit("cmp %%r12, %%rdx")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("je %s  # jump if false", labelIncr)
+
+		// when index matchex, set the value
+		emit("mov 8(%%rcx), %%r15") // emit value value
+		emit("jmp %s", labelEnd)
+
+		emit("%s: # incr", labelIncr)
+		emit("add $1, %%r13") // i++
+		emit("jmp %s", labelBegin)
+
+		emit("%s: # end loop", labelEnd)
+
+		emit("mov %%r15, %%rax # set answer")
+
+		/* set register values to a global array for debug
+		emit("mov %%r10, debug+0(%%rip)")
+		emit("mov %%r11, debug+8(%%rip)")
+		emit("mov %%r12, debug+16(%%rip)")
+		emit("mov %%r13, debug+24(%%rip)")
+		emit("mov %%r15, debug+40(%%rip)")
+		*/
+
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
-
 }
 
 func (e *ExprIndex) emit() {
@@ -1463,9 +1710,20 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING:
-		TBI(arg.token(), "unable to handle %s", gtype)
 	case gtype.typ == G_MAP:
+		switch arg.(type) {
+		case *Relation:
+			emit("# Relation")
+			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprStructField:
+			emit("# ExprStructField")
+			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprMapLiteral:
+			TBI(arg.token(), "unable to handle %T", arg)
+		default:
+			TBI(arg.token(), "unable to handle %T", arg)
+		}
+	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
@@ -1638,6 +1896,11 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		default:
 			TBI(ptok, "unable to handle %s", gtype)
 		}
+	} else if gtype.typ == G_MAP {
+		// @TODO
+		emit(".quad 0")
+		emit(".quad 0")
+		emit(".quad 0")
 	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
 		if value == nil {
 			// zero value
@@ -1744,6 +2007,7 @@ func (root *IrRoot) emit() {
 		vardecl.emitGlobal()
 	}
 
+	emit(".lcomm %s, 128 # bytes", PseudHeap)
 	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
@@ -1751,3 +2015,5 @@ func (root *IrRoot) emit() {
 		funcdecl.emit()
 	}
 }
+
+const PseudHeap = "heap"
