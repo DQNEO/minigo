@@ -51,6 +51,14 @@ func f4() {
 	fmt.Printf("%d\n", lmap[7]) // 17
 	fmt.Printf("%d\n", lmap[0]) // 18
 
+	fmt.Printf("%d\n", lmap[999]+19) // 19
+	lmap[9] = 21
+	fmt.Printf("%d\n", len(lmap)+16) // 20
+	fmt.Printf("%d\n", lmap[9]) // 21
+
+	lmap[2] = 23
+	fmt.Printf("%d\n", len(lmap)+17) // 22
+	fmt.Printf("%d\n", lmap[2]) // 23
 	/*
 	for i, v := range debug {
 		fmt.Printf("debug[1%d]=%d\n", i,v)

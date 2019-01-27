@@ -578,10 +578,30 @@ func emitSave(left Expr) {
 // m[k] = v
 // append key and value to the tail of map data, and increment its length
 func (e *ExprIndex) emitMapSet() {
+
+
+	labelAppend := makeLabel()
+	labelSave := makeLabel()
+
+	// map get to check if exists
+	e.emit()
+	// jusdge update or append
+	emit("cmp $0, %%rcx")
+	emit("setne %%al")
+	emit("movzb %%al, %%eax")
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump to append if not found", labelAppend)
+
+	// update
+	emit("push %%rcx") // push address of the key
+	emit("jmp %s", labelSave)
+
+	// append
+	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
 	emit("push %%rax # stash head address of mapData")
 
-	//emit len of the map
+	// emit len of the map
 	elen := &ExprLen{
 		arg: e.collection,
 	}
@@ -589,20 +609,25 @@ func (e *ExprIndex) emitMapSet() {
 	emit("imul $%d, %%rax", 2 * 8) // distance from head to tail
 	emit("pop %%rcx") // head
 	emit("add %%rax, %%rcx") // now rcx is the tail address
+	emit("push %%rcx")
 
+	// map len++
+	elen.emit()
+	emit("add $1, %%rax")
+	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
+
+
+	// Save key and value
+	emit("%s: # end loop", labelSave)
 	e.index.emit()
+	emit("pop %%rcx")
 	emit("mov %%rax, (%%rcx) #") // save key to the tail
-
 
 	emit("pop %%rax") // rhs
 
 	// save value
 	emit("mov %%rax, %d(%%rcx) #", 8) // save value data to the tail+8
 
-	// map len++
-	elen.emit()
-	emit("add $1, %%rax")
-	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 }
 
 func (e *ExprIndex) emitSave() {
@@ -1448,7 +1473,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// r13 loop counter
 
 		// rax: found value (zero if not found)
-		// rcx: ok (1:found or 0:not found)
+		// rcx: ok (found: address of the index,  not found:0)
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1488,7 +1513,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		// Value found!
 		emit("mov 8(%%rcx), %%rax") // set the found value
-		emit("mov $1, %%rcx") // ok = true
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
