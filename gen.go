@@ -1446,8 +1446,8 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// r11 map len
 		// r12 specified index value
 		// r13 loop counter
-		// r15 found map value
-		emit("mov $0, %%r15 # clear answer")
+
+		// rax: found value (zero if not found)
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1469,6 +1469,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("setl %%al")
 		emit("movzb %%al, %%eax")
 		emit("test %%rax, %%rax")
+		emit("mov $0, %%rax") // key not found. set zero value.
 		emit("jne %s  # jump if false", labelEnd)
 
 		// check if index matches
@@ -1484,7 +1485,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("je %s  # jump if false", labelIncr)
 
 		// when index matchex, set the value
-		emit("mov 8(%%rcx), %%r15") // emit value value
+		emit("mov 8(%%rcx), %%rax") // set the found value
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
@@ -1493,7 +1494,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		emit("%s: # end loop", labelEnd)
 
-		emit("mov %%r15, %%rax # set answer")
 
 		/* set register values to a global array for debug
 		emit("mov %%r10, debug+0(%%rip)")
