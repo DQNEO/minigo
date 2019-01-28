@@ -730,11 +730,13 @@ func (f *StmtFor) emitMapRange() {
 	emit("# init index")
 	initstmt.emit()
 
-	emit("mov %s+%d(%%rip), %%rax", PseudoHeap, 0) // key=heap[0]
+	f.rng.rangeexpr.emit() // emit value of map.data[0].index
+	emit("mov (%%rax), %%rax")
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
-		emit("mov %s+%d(%%rip), %%rax", PseudoHeap, 0+8) // value=heap[..]
+		f.rng.rangeexpr.emit() // emit value of map.data[8]
+		emit("mov 8(%%rax), %%rax")
 		f.rng.valuevar.emitSave()
 	}
 
@@ -781,9 +783,10 @@ func (f *StmtFor) emitMapRange() {
 	}
 	indexIncr.emit()
 	emit("imul $16, %%rax")
-
+	emit("push %%rax")
 	// i = next_index
-	emit("lea %s+%d(%%rip), %%rcx", PseudoHeap, 0)
+	f.rng.rangeexpr.emit() // emit address of map data head
+	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
 	f.rng.indexvar.emitSave()
@@ -791,8 +794,11 @@ func (f *StmtFor) emitMapRange() {
 	if f.rng.valuevar != nil {
 		mapCounter.emit()
 		emit("imul $16, %%rax")
+		emit("push %%rax")
 
-		emit("lea %s+%d(%%rip), %%rcx", PseudoHeap, 8)
+		f.rng.rangeexpr.emit() // emit value of map data head
+		emit("pop %%rcx")
+		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
 		f.rng.valuevar.emitSave()
