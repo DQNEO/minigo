@@ -1158,6 +1158,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("mov $%d, %%rdi", 128)
 		emit("mov $0, %%rax")
 		emit("call .malloc")
+		// @TODO check malloc error
 		emit("push %%rax") // allocaated address of the map head
 
 		for i, element := range lit.elements {

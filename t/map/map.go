@@ -59,6 +59,16 @@ func f4() {
 	lmap[2] = 23
 	fmt.Printf("%d\n", len(lmap)+17) // 22
 	fmt.Printf("%d\n", lmap[2]) // 23
+
+	var lmap2 map[int]int = map[int]int{
+		0:  1,
+		1:  1,
+		2: 1,
+		3:  1,
+	}
+
+	fmt.Printf("%d\n", lmap[7] + 7) // 24
+	fmt.Printf("%d\n", lmap2[0] + 24) // 25
 	/*
 	for i, v := range debug {
 		fmt.Printf("debug[1%d]=%d\n", i,v)
