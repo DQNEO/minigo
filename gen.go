@@ -1153,9 +1153,12 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		lit := rhs.(*ExprMapLiteral)
 		length := len(lit.elements)
-		// @TODO this does not work in resursive funcall
-		emit("lea %s+%d(%%rip), %%rax", PseudoHeap, PseudoHeapIndex)
-		emit("push %%rax")
+
+		// call malloc
+		emit("mov $%d, %%rdi", 128)
+		emit("mov $0, %%rax")
+		emit("call .malloc")
+		emit("push %%rax") // allocaated address of the map head
 
 		for i, element := range lit.elements {
 			// alloc key
@@ -1187,8 +1190,6 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("push %%rax") // address (head of the heap)
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
-
-		PseudoHeapIndex += 256
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -2055,15 +2056,9 @@ func (root *IrRoot) emit() {
 		vardecl.emitGlobal()
 	}
 
-	emit(".lcomm %s, %d # bytes", PseudoHeap, PseudoHeapSize)
-	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
 }
-
-const PseudoHeap = "heap"
-const PseudoHeapSize = 1024
-var PseudoHeapIndex int
