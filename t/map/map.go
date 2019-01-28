@@ -19,21 +19,25 @@ func f2() {
 		5:8,
 		6:9,
 	}
+
 	fmt.Printf("%d\n", len(lmap)) // 3
 	for i := range lmap {
 		fmt.Printf("%d\n", i) // 4,5,6
+	}
+
+	for _,v := range lmap {
+		fmt.Printf("%d\n", v) // 7,8,9
 	}
 }
 
 func f3() {
 	var lmap map[int]int = map[int]int{
-		7:  8,
-		9:  10,
-		11: 12,
+		10:  11,
+		12: 13,
 	}
 
-	lmap[13] = 14
-	lmap[15] = 16
+	lmap[14] = 15
+	lmap[16] = 17
 	for i, v := range lmap {
 		fmt.Printf("%d\n", i)
 		fmt.Printf("%d\n", v)
@@ -48,7 +52,6 @@ func f4() {
 		0:  18,
 	}
 
-	fmt.Printf("%d\n", lmap[7]) // 17
 	fmt.Printf("%d\n", lmap[0]) // 18
 
 	fmt.Printf("%d\n", lmap[999]+19) // 19

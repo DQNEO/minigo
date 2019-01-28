@@ -18,5 +18,5 @@ func main() {
 	*address = 3
 	fmt.Printf("%d\n", *address)
 
-	fmt.Printf("%d\n", (address - heapHead)  - 20) // 4
+	fmt.Printf("%d\n", (address - heapHead)  - 12) // 4
 }
