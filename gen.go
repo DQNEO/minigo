@@ -626,7 +626,8 @@ func (e *ExprIndex) emitMapSet() {
 	emit("pop %%rax") // rhs
 
 	// save value
-	emit("mov %%rax, %d(%%rcx) #", 8) // save value data to the tail+8
+	emit("mov %d(%%rcx), %%rcx ", 8) // save value data to the tail+8
+	emit("mov %%rax, (%%rcx)")
 
 }
 
@@ -730,36 +731,8 @@ func (f *StmtFor) emitMapRange() {
 	emit("# init index")
 	initstmt.emit()
 
-	f.rng.rangeexpr.emit() // emit value of map.data[0].index
-	emit("mov (%%rax), %%rax")
-	f.rng.indexvar.emitSave()
-
-	if f.rng.valuevar != nil {
-		f.rng.rangeexpr.emit() // emit value of map.data[8]
-		emit("mov 8(%%rax), %%rax")
-		f.rng.valuevar.emitSave()
-	}
-
-	// v = s[i]
-	/*
-	var assignVar *StmtAssignment
-	if f.rng.valuevar != nil {
-		assignVar = &StmtAssignment{
-			lefts: []Expr{
-				f.rng.valuevar,
-			},
-			rights: []Expr{
-				&ExprIndex{
-					collection: f.rng.rangeexpr,
-					index:      f.rng.indexvar,
-				},
-			},
-		}
-		assignVar.emit()
-	}
-	*/
-
 	emit("%s: # begin loop ", labelBegin)
+
 
 	// counter < len(list)
 	condition := &ExprBinop{
@@ -775,16 +748,10 @@ func (f *StmtFor) emitMapRange() {
 	emit("test %%rax, %%rax")
 	emit("je %s  # jump if false", labelEnd)
 
-	f.block.emit()
-
-	// counter++
-	indexIncr := &StmtInc{
-		operand: mapCounter,
-	}
-	indexIncr.emit()
+	// set key and value
+	mapCounter.emit()
 	emit("imul $16, %%rax")
 	emit("push %%rax")
-	// i = next_index
 	f.rng.rangeexpr.emit() // emit address of map data head
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
@@ -792,17 +759,32 @@ func (f *StmtFor) emitMapRange() {
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
-		mapCounter.emit()
-		emit("imul $16, %%rax")
-		emit("push %%rax")
+		emit("# Setting valuevar")
+		emit("## rangeexpr.emit()")
+		f.rng.rangeexpr.emit()
+		emit("mov %%rax, %%rcx")
 
-		f.rng.rangeexpr.emit() // emit value of map data head
-		emit("pop %%rcx")
+		emit("## mapCounter.emit()")
+		mapCounter.emit()
+
+		emit("## eval value")
+		emit("imul $16, %%rax")
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
+		emit("mov (%%rax), %%rax")
 		f.rng.valuevar.emitSave()
+
 	}
+
+	// execute body
+	f.block.emit()
+
+	// counter++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", labelEnd)
@@ -1155,7 +1137,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		length := len(lit.elements)
 
 		// call malloc
-		emit("mov $%d, %%rdi", 128)
+		emit("mov $%d, %%rdi", length * 8 * 2)
 		emit("mov $0, %%rax")
 		emit("call .malloc")
 		// @TODO check malloc error
@@ -1177,14 +1159,22 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("pop %%rcx") // restore key
 			emit("mov %%rax, (%%rcx)")
 			*/
-			emit("pop %%rcx")
-			emit("mov %%rax, %d(%%rcx) #", i * 2 * 8)
-			emit("push %%rcx")
+			emit("pop %%r10") // map head
+			emit("mov %%rax, %d(%%r10) #", i * 2 * 8)
+			emit("push %%r10") // map head
 
 			element.value.emit()
-			emit("pop %%rcx")
-			emit("mov %%rax, %d(%%rcx) #", i * 2 * 8 + 8)
-			emit("push %%rcx")
+			emit("push %%rax") // value of value
+
+			emit("mov $%d, %%rdi", 8)
+			emit("mov $0, %%rax")
+			emit("call .malloc")
+			emit("pop %%rcx") // value of value
+			emit("mov %%rcx, (%%rax)") // save value to heap
+
+			emit("pop %%r10") // map head
+			emit("mov %%rax, %d(%%r10) #", i * 2 * 8 + 8)
+			emit("push %%r10")
 		}
 
 		emit("pop %%rax")
@@ -1530,7 +1520,8 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("je %s  # jump if false", labelIncr)
 
 		// Value found!
-		emit("mov 8(%%rcx), %%rax") // set the found value
+		emit("mov 8(%%rcx), %%rax") // set the found value address
+		emit("mov (%%rax), %%rax") // dereference
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
