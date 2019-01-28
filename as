@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -eux
 file=out/a.s
 
 [[ -e $file ]] || echo "$file ooes not exist"
