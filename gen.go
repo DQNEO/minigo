@@ -616,19 +616,25 @@ func (e *ExprIndex) emitMapSet() {
 	emit("add $1, %%rax")
 	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 
-
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
-	emit("pop %%rcx")
+	emit("pop %%rcx") // map tail
 	emit("mov %%rax, (%%rcx) #") // save key to the tail
+	emit("push %%rcx") // push map tail
 
-	emit("pop %%rax") // rhs
+	// save value to heap
+	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+
+	emit("pop %%rcx") // map tail address
+	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+
+	emit("pop %%rcx") // rhs value
 
 	// save value
-	emit("mov %d(%%rcx), %%rcx ", 8) // save value data to the tail+8
-	emit("mov %%rax, (%%rcx)")
-
+	emit("mov %%rcx, (%%rax)") // save value address to the map tail
 }
 
 func (e *ExprIndex) emitSave() {
@@ -1137,7 +1143,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		length := len(lit.elements)
 
 		// call malloc
-		emit("mov $%d, %%rdi", length * 8 * 2)
+		emit("mov $%d, %%rdi", length * 8 * 4)
 		emit("mov $0, %%rax")
 		emit("call .malloc")
 		// @TODO check malloc error
