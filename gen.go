@@ -1149,10 +1149,14 @@ func assignToMap(lhs Expr, rhs Expr) {
 	}
 	switch rhs.(type) {
 	case *ExprMapLiteral:
-		// @TODO
 		emit("# map literal")
+
 		lit := rhs.(*ExprMapLiteral)
 		length := len(lit.elements)
+		// @TODO this does not work in resursive funcall
+		emit("lea %s+%d(%%rip), %%rax", PseudoHeap, PseudoHeapIndex)
+		emit("push %%rax")
+
 		for i, element := range lit.elements {
 			// alloc key
 			// alloc value
@@ -1169,16 +1173,22 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("pop %%rcx") // restore key
 			emit("mov %%rax, (%%rcx)")
 			*/
-			emit("mov %%rax, %s+%d(%%rip) #", PseudoHeap, i * 2 * 8)
+			emit("pop %%rcx")
+			emit("mov %%rax, %d(%%rcx) #", i * 2 * 8)
+			emit("push %%rcx")
 
 			element.value.emit()
-			emit("mov %%rax, %s+%d(%%rip) #", PseudoHeap, i * 2 * 8 + 8)
+			emit("pop %%rcx")
+			emit("mov %%rax, %d(%%rcx) #", i * 2 * 8 + 8)
+			emit("push %%rcx")
 		}
-		emit("lea %s+0(%%rip), %%rax", PseudoHeap)
 
+		emit("pop %%rax")
 		emit("push %%rax") // address (head of the heap)
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
+
+		PseudoHeapIndex += 256
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -2056,3 +2066,4 @@ func (root *IrRoot) emit() {
 
 const PseudoHeap = "heap"
 const PseudoHeapSize = 1024
+var PseudoHeapIndex int
