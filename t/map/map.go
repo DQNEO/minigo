@@ -74,9 +74,6 @@ func f4() {
 
 	fmt.Printf("%d\n", lmap[7] + 7) // 24
 	fmt.Printf("%d\n", lmap2[0] + 24) // 25
-//	for i, v := range debug {
-//		fmt.Printf("debug[1%d]=%d\n", i,v)
-//	}
 }
 
 /*
