@@ -2055,4 +2055,4 @@ func (root *IrRoot) emit() {
 }
 
 const PseudoHeap = "heap"
-const PseudoHeapSize = 128
+const PseudoHeapSize = 1024
