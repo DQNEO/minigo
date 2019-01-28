@@ -39,7 +39,7 @@ func malloc(size int) int {
 	if heapIndex + size - heap > len(heap) {
 		return 0
 	}
-    r := heapIndex
+	r := heapIndex
 	heapIndex += size
 	return r
 }
