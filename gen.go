@@ -2039,7 +2039,7 @@ func (root *IrRoot) emit() {
 		vardecl.emitGlobal()
 	}
 
-	emit(".lcomm %s, 128 # bytes", PseudoHeap)
+	emit(".lcomm %s, %d # bytes", PseudoHeap, PseudoHeapSize)
 	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
@@ -2049,3 +2049,4 @@ func (root *IrRoot) emit() {
 }
 
 const PseudoHeap = "heap"
+const PseudoHeapSize = 128
