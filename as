@@ -6,9 +6,9 @@ file=out/a.s
 
 if [[ `uname` == "Darwin" ]];then
     # for MacOS
-    docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash -c "gcc -no-pie $file && ./a.out"
+    docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c "gcc -g -no-pie $file && ./a.out"
 else
     # for Linux
-    gcc -no-pie $file && ./a.out
+    gcc -g -no-pie $file && ./a.out
 fi
 
