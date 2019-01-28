@@ -730,11 +730,11 @@ func (f *StmtFor) emitMapRange() {
 	emit("# init index")
 	initstmt.emit()
 
-	emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0) // key=heap[0]
+	emit("mov %s+%d(%%rip), %%rax", PseudoHeap, 0) // key=heap[0]
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
-		emit("mov %s+%d(%%rip), %%rax", PseudHeap, 0+8) // value=heap[..]
+		emit("mov %s+%d(%%rip), %%rax", PseudoHeap, 0+8) // value=heap[..]
 		f.rng.valuevar.emitSave()
 	}
 
@@ -783,7 +783,7 @@ func (f *StmtFor) emitMapRange() {
 	emit("imul $16, %%rax")
 
 	// i = next_index
-	emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 0)
+	emit("lea %s+%d(%%rip), %%rcx", PseudoHeap, 0)
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
 	f.rng.indexvar.emitSave()
@@ -792,7 +792,7 @@ func (f *StmtFor) emitMapRange() {
 		mapCounter.emit()
 		emit("imul $16, %%rax")
 
-		emit("lea %s+%d(%%rip), %%rcx", PseudHeap, 8)
+		emit("lea %s+%d(%%rip), %%rcx", PseudoHeap, 8)
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
 		f.rng.valuevar.emitSave()
@@ -1163,12 +1163,12 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("pop %%rcx") // restore key
 			emit("mov %%rax, (%%rcx)")
 			*/
-			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8)
+			emit("mov %%rax, %s+%d(%%rip) #", PseudoHeap, i * 2 * 8)
 
 			element.value.emit()
-			emit("mov %%rax, %s+%d(%%rip) #", PseudHeap, i * 2 * 8 + 8)
+			emit("mov %%rax, %s+%d(%%rip) #", PseudoHeap, i * 2 * 8 + 8)
 		}
-		emit("lea %s+0(%%rip), %%rax", PseudHeap)
+		emit("lea %s+0(%%rip), %%rax", PseudoHeap)
 
 		emit("push %%rax") // address (head of the heap)
 		emit("push $%d", length) // len
@@ -2039,7 +2039,7 @@ func (root *IrRoot) emit() {
 		vardecl.emitGlobal()
 	}
 
-	emit(".lcomm %s, 128 # bytes", PseudHeap)
+	emit(".lcomm %s, 128 # bytes", PseudoHeap)
 	emit("")
 	emitComment("FUNCTIONS")
 	emit(".text")
@@ -2048,4 +2048,4 @@ func (root *IrRoot) emit() {
 	}
 }
 
-const PseudHeap = "heap"
+const PseudoHeap = "heap"
