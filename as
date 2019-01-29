@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eux
+set -ux
 file=out/a.s
 
 [[ -e $file ]] || echo "$file ooes not exist"
@@ -12,3 +12,6 @@ else
     gcc -g -no-pie $file && ./a.out
 fi
 
+if [[ $? != 0 ]];then
+    echo "ERROR"
+fi

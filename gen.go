@@ -262,7 +262,7 @@ func emit_comp(inst string, ast *ExprBinop) {
 	emit("push %%rax")
 	ast.right.emit()
 	emit("pop %%rcx")
-	emit("cmp %%rax, %%rcx")
+	emit("cmp %%rax, %%rcx") // right, left
 	emit("%s %%al", inst)
 	emit("movzb %%al, %%eax")
 }
@@ -619,11 +619,21 @@ func (e *ExprIndex) emitMapSet() {
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
-	emit("pop %%rcx") // map tail
-	emit("mov %%rax, (%%rcx) #") // save key to the tail
+	emit("push %%rax") // index value
+	// malloc(8)
+	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+	// %%rax : malloced address
+	// stack : [map tail address, index value]
+	emit("pop %%rcx") // index value
+	emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
+	emit("pop %%rcx") // map tail address
+	emit("mov %%rax, (%%rcx) #") // save index address to the tail
 	emit("push %%rcx") // push map tail
 
 	// save value to heap
+	// malloc(8)
 	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
 	emit("mov $0, %%rax")
 	emit("call .malloc")
@@ -634,7 +644,7 @@ func (e *ExprIndex) emitMapSet() {
 	emit("pop %%rcx") // rhs value
 
 	// save value
-	emit("mov %%rcx, (%%rax)") // save value address to the map tail
+	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
 }
 
 func (e *ExprIndex) emitSave() {
@@ -762,6 +772,7 @@ func (f *StmtFor) emitMapRange() {
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
+	emit("mov (%%rax), %%rax")
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
@@ -1151,30 +1162,28 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		for i, element := range lit.elements {
 			// alloc key
-			// alloc value
-			// alloc array
 			element.key.emit()
-			/*
-			emit("push %%rax") // save key
-			emit("# malloc 8 bytes for int")
-			  // malloc is:
-			  // check if there is a enough space for the request.
-			  // return falsy value if not.
-			  // emit("emit address, %%rax").
-			  // move cursor to the head of fresh land.
-			emit("pop %%rcx") // restore key
-			emit("mov %%rax, (%%rcx)")
-			*/
+			emit("push %%rax") // value of key
+			// call malloc for key
+			emit("mov $%d, %%rdi", 8)
+			emit("mov $0, %%rax")
+			emit("call .malloc")
+
+			emit("pop %%rcx") // value of key
+			emit("mov %%rcx, (%%rax)") // save key to heap
+
 			emit("pop %%r10") // map head
-			emit("mov %%rax, %d(%%r10) #", i * 2 * 8)
-			emit("push %%r10") // map head
+			emit("mov %%rax, %d(%%r10) #", i * 2 * 8) // save key address
+			emit("push %%r10")
 
 			element.value.emit()
 			emit("push %%rax") // value of value
 
+			// call malloc
 			emit("mov $%d, %%rdi", 8)
 			emit("mov $0, %%rax")
 			emit("call .malloc")
+
 			emit("pop %%rcx") // value of value
 			emit("mov %%rcx, (%%rax)") // save value to heap
 
@@ -1505,21 +1514,22 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		labelIncr := makeLabel()
 		// break if i < len
-		emit("cmp %%r13, %%r11") // i < len
+		emit("cmp %%r11, %%r13") // len > i
 		emit("setl %%al")
 		emit("movzb %%al, %%eax")
 		emit("test %%rax, %%rax")
 		emit("mov $0, %%rax") // key not found. set zero value.
 		emit("mov $0, %%rcx") // ok = false
-		emit("jne %s  # jump if false", labelEnd)
+		emit("je %s  # jump if false", labelEnd)
 
 		// check if index matches
 		emit("mov %%r13, %%rax")  // i
 		emit("imul $16, %%rax") // i * 16
 		emit("mov %%r10, %%rcx") // head
 		emit("add %%rax, %%rcx") // head + i * 16
-		emit("mov (%%rcx), %%rdx") // emit index value
-		emit("cmp %%r12, %%rdx")
+		emit("mov (%%rcx), %%rax") // emit index address
+		emit("mov (%%rax), %%rax") // dereference
+		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
 		emit("sete %%al")
 		emit("movzb %%al, %%eax")
 		emit("test %%rax, %%rax")

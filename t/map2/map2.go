@@ -2,24 +2,25 @@ package main
 
 import "fmt"
 
-func f5() {
-	var lmap map[int]string = map[int]string {
-		27: "twenty seven",
-		26: "twenty six",
+func f1() {
+	var lmap map[int]int = map[int]int {
+		1: 2,
+		3: 4,
 	}
 
-	fmt.Printf("%s\n", lmap[27])
-	fmt.Printf("%s\n", lmap[26])
-
-	lmap[1] = "one"
-	fmt.Printf("%s\n", lmap[1])
-
-	for _,v := range lmap {
-		fmt.Printf("%s\n", v)
+	for i,v := range lmap {
+		fmt.Printf("%d\n", i)
+		fmt.Printf("%d\n", v)
 	}
+
+	fmt.Printf("%d\n", lmap[1] + 3) // 5
+	fmt.Printf("%d\n", lmap[3] + 2) // 6
+
+	lmap[7] = 8
+	fmt.Printf("%d\n", lmap[4] + 7 ) // 7
+	fmt.Printf("%d\n", lmap[7]) // 8
 }
 
-
 func main() {
-	f5()
+	f1()
 }
