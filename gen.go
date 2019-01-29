@@ -262,7 +262,7 @@ func emit_comp(inst string, ast *ExprBinop) {
 	emit("push %%rax")
 	ast.right.emit()
 	emit("pop %%rcx")
-	emit("cmp %%rax, %%rcx")
+	emit("cmp %%rax, %%rcx") // right, left
 	emit("%s %%al", inst)
 	emit("movzb %%al, %%eax")
 }
