@@ -74,11 +74,27 @@ func f4() {
 	fmt.Printf("%d\n", lmap2[0] + 24) // 25
 }
 
+func f5() {
+	var lmap map[int]string = map[int]string {
+		27: "twenty seven",
+		26: "twenty six",
+	}
 
+	fmt.Printf("%s\n", lmap[27])
+	fmt.Printf("%s\n", lmap[26])
+
+	lmap[1] = "one"
+	fmt.Printf("%s\n", lmap[1])
+
+	for _,v := range lmap {
+		fmt.Printf("%s\n", v)
+	}
+}
 
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }
