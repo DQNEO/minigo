@@ -74,21 +74,11 @@ func f4() {
 	fmt.Printf("%d\n", lmap2[0] + 24) // 25
 }
 
-/*
-func f9() {
-	var lmap map[string]int
-	value := lmap["hello"]
-	fmt.Printf("%d\n", value + 13)
-	//lmap["x"] = 1
-	value = lmap["hello"]
-	fmt.Printf("%d\n", value + 14)
-}
-*/
+
 
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
-	//f9()
 }
