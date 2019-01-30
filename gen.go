@@ -547,26 +547,19 @@ func (ast *StmtAssignment) emit() {
 	for rightIndex, right := range ast.rights {
 		left := ast.lefts[rightIndex]
 		switch right.(type) {
-		case *ExprFuncallOrConversion:
-			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
-			emit("# emitting rhs (funcall)")
-			if len(rettypes) == 1 {
-				right.emit()
-				emitSave(left)
-			} else {
-				right.emit()
-				for i, _ := range rettypes {
-					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-					emit("push %%rax")
-				}
-				for _, left := range ast.lefts {
-					emit("pop %%rax")
-					emitSave(left)
-				}
+		case *ExprFuncallOrConversion,*ExprMethodcall:
+			var rettypes []*Gtype
+			switch right.(type) {
+			case *ExprFuncallOrConversion:
+				emit("# emitting rhs (funcall)")
+				rettypes = right.(*ExprFuncallOrConversion).getFuncDef().rettypes
+			case *ExprMethodcall:
+				emit("# emitting rhs (method)")
+				rettypes = right.(*ExprMethodcall).getRettypes()
+			default:
+				errorf("no reach here")
 			}
-		case *ExprMethodcall:
-			rettypes := right.(*ExprMethodcall).getRettypes()
-			emit("# emitting rhs (method)")
+
 			if len(rettypes) == 1 {
 				right.emit()
 				emitSave(left)
