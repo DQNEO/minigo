@@ -544,8 +544,7 @@ func (ast *StmtAssignment) emit() {
 		case *ExprFuncallOrConversion,*ExprMethodcall:
 			rettypes := getRettypes(right)
 			if len(rettypes) == 1 {
-				right.emit()
-				emitSave(left)
+				emitAssignPrimitive(left, right)
 			} else {
 				right.emit()
 				for i, _ := range rettypes {
@@ -568,14 +567,16 @@ func (ast *StmtAssignment) emit() {
 				assignToStruct(left, right)
 			default:
 				// suppose primitive
-				emit("# evaluating rhs")
-				right.emit()
-				emit("# saving %%rax to lhs")
-				emitSave(left)
+				emitAssignPrimitive(left, right)
 			}
 		}
 	}
 
+}
+
+func emitAssignPrimitive(left Expr, right Expr) {
+	right.emit()   //   expr => %rax
+	emitSave(left) //   %rax => memory
 }
 
 // Each left-hand side operand must be addressable,
