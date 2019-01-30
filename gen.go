@@ -257,7 +257,7 @@ func (ast *ExprConstVariable) emit() {
 	}
 }
 
-func emit_comp(inst string, ast *ExprBinop) {
+func emit_comp_primitive(inst string, ast *ExprBinop) {
 	ast.left.emit()
 	emit("push %%rax")
 	ast.right.emit()
@@ -394,26 +394,32 @@ func (ast *ExprUop) emit() {
 
 }
 
+func (binop *ExprBinop) emitComp() {
+	var instruction string
+	switch binop.op {
+	case "<":
+		instruction = "setl"
+	case ">":
+		instruction = "setg"
+	case "<=":
+		instruction = "setle"
+	case ">=":
+		instruction = "setge"
+	case "!=":
+		instruction = "setne"
+	case "==":
+		instruction = "sete"
+	}
+
+	emit_comp_primitive(instruction, binop)
+}
+
 func (ast *ExprBinop) emit() {
-	if ast.op == "<" {
-		emit_comp("setl", ast)
+	switch ast.op {
+	case "<",">","<=",">=","!=","==":
+		ast.emitComp()
 		return
-	} else if ast.op == ">" {
-		emit_comp("setg", ast)
-		return
-	} else if ast.op == "<=" {
-		emit_comp("setle", ast)
-		return
-	} else if ast.op == ">=" {
-		emit_comp("setge", ast)
-		return
-	} else if ast.op == "!=" {
-		emit_comp("setne", ast)
-		return
-	} else if ast.op == "==" {
-		emit_comp("sete", ast)
-		return
-	} else if ast.op == "&&" {
+	case "&&" :
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
@@ -426,7 +432,7 @@ func (ast *ExprBinop) emit() {
 		emit("mov $1, %%rax")
 		emit("%s:", labelEnd)
 		return
-	} else if ast.op == "||" {
+	case "||" :
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
