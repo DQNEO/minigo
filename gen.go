@@ -2,9 +2,24 @@ package main
 
 import "fmt"
 
+/**
+  Intel® 64 and IA-32 Architectures Software Developer’s Manual
+  Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D and 4
+
+  3.4.1.1 General-Purpose Registers in 64-Bit Mode
+
+  In 64-bit mode, there are 16 general purpose registers and the default operand size is 32 bits.
+  However, general-purpose registers are able to work with either 32-bit or 64-bit operands.
+  If a 32-bit operand size is specified: EAX, EBX, ECX, EDX, EDI, ESI, EBP, ESP, R8D - R15D are available.
+  If a 64-bit operand size is specified: RAX, RBX, RCX, RDX, RDI, RSI, RBP, RSP, R8-R15 are available.
+  R8D-R15D/R8-R15 represent eight new general-purpose registers.
+  All of these registers can be accessed at the byte, word, dword, and qword level.
+  REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
+ */
+
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-const IntSize = 8 // not like 8cc
+const IntSize = 8 // 64-bit (8 bytes)
 
 var hiddenArrayId = 1
 
