@@ -412,17 +412,21 @@ func (binop *ExprBinop) emitCompareStrings() {
 		binop.right.emit()
 		emit("pop %%rcx")
 		emit("# rax = right, rcx = left")
+		emitStringsEqual("%%rcx", "%%rax")
 
-		// call strcmp(3)
-		emit("mov %%rcx, %%rsi")
-		emit("mov %%rax, %%rdi")
-		emit("mov $0, %%rax")
-		emit("call strcmp")
-		emit("cmp $0, %%rax") // retval == 0
-		emit("sete %%al")
-		emit("movzb %%al, %%eax")
 	}
 
+}
+
+// call strcmp
+func emitStringsEqual(leftReg string, rightReg string) {
+	emit("mov %s, %%rsi", leftReg)
+	emit("mov %s, %%rdi", rightReg)
+	emit("mov $0, %%rax")
+	emit("call strcmp")
+	emit("cmp $0, %%rax") // retval == 0
+	emit("sete %%al")
+	emit("movzb %%al, %%eax")
 }
 
 func (binop *ExprBinop) emitComp() {
@@ -1566,13 +1570,15 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov $0, %%rcx") // ok = false
 		emit("je %s  # jump if false", labelEnd)
 
-		// check if index matches
+		// check if index value matches
 		emit("mov %%r13, %%rax")  // i
 		emit("imul $16, %%rax") // i * 16
 		emit("mov %%r10, %%rcx") // head
 		emit("add %%rax, %%rcx") // head + i * 16
 		emit("mov (%%rcx), %%rax") // emit index address
 		emit("mov (%%rax), %%rax") // dereference
+
+		// @TODO if string type, call emitStringEqual()
 		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
 		emit("sete %%al")
 		emit("movzb %%al, %%eax")

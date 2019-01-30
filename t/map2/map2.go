@@ -21,6 +21,25 @@ func f1() {
 	fmt.Printf("%d\n", lmap[7]) // 8
 }
 
+func f2() {
+	keyFoo := "keyfoo"
+	var lmap map[string]string = map[string]string {
+		keyFoo: "valuefoo",
+		"keybar": "valuebar",
+	}
+
+	fmt.Printf("%s\n", lmap[keyFoo])
+	fmt.Printf("%s\n", lmap["keybar"])
+
+	lmap["keyadded"] = "valueadded"
+	fmt.Printf("%s\n", lmap["keyadded"])
+
+	for k,v := range lmap {
+		fmt.Printf("%s => %s\n", k, v)
+	}
+}
+
 func main() {
-	f1()
+	//f1()
+	f2()
 }
