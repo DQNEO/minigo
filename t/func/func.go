@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func plus(a int, b int) int {
 	return a + b
@@ -25,8 +27,15 @@ func f1() {
 	fmt.Printf("%d\n", plus(2, 2))
 }
 
+func f2() {
+	var sum int
+	sum = plus(2, 3)
+	fmt.Printf("%d\n", sum)
+}
+
 func main() {
 	f1()
+	f2()
 	fvoid()
 	fvoidsemicolon()
 	fvoidreturn()
