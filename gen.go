@@ -257,10 +257,10 @@ func (ast *ExprConstVariable) emit() {
 	}
 }
 
-func emit_comp_primitive(inst string, ast *ExprBinop) {
-	ast.left.emit()
+func emit_comp_primitive(inst string, binop *ExprBinop) {
+	binop.left.emit()
 	emit("push %%rax")
-	ast.right.emit()
+	binop.right.emit()
 	emit("pop %%rcx")
 	emit("cmp %%rax, %%rcx") // right, left
 	emit("%s %%al", inst)
