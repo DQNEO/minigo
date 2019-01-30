@@ -35,11 +35,12 @@ func f2() {
 	fmt.Printf("%s\n", lmap["keyadded"])
 
 	for k,v := range lmap {
-		fmt.Printf("%s => %s\n", k, v)
+		fmt.Printf("%s\n", k)
+		fmt.Printf("%s\n", v)
 	}
 }
 
 func main() {
-	//f1()
+	f1()
 	f2()
 }

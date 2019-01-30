@@ -412,7 +412,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 		binop.right.emit()
 		emit("pop %%rcx")
 		emit("# rax = right, rcx = left")
-		emitStringsEqual("%%rcx", "%%rax")
+		emitStringsEqual("%rcx", "%rax")
 
 	}
 
@@ -1579,9 +1579,16 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov (%%rax), %%rax") // dereference
 
 		// @TODO if string type, call emitStringEqual()
-		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
-		emit("sete %%al")
-		emit("movzb %%al, %%eax")
+		mapKeyType := array.getGtype().mapKey
+		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
+			emitStringsEqual("%r12", "%rax")
+		} else {
+			// primitive comparison
+			emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
+			emit("sete %%al")
+			emit("movzb %%al, %%eax")
+		}
+
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelIncr)
 

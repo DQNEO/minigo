@@ -6,3 +6,12 @@
 6
 7
 8
+valuefoo
+valuebar
+valueadded
+keyfoo
+valuefoo
+keybar
+valuebar
+keyadded
+valueadded
