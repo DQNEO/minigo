@@ -524,14 +524,8 @@ func (ast *StmtAssignment) emit() {
 	numRight := 0
 	for _, right := range ast.rights {
 		switch right.(type) {
-		case *ExprFuncallOrConversion:
-			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
-			if singleValueMode && len(rettypes) > 1 {
-				errorft(ast.token(), "multivalue is not allowed")
-			}
-			numRight += len(rettypes)
-		case *ExprMethodcall:
-			rettypes := right.(*ExprMethodcall).getRettypes()
+		case *ExprFuncallOrConversion,*ExprMethodcall:
+			rettypes := getRettypes(right)
 			if singleValueMode && len(rettypes) > 1 {
 				errorft(ast.token(), "multivalue is not allowed")
 			}
@@ -548,17 +542,7 @@ func (ast *StmtAssignment) emit() {
 		left := ast.lefts[rightIndex]
 		switch right.(type) {
 		case *ExprFuncallOrConversion,*ExprMethodcall:
-			var rettypes []*Gtype
-			switch right.(type) {
-			case *ExprFuncallOrConversion:
-				emit("# emitting rhs (funcall)")
-				rettypes = right.(*ExprFuncallOrConversion).getFuncDef().rettypes
-			case *ExprMethodcall:
-				emit("# emitting rhs (method)")
-				rettypes = right.(*ExprMethodcall).getRettypes()
-			default:
-				errorf("no reach here")
-			}
+			rettypes := getRettypes(right)
 
 			if len(rettypes) == 1 {
 				right.emit()
@@ -1732,6 +1716,21 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	origType := typeToBeloing.relation.gtype
 	//debugf("origType = %v", origType)
 	return origType
+}
+
+func getRettypes(call Expr) []*Gtype  {
+	switch call.(type) {
+	case *ExprFuncallOrConversion:
+		return call.(*ExprFuncallOrConversion).getRettypes()
+	case *ExprMethodcall:
+		return call.(*ExprMethodcall).getRettypes()
+	}
+	errorf("no reach here")
+	return nil
+}
+
+func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
+	return funcall.getFuncDef().rettypes
 }
 
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
