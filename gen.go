@@ -394,7 +394,45 @@ func (ast *ExprUop) emit() {
 
 }
 
+func (binop *ExprBinop) emitCompareStrings() {
+	switch binop.op {
+	case "<":
+		TBI(binop.token(), "")
+	case ">":
+		TBI(binop.token(), "")
+	case "<=":
+		TBI(binop.token(), "")
+	case ">=":
+		TBI(binop.token(), "")
+	case "!=":
+		TBI(binop.token(), "")
+	case "==":
+		binop.left.emit()
+		emit("push %%rax")
+		binop.right.emit()
+		emit("pop %%rcx")
+		emit("# rax = right, rcx = left")
+
+		// call strcmp(3)
+		emit("mov %%rcx, %%rsi")
+		emit("mov %%rax, %%rdi")
+		emit("mov $0, %%rax")
+		emit("call strcmp")
+		emit("cmp $0, %%rax") // retval == 0
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+	}
+
+}
+
 func (binop *ExprBinop) emitComp() {
+	switch {
+	case binop.left.getGtype().typ == G_STRING ||
+		(binop.left.getGtype().typ == G_REL && binop.left.getGtype().relation.gtype.typ == G_STRING) :
+			binop.emitCompareStrings()
+		return
+	}
+
 	var instruction string
 	switch binop.op {
 	case "<":
