@@ -543,7 +543,6 @@ func (ast *StmtAssignment) emit() {
 		switch right.(type) {
 		case *ExprFuncallOrConversion,*ExprMethodcall:
 			rettypes := getRettypes(right)
-
 			if len(rettypes) == 1 {
 				right.emit()
 				emitSave(left)
@@ -589,9 +588,7 @@ func emitSave(left Expr) {
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
 	case *ExprStructField:
-		structfield := left.(*ExprStructField)
-		fieldType := structfield.getGtype()
-		emitOffsetSave(structfield.strct, 8, fieldType.offset)
+		left.(*ExprStructField).emitSave()
 	case *ExprUop:
 		left.(*ExprUop).emitSave()
 	default:
@@ -707,6 +704,11 @@ func (e *ExprIndex) emitSave() {
 	emit("pop %%rax # load RHS value")
 	reg := getReg(size)
 	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
+}
+
+func (e *ExprStructField) emitSave() {
+	fieldType := e.getGtype()
+	emitOffsetSave(e.strct, 8, fieldType.offset)
 }
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
