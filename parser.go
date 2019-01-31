@@ -236,10 +236,8 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 		if tok.isPunct("]") {
 			p.skip()
 			// a missing high index defaults to the length of the sliced operand:
-			highIndex = &ExprNumberLiteral{
-				tok: tok,
-				val: e.getGtype().length,
-			}
+			// this must be resolved after resolving types
+			highIndex = nil
 		} else {
 			highIndex = p.parseExpr()
 			p.expect("]")
