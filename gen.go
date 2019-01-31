@@ -609,9 +609,7 @@ func (ast *StmtAssignment) emit() {
 		switch right.(type) {
 		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
-			if len(rettypes) == 1 {
-				emitAssignPrimitive(left, right)
-			} else {
+			if len(rettypes) > 1 {
 				// a,b,c = f()
 				right.emit()
 				for i, _ := range rettypes {
@@ -621,20 +619,21 @@ func (ast *StmtAssignment) emit() {
 					emit("pop %%rax")
 					emitSave(left)
 				}
+				return
 			}
+		}
+
+		gtype := right.getGtype()
+		switch {
+		case gtype.typ == G_ARRAY:
+			assignToArray(left, right)
+		case gtype.typ == G_SLICE:
+			assignToSlice(left, right)
+		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+			assignToStruct(left, right)
 		default:
-			gtype := right.getGtype()
-			switch {
-			case gtype.typ == G_ARRAY:
-				assignToArray(left, right)
-			case gtype.typ == G_SLICE:
-				assignToSlice(left, right)
-			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
-				assignToStruct(left, right)
-			default:
-				// suppose primitive
-				emitAssignPrimitive(left, right)
-			}
+			// suppose primitive
+			emitAssignPrimitive(left, right)
 		}
 		return
 	}
