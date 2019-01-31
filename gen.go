@@ -17,6 +17,10 @@ import "fmt"
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
  */
 
+var retRegi = [14]string{
+	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8" , "r9", "r10", "r11", "r12", "r13", "r14" ,"r15",
+}
+
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
 const IntSize = 8 // 64-bit (8 bytes)
@@ -563,8 +567,7 @@ func (ast *StmtAssignment) emit() {
 			} else {
 				right.emit()
 				for i, _ := range rettypes {
-					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-					emit("push %%rax")
+					emit("push %%%s", retRegi[len(rettypes)-1-i])
 				}
 				for _, left := range ast.lefts {
 					emit("pop %%rax")
@@ -966,10 +969,21 @@ func (stmt *StmtReturn) emit() {
 		TBI(stmt.token(), "too many number of arguments")
 	}
 
-	for i, expr := range stmt.exprs {
+	var retRegiIndex int
+	for _, expr := range stmt.exprs {
 		expr.emit()
-		emit("mov %%rax, %s(%%rip)", retvals[i])
+		size := expr.getGtype().getSize()
+		assert(size > 0, expr.token(), "size should be > 0")
+		var num64bit int = size / 8 // @TODO odd size
+		for j := 0; j < num64bit; j++ {
+			emit("push %%%s", retRegi[num64bit-1-j])
+			retRegiIndex++
+		}
 	}
+	for i := 0 ; i < retRegiIndex; i++ {
+		emit("pop %%%s", retRegi[retRegiIndex - 1 - i ])
+	}
+
 	emit("leave")
 	emit("ret")
 }
@@ -2101,8 +2115,6 @@ type IrRoot struct {
 	stringLiterals []*ExprStringLiteral
 }
 
-var retvals = [...]string{"rt1", "rt2", "rt3", "rt4", "rt5", "rt6"}
-
 func (root *IrRoot) emit() {
 
 	// generate code
@@ -2119,11 +2131,13 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
+	/*
 	emitComment("GLOBAL RETVALS")
 	for _, name := range retvals {
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
+	*/
 
 	emitComment("GLOBAL VARS")
 	emit("")
