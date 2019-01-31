@@ -583,7 +583,7 @@ func (ast *StmtAssignment) emit() {
 				emitAssignPrimitive(left, right)
 			}
 		}
-
+		return
 	} else {
 		// a,b,c = expr
 		numLeft := len(ast.lefts)
@@ -612,6 +612,7 @@ func (ast *StmtAssignment) emit() {
 			if len(rettypes) == 1 {
 				emitAssignPrimitive(left, right)
 			} else {
+				// a,b,c = f()
 				right.emit()
 				for i, _ := range rettypes {
 					emit("push %%%s", retRegi[len(rettypes)-1-i])
@@ -635,6 +636,7 @@ func (ast *StmtAssignment) emit() {
 				emitAssignPrimitive(left, right)
 			}
 		}
+		return
 	}
 
 }
