@@ -2,9 +2,28 @@ package main
 
 import "fmt"
 
+/**
+  Intel® 64 and IA-32 Architectures Software Developer’s Manual
+  Combined Volumes: 1, 2A, 2B, 2C, 2D, 3A, 3B, 3C, 3D and 4
+
+  3.4.1.1 General-Purpose Registers in 64-Bit Mode
+
+  In 64-bit mode, there are 16 general purpose registers and the default operand size is 32 bits.
+  However, general-purpose registers are able to work with either 32-bit or 64-bit operands.
+  If a 32-bit operand size is specified: EAX, EBX, ECX, EDX, EDI, ESI, EBP, ESP, R8D - R15D are available.
+  If a 64-bit operand size is specified: RAX, RBX, RCX, RDX, RDI, RSI, RBP, RSP, R8-R15 are available.
+  R8D-R15D/R8-R15 represent eight new general-purpose registers.
+  All of these registers can be accessed at the byte, word, dword, and qword level.
+  REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
+ */
+
+var retRegi = [14]string{
+	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8" , "r9", "r10", "r11", "r12", "r13", "r14" ,"r15",
+}
+
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-const IntSize = 8 // not like 8cc
+const IntSize = 8 // 64-bit (8 bytes)
 
 var hiddenArrayId = 1
 
@@ -211,6 +230,7 @@ func (a *ExprStructField) emit() {
 }
 
 func (ast *ExprVariable) emit() {
+	emit("# emit variable")
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
@@ -221,7 +241,15 @@ func (ast *ExprVariable) emit() {
 		if ast.offset == 0 {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
 		}
-		emit("mov %d(%%rbp), %%rax", ast.offset)
+		switch {
+		case ast.getGtype().typ == G_SLICE:
+			emit("#   emit slice variable")
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+			emit("mov %d(%%rbp), %%rbx", ast.offset + ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset + ptrSize + IntSize)
+		default:
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+		}
 	}
 }
 
@@ -512,76 +540,45 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
+// https://golang.org/ref/spec#Assignments
+// A tuple assignment assigns the individual elements of a multi-valued operation to a list of variables.
+// There are two forms.
+//
+// In the first,
+// the right hand operand is a single multi-valued expression such as a function call, a channel or map operation, or a type assertion.
+// The number of operands on the left hand side must match the number of values.
+// For instance, if f is a function returning two values,
+//
+//	x, y = f()
+//
+// assigns the first value to x and the second to y.
+//
+// In the second form,
+// the number of operands on the left must equal the number of expressions on the right,
+// each of which must be single-valued, and the nth expression on the right is assigned to the nth operand on the left:
+//
+//  one, two, three = '一', '二', '三'
+//
 func (ast *StmtAssignment) emit() {
 	emit("")
 	emit("# Assignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
-	singleValueMode := (len(ast.rights) > 1)
-
-	numLeft := len(ast.lefts)
-	numRight := 0
-	for _, right := range ast.rights {
-		switch right.(type) {
-		case *ExprFuncallOrConversion:
-			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
-			if singleValueMode && len(rettypes) > 1 {
-				errorft(ast.token(), "multivalue is not allowed")
-			}
-			numRight += len(rettypes)
-		case *ExprMethodcall:
-			rettypes := right.(*ExprMethodcall).getRettypes()
-			if singleValueMode && len(rettypes) > 1 {
-				errorft(ast.token(), "multivalue is not allowed")
-			}
-			numRight += len(rettypes)
-		default:
-			numRight++
+	isOnetoOneAssignment := (len(ast.rights) > 1)
+	if isOnetoOneAssignment {
+		// a,b,c = expr1,expr2,expr3
+		if len(ast.lefts) != len(ast.rights) {
+			errorft(ast.token(), "number of exprs does not match")
 		}
-	}
-	if numLeft != numRight {
-		errorft(ast.token(), "number of exprs does not match")
-	}
 
-	for rightIndex, right := range ast.rights {
-		left := ast.lefts[rightIndex]
-		switch right.(type) {
-		case *ExprFuncallOrConversion:
-			rettypes := right.(*ExprFuncallOrConversion).getFuncDef().rettypes
-			emit("# emitting rhs (funcall)")
-			if len(rettypes) == 1 {
-				right.emit()
-				emitSave(left)
-			} else {
-				right.emit()
-				for i, _ := range rettypes {
-					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-					emit("push %%rax")
-				}
-				for _, left := range ast.lefts {
-					emit("pop %%rax")
-					emitSave(left)
-				}
+		for rightIndex, right := range ast.rights {
+			left := ast.lefts[rightIndex]
+			switch right.(type) {
+			case *ExprFuncallOrConversion, *ExprMethodcall:
+				rettypes := getRettypes(right)
+				assert(len(rettypes) == 1, ast.token(), "return values should be one")
 			}
-		case *ExprMethodcall:
-			rettypes := right.(*ExprMethodcall).getRettypes()
-			emit("# emitting rhs (method)")
-			if len(rettypes) == 1 {
-				right.emit()
-				emitSave(left)
-			} else {
-				right.emit()
-				for i, _ := range rettypes {
-					emit("mov %s(%%rip), %%rax", retvals[len(rettypes)-1-i])
-					emit("push %%rax")
-				}
-				for _, left := range ast.lefts {
-					emit("pop %%rax")
-					emitSave(left)
-				}
-			}
-		default:
 			gtype := right.getGtype()
 			switch {
 			case gtype.typ == G_ARRAY:
@@ -592,14 +589,69 @@ func (ast *StmtAssignment) emit() {
 				assignToStruct(left, right)
 			default:
 				// suppose primitive
-				emit("# evaluating rhs")
-				right.emit()
-				emit("# saving %%rax to lhs")
-				emitSave(left)
+				emitAssignPrimitive(left, right)
 			}
 		}
+		return
+	} else {
+		// a,b,c = expr
+		numLeft := len(ast.lefts)
+		numRight := 0
+		right := ast.rights[0]
+
+		switch right.(type) {
+		case *ExprFuncallOrConversion, *ExprMethodcall:
+			rettypes := getRettypes(right)
+			if isOnetoOneAssignment && len(rettypes) > 1 {
+				errorft(ast.token(), "multivalue is not allowed")
+			}
+			numRight += len(rettypes)
+		default:
+			numRight++
+		}
+
+		if numLeft != numRight {
+			errorft(ast.token(), "number of exprs does not match")
+		}
+
+		left := ast.lefts[0]
+		switch right.(type) {
+		case *ExprFuncallOrConversion, *ExprMethodcall:
+			rettypes := getRettypes(right)
+			if len(rettypes) > 1 {
+				// a,b,c = f()
+				right.emit()
+				for i, _ := range rettypes {
+					emit("push %%%s", retRegi[len(rettypes)-1-i])
+				}
+				for _, left := range ast.lefts {
+					emit("pop %%rax")
+					emitSave(left)
+				}
+				return
+			}
+		}
+
+		gtype := right.getGtype()
+		switch {
+		case gtype.typ == G_ARRAY:
+			assignToArray(left, right)
+		case gtype.typ == G_SLICE:
+			assignToSlice(left, right)
+		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+			assignToStruct(left, right)
+		default:
+			// suppose primitive
+			emitAssignPrimitive(left, right)
+		}
+		return
 	}
 
+}
+
+func emitAssignPrimitive(left Expr, right Expr) {
+	right.emit()   //   expr => %rax
+	emitSave(left) //   %rax => memory
 }
 
 // Each left-hand side operand must be addressable,
@@ -612,9 +664,7 @@ func emitSave(left Expr) {
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
 	case *ExprStructField:
-		structfield := left.(*ExprStructField)
-		fieldType := structfield.getGtype()
-		emitOffsetSave(structfield.strct, 8, fieldType.offset)
+		left.(*ExprStructField).emitSave()
 	case *ExprUop:
 		left.(*ExprUop).emitSave()
 	default:
@@ -730,6 +780,11 @@ func (e *ExprIndex) emitSave() {
 	emit("pop %%rax # load RHS value")
 	reg := getReg(size)
 	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
+}
+
+func (e *ExprStructField) emitSave() {
+	fieldType := e.getGtype()
+	emitOffsetSave(e.strct, 8, fieldType.offset)
 }
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
@@ -964,6 +1019,8 @@ func (f *StmtFor) emit() {
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
+		emit("leave")
+		emit("ret")
 		return
 	}
 
@@ -971,10 +1028,38 @@ func (stmt *StmtReturn) emit() {
 		TBI(stmt.token(), "too many number of arguments")
 	}
 
-	for i, expr := range stmt.exprs {
+	var retRegiIndex int
+	if len(stmt.exprs) == 1 {
+		emit("# DEBUG 1")
+		expr := stmt.exprs[0]
 		expr.emit()
-		emit("mov %%rax, %s(%%rip)", retvals[i])
+		if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
+			emit("mov $0, %%rbx")
+			emit("mov $0, %%rcx")
+		}
+		emit("leave")
+		emit("ret")
+		return
 	}
+	for _, expr := range stmt.exprs {
+		expr.emit()
+		if expr.getGtype() == nil {
+			// nil value
+			emit("push $0")
+			retRegiIndex++
+			continue
+		}
+		size := expr.getGtype().getSize()
+		var num64bit int = size / 8 // @TODO odd size
+		for j := 0; j < num64bit; j++ {
+			emit("push %%%s", retRegi[num64bit-1-j])
+			retRegiIndex++
+		}
+	}
+	for i := 0 ; i < retRegiIndex; i++ {
+		emit("pop %%%s", retRegi[retRegiIndex - 1 - i ])
+	}
+
 	emit("leave")
 	emit("ret")
 }
@@ -1165,6 +1250,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
+// take slice values from stack
 func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
@@ -1350,7 +1436,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $%d", strlen) // cap
 
 	default:
-		TBI(rhs.token(), "unable to handle %T", rhs)
+		rhs.emit() // it should put values to rax,rbx,rcx
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
 	}
 
 	emitSaveSlice(lhs, 0)
@@ -1741,6 +1830,21 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	return origType
 }
 
+func getRettypes(call Expr) []*Gtype  {
+	switch call.(type) {
+	case *ExprFuncallOrConversion:
+		return call.(*ExprFuncallOrConversion).getRettypes()
+	case *ExprMethodcall:
+		return call.(*ExprMethodcall).getRettypes()
+	}
+	errorf("no reach here")
+	return nil
+}
+
+func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
+	return funcall.getFuncDef().rettypes
+}
+
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
 	if origType.typ == G_INTERFACE {
@@ -2091,8 +2195,6 @@ type IrRoot struct {
 	stringLiterals []*ExprStringLiteral
 }
 
-var retvals = [...]string{"rt1", "rt2", "rt3", "rt4", "rt5", "rt6"}
-
 func (root *IrRoot) emit() {
 
 	// generate code
@@ -2109,11 +2211,13 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
+	/*
 	emitComment("GLOBAL RETVALS")
 	for _, name := range retvals {
 		emitLabel("%s:", name)
 		emit(".quad 0")
 	}
+	*/
 
 	emitComment("GLOBAL VARS")
 	emit("")

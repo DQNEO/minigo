@@ -150,6 +150,7 @@ type StmtIf struct {
 type StmtReturn struct {
 	tok   *Token
 	exprs []Expr
+	rettypes []*Gtype
 }
 
 type StmtInc struct {
