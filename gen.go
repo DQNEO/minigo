@@ -531,6 +531,25 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
+// https://golang.org/ref/spec#Assignments
+// A tuple assignment assigns the individual elements of a multi-valued operation to a list of variables.
+// There are two forms.
+//
+// In the first,
+// the right hand operand is a single multi-valued expression such as a function call, a channel or map operation, or a type assertion.
+// The number of operands on the left hand side must match the number of values.
+// For instance, if f is a function returning two values,
+//
+//	x, y = f()
+//
+// assigns the first value to x and the second to y.
+//
+// In the second form,
+// the number of operands on the left must equal the number of expressions on the right,
+// each of which must be single-valued, and the nth expression on the right is assigned to the nth operand on the left:
+//
+//  one, two, three = '一', '二', '三'
+//
 func (ast *StmtAssignment) emit() {
 	emit("")
 	emit("# Assignment")
