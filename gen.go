@@ -1030,7 +1030,6 @@ func (stmt *StmtReturn) emit() {
 
 	var retRegiIndex int
 	if len(stmt.exprs) == 1 {
-		emit("# DEBUG 1")
 		expr := stmt.exprs[0]
 		expr.emit()
 		if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
