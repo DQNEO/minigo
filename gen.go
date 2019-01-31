@@ -230,6 +230,7 @@ func (a *ExprStructField) emit() {
 }
 
 func (ast *ExprVariable) emit() {
+	emit("# emit variable")
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
@@ -240,7 +241,15 @@ func (ast *ExprVariable) emit() {
 		if ast.offset == 0 {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
 		}
-		emit("mov %d(%%rbp), %%rax", ast.offset)
+		switch {
+		case ast.getGtype().typ == G_SLICE:
+			emit("#   emit slice variable")
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+			emit("mov %d(%%rbp), %%rbx", ast.offset + ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset + ptrSize + IntSize)
+		default:
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+		}
 	}
 }
 
@@ -1010,6 +1019,8 @@ func (f *StmtFor) emit() {
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		emit("mov $0, %%rax")
+		emit("leave")
+		emit("ret")
 		return
 	}
 
@@ -1018,10 +1029,27 @@ func (stmt *StmtReturn) emit() {
 	}
 
 	var retRegiIndex int
+	if len(stmt.exprs) == 1 {
+		emit("# DEBUG 1")
+		expr := stmt.exprs[0]
+		expr.emit()
+		if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
+			emit("mov $0, %%rbx")
+			emit("mov $0, %%rcx")
+		}
+		emit("leave")
+		emit("ret")
+		return
+	}
 	for _, expr := range stmt.exprs {
 		expr.emit()
+		if expr.getGtype() == nil {
+			// nil value
+			emit("push $0")
+			retRegiIndex++
+			continue
+		}
 		size := expr.getGtype().getSize()
-		assert(size > 0, expr.token(), "size should be > 0")
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
 			emit("push %%%s", retRegi[num64bit-1-j])
@@ -1222,6 +1250,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
+// take slice values from stack
 func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
@@ -1407,7 +1436,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $%d", strlen) // cap
 
 	default:
-		TBI(rhs.token(), "unable to handle %T", rhs)
+		rhs.emit() // it should put values to rax,rbx,rcx
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
 	}
 
 	emitSaveSlice(lhs, 0)

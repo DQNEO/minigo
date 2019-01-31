@@ -14,6 +14,7 @@ type parser struct {
 	packageBlockScope   *scope
 	currentScope        *scope
 	scopes              map[identifier]*scope
+	currentFunc         *DeclFunc
 	stringLiterals      []*ExprStringLiteral
 	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
@@ -1145,6 +1146,7 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 	return &StmtReturn{
 		tok:   ptok,
 		exprs: exprs,
+		rettypes: p.currentFunc.rettypes,
 	}
 }
 
@@ -1562,6 +1564,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.packageBlockScope.setFunc(fname, ref)
 	}
 
+	p.currentFunc = r
 	body := p.parseCompoundStmt()
 	r.body = body
 	r.localvars = p.localvars

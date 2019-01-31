@@ -33,10 +33,33 @@ func f2() {
 	fmt.Printf("%d\n", sum)
 }
 
+func returnNil() []int {
+	return nil
+}
+
+var ary = [2]int{8,9}
+func returnSlice() []int {
+	s := ary[0:2]
+	return s
+}
+
+func receiveNilSlice() {
+	nilSlice := returnNil()
+	fmt.Printf("%d\n", len(nilSlice) + 6) // 6
+}
+
+func receiveIntSlice() {
+	intSlice := returnSlice()
+	fmt.Printf("%d\n", len(intSlice) + 5) // 7
+	fmt.Printf("%d\n", intSlice[0]) // 8
+}
+
 func main() {
 	f1()
 	f2()
 	fvoid()
 	fvoidsemicolon()
 	fvoidreturn()
+	receiveNilSlice()
+	receiveIntSlice()
 }
