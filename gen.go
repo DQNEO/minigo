@@ -556,30 +556,58 @@ func (ast *StmtAssignment) emit() {
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
-	singleValueMode := (len(ast.rights) > 1)
+	isOnetoOneAssignment := (len(ast.rights) > 1)
+	if isOnetoOneAssignment {
+		// a,b,c = expr1,expr2,expr3
+		if len(ast.lefts) != len(ast.rights) {
+			errorft(ast.token(), "number of exprs does not match")
+		}
 
-	numLeft := len(ast.lefts)
-	numRight := 0
-	for _, right := range ast.rights {
+		for rightIndex, right := range ast.rights {
+			left := ast.lefts[rightIndex]
+			switch right.(type) {
+			case *ExprFuncallOrConversion, *ExprMethodcall:
+				rettypes := getRettypes(right)
+				assert(len(rettypes) == 1, ast.token(), "return values should be one")
+			}
+			gtype := right.getGtype()
+			switch {
+			case gtype.typ == G_ARRAY:
+				assignToArray(left, right)
+			case gtype.typ == G_SLICE:
+				assignToSlice(left, right)
+			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+				assignToStruct(left, right)
+			default:
+				// suppose primitive
+				emitAssignPrimitive(left, right)
+			}
+		}
+
+	} else {
+		// a,b,c = expr
+		numLeft := len(ast.lefts)
+		numRight := 0
+		right := ast.rights[0]
+
 		switch right.(type) {
-		case *ExprFuncallOrConversion,*ExprMethodcall:
+		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
-			if singleValueMode && len(rettypes) > 1 {
+			if isOnetoOneAssignment && len(rettypes) > 1 {
 				errorft(ast.token(), "multivalue is not allowed")
 			}
 			numRight += len(rettypes)
 		default:
 			numRight++
 		}
-	}
-	if numLeft != numRight {
-		errorft(ast.token(), "number of exprs does not match")
-	}
 
-	for rightIndex, right := range ast.rights {
-		left := ast.lefts[rightIndex]
+		if numLeft != numRight {
+			errorft(ast.token(), "number of exprs does not match")
+		}
+
+		left := ast.lefts[0]
 		switch right.(type) {
-		case *ExprFuncallOrConversion,*ExprMethodcall:
+		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
 			if len(rettypes) == 1 {
 				emitAssignPrimitive(left, right)
