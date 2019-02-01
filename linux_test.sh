@@ -16,7 +16,7 @@ function test_file {
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
     $bin_file /etc/lsb-release > $actual
-    diff -u $actual $expected
+    diff -u $expected $actual
     echo ok
 }
 
