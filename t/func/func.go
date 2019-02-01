@@ -39,7 +39,7 @@ func returnNil() []int {
 
 var ary = [2]int{8,9}
 func returnSlice() []int {
-	s := ary[0:2]
+	s := ary[:]
 	return s
 }
 

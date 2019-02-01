@@ -1399,6 +1399,12 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 
 		emit("#   calc and set len")
+
+		if e.high == nil {
+			e.high = &ExprNumberLiteral{
+				val: e.collection.getGtype().length,
+			}
+		}
 		calcLen := &ExprBinop{
 			op:    "-",
 			left:  e.high,
