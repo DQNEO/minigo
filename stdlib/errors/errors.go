@@ -1,5 +1,6 @@
 package errors
 
-func New() {
+func New() error {
+	return nil
 }
 

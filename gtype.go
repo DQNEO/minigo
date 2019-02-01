@@ -162,6 +162,7 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
+	assert(e.rel.expr.(*ExprFuncRef).funcdef.rettypes != nil, e.token(), "")
 	return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
 }
 
