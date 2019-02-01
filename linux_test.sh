@@ -1,7 +1,7 @@
 #!/bin/bash
-set -e
 
 actual=out/actual.txt
+differ=0
 
 function test_file {
     local basename=$1
@@ -17,6 +17,9 @@ function test_file {
     gcc -no-pie -o $bin_file $obj_file
     $bin_file /etc/lsb-release > $actual
     diff -u $expected $actual
+    if [[ $? -ne 0 ]];then
+        differ=1
+    fi
     echo ok
 }
 
@@ -28,4 +31,8 @@ do
     test_file $name
 done
 
-echo "All tests passed"
+if [[ $differ -eq 0 ]];then
+    echo "All tests passed"
+else
+    echo "FAILED"
+fi
