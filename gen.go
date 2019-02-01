@@ -620,13 +620,27 @@ func (ast *StmtAssignment) emit() {
 			rettypes := getRettypes(right)
 			if len(rettypes) > 1 {
 				// a,b,c = f()
+				emit("# a,b,c = f()")
 				right.emit()
-				for i, _ := range rettypes {
-					emit("push %%%s", retRegi[len(rettypes)-1-i])
+				var retRegiLen int
+				for _, rettype := range rettypes {
+					retSize := rettype.getSize()
+					if retSize < 8 {
+						retSize = 8
+					}
+					retRegiLen += retSize / 8
+				}
+				emit("# retRegiLen=%d\n", retRegiLen)
+				for i := retRegiLen - 1; i >= 0; i-- {
+					emit("push %%%s # %d", retRegi[i],i)
 				}
 				for _, left := range ast.lefts {
-					emit("pop %%rax")
-					emitSave(left)
+					if left.getGtype().typ == G_SLICE {
+						emitSaveSlice(left, 0)
+					} else {
+						emit("pop %%rax")
+						emitSave(left)
+					}
 				}
 				return
 			}
@@ -1040,15 +1054,18 @@ func (stmt *StmtReturn) emit() {
 		emit("ret")
 		return
 	}
-	for _, expr := range stmt.exprs {
+	for i, rettype := range stmt.rettypes {
+		expr := stmt.exprs[i]
 		expr.emit()
-		if expr.getGtype() == nil {
-			// nil value
-			emit("push $0")
-			retRegiIndex++
-			continue
+//		rettype := stmt.rettypes[i]
+		if expr.getGtype() == nil && rettype.typ == G_SLICE  {
+			emit("mov $0, %%rbx")
+			emit("mov $0, %%rcx")
 		}
-		size := expr.getGtype().getSize()
+		size := rettype.getSize()
+		if size < 8 {
+			size = 8
+		}
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
 			emit("push %%%s", retRegi[num64bit-1-j])
@@ -1381,47 +1398,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $%d", lit.invisiblevar.gtype.length) // cap
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
-		emit("# assign to a slice")
-		emit("#   emit address of the array")
-		e.collection.emit()
-		emit("push %%rax") // head of the array
-		emit("#   emit low index")
-		e.low.emit()
-		emit("mov %%rax, %%rcx") // low index
-		elmType := e.collection.getGtype().elementType
-		size := elmType.getSize()
-		assert(size > 0, nil, "size > 0")
-		emit("mov $%d, %%rax", size) // size of one element
-		emit("imul %%rcx, %%rax")    // index * size
-		emit("pop %%rcx")            // head of the array
-		emit("add %%rcx , %%rax")    // (index * size) + address
-		emit("push %%rax")
-
-		emit("#   calc and set len")
-
-		if e.high == nil {
-			e.high = &ExprNumberLiteral{
-				val: e.collection.getGtype().length,
-			}
-		}
-		calcLen := &ExprBinop{
-			op:    "-",
-			left:  e.high,
-			right: e.low,
-		}
-		calcLen.emit()
-		emit("push %%rax")
-
-		emit("#   calc and set cap")
-		calcCap := &ExprBinop{
-			op: "-",
-			left: &ExprNumberLiteral{
-				val: e.collection.getGtype().length,
-			},
-			right: e.low,
-		}
-		calcCap.emit()
-		emit("push %%rax")
+		e.emitToStack()
 	case *ExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
@@ -1451,6 +1428,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 }
 
 func (variable *ExprVariable) saveSlice(offset int) {
+	emit("# *ExprVariable.saveSlice()")
 	emit("pop %%rax")
 	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen)
 	emit("pop %%rax")
@@ -1734,7 +1712,54 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e *ExprSlice) emit() {
-	TBI(e.token(), "")
+	e.emitToStack()
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("pop %%rax")
+}
+
+func (e *ExprSlice) emitToStack() {
+	emit("# assign to a slice")
+	emit("#   emit address of the array")
+	e.collection.emit()
+	emit("push %%rax") // head of the array
+	emit("#   emit low index")
+	e.low.emit()
+	emit("mov %%rax, %%rcx") // low index
+	elmType := e.collection.getGtype().elementType
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax", size) // size of one element
+	emit("imul %%rcx, %%rax")    // index * size
+	emit("pop %%rcx")            // head of the array
+	emit("add %%rcx , %%rax")    // (index * size) + address
+	emit("push %%rax")
+
+	emit("#   calc and set len")
+
+	if e.high == nil {
+		e.high = &ExprNumberLiteral{
+			val: e.collection.getGtype().length,
+		}
+	}
+	calcLen := &ExprBinop{
+		op:    "-",
+		left:  e.high,
+		right: e.low,
+	}
+	calcLen.emit()
+	emit("push %%rax")
+
+	emit("#   calc and set cap")
+	calcCap := &ExprBinop{
+		op: "-",
+		left: &ExprNumberLiteral{
+			val: e.collection.getGtype().length,
+		},
+		right: e.low,
+	}
+	calcCap.emit()
+	emit("push %%rax")
 }
 
 func (e ExprArrayLiteral) emit() {
