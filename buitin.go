@@ -27,7 +27,10 @@ func recover() interface{} {
 type error interface {
 	Error() string
 }
+`
 
+var internalRuntimeCode = `
+package runtime
 // Runtime
 var heap [1048576]int
 var heapIndex int
@@ -43,7 +46,4 @@ func malloc(size int) int {
 	heapIndex += size
 	return r
 }
-
-
-
 `

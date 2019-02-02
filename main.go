@@ -86,6 +86,9 @@ func main() {
 
 	universe := newScope(nil)
 
+	bs = NewByteStreamFromString("runtime.memory", internalRuntimeCode)
+	astFiles = append(astFiles, p.parseSourceFile(bs, universe))
+
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe))
 
