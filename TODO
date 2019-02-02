@@ -1,15 +1,7 @@
-# Decl/Assign
-* assign zero value when no init value
-
-# Slice
-* assigns slice expr to any lhs (other than variable)
 * raise out of range error on slice index
-
-# Others
-* Gtype: string, map
 * improve Gtype.String()
 * re-organize dump/debug functions
-* convert Gtype as an interface?
+* convert Gtype to an interface?
 * emit expression of top-level var decls
 * redesign how to handle semicolon
 * git hook test pre-commit
