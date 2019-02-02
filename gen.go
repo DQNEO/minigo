@@ -1825,19 +1825,6 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-func (methodCall *ExprMethodcall) getPkgName() identifier {
-	origType := methodCall.getOrigType()
-	if origType.typ == G_INTERFACE {
-		TBI(methodCall.token(), "G_INTERFACE is not supported yet")
-	} else {
-		funcref, ok := origType.methods[methodCall.fname]
-		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
-		}
-		return funcref.funcdef.pkg
-	}
-	return ""
-}
 
 func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
@@ -1891,7 +1878,16 @@ func (methodCall *ExprMethodcall) emit() {
 		args = append(args, arg)
 	}
 
-	pkgname := methodCall.getPkgName()
+	origType := methodCall.getOrigType()
+	if origType.typ == G_INTERFACE {
+		TBI(methodCall.token(), "G_INTERFACE is not supported yet")
+	}
+
+	funcref, ok := origType.methods[methodCall.fname]
+	if !ok {
+		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+	}
+	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	emitCall(getPackagedFuncName(pkgname, name), args)
 }
