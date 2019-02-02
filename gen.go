@@ -234,7 +234,17 @@ func (ast *ExprVariable) emit() {
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
+	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
+		ast.gtype.typ = G_POINTER
+		uop := &ExprUop{
+			tok: ast.token(),
+			op: "*",
+			operand:ast,
+		}
+		uop.emit()
+		return
 	}
+
 	if ast.isGlobal {
 		emit("mov %s(%%rip), %%rax", ast.varname)
 	} else {
@@ -393,11 +403,11 @@ func (ast *ExprUop) emit() {
 	} else if ast.op == "*" {
 		// dereferene of a pointer
 		//debugf("dereferene of a pointer")
-		rel, ok := ast.operand.(*Relation)
+		//rel, ok := ast.operand.(*Relation)
 		//debugf("operand:%s", rel)
-		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "operand is a rel")
-		vr.emit()
+		//vr, ok := rel.expr.(*ExprVariable)
+		//assert(ok, nil, "operand is a rel")
+		ast.operand.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
 	} else if ast.op == "!" {
@@ -587,6 +597,8 @@ func (ast *StmtAssignment) emit() {
 				assignToSlice(left, right)
 			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 				assignToStruct(left, right)
+			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+				assignToInterface(left, right)
 			default:
 				// suppose primitive
 				emitAssignPrimitive(left, right)
@@ -654,6 +666,8 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 			assignToStruct(left, right)
+		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+			assignToInterface(left, right)
 		default:
 			// suppose primitive
 			emitAssignPrimitive(left, right)
@@ -1263,6 +1277,25 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
+func emitSaveInterface(lhs Expr, offset int) {
+	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		emitSaveInterface(rel.expr, offset)
+	case *ExprVariable:
+		variable := lhs.(*ExprVariable)
+		variable.saveInterface(offset)
+	case *ExprStructField:
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitSaveInterface(structfield.strct, fieldType.offset+offset)
+	case *ExprIndex:
+		TBI(lhs.token(), "Unable to assign to %T", lhs)
+	default:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
+	}
+}
+
 // take slice values from stack
 func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
@@ -1347,6 +1380,27 @@ func assignToMap(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
 	emitSaveSlice(lhs, 0)
+}
+
+func assignToInterface(lhs Expr, rhs Expr) {
+	emit("# assignToInterface")
+	if rhs == nil {
+		emit("# initialize interface with a zero value")
+		emit("push $0")
+		emit("push $0")
+		emitSaveInterface(lhs, 0)
+		return
+	}
+	uop := &ExprUop{
+		tok: lhs.token(),
+		op: "&",
+		operand: rhs,
+	}
+	uop.emit()
+	emit("push %%rax")  // address
+	rhs.getGtype().emitTypeId()
+	emit("push %%rax") // concrete type (type id)
+	emitSaveInterface(lhs, 0)
 }
 
 func assignToSlice(lhs Expr, rhs Expr) {
@@ -1434,6 +1488,15 @@ func (variable *ExprVariable) saveSlice(offset int) {
 	variable.emitOffsetSave(8, offset)
 }
 
+func (variable *ExprVariable) saveInterface(offset int) {
+	emit("# *ExprVariable.saveInterface()")
+	emit("pop %%rax")
+	variable.emitOffsetSave(8, offset+ptrSize)
+	emit("pop %%rax")
+	variable.emitOffsetSave(8, offset)
+}
+
+
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	emit("# assignToArray")
@@ -1507,7 +1570,10 @@ func (decl *DeclVar) emit() {
 		assignToStruct(decl.varname, decl.initval)
 	case gtype.typ == G_MAP:
 		assignToMap(decl.varname, decl.initval)
+	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+		assignToInterface(decl.varname, decl.initval)
 	default:
+		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+ gtype.String())
 		// primitive types like int,bool,byte
 		rhs := decl.initval
 		if rhs == nil {
@@ -1825,7 +1891,6 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-
 func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(gtype != nil, methodCall.tok)
@@ -1871,16 +1936,24 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	}
 }
 
-func (methodCall *ExprMethodcall) emit() {
-
+func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
+	emitCall("main.Point.sum", args)
+}
 
+func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
 	if origType.typ == G_INTERFACE {
-		TBI(methodCall.token(), "G_INTERFACE is not supported yet")
+		methodCall.emitInterfaceMethodCall()
+		return
+	}
+
+	args := []Expr{methodCall.receiver}
+	for _, arg := range methodCall.args {
+		args = append(args, arg)
 	}
 
 	funcref, ok := origType.methods[methodCall.fname]
@@ -1992,13 +2065,13 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 func emitCall(fname string, args []Expr) {
 
-	emit("# funcall %s", fname)
+	emit("# emitCall %s", fname)
 	/*
 		for i, _ := range args {
 			emit("push %%%s", RegsForCall[i])
 		}
 	*/
-	emit("# setting arguments")
+	emit("# setting arguments %v", args)
 	for i, arg := range args {
 		//debugf("arg[%d] = %v", i, arg)
 		if _, ok := arg.(*ExprVaArg); ok {
