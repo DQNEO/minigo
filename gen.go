@@ -579,7 +579,7 @@ func (ast *StmtAssignment) emit() {
 				rettypes := getRettypes(right)
 				assert(len(rettypes) == 1, ast.token(), "return values should be one")
 			}
-			gtype := right.getGtype()
+			gtype := left.getGtype()
 			switch {
 			case gtype.typ == G_ARRAY:
 				assignToArray(left, right)
@@ -646,7 +646,7 @@ func (ast *StmtAssignment) emit() {
 			}
 		}
 
-		gtype := right.getGtype()
+		gtype := left.getGtype()
 		switch {
 		case gtype.typ == G_ARRAY:
 			assignToArray(left, right)
