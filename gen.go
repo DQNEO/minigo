@@ -45,6 +45,8 @@ func emitLabel(format string, v ...interface{}) {
 	fmt.Printf(format+"\n", v...)
 }
 
+// Mytype.method -> Mytype#method
+
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
@@ -53,7 +55,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "." + string(fname)
+	return string(typename) + "$" + string(fname)
 }
 
 // main.f1 -> main.f1
