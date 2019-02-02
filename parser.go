@@ -1741,6 +1741,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 }
 
+var typeId int
+
 func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
 	ptok := p.expectKeyword("type")
@@ -1755,7 +1757,9 @@ func (p *parser) parseTypeDecl() *DeclType {
 		tok:   ptok,
 		name:  newName,
 		gtype: gtype,
+		typeId: typeId,
 	}
+	typeId++
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }

@@ -59,15 +59,15 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 }
 
 // main.f1 -> main.f1
-func getPackagedFuncName(pkg identifier, fname string) string {
+func getPackagedFuncName(pkg identifier, fname string) IrStaticCall {
 	if pkg == "libc" {
-		return fname
+		return IrStaticCall(fname)
 	}
 
-	return fmt.Sprintf("%s.%s", pkg, fname)
+	return IrStaticCall(fmt.Sprintf("%s.%s", pkg, fname))
 }
 
-func (f *DeclFunc) getUniqueName() string {
+func (f *DeclFunc) getUniqueName() IrStaticCall {
 	if f.receiver != nil {
 		// method
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
@@ -1938,12 +1938,34 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	}
 }
 
+type IrInterfaceMethodCall struct {
+	methodName identifier
+}
+
+func (call *IrInterfaceMethodCall) emitPush() {
+	emit("lea methods(%%rip), %%rax")
+	methodId := 1
+	emit("mov $%d, %%rcx", methodId)
+	emit("imul $8, %%rcx")
+	emit("add %%rcx, %%rax")
+	emit("mov (%%rax), %%rax")
+	emit("push %%rax")
+}
+
+func (call *IrInterfaceMethodCall) emit() {
+	emit("pop %%rax")
+	emit("call *%%rax")
+}
+
 func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
-	emitCall("main.Point$sum", args)
+	call := &IrInterfaceMethodCall{
+		methodName : methodCall.fname,
+	}
+	emitCall(call, args)
 }
 
 func (methodCall *ExprMethodcall) emit() {
@@ -2065,7 +2087,22 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
 }
 
-func emitCall(fname string, args []Expr) {
+type IrStaticCall string
+func (ircall IrStaticCall) emitPush() {
+	// nothing to do
+}
+
+func (ircall IrStaticCall) emit() {
+	emit("mov $0, %%rax")
+	emit("call %s", ircall)
+}
+
+type IrCall interface {
+	emitPush()
+	emit()
+}
+
+func emitCall(fname IrCall, args []Expr) {
 
 	emit("# emitCall %s", fname)
 	/*
@@ -2073,7 +2110,9 @@ func emitCall(fname string, args []Expr) {
 			emit("push %%%s", RegsForCall[i])
 		}
 	*/
+	fname.emitPush()
 	emit("# setting arguments %v", args)
+
 	for i, arg := range args {
 		//debugf("arg[%d] = %v", i, arg)
 		if _, ok := arg.(*ExprVaArg); ok {
@@ -2090,9 +2129,7 @@ func emitCall(fname string, args []Expr) {
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 
-	emit("mov $0, %%rax")
-	emit("call %s", fname)
-
+	fname.emit()
 	/*
 		for i, _ := range args {
 			j := len(args) - 1 - i
@@ -2308,13 +2345,31 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
-	/*
-		emitComment("GLOBAL RETVALS")
-		for _, name := range retvals {
-			emitLabel("%s:", name)
-			emit(".quad 0")
+	emitComment("Method table")
+
+	emitLabel("%s:", "methods")
+	emit(".quad %s", "main.Point$sum")
+	emit(".quad %s", "main.Asset$sum")
+
+	var methods = make(map[string][]string) // typeName : []methods
+
+	for _, funcdecl := range root.funcs {
+		if funcdecl.receiver != nil {
+			gtype := funcdecl.receiver.getGtype()
+			if gtype.typ == G_POINTER {
+				gtype = gtype.origType
+			}
+			if gtype.relation == nil {
+				errorf("no relation for %#v", funcdecl.receiver.getGtype())
+			}
+			typeName := string(gtype.relation.name)
+			if methods[typeName] == nil {
+				methods[typeName] = make([]string,0)
+			}
+			methods[typeName] = append(methods[typeName], string(funcdecl.getUniqueName()))
 		}
-	*/
+	}
+	debugf("methods=%v", methods)
 
 	emitComment("GLOBAL VARS")
 	emit("")
