@@ -87,8 +87,7 @@ func main() {
 	universe := newScope(nil)
 
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
-	astFileBuiltin := p.parseSourceFile(bs, universe)
-	astFiles = append(astFiles, astFileBuiltin)
+	astFiles = append(astFiles, p.parseSourceFile(bs, universe))
 
 	setPredeclaredIdentifiers(universe)
 
@@ -103,9 +102,7 @@ func main() {
 	p.currentPackageName = "main"
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
-		astFile := p.parseSourceFile(bs, packageblockscope)
-
-		astFiles = append(astFiles, astFile)
+		astFiles = append(astFiles, p.parseSourceFile(bs, packageblockscope))
 	}
 
 	if parseOnly {
