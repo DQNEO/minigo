@@ -117,11 +117,11 @@ type StmtShortVarDecl struct {
 }
 
 type ForRangeClause struct {
-	tok       *Token
+	tok                 *Token
 	invisibleMapCounter *ExprVariable
-	indexvar  *Relation
-	valuevar  *Relation
-	rangeexpr Expr
+	indexvar            *Relation
+	valuevar            *Relation
+	rangeexpr           Expr
 }
 
 type ForForClause struct {
@@ -148,8 +148,8 @@ type StmtIf struct {
 }
 
 type StmtReturn struct {
-	tok   *Token
-	exprs []Expr
+	tok      *Token
+	exprs    []Expr
 	rettypes []*Gtype
 }
 

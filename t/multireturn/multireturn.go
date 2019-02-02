@@ -28,7 +28,7 @@ func getMulti() {
 	fmt.Printf("%d\n", d)
 }
 
-var bytes = [3]byte{'a','b','c'}
+var bytes = [3]byte{'a', 'b', 'c'}
 
 func ReadFile() ([]byte, int) {
 	return bytes[:], 9

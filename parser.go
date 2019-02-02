@@ -704,7 +704,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	var variable *ExprVariable
 	if p.isGlobal() {
 		variable = &ExprVariable{
-			tok: p.lastToken(),
+			tok:      p.lastToken(),
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
@@ -712,7 +712,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
-			tok: p.lastToken(),
+			tok:      p.lastToken(),
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
@@ -1075,11 +1075,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	var r = &StmtFor{
 		tok: tokRange,
 		rng: &ForRangeClause{
-			tok:       tokRange,
-			invisibleMapCounter :p.newVariable("", gInt),
-			indexvar:  indexvar,
-			valuevar:  valuevar,
-			rangeexpr: rangeExpr,
+			tok:                 tokRange,
+			invisibleMapCounter: p.newVariable("", gInt),
+			indexvar:            indexvar,
+			valuevar:            valuevar,
+			rangeexpr:           rangeExpr,
 		},
 	}
 	if infer {
@@ -1142,8 +1142,8 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 		exprs = nil
 	}
 	return &StmtReturn{
-		tok:   ptok,
-		exprs: exprs,
+		tok:      ptok,
+		exprs:    exprs,
 		rettypes: p.currentFunc.rettypes,
 	}
 }

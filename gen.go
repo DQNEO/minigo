@@ -15,10 +15,10 @@ import "fmt"
   R8D-R15D/R8-R15 represent eight new general-purpose registers.
   All of these registers can be accessed at the byte, word, dword, and qword level.
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
- */
+*/
 
 var retRegi = [14]string{
-	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8" , "r9", "r10", "r11", "r12", "r13", "r14" ,"r15",
+	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 }
 
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
@@ -245,8 +245,8 @@ func (ast *ExprVariable) emit() {
 		case ast.getGtype().typ == G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %d(%%rbp), %%rax", ast.offset)
-			emit("mov %d(%%rbp), %%rbx", ast.offset + ptrSize)
-			emit("mov %d(%%rbp), %%rcx", ast.offset + ptrSize + IntSize)
+			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
 		default:
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
@@ -460,8 +460,8 @@ func emitStringsEqual(leftReg string, rightReg string) {
 func (binop *ExprBinop) emitComp() {
 	switch {
 	case binop.left.getGtype().typ == G_STRING ||
-		(binop.left.getGtype().typ == G_REL && binop.left.getGtype().relation.gtype.typ == G_STRING) :
-			binop.emitCompareStrings()
+		(binop.left.getGtype().typ == G_REL && binop.left.getGtype().relation.gtype.typ == G_STRING):
+		binop.emitCompareStrings()
 		return
 	}
 
@@ -486,10 +486,10 @@ func (binop *ExprBinop) emitComp() {
 
 func (ast *ExprBinop) emit() {
 	switch ast.op {
-	case "<",">","<=",">=","!=","==":
+	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
-	case "&&" :
+	case "&&":
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
@@ -502,7 +502,7 @@ func (ast *ExprBinop) emit() {
 		emit("mov $1, %%rax")
 		emit("%s:", labelEnd)
 		return
-	case "||" :
+	case "||":
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("test %%rax, %%rax")
@@ -632,7 +632,7 @@ func (ast *StmtAssignment) emit() {
 				}
 				emit("# retRegiLen=%d\n", retRegiLen)
 				for i := retRegiLen - 1; i >= 0; i-- {
-					emit("push %%%s # %d", retRegi[i],i)
+					emit("push %%%s # %d", retRegi[i], i)
 				}
 				for _, left := range ast.lefts {
 					if left.getGtype().typ == G_SLICE {
@@ -691,7 +691,6 @@ func emitSave(left Expr) {
 // append key and value to the tail of map data, and increment its length
 func (e *ExprIndex) emitMapSet() {
 
-
 	labelAppend := makeLabel()
 	labelSave := makeLabel()
 
@@ -718,9 +717,9 @@ func (e *ExprIndex) emitMapSet() {
 		arg: e.collection,
 	}
 	elen.emit()
-	emit("imul $%d, %%rax", 2 * 8) // distance from head to tail
-	emit("pop %%rcx") // head
-	emit("add %%rax, %%rcx") // now rcx is the tail address
+	emit("imul $%d, %%rax", 2*8) // distance from head to tail
+	emit("pop %%rcx")            // head
+	emit("add %%rax, %%rcx")     // now rcx is the tail address
 	emit("push %%rcx")
 
 	// map len++
@@ -738,11 +737,11 @@ func (e *ExprIndex) emitMapSet() {
 	emit("call .malloc")
 	// %%rax : malloced address
 	// stack : [map tail address, index value]
-	emit("pop %%rcx") // index value
-	emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
-	emit("pop %%rcx") // map tail address
+	emit("pop %%rcx")            // index value
+	emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+	emit("pop %%rcx")            // map tail address
 	emit("mov %%rax, (%%rcx) #") // save index address to the tail
-	emit("push %%rcx") // push map tail
+	emit("push %%rcx")           // push map tail
 
 	// save value to heap
 	// malloc(8)
@@ -750,7 +749,7 @@ func (e *ExprIndex) emitMapSet() {
 	emit("mov $0, %%rax")
 	emit("call .malloc")
 
-	emit("pop %%rcx") // map tail address
+	emit("pop %%rcx")           // map tail address
 	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
 
 	emit("pop %%rcx") // rhs value
@@ -847,7 +846,7 @@ func (f *StmtFor) emitMapRange() {
 	labelEnd := makeLabel()
 
 	mapCounter := &Relation{
-		name:"",
+		name: "",
 		expr: f.rng.invisibleMapCounter,
 	}
 	// counter = 0
@@ -865,7 +864,6 @@ func (f *StmtFor) emitMapRange() {
 	initstmt.emit()
 
 	emit("%s: # begin loop ", labelBegin)
-
 
 	// counter < len(list)
 	condition := &ExprBinop{
@@ -949,7 +947,6 @@ func (f *StmtFor) emitRange() {
 	}
 	emit("# init index")
 	initstmt.emit()
-
 
 	// v = s[i]
 	var assignVar *StmtAssignment
@@ -1057,8 +1054,8 @@ func (stmt *StmtReturn) emit() {
 	for i, rettype := range stmt.rettypes {
 		expr := stmt.exprs[i]
 		expr.emit()
-//		rettype := stmt.rettypes[i]
-		if expr.getGtype() == nil && rettype.typ == G_SLICE  {
+		//		rettype := stmt.rettypes[i]
+		if expr.getGtype() == nil && rettype.typ == G_SLICE {
 			emit("mov $0, %%rbx")
 			emit("mov $0, %%rcx")
 		}
@@ -1072,8 +1069,8 @@ func (stmt *StmtReturn) emit() {
 			retRegiIndex++
 		}
 	}
-	for i := 0 ; i < retRegiIndex; i++ {
-		emit("pop %%%s", retRegi[retRegiIndex - 1 - i ])
+	for i := 0; i < retRegiIndex; i++ {
+		emit("pop %%%s", retRegi[retRegiIndex-1-i])
 	}
 
 	emit("leave")
@@ -1304,7 +1301,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		length := len(lit.elements)
 
 		// call malloc
-		emit("mov $%d, %%rdi", length * 8 * 4)
+		emit("mov $%d, %%rdi", length*8*4)
 		emit("mov $0, %%rax")
 		emit("call .malloc")
 		// @TODO check malloc error
@@ -1319,11 +1316,11 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("mov $0, %%rax")
 			emit("call .malloc")
 
-			emit("pop %%rcx") // value of key
+			emit("pop %%rcx")          // value of key
 			emit("mov %%rcx, (%%rax)") // save key to heap
 
-			emit("pop %%r10") // map head
-			emit("mov %%rax, %d(%%r10) #", i * 2 * 8) // save key address
+			emit("pop %%r10")                     // map head
+			emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
 			emit("push %%r10")
 
 			element.value.emit()
@@ -1334,16 +1331,16 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("mov $0, %%rax")
 			emit("call .malloc")
 
-			emit("pop %%rcx") // value of value
+			emit("pop %%rcx")          // value of value
 			emit("mov %%rcx, (%%rax)") // save value to heap
 
 			emit("pop %%r10") // map head
-			emit("mov %%rax, %d(%%r10) #", i * 2 * 8 + 8)
+			emit("mov %%rax, %d(%%r10) #", i*2*8+8)
 			emit("push %%r10")
 		}
 
 		emit("pop %%rax")
-		emit("push %%rax") // address (head of the heap)
+		emit("push %%rax")       // address (head of the heap)
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
 	default:
@@ -1643,10 +1640,10 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("je %s  # jump if false", labelEnd)
 
 		// check if index value matches
-		emit("mov %%r13, %%rax")  // i
-		emit("imul $16, %%rax") // i * 16
-		emit("mov %%r10, %%rcx") // head
-		emit("add %%rax, %%rcx") // head + i * 16
+		emit("mov %%r13, %%rax")   // i
+		emit("imul $16, %%rax")    // i * 16
+		emit("mov %%r10, %%rcx")   // head
+		emit("add %%rax, %%rcx")   // head + i * 16
 		emit("mov (%%rcx), %%rax") // emit index address
 		emit("mov (%%rax), %%rax") // dereference
 
@@ -1666,7 +1663,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		// Value found!
 		emit("mov 8(%%rcx), %%rax") // set the found value address
-		emit("mov (%%rax), %%rax") // dereference
+		emit("mov (%%rax), %%rax")  // dereference
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
@@ -1674,7 +1671,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("jmp %s", labelBegin)
 
 		emit("%s: # end loop", labelEnd)
-
 
 		/* set register values to a global array for debug
 		emit("mov %%r10, debug+0(%%rip)")
@@ -1860,7 +1856,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	return origType
 }
 
-func getRettypes(call Expr) []*Gtype  {
+func getRettypes(call Expr) []*Gtype {
 	switch call.(type) {
 	case *ExprFuncallOrConversion:
 		return call.(*ExprFuncallOrConversion).getRettypes()
@@ -2242,11 +2238,11 @@ func (root *IrRoot) emit() {
 
 	emit("")
 	/*
-	emitComment("GLOBAL RETVALS")
-	for _, name := range retvals {
-		emitLabel("%s:", name)
-		emit(".quad 0")
-	}
+		emitComment("GLOBAL RETVALS")
+		for _, name := range retvals {
+			emitLabel("%s:", name)
+			emit(".quad 0")
+		}
 	*/
 
 	emitComment("GLOBAL VARS")
