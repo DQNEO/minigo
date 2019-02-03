@@ -21,48 +21,62 @@ func f2() {
 	myInterface = ptr
 	sum := myInterface.sum()
 	fmt.Printf("%d\n", sum - 3) // 2
+
+	diff := myInterface.diff()
+	fmt.Printf("%d\n", diff + 2) // 3
 }
 
-func f3(bol bool) {
+func f3() {
 	var myInterface MyInterface
-	ptr := &Point{
+	ptr := &Asset{
+		money: 2,
+		stock: 3,
+	}
+	myInterface = ptr
+	sum := myInterface.sum()
+	fmt.Printf("%d\n", sum - 1) // 4
+
+	diff := myInterface.diff()
+	fmt.Printf("%d\n", diff + 4) // 5
+}
+
+func f4(bol bool) {
+	var myInterface MyInterface
+	point := &Point{
 		x: 2,
-		y: 3,
+		y: 4,
 	}
 
 	asset := &Asset{
-		money: 4,
-		stock: 2,
+		money: 2,
+		stock: 6,
 	}
 
 	if bol {
-		myInterface = ptr
+		myInterface = point
 	} else {
 		myInterface = asset
 	}
 
 	sum := myInterface.sum()
 
-	fmt.Printf("%d\n", sum - 3) // 2
-}
+	fmt.Printf("%d\n", sum) // 6, 8
 
-var garray [3][3]int
-
-func debug() {
-	fmt.Printf("%d\n", garray+8)
+	diff := myInterface.diff()
+	fmt.Printf("%d\n", diff + 5) // 7, 9
 }
 
 func main() {
-	//debug()
-	//return
 	f1()
 	f2()
-	f3(true)
-	f3(false)
+	f3()
+	f4(true)
+	f4(false)
 }
 
 type MyInterface interface {
 	sum() int
+	diff() int
 }
 
 type Point struct {
@@ -74,8 +88,8 @@ func (p *Point) sum() int {
 	return p.x + p.y
 }
 
-func (p *Point) total() int {
-	return p.x + p.y
+func (p *Point) diff() int {
+	return p.y - p.x
 }
 
 type Asset struct {
@@ -87,6 +101,6 @@ func (a *Asset) sum() int {
 	return a.money + a.stock
 }
 
-func (a *Asset) total() int {
-	return a.money + a.stock
+func (a *Asset) diff() int {
+	return a.stock - a.money
 }

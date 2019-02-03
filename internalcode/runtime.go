@@ -14,12 +14,3 @@ func malloc(size int) int {
 	heapIndex += size
 	return r
 }
-
-/*
-var methods [16]int = [16]int{}
-
-func findmethod() int {
-	return methods[1]
-}
-*/
-

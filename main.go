@@ -133,7 +133,7 @@ func main() {
 
 	var methods map[int][]string = make(map[int][]string) // typeId : []methods
 
-	var typeId = 1
+	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.concreteNamedTypes {
 		concreteNamedType.gtype.typeId = typeId
 		typeId++
@@ -149,14 +149,11 @@ func main() {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
 			typeId := gtype.relation.gtype.typeId
-			if methods[typeId] == nil {
-				//methods[typeId] = make([]string,0)
-			}
 			methods[typeId] = append(methods[typeId], string(funcdecl.getUniqueName()))
 		}
 	}
 	ir.methodTable = methods
-	debugf("methods=%v", methods)
+	//debugf("methods=%v", methods)
 	ir.emit()
 }
 

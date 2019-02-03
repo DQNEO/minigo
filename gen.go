@@ -240,13 +240,12 @@ func (ast *ExprVariable) emit() {
 		ast.emitAddress(0)
 		return
 	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
-		ast.gtype.typ = G_POINTER
-		uop := &ExprUop{
-			tok: ast.token(),
-			op: "*",
-			operand:ast,
+		if ast.isGlobal {
+			emit("mov %s(%%rip), %%rax", ast.varname)
+		} else {
+			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
-		uop.emit()
+		emit("mov (%%rax), %%rax")
 		return
 	}
 
@@ -1729,7 +1728,11 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// @TODO if string type, call emitStringEqual()
 		mapKeyType := array.getGtype().mapKey
 		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
+			emit("push %%r13")
+			emit("push %%r10")
 			emitStringsEqual("%r12", "%rax")
+			emit("pop %%r10")
+			emit("pop %%r13")
 		} else {
 			// primitive comparison
 			emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
@@ -1897,16 +1900,17 @@ func (ast *ExprMethodcall) getUniqueName() string {
 
 func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
+	assertNotNil(methodCall.receiver !=nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
 		typeToBeloing = gtype.origType
+		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:" +  gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
 	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
-	//debugf("typeToBeloing = %s", typeToBeloing)
 	origType := typeToBeloing.relation.gtype
 	//debugf("origType = %v", origType)
 	return origType
@@ -1954,10 +1958,67 @@ func (call *IrInterfaceMethodCall) emitPush() {
 	emit("pop %%rcx")
 	emit("add %%rcx, %%rax")
 	emit("# find method %s", call.methodName)
-	emit("mov (%%rax), %%rax") // address of namedTypeN
+	emit("mov (%%rax), %%r10") // address of namedTypeN
 
-	emit("add $8, %%rax")
-	emit("mov (%%rax), %%rax") // rax is now func address
+	emit("mov $128, %%r11") // copy len
+	emit("lea .M%s, %%r12", call.methodName) // index value
+
+	emit("mov $0, %%r13 # init loop counter") // i = 0
+
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+	emit("%s: # begin loop ", labelBegin)
+
+	labelIncr := makeLabel()
+	// break if i < len
+	emit("cmp %%r11, %%r13") // len > i
+	emit("setl %%al")
+	emit("movzb %%al, %%eax")
+	emit("test %%rax, %%rax")
+	emit("mov $0, %%rax") // key not found. set zero value.
+	emit("mov $0, %%rcx") // ok = false
+	emit("je %s  # jump if false", labelEnd)
+
+	// check if index value matches
+	emit("mov %%r13, %%rax")   // i
+	emit("imul $16, %%rax")    // i * 16
+	emit("mov %%r10, %%rcx")   // head
+	emit("add %%rax, %%rcx")   // head + i * 16
+	emit("mov (%%rcx), %%rax") // emit index address
+	//emit("mov (%%rax), %%rax") // dereference
+
+	// @TODO if string type, call emitStringEqual()
+	mapKeyType := &Gtype{
+		typ: G_STRING,
+	}
+	if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
+		emit("push %%r13")
+		emit("push %%r10")
+		emitStringsEqual("%r12", "%rax")
+		emit("pop %%r10")
+		emit("pop %%r13")
+	} else {
+		// primitive comparison
+		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+	}
+
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelIncr)
+
+	emit("# Value found!")
+	emit("mov 8(%%rcx), %%rax # set the found value address")
+	// now rax is the funcref
+	//emit("mov (%%rax), %%rax # dereference")
+	emit("jmp %s", labelEnd)
+
+	emit("%s: # incr", labelIncr)
+	emit("add $1, %%r13") // i++
+	emit("jmp %s", labelBegin)
+
+	emit("%s: # end loop", labelEnd)
+
 	emit("push %%rax")
 }
 
