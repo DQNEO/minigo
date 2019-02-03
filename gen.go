@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 /**
   Intel® 64 and IA-32 Architectures Software Developer’s Manual
@@ -1400,7 +1403,15 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	}
 	uop.emit()
 	emit("push %%rax")  // address
-	rhs.getGtype().emitTypeId()
+
+
+	concreteType := rhs.getGtype()
+	if concreteType.typ == G_POINTER {
+		concreteType = concreteType.origType.relation.gtype
+	}
+	assert(concreteType.typeId > 0,  rhs.token(), "no typeId")
+	emit("mov $%d, %%rax # typeId", concreteType.typeId)
+
 	emit("push %%rax") // concrete type (type id)
 	emitSaveInterface(lhs, 0)
 }
@@ -1939,16 +1950,23 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 }
 
 type IrInterfaceMethodCall struct {
+	receiver Expr
 	methodName identifier
 }
 
 func (call *IrInterfaceMethodCall) emitPush() {
-	emit("lea methods(%%rip), %%rax")
-	methodId := 1
-	emit("mov $%d, %%rcx", methodId)
-	emit("imul $8, %%rcx")
+	emit("# emit typeId")
+	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
+	emit("imul $8, %%rax")
+	emit("push %%rax")
+	emit("lea namedTypes(%%rip), %%rax")
+	emit("pop %%rcx")
 	emit("add %%rcx, %%rax")
-	emit("mov (%%rax), %%rax")
+	emit("# find method %s", call.methodName)
+	emit("mov (%%rax), %%rax") // address of namedTypeN
+
+	emit("add $8, %%rax")
+	emit("mov (%%rax), %%rax") // rax is now func address
 	emit("push %%rax")
 }
 
@@ -1963,6 +1981,7 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 		args = append(args, arg)
 	}
 	call := &IrInterfaceMethodCall{
+		receiver: methodCall.receiver,
 		methodName : methodCall.fname,
 	}
 	emitCall(call, args)
@@ -2327,6 +2346,7 @@ type IrRoot struct {
 	vars           []*DeclVar
 	funcs          []*DeclFunc
 	stringLiterals []*ExprStringLiteral
+	methodTable    map[int][]string
 }
 
 func (root *IrRoot) emit() {
@@ -2347,29 +2367,30 @@ func (root *IrRoot) emit() {
 	emit("")
 	emitComment("Method table")
 
-	emitLabel("%s:", "methods")
-	emit(".quad %s", "main.Point$sum")
-	emit(".quad %s", "main.Asset$sum")
+	emitLabel("%s:", "namedTypes")
+	emit(".quad 0 # typeId:0")
+	for i:= 1; i <= len(root.methodTable); i++ {
+		emit(".quad namedType%d # typeId:%d", i, i)
+	}
 
-	var methods = make(map[string][]string) // typeName : []methods
+	var shortMethodNames map[string]string = make(map[string]string)
 
-	for _, funcdecl := range root.funcs {
-		if funcdecl.receiver != nil {
-			gtype := funcdecl.receiver.getGtype()
-			if gtype.typ == G_POINTER {
-				gtype = gtype.origType
-			}
-			if gtype.relation == nil {
-				errorf("no relation for %#v", funcdecl.receiver.getGtype())
-			}
-			typeName := string(gtype.relation.name)
-			if methods[typeName] == nil {
-				methods[typeName] = make([]string,0)
-			}
-			methods[typeName] = append(methods[typeName], string(funcdecl.getUniqueName()))
+	for i:= 1; i <= len(root.methodTable); i++ {
+		emitLabel("namedType%d:", i)
+		for _, methodNameFull := range root.methodTable[i] {
+			splitted := strings.Split(methodNameFull, "$")
+			shortMethodName := splitted[1]
+			emit(".quad .M%s # key", shortMethodName)
+			emit(".quad %s # method", methodNameFull)
+			shortMethodNames[shortMethodName] = shortMethodName
 		}
 	}
-	debugf("methods=%v", methods)
+
+	emitComment("METHOD NAMES")
+	for shortMethodName := range shortMethodNames {
+		emitLabel(".M%s:", shortMethodName)
+		emit(".string \"%s\"", shortMethodName)
+	}
 
 	emitComment("GLOBAL VARS")
 	emit("")

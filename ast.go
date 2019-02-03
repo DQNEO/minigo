@@ -221,7 +221,6 @@ type DeclType struct {
 	tok   *Token
 	name  identifier
 	gtype *Gtype
-	typeId int
 }
 
 // https://golang.org/ref/spec#Slice_expressions

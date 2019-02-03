@@ -13,6 +13,7 @@ type parser struct {
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
+	concreteNamedTypes  []*DeclType
 	scopes              map[identifier]*scope
 	currentFunc         *DeclFunc
 	stringLiterals      []*ExprStringLiteral
@@ -1757,9 +1758,9 @@ func (p *parser) parseTypeDecl() *DeclType {
 		tok:   ptok,
 		name:  newName,
 		gtype: gtype,
-		typeId: typeId,
 	}
-	typeId++
+
+	p.concreteNamedTypes = append(p.concreteNamedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }

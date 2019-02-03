@@ -36,6 +36,7 @@ type signature struct {
 
 type Gtype struct {
 	typ          GTYPE_TYPE
+	typeId int
 	dependendson Expr                      // for G_DEPENDENT
 	relation     *Relation                 // for G_REL
 	size         int                       // for scalar type like int, bool, byte, for struct
@@ -50,10 +51,6 @@ type Gtype struct {
 	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
-}
-
-func (gtype *Gtype) emitTypeId() {
-	emit("mov $1, %%rax")
 }
 
 func (gtype *Gtype) getSize() int {

@@ -46,7 +46,15 @@ func f3(bol bool) {
 	fmt.Printf("%d\n", sum - 3) // 2
 }
 
+var garray [3][3]int
+
+func debug() {
+	fmt.Printf("%d\n", garray+8)
+}
+
 func main() {
+	//debug()
+	//return
 	f1()
 	f2()
 	f3(true)
@@ -66,11 +74,19 @@ func (p *Point) sum() int {
 	return p.x + p.y
 }
 
+func (p *Point) total() int {
+	return p.x + p.y
+}
+
 type Asset struct {
 	money int
 	stock int
 }
 
 func (a *Asset) sum() int {
+	return a.money + a.stock
+}
+
+func (a *Asset) total() int {
 	return a.money + a.stock
 }
