@@ -1750,15 +1750,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("jmp %s", labelBegin)
 
 		emit("%s: # end loop", labelEnd)
-
-		/* set register values to a global array for debug
-		emit("mov %%r10, debug+0(%%rip)")
-		emit("mov %%r11, debug+8(%%rip)")
-		emit("mov %%r12, debug+16(%%rip)")
-		emit("mov %%r13, debug+24(%%rip)")
-		emit("mov %%r15, debug+40(%%rip)")
-		*/
-
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
