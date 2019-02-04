@@ -2010,7 +2010,7 @@ func (call *IrInterfaceMethodCall) emitPush() {
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
 	// now rax is the funcref
-	//emit("mov (%%rax), %%rax # dereference")
+	emit("mov (%%rax), %%rax # dereference")
 	emit("jmp %s", labelEnd)
 
 	emit("%s: # incr", labelIncr)
@@ -2433,7 +2433,7 @@ func (root *IrRoot) emit() {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
 			emit(".quad .M%s # key", shortMethodName)
-			emit(".quad %s # method", methodNameFull)
+			emit(".quad $%s # method", methodNameFull)
 			shortMethodNames[shortMethodName] = shortMethodName
 		}
 	}
@@ -2442,6 +2442,12 @@ func (root *IrRoot) emit() {
 	for shortMethodName := range shortMethodNames {
 		emitLabel(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
+	}
+	for i:= 1; i <= len(root.methodTable); i++ {
+		for _, methodNameFull := range root.methodTable[i] {
+			emitLabel("$%s:", methodNameFull)
+			emit(".quad %s", methodNameFull)
+		}
 	}
 
 	emitComment("GLOBAL VARS")
