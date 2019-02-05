@@ -1693,6 +1693,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
 		mapKeyType := array.getGtype().mapKey
+		shortCut := false
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1724,8 +1725,9 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov %%r10, %%rcx")   // head
 		emit("add %%rax, %%rcx")   // head + i * 16
 		emit("mov (%%rcx), %%rax") // emit index address
-		emit("mov (%%rax), %%rax") // dereference
-
+		if !shortCut {
+			emit("mov (%%rax), %%rax") // dereference
+		}
 		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
 			emit("push %%r13")
 			emit("push %%r10")
@@ -1744,7 +1746,9 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		emit("# Value found!")
 		emit("mov 8(%%rcx), %%rax # set the found value address")
-		emit("mov (%%rax), %%rax # dereference")
+		if !shortCut {
+			emit("mov (%%rax), %%rax # dereference")
+		}
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
@@ -1953,6 +1957,7 @@ func (call *IrInterfaceMethodCall) emitPush() {
 		mapKeyType := &Gtype{
 			typ: G_STRING,
 		}
+		shortCut := true
 		emit("# emit typeId")
 		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 		emit("imul $8, %%rax")
@@ -1988,8 +1993,9 @@ func (call *IrInterfaceMethodCall) emitPush() {
 		emit("mov %%r10, %%rcx")   // head
 		emit("add %%rax, %%rcx")   // head + i * 16
 		emit("mov (%%rcx), %%rax") // emit index address
-		//emit("mov (%%rax), %%rax") // dereference
-
+		if !shortCut {
+			emit("mov (%%rax), %%rax") // dereference
+		}
 		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
 			emit("push %%r13")
 			emit("push %%r10")
@@ -2008,8 +2014,9 @@ func (call *IrInterfaceMethodCall) emitPush() {
 
 		emit("# Value found!")
 		emit("mov 8(%%rcx), %%rax # set the found value address")
-		// now rax is the funcref
-		emit("mov (%%rax), %%rax # dereference")
+		if !shortCut {
+			emit("mov (%%rax), %%rax # dereference")
+		}
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
@@ -2017,7 +2024,6 @@ func (call *IrInterfaceMethodCall) emitPush() {
 		emit("jmp %s", labelBegin)
 
 		emit("%s: # end loop", labelEnd)
-
 	}
 
 	emit("push %%rax")
@@ -2434,7 +2440,7 @@ func (root *IrRoot) emit() {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
 			emit(".quad .M%s # key", shortMethodName)
-			emit(".quad $%s # method", methodNameFull)
+			emit(".quad %s # method", methodNameFull)
 			shortMethodNames[shortMethodName] = shortMethodName
 		}
 	}
@@ -2443,12 +2449,6 @@ func (root *IrRoot) emit() {
 	for shortMethodName := range shortMethodNames {
 		emitLabel(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
-	}
-	for i:= 1; i <= len(root.methodTable); i++ {
-		for _, methodNameFull := range root.methodTable[i] {
-			emitLabel("$%s:", methodNameFull)
-			emit(".quad %s", methodNameFull)
-		}
 	}
 
 	emitComment("GLOBAL VARS")
