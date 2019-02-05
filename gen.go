@@ -745,13 +745,20 @@ func (e *ExprIndex) emitMapSet() {
 	emit("add $1, %%rax")
 	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 
-	shortCut := false
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
 	emit("push %%rax") // index value
 
-	if shortCut {
+	mapType := e.collection.getGtype()
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
+
+	if mapKeyType.isString() {
+		emit("pop %%rcx")            // index value
+		emit("pop %%rax")            // map tail address
+		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+		emit("push %%rax")           // push map tail
 	} else {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
@@ -766,8 +773,12 @@ func (e *ExprIndex) emitMapSet() {
 		emit("push %%rcx")           // push map tail
 	}
 
-	// save value to heap
-	if shortCut {
+	// save value
+	if mapValueType.isString() {
+		emit("pop %%rax")           // map tail address
+		emit("pop %%rcx") // rhs value
+		// save value
+		emit("mov %%rcx, 8(%%rax)") // save value to the tail
 	} else {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
@@ -910,11 +921,13 @@ func (f *StmtFor) emitMapRange() {
 	emit("imul $16, %%rax")
 	emit("push %%rax")
 	f.rng.rangeexpr.emit() // emit address of map data head
+	mapType := f.rng.rangeexpr.getGtype()
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
-	shortCut := false
-	if !shortCut {
+	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax")
 	}
 	f.rng.indexvar.emitSave()
@@ -933,7 +946,7 @@ func (f *StmtFor) emitMapRange() {
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
-		if !shortCut {
+		if !mapValueType.isString() {
 			emit("mov (%%rax), %%rax")
 		}
 		f.rng.valuevar.emitSave()
@@ -1357,36 +1370,56 @@ func assignToMap(lhs Expr, rhs Expr) {
 		// @TODO check malloc error
 		emit("push %%rax") // allocaated address of the map head
 
+		mapType := rhs.getGtype()
+		mapKeyType := mapType.mapKey
+		mapValueType := mapType.mapValue
+
 		for i, element := range lit.elements {
 			// alloc key
 			element.key.emit()
 			emit("push %%rax") // value of key
-			// call malloc for key
-			emit("mov $%d, %%rdi", 8)
-			emit("mov $0, %%rax")
-			emit("call .malloc")
 
-			emit("pop %%rcx")          // value of key
-			emit("mov %%rcx, (%%rax)") // save key to heap
+			if mapKeyType.isString() {
+				emit("pop %%rcx")          // value of key
+				emit("pop %%r10")                     // map head
+				emit("mov %%rcx, %d(%%r10) #", i*2*8) // save key address
+				emit("push %%r10")
+			} else {
+				// call malloc for key
+				emit("mov $%d, %%rdi", 8)
+				emit("mov $0, %%rax")
+				emit("call .malloc")
 
-			emit("pop %%r10")                     // map head
-			emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
-			emit("push %%r10")
+				emit("pop %%rcx")          // value of key
+				emit("mov %%rcx, (%%rax)") // save key to heap
+
+				emit("pop %%r10")                     // map head
+				emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
+				emit("push %%r10")
+			}
 
 			element.value.emit()
 			emit("push %%rax") // value of value
 
-			// call malloc
-			emit("mov $%d, %%rdi", 8)
-			emit("mov $0, %%rax")
-			emit("call .malloc")
+			if mapValueType.isString() {
+				emit("pop %%rcx")          // value of value
+				emit("pop %%r10") // map head
+				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
+				emit("push %%r10")
+			} else {
+				// call malloc
+				emit("mov $%d, %%rdi", 8)
+				emit("mov $0, %%rax")
+				emit("call .malloc")
 
-			emit("pop %%rcx")          // value of value
-			emit("mov %%rcx, (%%rax)") // save value to heap
+				emit("pop %%rcx")          // value of value
+				emit("mov %%rcx, (%%rax)") // save value to heap
 
-			emit("pop %%r10") // map head
-			emit("mov %%rax, %d(%%r10) #", i*2*8+8)
-			emit("push %%r10")
+				emit("pop %%r10") // map head
+				emit("mov %%rax, %d(%%r10) #", i*2*8+8)
+				emit("push %%r10")
+			}
+
 		}
 
 		emit("pop %%rax")
@@ -1712,14 +1745,15 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emitOffsetLoad(_map, IntSize, IntSize)
 		emit("mov %%rax, %%r11 # copy len ")
 		index.emit()
-		emit("mov %%rax, %%r12") // index value
-		emitMapGet(array.getGtype(), false)
+		emit("mov %%rax, %%r12 # index value")
+		emitMapGet(array.getGtype())
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
 }
 
-func emitMapGet(mapType *Gtype, shortCut bool) {
+func emitMapGet(mapType *Gtype) {
+	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
 	labelBegin := makeLabel()
@@ -1742,10 +1776,12 @@ func emitMapGet(mapType *Gtype, shortCut bool) {
 	emit("mov %%r10, %%rcx")   // head
 	emit("add %%rax, %%rcx")   // head + i * 16
 	emit("mov (%%rcx), %%rax") // emit index address
-	if !shortCut {
+
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
+	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}
-	mapKeyType := mapType.mapKey
 	if mapKeyType.isString() {
 		emit("push %%r13")
 		emit("push %%r11")
@@ -1766,7 +1802,7 @@ func emitMapGet(mapType *Gtype, shortCut bool) {
 
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
-	if !shortCut {
+	if !mapValueType.isString() {
 		emit("mov (%%rax), %%rax # dereference")
 	}
 	emit("jmp %s", labelEnd)
@@ -1995,7 +2031,7 @@ func (call *IrInterfaceMethodCall) emitPush() {
 
 		emit("lea .M%s, %%rax", call.methodName) // index value
 		emit("mov %%rax, %%r12") // index value
-		emitMapGet(mapType, true)
+		emitMapGet(mapType)
 	}
 
 	emit("push %%rax")
