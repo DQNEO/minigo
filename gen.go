@@ -1692,8 +1692,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
-		mapKeyType := array.getGtype().mapKey
-		shortCut := false
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1703,13 +1701,13 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		index.emit()
 		emit("mov %%rax, %%r12") // index value
-		emitMapGet(mapKeyType, shortCut)
+		emitMapGet(array.getGtype(), false)
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
 }
 
-func emitMapGet(mapKeyType *Gtype, shortCut bool) {
+func emitMapGet(mapType *Gtype, shortCut bool) {
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
 	labelBegin := makeLabel()
@@ -1735,6 +1733,7 @@ func emitMapGet(mapKeyType *Gtype, shortCut bool) {
 	if !shortCut {
 		emit("mov (%%rax), %%rax") // dereference
 	}
+	mapKeyType := mapType.mapKey
 	if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
 		emit("push %%r13")
 		emit("push %%r10")
@@ -1958,10 +1957,15 @@ type IrInterfaceMethodCall struct {
 
 func (call *IrInterfaceMethodCall) emitPush() {
 	if true {
-		mapKeyType := &Gtype{
-			typ: G_STRING,
+		mapType := &Gtype{
+			typ:      G_MAP,
+			mapKey:   &Gtype{
+				typ: G_STRING,
+			},
+			mapValue: &Gtype{
+				typ: G_STRING,
+			},
 		}
-		shortCut := true
 		emit("# emit typeId")
 		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 		emit("imul $8, %%rax")
@@ -1977,7 +1981,7 @@ func (call *IrInterfaceMethodCall) emitPush() {
 
 		emit("lea .M%s, %%rax", call.methodName) // index value
 		emit("mov %%rax, %%r12") // index value
-		emitMapGet(mapKeyType, shortCut)
+		emitMapGet(mapType, true)
 	}
 
 	emit("push %%rax")
