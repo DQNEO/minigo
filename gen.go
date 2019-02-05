@@ -1692,6 +1692,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
+		mapKeyType := array.getGtype().mapKey
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
@@ -1725,8 +1726,6 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov (%%rcx), %%rax") // emit index address
 		emit("mov (%%rax), %%rax") // dereference
 
-		// @TODO if string type, call emitStringEqual()
-		mapKeyType := array.getGtype().mapKey
 		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
 			emit("push %%r13")
 			emit("push %%r10")
@@ -1951,6 +1950,9 @@ type IrInterfaceMethodCall struct {
 
 func (call *IrInterfaceMethodCall) emitPush() {
 	if true {
+		mapKeyType := &Gtype{
+			typ: G_STRING,
+		}
 		emit("# emit typeId")
 		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 		emit("imul $8, %%rax")
@@ -1988,10 +1990,6 @@ func (call *IrInterfaceMethodCall) emitPush() {
 		emit("mov (%%rcx), %%rax") // emit index address
 		//emit("mov (%%rax), %%rax") // dereference
 
-		// @TODO if string type, call emitStringEqual()
-		mapKeyType := &Gtype{
-			typ: G_STRING,
-		}
 		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
 			emit("push %%r13")
 			emit("push %%r10")
