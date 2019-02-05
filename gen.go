@@ -745,35 +745,41 @@ func (e *ExprIndex) emitMapSet() {
 	emit("add $1, %%rax")
 	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 
+	shortCut := false
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
 	emit("push %%rax") // index value
-	// malloc(8)
-	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-	emit("mov $0, %%rax")
-	emit("call .malloc")
-	// %%rax : malloced address
-	// stack : [map tail address, index value]
-	emit("pop %%rcx")            // index value
-	emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-	emit("pop %%rcx")            // map tail address
-	emit("mov %%rax, (%%rcx) #") // save index address to the tail
-	emit("push %%rcx")           // push map tail
+
+	if !shortCut {
+		// malloc(8)
+		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+		emit("mov $0, %%rax")
+		emit("call .malloc")
+		// %%rax : malloced address
+		// stack : [map tail address, index value]
+		emit("pop %%rcx")            // index value
+		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+		emit("pop %%rcx")            // map tail address
+		emit("mov %%rax, (%%rcx) #") // save index address to the tail
+		emit("push %%rcx")           // push map tail
+	}
 
 	// save value to heap
-	// malloc(8)
-	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-	emit("mov $0, %%rax")
-	emit("call .malloc")
+	if !shortCut {
+		// malloc(8)
+		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+		emit("mov $0, %%rax")
+		emit("call .malloc")
 
-	emit("pop %%rcx")           // map tail address
-	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+		emit("pop %%rcx")           // map tail address
+		emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
 
-	emit("pop %%rcx") // rhs value
+		emit("pop %%rcx") // rhs value
 
-	// save value
-	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
+		// save value
+		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
+	}
 }
 
 func (e *ExprIndex) emitSave() {
