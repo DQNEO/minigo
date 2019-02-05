@@ -751,7 +751,8 @@ func (e *ExprIndex) emitMapSet() {
 	e.index.emit()
 	emit("push %%rax") // index value
 
-	if !shortCut {
+	if shortCut {
+	} else {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
 		emit("mov $0, %%rax")
@@ -766,7 +767,8 @@ func (e *ExprIndex) emitMapSet() {
 	}
 
 	// save value to heap
-	if !shortCut {
+	if shortCut {
+	} else {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
 		emit("mov $0, %%rax")
@@ -911,7 +913,10 @@ func (f *StmtFor) emitMapRange() {
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
-	emit("mov (%%rax), %%rax")
+	shortCut := false
+	if !shortCut {
+		emit("mov (%%rax), %%rax")
+	}
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
@@ -928,7 +933,9 @@ func (f *StmtFor) emitMapRange() {
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
-		emit("mov (%%rax), %%rax")
+		if !shortCut {
+			emit("mov (%%rax), %%rax")
+		}
 		f.rng.valuevar.emitSave()
 
 	}
