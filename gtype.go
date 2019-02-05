@@ -36,6 +36,7 @@ type signature struct {
 
 type Gtype struct {
 	typ          GTYPE_TYPE
+	typeId int
 	dependendson Expr                      // for G_DEPENDENT
 	relation     *Relation                 // for G_REL
 	size         int                       // for scalar type like int, bool, byte, for struct
@@ -50,6 +51,16 @@ type Gtype struct {
 	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
+}
+
+func (gtype *Gtype) isString() bool {
+	if gtype.typ == G_STRING {
+		return true
+	}
+	if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING {
+		return true
+	}
+	return false
 }
 
 func (gtype *Gtype) getSize() int {
@@ -70,8 +81,10 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING || gtype.typ == G_INTERFACE {
+		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING {
 			return ptrSize
+		} else if gtype.typ == G_INTERFACE {
+			return ptrSize + ptrSize
 		} else if gtype.typ == G_SLICE {
 			return ptrSize + IntSize + IntSize
 		} else if gtype.typ == G_MAP {

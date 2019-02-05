@@ -13,6 +13,7 @@ type parser struct {
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
+	concreteNamedTypes  []*DeclType
 	scopes              map[identifier]*scope
 	currentFunc         *DeclFunc
 	stringLiterals      []*ExprStringLiteral
@@ -1741,6 +1742,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 }
 
+var typeId int
+
 func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(p.traceIn())
 	ptok := p.expectKeyword("type")
@@ -1756,6 +1759,8 @@ func (p *parser) parseTypeDecl() *DeclType {
 		name:  newName,
 		gtype: gtype,
 	}
+
+	p.concreteNamedTypes = append(p.concreteNamedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }

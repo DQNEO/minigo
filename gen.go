@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 /**
   Intel® 64 and IA-32 Architectures Software Developer’s Manual
@@ -59,15 +62,15 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 }
 
 // main.f1 -> main.f1
-func getPackagedFuncName(pkg identifier, fname string) string {
+func getPackagedFuncName(pkg identifier, fname string) IrStaticCall {
 	if pkg == "libc" {
-		return fname
+		return IrStaticCall(fname)
 	}
 
-	return fmt.Sprintf("%s.%s", pkg, fname)
+	return IrStaticCall(fmt.Sprintf("%s.%s", pkg, fname))
 }
 
-func (f *DeclFunc) getUniqueName() string {
+func (f *DeclFunc) getUniqueName() IrStaticCall {
 	if f.receiver != nil {
 		// method
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
@@ -236,7 +239,16 @@ func (ast *ExprVariable) emit() {
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
+	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
+		if ast.isGlobal {
+			emit("mov %s(%%rip), %%rax", ast.varname)
+		} else {
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+		}
+		emit("mov (%%rax), %%rax")
+		return
 	}
+
 	if ast.isGlobal {
 		emit("mov %s(%%rip), %%rax", ast.varname)
 	} else {
@@ -395,11 +407,11 @@ func (ast *ExprUop) emit() {
 	} else if ast.op == "*" {
 		// dereferene of a pointer
 		//debugf("dereferene of a pointer")
-		rel, ok := ast.operand.(*Relation)
+		//rel, ok := ast.operand.(*Relation)
 		//debugf("operand:%s", rel)
-		vr, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "operand is a rel")
-		vr.emit()
+		//vr, ok := rel.expr.(*ExprVariable)
+		//assert(ok, nil, "operand is a rel")
+		ast.operand.emit()
 		emit("mov (%%rax), %%rcx")
 		emit("mov %%rcx, %%rax")
 	} else if ast.op == "!" {
@@ -581,7 +593,7 @@ func (ast *StmtAssignment) emit() {
 				rettypes := getRettypes(right)
 				assert(len(rettypes) == 1, ast.token(), "return values should be one")
 			}
-			gtype := right.getGtype()
+			gtype := left.getGtype()
 			switch {
 			case gtype.typ == G_ARRAY:
 				assignToArray(left, right)
@@ -589,6 +601,8 @@ func (ast *StmtAssignment) emit() {
 				assignToSlice(left, right)
 			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 				assignToStruct(left, right)
+			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+				assignToInterface(left, right)
 			default:
 				// suppose primitive
 				emitAssignPrimitive(left, right)
@@ -648,7 +662,7 @@ func (ast *StmtAssignment) emit() {
 			}
 		}
 
-		gtype := right.getGtype()
+		gtype := left.getGtype()
 		switch {
 		case gtype.typ == G_ARRAY:
 			assignToArray(left, right)
@@ -656,6 +670,8 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 			assignToStruct(left, right)
+		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+			assignToInterface(left, right)
 		default:
 			// suppose primitive
 			emitAssignPrimitive(left, right)
@@ -733,31 +749,50 @@ func (e *ExprIndex) emitMapSet() {
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
 	emit("push %%rax") // index value
-	// malloc(8)
-	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-	emit("mov $0, %%rax")
-	emit("call .malloc")
-	// %%rax : malloced address
-	// stack : [map tail address, index value]
-	emit("pop %%rcx")            // index value
-	emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-	emit("pop %%rcx")            // map tail address
-	emit("mov %%rax, (%%rcx) #") // save index address to the tail
-	emit("push %%rcx")           // push map tail
 
-	// save value to heap
-	// malloc(8)
-	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-	emit("mov $0, %%rax")
-	emit("call .malloc")
+	mapType := e.collection.getGtype()
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
 
-	emit("pop %%rcx")           // map tail address
-	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
-
-	emit("pop %%rcx") // rhs value
+	if mapKeyType.isString() {
+		emit("pop %%rcx")            // index value
+		emit("pop %%rax")            // map tail address
+		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+		emit("push %%rax")           // push map tail
+	} else {
+		// malloc(8)
+		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+		emit("mov $0, %%rax")
+		emit("call .malloc")
+		// %%rax : malloced address
+		// stack : [map tail address, index value]
+		emit("pop %%rcx")            // index value
+		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+		emit("pop %%rcx")            // map tail address
+		emit("mov %%rax, (%%rcx) #") // save index address to the tail
+		emit("push %%rcx")           // push map tail
+	}
 
 	// save value
-	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
+	if mapValueType.isString() {
+		emit("pop %%rax")           // map tail address
+		emit("pop %%rcx") // rhs value
+		// save value
+		emit("mov %%rcx, 8(%%rax)") // save value to the tail
+	} else {
+		// malloc(8)
+		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+		emit("mov $0, %%rax")
+		emit("call .malloc")
+
+		emit("pop %%rcx")           // map tail address
+		emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+
+		emit("pop %%rcx") // rhs value
+
+		// save value
+		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
+	}
 }
 
 func (e *ExprIndex) emitSave() {
@@ -886,10 +921,15 @@ func (f *StmtFor) emitMapRange() {
 	emit("imul $16, %%rax")
 	emit("push %%rax")
 	f.rng.rangeexpr.emit() // emit address of map data head
+	mapType := f.rng.rangeexpr.getGtype()
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
-	emit("mov (%%rax), %%rax")
+	if !mapKeyType.isString() {
+		emit("mov (%%rax), %%rax")
+	}
 	f.rng.indexvar.emitSave()
 
 	if f.rng.valuevar != nil {
@@ -906,7 +946,9 @@ func (f *StmtFor) emitMapRange() {
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
-		emit("mov (%%rax), %%rax")
+		if !mapValueType.isString() {
+			emit("mov (%%rax), %%rax")
+		}
 		f.rng.valuevar.emitSave()
 
 	}
@@ -1265,6 +1307,25 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
+func emitSaveInterface(lhs Expr, offset int) {
+	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		emitSaveInterface(rel.expr, offset)
+	case *ExprVariable:
+		variable := lhs.(*ExprVariable)
+		variable.saveInterface(offset)
+	case *ExprStructField:
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitSaveInterface(structfield.strct, fieldType.offset+offset)
+	case *ExprIndex:
+		TBI(lhs.token(), "Unable to assign to %T", lhs)
+	default:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
+	}
+}
+
 // take slice values from stack
 func emitSaveSlice(lhs Expr, offset int) {
 	switch lhs.(type) {
@@ -1309,36 +1370,56 @@ func assignToMap(lhs Expr, rhs Expr) {
 		// @TODO check malloc error
 		emit("push %%rax") // allocaated address of the map head
 
+		mapType := rhs.getGtype()
+		mapKeyType := mapType.mapKey
+		mapValueType := mapType.mapValue
+
 		for i, element := range lit.elements {
 			// alloc key
 			element.key.emit()
 			emit("push %%rax") // value of key
-			// call malloc for key
-			emit("mov $%d, %%rdi", 8)
-			emit("mov $0, %%rax")
-			emit("call .malloc")
 
-			emit("pop %%rcx")          // value of key
-			emit("mov %%rcx, (%%rax)") // save key to heap
+			if mapKeyType.isString() {
+				emit("pop %%rcx")          // value of key
+				emit("pop %%r10")                     // map head
+				emit("mov %%rcx, %d(%%r10) #", i*2*8) // save key address
+				emit("push %%r10")
+			} else {
+				// call malloc for key
+				emit("mov $%d, %%rdi", 8)
+				emit("mov $0, %%rax")
+				emit("call .malloc")
 
-			emit("pop %%r10")                     // map head
-			emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
-			emit("push %%r10")
+				emit("pop %%rcx")          // value of key
+				emit("mov %%rcx, (%%rax)") // save key to heap
+
+				emit("pop %%r10")                     // map head
+				emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
+				emit("push %%r10")
+			}
 
 			element.value.emit()
 			emit("push %%rax") // value of value
 
-			// call malloc
-			emit("mov $%d, %%rdi", 8)
-			emit("mov $0, %%rax")
-			emit("call .malloc")
+			if mapValueType.isString() {
+				emit("pop %%rcx")          // value of value
+				emit("pop %%r10") // map head
+				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
+				emit("push %%r10")
+			} else {
+				// call malloc
+				emit("mov $%d, %%rdi", 8)
+				emit("mov $0, %%rax")
+				emit("call .malloc")
 
-			emit("pop %%rcx")          // value of value
-			emit("mov %%rcx, (%%rax)") // save value to heap
+				emit("pop %%rcx")          // value of value
+				emit("mov %%rcx, (%%rax)") // save value to heap
 
-			emit("pop %%r10") // map head
-			emit("mov %%rax, %d(%%r10) #", i*2*8+8)
-			emit("push %%r10")
+				emit("pop %%r10") // map head
+				emit("mov %%rax, %d(%%r10) #", i*2*8+8)
+				emit("push %%r10")
+			}
+
 		}
 
 		emit("pop %%rax")
@@ -1349,6 +1430,35 @@ func assignToMap(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
 	emitSaveSlice(lhs, 0)
+}
+
+func assignToInterface(lhs Expr, rhs Expr) {
+	emit("# assignToInterface")
+	if rhs == nil {
+		emit("# initialize interface with a zero value")
+		emit("push $0")
+		emit("push $0")
+		emitSaveInterface(lhs, 0)
+		return
+	}
+	uop := &ExprUop{
+		tok: lhs.token(),
+		op: "&",
+		operand: rhs,
+	}
+	uop.emit()
+	emit("push %%rax")  // address
+
+
+	concreteType := rhs.getGtype()
+	if concreteType.typ == G_POINTER {
+		concreteType = concreteType.origType.relation.gtype
+	}
+	assert(concreteType.typeId > 0,  rhs.token(), "no typeId")
+	emit("mov $%d, %%rax # typeId", concreteType.typeId)
+
+	emit("push %%rax") // concrete type (type id)
+	emitSaveInterface(lhs, 0)
 }
 
 func assignToSlice(lhs Expr, rhs Expr) {
@@ -1436,6 +1546,15 @@ func (variable *ExprVariable) saveSlice(offset int) {
 	variable.emitOffsetSave(8, offset)
 }
 
+func (variable *ExprVariable) saveInterface(offset int) {
+	emit("# *ExprVariable.saveInterface()")
+	emit("pop %%rax")
+	variable.emitOffsetSave(8, offset+ptrSize)
+	emit("pop %%rax")
+	variable.emitOffsetSave(8, offset)
+}
+
+
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	emit("# assignToArray")
@@ -1509,7 +1628,10 @@ func (decl *DeclVar) emit() {
 		assignToStruct(decl.varname, decl.initval)
 	case gtype.typ == G_MAP:
 		assignToMap(decl.varname, decl.initval)
+	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+		assignToInterface(decl.varname, decl.initval)
 	default:
+		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+ gtype.String())
 		// primitive types like int,bool,byte
 		rhs := decl.initval
 		if rhs == nil {
@@ -1609,82 +1731,87 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 	} else if array.getGtype().typ == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
-		// r10 map header address
-		// r11 map len
-		// r12 specified index value
-		// r13 loop counter
+		emit("# r10: map header address")
+		emit("# r11: map len")
+		emit("# r12: specified index value")
+		emit("# r13: loop counter")
 
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
-		emit("mov %%rax, %%r10") // copy head address
+		emit("mov %%rax, %%r10 # copy head address")
 		emitOffsetLoad(_map, IntSize, IntSize)
-		emit("mov %%rax, %%r11") // copy len
+		emit("mov %%rax, %%r11 # copy len ")
 		index.emit()
-		emit("mov %%rax, %%r12") // index value
-
-		emit("mov $0, %%r13 # init loop counter") // i = 0
-
-		labelBegin := makeLabel()
-		labelEnd := makeLabel()
-		emit("%s: # begin loop ", labelBegin)
-
-		labelIncr := makeLabel()
-		// break if i < len
-		emit("cmp %%r11, %%r13") // len > i
-		emit("setl %%al")
-		emit("movzb %%al, %%eax")
-		emit("test %%rax, %%rax")
-		emit("mov $0, %%rax") // key not found. set zero value.
-		emit("mov $0, %%rcx") // ok = false
-		emit("je %s  # jump if false", labelEnd)
-
-		// check if index value matches
-		emit("mov %%r13, %%rax")   // i
-		emit("imul $16, %%rax")    // i * 16
-		emit("mov %%r10, %%rcx")   // head
-		emit("add %%rax, %%rcx")   // head + i * 16
-		emit("mov (%%rcx), %%rax") // emit index address
-		emit("mov (%%rax), %%rax") // dereference
-
-		// @TODO if string type, call emitStringEqual()
-		mapKeyType := array.getGtype().mapKey
-		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
-			emitStringsEqual("%r12", "%rax")
-		} else {
-			// primitive comparison
-			emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
-			emit("sete %%al")
-			emit("movzb %%al, %%eax")
-		}
-
-		emit("test %%rax, %%rax")
-		emit("je %s  # jump if false", labelIncr)
-
-		// Value found!
-		emit("mov 8(%%rcx), %%rax") // set the found value address
-		emit("mov (%%rax), %%rax")  // dereference
-		emit("jmp %s", labelEnd)
-
-		emit("%s: # incr", labelIncr)
-		emit("add $1, %%r13") // i++
-		emit("jmp %s", labelBegin)
-
-		emit("%s: # end loop", labelEnd)
-
-		/* set register values to a global array for debug
-		emit("mov %%r10, debug+0(%%rip)")
-		emit("mov %%r11, debug+8(%%rip)")
-		emit("mov %%r12, debug+16(%%rip)")
-		emit("mov %%r13, debug+24(%%rip)")
-		emit("mov %%r15, debug+40(%%rip)")
-		*/
-
+		emit("mov %%rax, %%r12 # index value")
+		emitMapGet(array.getGtype())
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
+}
+
+func emitMapGet(mapType *Gtype) {
+	emit("# emitMapGet")
+	emit("mov $0, %%r13 # init loop counter") // i = 0
+
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+	emit("%s: # begin loop ", labelBegin)
+
+	labelIncr := makeLabel()
+	// break if i < len
+	emit("cmp %%r11, %%r13") // len > i
+	emit("setl %%al")
+	emit("movzb %%al, %%eax")
+	emit("test %%rax, %%rax")
+	emit("mov $0, %%rax") // key not found. set zero value.
+	emit("mov $0, %%rcx") // ok = false
+	emit("je %s  # jump if false", labelEnd)
+
+	// check if index value matches
+	emit("mov %%r13, %%rax")   // i
+	emit("imul $16, %%rax")    // i * 16
+	emit("mov %%r10, %%rcx")   // head
+	emit("add %%rax, %%rcx")   // head + i * 16
+	emit("mov (%%rcx), %%rax") // emit index address
+
+	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
+	if !mapKeyType.isString() {
+		emit("mov (%%rax), %%rax") // dereference
+	}
+	if mapKeyType.isString() {
+		emit("push %%r13")
+		emit("push %%r11")
+		emit("push %%r10")
+		emitStringsEqual("%r12", "%rax")
+		emit("pop %%r10")
+		emit("pop %%r11")
+		emit("pop %%r13")
+	} else {
+		// primitive comparison
+		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+	}
+
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelIncr)
+
+	emit("# Value found!")
+	emit("mov 8(%%rcx), %%rax # set the found value address")
+	if !mapValueType.isString() {
+		emit("mov (%%rax), %%rax # dereference")
+	}
+	emit("jmp %s", labelEnd)
+
+	emit("%s: # incr", labelIncr)
+	emit("add $1, %%r13") // i++
+	emit("jmp %s", labelBegin)
+
+	emit("%s: # end loop", labelEnd)
 }
 
 func (e *ExprIndex) emit() {
@@ -1827,32 +1954,19 @@ func (ast *ExprMethodcall) getUniqueName() string {
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
-func (methodCall *ExprMethodcall) getPkgName() identifier {
-	origType := methodCall.getOrigType()
-	if origType.typ == G_INTERFACE {
-		TBI(methodCall.token(), "G_INTERFACE is not supported yet")
-	} else {
-		funcref, ok := origType.methods[methodCall.fname]
-		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
-		}
-		return funcref.funcdef.pkg
-	}
-	return ""
-}
-
 func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
+	assertNotNil(methodCall.receiver !=nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
 		typeToBeloing = gtype.origType
+		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:" +  gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
 	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
-	//debugf("typeToBeloing = %s", typeToBeloing)
 	origType := typeToBeloing.relation.gtype
 	//debugf("origType = %v", origType)
 	return origType
@@ -1886,14 +2000,77 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	}
 }
 
+type IrInterfaceMethodCall struct {
+	receiver Expr
+	methodName identifier
+}
+
+func (call *IrInterfaceMethodCall) emitPush() {
+	if true {
+		mapType := &Gtype{
+			typ:      G_MAP,
+			mapKey:   &Gtype{
+				typ: G_STRING,
+			},
+			mapValue: &Gtype{
+				typ: G_STRING,
+			},
+		}
+		emit("# emit typeId")
+		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
+		emit("imul $8, %%rax")
+		emit("push %%rax")
+		emit("lea namedTypes(%%rip), %%rax")
+		emit("pop %%rcx")
+		emit("add %%rcx, %%rax")
+		emit("# find method %s", call.methodName)
+		emit("mov (%%rax), %%r10") // address of namedTypeN
+
+		emit("mov $128, %%rax")                  // copy len
+		emit("mov %%rax, %%r11")                  // copy len
+
+		emit("lea .M%s, %%rax", call.methodName) // index value
+		emit("mov %%rax, %%r12") // index value
+		emitMapGet(mapType)
+	}
+
+	emit("push %%rax")
+}
+
+func (call *IrInterfaceMethodCall) emit() {
+	emit("pop %%rax")
+	emit("call *%%rax")
+}
+
+func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
+	args := []Expr{methodCall.receiver}
+	for _, arg := range methodCall.args {
+		args = append(args, arg)
+	}
+	call := &IrInterfaceMethodCall{
+		receiver: methodCall.receiver,
+		methodName : methodCall.fname,
+	}
+	emitCall(call, args)
+}
+
 func (methodCall *ExprMethodcall) emit() {
+	origType := methodCall.getOrigType()
+	if origType.typ == G_INTERFACE {
+		methodCall.emitInterfaceMethodCall()
+		return
+	}
 
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
 
-	pkgname := methodCall.getPkgName()
+	funcref, ok := origType.methods[methodCall.fname]
+	if !ok {
+		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+	}
+	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	emitCall(getPackagedFuncName(pkgname, name), args)
 }
@@ -1996,15 +2173,32 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
 }
 
-func emitCall(fname string, args []Expr) {
+type IrStaticCall string
+func (ircall IrStaticCall) emitPush() {
+	// nothing to do
+}
 
-	emit("# funcall %s", fname)
+func (ircall IrStaticCall) emit() {
+	emit("mov $0, %%rax")
+	emit("call %s", ircall)
+}
+
+type IrCall interface {
+	emitPush()
+	emit()
+}
+
+func emitCall(fname IrCall, args []Expr) {
+
+	emit("# emitCall %s", fname)
 	/*
 		for i, _ := range args {
 			emit("push %%%s", RegsForCall[i])
 		}
 	*/
-	emit("# setting arguments")
+	fname.emitPush()
+	emit("# setting arguments %v", args)
+
 	for i, arg := range args {
 		//debugf("arg[%d] = %v", i, arg)
 		if _, ok := arg.(*ExprVaArg); ok {
@@ -2021,9 +2215,7 @@ func emitCall(fname string, args []Expr) {
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 
-	emit("mov $0, %%rax")
-	emit("call %s", fname)
-
+	fname.emit()
 	/*
 		for i, _ := range args {
 			j := len(args) - 1 - i
@@ -2221,6 +2413,7 @@ type IrRoot struct {
 	vars           []*DeclVar
 	funcs          []*DeclFunc
 	stringLiterals []*ExprStringLiteral
+	methodTable    map[int][]string
 }
 
 func (root *IrRoot) emit() {
@@ -2239,13 +2432,32 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
-	/*
-		emitComment("GLOBAL RETVALS")
-		for _, name := range retvals {
-			emitLabel("%s:", name)
-			emit(".quad 0")
+	emitComment("Method table")
+
+	emitLabel("%s:", "namedTypes")
+	emit(".quad 0 # typeId:0")
+	for i:= 1; i <= len(root.methodTable); i++ {
+		emit(".quad namedType%d # typeId:%d", i, i)
+	}
+
+	var shortMethodNames map[string]string = make(map[string]string)
+
+	for i:= 1; i <= len(root.methodTable); i++ {
+		emitLabel("namedType%d:", i)
+		for _, methodNameFull := range root.methodTable[i] {
+			splitted := strings.Split(methodNameFull, "$")
+			shortMethodName := splitted[1]
+			emit(".quad .M%s # key", shortMethodName)
+			emit(".quad %s # method", methodNameFull)
+			shortMethodNames[shortMethodName] = shortMethodName
 		}
-	*/
+	}
+
+	emitComment("METHOD NAMES")
+	for shortMethodName := range shortMethodNames {
+		emitLabel(".M%s:", shortMethodName)
+		emit(".string \"%s\"", shortMethodName)
+	}
 
 	emitComment("GLOBAL VARS")
 	emit("")

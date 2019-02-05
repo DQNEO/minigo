@@ -130,6 +130,30 @@ func main() {
 	}
 	_, importOS = p.importedNames["os"]
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
+
+	var methods map[int][]string = make(map[int][]string) // typeId : []methods
+
+	var typeId = 1 // start with 1 because we want to zero as error
+	for _, concreteNamedType := range p.concreteNamedTypes {
+		concreteNamedType.gtype.typeId = typeId
+		typeId++
+	}
+
+	for _, funcdecl := range ir.funcs {
+		if funcdecl.receiver != nil {
+			gtype := funcdecl.receiver.getGtype()
+			if gtype.typ == G_POINTER {
+				gtype = gtype.origType
+			}
+			if gtype.relation == nil {
+				errorf("no relation for %#v", funcdecl.receiver.getGtype())
+			}
+			typeId := gtype.relation.gtype.typeId
+			methods[typeId] = append(methods[typeId], string(funcdecl.getUniqueName()))
+		}
+	}
+	ir.methodTable = methods
+	//debugf("methods=%v", methods)
 	ir.emit()
 }
 
