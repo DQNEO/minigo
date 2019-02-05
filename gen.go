@@ -1749,9 +1749,11 @@ func emitMapGet(mapType *Gtype, shortCut bool) {
 	mapKeyType := mapType.mapKey
 	if mapKeyType.isString() {
 		emit("push %%r13")
+		emit("push %%r11")
 		emit("push %%r10")
 		emitStringsEqual("%r12", "%rax")
 		emit("pop %%r10")
+		emit("pop %%r11")
 		emit("pop %%r13")
 	} else {
 		// primitive comparison
