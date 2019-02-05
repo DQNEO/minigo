@@ -1703,63 +1703,66 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		index.emit()
 		emit("mov %%rax, %%r12") // index value
-
-		emit("mov $0, %%r13 # init loop counter") // i = 0
-
-		labelBegin := makeLabel()
-		labelEnd := makeLabel()
-		emit("%s: # begin loop ", labelBegin)
-
-		labelIncr := makeLabel()
-		// break if i < len
-		emit("cmp %%r11, %%r13") // len > i
-		emit("setl %%al")
-		emit("movzb %%al, %%eax")
-		emit("test %%rax, %%rax")
-		emit("mov $0, %%rax") // key not found. set zero value.
-		emit("mov $0, %%rcx") // ok = false
-		emit("je %s  # jump if false", labelEnd)
-
-		// check if index value matches
-		emit("mov %%r13, %%rax")   // i
-		emit("imul $16, %%rax")    // i * 16
-		emit("mov %%r10, %%rcx")   // head
-		emit("add %%rax, %%rcx")   // head + i * 16
-		emit("mov (%%rcx), %%rax") // emit index address
-		if !shortCut {
-			emit("mov (%%rax), %%rax") // dereference
-		}
-		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
-			emit("push %%r13")
-			emit("push %%r10")
-			emitStringsEqual("%r12", "%rax")
-			emit("pop %%r10")
-			emit("pop %%r13")
-		} else {
-			// primitive comparison
-			emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
-			emit("sete %%al")
-			emit("movzb %%al, %%eax")
-		}
-
-		emit("test %%rax, %%rax")
-		emit("je %s  # jump if false", labelIncr)
-
-		emit("# Value found!")
-		emit("mov 8(%%rcx), %%rax # set the found value address")
-		if !shortCut {
-			emit("mov (%%rax), %%rax # dereference")
-		}
-		emit("jmp %s", labelEnd)
-
-		emit("%s: # incr", labelIncr)
-		emit("add $1, %%r13") // i++
-		emit("jmp %s", labelBegin)
-
-		emit("%s: # end loop", labelEnd)
+		emitMapGet(mapKeyType, shortCut)
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
+}
+
+func emitMapGet(mapKeyType *Gtype, shortCut bool) {
+	emit("mov $0, %%r13 # init loop counter") // i = 0
+
+	labelBegin := makeLabel()
+	labelEnd := makeLabel()
+	emit("%s: # begin loop ", labelBegin)
+
+	labelIncr := makeLabel()
+	// break if i < len
+	emit("cmp %%r11, %%r13") // len > i
+	emit("setl %%al")
+	emit("movzb %%al, %%eax")
+	emit("test %%rax, %%rax")
+	emit("mov $0, %%rax") // key not found. set zero value.
+	emit("mov $0, %%rcx") // ok = false
+	emit("je %s  # jump if false", labelEnd)
+
+	// check if index value matches
+	emit("mov %%r13, %%rax")   // i
+	emit("imul $16, %%rax")    // i * 16
+	emit("mov %%r10, %%rcx")   // head
+	emit("add %%rax, %%rcx")   // head + i * 16
+	emit("mov (%%rcx), %%rax") // emit index address
+	if !shortCut {
+		emit("mov (%%rax), %%rax") // dereference
+	}
+	if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
+		emit("push %%r13")
+		emit("push %%r10")
+		emitStringsEqual("%r12", "%rax")
+		emit("pop %%r10")
+		emit("pop %%r13")
+	} else {
+		// primitive comparison
+		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
+	}
+
+	emit("test %%rax, %%rax")
+	emit("je %s  # jump if false", labelIncr)
+
+	emit("# Value found!")
+	emit("mov 8(%%rcx), %%rax # set the found value address")
+	if !shortCut {
+		emit("mov (%%rax), %%rax # dereference")
+	}
+	emit("jmp %s", labelEnd)
+
+	emit("%s: # incr", labelIncr)
+	emit("add $1, %%r13") // i++
+	emit("jmp %s", labelBegin)
+
+	emit("%s: # end loop", labelEnd)
 }
 
 func (e *ExprIndex) emit() {
@@ -1974,60 +1977,7 @@ func (call *IrInterfaceMethodCall) emitPush() {
 
 		emit("lea .M%s, %%rax", call.methodName) // index value
 		emit("mov %%rax, %%r12") // index value
-
-		emit("mov $0, %%r13 # init loop counter") // i = 0
-
-		labelBegin := makeLabel()
-		labelEnd := makeLabel()
-		emit("%s: # begin loop ", labelBegin)
-
-		labelIncr := makeLabel()
-		// break if i < len
-		emit("cmp %%r11, %%r13") // len > i
-		emit("setl %%al")
-		emit("movzb %%al, %%eax")
-		emit("test %%rax, %%rax")
-		emit("mov $0, %%rax") // key not found. set zero value.
-		emit("mov $0, %%rcx") // ok = false
-		emit("je %s  # jump if false", labelEnd)
-
-		// check if index value matches
-		emit("mov %%r13, %%rax")   // i
-		emit("imul $16, %%rax")    // i * 16
-		emit("mov %%r10, %%rcx")   // head
-		emit("add %%rax, %%rcx")   // head + i * 16
-		emit("mov (%%rcx), %%rax") // emit index address
-		if !shortCut {
-			emit("mov (%%rax), %%rax") // dereference
-		}
-		if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
-			emit("push %%r13")
-			emit("push %%r10")
-			emitStringsEqual("%r12", "%rax")
-			emit("pop %%r10")
-			emit("pop %%r13")
-		} else {
-			// primitive comparison
-			emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
-			emit("sete %%al")
-			emit("movzb %%al, %%eax")
-		}
-
-		emit("test %%rax, %%rax")
-		emit("je %s  # jump if false", labelIncr)
-
-		emit("# Value found!")
-		emit("mov 8(%%rcx), %%rax # set the found value address")
-		if !shortCut {
-			emit("mov (%%rax), %%rax # dereference")
-		}
-		emit("jmp %s", labelEnd)
-
-		emit("%s: # incr", labelIncr)
-		emit("add $1, %%r13") // i++
-		emit("jmp %s", labelBegin)
-
-		emit("%s: # end loop", labelEnd)
+		emitMapGet(mapKeyType, shortCut)
 	}
 
 	emit("push %%rax")
