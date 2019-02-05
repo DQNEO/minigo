@@ -1734,7 +1734,7 @@ func emitMapGet(mapType *Gtype, shortCut bool) {
 		emit("mov (%%rax), %%rax") // dereference
 	}
 	mapKeyType := mapType.mapKey
-	if mapKeyType.typ == G_STRING || (mapKeyType.typ == G_REL && mapKeyType.relation.gtype.typ == G_STRING) {
+	if mapKeyType.isString() {
 		emit("push %%r13")
 		emit("push %%r10")
 		emitStringsEqual("%r12", "%rax")

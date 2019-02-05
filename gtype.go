@@ -53,6 +53,16 @@ type Gtype struct {
 	mapValue *Gtype // for map
 }
 
+func (gtype *Gtype) isString() bool {
+	if gtype.typ == G_STRING {
+		return true
+	}
+	if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING {
+		return true
+	}
+	return false
+}
+
 func (gtype *Gtype) getSize() int {
 	assertNotNil(gtype != nil, nil)
 	assert(gtype.typ != G_DEPENDENT, nil, "type should be inferred")
