@@ -1698,20 +1698,19 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 	} else if array.getGtype().typ == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
-		// r10 map header address
-		// r11 map len
-		// r12 specified index value
-		// r13 loop counter
+		emit("# r10: map header address")
+		emit("# r11: map len")
+		emit("# r12: specified index value")
+		emit("# r13: loop counter")
 
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
 		_map := array
 		emit("# emit mapData head address")
 		_map.emit()
-		emit("mov %%rax, %%r10") // copy head address
+		emit("mov %%rax, %%r10 # copy head address")
 		emitOffsetLoad(_map, IntSize, IntSize)
-		emit("mov %%rax, %%r11") // copy len
-
+		emit("mov %%rax, %%r11 # copy len ")
 		index.emit()
 		emit("mov %%rax, %%r12") // index value
 		emitMapGet(array.getGtype(), false)
