@@ -1700,6 +1700,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov %%rax, %%r10") // copy head address
 		emitOffsetLoad(_map, IntSize, IntSize)
 		emit("mov %%rax, %%r11") // copy len
+
 		index.emit()
 		emit("mov %%rax, %%r12") // index value
 
@@ -1968,8 +1969,11 @@ func (call *IrInterfaceMethodCall) emitPush() {
 		emit("# find method %s", call.methodName)
 		emit("mov (%%rax), %%r10") // address of namedTypeN
 
-		emit("mov $128, %%r11")                  // copy len
-		emit("lea .M%s, %%r12", call.methodName) // index value
+		emit("mov $128, %%rax")                  // copy len
+		emit("mov %%rax, %%r11")                  // copy len
+
+		emit("lea .M%s, %%rax", call.methodName) // index value
+		emit("mov %%rax, %%r12") // index value
 
 		emit("mov $0, %%r13 # init loop counter") // i = 0
 
