@@ -1743,9 +1743,9 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("test %%rax, %%rax")
 		emit("je %s  # jump if false", labelIncr)
 
-		// Value found!
-		emit("mov 8(%%rcx), %%rax") // set the found value address
-		emit("mov (%%rax), %%rax")  // dereference
+		emit("# Value found!")
+		emit("mov 8(%%rcx), %%rax # set the found value address")
+		emit("mov (%%rax), %%rax # dereference")
 		emit("jmp %s", labelEnd)
 
 		emit("%s: # incr", labelIncr)
