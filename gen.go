@@ -2219,10 +2219,6 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	emit("call %s", ircall)
 }
 
-type IrCall interface {
-	emit(args []Expr)
-}
-
 func (f *DeclFunc) emit() {
 	f.emitPrologue()
 	f.body.emit()
