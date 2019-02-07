@@ -2042,6 +2042,8 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	}
 	variable := rel.expr.(*ExprVariable)
 	assert(variable.gtype.typ == G_REL && variable.gtype.relation.gtype.typ == G_INTERFACE, nil, "should be interface")
+
+	// dereference inerface: convert an interface value to a concrete value
 	if variable.isGlobal {
 		emit("mov %s(%%rip), %%rax", variable.varname)
 	} else {
