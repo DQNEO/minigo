@@ -240,12 +240,7 @@ func (ast *ExprVariable) emit() {
 		ast.emitAddress(0)
 		return
 	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
-		if ast.isGlobal {
-			emit("mov %s(%%rip), %%rax", ast.varname)
-		} else {
-			emit("mov %d(%%rbp), %%rax", ast.offset)
-		}
-		emit("mov (%%rax), %%rax")
+		TBI(ast.token(), "")
 		return
 	}
 
@@ -2041,7 +2036,19 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	receiver := args[0]
 	emit("mov $0, %%rax")
-	receiver.emit()
+	rel, ok := receiver.(*Relation)
+	if !ok {
+		TBI(receiver.token(), "only variable receiver is supported: %T",receiver )
+	}
+	variable := rel.expr.(*ExprVariable)
+	assert(variable.gtype.typ == G_REL && variable.gtype.relation.gtype.typ == G_INTERFACE, nil, "should be interface")
+	if variable.isGlobal {
+		emit("mov %s(%%rip), %%rax", variable.varname)
+	} else {
+		emit("mov %d(%%rbp), %%rax", variable.offset)
+	}
+	emit("mov (%%rax), %%rax")
+
 	emit("push %%rax  # receiver")
 
 	otherArgs := args[1:]
