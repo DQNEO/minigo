@@ -2039,14 +2039,20 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("# setting arguments %v", args)
 
-	for i, arg := range args {
+	receiver := args[0]
+	emit("mov $0, %%rax")
+	receiver.emit()
+	emit("push %%rax  # receiver")
+
+	otherArgs := args[1:]
+	for i, arg := range otherArgs {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
 		} else {
 			arg.emit()
 		}
-		emit("push %%rax  # argument no %d", i+1)
+		emit("push %%rax  # argument no %d", i+2)
 	}
 
 	for i, _ := range args {
