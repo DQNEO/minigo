@@ -240,7 +240,13 @@ func (ast *ExprVariable) emit() {
 		ast.emitAddress(0)
 		return
 	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
-		TBI(ast.token(), "")
+		if ast.isGlobal {
+			emit("mov %s+8(%%rip), %%rbx", ast.varname)
+			emit("mov %s(%%rip), %%rax", ast.varname)
+		} else {
+			emit("mov %d(%%rbp), %%rbx", ast.offset+8)
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+		}
 		return
 	}
 
@@ -1433,6 +1439,14 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		emit("# initialize interface with a zero value")
 		emit("push $0")
 		emit("push $0")
+		emitSaveInterface(lhs, 0)
+		return
+	}
+
+	if rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_INTERFACE {
+		rhs.emit()
+		emit("push %%rax")
+		emit("push %%rbx")
 		emitSaveInterface(lhs, 0)
 		return
 	}

@@ -22,7 +22,9 @@ func f2() {
 	sum := myInterface.sum()
 	fmt.Printf("%d\n", sum - 3) // 2
 
-	diff := myInterface.diff()
+	var myInterface2 MyInterface
+	myInterface2 = myInterface
+	diff := myInterface2.diff()
 	fmt.Printf("%d\n", diff + 2) // 3
 }
 
