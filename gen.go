@@ -2188,10 +2188,10 @@ type IrCall interface {
 	emit()
 }
 
-func emitCall(fname IrCall, args []Expr) {
+func emitCall(irCall IrCall, args []Expr) {
 
-	emit("# emitCall %s", fname)
-	fname.emitPush()
+	emit("# emitCall %s", irCall)
+	irCall.emitPush()
 	emit("# setting arguments %v", args)
 
 	for i, arg := range args {
@@ -2209,7 +2209,7 @@ func emitCall(fname IrCall, args []Expr) {
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 
-	fname.emit()
+	irCall.emit()
 }
 
 func (f *DeclFunc) emit() {
