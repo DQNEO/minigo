@@ -2005,7 +2005,8 @@ type IrInterfaceMethodCall struct {
 	methodName identifier
 }
 
-func (call *IrInterfaceMethodCall) emitPush() {
+func (call *IrInterfaceMethodCall) emit(args []Expr) {
+	emit("# emitCall %s", call.methodName)
 	if true {
 		mapType := &Gtype{
 			typ:      G_MAP,
@@ -2035,9 +2036,25 @@ func (call *IrInterfaceMethodCall) emitPush() {
 	}
 
 	emit("push %%rax")
-}
 
-func (call *IrInterfaceMethodCall) emit() {
+	emit("# setting arguments %v", args)
+
+	for i, arg := range args {
+		if _, ok := arg.(*ExprVaArg); ok {
+			// skip VaArg for now
+			emit("mov $0, %%rax")
+		} else {
+			arg.emit()
+		}
+		emit("push %%rax  # argument no %d", i+1)
+	}
+
+	for i, _ := range args {
+		j := len(args) - 1 - i
+		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
+	}
+
+
 	emit("pop %%rax")
 	emit("call *%%rax")
 }
@@ -2051,7 +2068,7 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 		receiver: methodCall.receiver,
 		methodName : methodCall.fname,
 	}
-	emitCall(call, args)
+	call.emit(args)
 }
 
 func (methodCall *ExprMethodcall) emit() {
@@ -2072,7 +2089,8 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
-	emitCall(getPackagedFuncName(pkgname, name), args)
+	var staticCall IrStaticCall =  getPackagedFuncName(pkgname, name)
+	staticCall.emit(args)
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
@@ -2170,28 +2188,16 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		exprLen.emit()
 		return
 	}
-	emitCall(getPackagedFuncName(decl.pkg, funcall.fname), funcall.args)
+	var staticCall IrStaticCall = getPackagedFuncName(decl.pkg, funcall.fname)
+	staticCall.emit(funcall.args)
 }
 
 type IrStaticCall string
-func (ircall IrStaticCall) emitPush() {
+
+func (ircall IrStaticCall) emit(args []Expr) {
 	// nothing to do
-}
+	emit("# emitCall %s", ircall)
 
-func (ircall IrStaticCall) emit() {
-	emit("mov $0, %%rax")
-	emit("call %s", ircall)
-}
-
-type IrCall interface {
-	emitPush()
-	emit()
-}
-
-func emitCall(irCall IrCall, args []Expr) {
-
-	emit("# emitCall %s", irCall)
-	irCall.emitPush()
 	emit("# setting arguments %v", args)
 
 	for i, arg := range args {
@@ -2209,7 +2215,12 @@ func emitCall(irCall IrCall, args []Expr) {
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 
-	irCall.emit()
+	emit("mov $0, %%rax")
+	emit("call %s", ircall)
+}
+
+type IrCall interface {
+	emit(args []Expr)
 }
 
 func (f *DeclFunc) emit() {
