@@ -68,12 +68,35 @@ func f4(bol bool) {
 	fmt.Printf("%d\n", diff + 5) // 7, 9
 }
 
+var gpoint = Point{
+	x: 6,
+	y: 4,
+}
+
+var gptr *Point
+
+func return_interface() MyInterface {
+	var myInterface MyInterface
+	gptr = &gpoint
+	myInterface = gptr
+	sum := myInterface.sum()
+
+	fmt.Printf("%d\n", sum) // 10
+	return myInterface
+}
+
+func f5() {
+	var myif MyInterface = return_interface()
+	fmt.Printf("%d\n", myif.sum() + 1) // 11
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4(true)
 	f4(false)
+	f5()
 }
 
 type MyInterface interface {
