@@ -2032,19 +2032,12 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	receiver := args[0]
 	emit("mov $0, %%rax")
-	rel, ok := receiver.(*Relation)
-	if !ok {
-		TBI(receiver.token(), "only variable receiver is supported: %T",receiver )
-	}
-	variable := rel.expr.(*ExprVariable)
-	assert(variable.gtype.typ == G_REL && variable.gtype.relation.gtype.typ == G_INTERFACE, nil, "should be interface")
+	receiverType := receiver.getGtype()
+	assert(receiverType.typ == G_REL && receiverType.relation.gtype.typ == G_INTERFACE, nil, "should be interface")
 
-	// dereference inerface: convert an interface value to a concrete value
-	if variable.isGlobal {
-		emit("mov %s(%%rip), %%rax", variable.varname)
-	} else {
-		emit("mov %d(%%rbp), %%rax", variable.offset)
-	}
+	// dereference: convert an interface value to a concrete value
+	receiver.emit()
+
 	emit("mov (%%rax), %%rax")
 
 	emit("push %%rax  # receiver")
