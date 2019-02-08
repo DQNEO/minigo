@@ -2180,6 +2180,17 @@ func (e *ExprLen) emit() {
 }
 
 func (funcall *ExprFuncallOrConversion) emit() {
+	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		// Conversion
+		conversion := &ExprConversion{
+			tok: funcall.token(),
+			gtype: funcall.rel.gtype,
+			expr: funcall.args[0],
+		}
+		conversion.emit()
+		return
+	}
+
 	decl := funcall.getFuncDef() // check existance
 	if decl == nil {
 		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
