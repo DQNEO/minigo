@@ -653,7 +653,11 @@ func (ast *StmtAssignment) emit() {
 				}
 				for _, left := range ast.lefts {
 					if left.getGtype().typ == G_SLICE {
+						// @TODO: Does this work ?
 						emitSaveSlice(left, 0)
+					} else if left.getGtype().typ == G_REL && left.getGtype().relation.gtype.typ == G_INTERFACE {
+						// @TODO: Does this work ?
+						emitSaveInterface(left, 0)
 					} else {
 						emit("pop %%rax")
 						emitSave(left)
