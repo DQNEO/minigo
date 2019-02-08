@@ -1941,25 +1941,7 @@ func (e *ExprMapLiteral) emit() {
 }
 
 func (ast *ExprMethodcall) getUniqueName() string {
-	var gtype *Gtype
-
-	switch ast.receiver.(type) {
-	case *Relation:
-		rel := ast.receiver.(*Relation)
-		if vr, ok := rel.expr.(*ExprVariable); ok {
-			gtype = vr.gtype
-			if gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE {
-				TBI(ast.token(), "interface method call is not supported yet. (%s.%s)", gtype.relation.name, ast.fname)
-			}
-		} else {
-			// @TODO must adapt to method chains like foo.Bar().Buz()
-			TBI(ast.token(), "")
-		}
-	default:
-		TBI(ast.token(), "unable to handle %T", ast.receiver)
-	}
-	//debugf("ast.receiver=%v", ast.receiver)
-	//debugf("gtype=%v", gtype)
+	gtype := ast.receiver.getGtype()
 	return getMethodUniqueName(gtype, ast.fname)
 }
 
