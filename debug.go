@@ -182,12 +182,6 @@ func (a *ExprStructField) dump() {
 	debugf("%s.%s", a.strct, a.fieldname)
 }
 
-func (stmt *StmtSwitch) emit() {
-	stmt.cond.emit()
-	emit("push %%rax")
-	// @TODO see the 8cc implementation
-}
-
 func (stmt *ExprCaseClause) dump() {
 	//stmt.exprs.dump()
 	//stmt.compound.dump()

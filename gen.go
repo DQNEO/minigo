@@ -882,6 +882,69 @@ func (stmt *StmtIf) emit() {
 	}
 }
 
+func (stmt *StmtSwitch) emit() {
+
+	emit("#")
+	emit("# switch statement")
+	labelEnd := makeLabel()
+	var labels []string
+
+	// switch (expr) {
+	if stmt.cond != nil {
+		emit("# the subject expression")
+		stmt.cond.emit()
+		emit("push %%rax")
+		emit("#")
+	}
+
+	// case exp1,exp2,..:
+	//     stmt1;
+	//     stmt2;
+	//     ...
+	for i, caseClause := range stmt.cases {
+		emit("# case %d exprs", i)
+		myCaseLabel := makeLabel()
+		labels = append(labels, myCaseLabel)
+
+		for _, e := range caseClause.exprs {
+			e.emit()
+			// compare primitive
+			emit("pop %%rcx # the subject value")
+			emit("cmp %%rax, %%rcx") // right, left
+			emit("sete %%al")
+			emit("movzb %%al, %%eax")
+			emit("test %%rax, %%rax")
+			emit("jne %s # jump if matches", myCaseLabel)
+			emit("push %%rcx # the subject value")
+		}
+	}
+
+	var defaultLabel string
+	if stmt.dflt == nil {
+		emit("jmp %s", labelEnd)
+	} else {
+		emit("# default")
+		defaultLabel = makeLabel()
+		emit("jmp %s", defaultLabel)
+	}
+
+	emit("pop %%rax # destroy the subject value")
+	emit("#")
+	for i, caseClause := range stmt.cases {
+		emit("# case stmts")
+		emit("%s:", labels[i])
+		caseClause.compound.emit()
+		emit("jmp %s", labelEnd)
+	}
+
+	if stmt.dflt != nil {
+		emit("%s:", defaultLabel)
+		stmt.dflt.emit()
+	}
+
+	emit("%s: # end of switch", labelEnd)
+}
+
 func (f *StmtFor) emitMapRange() {
 
 	labelBegin := makeLabel()
