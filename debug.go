@@ -183,7 +183,9 @@ func (a *ExprStructField) dump() {
 }
 
 func (stmt *StmtSwitch) emit() {
-	panic("implement me")
+	stmt.cond.emit()
+	emit("push %%rax")
+	// @TODO see the 8cc implementation
 }
 
 func (stmt *ExprCaseClause) dump() {
