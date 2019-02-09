@@ -101,6 +101,8 @@ func (gtype *Gtype) String() string {
 		return fmt.Sprintf("G_REL(\"%s\")", gtype.relation.name)
 	case G_INT:
 		return "int"
+	case G_BOOL:
+		return "bool"
 	case G_BYTE:
 		return "byte"
 	case G_ARRAY:
