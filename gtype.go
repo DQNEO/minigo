@@ -175,8 +175,14 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
-	assert(e.rel.expr.(*ExprFuncRef).funcdef.rettypes != nil, e.token(), "")
-	return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
+	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), "")
+	if e.rel.expr != nil {
+		return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
+	} else if e.rel.gtype != nil {
+		return e.rel.gtype
+	}
+	errorf("should not reach here")
+	return nil
 }
 
 func (e *ExprMethodcall) getGtype() *Gtype {
