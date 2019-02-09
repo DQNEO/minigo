@@ -852,34 +852,97 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
 
-func (s *StmtIf) emit() {
+func (stmt *StmtIf) emit() {
 	emit("# if")
-	if s.simplestmt != nil {
-		s.simplestmt.emit()
+	if stmt.simplestmt != nil {
+		stmt.simplestmt.emit()
 	}
-	s.cond.emit()
+	stmt.cond.emit()
 	emit("test %%rax, %%rax")
-	if s.els != nil {
+	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelElse)
+		emit("je %stmt  # jump if 0", labelElse)
 		emit("# then block")
-		s.then.emit()
-		emit("jmp %s # jump to endif", labelEndif)
+		stmt.then.emit()
+		emit("jmp %stmt # jump to endif", labelEndif)
 		emit("# else block")
-		emit("%s:", labelElse)
-		s.els.emit()
+		emit("%stmt:", labelElse)
+		stmt.els.emit()
 		emit("# endif")
-		emit("%s:", labelEndif)
+		emit("%stmt:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelEndif)
+		emit("je %stmt  # jump if 0", labelEndif)
 		emit("# then block")
-		s.then.emit()
+		stmt.then.emit()
 		emit("# endif")
-		emit("%s:", labelEndif)
+		emit("%stmt:", labelEndif)
 	}
+}
+
+func (stmt *StmtSwitch) emit() {
+
+	emit("#")
+	emit("# switch statement")
+	labelEnd := makeLabel()
+	var labels []string
+
+	// switch (expr) {
+	if stmt.cond != nil {
+		emit("# the subject expression")
+		stmt.cond.emit()
+		emit("push %%rax")
+		emit("#")
+	}
+
+	// case exp1,exp2,..:
+	//     stmt1;
+	//     stmt2;
+	//     ...
+	for i, caseClause := range stmt.cases {
+		emit("# case %d exprs", i)
+		myCaseLabel := makeLabel()
+		labels = append(labels, myCaseLabel)
+
+		for _, e := range caseClause.exprs {
+			e.emit()
+			// compare primitive
+			emit("pop %%rcx # the subject value")
+			emit("cmp %%rax, %%rcx") // right, left
+			emit("sete %%al")
+			emit("movzb %%al, %%eax")
+			emit("test %%rax, %%rax")
+			emit("jne %s # jump if matches", myCaseLabel)
+			emit("push %%rcx # the subject value")
+		}
+	}
+
+	var defaultLabel string
+	if stmt.dflt == nil {
+		emit("jmp %s", labelEnd)
+	} else {
+		emit("# default")
+		defaultLabel = makeLabel()
+		emit("jmp %s", defaultLabel)
+	}
+
+	emit("pop %%rax # destroy the subject value")
+	emit("#")
+	for i, caseClause := range stmt.cases {
+		emit("# case stmts")
+		emit("%s:", labels[i])
+		caseClause.compound.emit()
+		emit("jmp %s", labelEnd)
+	}
+
+	if stmt.dflt != nil {
+		emit("%s:", defaultLabel)
+		stmt.dflt.emit()
+	}
+
+	emit("%s: # end of switch", labelEnd)
 }
 
 func (f *StmtFor) emitMapRange() {

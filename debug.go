@@ -182,10 +182,6 @@ func (a *ExprStructField) dump() {
 	debugf("%s.%s", a.strct, a.fieldname)
 }
 
-func (stmt *StmtSwitch) emit() {
-	panic("implement me")
-}
-
 func (stmt *ExprCaseClause) dump() {
 	//stmt.exprs.dump()
 	//stmt.compound.dump()
