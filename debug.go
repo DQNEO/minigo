@@ -142,7 +142,7 @@ func (ast *ExprConstVariable) dump() {
 	debugf("var %s", ast.name)
 }
 
-func (e ExprArrayLiteral) dump() {
+func (e *ExprArrayLiteral) dump() {
 	debugNest++
 	for _, v := range e.values {
 		v.dump()
