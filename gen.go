@@ -852,33 +852,33 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
 
-func (s *StmtIf) emit() {
+func (stmt *StmtIf) emit() {
 	emit("# if")
-	if s.simplestmt != nil {
-		s.simplestmt.emit()
+	if stmt.simplestmt != nil {
+		stmt.simplestmt.emit()
 	}
-	s.cond.emit()
+	stmt.cond.emit()
 	emit("test %%rax, %%rax")
-	if s.els != nil {
+	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelElse)
+		emit("je %stmt  # jump if 0", labelElse)
 		emit("# then block")
-		s.then.emit()
-		emit("jmp %s # jump to endif", labelEndif)
+		stmt.then.emit()
+		emit("jmp %stmt # jump to endif", labelEndif)
 		emit("# else block")
-		emit("%s:", labelElse)
-		s.els.emit()
+		emit("%stmt:", labelElse)
+		stmt.els.emit()
 		emit("# endif")
-		emit("%s:", labelEndif)
+		emit("%stmt:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelEndif)
+		emit("je %stmt  # jump if 0", labelEndif)
 		emit("# then block")
-		s.then.emit()
+		stmt.then.emit()
 		emit("# endif")
-		emit("%s:", labelEndif)
+		emit("%stmt:", labelEndif)
 	}
 }
 
