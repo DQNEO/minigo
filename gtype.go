@@ -53,6 +53,13 @@ type Gtype struct {
 	mapValue *Gtype // for map
 }
 
+func (gtype *Gtype) getPrimType() GTYPE_TYPE {
+	if gtype.typ == G_REL {
+		return gtype.relation.gtype.getPrimType()
+	}
+	return gtype.typ
+}
+
 func (gtype *Gtype) isString() bool {
 	if gtype.typ == G_STRING {
 		return true

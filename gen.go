@@ -618,6 +618,7 @@ func (ast *StmtAssignment) emit() {
 		numRight := 0
 		right := ast.rights[0]
 
+		var leftsMayBeTwo bool // a(,b) := expr // map index or type assertion
 		switch right.(type) {
 		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
@@ -625,12 +626,20 @@ func (ast *StmtAssignment) emit() {
 				errorft(ast.token(), "multivalue is not allowed")
 			}
 			numRight += len(rettypes)
+		case *ExprTypeAssertion:
+			leftsMayBeTwo = true
 		default:
 			numRight++
 		}
 
-		if numLeft != numRight {
-			errorft(ast.token(), "number of exprs does not match")
+		if leftsMayBeTwo {
+			if numLeft > 2 {
+				errorft(ast.token(), "number of exprs does not match")
+			}
+		} else {
+			if numLeft != numRight {
+				errorft(ast.token(), "number of exprs does not match")
+			}
 		}
 
 		left := ast.lefts[0]
@@ -682,6 +691,12 @@ func (ast *StmtAssignment) emit() {
 		default:
 			// suppose primitive
 			emitAssignPrimitive(left, right)
+		}
+		if leftsMayBeTwo && len(ast.lefts) == 2 {
+			okVariable := ast.lefts[1]
+			// @TODO consider big data like slice, struct, etd
+			emit("mov %%rbx, %%rax") // ok
+			emitSave(okVariable)
 		}
 		return
 	}
@@ -1990,8 +2005,28 @@ func (e ExprArrayLiteral) emit() {
 	errorft(e.token(), "DO NOT EMIT")
 }
 
+// https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
-	panic("implement me")
+	assert(e.expr.getGtype().getPrimType() == G_INTERFACE, e.token(), "expr must be an Interface type")
+	if e.gtype.getPrimType() == G_INTERFACE {
+		TBI(e.token(),"")
+	} else {
+		// if T is not an interface type,
+		// x.(T) asserts that the dynamic type of x is identical to the type T.
+
+		e.expr.emit() // emit interface
+		// rax(ptr), rbx(typeId of method table), rcx(hashed typeId)
+		emit("push %%rax")
+		// @TODO DRY with type swtich statement
+		typeLabel := groot.getTypeLabel(e.gtype)
+		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
+		emitStringsEqual("%rax", "%rcx")
+
+		emit("mov %%rax, %%rbx") // move flag
+		// @TODO consider big data like slice, struct, etd
+		emit("pop %%rax") // load ptr
+		emit("mov (%%rax), %%rax") // deref
+	}
 }
 
 func (ast *StmtContinue) emit() {

@@ -266,10 +266,12 @@ func (e *ExprSliceLiteral) getGtype() *Gtype {
 	return e.gtype
 }
 
+// https://golang.org/ref/spec#Type_assertions
+// x.(T)
 type ExprTypeAssertion struct {
 	tok   *Token
-	expr  Expr
-	gtype *Gtype
+	expr  Expr    // x
+	gtype *Gtype  // T
 }
 
 type StmtContinue struct {
