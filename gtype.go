@@ -84,7 +84,8 @@ func (gtype *Gtype) getSize() int {
 		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING {
 			return ptrSize
 		} else if gtype.typ == G_INTERFACE {
-			return ptrSize + ptrSize
+			//     data    ,  namedType, dtype
+			return ptrSize + ptrSize + ptrSize
 		} else if gtype.typ == G_SLICE {
 			return ptrSize + IntSize + IntSize
 		} else if gtype.typ == G_MAP {
@@ -98,7 +99,7 @@ func (gtype *Gtype) getSize() int {
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
 	case G_REL:
-		return fmt.Sprintf("G_REL(\"%s\")", gtype.relation.name)
+		return fmt.Sprintf("G_REL(%s)", gtype.relation.name)
 	case G_INT:
 		return "int"
 	case G_BOOL:
@@ -109,20 +110,27 @@ func (gtype *Gtype) String() string {
 		elm := gtype.elementType
 		return fmt.Sprintf("[%d]%s", gtype.length, elm)
 	case G_STRUCT:
-		return "struct"
+		var r  = "struct{"
+		for _, field := range gtype.fields {
+			r += field.String() + ","
+		}
+		r += "}"
+		return r
 	case G_STRUCT_FIELD:
 		return "structfield"
 	case G_POINTER:
 		origType := gtype.origType
 		return fmt.Sprintf("*%s", origType)
 	case G_SLICE:
-		return "slice"
+		return fmt.Sprintf("[]%s", gtype.elementType)
 	case G_STRING:
 		return "string"
 	case G_INTERFACE:
 		return fmt.Sprintf("interface {%s}", gtype.imethods)
 	case G_MAP:
 		return "map"
+	case G_ANY:
+		return "interface{}"
 	default:
 		errorf("gtype.String() error: type=%d", gtype.typ)
 	}
@@ -161,6 +169,7 @@ func (strct *Gtype) calcStructOffset() {
 
 	strct.size = offset
 }
+
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {

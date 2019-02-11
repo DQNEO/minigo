@@ -301,14 +301,18 @@ type ExprConversion struct {
 	expr  Expr
 }
 
+// ExprCaseClause or TypeCaseClause
 type ExprCaseClause struct {
 	tok      *Token
 	exprs    []Expr
+	gtypes   []*Gtype
 	compound *StmtSatementList
 }
 
+// https://golang.org/ref/spec#Switch_statements
 type StmtSwitch struct {
 	tok   *Token
+	isTypeSwitch bool
 	cond  Expr
 	cases []*ExprCaseClause
 	dflt  *StmtSatementList

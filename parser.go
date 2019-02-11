@@ -27,6 +27,7 @@ type parser struct {
 	inCase              int  // > 0  while in reading case compound stmts
 	constSpecIndex      int
 	currentPackageName  identifier
+	alldynamictypes     []*Gtype
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -723,6 +724,11 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	return variable
 }
 
+func (p *parser) registerDynamicType(gtype *Gtype) *Gtype {
+	p.alldynamictypes = append(p.alldynamictypes, gtype)
+	return gtype
+}
+
 // https://golang.org/ref/spec#Type
 func (p *parser) parseType() *Gtype {
 	defer p.traceOut(p.traceIn())
@@ -743,7 +749,7 @@ func (p *parser) parseType() *Gtype {
 				typ:      G_REL,
 				relation: rel,
 			}
-			return gtype
+			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("interface") {
 			p.expect("{")
 			p.expect("}")
@@ -754,13 +760,15 @@ func (p *parser) parseType() *Gtype {
 				typ:      G_POINTER,
 				origType: p.parseType(),
 			}
-			return gtype
+			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("struct") {
 			p.unreadToken()
-			return p.parseStructDef()
+			gtype = p.parseStructDef()
+			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("map") {
 			p.unreadToken()
-			return p.parseMapType()
+			gtype = p.parseMapType()
+			return p.registerDynamicType(gtype)
 		} else if tok.isPunct("[") {
 			// array or slice
 			tok := p.readToken()
@@ -770,19 +778,21 @@ func (p *parser) parseType() *Gtype {
 			if tok.isPunct("]") {
 				// slice
 				typ := p.parseType()
-				return &Gtype{
+				gtype = &Gtype{
 					typ:         G_SLICE,
 					elementType: typ,
 				}
+				return p.registerDynamicType(gtype)
 			} else {
 				// array
 				p.expect("]")
 				typ := p.parseType()
-				return &Gtype{
+				gtype = &Gtype{
 					typ:         G_ARRAY,
 					length:      tok.getIntval(),
 					elementType: typ,
 				}
+				return p.registerDynamicType(gtype)
 			}
 		} else if tok.isPunct("]") {
 
@@ -1243,6 +1253,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	return r
 }
 
+// https://golang.org/ref/spec#Switch_statements
 func (p *parser) parseSwitchStmt() Stmt {
 	defer p.traceOut(p.traceIn())
 	ptok := p.expectKeyword("switch")
@@ -1255,8 +1266,12 @@ func (p *parser) parseSwitchStmt() Stmt {
 		cond = p.parseExpr()
 		p.requireBlock = false
 	}
+
+	_, isTypeSwitch := cond.(*ExprTypeSwitchGuard)
+
 	p.expect("{")
 	r := &StmtSwitch{
+		isTypeSwitch: isTypeSwitch,
 		tok:  ptok,
 		cond: cond,
 	}
@@ -1266,16 +1281,32 @@ func (p *parser) parseSwitchStmt() Stmt {
 		if tok.isKeyword("case") {
 			p.skip()
 			var exprs []Expr
-			expr := p.parseExpr()
-			exprs = append(exprs, expr)
-			for {
-				tok := p.peekToken()
-				if tok.isPunct(",") {
-					p.skip()
-					expr := p.parseExpr()
-					exprs = append(exprs, expr)
-				} else if tok.isPunct(":") {
-					break
+			var gtypes []*Gtype
+			if r.isTypeSwitch {
+				gtype := p.parseType()
+				gtypes = append(gtypes, gtype)
+				for {
+					tok := p.peekToken()
+					if tok.isPunct(",") {
+						p.skip()
+						gtype := p.parseType()
+						gtypes = append(gtypes, gtype)
+					} else if tok.isPunct(":") {
+						break
+					}
+				}
+			} else {
+				expr := p.parseExpr()
+				exprs = append(exprs, expr)
+				for {
+					tok := p.peekToken()
+					if tok.isPunct(",") {
+						p.skip()
+						expr := p.parseExpr()
+						exprs = append(exprs, expr)
+					} else if tok.isPunct(":") {
+						break
+					}
 				}
 			}
 			ptok := p.expect(":")
@@ -1284,6 +1315,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			casestmt := &ExprCaseClause{
 				tok:      ptok,
 				exprs:    exprs,
+				gtypes:  gtypes,
 				compound: compound,
 			}
 			p.inCase--
