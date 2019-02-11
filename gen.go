@@ -1293,6 +1293,11 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				fieldname: fieldtype.fieldname,
 			}
 			assignToStruct(left, nil)
+		case fieldtype.getPrimType() == G_INTERFACE:
+			emit("push $0")
+			emit("push $0")
+			emit("push $0")
+			emitSaveInterface(lhs, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
@@ -1343,6 +1348,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				fieldname: field.key,
 			}
 			assignToSlice(left, field.value)
+		case fieldtype.getPrimType() == G_INTERFACE:
+			left := &ExprStructField{
+				tok:       lhs.token(),
+				strct:     lhs,
+				fieldname: field.key,
+			}
+			assignToInterface(left, field.value)
 		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
 			left := &ExprStructField{
 				tok:       variable.token(),
