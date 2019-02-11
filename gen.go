@@ -241,10 +241,12 @@ func (ast *ExprVariable) emit() {
 		return
 	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
 		if ast.isGlobal {
-			emit("mov %s+8(%%rip), %%rbx", ast.varname)
+			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize + ptrSize)
+			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s(%%rip), %%rax", ast.varname)
 		} else {
-			emit("mov %d(%%rbp), %%rbx", ast.offset+8)
+			emit("mov %d(%%rbp), %%rcx", ast.offset + ptrSize + ptrSize)
+			emit("mov %d(%%rbp), %%rbx", ast.offset + ptrSize)
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
 		return
@@ -902,20 +904,31 @@ func (stmt *StmtSwitch) emit() {
 	//     stmt2;
 	//     ...
 	for i, caseClause := range stmt.cases {
-		emit("# case %d exprs", i)
+		emit("# case %d", i)
 		myCaseLabel := makeLabel()
 		labels = append(labels, myCaseLabel)
-
-		for _, e := range caseClause.exprs {
-			e.emit()
-			// compare primitive
-			emit("pop %%rcx # the subject value")
-			emit("cmp %%rax, %%rcx") // right, left
-			emit("sete %%al")
-			emit("movzb %%al, %%eax")
-			emit("test %%rax, %%rax")
-			emit("jne %s # jump if matches", myCaseLabel)
-			emit("push %%rcx # the subject value")
+		if stmt.isTypeSwitch {
+			// compare type
+			for _, gtype := range caseClause.gtypes {
+				typeLabel := groot.getTypeLabel(gtype)
+				emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
+				emit("pop %%rcx # the subject type")
+				emitStringsEqual("%rax", "%rcx")
+				emit("test %%rax, %%rax")
+				emit("jne %s # jump if matches", myCaseLabel)
+				emit("push %%rcx # the subject value")
+			}
+		} else {
+			for _, e := range caseClause.exprs {
+				e.emit()
+				emit("pop %%rcx # the subject value")
+				emit("cmp %%rax, %%rcx") // right, left
+				emit("sete %%al")
+				emit("movzb %%al, %%eax")
+				emit("test %%rax, %%rax")
+				emit("jne %s # jump if matches", myCaseLabel)
+				emit("push %%rcx # the subject value")
+			}
 		}
 	}
 
@@ -1506,6 +1519,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		emit("# initialize interface with a zero value")
 		emit("push $0")
 		emit("push $0")
+		emit("push $0")
 		emitSaveInterface(lhs, 0)
 		return
 	}
@@ -1514,6 +1528,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		rhs.emit()
 		emit("push %%rax")
 		emit("push %%rbx")
+		emit("push %%rcx")
 		emitSaveInterface(lhs, 0)
 		return
 	}
@@ -1526,14 +1541,20 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	emit("push %%rax")  // address
 
 
-	concreteType := rhs.getGtype()
-	if concreteType.typ == G_POINTER {
-		concreteType = concreteType.origType.relation.gtype
+	namedType := rhs.getGtype()
+	if namedType.typ == G_POINTER {
+		namedType = namedType.origType.relation.gtype
 	}
-	assert(concreteType.typeId > 0,  rhs.token(), "no typeId")
-	emit("mov $%d, %%rax # typeId", concreteType.typeId)
+	assert(namedType.typeId > 0,  rhs.token(), "no typeId")
+	emit("mov $%d, %%rax # typeId", namedType.typeId)
 
-	emit("push %%rax") // concrete type (type id)
+	emit("push %%rax") // namedType id
+
+	gtype := rhs.getGtype()
+	dtypeId := groot.hashedTypes[gtype.String()]
+	label := fmt.Sprintf("DT%d", dtypeId)
+	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
+	emit("push %%rax")
 	emitSaveInterface(lhs, 0)
 }
 
@@ -1624,6 +1645,8 @@ func (variable *ExprVariable) saveSlice(offset int) {
 
 func (variable *ExprVariable) saveInterface(offset int) {
 	emit("# *ExprVariable.saveInterface()")
+	emit("pop %%rax")
+	variable.emitOffsetSave(8, offset+ptrSize+ptrSize)
 	emit("pop %%rax")
 	variable.emitOffsetSave(8, offset+ptrSize)
 	emit("pop %%rax")
@@ -2000,7 +2023,8 @@ func (e *ExprStructLiteral) emit() {
 }
 
 func (e *ExprTypeSwitchGuard) emit() {
-	TBI(e.token(), "")
+	e.expr.emit()
+	emit("mov %%rcx, %%rax # copy type id")
 }
 
 func (e *ExprMapLiteral) emit() {
@@ -2491,10 +2515,19 @@ type IrRoot struct {
 	funcs          []*DeclFunc
 	stringLiterals []*ExprStringLiteral
 	methodTable    map[int][]string
+	hashedTypes    map[string]int
+}
+
+var groot *IrRoot
+
+func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
+	dtypeId := root.hashedTypes[gtype.String()]
+	label := fmt.Sprintf("DT%d", dtypeId)
+	return label
 }
 
 func (root *IrRoot) emit() {
-
+	groot = root
 	// generate code
 	emit(".data")
 
@@ -2509,6 +2542,16 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
+	emitComment("Dinamic Types")
+	var dtypeId int // 0 means nil
+	for hashedType, _ := range root.hashedTypes {
+		dtypeId++
+		root.hashedTypes[hashedType] = dtypeId
+		label := fmt.Sprintf("DT%d", dtypeId)
+		emitLabel(".%s:", label)
+		emit(".string \"%s\"", hashedType)
+	}
+
 	emitComment("Method table")
 
 	emitLabel("%s:", "namedTypes")

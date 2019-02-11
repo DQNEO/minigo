@@ -84,7 +84,8 @@ func (gtype *Gtype) getSize() int {
 		} else if gtype.typ == G_POINTER || gtype.typ == G_STRING {
 			return ptrSize
 		} else if gtype.typ == G_INTERFACE {
-			return ptrSize + ptrSize
+			//     data    ,  namedType, dtype
+			return ptrSize + ptrSize + ptrSize
 		} else if gtype.typ == G_SLICE {
 			return ptrSize + IntSize + IntSize
 		} else if gtype.typ == G_MAP {
@@ -168,6 +169,7 @@ func (strct *Gtype) calcStructOffset() {
 
 	strct.size = offset
 }
+
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {

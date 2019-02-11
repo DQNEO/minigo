@@ -131,6 +131,11 @@ func main() {
 	_, importOS = p.importedNames["os"]
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 
+	var uniquedDynamicTypes map[string]int = make(map[string]int)
+	for _, gtype := range p.alldynamictypes {
+		uniquedDynamicTypes[gtype.String()] = 0
+	}
+	ir.hashedTypes = uniquedDynamicTypes
 	var methods map[int][]string = make(map[int][]string) // typeId : []methods
 
 	var typeId = 1 // start with 1 because we want to zero as error
