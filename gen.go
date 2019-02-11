@@ -426,9 +426,10 @@ func (ast *ExprUop) emit() {
 	} else if ast.op == "-" {
 		// delegate to biop
 		// -(x) -> (-1) * (x)
+		left := &ExprNumberLiteral{val: -1}
 		binop := &ExprBinop{
 			op:    "*",
-			left:  &ExprNumberLiteral{val: -1},
+			left:  left,
 			right: ast.operand,
 		}
 		binop.emit()
