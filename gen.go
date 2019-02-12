@@ -405,7 +405,7 @@ func (ast *ExprUop) emit() {
 			assignToStruct(e.invisiblevar, e)
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 		default:
-			errorft(ast.token(), "Unknown type: %s", ast.operand)
+			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
 	} else if ast.op == "*" {
 		// dereferene of a pointer
