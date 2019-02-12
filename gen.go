@@ -215,6 +215,13 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 
 }
 
+func (a *ExprStructField) emitAddress() {
+	strcttype := a.strct.getGtype().origType.relation.gtype
+	field := strcttype.getField(a.fieldname)
+	a.strct.emit()
+	emit("add $%d, %%rax", field.offset)
+}
+
 func (a *ExprStructField) emit() {
 	emit("# ExprStructField.emit()")
 	switch a.strct.getGtype().typ {
@@ -403,7 +410,11 @@ func (ast *ExprUop) emit() {
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
 			assignToStruct(e.invisiblevar, e)
+			// @TODO handle global vars
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
+		case *ExprStructField:
+			e := ast.operand.(*ExprStructField)
+			e.emitAddress()
 		default:
 			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
