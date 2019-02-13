@@ -1466,6 +1466,13 @@ func emitSaveSlice(lhs Expr, offset int) {
 	}
 }
 
+func emitCallMalloc(size int) {
+	emit("mov $%d, %%rdi", size)
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+	// @TODO check malloc error
+}
+
 func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
@@ -1483,12 +1490,9 @@ func assignToMap(lhs Expr, rhs Expr) {
 		lit := rhs.(*ExprMapLiteral)
 		length := len(lit.elements)
 
-		// call malloc
-		emit("mov $%d, %%rdi", length*8*4)
-		emit("mov $0, %%rax")
-		emit("call .malloc")
-		// @TODO check malloc error
-		emit("push %%rax") // allocaated address of the map head
+		// allocaated address of the map head
+		emitCallMalloc(length*8*4)
+		emit("push %%rax")
 
 		mapType := rhs.getGtype()
 		mapKeyType := mapType.mapKey
@@ -1506,10 +1510,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 				emit("push %%r10")
 			} else {
 				// call malloc for key
-				emit("mov $%d, %%rdi", 8)
-				emit("mov $0, %%rax")
-				emit("call .malloc")
-
+				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of key
 				emit("mov %%rcx, (%%rax)") // save key to heap
 
@@ -1528,10 +1529,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 				emit("push %%r10")
 			} else {
 				// call malloc
-				emit("mov $%d, %%rdi", 8)
-				emit("mov $0, %%rax")
-				emit("call .malloc")
-
+				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of value
 				emit("mov %%rcx, (%%rax)") // save value to heap
 
