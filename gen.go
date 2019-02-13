@@ -1551,12 +1551,11 @@ func assignToMap(lhs Expr, rhs Expr) {
 }
 
 func convertDynamicTypeToInterface(dynamicValue Expr) {
-	uop := &ExprUop{
-		tok: dynamicValue.token(),
-		op:  "&",
-		operand: dynamicValue,
-	}
-	uop.emit()
+	dynamicValue.emit()
+	emit("push %%rax")
+	emitCallMalloc(8)
+	emit("pop %%rcx") // dynamicValue
+	emit("mov %%rcx, (%%rax)") // store value to heap
 	emit("push %%rax")  // address
 
 	namedType := dynamicValue.getGtype()

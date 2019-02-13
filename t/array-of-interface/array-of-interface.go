@@ -8,6 +8,13 @@ func f1() int {
 	return len(lefts)
 }
 
+
+func f2() int {
+	var lefts []Expr = []Expr{&A{}}
+	return len(lefts)
+}
+
+
 type Expr interface {
 	emit()
 }
@@ -20,6 +27,10 @@ func (a *A) emit() {
 }
 
 func main() {
-	l := f1()
-	fmt.Printf("%d\n", l)
+	var l int
+	l = f1()
+	fmt.Printf("%d\n", l) // 1
+
+	l = f2()
+	fmt.Printf("%d\n", l + 1) // 2
 }
