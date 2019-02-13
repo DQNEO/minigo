@@ -1552,6 +1552,10 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emitSaveSlice(lhs, 0)
 }
 
+func convertDynamicTypeToInterface(rhs Expr) {
+
+}
+
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
 	if rhs == nil {
@@ -1571,25 +1575,26 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		emitSaveInterface(lhs, 0)
 		return
 	}
+
+	dynamicValue := rhs
 	uop := &ExprUop{
 		tok: lhs.token(),
-		op: "&",
-		operand: rhs,
+		op:  "&",
+		operand: dynamicValue,
 	}
 	uop.emit()
 	emit("push %%rax")  // address
 
-
-	namedType := rhs.getGtype()
+	namedType := dynamicValue.getGtype()
 	if namedType.typ == G_POINTER {
 		namedType = namedType.origType.relation.gtype
 	}
-	assert(namedType.typeId > 0,  rhs.token(), "no typeId")
+	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
 	emit("mov $%d, %%rax # typeId", namedType.typeId)
 
 	emit("push %%rax") // namedType id
 
-	gtype := rhs.getGtype()
+	gtype := dynamicValue.getGtype()
 	dtypeId := groot.hashedTypes[gtype.String()]
 	label := fmt.Sprintf("DT%d", dtypeId)
 	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
@@ -1730,6 +1735,45 @@ func assignToArray(lhs Expr, rhs Expr) {
 				emit("mov $0, %%rax")
 			case *ExprArrayLiteral:
 				arrayLiteral := rhs.(*ExprArrayLiteral)
+				if elementType.getPrimType() == G_INTERFACE {
+					if i >= len(arrayLiteral.values) {
+						// zero value
+						emit("push $0")
+						emit("push $0")
+						emit("push $0")
+						emitSaveInterface(lhs, offsetByIndex)
+						continue
+					} else if arrayLiteral.values[i].getGtype().getPrimType() != G_INTERFACE {
+						// conversion of dynamic type => interface type
+	dynamicValue :=  arrayLiteral.values[i]
+	uop := &ExprUop{
+		tok: lhs.token(),
+		op:  "&",
+		operand: dynamicValue,
+	}
+	uop.emit()
+	emit("push %%rax")  // address
+
+	namedType := dynamicValue.getGtype()
+	if namedType.typ == G_POINTER {
+		namedType = namedType.origType.relation.gtype
+	}
+	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
+	emit("mov $%d, %%rax # typeId", namedType.typeId)
+
+	emit("push %%rax") // namedType id
+
+	gtype := dynamicValue.getGtype()
+	dtypeId := groot.hashedTypes[gtype.String()]
+	label := fmt.Sprintf("DT%d", dtypeId)
+	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
+	emit("push %%rax")
+	emitSaveInterface(lhs, offsetByIndex)
+
+						continue
+					}
+				}
+
 				if i >= len(arrayLiteral.values) {
 					// zero value
 					emit("mov $0, %%rax")
