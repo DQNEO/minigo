@@ -1552,7 +1552,29 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emitSaveSlice(lhs, 0)
 }
 
-func convertDynamicTypeToInterface(rhs Expr) {
+func convertDynamicTypeToInterface(dynamicValue Expr) {
+	uop := &ExprUop{
+		tok: dynamicValue.token(),
+		op:  "&",
+		operand: dynamicValue,
+	}
+	uop.emit()
+	emit("push %%rax")  // address
+
+	namedType := dynamicValue.getGtype()
+	if namedType.typ == G_POINTER {
+		namedType = namedType.origType.relation.gtype
+	}
+	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
+	emit("mov $%d, %%rax # typeId", namedType.typeId)
+
+	emit("push %%rax") // namedType id
+
+	gtype := dynamicValue.getGtype()
+	dtypeId := groot.hashedTypes[gtype.String()]
+	label := fmt.Sprintf("DT%d", dtypeId)
+	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
+	emit("push %%rax")
 
 }
 
@@ -1576,29 +1598,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
-	dynamicValue := rhs
-	uop := &ExprUop{
-		tok: lhs.token(),
-		op:  "&",
-		operand: dynamicValue,
-	}
-	uop.emit()
-	emit("push %%rax")  // address
-
-	namedType := dynamicValue.getGtype()
-	if namedType.typ == G_POINTER {
-		namedType = namedType.origType.relation.gtype
-	}
-	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
-	emit("mov $%d, %%rax # typeId", namedType.typeId)
-
-	emit("push %%rax") // namedType id
-
-	gtype := dynamicValue.getGtype()
-	dtypeId := groot.hashedTypes[gtype.String()]
-	label := fmt.Sprintf("DT%d", dtypeId)
-	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
-	emit("push %%rax")
+	convertDynamicTypeToInterface(rhs)
 	emitSaveInterface(lhs, 0)
 }
 
@@ -1745,32 +1745,12 @@ func assignToArray(lhs Expr, rhs Expr) {
 						continue
 					} else if arrayLiteral.values[i].getGtype().getPrimType() != G_INTERFACE {
 						// conversion of dynamic type => interface type
-	dynamicValue :=  arrayLiteral.values[i]
-	uop := &ExprUop{
-		tok: lhs.token(),
-		op:  "&",
-		operand: dynamicValue,
-	}
-	uop.emit()
-	emit("push %%rax")  // address
-
-	namedType := dynamicValue.getGtype()
-	if namedType.typ == G_POINTER {
-		namedType = namedType.origType.relation.gtype
-	}
-	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
-	emit("mov $%d, %%rax # typeId", namedType.typeId)
-
-	emit("push %%rax") // namedType id
-
-	gtype := dynamicValue.getGtype()
-	dtypeId := groot.hashedTypes[gtype.String()]
-	label := fmt.Sprintf("DT%d", dtypeId)
-	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
-	emit("push %%rax")
-	emitSaveInterface(lhs, offsetByIndex)
-
+						dynamicValue :=  arrayLiteral.values[i]
+						convertDynamicTypeToInterface(dynamicValue)
+						emitSaveInterface(lhs, offsetByIndex)
 						continue
+					} else {
+						TBI(lhs.token(),"")
 					}
 				}
 
