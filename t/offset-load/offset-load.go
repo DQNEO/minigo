@@ -30,7 +30,7 @@ func (ast *Ast) getGtype() *Gtype {
 func f1() int {
 	var lhs *Ast = &Ast{
 		gtype: &Gtype{
-			typeId:11,
+			typeId:12,
 			relation:&Relation{
 				gtype:&Gtype{
 
@@ -39,9 +39,16 @@ func f1() int {
 		},
 	}
 
-	id := lhs.getGtype().typeId
-	return id
+	g := lhs.getGtype()
+	fields := g.relation.gtype.fields
+	fmt.Printf("%d\n", len(fields) + 1) // 0
+
+	for _, fieldtype := range fields {
+		fmt.Printf("Error %s\n", fieldtype.fieldname)
+	}
+	return lhs.getGtype().typeId
 }
+
 
 func main() {
 	id := f1()

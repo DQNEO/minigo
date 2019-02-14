@@ -1090,6 +1090,20 @@ func (f *StmtFor) emitRange() {
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 
+	// check if 0 == len(list)
+	conditionEmpty := &ExprBinop{
+		op:   "==",
+		left: &ExprNumberLiteral{
+			val: 0,
+		},
+		right: &ExprLen{
+			arg: f.rng.rangeexpr, // len(expr)
+		},
+	}
+	conditionEmpty.emit()
+	emit("test %%rax, %%rax")
+	emit("jne %s  # if true, go to loop end", labelEnd)
+
 	// i = 0
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
@@ -1135,7 +1149,7 @@ func (f *StmtFor) emitRange() {
 	}
 	condition.emit()
 	emit("test %%rax, %%rax")
-	emit("je %s  # jump if false", labelEnd)
+	emit("je %s  # if false, go to loop end", labelEnd)
 
 	f.block.emit()
 

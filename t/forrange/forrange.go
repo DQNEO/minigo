@@ -44,11 +44,20 @@ func f4() {
 	}
 }
 
+func f5() {
+	var slice []int = nil
+	for i,v := range slice {
+		fmt.Printf("error %d,%d\n", i, v)
+	}
+
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }
 
 type Hobbit struct {
