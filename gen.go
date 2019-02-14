@@ -1440,6 +1440,17 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 	case *ExprIndex:
 		TBI(lhs.token(), "Unable to assign to %T", lhs)
+	case *ExprMethodcall:
+		// @TODO this logic is temporarly. Need to be verified.
+		mcall := lhs.(*ExprMethodcall)
+		rettypes := mcall.getRettypes()
+		assert(len(rettypes) == 1, lhs.token(), "rettype should be single")
+		rettype := rettypes[0]
+		assert(rettype.getPrimType() == G_POINTER, lhs.token(),"only pointer is supported")
+		mcall.emit()
+		emit("# START DEBUG")
+		emit("add $%d, %%rax", offset)
+		emit("mov (%%rax), %%rax")
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
