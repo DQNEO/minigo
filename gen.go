@@ -227,6 +227,10 @@ func (a *ExprStructField) emit() {
 	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
+		// very dirty hack
+		if strcttype.size == undefinedSize {
+			strcttype.calcStructOffset()
+		}
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax", field.offset)
