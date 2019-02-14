@@ -2314,7 +2314,7 @@ type ExprLen struct {
 }
 
 func (e *ExprLen) token() *Token {
-	panic("implement me")
+	return e.tok
 }
 
 func (e *ExprLen) dump() {
