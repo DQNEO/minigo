@@ -2104,11 +2104,11 @@ func (e *ExprTypeAssertion) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	panic("implement me")
+	TBI(ast.token(),"")
 }
 
 func (ast *StmtBreak) emit() {
-	panic("implement me")
+	TBI(ast.token(),"")
 }
 
 func (ast *StmtExpr) emit() {
@@ -2116,11 +2116,11 @@ func (ast *StmtExpr) emit() {
 }
 
 func (ast *StmtDefer) emit() {
-	panic("implement me")
+	TBI(ast.token(),"")
 }
 
 func (e *ExprVaArg) emit() {
-	panic("implement me " + e.tok.String())
+	TBI(e.token(),"")
 }
 
 func (e *ExprConversion) emit() {
@@ -2318,7 +2318,7 @@ func (e *ExprLen) token() *Token {
 }
 
 func (e *ExprLen) dump() {
-	panic("implement me")
+	TBI(e.token(),"")
 }
 
 func (e *ExprLen) getGtype() *Gtype {
