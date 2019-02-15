@@ -456,6 +456,7 @@ func (ast *ExprUop) emit() {
 }
 
 func (binop *ExprBinop) emitCompareStrings() {
+	var equal bool
 	switch binop.op {
 	case "<":
 		TBI(binop.token(), "")
@@ -466,27 +467,31 @@ func (binop *ExprBinop) emitCompareStrings() {
 	case ">=":
 		TBI(binop.token(), "")
 	case "!=":
-		TBI(binop.token(), "")
+		equal = false
 	case "==":
-		binop.left.emit()
-		emit("push %%rax")
-		binop.right.emit()
-		emit("pop %%rcx")
-		emit("# rax = right, rcx = left")
-		emitStringsEqual("%rcx", "%rax")
-
+		equal = true
 	}
 
+	binop.left.emit()
+	emit("push %%rax")
+	binop.right.emit()
+	emit("pop %%rcx")
+	emit("# rax = right, rcx = left")
+	emitStringsEqual(equal,"%rcx", "%rax")
 }
 
 // call strcmp
-func emitStringsEqual(leftReg string, rightReg string) {
+func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 	emit("mov %s, %%rsi", leftReg)
 	emit("mov %s, %%rdi", rightReg)
 	emit("mov $0, %%rax")
 	emit("call strcmp")
 	emit("cmp $0, %%rax") // retval == 0
-	emit("sete %%al")
+	if equal {
+		emit("sete %%al")
+	} else {
+		emit("setne %%al")
+	}
 	emit("movzb %%al, %%eax")
 }
 
@@ -944,7 +949,7 @@ func (stmt *StmtSwitch) emit() {
 				typeLabel := groot.getTypeLabel(gtype)
 				emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
 				emit("pop %%rcx # the subject type")
-				emitStringsEqual("%rax", "%rcx")
+				emitStringsEqual(true, "%rax", "%rcx")
 				emit("test %%rax, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 				emit("push %%rcx # the subject value")
@@ -1982,7 +1987,7 @@ func emitMapGet(mapType *Gtype) {
 		emit("push %%r13")
 		emit("push %%r11")
 		emit("push %%r10")
-		emitStringsEqual("%r12", "%rax")
+		emitStringsEqual(true, "%r12", "%rax")
 		emit("pop %%r10")
 		emit("pop %%r11")
 		emit("pop %%r13")
@@ -2102,7 +2107,7 @@ func (e *ExprTypeAssertion) emit() {
 		// @TODO DRY with type swtich statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
-		emitStringsEqual("%rax", "%rcx")
+		emitStringsEqual(true,"%rax", "%rcx")
 
 		emit("mov %%rax, %%rbx") // move flag
 		// @TODO consider big data like slice, struct, etd

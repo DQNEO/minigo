@@ -42,8 +42,20 @@ func f3() {
 	}
 }
 
+func f4() {
+	s1 := "aaa"
+	if s1 != "bbb" {
+		fmt.Printf("6\n")
+	}
+
+	if s1 != "" {
+		fmt.Printf("7\n")
+	}
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }
