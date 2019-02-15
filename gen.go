@@ -989,8 +989,9 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-func (f *StmtFor) emitMapRange() {
-
+func (f *StmtFor) emitRangeForMap() {
+	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
@@ -1079,13 +1080,9 @@ func (f *StmtFor) emitMapRange() {
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
-func (f *StmtFor) emitRange() {
+func (f *StmtFor) emitRangeForList() {
 	emit("# for range %T", f.rng.rangeexpr.getGtype())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	if f.rng.rangeexpr.getGtype().typ == G_MAP {
-		f.emitMapRange()
-		return
-	}
 	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 
 	labelBegin := makeLabel()
@@ -1196,7 +1193,11 @@ func (f *StmtFor) emitForClause() {
 
 func (f *StmtFor) emit() {
 	if f.rng != nil {
-		f.emitRange()
+		if f.rng.rangeexpr.getGtype().typ == G_MAP {
+			f.emitRangeForMap()
+		} else {
+			f.emitRangeForList()
+		}
 		return
 	}
 	f.emitForClause()
