@@ -1095,6 +1095,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 			rangeexpr:           rangeExpr,
 		},
 	}
+	p.currentForStmt = r
 	if infer {
 		p.localuninferred = append(p.localuninferred, r.rng)
 	}
