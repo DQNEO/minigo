@@ -27,7 +27,7 @@ func (ast *Ast) getGtype() *Gtype {
 	return ast.gtype
 }
 
-func f1() int {
+func ff1() int {
 	var lhs *Ast = &Ast{
 		gtype: &Gtype{
 			typeId:12,
@@ -49,8 +49,11 @@ func f1() int {
 	return lhs.getGtype().typeId
 }
 
+func f1() {
+	id := ff1()
+	fmt.Printf("%d\n", id - 10) // 1
+}
 
 func main() {
-	id := f1()
-	fmt.Printf("%d\n", id - 10) // 1
+	f1()
 }
