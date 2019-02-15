@@ -1170,7 +1170,8 @@ func (f *StmtFor) emitRange() {
 func (f *StmtFor) emitForClause() {
 	assertNotNil(f.cls != nil, nil)
 	labelBegin := makeLabel()
-	labelEnd := makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
 
 	if f.cls.init != nil {
 		f.cls.init.emit()
@@ -1179,14 +1180,15 @@ func (f *StmtFor) emitForClause() {
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
 		emit("test %%rax, %%rax")
-		emit("je %s  # jump if false", labelEnd)
+		emit("je %s  # jump if false", f.labelEndLoop)
 	}
 	f.block.emit()
+	emit("%s: # end block", f.labelEndBlock)
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
 	emit("jmp %s", labelBegin)
-	emit("%s: # end loop", labelEnd)
+	emit("%s: # end loop", f.labelEndLoop)
 }
 
 func (f *StmtFor) emit() {
@@ -2104,11 +2106,11 @@ func (e *ExprTypeAssertion) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	TBI(ast.token(),"")
+	emit("jmp %s # break", ast.stmtFor.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	TBI(ast.token(),"")
+	emit("jmp %s # break", ast.stmtFor.labelEndLoop)
 }
 
 func (ast *StmtExpr) emit() {

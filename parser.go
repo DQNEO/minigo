@@ -28,6 +28,7 @@ type parser struct {
 	constSpecIndex      int
 	currentPackageName  identifier
 	alldynamictypes     []*Gtype
+	currentForStmt      *StmtFor
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -1003,6 +1004,7 @@ func (p *parser) parseForStmt() *StmtFor {
 		tok: ptok,
 	}
 	p.enterNewScope()
+	p.currentForStmt = r
 	defer p.exitScope()
 
 	var cond Expr
@@ -1371,11 +1373,13 @@ func (p *parser) parseStmt() Stmt {
 		ptok := p.expectKeyword("continue")
 		return &StmtContinue{
 			tok: ptok,
+			stmtFor: p.currentForStmt,
 		}
 	} else if tok.isKeyword("break") {
 		ptok := p.expectKeyword("break")
 		return &StmtBreak{
 			tok: ptok,
+			stmtFor: p.currentForStmt,
 		}
 	} else if tok.isKeyword("defer") {
 		return p.parseDeferStmt()

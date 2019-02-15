@@ -137,6 +137,8 @@ type StmtFor struct {
 	rng   *ForRangeClause
 	cls   *ForForClause
 	block *StmtSatementList
+	labelEndBlock string
+	labelEndLoop string
 }
 
 type StmtIf struct {
@@ -275,11 +277,13 @@ type ExprTypeAssertion struct {
 }
 
 type StmtContinue struct {
-	tok *Token
+	tok           *Token
+	stmtFor *StmtFor
 }
 
 type StmtBreak struct {
 	tok *Token
+	stmtFor *StmtFor
 }
 
 type StmtExpr struct {
