@@ -649,6 +649,14 @@ func (ast *StmtAssignment) emit() {
 			numRight += len(rettypes)
 		case *ExprTypeAssertion:
 			leftsMayBeTwo = true
+			numRight++
+		case *ExprIndex:
+			indexExpr := right.(*ExprIndex)
+			if indexExpr.collection.getGtype().getPrimType() == G_MAP {
+				// map get
+				leftsMayBeTwo = true
+			}
+			numRight++
 		default:
 			numRight++
 		}
@@ -659,7 +667,7 @@ func (ast *StmtAssignment) emit() {
 			}
 		} else {
 			if numLeft != numRight {
-				errorft(ast.token(), "number of exprs does not match")
+				errorft(ast.token(), "number of exprs does not match: %d <=> %d", numLeft, numRight)
 			}
 		}
 
