@@ -989,10 +989,12 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-func (f *StmtFor) emitMapRange() {
-
+func (f *StmtFor) emitRangeForMap() {
+	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	labelBegin := makeLabel()
-	labelEnd := makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
 
 	mapCounter := &Relation{
 		name: "",
@@ -1026,7 +1028,7 @@ func (f *StmtFor) emitMapRange() {
 	}
 	condition.emit()
 	emit("test %%rax, %%rax")
-	emit("je %s  # jump if false", labelEnd)
+	emit("je %s  # if false, exit loop", f.labelEndLoop)
 
 	// set key and value
 	mapCounter.emit()
@@ -1065,8 +1067,8 @@ func (f *StmtFor) emitMapRange() {
 
 	}
 
-	// execute body
 	f.block.emit()
+	emit("%s: # end block", f.labelEndBlock)
 
 	// counter++
 	indexIncr := &StmtInc{
@@ -1075,20 +1077,17 @@ func (f *StmtFor) emitMapRange() {
 	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)
-	emit("%s: # end loop", labelEnd)
+	emit("%s: # end loop", f.labelEndLoop)
 }
 
-func (f *StmtFor) emitRange() {
+func (f *StmtFor) emitRangeForList() {
 	emit("# for range %T", f.rng.rangeexpr.getGtype())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	if f.rng.rangeexpr.getGtype().typ == G_MAP {
-		f.emitMapRange()
-		return
-	}
 	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 
 	labelBegin := makeLabel()
-	labelEnd := makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
 
 	// check if 0 == len(list)
 	conditionEmpty := &ExprBinop{
@@ -1102,7 +1101,7 @@ func (f *StmtFor) emitRange() {
 	}
 	conditionEmpty.emit()
 	emit("test %%rax, %%rax")
-	emit("jne %s  # if true, go to loop end", labelEnd)
+	emit("jne %s  # if true, go to loop end", f.labelEndLoop)
 
 	// i = 0
 	initstmt := &StmtAssignment{
@@ -1149,9 +1148,10 @@ func (f *StmtFor) emitRange() {
 	}
 	condition.emit()
 	emit("test %%rax, %%rax")
-	emit("je %s  # if false, go to loop end", labelEnd)
+	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
 	f.block.emit()
+	emit("%s: # end block", f.labelEndBlock)
 
 	// i++
 	indexIncr := &StmtInc{
@@ -1164,7 +1164,7 @@ func (f *StmtFor) emitRange() {
 		assignVar.emit()
 	}
 	emit("jmp %s", labelBegin)
-	emit("%s: # end loop", labelEnd)
+	emit("%s: # end loop", f.labelEndLoop)
 }
 
 func (f *StmtFor) emitForClause() {
@@ -1193,7 +1193,11 @@ func (f *StmtFor) emitForClause() {
 
 func (f *StmtFor) emit() {
 	if f.rng != nil {
-		f.emitRange()
+		if f.rng.rangeexpr.getGtype().typ == G_MAP {
+			f.emitRangeForMap()
+		} else {
+			f.emitRangeForList()
+		}
 		return
 	}
 	f.emitForClause()
@@ -2106,10 +2110,12 @@ func (e *ExprTypeAssertion) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	emit("jmp %s # break", ast.stmtFor.labelEndBlock)
+	assert(ast.stmtFor.labelEndBlock != "",ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # continue", ast.stmtFor.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
+	assert(ast.stmtFor.labelEndLoop != "",ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # break", ast.stmtFor.labelEndLoop)
 }
 

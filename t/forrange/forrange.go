@@ -52,12 +52,27 @@ func f5() {
 
 }
 
+func f6() {
+	var array [5]int = [5]int{1,2,3,4,5}
+	for _,v := range array {
+		if v == 1 {
+			continue
+		}
+		if v == 4 {
+			break
+		}
+		fmt.Printf("%d\n", v + 13) // 15,16
+	}
+
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
 	f5()
+	f6()
 }
 
 type Hobbit struct {
