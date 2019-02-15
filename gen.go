@@ -1445,7 +1445,9 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 	case *ExprIndex:
-		TBI(lhs.token(), "Unable to assign to %T", lhs)
+		//  e.g. arrayLiteral.values[i].getGtype().getPrimType()
+		indexExpr := lhs.(*ExprIndex)
+		loadCollectIndex(indexExpr.collection, indexExpr.index, offset)
 	case *ExprMethodcall:
 		// @TODO this logic is temporarly. Need to be verified.
 		mcall := lhs.(*ExprMethodcall)
