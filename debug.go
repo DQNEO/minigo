@@ -258,6 +258,10 @@ func (f *StmtFor) dump() {
 	debugNest--
 }
 
+func (e *ExprSliceLiteral) dump() {
+	panic("implement me")
+}
+
 func (stmt *StmtReturn) dump() {
 	panic("implement me")
 }

@@ -898,6 +898,10 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
 
+func (e *ExprSliceLiteral) emit() {
+	panic("implement me")
+}
+
 func (stmt *StmtIf) emit() {
 	emit("# if")
 	if stmt.simplestmt != nil {

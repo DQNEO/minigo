@@ -256,14 +256,6 @@ type ExprSliceLiteral struct {
 	invisiblevar *ExprVariable // the underlying array
 }
 
-func (e *ExprSliceLiteral) emit() {
-	panic("implement me")
-}
-
-func (e *ExprSliceLiteral) dump() {
-	panic("implement me")
-}
-
 func (e *ExprSliceLiteral) getGtype() *Gtype {
 	return e.gtype
 }
