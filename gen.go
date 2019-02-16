@@ -2654,7 +2654,6 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
-			value.getGtype().length = len(stringLiteral.val)
 		case *Relation:
 			emit(".quad 0 # TBI") // TBI
 		case *ExprUop:
