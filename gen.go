@@ -898,8 +898,27 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
 
+// rax: address
+// rbx: len
+// rcx: cap
 func (e *ExprSliceLiteral) emit() {
-	panic("implement me")
+	length := len(e.values)
+	emitCallMalloc(e.gtype.getSize())
+	emit("push %%rax")
+	for i, value := range e.values {
+		switch value.getGtype().getPrimType() {
+		case G_INT,G_POINTER:
+			value.emit()
+			emit("pop %%rbx # head")
+			emit("mov %%rax, %d(%%rbx)", IntSize * i)
+			emit("push %%rbx # head")
+		default:
+			TBI(e.token(), "")
+		}
+	}
+	emit("pop %%rax # head")
+	emit("mov $%d, %%rbx # len", length)
+	emit("mov $%d, %%rcx # cap", length)
 }
 
 func (stmt *StmtIf) emit() {
@@ -1693,16 +1712,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
-		// initialize a hidden array
-		arrayLiteral := &ExprArrayLiteral{
-			gtype:  lit.invisiblevar.gtype,
-			values: lit.values,
-		}
-		assignToArray(lit.invisiblevar, arrayLiteral)
-		lit.invisiblevar.emitAddress(0)
+		lit.emit()
 		emit("push %%rax")
-		emit("push $%d", lit.invisiblevar.gtype.length) // len
-		emit("push $%d", lit.invisiblevar.gtype.length) // cap
+		emit("push %%rbx")
+		emit("push %%rcx")
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
 		e.emitToStack()

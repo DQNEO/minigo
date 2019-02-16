@@ -55,6 +55,16 @@ func receiveIntSlice() {
 	fmt.Printf("%d\n", intSlice[0])     // 8
 }
 
+func returnSliceLiteral() []int {
+	return []int{10}
+}
+
+func receiveSliceLiteral() {
+	intSlice := returnSliceLiteral()
+	fmt.Printf("%d\n", len(intSlice)+8) // 9
+	fmt.Printf("%d\n", intSlice[0])     // 10
+}
+
 func main() {
 	f1()
 	f2()
@@ -63,4 +73,5 @@ func main() {
 	fvoidreturn()
 	receiveNilSlice()
 	receiveIntSlice()
+	receiveSliceLiteral()
 }
