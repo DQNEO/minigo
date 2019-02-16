@@ -2373,7 +2373,8 @@ func (e *ExprLen) emit() {
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
-			length := len(arg.(*ExprSliceLiteral).values)
+			_arg := arg.(*ExprSliceLiteral)
+			length := len(_arg.values)
 			emit("mov $%d, %%rax", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
