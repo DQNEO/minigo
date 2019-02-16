@@ -333,6 +333,10 @@ func (e *ExprStringLiteral) getGtype() *Gtype {
 	}
 }
 
+func (e *ExprLen) getGtype() *Gtype {
+	return gInt
+}
+
 func (e *ExprVariable) getGtype() *Gtype {
 	return e.gtype
 }

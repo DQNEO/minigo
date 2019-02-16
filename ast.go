@@ -90,6 +90,12 @@ type ExprUop struct {
 	operand Expr
 }
 
+// call of builtin len()
+type ExprLen struct {
+	tok *Token
+	arg Expr
+}
+
 // local or global
 type DeclVar struct {
 	tok      *Token
@@ -400,3 +406,4 @@ func (node *ExprStructLiteral) token() *Token       { return node.tok }
 func (node *ExprStructField) token() *Token         { return node.tok }
 func (node *ExprTypeSwitchGuard) token() *Token     { return node.tok }
 func (node *ExprMapLiteral) token() *Token          { return node.tok }
+func (node *ExprLen) token() *Token                 { return node.tok }

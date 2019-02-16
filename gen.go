@@ -2369,23 +2369,6 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
-type ExprLen struct {
-	tok *Token
-	arg Expr
-}
-
-func (e *ExprLen) token() *Token {
-	return e.tok
-}
-
-func (e *ExprLen) dump() {
-	TBI(e.token(),"")
-}
-
-func (e *ExprLen) getGtype() *Gtype {
-	return gInt
-}
-
 func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := e.arg
