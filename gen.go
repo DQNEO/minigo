@@ -1336,6 +1336,8 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("push $0")
 			emit("push $0")
 			emitSaveSlice(lhs, fieldtype.offset)
+		case fieldtype.typ == G_MAP:
+			TBI(lhs.token(), "")
 		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
