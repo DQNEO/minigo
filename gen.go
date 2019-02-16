@@ -912,6 +912,14 @@ func (e *ExprSliceLiteral) emit() {
 			emit("pop %%rbx # head")
 			emit("mov %%rax, %d(%%rbx)", IntSize * i)
 			emit("push %%rbx # head")
+		case G_INTERFACE,G_SLICE,G_MAP:
+			//@TODO this logic is not tested.
+			value.emit()
+			emit("pop %%rdx # head")
+			emit("mov %%rax, %d(%%rbx)", IntSize * i)
+			emit("mov %%rbx, %d(%%rbx)", IntSize * i + ptrSize)
+			emit("mov %%rcx, %d(%%rbx)", IntSize * i + ptrSize + ptrSize)
+			emit("push %%rdx # head")
 		default:
 			TBI(e.token(), "")
 		}
