@@ -53,9 +53,17 @@ func f4() {
 	}
 }
 
+type mystring string
+func f5() {
+	s := "8"
+	ms := mystring(s)
+	fmt.Printf("%s\n", ms)
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }
