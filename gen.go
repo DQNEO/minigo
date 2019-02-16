@@ -1803,7 +1803,9 @@ func assignToArray(lhs Expr, rhs Expr) {
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
 					} else {
-						TBI(lhs.token(),"")
+						arrayLiteral.values[i].emit()
+						emitSaveInterface(lhs, offsetByIndex)
+						continue
 					}
 				}
 
