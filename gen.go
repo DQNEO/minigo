@@ -2430,8 +2430,11 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.typ == G_STRING, gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING:
-		TBI(arg.token(), "unable to handle %s", gtype)
+	case gtype.getPrimType() == G_STRING:
+		arg.emit()
+		emit("mov %%rax, %%rdi")
+		emit("mov $0, %%rax")
+		emit("call strlen")
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	}

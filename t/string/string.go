@@ -57,7 +57,13 @@ type mystring string
 func f5() {
 	s := "8"
 	ms := mystring(s)
-	fmt.Printf("%s\n", ms)
+	fmt.Printf("%s\n", ms) // 8
+}
+
+func f6() {
+	fmt.Printf("%d\n", len("123456789")) // 9
+	s := "0123456789"
+	fmt.Printf("%d\n", len(s)) // 10
 }
 
 func main() {
@@ -66,4 +72,5 @@ func main() {
 	f3()
 	f4()
 	f5()
+	f6()
 }
