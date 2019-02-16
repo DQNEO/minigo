@@ -694,7 +694,7 @@ func (ast *StmtAssignment) emit() {
 				for _, left := range ast.lefts {
 					if left.getGtype().typ == G_SLICE {
 						// @TODO: Does this work ?
-						emitSaveSlice(left, 0)
+						emitSave3Elements(left, 0)
 					} else if left.getGtype().typ == G_REL && left.getGtype().relation.gtype.typ == G_INTERFACE {
 						// @TODO: Does this work ?
 						emitSaveInterface(left, 0)
@@ -1335,7 +1335,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
-			emitSaveSlice(lhs, fieldtype.offset)
+			emitSave3Elements(lhs, fieldtype.offset)
+		case fieldtype.typ == G_MAP:
+			emit("# initialize slice with a zero value")
+			emit("push $0")
+			emit("push $0")
+			emit("push $0")
+			emitSave3Elements(lhs, fieldtype.offset)
 		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
@@ -1497,18 +1503,18 @@ func emitSaveInterface(lhs Expr, offset int) {
 }
 
 // take slice values from stack
-func emitSaveSlice(lhs Expr, offset int) {
+func emitSave3Elements(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		emitSaveSlice(rel.expr, offset)
+		emitSave3Elements(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.saveSlice(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
-		emitSaveSlice(structfield.strct, fieldType.offset+offset)
+		emitSave3Elements(structfield.strct, fieldType.offset+offset)
 	case *ExprIndex:
 		TBI(lhs.token(), "Unable to assign to %T", lhs)
 	default:
@@ -1530,7 +1536,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("push $0")
 		emit("push $0")
 		emit("push $0")
-		emitSaveSlice(lhs, 0)
+		emitSave3Elements(lhs, 0)
 		return
 	}
 	switch rhs.(type) {
@@ -1597,7 +1603,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
-	emitSaveSlice(lhs, 0)
+	emitSave3Elements(lhs, 0)
 }
 
 func convertDynamicTypeToInterface(dynamicValue Expr) {
@@ -1657,7 +1663,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $0")
 		emit("push $0")
 		emit("push $0")
-		emitSaveSlice(lhs, 0)
+		emitSave3Elements(lhs, 0)
 		return
 	}
 
@@ -1721,7 +1727,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rcx")
 	}
 
-	emitSaveSlice(lhs, 0)
+	emitSave3Elements(lhs, 0)
 }
 
 func (variable *ExprVariable) saveSlice(offset int) {
