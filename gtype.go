@@ -213,7 +213,9 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 	// refetch gtype from the package block scope
 	// I don't know why. mabye management of gtypes is broken
 	pgtype := gp.packageBlockScope.getGtype(gtype.relation.name)
-	assertNotNil(pgtype != nil, e.tok)
+	if pgtype == nil {
+		errorft(e.token(), "%s is not found in the scope", gtype)
+	}
 	if pgtype.typ == G_INTERFACE {
 		methodsig, ok := pgtype.imethods[e.fname]
 		if !ok {
