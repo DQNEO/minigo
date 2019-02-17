@@ -65,6 +65,15 @@ func receiveSliceLiteral() {
 	fmt.Printf("%d\n", intSlice[0])     // 10
 }
 
+func returnStringSliceLiteral() []string {
+	return []string{"11"}
+}
+
+func receiveStringSliceLiteral() {
+	slice := returnStringSliceLiteral()
+	fmt.Printf("%s\n", slice[0])
+}
+
 func main() {
 	f1()
 	f2()
@@ -74,4 +83,5 @@ func main() {
 	receiveNilSlice()
 	receiveIntSlice()
 	receiveSliceLiteral()
+	receiveStringSliceLiteral()
 }
