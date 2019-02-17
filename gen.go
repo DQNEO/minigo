@@ -1563,7 +1563,7 @@ func emitCallMalloc(size int) {
 func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
-		emit("# initialize slice with a zero value")
+		emit("# initialize map with a zero value")
 		emit("push $0")
 		emit("push $0")
 		emit("push $0")
@@ -1578,7 +1578,12 @@ func assignToMap(lhs Expr, rhs Expr) {
 		length := len(lit.elements)
 
 		// allocaated address of the map head
-		emitCallMalloc(length*8*4)
+		var size int
+		if length == 0 {
+		} else {
+			size = length*ptrSize*2*2 // 2*2 = key+value x double
+		}
+		emitCallMalloc(size)
 		emit("push %%rax")
 
 		mapType := rhs.getGtype()
