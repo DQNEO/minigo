@@ -180,7 +180,8 @@ func (strct *Gtype) calcStructOffset() {
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {
-		errorft(rel.token(), "rel.expr is nil for %s", rel)
+		//errorft(rel.token(), "rel.expr is nil for %s", rel)
+		return nil
 	}
 	return rel.expr.getGtype()
 }

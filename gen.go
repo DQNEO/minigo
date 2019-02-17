@@ -709,6 +709,9 @@ func (ast *StmtAssignment) emit() {
 
 		gtype := left.getGtype()
 		switch {
+		case gtype == nil:
+			// suppose left is "_"
+			right.emit()
 		case gtype.typ == G_ARRAY:
 			assignToArray(left, right)
 		case gtype.typ == G_SLICE:
