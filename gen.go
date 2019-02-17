@@ -2722,7 +2722,7 @@ func (root *IrRoot) emit() {
 		emit(".quad namedType%d # typeId:%d", i, i)
 	}
 
-	var shortMethodNames map[string]string = make(map[string]string)
+	var shortMethodNames map[string]string = map[string]string{}
 
 	for i:= 1; i <= len(root.methodTable); i++ {
 		emitLabel("namedType%d:", i)
