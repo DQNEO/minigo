@@ -95,7 +95,7 @@ func main() {
 	setPredeclaredIdentifiers(universe)
 
 	// add std packages
-	var compiledPackages map[identifier]*stdpkg = make(map[identifier]*stdpkg)
+	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
 
 	for pkgName, pkgCode := range pkgMap {
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
