@@ -76,24 +76,12 @@ func (f *DeclFunc) getUniqueName() IrStaticCall {
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
 
-	// main.main => main
-	if f.isMainMain {
-		return "main"
-	}
-
 	// other functions
 	return getPackagedFuncName(f.pkg, string(f.fname))
 }
 
 func (f *DeclFunc) emitPrologue() {
-	if f.isMainMain {
-		emit("# main.main")
-	}
 	uniquName := f.getUniqueName()
-	//emitComment("func %s.%s()", f.pkg, f.fname)
-	if f.getUniqueName() == "main" {
-		emit(".global	%s", f.getUniqueName())
-	}
 	emitLabel("%s:", uniquName)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
@@ -141,14 +129,6 @@ func (f *DeclFunc) emitPrologue() {
 	}
 
 	emit("")
-	if f.isMainMain {
-		if importOS {
-			emit("# set Args")
-			emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
-			emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
-			emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
-		}
-	}
 }
 
 func align(n int, m int) int {
@@ -2494,6 +2474,24 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	emit("call %s", ircall)
 }
 
+func emitMainFunc() {
+	fname := "main"
+	emit(".global	%s", fname)
+	emitLabel("%s:", fname)
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+	if importOS {
+		emit("# set Args")
+		emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
+		emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
+		emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
+	}
+	emit("")
+	emit("mov $0, %%rax")
+	emit("call main.main")
+	emitFuncEpilogue()
+}
+
 func (f *DeclFunc) emit() {
 	f.emitPrologue()
 	f.body.emit()
@@ -2758,4 +2756,6 @@ func (root *IrRoot) emit() {
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
+	emitMainFunc()
 }
+

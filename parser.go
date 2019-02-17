@@ -1572,9 +1572,6 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		params:     params,
 		isVariadic: isVariadic,
 	}
-	if r.pkg == "main" && r.fname == "main" {
-		r.isMainMain = true
-	}
 
 	ref := &ExprFuncRef{
 		tok:     ptok2,
