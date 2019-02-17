@@ -55,6 +55,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	scp := newScope(nil)
 	p.scopes[pkgname] = scp
 	p.currentPackageName = pkgname
+	p.methods = make(map[identifier]methods)
 	asf := p.parseSourceFile(bs, scp)
 	p.resolve(universe)
 	return &stdpkg{
