@@ -1550,7 +1550,8 @@ func emitSave3Elements(lhs Expr, offset int) {
 		fieldType := structfield.getGtype()
 		emitSave3Elements(structfield.strct, fieldType.offset+offset)
 	case *ExprIndex:
-		TBI(lhs.token(), "Unable to assign to %T", lhs)
+		indexExpr := lhs.(*ExprIndex)
+		indexExpr.emitSave()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
