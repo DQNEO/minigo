@@ -2390,6 +2390,8 @@ func (e *ExprLen) emit() {
 		case *ExprStructField:
 			emit("# ExprStructField")
 			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprIndex:
+			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
