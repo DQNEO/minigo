@@ -1580,6 +1580,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		// allocaated address of the map head
 		var size int
 		if length == 0 {
+			size = ptrSize * 2 * 256
 		} else {
 			size = length*ptrSize*2*2 // 2*2 = key+value x double
 		}

@@ -90,10 +90,18 @@ func f5() {
 	}
 }
 
+// assign to an empty map
+func f6() {
+	var m map[int]int = map[int]int{}
+	m[3] = 28
+	fmt.Printf("%d\n", m[3])
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
 	f5()
+	f6()
 }
