@@ -158,7 +158,7 @@ func main() {
 		}
 	}
 	ir.methodTable = methods
-	//debugf("methods=%v", methods)
+	debugf("methods=%v", methods)
 	ir.emit()
 }
 
