@@ -103,7 +103,11 @@ func main() {
 		compiledPackages[pkgName] = pkg
 	}
 
-	p.currentPackageName = "main"
+	var pkgname identifier = "main"
+	p.methods = make(map[identifier]methods)
+	p.currentPackageName = pkgname
+	p.scopes[pkgname] = packageblockscope
+
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFiles = append(astFiles, p.parseSourceFile(bs, packageblockscope))

@@ -185,6 +185,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	rel := &Relation{
 		tok:  firstIdentToken,
 		name: firstIdent,
+		pkg: p.currentPackageName, // @TODO is this right?
 	}
 	p.tryResolve(pkg, rel)
 
@@ -743,6 +744,7 @@ func (p *parser) parseType() *Gtype {
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
+				pkg: p.currentPackageName,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -845,6 +847,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 		pkg: p.currentPackageName,
 		varname: &Relation{
 			expr: variable,
+			pkg: p.currentPackageName,
 		},
 		variable: variable,
 		initval:  initval,
@@ -1932,6 +1935,7 @@ func (ast *StmtShortVarDecl) infer() {
 			if gtype == nil {
 				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
 			}
+			debugf("infered type %s", gtype)
 			rightTypes = append(rightTypes, gtype)
 		}
 	}
@@ -1991,6 +1995,7 @@ func (variable *ExprVariable) infer() {
 	vr, ok := rel.expr.(*ExprVariable)
 	vr.infer() // recursive call
 	variable.gtype = e.getGtype()
+	debugf("infered type=%s", variable.gtype)
 }
 
 func (p *parser) inferTypes() {
