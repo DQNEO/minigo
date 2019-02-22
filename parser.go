@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
-
-	"os"
 )
 
 type parser struct {
@@ -1855,7 +1854,7 @@ func (p *parser) isGlobal() bool {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *SourceFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
 
 	// initialize parser's status per file
 	p.tokenStream = NewTokenStream(bs)
@@ -1870,14 +1869,16 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
-			if strings.Contains(spec.path, "/") {
-				words := strings.Split(spec.path, "/")
-				pkgName = identifier(words[len(words)-1])
-			} else {
-				pkgName = identifier(spec.path)
-			}
-
+			pkgName = getBaseNameFromImport(spec.path)
 			p.importedNames[pkgName] = true
+		}
+	}
+
+	if importOnly {
+		return &SourceFile{
+			tok:           packageClause.tok,
+			packageClause: packageClause,
+			importDecls:   importDecls,
 		}
 	}
 
@@ -1891,6 +1892,19 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope) *Sour
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
 	}
+}
+
+func getBaseNameFromImport(path string) identifier {
+	var baseName identifier
+	if strings.Contains(path, "/") {
+		words := strings.Split(path, "/")
+		baseName = identifier(words[len(words)-1])
+	} else {
+		baseName = identifier(path)
+	}
+
+	return baseName
+
 }
 
 func (ast *StmtShortVarDecl) infer() {

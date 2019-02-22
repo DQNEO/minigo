@@ -1,7 +1,10 @@
 package main
 
+import "fmt"
+
 func f1() {
-	println("0")
+	var x = 0
+	fmt.Printf("%d\n", x)
 }
 
 func main() {

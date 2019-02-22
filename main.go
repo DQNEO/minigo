@@ -52,11 +52,14 @@ type pkgsource struct {
 func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
 	bs = NewByteStreamFromString(filename, code)
-	scp := newScope(nil)
-	p.scopes[pkgname] = scp
-	p.currentPackageName = pkgname
+
+	// initialize a package
 	p.methods = make(map[identifier]methods)
-	asf := p.parseSourceFile(bs, scp)
+	p.scopes[pkgname] = newScope(nil)
+	p.currentPackageName = pkgname
+
+	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+
 	p.resolve(universe)
 	return &stdpkg{
 		name:  pkgname,
@@ -74,7 +77,20 @@ func main() {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	packageblockscope := newScope(nil)
+	// parser to parse imported
+	pForImport := &parser{}
+	// parse imported only
+	var imported map[identifier]bool = map[identifier]bool{}
+	for _, sourceFile := range sourceFiles {
+		bs := NewByteStreamFromFile(sourceFile)
+		astFile := pForImport.parseSourceFile(bs, nil, true)
+		for _, importDecl := range astFile.importDecls {
+			for _, spec := range importDecl.specs {
+				imported[getBaseNameFromImport(spec.path)] = true
+			}
+		}
+	}
+
 
 	// parse
 	p := &parser{}
@@ -88,30 +104,33 @@ func main() {
 	universe := newScope(nil)
 
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
-	astFiles = append(astFiles, p.parseSourceFile(bs, universe))
+	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 
 	bs = NewByteStreamFromString("builtin.memory", builtinCode)
-	astFiles = append(astFiles, p.parseSourceFile(bs, universe))
+	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 
 	setPredeclaredIdentifiers(universe)
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
-
 	// parse std packages
-	for pkgName, pkgCode := range pkgMap {
+	for pkgName, _ := range imported {
+		pkgCode := stdPkgs[pkgName]
+		assert(len(pkgCode) > 0,nil, "pkgCode should not empty:" + string(pkgName))
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
 	}
 
+	// initialize main package
 	var pkgname identifier = "main"
 	p.methods = make(map[identifier]methods)
+	p.scopes[pkgname] = newScope(nil)
 	p.currentPackageName = pkgname
-	p.scopes[pkgname] = packageblockscope
 
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
-		astFiles = append(astFiles, p.parseSourceFile(bs, packageblockscope))
+		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+		astFiles = append(astFiles, asf)
 	}
 
 	if parseOnly {
@@ -127,7 +146,6 @@ func main() {
 	}
 
 	var importedPackages []*stdpkg
-	p.importedNames["runtime"] = true // @TODO import only when used
 	for importedName := range p.importedNames {
 		compiledPkg, ok := compiledPackages[importedName]
 		if !ok {
