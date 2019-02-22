@@ -971,10 +971,10 @@ func (stmt *StmtSwitch) emit() {
 				typeLabel := groot.getTypeLabel(gtype)
 				emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
 				emit("pop %%rcx # the subject type")
+				emit("push %%rcx # the subject value")
 				emitStringsEqual(true, "%rax", "%rcx")
 				emit("test %%rax, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
-				emit("push %%rcx # the subject value")
 			}
 		} else {
 			for _, e := range caseClause.exprs {
