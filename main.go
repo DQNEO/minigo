@@ -126,6 +126,7 @@ func main() {
 	}
 
 	var importedPackages []*stdpkg
+	p.importedNames["runtime"] = true // @TODO import only when used
 	for importedName := range p.importedNames {
 		compiledPkg, ok := compiledPackages[importedName]
 		if !ok {
