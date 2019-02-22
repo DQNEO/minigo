@@ -13,7 +13,7 @@ do
     echo ""
 done
 
-echo "var pkgMap map[identifier]string = map[identifier]string{"
+echo "var stdPkgs map[identifier]string = map[identifier]string{"
 
 for dir in stdlib/*
 do
