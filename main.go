@@ -52,11 +52,14 @@ type pkgsource struct {
 func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
 	bs = NewByteStreamFromString(filename, code)
-	scp := newScope(nil)
-	p.scopes[pkgname] = scp
-	p.currentPackageName = pkgname
+
+	// initialize a package
 	p.methods = make(map[identifier]methods)
-	asf := p.parseSourceFile(bs, scp, false)
+	p.scopes[pkgname] = newScope(nil)
+	p.currentPackageName = pkgname
+
+	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+
 	p.resolve(universe)
 	return &stdpkg{
 		name:  pkgname,
@@ -74,21 +77,20 @@ func main() {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	// parser to parse imports
+	// parser to parse imported
 	pForImport := &parser{}
-	// parse imports only
-	var imports map[identifier]bool = map[identifier]bool{}
+	// parse imported only
+	var imported map[identifier]bool = map[identifier]bool{}
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
-				imports[getBaseNameFromImport(spec.path)] = true
+				imported[getBaseNameFromImport(spec.path)] = true
 			}
 		}
 	}
 
-	packageblockscope := newScope(nil)
 
 	// parse
 	p := &parser{}
@@ -112,21 +114,23 @@ func main() {
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
 	// parse std packages
-	for pkgName, _ := range imports {
+	for pkgName, _ := range imported {
 		pkgCode := stdPkgs[pkgName]
 		assert(len(pkgCode) > 0,nil, "pkgCode should not empty:" + string(pkgName))
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
 	}
 
+	// initialize main package
 	var pkgname identifier = "main"
 	p.methods = make(map[identifier]methods)
+	p.scopes[pkgname] = newScope(nil)
 	p.currentPackageName = pkgname
-	p.scopes[pkgname] = packageblockscope
 
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
-		astFiles = append(astFiles, p.parseSourceFile(bs, packageblockscope, false))
+		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+		astFiles = append(astFiles, asf)
 	}
 
 	if parseOnly {
