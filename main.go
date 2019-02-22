@@ -55,6 +55,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	scp := newScope(nil)
 	p.scopes[pkgname] = scp
 	p.currentPackageName = pkgname
+	p.methods = make(map[identifier]methods)
 	asf := p.parseSourceFile(bs, scp)
 	p.resolve(universe)
 	return &stdpkg{
@@ -102,7 +103,11 @@ func main() {
 		compiledPackages[pkgName] = pkg
 	}
 
-	p.currentPackageName = "main"
+	var pkgname identifier = "main"
+	p.methods = make(map[identifier]methods)
+	p.currentPackageName = pkgname
+	p.scopes[pkgname] = packageblockscope
+
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFiles = append(astFiles, p.parseSourceFile(bs, packageblockscope))
@@ -121,6 +126,7 @@ func main() {
 	}
 
 	var importedPackages []*stdpkg
+	p.importedNames["runtime"] = true // @TODO import only when used
 	for importedName := range p.importedNames {
 		compiledPkg, ok := compiledPackages[importedName]
 		if !ok {
@@ -136,16 +142,18 @@ func main() {
 		uniquedDynamicTypes[gtype.String()] = 0
 	}
 	ir.hashedTypes = uniquedDynamicTypes
-	var methods map[int][]string = map[int][]string{} // typeId : []methods
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.concreteNamedTypes {
 		concreteNamedType.gtype.typeId = typeId
+		debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
 		typeId++
 	}
 
+	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
+			debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
 			if gtype.typ == G_POINTER {
 				gtype = gtype.origType
@@ -154,11 +162,11 @@ func main() {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
 			typeId := gtype.relation.gtype.typeId
-			methods[typeId] = append(methods[typeId], string(funcdecl.getUniqueName()))
+			methodTable[typeId] = append(methodTable[typeId], string(funcdecl.getUniqueName()))
 		}
 	}
-	ir.methodTable = methods
-	debugf("methods=%v", methods)
+	debugf("methodTable=%v", methodTable)
+	ir.methodTable = methodTable
 	ir.emit()
 }
 
@@ -173,12 +181,14 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 		stringLiterals: stringLiterals,
 	}
 
-	for _, pkg := range stdpkgs {
+	for i, pkg := range stdpkgs {
+		debugf("pkg[%d]:%s", i, pkg.name)
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
 					root.vars = append(root.vars, decl.vardecl)
 				} else if decl.funcdecl != nil {
+					debugf("register func to ir:%v", decl.funcdecl)
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}
 			}
@@ -190,6 +200,7 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 			if decl.vardecl != nil {
 				root.vars = append(root.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
+				debugf("register func to ir:%v", decl.funcdecl)
 				root.funcs = append(root.funcs, decl.funcdecl)
 			}
 		}

@@ -971,10 +971,10 @@ func (stmt *StmtSwitch) emit() {
 				typeLabel := groot.getTypeLabel(gtype)
 				emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
 				emit("pop %%rcx # the subject type")
+				emit("push %%rcx # the subject value")
 				emitStringsEqual(true, "%rax", "%rcx")
 				emit("test %%rax, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
-				emit("push %%rcx # the subject value")
 			}
 		} else {
 			for _, e := range caseClause.exprs {
@@ -1645,7 +1645,13 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emit("push %%rax") // namedType id
 
 	gtype := dynamicValue.getGtype()
-	dtypeId := groot.hashedTypes[gtype.String()]
+	debugf("dynamic type:%s", gtype)
+	dtypeId,ok := groot.hashedTypes[gtype.String()]
+	if !ok {
+		debugf("types:%#v", groot.hashedTypes)
+		debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
+		errorft(dynamicValue.token(), "type %s not found", gtype)
+	}
 	label := fmt.Sprintf("DT%d", dtypeId)
 	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
 	emit("push %%rax")
@@ -2723,7 +2729,7 @@ func (root *IrRoot) emit() {
 	emitLabel("%s:", "namedTypes")
 	emit(".quad 0 # typeId:0")
 	for i:= 1; i <= len(root.methodTable); i++ {
-		emit(".quad namedType%d # typeId:%d", i, i)
+		emit(".quad namedType%d # typeId:%d, %s", i, i, root.methodTable[i])
 	}
 
 	var shortMethodNames map[string]string = map[string]string{}

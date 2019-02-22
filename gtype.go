@@ -106,7 +106,11 @@ func (gtype *Gtype) getSize() int {
 func (gtype *Gtype) String() string {
 	switch gtype.typ {
 	case G_REL:
-		return fmt.Sprintf("G_REL(%s)", gtype.relation.name)
+		if gtype.relation.pkg == "" {
+			//errorf("pkg is empty: %s", gtype.relation.name)
+		}
+		return fmt.Sprintf("G_REL(%s.%s)",
+			gtype.relation.pkg, gtype.relation.name)
 	case G_INT:
 		return "int"
 	case G_BOOL:
@@ -187,6 +191,7 @@ func (rel *Relation) getGtype() *Gtype {
 }
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
+	debugf("strctname:%s.%s", e.strctname.pkg, e.strctname.name)
 	return &Gtype{
 		typ:      G_REL,
 		relation: e.strctname,
@@ -212,8 +217,10 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 
 	// refetch gtype from the package block scope
 	// I don't know why. mabye management of gtypes is broken
-	pgtype := gp.packageBlockScope.getGtype(gtype.relation.name)
-	assertNotNil(pgtype != nil, e.tok)
+	pgtype := gp.scopes[gtype.relation.pkg].getGtype(gtype.relation.name)
+	if pgtype == nil {
+		errorft(e.token(), "%s is not found in the scope", gtype)
+	}
 	if pgtype.typ == G_INTERFACE {
 		methodsig, ok := pgtype.imethods[e.fname]
 		if !ok {
