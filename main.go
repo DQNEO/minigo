@@ -98,6 +98,7 @@ func main() {
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
 
+	// parse std packages
 	for pkgName, pkgCode := range pkgMap {
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
