@@ -3,5 +3,5 @@ set -e
 set -x
 name=$1
 mkdir t/$name
-cp t/min/min.go t/$name/$name.go
+cp t/tmpl/tmpl.go t/$name/$name.go
 touch t/expected/$name.txt
