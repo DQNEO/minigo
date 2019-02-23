@@ -1658,9 +1658,18 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 
 }
 
+func isNil(e Expr) bool {
+	rel, ok := e.(*Relation)
+	if ok {
+		_, isNil := rel.expr.(*ExprNilLiteral)
+		return isNil
+	}
+	return false
+}
+
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
-	if rhs == nil {
+	if rhs == nil || isNil(rhs) {
 		emit("# initialize interface with a zero value")
 		emit("push $0")
 		emit("push $0")
@@ -1669,6 +1678,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
+	assert(rhs.getGtype() != nil,rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_INTERFACE {
 		rhs.emit()
 		emit("push %%rax")
