@@ -1995,6 +1995,26 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		index.emit()
 		emit("mov %%rax, %%r12 # index value")
 		emitMapGet(array.getGtype())
+	} else if array.getGtype().getPrimType() == G_STRING {
+		// https://golang.org/ref/spec#Index_expressions
+		// For a of string type:
+		//
+		// a constant index must be in range if the string a is also constant
+		// if x is out of range at run time, a run-time panic occurs
+		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
+		// a[x] may not be assigned to
+
+		emit("# load head address of the string")
+		array.emit()       // emit address
+		emit("push %%rax") // store address of variable
+		index.emit()
+		emit("mov %%rax, %%rcx")  // load  index * 1
+		emit("pop %%rbx")         // load address of variable
+		emit("add %%rcx , %%rbx") // (index * size) + address
+		if offset > 0 {
+			emit("add $%d,  %%rbx", offset)
+		}
+		emit("mov (%%rbx), %%rax") // dereference the content of an emelment	} else {
 	} else {
 		TBI(array.token(), "unable to handle %s", array.getGtype())
 	}
