@@ -2168,7 +2168,21 @@ func (ast *StmtExpr) emit() {
 }
 
 func (ast *StmtDefer) emit() {
-	TBI(ast.token(),"")
+	var args []Expr
+	switch ast.expr.(type) {
+	case *ExprMethodcall:
+		call := ast.expr.(*ExprMethodcall)
+		args = call.args
+	case *ExprFuncallOrConversion:
+		call := ast.expr.(*ExprFuncallOrConversion)
+		args = call.args
+	default:
+		errorft(ast.token(), "defer should be a funcall")
+	}
+	for _, arg := range args {
+		arg.emit()
+	}
+	// @TODO execute funcall
 }
 
 func (e *ExprVaArg) emit() {
