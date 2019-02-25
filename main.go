@@ -54,7 +54,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	bs = NewByteStreamFromString(filename, code)
 
 	// initialize a package
-	p.methods = make(map[identifier]methods)
+	p.methods = map[identifier]methods{}
 	p.scopes[pkgname] = newScope(nil)
 	p.currentPackageName = pkgname
 
@@ -95,8 +95,8 @@ func main() {
 	// parse
 	p := &parser{}
 	gp = p
-	p.methods = make(map[identifier]methods)
-	p.scopes = make(map[identifier]*scope)
+	p.methods = map[identifier]methods{}
+	p.scopes = map[identifier]*scope{}
 
 	var bs *ByteStream
 	var astFiles []*SourceFile
@@ -123,7 +123,7 @@ func main() {
 
 	// initialize main package
 	var pkgname identifier = "main"
-	p.methods = make(map[identifier]methods)
+	p.methods = map[identifier]methods{}
 	p.scopes[pkgname] = newScope(nil)
 	p.currentPackageName = pkgname
 
