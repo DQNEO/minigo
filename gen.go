@@ -700,6 +700,8 @@ func (ast *StmtAssignment) emit() {
 			assignToStruct(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
 			assignToInterface(left, right)
+		case gtype.typ == G_MAP:
+			assignToMap(left, right)
 		default:
 			// suppose primitive
 			emitAssignPrimitive(left, right)
