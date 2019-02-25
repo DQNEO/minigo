@@ -1647,11 +1647,11 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emit("push %%rax") // namedType id
 
 	gtype := dynamicValue.getGtype()
-	debugf("dynamic type:%s", gtype)
+	//debugf("dynamic type:%s", gtype)
 	dtypeId,ok := groot.hashedTypes[gtype.String()]
 	if !ok {
-		debugf("types:%#v", groot.hashedTypes)
-		debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
+		//debugf("types:%#v", groot.hashedTypes)
+		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
 		errorft(dynamicValue.token(), "type %s not found", gtype)
 	}
 	label := fmt.Sprintf("DT%d", dtypeId)

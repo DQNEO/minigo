@@ -191,7 +191,6 @@ func (rel *Relation) getGtype() *Gtype {
 }
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
-	debugf("strctname:%s.%s", e.strctname.pkg, e.strctname.name)
 	return &Gtype{
 		typ:      G_REL,
 		relation: e.strctname,

@@ -1949,7 +1949,7 @@ func (ast *StmtShortVarDecl) infer() {
 			if gtype == nil {
 				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
 			}
-			debugf("infered type %s", gtype)
+			//debugf("infered type %s", gtype)
 			rightTypes = append(rightTypes, gtype)
 		}
 	}
@@ -2009,7 +2009,7 @@ func (variable *ExprVariable) infer() {
 	vr, ok := rel.expr.(*ExprVariable)
 	vr.infer() // recursive call
 	variable.gtype = e.getGtype()
-	debugf("infered type=%s", variable.gtype)
+	//debugf("infered type=%s", variable.gtype)
 }
 
 func (p *parser) inferTypes() {

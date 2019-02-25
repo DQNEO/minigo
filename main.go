@@ -165,14 +165,14 @@ func main() {
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.concreteNamedTypes {
 		concreteNamedType.gtype.typeId = typeId
-		debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
+		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
 		typeId++
 	}
 
 	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
-			debugf("funcdecl:%v", funcdecl)
+			//debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
 			if gtype.typ == G_POINTER {
 				gtype = gtype.origType
@@ -184,7 +184,7 @@ func main() {
 			methodTable[typeId] = append(methodTable[typeId], string(funcdecl.getUniqueName()))
 		}
 	}
-	debugf("methodTable=%v", methodTable)
+	//debugf("methodTable=%v", methodTable)
 	ir.methodTable = methodTable
 	ir.emit()
 }
@@ -207,7 +207,7 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 				if decl.vardecl != nil {
 					root.vars = append(root.vars, decl.vardecl)
 				} else if decl.funcdecl != nil {
-					debugf("register func to ir:%v", decl.funcdecl)
+					//debugf("register func to ir:%v", decl.funcdecl)
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}
 			}
@@ -219,7 +219,7 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 			if decl.vardecl != nil {
 				root.vars = append(root.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
-				debugf("register func to ir:%v", decl.funcdecl)
+				//debugf("register func to ir:%v", decl.funcdecl)
 				root.funcs = append(root.funcs, decl.funcdecl)
 			}
 		}
