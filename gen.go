@@ -352,7 +352,7 @@ func (rel *Relation) emitSave() {
 
 func (variable *ExprVariable) emitOffsetSave(size int, offset int) {
 	emit("# ExprVariable.emitOffsetSave")
-	assert(0 <= size && size <= 8, variable.token(), "invalid size")
+	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().typ == G_POINTER && offset > 0 {
 		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
 		emit("push %%rax # save the value")
