@@ -16,6 +16,13 @@ function test_file {
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
     $bin_file /etc/lsb-release > $actual
+    if [[ $? -ne 0 ]];then
+        differ=1
+        echo "FAILED"
+        gdb  --batch --eval-command=run $bin_file
+        return
+    fi
+
     diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         differ=1
