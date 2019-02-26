@@ -255,6 +255,11 @@ func (ast *ExprVariable) emit() {
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
+		case ast.getGtype().typ == G_MAP:
+			emit("#   emit slice variable")
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
 		default:
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
@@ -700,7 +705,7 @@ func (ast *StmtAssignment) emit() {
 			assignToStruct(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
 			assignToInterface(left, right)
-		case gtype.typ == G_MAP:
+		case gtype.getPrimType() == G_MAP:
 			assignToMap(left, right)
 		default:
 			// suppose primitive
@@ -718,6 +723,8 @@ func (ast *StmtAssignment) emit() {
 }
 
 func emitAssignPrimitive(left Expr, right Expr) {
+	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
+	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
 	right.emit()   //   expr => %rax
 	emitSave(left) //   %rax => memory
 }
@@ -1623,6 +1630,11 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("push %%rax")       // address (head of the heap)
 		emit("push $%d", length) // len
 		emit("push $%d", length) // cap
+	case *Relation,*ExprVariable:
+		rhs.emit()
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
