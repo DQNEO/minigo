@@ -1594,26 +1594,20 @@ func assignToMap(lhs Expr, rhs Expr) {
 			emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
 			emit("push %%rbx")  // map head
 
-
-			element.value.emit()
-			emit("push %%rax") // value of value
-
 			if mapValueType.isString() {
-				emit("pop %%rcx")          // value of value
-				emit("pop %%r10") // map head
-				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
-				emit("push %%r10")
+				element.value.emit()
 			} else {
+				element.value.emit()
+				emit("push %%rax") // value of value
 				// call malloc
 				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of value
 				emit("mov %%rcx, (%%rax)") // save value to heap
-
-				emit("pop %%r10") // map head
-				emit("mov %%rax, %d(%%r10) #", i*2*8+8)
-				emit("push %%r10")
 			}
 
+			emit("pop %%rbx") // map head
+			emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
+			emit("push %%rbx")
 		}
 
 		emit("pop %%rax")
