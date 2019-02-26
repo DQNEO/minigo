@@ -1578,7 +1578,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 			size = length*ptrSize*2*2 // 2*2 = key+value x double
 		}
 		emitCallMalloc(size)
-		emit("push %%rax")
+		emit("push %%rax") // map head
 
 		mapType := rhs.getGtype()
 		mapKeyType := mapType.mapKey
@@ -1605,15 +1605,16 @@ func assignToMap(lhs Expr, rhs Expr) {
 				emit("push %%r10")
 			}
 
-			element.value.emit()
-			emit("push %%rax") // value of value
-
 			if mapValueType.isString() {
+				element.value.emit()
+				emit("push %%rax") // value of value
 				emit("pop %%rcx")          // value of value
 				emit("pop %%r10") // map head
 				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
 				emit("push %%r10")
 			} else {
+				element.value.emit()
+				emit("push %%rax") // value of value
 				// call malloc
 				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of value
@@ -1891,7 +1892,7 @@ func (decl *DeclVar) emit() {
 		assignToSlice(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 		assignToStruct(decl.varname, decl.initval)
-	case gtype.typ == G_MAP:
+	case gtype.getPrimType() == G_MAP:
 		assignToMap(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
 		assignToInterface(decl.varname, decl.initval)
@@ -1993,7 +1994,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		}
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
-	} else if array.getGtype().typ == G_MAP {
+	} else if array.getGtype().getPrimType() == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
 		emit("# r10: map header address")
@@ -2038,6 +2039,11 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 }
 
 func emitMapGet(mapType *Gtype) {
+	if mapType.typ == G_REL {
+		// @TODO handle infinite chain of relations
+		mapType = mapType.relation.gtype
+	}
+
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
@@ -2064,6 +2070,7 @@ func emitMapGet(mapType *Gtype) {
 
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
+	assert(mapKeyType != nil, nil, "key typ should not be nil:" + mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}
