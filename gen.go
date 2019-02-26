@@ -1635,6 +1635,9 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 		emit("push %%rbx")
 		emit("push %%rcx")
+	case *ExprIndex:
+		rhs.emit()
+		TBI(rhs.token(), "")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
