@@ -1571,7 +1571,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 			size = length*ptrSize*2*2 // 2*2 = key+value x double
 		}
 		emitCallMalloc(size)
-		emit("push %%rax")
+		emit("push %%rax") // map head
 
 		mapType := rhs.getGtype()
 		mapKeyType := mapType.mapKey
