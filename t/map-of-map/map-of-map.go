@@ -9,17 +9,20 @@ func f1() {
 
 func f2() {
 	var mi MapIntInt = map[int]int{
-		2:3,
+		5:1,
 	}
 
-	fmt.Printf("%d\n", mi[2])
+	fmt.Printf("%d\n", mi[5])
 
 	var x map[int]map[int]int =  map[int]map[int]int{
-		1: map[int]int{
-			2:3,
+		11: map[int]int{
+			13:2,
 		},
 	}
-	fmt.Printf("%d\n", x[1][2])
+
+	y := x[11]
+	z := y[13]
+	fmt.Printf("%d\n", z)
 }
 
 type MapIntInt map[int]int
