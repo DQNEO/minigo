@@ -1382,7 +1382,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 	structliteral, ok := rhs.(*ExprStructLiteral)
 	assert(ok || rhs == nil, rhs.token(), fmt.Sprintf("invalid rhs: %T", rhs))
-	strcttyp := structliteral.getGtype().getSource() // strctname.gtype
+	strcttyp := rhs.getGtype().getSource()
 
 	// do assignment for each field
 	for _, field := range structliteral.fields {
