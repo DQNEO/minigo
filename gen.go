@@ -1578,7 +1578,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 			size = length*ptrSize*2*2 // 2*2 = key+value x double
 		}
 		emitCallMalloc(size)
-		emit("push %%rax") // map head
+		emit("push %%rax")
 
 		mapType := rhs.getGtype()
 		mapKeyType := mapType.mapKey
@@ -1605,16 +1605,15 @@ func assignToMap(lhs Expr, rhs Expr) {
 				emit("push %%r10")
 			}
 
+			element.value.emit()
+			emit("push %%rax") // value of value
+
 			if mapValueType.isString() {
-				element.value.emit()
-				emit("push %%rax") // value of value
 				emit("pop %%rcx")          // value of value
 				emit("pop %%r10") // map head
 				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
 				emit("push %%r10")
 			} else {
-				element.value.emit()
-				emit("push %%rax") // value of value
 				// call malloc
 				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of value
