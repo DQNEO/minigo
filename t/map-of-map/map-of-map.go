@@ -15,13 +15,20 @@ func f2() {
 	fmt.Printf("%d\n", mi[5])
 
 	var x map[int]map[int]int =  map[int]map[int]int{
-		11: map[int]int{
-			13:2,
+		111: map[int]int{
+			11:2,
+		},
+		112: map[int]int{
+			12:3,
 		},
 	}
 
-	y := x[11]
-	z := y[13]
+	y := x[111]
+	z := y[11]
+	fmt.Printf("%d\n", z)
+
+	y = x[112]
+	z = y[12]
 	fmt.Printf("%d\n", z)
 }
 
