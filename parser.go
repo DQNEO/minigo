@@ -1589,7 +1589,9 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		}
 
 		p.assert(typeToBelong.typ == G_REL, "methods must belong to a named type")
-		methods, ok := p.methods[typeToBelong.relation.name]
+		var methods methods
+		var ok bool
+		methods, ok = p.methods[typeToBelong.relation.name]
 		if !ok {
 			methods = map[identifier]*ExprFuncRef{}
 			p.methods[typeToBelong.relation.name] = methods

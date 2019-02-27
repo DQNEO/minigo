@@ -793,7 +793,7 @@ func (e *ExprIndex) emitMapSet() {
 	e.index.emit()
 	emit("push %%rax") // index value
 
-	mapType := e.collection.getGtype()
+	mapType := e.collection.getGtype().getSource()
 	mapKeyType := mapType.mapKey
 
 	if mapKeyType.isString() {
@@ -842,9 +842,9 @@ func (e *ExprIndex) emitSave() {
 
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.typ == G_ARRAY, collectionType.typ == G_SLICE:
+	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE:
 		e.collection.emit() // head address
-	case collectionType.typ == G_MAP:
+	case collectionType.getPrimType() == G_MAP:
 		e.emitMapSet()
 		return
 	default:
@@ -2470,7 +2470,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.typ == G_MAP:
+	case gtype.getPrimType() == G_MAP:
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
