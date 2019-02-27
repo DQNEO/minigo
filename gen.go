@@ -255,6 +255,11 @@ func (ast *ExprVariable) emit() {
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
+		case ast.getGtype().typ == G_MAP:
+			emit("#   emit slice variable")
+			emit("mov %d(%%rbp), %%rax", ast.offset)
+			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
 		default:
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
@@ -700,7 +705,7 @@ func (ast *StmtAssignment) emit() {
 			assignToStruct(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
 			assignToInterface(left, right)
-		case gtype.typ == G_MAP:
+		case gtype.getPrimType() == G_MAP:
 			assignToMap(left, right)
 		default:
 			// suppose primitive
@@ -718,6 +723,8 @@ func (ast *StmtAssignment) emit() {
 }
 
 func emitAssignPrimitive(left Expr, right Expr) {
+	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
+	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
 	right.emit()   //   expr => %rax
 	emitSave(left) //   %rax => memory
 }
@@ -1537,6 +1544,77 @@ func emitCallMalloc(size int) {
 	// @TODO check malloc error
 }
 
+// push addr, len, cap
+func (lit *ExprMapLiteral) emitPush() {
+	length := len(lit.elements)
+
+	// allocaated address of the map head
+	var size int
+	if length == 0 {
+		size = ptrSize * 2 * 256
+	} else {
+		size = length*ptrSize*2*2 // 2*2 = key+value x double
+	}
+	emitCallMalloc(size)
+	emit("push %%rax") // map head
+
+	mapType := lit.getGtype()
+	mapKeyType := mapType.mapKey
+
+	for i, element := range lit.elements {
+		// alloc key
+		if mapKeyType.isString() {
+			element.key.emit()
+		} else {
+			element.key.emit()
+			emit("push %%rax") // value of key
+			// call malloc for key
+			emitCallMalloc(8)
+			emit("pop %%rcx")          // value of key
+			emit("mov %%rcx, (%%rax)") // save key to heap
+		}
+
+		emit("pop %%rbx")  // map head
+		emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
+		emit("push %%rbx")  // map head
+
+
+		if element.value.getGtype().getSize() <= 8 {
+			element.value.emit()
+			emit("push %%rax") // value of value
+			// call malloc
+			emitCallMalloc(8)
+			emit("pop %%rcx")          // value of value
+			emit("mov %%rcx, (%%rax)") // save value to heap
+		} else {
+			switch element.value.getGtype().getPrimType() {
+			case G_MAP:
+				// rax,rbx,rcx
+				element.value.emit()
+				emit("push %%rax") // ptr
+				emitCallMalloc(8 * 3)
+				emit("pop %%rdx")  // ptr
+				emit("mov %%rdx, (%%rax)")
+				emit("mov %%rbx, %d(%%rax)", 8*1)
+				emit("mov %%rcx, %d(%%rax)", 8*2)
+
+			default:
+				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
+			}
+		}
+
+
+		emit("pop %%rbx") // map head
+		emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
+		emit("push %%rbx")
+	}
+
+	emit("pop %%rax")
+	emit("push %%rax")       // address (head of the heap)
+	emit("push $%d", length) // len
+	emit("push $%d", length) // cap
+}
+
 func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
@@ -1552,58 +1630,17 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("# map literal")
 
 		lit := rhs.(*ExprMapLiteral)
-		length := len(lit.elements)
-
-		// allocaated address of the map head
-		var size int
-		if length == 0 {
-			size = ptrSize * 2 * 256
-		} else {
-			size = length*ptrSize*2*2 // 2*2 = key+value x double
-		}
-		emitCallMalloc(size)
-		emit("push %%rax") // map head
-
-		mapType := rhs.getGtype()
-		mapKeyType := mapType.mapKey
-
-		for i, element := range lit.elements {
-			// alloc key
-			if mapKeyType.isString() {
-				element.key.emit()
-			} else {
-				element.key.emit()
-				emit("push %%rax") // value of key
-				// call malloc for key
-				emitCallMalloc(8)
-				emit("pop %%rcx")          // value of key
-				emit("mov %%rcx, (%%rax)") // save key to heap
-			}
-
-			emit("pop %%rbx")  // map head
-			emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
-			emit("push %%rbx")  // map head
-
-			if false {
-				element.value.emit()
-			} else {
-				element.value.emit()
-				emit("push %%rax") // value of value
-				// call malloc
-				emitCallMalloc(8)
-				emit("pop %%rcx")          // value of value
-				emit("mov %%rcx, (%%rax)") // save value to heap
-			}
-
-			emit("pop %%rbx") // map head
-			emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
-			emit("push %%rbx")
-		}
-
-		emit("pop %%rax")
-		emit("push %%rax")       // address (head of the heap)
-		emit("push $%d", length) // len
-		emit("push $%d", length) // cap
+		lit.emitPush()
+	case *Relation,*ExprVariable:
+		rhs.emit()
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
+	case *ExprIndex:
+		rhs.emit()
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -1857,7 +1894,7 @@ func (decl *DeclVar) emit() {
 		assignToSlice(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 		assignToStruct(decl.varname, decl.initval)
-	case gtype.typ == G_MAP:
+	case gtype.getPrimType() == G_MAP:
 		assignToMap(decl.varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
 		assignToInterface(decl.varname, decl.initval)
@@ -1959,7 +1996,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		}
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
-	} else if array.getGtype().typ == G_MAP {
+	} else if array.getGtype().getPrimType() == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
 		emit("# r10: map header address")
@@ -2004,6 +2041,11 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 }
 
 func emitMapGet(mapType *Gtype, deref bool) {
+	if mapType.typ == G_REL {
+		// @TODO handle infinite chain of relations
+		mapType = mapType.relation.gtype
+	}
+
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
@@ -2029,6 +2071,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("mov (%%rcx), %%rax") // emit index address
 
 	mapKeyType := mapType.mapKey
+	assert(mapKeyType != nil, nil, "key typ should not be nil:" + mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}
@@ -2215,7 +2258,10 @@ func (e *ExprTypeSwitchGuard) emit() {
 }
 
 func (e *ExprMapLiteral) emit() {
-	TBI(e.token(), "")
+	e.emitPush()
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("pop %%rax")
 }
 
 func (ast *ExprMethodcall) getUniqueName() string {
