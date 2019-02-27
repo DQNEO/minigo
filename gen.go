@@ -795,7 +795,6 @@ func (e *ExprIndex) emitMapSet() {
 
 	mapType := e.collection.getGtype()
 	mapKeyType := mapType.mapKey
-	mapValueType := mapType.mapValue
 
 	if mapKeyType.isString() {
 		emit("pop %%rcx")            // index value
@@ -817,25 +816,19 @@ func (e *ExprIndex) emitMapSet() {
 	}
 
 	// save value
-	if mapValueType.isString() {
-		emit("pop %%rax")           // map tail address
-		emit("pop %%rcx") // rhs value
-		// save value
-		emit("mov %%rcx, 8(%%rax)") // save value to the tail
-	} else {
-		// malloc(8)
-		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-		emit("mov $0, %%rax")
-		emit("call .malloc")
 
-		emit("pop %%rcx")           // map tail address
-		emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+	// malloc(8)
+	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+	emit("mov $0, %%rax")
+	emit("call .malloc")
 
-		emit("pop %%rcx") // rhs value
+	emit("pop %%rcx")           // map tail address
+	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
 
-		// save value
-		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
-	}
+	emit("pop %%rcx") // rhs value
+
+	// save value
+	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
 }
 
 func (e *ExprIndex) emitSave() {
@@ -1073,7 +1066,7 @@ func (f *StmtFor) emitRangeForMap() {
 	f.rng.rangeexpr.emit() // emit address of map data head
 	mapType := f.rng.rangeexpr.getGtype()
 	mapKeyType := mapType.mapKey
-	mapValueType := mapType.mapValue
+
 	emit("pop %%rcx")
 	emit("add %%rax, %%rcx")
 	emit("mov (%%rcx), %%rax")
@@ -1096,9 +1089,7 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
 		emit("mov (%%rcx), %%rax")
-		if !mapValueType.isString() {
-			emit("mov (%%rax), %%rax")
-		}
+		emit("mov (%%rax), %%rax")
 		f.rng.valuevar.emitSave()
 
 	}
@@ -1578,52 +1569,39 @@ func assignToMap(lhs Expr, rhs Expr) {
 			size = length*ptrSize*2*2 // 2*2 = key+value x double
 		}
 		emitCallMalloc(size)
-		emit("push %%rax")
+		emit("push %%rax") // map head
 
 		mapType := rhs.getGtype()
 		mapKeyType := mapType.mapKey
-		mapValueType := mapType.mapValue
 
 		for i, element := range lit.elements {
 			// alloc key
-			element.key.emit()
-			emit("push %%rax") // value of key
-
 			if mapKeyType.isString() {
-				emit("pop %%rcx")          // value of key
-				emit("pop %%r10")                     // map head
-				emit("mov %%rcx, %d(%%r10) #", i*2*8) // save key address
-				emit("push %%r10")
+				element.key.emit()
 			} else {
+				element.key.emit()
+				emit("push %%rax") // value of key
 				// call malloc for key
 				emitCallMalloc(8)
 				emit("pop %%rcx")          // value of key
 				emit("mov %%rcx, (%%rax)") // save key to heap
-
-				emit("pop %%r10")                     // map head
-				emit("mov %%rax, %d(%%r10) #", i*2*8) // save key address
-				emit("push %%r10")
 			}
+
+			emit("pop %%rbx")  // map head
+			emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
+			emit("push %%rbx")  // map head
 
 			element.value.emit()
 			emit("push %%rax") // value of value
+			// call malloc
+			emitCallMalloc(8)
+			emit("pop %%rcx")          // value of value
+			emit("mov %%rcx, (%%rax)") // save value to heap
 
-			if mapValueType.isString() {
-				emit("pop %%rcx")          // value of value
-				emit("pop %%r10") // map head
-				emit("mov %%rcx, %d(%%r10) #", i*2*8+8)
-				emit("push %%r10")
-			} else {
-				// call malloc
-				emitCallMalloc(8)
-				emit("pop %%rcx")          // value of value
-				emit("mov %%rcx, (%%rax)") // save value to heap
 
-				emit("pop %%r10") // map head
-				emit("mov %%rax, %d(%%r10) #", i*2*8+8)
-				emit("push %%r10")
-			}
-
+			emit("pop %%rbx") // map head
+			emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
+			emit("push %%rbx")
 		}
 
 		emit("pop %%rax")
@@ -2011,7 +1989,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov %%rax, %%r11 # copy len ")
 		index.emit()
 		emit("mov %%rax, %%r12 # index value")
-		emitMapGet(array.getGtype())
+		emitMapGet(array.getGtype(), true)
 	} else if array.getGtype().getPrimType() == G_STRING {
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:
@@ -2037,7 +2015,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 	}
 }
 
-func emitMapGet(mapType *Gtype) {
+func emitMapGet(mapType *Gtype, deref bool) {
 	if mapType.typ == G_REL {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
@@ -2068,7 +2046,6 @@ func emitMapGet(mapType *Gtype) {
 	emit("mov (%%rcx), %%rax") // emit index address
 
 	mapKeyType := mapType.mapKey
-	mapValueType := mapType.mapValue
 	assert(mapKeyType != nil, nil, "key typ should not be nil:" + mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
@@ -2093,7 +2070,7 @@ func emitMapGet(mapType *Gtype) {
 
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
-	if !mapValueType.isString() {
+	if deref {
 		emit("mov (%%rax), %%rax # dereference")
 	}
 	emit("jmp %s", labelEnd)
@@ -2347,7 +2324,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 		emit("lea .M%s, %%rax", call.methodName) // index value
 		emit("mov %%rax, %%r12") // index value
-		emitMapGet(mapType)
+		emitMapGet(mapType, false)
 	}
 
 	emit("push %%rax")
