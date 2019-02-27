@@ -1381,7 +1381,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	variable := lhs
 
 	structliteral, ok := rhs.(*ExprStructLiteral)
-	assert(ok || rhs == nil, nil, fmt.Sprintf("invalid rhs: %T", rhs))
+	assert(ok || rhs == nil, rhs.token(), fmt.Sprintf("invalid rhs: %T", rhs))
 	strcttyp := structliteral.strctname.gtype
 
 	// do assignment for each field
