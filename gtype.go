@@ -274,7 +274,7 @@ func (e *ExprSlice) getGtype() *Gtype {
 
 func (e *ExprIndex) getGtype() *Gtype {
 	//debugf("collection=%T", e.collection)
-	assertNotNil(e.collection.getGtype() != nil, nil)
+	assertNotNil(e.collection.getGtype() != nil, e.token())
 	//debugf("collection.gtype=%v", e.collection.getGtype())
 	gtype := e.collection.getGtype()
 	if gtype.typ == G_REL {
