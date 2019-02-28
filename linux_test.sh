@@ -3,6 +3,9 @@
 actual=out/actual.txt
 differ=0
 
+# for os.Args
+sample_file=/etc/resolv.conf
+cp $sample_file t/expected/open-read.txt
 function test_file {
     local basename=$1
     local expected=t/expected/${basename}.txt
@@ -15,7 +18,7 @@ function test_file {
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
-    $bin_file /etc/lsb-release > $actual
+    $bin_file $sample_file > $actual
     if [[ $? -ne 0 ]];then
         differ=1
         echo "FAILED"
