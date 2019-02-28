@@ -7,11 +7,13 @@ A Go compiler from scratch.
 # Description
 `minigo` is yet another Go compiler made from scratch.
 
+* No dependency on yacc/lex
 * No dependency on external packages/libraries
-* No dependency on yacc/lex things
 
 Lexer and parse are written by hand.
 Standard libraries are also made from scratch.
+
+It depends only on gcc as an assenmbler and linker, and on libc as a runtime.
 
 # Notes
 
