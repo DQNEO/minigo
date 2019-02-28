@@ -1,5 +1,7 @@
 # Mini Go Compiler
 
+[![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
+
 minigo is a Go compiler from scratch.
 
 The design is much influenced from 
