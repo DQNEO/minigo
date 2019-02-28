@@ -10,6 +10,6 @@ if [[ `uname` == "Darwin" ]];then
     docker run --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c "$cmd"
 else
     # for Linux
-    $cmd
+    gcc -g -no-pie $file && ./a.out || gdb --batch --eval-command=run ./a.out
 fi
 
