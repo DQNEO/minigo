@@ -2,12 +2,26 @@
 
 [![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
 
-minigo is a Go compiler from scratch.
+A Go compiler from scratch.
 
-The design is much influenced from 
+# Description
+`minigo` is yet another Go compiler made from scratch.
+
+* No dependency on external packages/libraries
+* No dependency on yacc/lex things
+
+Lexer and parse are written by hand.
+Standard libraries are also made from scratch.
+
+# Notes
+
+The design is influenced from
 
 * 8cc (https://github.com/rui314/8cc)
 * 8cc.go (https://github.com/DQNEO/8cc.go)
+
+# AUTHOR
+[@DQNEO](https://twitter.com/DQNEO)
 
 # LICENSE
 
