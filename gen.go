@@ -1325,12 +1325,12 @@ func emitAddress(e Expr) {
 	}
 }
 
-func emitCopyStruct(left Expr, right Expr) {
-	assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
-
+// expect rhs address in the stack top
+func emitCopyStruct(left Expr) {
+	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
+	emit("pop %%rax")
 	emit("push %%rcx")
 	emit("push %%r11")
-	emitAddress(right)
 	emit("mov %%rax, %%rcx")
 	emitAddress(left)
 
@@ -1422,12 +1422,16 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 	switch rhs.(type) {
 	case *Relation:
-		emitCopyStruct(lhs, rhs)
+		emitAddress(rhs)
+		emit("push %%rax")
+		emitCopyStruct(lhs)
 	case *ExprUop:
-		e := rhs.(*ExprUop)
-		if e.op == "*" {
+		re := rhs.(*ExprUop)
+		if re.op == "*" {
 			// copy struct
-			TBI(rhs.token(),"")
+			re.operand.emit()
+			emit("push %%rax")
+			emitCopyStruct(lhs)
 		} else {
 			TBI(rhs.token(),"")
 		}
