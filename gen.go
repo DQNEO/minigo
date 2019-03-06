@@ -1314,6 +1314,44 @@ func emitGload(regSize int, varname identifier, offset int) {
 	emit("mov %s+%d(%%rip), %%%s", varname, offset, reg)
 }
 
+func emitAddress(e Expr) {
+	switch e.(type) {
+	case *Relation:
+		emitAddress(e.(*Relation).expr)
+	case *ExprVariable:
+		e.(*ExprVariable).emitAddress(0)
+	default:
+		TBI(e.token(), "")
+	}
+}
+
+func emitCopyStruct(left Expr, right Expr) {
+	assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
+
+	emit("push %%rcx")
+	emit("push %%r11")
+	emitAddress(right)
+	emit("mov %%rax, %%rcx")
+	emitAddress(left)
+
+	var i int
+	for i=i; i < left.getGtype().getSize(); i += 8 {
+		emit("movq %d(%%rcx), %%r11", i)
+		emit("movq %%r11, %d(%%rax)", i)
+	}
+	for i=i; i < left.getGtype().getSize(); i += 4 {
+		emit("movl %d(%%rcx), %%r11", i)
+		emit("movl %%r11, %d(%%rax)", i)
+	}
+	for i=i; i < left.getGtype().getSize(); i++ {
+		emit("movb %d(%%rcx), %%r11", i)
+		emit("movb %%r11, %d(%%rax)", i)
+	}
+
+	emit("pop %%r11")
+	emit("pop %%rcx")
+}
+
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct")
 	if rel, ok := lhs.(*Relation); ok {
@@ -1380,64 +1418,80 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	}
 	variable := lhs
 
-	structliteral, ok := rhs.(*ExprStructLiteral)
-	assert(ok || rhs == nil, rhs.token(), fmt.Sprintf("invalid rhs: %T", rhs))
 	strcttyp := rhs.getGtype().getSource()
 
-	// do assignment for each field
-	for _, field := range structliteral.fields {
-		emit("# .%s", field.key)
-		fieldtype := strcttyp.getField(field.key)
-
-		switch {
-		case fieldtype.typ == G_ARRAY:
-			initvalues, ok := field.value.(*ExprArrayLiteral)
-			assert(ok, nil, "ok")
-			fieldtype := strcttyp.getField(field.key)
-			arrayType := fieldtype
-			elementType := arrayType.elementType
-			elmSize := elementType.getSize()
-			switch {
-			case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
-				left := &ExprStructField{
-					strct:     lhs,
-					fieldname: fieldtype.fieldname,
-				}
-				assignToArray(left, field.value)
-			default:
-				for i, val := range initvalues.values {
-					val.emit()
-					emitOffsetSave(variable, elmSize, fieldtype.offset+i*elmSize)
-				}
-			}
-		case fieldtype.typ == G_SLICE:
-			left := &ExprStructField{
-				tok:       variable.token(),
-				strct:     lhs,
-				fieldname: field.key,
-			}
-			assignToSlice(left, field.value)
-		case fieldtype.getPrimType() == G_INTERFACE:
-			left := &ExprStructField{
-				tok:       lhs.token(),
-				strct:     lhs,
-				fieldname: field.key,
-			}
-			assignToInterface(left, field.value)
-		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
-			left := &ExprStructField{
-				tok:       variable.token(),
-				strct:     lhs,
-				fieldname: field.key,
-			}
-			assignToStruct(left, field.value)
-		default:
-			field.value.emit()
-
-			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-			emitOffsetSave(variable, regSize, fieldtype.offset)
+	switch rhs.(type) {
+	case *Relation:
+		emitCopyStruct(lhs, rhs)
+	case *ExprUop:
+		e := rhs.(*ExprUop)
+		if e.op == "*" {
+			// copy struct
+			TBI(rhs.token(),"")
+		} else {
+			TBI(rhs.token(),"")
 		}
+	case *ExprStructLiteral:
+		structliteral, ok := rhs.(*ExprStructLiteral)
+		assert(ok || rhs == nil, rhs.token(), fmt.Sprintf("invalid rhs: %T", rhs))
+
+		// do assignment for each field
+		for _, field := range structliteral.fields {
+			emit("# .%s", field.key)
+			fieldtype := strcttyp.getField(field.key)
+
+			switch {
+			case fieldtype.typ == G_ARRAY:
+				initvalues, ok := field.value.(*ExprArrayLiteral)
+				assert(ok, nil, "ok")
+				fieldtype := strcttyp.getField(field.key)
+				arrayType := fieldtype
+				elementType := arrayType.elementType
+				elmSize := elementType.getSize()
+				switch {
+				case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+					left := &ExprStructField{
+						strct:     lhs,
+						fieldname: fieldtype.fieldname,
+					}
+					assignToArray(left, field.value)
+				default:
+					for i, val := range initvalues.values {
+						val.emit()
+						emitOffsetSave(variable, elmSize, fieldtype.offset+i*elmSize)
+					}
+				}
+			case fieldtype.typ == G_SLICE:
+				left := &ExprStructField{
+					tok:       variable.token(),
+					strct:     lhs,
+					fieldname: field.key,
+				}
+				assignToSlice(left, field.value)
+			case fieldtype.getPrimType() == G_INTERFACE:
+				left := &ExprStructField{
+					tok:       lhs.token(),
+					strct:     lhs,
+					fieldname: field.key,
+				}
+				assignToInterface(left, field.value)
+			case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
+				left := &ExprStructField{
+					tok:       variable.token(),
+					strct:     lhs,
+					fieldname: field.key,
+				}
+				assignToStruct(left, field.value)
+			default:
+				field.value.emit()
+
+				regSize := fieldtype.getSize()
+				assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
+				emitOffsetSave(variable, regSize, fieldtype.offset)
+			}
+		}
+	default:
+		TBI(rhs.token(),"")
 	}
 
 }
