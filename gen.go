@@ -1472,6 +1472,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
+			case fieldtype.getPrimType() == G_MAP:
+				left := &ExprStructField{
+					tok:       variable.token(),
+					strct:     lhs,
+					fieldname: field.key,
+				}
+				assignToMap(left, field.value)
 			case fieldtype.getPrimType() == G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),

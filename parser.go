@@ -1707,8 +1707,8 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.expectKeyword("interface")
 
 	p.expect("{")
-	var methods map[identifier]*signature
-	methods = make(map[identifier]*signature)
+	var methods map[identifier]*signature = map[identifier]*signature{}
+
 	for {
 		if p.peekToken().isPunct("}") {
 			break
