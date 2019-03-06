@@ -1335,15 +1335,15 @@ func emitCopyStruct(left Expr, right Expr) {
 	emitAddress(left)
 
 	var i int
-	for ; i < left.getGtype().getSize(); i += 8 {
+	for i=i; i < left.getGtype().getSize(); i += 8 {
 		emit("movq %d(%%rcx), %%r11", i)
 		emit("movq %%r11, %d(%%rax)", i)
 	}
-	for ; i < left.getGtype().getSize(); i += 4 {
+	for i=i; i < left.getGtype().getSize(); i += 4 {
 		emit("movl %d(%%rcx), %%r11", i)
 		emit("movl %%r11, %d(%%rax)", i)
 	}
-	for ; i < left.getGtype().getSize(); i++ {
+	for i=i; i < left.getGtype().getSize(); i++ {
 		emit("movb %d(%%rcx), %%r11", i)
 		emit("movb %%r11, %d(%%rax)", i)
 	}
