@@ -2,6 +2,13 @@ package main
 
 import "fmt"
 
+func f0() {
+	var x []int
+	l := len(x)
+	fmt.Printf("%d\n", l)
+}
+
+
 func f1() {
 	var a [1]int
 	fmt.Printf("%d\n", len(a))
@@ -41,6 +48,7 @@ func f3() {
 }
 
 func main() {
+	f0()
 	f1()
 	f2()
 	f3()

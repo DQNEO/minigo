@@ -1923,8 +1923,12 @@ func (ast *StmtShortVarDecl) infer() {
 				if fcall.getFuncDef() == nil {
 					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
 				}
-				for _, gtype := range fcall.getFuncDef().rettypes {
-					rightTypes = append(rightTypes, gtype)
+				if fcall.isBuiltinLen() {
+					rightTypes = append(rightTypes, gInt)
+				} else {
+					for _, gtype := range fcall.getFuncDef().rettypes {
+						rightTypes = append(rightTypes, gtype)
+					}
 				}
 			}
 		case *ExprMethodcall:
@@ -1968,6 +1972,20 @@ func (ast *StmtShortVarDecl) infer() {
 	}
 
 }
+
+func (funcall *ExprFuncallOrConversion) isBuiltinLen() bool {
+	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		return false
+	}
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
+		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+	}
+
+	// len()
+	return decl == builinLen
+}
+
 
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
