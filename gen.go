@@ -230,7 +230,7 @@ func (ast *ExprVariable) emit() {
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
-	} else if ast.gtype.typ == G_INTERFACE || (ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE) {
+	} else if ast.gtype.getPrimType() == G_INTERFACE {
 		if ast.isGlobal {
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
@@ -610,7 +610,7 @@ func (ast *StmtAssignment) emit() {
 				assignToSlice(left, right)
 			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 				assignToStruct(left, right)
-			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+			case gtype.getPrimType() == G_INTERFACE:
 				assignToInterface(left, right)
 			default:
 				// suppose primitive
@@ -680,7 +680,7 @@ func (ast *StmtAssignment) emit() {
 					if left.getGtype().typ == G_SLICE {
 						// @TODO: Does this work ?
 						emitSave3Elements(left, 0)
-					} else if left.getGtype().typ == G_REL && left.getGtype().relation.gtype.typ == G_INTERFACE {
+					} else if left.getGtype().getPrimType() == G_INTERFACE {
 						// @TODO: Does this work ?
 						emitSaveInterface(left, 0)
 					} else {
@@ -703,7 +703,7 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 			assignToStruct(left, right)
-		case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
+		case gtype.getPrimType() == G_INTERFACE:
 			assignToInterface(left, right)
 		case gtype.getPrimType() == G_MAP:
 			assignToMap(left, right)
@@ -1762,7 +1762,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	}
 
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
-	if rhs.getGtype().typ == G_INTERFACE || (rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_INTERFACE) {
+	if rhs.getGtype().getPrimType() == G_INTERFACE {
 		rhs.emit()
 		emit("push %%rax")
 		emit("push %%rbx")
@@ -1958,7 +1958,7 @@ func (decl *DeclVar) emit() {
 		assignToStruct(decl.varname, decl.initval)
 	case gtype.getPrimType() == G_MAP:
 		assignToMap(decl.varname, decl.initval)
-	case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
+	case gtype.getPrimType() == G_INTERFACE:
 		assignToInterface(decl.varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
@@ -2424,7 +2424,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	receiver := args[0]
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
-	assert(receiverType.typ == G_REL && receiverType.relation.gtype.typ == G_INTERFACE, nil, "should be interface")
+	assert(receiverType.getPrimType() == G_INTERFACE, nil, "should be interface")
 
 	// dereference: convert an interface value to a concrete value
 	receiver.emit()
