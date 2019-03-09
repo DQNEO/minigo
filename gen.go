@@ -2261,7 +2261,7 @@ func (e *ExprTypeAssertion) emit() {
 		e.expr.emit() // emit interface
 		// rax(ptr), rbx(typeId of method table), rcx(hashed typeId)
 		emit("push %%rax")
-		// @TODO DRY with type swtich statement
+		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
 		emitStringsEqual(true,"%rax", "%rcx")
