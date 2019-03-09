@@ -140,7 +140,11 @@ func (gtype *Gtype) String() string {
 	case G_STRING:
 		return "string"
 	case G_INTERFACE:
-		return fmt.Sprintf("interface {%s}", gtype.imethods)
+		if len(gtype.imethods) == 0 {
+			return "interface{}"
+		} else {
+			return fmt.Sprintf("interface {%s}", gtype.imethods)
+		}
 	case G_MAP:
 		return "map"
 	default:

@@ -2576,7 +2576,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	}
 
 	// len()
-	if decl == builinLen {
+	if funcall.isBuiltinLen() {
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
 		exprLen := &ExprLen{
