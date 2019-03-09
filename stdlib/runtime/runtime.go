@@ -1,7 +1,8 @@
 package runtime
 
-func Caller(n int) (interface{}, interface{},interface{},interface{}) {
-	return nil,nil,nil,nil
+// func Caller(skip int) (pc uintptr, file string, line int, ok bool) {
+func Caller(n int) (int, string, int ,bool) {
+	return 0,"", 0, false
 }
 
 func FuncForPC(pc int) *Func {
