@@ -703,7 +703,7 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 			assignToStruct(left, right)
-		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+		case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
 			assignToInterface(left, right)
 		case gtype.getPrimType() == G_MAP:
 			assignToMap(left, right)
@@ -1961,7 +1961,7 @@ func (decl *DeclVar) emit() {
 		assignToStruct(decl.varname, decl.initval)
 	case gtype.getPrimType() == G_MAP:
 		assignToMap(decl.varname, decl.initval)
-	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+	case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
 		assignToInterface(decl.varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+ gtype.String())

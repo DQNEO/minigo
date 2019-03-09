@@ -24,7 +24,6 @@ const (
 	G_POINTER
 	G_FUNC
 	G_INTERFACE
-	G_ANY // interface{}
 )
 
 type signature struct {
@@ -36,7 +35,7 @@ type signature struct {
 
 type Gtype struct {
 	typ          GTYPE_TYPE
-	typeId int
+	typeId int                             // 0:unkonwn
 	dependendson Expr                      // for G_DEPENDENT
 	relation     *Relation                 // for G_REL
 	size         int                       // for scalar type like int, bool, byte, for struct
@@ -144,8 +143,6 @@ func (gtype *Gtype) String() string {
 		return fmt.Sprintf("interface {%s}", gtype.imethods)
 	case G_MAP:
 		return "map"
-	case G_ANY:
-		return "interface{}"
 	default:
 		errorf("gtype.String() error: type=%d", gtype.typ)
 	}
