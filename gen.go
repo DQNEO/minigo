@@ -230,7 +230,7 @@ func (ast *ExprVariable) emit() {
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
-	} else if ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE {
+	} else if ast.gtype.typ == G_INTERFACE || (ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE) {
 		if ast.isGlobal {
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize + ptrSize)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
@@ -703,7 +703,7 @@ func (ast *StmtAssignment) emit() {
 			assignToSlice(left, right)
 		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
 			assignToStruct(left, right)
-		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+		case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
 			assignToInterface(left, right)
 		case gtype.getPrimType() == G_MAP:
 			assignToMap(left, right)
@@ -1724,7 +1724,7 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	if namedType.typ == G_POINTER {
 		namedType = namedType.origType.relation.gtype
 	}
-	assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
+	//assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
 	emit("mov $%d, %%rax # typeId", namedType.typeId)
 
 	emit("push %%rax") // namedType id
@@ -1961,7 +1961,7 @@ func (decl *DeclVar) emit() {
 		assignToStruct(decl.varname, decl.initval)
 	case gtype.getPrimType() == G_MAP:
 		assignToMap(decl.varname, decl.initval)
-	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE:
+	case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
 		assignToInterface(decl.varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+ gtype.String())
