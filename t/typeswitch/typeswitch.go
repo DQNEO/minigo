@@ -3,17 +3,16 @@ package main
 import "fmt"
 
 func typeswtch(flg bool) int {
-	var  r int
+	var r int
 	var p *Point = &Point{
-		a:1,
-		b:2,
+		a: 1,
+		b: 2,
 	}
 
 	var p2 *Point2 = &Point2{
-		c:2,
-		d:3,
+		c: 2,
+		d: 3,
 	}
-
 
 	var i myInterface
 	if flg {
@@ -42,7 +41,6 @@ func f3() {
 	fmt.Printf("%d\n", x) // 2
 }
 
-
 type myInterface interface {
 	sum() int
 }
@@ -60,7 +58,6 @@ type Point2 struct {
 func (p *Point) sum() int {
 	return p.a + p.b
 }
-
 
 func (p *Point2) sum() int {
 	return p.c + p.d

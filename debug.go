@@ -258,9 +258,8 @@ func (f *StmtFor) dump() {
 	debugNest--
 }
 
-
 func (e *ExprLen) dump() {
-	TBI(e.token(),"")
+	TBI(e.token(), "")
 }
 
 func (e *ExprSliceLiteral) dump() {

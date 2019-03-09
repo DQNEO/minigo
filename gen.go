@@ -232,12 +232,12 @@ func (ast *ExprVariable) emit() {
 		return
 	} else if ast.gtype.typ == G_INTERFACE || (ast.gtype.typ == G_REL && ast.gtype.relation.gtype.typ == G_INTERFACE) {
 		if ast.isGlobal {
-			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize + ptrSize)
+			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s(%%rip), %%rax", ast.varname)
 		} else {
-			emit("mov %d(%%rbp), %%rcx", ast.offset + ptrSize + ptrSize)
-			emit("mov %d(%%rbp), %%rbx", ast.offset + ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
+			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
 		return
@@ -462,7 +462,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 	binop.right.emit()
 	emit("pop %%rcx")
 	emit("# rax = right, rcx = left")
-	emitStringsEqual(equal,"%rcx", "%rax")
+	emitStringsEqual(equal, "%rcx", "%rax")
 }
 
 // call strcmp
@@ -797,10 +797,10 @@ func (e *ExprIndex) emitMapSet() {
 	mapKeyType := mapType.mapKey
 
 	if mapKeyType.isString() {
-		emit("pop %%rcx")            // index value
-		emit("pop %%rax")            // map tail address
-		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-		emit("push %%rax")           // push map tail
+		emit("pop %%rcx")          // index value
+		emit("pop %%rax")          // map tail address
+		emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
+		emit("push %%rax")         // push map tail
 	} else {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
@@ -892,18 +892,18 @@ func (e *ExprSliceLiteral) emit() {
 	emit("push %%rax")
 	for i, value := range e.values {
 		switch value.getGtype().getPrimType() {
-		case G_INT,G_POINTER,G_STRING:
+		case G_INT, G_POINTER, G_STRING:
 			value.emit()
 			emit("pop %%rbx # head")
-			emit("mov %%rax, %d(%%rbx)", IntSize * i)
+			emit("mov %%rax, %d(%%rbx)", IntSize*i)
 			emit("push %%rbx # head")
-		case G_INTERFACE,G_SLICE,G_MAP:
+		case G_INTERFACE, G_SLICE, G_MAP:
 			//@TODO this logic is not tested.
 			value.emit()
 			emit("pop %%rdx # head")
-			emit("mov %%rax, %d(%%rbx)", IntSize * i)
-			emit("mov %%rbx, %d(%%rbx)", IntSize * i + ptrSize)
-			emit("mov %%rcx, %d(%%rbx)", IntSize * i + ptrSize + ptrSize)
+			emit("mov %%rax, %d(%%rbx)", IntSize*i)
+			emit("mov %%rbx, %d(%%rbx)", IntSize*i+ptrSize)
+			emit("mov %%rcx, %d(%%rbx)", IntSize*i+ptrSize+ptrSize)
 			emit("push %%rdx # head")
 		default:
 			TBI(e.token(), "")
@@ -1118,7 +1118,7 @@ func (f *StmtFor) emitRangeForList() {
 
 	// check if 0 == len(list)
 	conditionEmpty := &ExprBinop{
-		op:   "==",
+		op: "==",
 		left: &ExprNumberLiteral{
 			val: 0,
 		},
@@ -1335,15 +1335,15 @@ func emitCopyStruct(left Expr) {
 	emitAddress(left)
 
 	var i int
-	for i=i; i < left.getGtype().getSize(); i += 8 {
+	for i = i; i < left.getGtype().getSize(); i += 8 {
 		emit("movq %d(%%rcx), %%r11", i)
 		emit("movq %%r11, %d(%%rax)", i)
 	}
-	for i=i; i < left.getGtype().getSize(); i += 4 {
+	for i = i; i < left.getGtype().getSize(); i += 4 {
 		emit("movl %d(%%rcx), %%r11", i)
 		emit("movl %%r11, %d(%%rax)", i)
 	}
-	for i=i; i < left.getGtype().getSize(); i++ {
+	for i = i; i < left.getGtype().getSize(); i++ {
 		emit("movb %d(%%rcx), %%r11", i)
 		emit("movb %%r11, %d(%%rax)", i)
 	}
@@ -1433,7 +1433,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("push %%rax")
 			emitCopyStruct(lhs)
 		} else {
-			TBI(rhs.token(),"")
+			TBI(rhs.token(), "")
 		}
 	case *ExprStructLiteral:
 		structliteral, ok := rhs.(*ExprStructLiteral)
@@ -1502,7 +1502,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 		}
 	default:
-		TBI(rhs.token(),"")
+		TBI(rhs.token(), "")
 	}
 
 }
@@ -1552,7 +1552,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		rettypes := mcall.getRettypes()
 		assert(len(rettypes) == 1, lhs.token(), "rettype should be single")
 		rettype := rettypes[0]
-		assert(rettype.getPrimType() == G_POINTER, lhs.token(),"only pointer is supported")
+		assert(rettype.getPrimType() == G_POINTER, lhs.token(), "only pointer is supported")
 		mcall.emit()
 		emit("# START DEBUG")
 		emit("add $%d, %%rax", offset)
@@ -1618,7 +1618,7 @@ func (lit *ExprMapLiteral) emitPush() {
 	if length == 0 {
 		size = ptrSize * 2 * 256
 	} else {
-		size = length*ptrSize*2*2 // 2*2 = key+value x double
+		size = length * ptrSize * 2 * 2 // 2*2 = key+value x double
 	}
 	emitCallMalloc(size)
 	emit("push %%rax") // map head
@@ -1639,10 +1639,9 @@ func (lit *ExprMapLiteral) emitPush() {
 			emit("mov %%rcx, (%%rax)") // save key to heap
 		}
 
-		emit("pop %%rbx")  // map head
+		emit("pop %%rbx")                     // map head
 		emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
-		emit("push %%rbx")  // map head
-
+		emit("push %%rbx")                    // map head
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
@@ -1658,7 +1657,7 @@ func (lit *ExprMapLiteral) emitPush() {
 				element.value.emit()
 				emit("push %%rax") // ptr
 				emitCallMalloc(8 * 3)
-				emit("pop %%rdx")  // ptr
+				emit("pop %%rdx") // ptr
 				emit("mov %%rdx, (%%rax)")
 				emit("mov %%rbx, %d(%%rax)", 8*1)
 				emit("mov %%rcx, %d(%%rax)", 8*2)
@@ -1667,7 +1666,6 @@ func (lit *ExprMapLiteral) emitPush() {
 				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
 			}
 		}
-
 
 		emit("pop %%rbx") // map head
 		emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
@@ -1696,7 +1694,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		lit := rhs.(*ExprMapLiteral)
 		lit.emitPush()
-	case *Relation,*ExprVariable:
+	case *Relation, *ExprVariable:
 		rhs.emit()
 		emit("push %%rax")
 		emit("push %%rbx")
@@ -1716,9 +1714,9 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
-	emit("pop %%rcx") // dynamicValue
+	emit("pop %%rcx")          // dynamicValue
 	emit("mov %%rcx, (%%rax)") // store value to heap
-	emit("push %%rax")  // address
+	emit("push %%rax")         // address
 
 	namedType := dynamicValue.getGtype()
 	if namedType.typ == G_POINTER {
@@ -1731,14 +1729,14 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	//debugf("dynamic type:%s", gtype)
-	dtypeId,ok := groot.hashedTypes[gtype.String()]
+	dtypeId, ok := groot.hashedTypes[gtype.String()]
 	if !ok {
 		//debugf("types:%#v", groot.hashedTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
 		errorft(dynamicValue.token(), "type %s not found", gtype)
 	}
 	label := fmt.Sprintf("DT%d", dtypeId)
-	emit("lea .%s, %%rax# dtype %s",label,  gtype.String())
+	emit("lea .%s, %%rax# dtype %s", label, gtype.String())
 	emit("push %%rax")
 
 }
@@ -1763,7 +1761,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
-	assert(rhs.getGtype() != nil,rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
+	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_INTERFACE {
 		rhs.emit()
 		emit("push %%rax")
@@ -1866,7 +1864,6 @@ func (variable *ExprVariable) saveInterface(offset int) {
 	variable.emitOffsetSave(8, offset)
 }
 
-
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	emit("# assignToArray")
@@ -1914,7 +1911,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 						continue
 					} else if arrayLiteral.values[i].getGtype().getPrimType() != G_INTERFACE {
 						// conversion of dynamic type => interface type
-						dynamicValue :=  arrayLiteral.values[i]
+						dynamicValue := arrayLiteral.values[i]
 						convertDynamicTypeToInterface(dynamicValue)
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
@@ -1964,7 +1961,7 @@ func (decl *DeclVar) emit() {
 	case gtype.typ == G_INTERFACE || (gtype.typ == G_REL && gtype.relation.gtype.typ == G_INTERFACE):
 		assignToInterface(decl.varname, decl.initval)
 	default:
-		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+ gtype.String())
+		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
 		// primitive types like int,bool,byte
 		rhs := decl.initval
 		if rhs == nil {
@@ -2136,7 +2133,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("mov (%%rcx), %%rax") // emit index address
 
 	mapKeyType := mapType.mapKey
-	assert(mapKeyType != nil, nil, "key typ should not be nil:" + mapType.String())
+	assert(mapKeyType != nil, nil, "key typ should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}
@@ -2253,7 +2250,7 @@ func (e ExprArrayLiteral) emit() {
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getPrimType() == G_INTERFACE, e.token(), "expr must be an Interface type")
 	if e.gtype.getPrimType() == G_INTERFACE {
-		TBI(e.token(),"")
+		TBI(e.token(), "")
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.
@@ -2264,22 +2261,22 @@ func (e *ExprTypeAssertion) emit() {
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
-		emitStringsEqual(true,"%rax", "%rcx")
+		emitStringsEqual(true, "%rax", "%rcx")
 
 		emit("mov %%rax, %%rbx") // move flag
 		// @TODO consider big data like slice, struct, etd
-		emit("pop %%rax") // load ptr
+		emit("pop %%rax")          // load ptr
 		emit("mov (%%rax), %%rax") // deref
 	}
 }
 
 func (ast *StmtContinue) emit() {
-	assert(ast.stmtFor.labelEndBlock != "",ast.token(), "labelEndLoop should not be empty")
+	assert(ast.stmtFor.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # continue", ast.stmtFor.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(ast.stmtFor.labelEndLoop != "",ast.token(), "labelEndLoop should not be empty")
+	assert(ast.stmtFor.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # break", ast.stmtFor.labelEndLoop)
 }
 
@@ -2306,7 +2303,7 @@ func (ast *StmtDefer) emit() {
 }
 
 func (e *ExprVaArg) emit() {
-	TBI(e.token(),"")
+	TBI(e.token(), "")
 }
 
 func (e *ExprConversion) emit() {
@@ -2336,13 +2333,13 @@ func (ast *ExprMethodcall) getUniqueName() string {
 
 func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
-	assertNotNil(methodCall.receiver !=nil, methodCall.token())
+	assertNotNil(methodCall.receiver != nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
 	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.typ == G_POINTER {
 		typeToBeloing = gtype.origType
-		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:" +  gtype.String())
+		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:"+gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
@@ -2386,7 +2383,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 }
 
 type IrInterfaceMethodCall struct {
-	receiver Expr
+	receiver   Expr
 	methodName identifier
 }
 
@@ -2394,8 +2391,8 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emitCall %s", call.methodName)
 	if true {
 		mapType := &Gtype{
-			typ:      G_MAP,
-			mapKey:   &Gtype{
+			typ: G_MAP,
+			mapKey: &Gtype{
 				typ: G_STRING,
 			},
 			mapValue: &Gtype{
@@ -2412,11 +2409,11 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 		emit("# find method %s", call.methodName)
 		emit("mov (%%rax), %%r10") // address of namedTypeN
 
-		emit("mov $128, %%rax")                  // copy len
-		emit("mov %%rax, %%r11")                  // copy len
+		emit("mov $128, %%rax")  // copy len
+		emit("mov %%rax, %%r11") // copy len
 
 		emit("lea .M%s, %%rax", call.methodName) // index value
-		emit("mov %%rax, %%r12") // index value
+		emit("mov %%rax, %%r12")                 // index value
 		emitMapGet(mapType, false)
 	}
 
@@ -2452,7 +2449,6 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
 	}
 
-
 	emit("pop %%rax")
 	emit("call *%%rax")
 }
@@ -2463,8 +2459,8 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 		args = append(args, arg)
 	}
 	call := &IrInterfaceMethodCall{
-		receiver: methodCall.receiver,
-		methodName : methodCall.fname,
+		receiver:   methodCall.receiver,
+		methodName: methodCall.fname,
 	}
 	call.emit(args)
 }
@@ -2487,7 +2483,7 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
-	var staticCall IrStaticCall =  getPackagedFuncName(pkgname, name)
+	var staticCall IrStaticCall = getPackagedFuncName(pkgname, name)
 	staticCall.emit(args)
 }
 
@@ -2562,9 +2558,9 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 		// Conversion
 		conversion := &ExprConversion{
-			tok: funcall.token(),
+			tok:   funcall.token(),
 			gtype: funcall.rel.gtype,
-			expr: funcall.args[0],
+			expr:  funcall.args[0],
 		}
 		conversion.emit()
 		return
@@ -2865,13 +2861,13 @@ func (root *IrRoot) emit() {
 
 	emitLabel("%s:", "namedTypes")
 	emit(".quad 0 # typeId:0")
-	for i:= 1; i <= len(root.methodTable); i++ {
+	for i := 1; i <= len(root.methodTable); i++ {
 		emit(".quad namedType%d # typeId:%d, %s", i, i, root.methodTable[i])
 	}
 
 	var shortMethodNames map[string]string = map[string]string{}
 
-	for i:= 1; i <= len(root.methodTable); i++ {
+	for i := 1; i <= len(root.methodTable); i++ {
 		emitLabel("namedType%d:", i)
 		for _, methodNameFull := range root.methodTable[i] {
 			splitted := strings.Split(methodNameFull, "$")
@@ -2901,4 +2897,3 @@ func (root *IrRoot) emit() {
 	}
 	emitMainFunc()
 }
-

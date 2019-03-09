@@ -46,22 +46,22 @@ func f4() {
 
 func f5() {
 	var slice []int = nil
-	for i,v := range slice {
+	for i, v := range slice {
 		fmt.Printf("error %d,%d\n", i, v)
 	}
 
 }
 
 func f6() {
-	var array [5]int = [5]int{1,2,3,4,5}
-	for _,v := range array {
+	var array [5]int = [5]int{1, 2, 3, 4, 5}
+	for _, v := range array {
 		if v == 1 {
 			continue
 		}
 		if v == 4 {
 			break
 		}
-		fmt.Printf("%d\n", v + 13) // 15,16
+		fmt.Printf("%d\n", v+13) // 15,16
 	}
 
 }

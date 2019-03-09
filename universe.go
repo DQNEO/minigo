@@ -1,8 +1,9 @@
 package main
 
 // built-in types
-const sizeOfInterface = 8*3
-var gInterface = &Gtype{typ: G_INTERFACE, size: sizeOfInterface,}
+const sizeOfInterface = 8 * 3
+
+var gInterface = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
 var gInt = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
@@ -17,6 +18,7 @@ var builinLen = &DeclFunc{
 var buitinAppend = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
+
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
 	predeclareNil(universe)

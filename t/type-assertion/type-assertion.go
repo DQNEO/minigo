@@ -57,8 +57,8 @@ func (p *Point2) calc() int {
 func main() {
 	var x int
 	x = do(true)
-	fmt.Printf("%d\n", x - 2) // 1
+	fmt.Printf("%d\n", x-2) // 1
 
 	x = do(false)
-	fmt.Printf("%d\n", x - 4) // 2
+	fmt.Printf("%d\n", x-4) // 2
 }

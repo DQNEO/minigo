@@ -91,7 +91,6 @@ func main() {
 		}
 	}
 
-
 	// parse
 	p := &parser{}
 	gp = p
@@ -116,7 +115,7 @@ func main() {
 	// parse std packages
 	for pkgName, _ := range imported {
 		pkgCode := stdPkgs[pkgName]
-		assert(len(pkgCode) > 0,nil, "pkgCode should not empty:" + string(pkgName))
+		assert(len(pkgCode) > 0, nil, "pkgCode should not empty:"+string(pkgName))
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
 	}

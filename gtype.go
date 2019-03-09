@@ -35,7 +35,7 @@ type signature struct {
 
 type Gtype struct {
 	typ          GTYPE_TYPE
-	typeId int                             // 0:unkonwn
+	typeId       int                       // 0:unkonwn
 	dependendson Expr                      // for G_DEPENDENT
 	relation     *Relation                 // for G_REL
 	size         int                       // for scalar type like int, bool, byte, for struct
@@ -124,7 +124,7 @@ func (gtype *Gtype) String() string {
 		elm := gtype.elementType
 		return fmt.Sprintf("[%d]%s", gtype.length, elm)
 	case G_STRUCT:
-		var r  = "struct{"
+		var r = "struct{"
 		for _, field := range gtype.fields {
 			r += field.String() + ","
 		}
@@ -185,7 +185,6 @@ func (strct *Gtype) calcStructOffset() {
 
 	strct.size = offset
 }
-
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {

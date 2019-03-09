@@ -184,7 +184,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	rel := &Relation{
 		tok:  firstIdentToken,
 		name: firstIdent,
-		pkg: p.currentPackageName, // @TODO is this right?
+		pkg:  p.currentPackageName, // @TODO is this right?
 	}
 	p.tryResolve(pkg, rel)
 
@@ -743,7 +743,7 @@ func (p *parser) parseType() *Gtype {
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
-				pkg: p.currentPackageName,
+				pkg:  p.currentPackageName,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -846,7 +846,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 		pkg: p.currentPackageName,
 		varname: &Relation{
 			expr: variable,
-			pkg: p.currentPackageName,
+			pkg:  p.currentPackageName,
 		},
 		variable: variable,
 		initval:  initval,
@@ -1277,8 +1277,8 @@ func (p *parser) parseSwitchStmt() Stmt {
 	p.expect("{")
 	r := &StmtSwitch{
 		isTypeSwitch: isTypeSwitch,
-		tok:  ptok,
-		cond: cond,
+		tok:          ptok,
+		cond:         cond,
 	}
 
 	for {
@@ -1320,7 +1320,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			casestmt := &ExprCaseClause{
 				tok:      ptok,
 				exprs:    exprs,
-				gtypes:  gtypes,
+				gtypes:   gtypes,
 				compound: compound,
 			}
 			p.inCase--
@@ -1375,13 +1375,13 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("continue") {
 		ptok := p.expectKeyword("continue")
 		return &StmtContinue{
-			tok: ptok,
+			tok:     ptok,
 			stmtFor: p.currentForStmt,
 		}
 	} else if tok.isKeyword("break") {
 		ptok := p.expectKeyword("break")
 		return &StmtBreak{
-			tok: ptok,
+			tok:     ptok,
 			stmtFor: p.currentForStmt,
 		}
 	} else if tok.isKeyword("defer") {
@@ -1985,7 +1985,6 @@ func (funcall *ExprFuncallOrConversion) isBuiltinLen() bool {
 	// len()
 	return decl == builinLen
 }
-
 
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe

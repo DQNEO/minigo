@@ -141,11 +141,11 @@ type ForForClause struct {
 type StmtFor struct {
 	tok *Token
 	// either of rng or cls is set
-	rng   *ForRangeClause
-	cls   *ForForClause
-	block *StmtSatementList
+	rng           *ForRangeClause
+	cls           *ForForClause
+	block         *StmtSatementList
 	labelEndBlock string
-	labelEndLoop string
+	labelEndLoop  string
 }
 
 type StmtIf struct {
@@ -270,17 +270,17 @@ func (e *ExprSliceLiteral) getGtype() *Gtype {
 // x.(T)
 type ExprTypeAssertion struct {
 	tok   *Token
-	expr  Expr    // x
-	gtype *Gtype  // T
+	expr  Expr   // x
+	gtype *Gtype // T
 }
 
 type StmtContinue struct {
-	tok           *Token
+	tok     *Token
 	stmtFor *StmtFor
 }
 
 type StmtBreak struct {
-	tok *Token
+	tok     *Token
 	stmtFor *StmtFor
 }
 
@@ -315,11 +315,11 @@ type ExprCaseClause struct {
 
 // https://golang.org/ref/spec#Switch_statements
 type StmtSwitch struct {
-	tok   *Token
+	tok          *Token
 	isTypeSwitch bool
-	cond  Expr
-	cases []*ExprCaseClause
-	dflt  *StmtSatementList
+	cond         Expr
+	cases        []*ExprCaseClause
+	dflt         *StmtSatementList
 }
 
 type KeyedElement struct {

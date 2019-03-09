@@ -7,7 +7,7 @@ func swtch(x int) int {
 	switch x {
 	case 1:
 		y = 1
-	case 2,3:
+	case 2, 3:
 		y = 2
 	case 5:
 		y = 5
@@ -26,9 +26,9 @@ func f1() {
 	i = swtch(2)
 	fmt.Printf("%d\n", i) // 2
 	i = swtch(3)
-	fmt.Printf("%d\n", i + 1) // 3
+	fmt.Printf("%d\n", i+1) // 3
 	i = swtch(999)
-	fmt.Printf("%d\n", i - 3) // 4
+	fmt.Printf("%d\n", i-3) // 4
 }
 
 func swtch2(x int) int {
@@ -43,7 +43,7 @@ func swtch2(x int) int {
 
 func f2() {
 	i := swtch2(3)
-	fmt.Printf("%d\n", i + 5) // 5
+	fmt.Printf("%d\n", i+5) // 5
 }
 
 func main() {

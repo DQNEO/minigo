@@ -4,8 +4,8 @@ import "fmt"
 
 func f0() *int {
 	p := &Point{
-		x:1,
-		y:2,
+		x: 1,
+		y: 2,
 	}
 	x := &p.x
 	return x
@@ -14,8 +14,8 @@ func f0() *int {
 func f1() string {
 	f := &StmtFor{
 		rng: &ForRangeClause{
-			invisibleMapCounter:&ExprVariable{
-				id:1,
+			invisibleMapCounter: &ExprVariable{
+				id: 1,
 			},
 		},
 	}
@@ -39,7 +39,7 @@ type Point struct {
 }
 
 type StmtFor struct {
-	rng   *ForRangeClause
+	rng *ForRangeClause
 }
 
 type ForRangeClause struct {

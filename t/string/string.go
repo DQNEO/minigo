@@ -54,6 +54,7 @@ func f4() {
 }
 
 type mystring string
+
 func f5() {
 	s := "8"
 	ms := mystring(s)

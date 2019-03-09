@@ -8,7 +8,6 @@ func f0() {
 	fmt.Printf("%d\n", l)
 }
 
-
 func f1() {
 	var a [1]int
 	fmt.Printf("%d\n", len(a))
