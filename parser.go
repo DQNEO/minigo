@@ -1861,7 +1861,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
-	p.importedNames = make(map[identifier]bool)
+	p.importedNames = map[identifier]bool{}
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
