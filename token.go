@@ -178,7 +178,7 @@ func readIdentifier(c0 byte) string {
 }
 
 func read_string() string {
-	var chars = []byte{}
+	var chars []byte
 	for {
 		c, err := getc()
 		if err != nil {
@@ -200,7 +200,7 @@ func read_string() string {
 }
 
 func read_raw_string() string {
-	var chars = []byte{}
+	var chars []byte
 	for {
 		c, err := getc()
 		if err != nil {
