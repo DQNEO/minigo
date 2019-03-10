@@ -1982,8 +1982,19 @@ func (funcall *ExprFuncallOrConversion) isBuiltinLen() bool {
 		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
 
-	// len()
 	return decl == builinLen
+}
+
+func (funcall *ExprFuncallOrConversion) isBuiltinCap() bool {
+	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		return false
+	}
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
+		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+	}
+
+	return decl == builinCap
 }
 
 func (p *parser) resolve(universe *scope) {

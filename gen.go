@@ -2580,6 +2580,56 @@ func (e *ExprLen) emit() {
 	}
 }
 
+func (e *ExprCap) emit() {
+	emit("# emit len()")
+	arg := e.arg
+	gtype := arg.getGtype()
+	switch {
+	case gtype.typ == G_ARRAY:
+		emit("mov $%d, %%rax", gtype.length)
+	case gtype.typ == G_SLICE:
+		switch arg.(type) {
+		case *Relation:
+			emit("# Relation")
+			emitOffsetLoad(arg, 8, ptrSize * 2)
+		case *ExprStructField:
+			emit("# ExprStructField")
+			emitOffsetLoad(arg, 8, ptrSize * 2)
+		case *ExprIndex:
+			emitOffsetLoad(arg, 8, ptrSize * 2)
+		case *ExprSliceLiteral:
+			emit("# ExprSliceLiteral")
+			_arg := arg.(*ExprSliceLiteral)
+			length := len(_arg.values)
+			emit("mov $%d, %%rax", length)
+		case *ExprSlice:
+			sliceExpr := arg.(*ExprSlice)
+			if sliceExpr.collection.getGtype().typ == G_ARRAY {
+				cp := &ExprBinop{
+					tok: e.tok,
+					op:"-",
+					left: &ExprLen{
+						tok: e.tok,
+						arg:sliceExpr.collection,
+					},
+					right:sliceExpr.low,
+				}
+				cp.emit()
+			} else {
+				TBI(arg.token(), "unable to handle %T", arg)
+			}
+		default:
+			TBI(arg.token(), "unable to handle %T", arg)
+		}
+	case gtype.getPrimType() == G_MAP:
+		TBI(arg.token(), "unable to handle %T", arg)
+	case gtype.getPrimType() == G_STRING:
+		TBI(arg.token(), "unable to handle %T", arg)
+	default:
+		TBI(arg.token(), "unable to handle %s", gtype)
+	}
+}
+
 func (funcall *ExprFuncallOrConversion) emit() {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 		// Conversion
@@ -2606,6 +2656,14 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			arg: arg,
 		}
 		exprLen.emit()
+		return
+	} else if funcall.isBuiltinCap() {
+		arg := funcall.args[0]
+		e := &ExprCap{
+			tok: arg.token(),
+			arg: arg,
+		}
+		e.emit()
 		return
 	}
 	var staticCall IrStaticCall = getPackagedFuncName(decl.pkg, funcall.fname)
