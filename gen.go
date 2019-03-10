@@ -892,7 +892,7 @@ func (e *ExprSliceLiteral) emit() {
 	emit("push %%rax")
 	for i, value := range e.values {
 		switch value.getGtype().getPrimType() {
-		case G_INT, G_POINTER, G_STRING:
+		case G_BYTE, G_INT, G_POINTER, G_STRING:
 			value.emit()
 			emit("pop %%rbx # head")
 			emit("mov %%rax, %d(%%rbx)", IntSize*i)
