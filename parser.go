@@ -1932,7 +1932,8 @@ func (ast *StmtShortVarDecl) infer() {
 			}
 		case *ExprMethodcall:
 			fcall := rightExpr.(*ExprMethodcall)
-			for _, gtype := range fcall.getRettypes() {
+			rettypes := fcall.getRettypes()
+			for _, gtype := range rettypes {
 				rightTypes = append(rightTypes, gtype)
 			}
 		case *ExprTypeAssertion:
