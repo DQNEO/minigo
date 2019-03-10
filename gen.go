@@ -1084,13 +1084,27 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("## mapCounter.emit()")
 		mapCounter.emit()
 
+		//assert(f.rng.valuevar.getGtype().getSize() <= 8, f.rng.token(), "invalid size")
 		emit("## eval value")
 		emit("imul $16, %%rax")
 		emit("add $8, %%rax")
 		emit("add %%rax, %%rcx")
-		emit("mov (%%rcx), %%rax")
-		emit("mov (%%rax), %%rax")
-		f.rng.valuevar.emitSave()
+		emit("mov (%%rcx), %%rdx")
+
+		switch f.rng.valuevar.getGtype().getPrimType() {
+		case G_SLICE, G_MAP:
+			emit("mov (%%rdx), %%rax")
+			emit("mov 8(%%rdx), %%rbx")
+			emit("mov 16(%%rdx), %%rcx")
+			emit("push %%rax")
+			emit("push %%rbx")
+			emit("push %%rcx")
+			emitSave3Elements(f.rng.valuevar, 0)
+		default:
+			emit("mov (%%rdx), %%rax")
+			f.rng.valuevar.emitSave()
+		}
+
 
 	}
 
