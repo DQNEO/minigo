@@ -145,11 +145,7 @@ func main() {
 	}
 
 	var importedPackages []*stdpkg
-	for importedName := range p.importedNames {
-		compiledPkg, ok := compiledPackages[importedName]
-		if !ok {
-			errorf("package not found")
-		}
+	for _, compiledPkg := range compiledPackages {
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	_, importOS = p.importedNames["os"]
@@ -199,8 +195,7 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 		stringLiterals: stringLiterals,
 	}
 
-	for i, pkg := range stdpkgs {
-		debugf("pkg[%d]:%s", i, pkg.name)
+	for _, pkg := range stdpkgs {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
