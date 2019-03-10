@@ -563,6 +563,14 @@ func (ast *ExprBinop) emit() {
 	}
 }
 
+func isUnderScore(e Expr) bool {
+	rel, ok := e.(*Relation)
+	if !ok {
+		return false
+	}
+	return rel.name == "_"
+}
+
 // https://golang.org/ref/spec#Assignments
 // A tuple assignment assigns the individual elements of a multi-valued operation to a list of variables.
 // There are two forms.
@@ -677,6 +685,10 @@ func (ast *StmtAssignment) emit() {
 					emit("push %%%s # %d", retRegi[i], i)
 				}
 				for _, left := range ast.lefts {
+					if isUnderScore(left) {
+						continue
+					}
+					assert(left.getGtype() != nil, left.token(), "should not be nil")
 					if left.getGtype().typ == G_SLICE {
 						// @TODO: Does this work ?
 						emitSave3Elements(left, 0)
