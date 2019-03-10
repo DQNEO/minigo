@@ -67,6 +67,12 @@ func f6() {
 	fmt.Printf("%d\n", len(s)) // 10
 }
 
+func f7() {
+	s := `11
+12`
+	fmt.Printf("%s\n", s)
+}
+
 func main() {
 	f1()
 	f2()
@@ -74,4 +80,5 @@ func main() {
 	f4()
 	f5()
 	f6()
+	f7()
 }

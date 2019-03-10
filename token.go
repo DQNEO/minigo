@@ -214,7 +214,12 @@ func read_raw_string() string {
 			continue
 		}
 		if c != '`' {
-			chars = append(chars, c)
+			if c == '\n' {
+				chars = append(chars, '\\')
+				chars = append(chars, 'n')
+			} else {
+				chars = append(chars, c)
+			}
 			continue
 		} else {
 			return string(chars)
