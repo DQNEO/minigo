@@ -15,6 +15,10 @@ var builinLen = &DeclFunc{
 	rettypes: []*Gtype{gInterface},
 }
 
+var builinCap = &DeclFunc{
+	rettypes: []*Gtype{gInterface},
+}
+
 var buitinAppend = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
@@ -28,6 +32,9 @@ func setPredeclaredIdentifiers(universe *scope) {
 
 	universe.setFunc("len", &ExprFuncRef{
 		funcdef: builinLen,
+	})
+	universe.setFunc("cap", &ExprFuncRef{
+		funcdef: builinCap,
 	})
 	universe.setFunc("append", &ExprFuncRef{
 		funcdef: buitinAppend,

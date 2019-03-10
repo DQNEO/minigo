@@ -97,6 +97,12 @@ type ExprLen struct {
 	arg Expr
 }
 
+// call of builtin cap()
+type ExprCap struct {
+	tok *Token
+	arg Expr
+}
+
 // local or global
 type DeclVar struct {
 	tok      *Token
