@@ -1750,32 +1750,31 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 
 	if pkg == "" {
-		relfound := p.currentScope.get(rel.name)
-		if relfound != nil {
-			switch relfound.(type) {
-			case *Gtype:
-				rel.gtype = relfound.(*Gtype)
-			case Expr:
-				rel.expr = relfound.(Expr)
-			default:
-				errorft(rel.token(), "Bad type relfound %v", relfound)
+		relbody := p.currentScope.get(rel.name)
+		if relbody != nil {
+			if relbody.gtype != nil {
+				rel.gtype = relbody.gtype
+			} else if relbody.expr != nil {
+				rel.expr = relbody.expr
+			} else {
+				errorft(rel.token(), "Bad type relbody %v", relbody)
 			}
 		} else {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {
 		// foreign package
-		relfound := p.scopes[pkg].get(rel.name)
-		if relfound == nil {
+		relbody := p.scopes[pkg].get(rel.name)
+		if relbody == nil {
 			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}
-		switch relfound.(type) {
-		case *Gtype:
-			rel.gtype = relfound.(*Gtype)
-		case Expr:
-			rel.expr = relfound.(Expr)
-		default:
-			errorft(rel.token(), "Bad type relfound %T", relfound)
+
+		if relbody.gtype != nil {
+			rel.gtype = relbody.gtype
+		} else if relbody.expr != nil {
+			rel.expr = relbody.expr
+		} else {
+			errorft(rel.token(), "Bad type relbody %v", relbody)
 		}
 	}
 }
