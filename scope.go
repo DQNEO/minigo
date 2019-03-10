@@ -68,6 +68,6 @@ func (sc *scope) getGtype(name identifier) *Gtype {
 func newScope(outer *scope) *scope {
 	return &scope{
 		outer:  outer,
-		idents: make(map[identifier]*IdentBody),
+		idents: map[identifier]*IdentBody{},
 	}
 }
