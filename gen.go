@@ -98,20 +98,22 @@ func (f *DeclFunc) emitPrologue() {
 		params = f.params
 	}
 
+	if len(params) > 0 {
+		emit("# Allocating stack for params")
+	}
+
 	for i, param := range params {
-		if i == 0 {
-			emit("# Allocating stack for params")
-		}
 		offset -= IntSize
 		param.offset = offset
 		emit("push %%%s", RegsForCall[i])
 	}
 
+	if len(f.localvars) > 0 {
+		emit("# Allocating stack for localvars")
+	}
+
 	var localarea int
-	for i, lvar := range f.localvars {
-		if i == 0 {
-			emit("# Allocating stack for localvars")
-		}
+	for _, lvar := range f.localvars {
 		if lvar.gtype == nil {
 			debugf("%s has nil gtype ", lvar)
 		}
