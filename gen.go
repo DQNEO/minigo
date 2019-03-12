@@ -86,9 +86,9 @@ func (f *DeclFunc) emitPrologue() {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	// calc offset
-	var offset int
 	var params []*ExprVariable
+
+	// prepend receiver to params
 	if f.receiver != nil {
 		params = []*ExprVariable{f.receiver}
 		for _, param := range f.params {
@@ -97,6 +97,9 @@ func (f *DeclFunc) emitPrologue() {
 	} else {
 		params = f.params
 	}
+
+	// offset for params and local variables
+	var offset int
 
 	if len(params) > 0 {
 		emit("# Allocating stack for params")
