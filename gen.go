@@ -106,9 +106,15 @@ func (f *DeclFunc) emitPrologue() {
 	}
 
 	for i, param := range params {
-		offset -= IntSize
-		param.offset = offset
-		emit("push %%%s", RegsForCall[i])
+		switch param.getGtype().getPrimType() {
+		case G_SLICE:
+			TBI(param.token(),"")
+		default:
+			offset -= IntSize
+			param.offset = offset
+			emit("push %%%s", RegsForCall[i])
+
+		}
 	}
 
 	if len(f.localvars) > 0 {
