@@ -45,7 +45,7 @@ func setPredeclaredIdentifiers(universe *scope) {
 // nil
 func predeclareNil(universe *scope) {
 	universe.set("nil", &IdentBody{
-		expr:&ExprNilLiteral{},
+		expr: &ExprNilLiteral{},
 	})
 }
 

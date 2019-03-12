@@ -109,7 +109,7 @@ func (f *DeclFunc) emitPrologue() {
 	for _, param := range params {
 		switch param.getGtype().getPrimType() {
 		case G_SLICE:
-			offset -= IntSize*3
+			offset -= IntSize * 3
 			param.offset = offset
 			emit("push %%%s # slice cap", RegsForCall[regIndex+2])
 			emit("push %%%s # slice len", RegsForCall[regIndex+1])
@@ -1133,7 +1133,6 @@ func (f *StmtFor) emitRangeForMap() {
 			emit("mov (%%rdx), %%rax")
 			f.rng.valuevar.emitSave()
 		}
-
 
 	}
 
@@ -2608,12 +2607,12 @@ func (e *ExprCap) emit() {
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
-			emitOffsetLoad(arg, 8, ptrSize * 2)
+			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprStructField:
 			emit("# ExprStructField")
-			emitOffsetLoad(arg, 8, ptrSize * 2)
+			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprIndex:
-			emitOffsetLoad(arg, 8, ptrSize * 2)
+			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
@@ -2624,12 +2623,12 @@ func (e *ExprCap) emit() {
 			if sliceExpr.collection.getGtype().typ == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
-					op:"-",
+					op:  "-",
 					left: &ExprLen{
 						tok: e.tok,
-						arg:sliceExpr.collection,
+						arg: sliceExpr.collection,
 					},
-					right:sliceExpr.low,
+					right: sliceExpr.low,
 				}
 				cp.emit()
 			} else {
@@ -2704,19 +2703,19 @@ func (ircall IrStaticCall) emit(args []Expr) {
 		} else {
 			arg.emit()
 		}
-		
+
 		if arg.getGtype() != nil && arg.getGtype().getPrimType() == G_SLICE {
 			emit("push %%rax  # argument slice ptr")
 			emit("push %%rbx  # argument slice len")
 			emit("push %%rcx  # argument slice cap")
-			numRegs+=3
+			numRegs += 3
 		} else {
 			emit("push %%rax  # argument primitive")
-			numRegs+=1
+			numRegs += 1
 		}
 	}
 
-	for i := numRegs - 1; i >= 0 ; i-- {
+	for i := numRegs - 1; i >= 0; i-- {
 		emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
 	}
 

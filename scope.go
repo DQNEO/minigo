@@ -8,14 +8,14 @@ type scope struct {
 }
 
 type IdentBody struct {
-	typ int // 1:*Gtype, 2:Expr
+	typ   int // 1:*Gtype, 2:Expr
 	gtype *Gtype
-	expr Expr
+	expr  Expr
 }
 
 func (sc *scope) get(name identifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
-		v,ok := s.idents[name]
+		v, ok := s.idents[name]
 		if ok {
 			return v
 		}
@@ -55,7 +55,7 @@ func (sc *scope) set(name identifier, elm *IdentBody) {
 }
 
 func (sc *scope) getGtype(name identifier) *Gtype {
-	elm,ok := sc.idents[name]
+	elm, ok := sc.idents[name]
 	if !ok {
 		return nil
 	}
