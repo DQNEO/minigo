@@ -105,15 +105,21 @@ func (f *DeclFunc) emitPrologue() {
 		emit("# Allocating stack for params")
 	}
 
-	for i, param := range params {
+	var regIndex int
+	for _, param := range params {
 		switch param.getGtype().getPrimType() {
 		case G_SLICE:
-			TBI(param.token(),"")
+			offset -= IntSize*3
+			param.offset = offset
+			emit("push %%%s # slice cap", RegsForCall[regIndex+2])
+			emit("push %%%s # slice len", RegsForCall[regIndex+1])
+			emit("push %%%s # slice ptr", RegsForCall[regIndex])
+			regIndex += 3
 		default:
 			offset -= IntSize
 			param.offset = offset
-			emit("push %%%s", RegsForCall[i])
-
+			emit("push %%%s", RegsForCall[regIndex])
+			regIndex += 1
 		}
 	}
 
@@ -263,14 +269,14 @@ func (ast *ExprVariable) emit() {
 		switch {
 		case ast.getGtype().typ == G_SLICE:
 			emit("#   emit slice variable")
-			emit("mov %d(%%rbp), %%rax", ast.offset)
-			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
-			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
+			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
+			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
 		case ast.getGtype().typ == G_MAP:
-			emit("#   emit slice variable")
-			emit("mov %d(%%rbp), %%rax", ast.offset)
-			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
-			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+IntSize)
+			emit("#   emit map variable")
+			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
+			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
 		default:
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 		}
@@ -2685,27 +2691,38 @@ type IrStaticCall string
 
 func (ircall IrStaticCall) emit(args []Expr) {
 	// nothing to do
+	emit("")
 	emit("# emitCall %s", ircall)
 
 	emit("# setting arguments %v", args)
 
-	for i, arg := range args {
+	var numRegs int
+	for _, arg := range args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
 		} else {
 			arg.emit()
 		}
-		emit("push %%rax  # argument no %d", i+1)
+		
+		if arg.getGtype() != nil && arg.getGtype().getPrimType() == G_SLICE {
+			emit("push %%rax  # argument slice ptr")
+			emit("push %%rbx  # argument slice len")
+			emit("push %%rcx  # argument slice cap")
+			numRegs+=3
+		} else {
+			emit("push %%rax  # argument primitive")
+			numRegs+=1
+		}
 	}
 
-	for i, _ := range args {
-		j := len(args) - 1 - i
-		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
+	for i := numRegs - 1; i >= 0 ; i-- {
+		emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
 	}
 
 	emit("mov $0, %%rax")
 	emit("call %s", ircall)
+	emit("")
 }
 
 func emitMainFunc() {
