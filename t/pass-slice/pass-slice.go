@@ -51,8 +51,30 @@ func f3() {
 	fmt.Printf("%d\n", slice2[4]) // 16
 }
 
+func append(x []int, elm int) []int {
+	var s []int
+	zlen := len(x) + 1
+	if cap(x) >= zlen {
+		s = x[:zlen]
+		s[len(x)] = elm
+	}
+
+	return s
+}
+
+var array4 [5]int = [...]int{1,2,3,4,5}
+
+func f4() {
+	var slice []int = array4[0:1]
+	var slice2 []int
+	slice2 = append(slice, 18)
+	fmt.Printf("%d\n", len(slice2) + 15) //17
+	fmt.Printf("%d\n", slice2[1]) // 18
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }
