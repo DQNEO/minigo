@@ -22,7 +22,7 @@ func f1() {
 	fmt.Printf("%d\n", cap(c)+2) // 4
 
 	c = b[1:2]
-	fmt.Printf("%d\n", cap(c)+4) // 5
+	fmt.Printf("%d\n", cap(c)+3) // 5
 
 	var d []int = []int{1, 2, 3, 4, 5, 6}
 	fmt.Printf("%d\n", cap(d)) // 6

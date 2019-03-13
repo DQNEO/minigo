@@ -23,6 +23,36 @@ func f1() {
 	fmt.Printf("%d\n", s[2]+7)   // 10
 }
 
+func copy_slice(x []int) []int {
+	var s []int
+	x[0] = 11
+	s = x
+	return s
+}
+
+var array2 [5]int = [...]int{15, 14, 13, 12, 11}
+
+func f2() {
+	var slice []int = array2[0:2]
+	var slice2 []int
+	slice2 = copy_slice(slice)
+	fmt.Printf("%d\n", slice2[0]) // 11
+	fmt.Printf("%d\n", len(slice2) + 10) // 12
+	fmt.Printf("%d\n", cap(slice2) + 8) // 13
+}
+
+var array3 [5]int = [...]int{1,2,3,4,16}
+
+func f3() {
+	var slice []int = array3[0:2]
+	var slice2 []int = slice[0:5]
+	fmt.Printf("%d\n", len(slice2) + 9) // 14
+	fmt.Printf("%d\n", cap(slice2) + 10) // 15
+	fmt.Printf("%d\n", slice[4]) // 16
+}
+
 func main() {
 	f1()
+	f2()
+	f3()
 }
