@@ -26,7 +26,10 @@ var retRegi = [14]string{
 
 var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
 
-const IntSize = 8 // 64-bit (8 bytes)
+const IntSize  int = 8 // 64-bit (8 bytes)
+const ptrSize int = 8
+const sliceWidth int = 3
+const sliceSize int = IntSize + ptrSize + ptrSize
 
 var hiddenArrayId = 1
 
@@ -109,12 +112,12 @@ func (f *DeclFunc) emitPrologue() {
 	for _, param := range params {
 		switch param.getGtype().getPrimType() {
 		case G_SLICE:
-			offset -= IntSize * 3
+			offset -= sliceSize
 			param.offset = offset
 			emit("push %%%s # slice cap", RegsForCall[regIndex+2])
 			emit("push %%%s # slice len", RegsForCall[regIndex+1])
 			emit("push %%%s # slice ptr", RegsForCall[regIndex])
-			regIndex += 3
+			regIndex += sliceWidth
 		default:
 			offset -= IntSize
 			param.offset = offset
@@ -2708,7 +2711,7 @@ func (ircall IrStaticCall) emit(args []Expr) {
 			emit("push %%rax  # argument slice ptr")
 			emit("push %%rbx  # argument slice len")
 			emit("push %%rcx  # argument slice cap")
-			numRegs += 3
+			numRegs += sliceWidth
 		} else {
 			emit("push %%rax  # argument primitive")
 			numRegs += 1
