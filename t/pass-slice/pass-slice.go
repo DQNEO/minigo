@@ -52,14 +52,14 @@ func f3() {
 }
 
 func append(x []int, elm int) []int {
-	var s []int
+	var z []int
 	zlen := len(x) + 1
 	if cap(x) >= zlen {
-		s = x[:zlen]
-		s[len(x)] = elm
+		z = x[:zlen]
+		z[len(x)] = elm
 	}
 
-	return s
+	return z
 }
 
 var array4 [5]int = [...]int{1,2,3,4,5}
