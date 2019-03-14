@@ -272,20 +272,44 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 					tok: tok,
 					val: e.getGtype().length,
 				}
+				r = &ExprSlice{
+					tok:        tok,
+					collection: e,
+					low:        index,
+					high:       highIndex,
+				}
 			} else {
 				highIndex = p.parseExpr()
-				p.expect("]")
+				tok := p.peekToken()
+				if tok.isPunct("]") {
+					p.skip()
+					r = &ExprSlice{
+						tok:        tok,
+						collection: e,
+						low:        index,
+						high:       highIndex,
+					}
+				} else if tok.isPunct(":") {
+					p.skip()
+					maxIndex :=  p.parseExpr()
+					r = &ExprSlice{
+						tok:        tok,
+						collection: e,
+						low:        index,
+						high:       highIndex,
+						max:        maxIndex,
+					}
+					p.expect("]")
+				} else {
+					errorft(tok, "invalid token in index access")
+				}
 			}
-			r = &ExprSlice{
-				tok:        tok,
-				collection: e,
-				low:        index,
-				high:       highIndex,
-			}
-
 		} else {
 			errorft(tok, "invalid token in index access")
 		}
+	}
+	if r == nil {
+		errorft(tok, "should not be nil")
 	}
 	return r
 }
@@ -1951,6 +1975,9 @@ func (ast *StmtShortVarDecl) infer() {
 				rightTypes = append(rightTypes, secondGtype)
 			}
 		default:
+			if rightExpr == nil {
+				errorft(ast.token(), "rightExpr is nil")
+			}
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
 				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)

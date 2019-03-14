@@ -2276,12 +2276,18 @@ func (e *ExprSlice) emitToStack() {
 	emit("push %%rax")
 
 	emit("#   calc and set cap")
-	calcCap := &ExprBinop{
-		op:"-",
-		left: &ExprCap{
+	var max Expr
+	if e.max != nil {
+		max = e.max
+	} else {
+		max = &ExprCap{
 			tok: e.token(),
 			arg: e.collection,
-		},
+		}
+	}
+	calcCap := &ExprBinop{
+		op:"-",
+		left: max,
 		right: e.low,
 	}
 

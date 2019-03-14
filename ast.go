@@ -243,6 +243,7 @@ type ExprSlice struct {
 	collection Expr
 	low        Expr
 	high       Expr
+	max        Expr
 }
 
 // Expr e.g. array[2], myap["foo"]

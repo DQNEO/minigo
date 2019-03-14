@@ -69,10 +69,33 @@ func f4() {
 	fmt.Printf("%d\n", s[0] + 11)  // 13
 }
 
+//  Full slice expressions
+//
+//  For an array, pointer to array, or slice a (but not a string), the primary expression
+//
+//  a[low : high : max]
+//  constructs a slice of the same type, and with the same length and elements as the simple slice expression a[low : high]. Additionally, it controls the resulting slice's capacity by setting it to max - low. Only the first index may be omitted; it defaults to 0. After slicing the array a
+//
+//  a := [5]int{1, 2, 3, 4, 5}
+//  t := a[1:3:5]
+//  the slice t has type []int, length 2, capacity 4, and elements
+//
+//  t[0] == 2
+//  t[1] == 3
+
+func f5() {
+	var a = [5]int{1,2,3,4,5}
+	var s []int = a[1:3:4]
+	fmt.Printf("%d\n", len(s) + 12) // 14
+	fmt.Printf("%d\n", cap(s) + 12) // 15
+	fmt.Printf("%d\n", s[0] + 14)  // 16
+}
+
 func main() {
 	f0()
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }
