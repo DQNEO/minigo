@@ -22,7 +22,7 @@ func f1() {
 	fmt.Printf("%d\n", cap(c)+2) // 4
 
 	c = b[1:2]
-	fmt.Printf("%d\n", cap(c)+3) // 5
+	fmt.Printf("%d\n", cap(c)+4) // 5
 
 	var d []int = []int{1, 2, 3, 4, 5, 6}
 	fmt.Printf("%d\n", cap(d)) // 6
@@ -43,7 +43,30 @@ func f2() {
 
 func f3() {
 	var array = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
-	fmt.Printf("%d\n", cap(array))
+	fmt.Printf("%d\n", cap(array)) // 10
+}
+
+/*
+
+https://golang.org/ref/spec#Slice_expressions
+
+After slicing the array a
+
+a := [5]int{1, 2, 3, 4, 5}
+s := a[1:4]
+the slice s has type []int, length 3, capacity 4, and elements
+
+s[0] == 2
+s[1] == 3
+s[2] == 4
+
+*/
+func f4() {
+	var a = [5]int{1,2,3,4,5}
+	var s []int = a[1:4]
+	fmt.Printf("%d\n", len(s) + 8) // 11
+	fmt.Printf("%d\n", cap(s) + 8) // 12
+	fmt.Printf("%d\n", s[0] + 11)  // 13
 }
 
 func main() {
@@ -51,4 +74,5 @@ func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }

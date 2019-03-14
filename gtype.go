@@ -348,6 +348,10 @@ func (e *ExprLen) getGtype() *Gtype {
 	return gInt
 }
 
+func (e *ExprCap) getGtype() *Gtype {
+	return gInt
+}
+
 func (e *ExprVariable) getGtype() *Gtype {
 	return e.gtype
 }

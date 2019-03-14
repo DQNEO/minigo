@@ -262,6 +262,10 @@ func (e *ExprLen) dump() {
 	TBI(e.token(), "")
 }
 
+func (e *ExprCap) dump() {
+	TBI(e.token(), "")
+}
+
 func (e *ExprSliceLiteral) dump() {
 	panic("implement me")
 }

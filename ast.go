@@ -413,3 +413,4 @@ func (node *ExprStructField) token() *Token         { return node.tok }
 func (node *ExprTypeSwitchGuard) token() *Token     { return node.tok }
 func (node *ExprMapLiteral) token() *Token          { return node.tok }
 func (node *ExprLen) token() *Token                 { return node.tok }
+func (node *ExprCap) token() *Token                 { return node.tok }

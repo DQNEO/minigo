@@ -2276,11 +2276,16 @@ func (e *ExprSlice) emitToStack() {
 	emit("push %%rax")
 
 	emit("#   calc and set cap")
-	eCap := &ExprCap{
-		tok: e.token(),
-		arg: e.collection,
+	calcCap := &ExprBinop{
+		op:"-",
+		left: &ExprCap{
+			tok: e.token(),
+			arg: e.collection,
+		},
+		right: e.low,
 	}
-	eCap.emit()
+
+	calcCap.emit()
 
 	emit("push %%rax")
 }
@@ -2598,7 +2603,7 @@ func (e *ExprLen) emit() {
 }
 
 func (e *ExprCap) emit() {
-	emit("# emit len()")
+	emit("# emit cap()")
 	arg := e.arg
 	gtype := arg.getGtype()
 	switch {
