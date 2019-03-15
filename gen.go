@@ -2751,6 +2751,8 @@ func emitMainFunc() {
 		emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
 		emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
 		emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
+	} else {
+		emit("# No Args. os is not imported.")
 	}
 	emit("")
 	emit("mov $0, %%rax")
