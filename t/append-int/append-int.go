@@ -51,25 +51,6 @@ func f3() {
 	fmt.Printf("%d\n", slice2[4]) // 16
 }
 
-func append(x []int, elm int) []int {
-	var z []int
-	zlen := len(x) + 1
-	if cap(x) >= zlen {
-		z = x[:zlen]
-	} else {
-		newcap := len(x) * 2
-		z = x[:zlen]
-		//z = malloc(newcap * 8)//make([]int, zlen, newcap)
-		z = makeSlice(zlen, newcap)
-		for i:=0;i<len(x);i++ {
-			z[i] = x[i]
-		}
-	}
-
-	z[len(x)] = elm
-	return z
-}
-
 var array4 [5]int = [...]int{1,2,3,4,5}
 
 func f4() {
