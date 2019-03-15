@@ -61,7 +61,9 @@ func append(x []int, elm int) []int {
 		z = x[:zlen]
 		//z = malloc(newcap * 8)//make([]int, zlen, newcap)
 		z = makeSlice(zlen, newcap)
-		//copy(x, z)
+		for i:=0;i<len(x);i++ {
+			z[i] = x[i]
+		}
 	}
 
 	z[len(x)] = elm
@@ -80,7 +82,7 @@ func f4() {
 
 
 func f5() {
-	var array [2]int = [...]int{1,2}
+	var array [2]int = [...]int{22,23}
 	var tmp []int = array[0:2]
 	var s []int
 	s = append(tmp, 19)
@@ -89,6 +91,8 @@ func f5() {
 	s = append(s, 1)
 	s = append(s, 1)
 	fmt.Printf("%d\n", cap(s) /* 8 */ + 13 ) // 21
+	fmt.Printf("%d\n", s[0])    // 22
+	fmt.Printf("%d\n", s[1])    // 23
 }
 
 func main() {
