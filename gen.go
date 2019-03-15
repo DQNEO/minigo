@@ -24,7 +24,7 @@ var retRegi = [14]string{
 	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 }
 
-var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9"}
+var RegsForCall = [...]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
 const IntSize  int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
@@ -2729,6 +2729,9 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	}
 
 	for i := numRegs - 1; i >= 0; i-- {
+		if i >= len(RegsForCall) {
+			errorft(args[0].token(), "too many arguments")
+		}
 		emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
 	}
 
