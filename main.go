@@ -73,6 +73,11 @@ var importOS bool
 func main() {
 	var sourceFiles []string
 
+	if len(os.Args) <= 1 {
+		println("[Help]")
+		return
+	}
+
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
