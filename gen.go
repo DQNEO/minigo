@@ -2712,6 +2712,7 @@ func (ircall IrStaticCall) emit(args []Expr) {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
+			continue
 		} else {
 			arg.emit()
 		}
