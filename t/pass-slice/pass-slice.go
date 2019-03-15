@@ -56,9 +56,15 @@ func append(x []int, elm int) []int {
 	zlen := len(x) + 1
 	if cap(x) >= zlen {
 		z = x[:zlen]
-		z[len(x)] = elm
+	} else {
+		newcap := len(x) * 2
+		z = x[:zlen]
+		//z = malloc(newcap * 8)//make([]int, zlen, newcap)
+		z = makeSlice(zlen, newcap)
+		//copy(x, z)
 	}
 
+	z[len(x)] = elm
 	return z
 }
 
@@ -72,9 +78,23 @@ func f4() {
 	fmt.Printf("%d\n", slice2[1]) // 18
 }
 
+
+func f5() {
+	var array [2]int = [...]int{1,2}
+	var tmp []int = array[0:2]
+	var s []int
+	s = append(tmp, 19)
+	fmt.Printf("%d\n", s[2])                 // 19
+	fmt.Printf("%d\n", cap(s) /* 4 */ + 16 ) // 20
+	s = append(s, 1)
+	s = append(s, 1)
+	fmt.Printf("%d\n", cap(s) /* 8 */ + 13 ) // 21
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }

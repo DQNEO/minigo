@@ -14,3 +14,10 @@ func malloc(size int) int {
 	heapIndex += size
 	return r
 }
+
+func makeSlice(newLen int, newCap int) []int {
+	var r []int
+	r = heap[heapIndex:newLen:heapIndex+newCap]
+	heapIndex += newCap * 8
+	return r
+}
