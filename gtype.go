@@ -380,7 +380,8 @@ func (e *ExprConversion) getGtype() *Gtype {
 }
 
 func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
-	panic("implement me")
+	TBI(e.token(), "")
+	return nil
 }
 
 func (e *ExprTypeAssertion) getGtype() *Gtype {
@@ -388,7 +389,8 @@ func (e *ExprTypeAssertion) getGtype() *Gtype {
 }
 
 func (e *ExprVaArg) getGtype() *Gtype {
-	panic("implement me")
+	TBI(e.token(), "")
+	return nil
 }
 
 func (e *ExprMapLiteral) getGtype() *Gtype {
