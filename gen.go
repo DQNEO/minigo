@@ -2918,7 +2918,6 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
-			emit(".quad hiddenStruct1") // @TODO
 		default:
 			TBI(ptok, "unable to handle %T", value)
 		}
