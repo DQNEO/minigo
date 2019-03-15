@@ -291,7 +291,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 					}
 				} else if tok.isPunct(":") {
 					p.skip()
-					maxIndex :=  p.parseExpr()
+					maxIndex := p.parseExpr()
 					r = &ExprSlice{
 						tok:        tok,
 						collection: e,

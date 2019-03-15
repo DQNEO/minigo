@@ -62,11 +62,11 @@ s[2] == 4
 
 */
 func f4() {
-	var a = [5]int{1,2,3,4,5}
+	var a = [5]int{1, 2, 3, 4, 5}
 	var s []int = a[1:4]
-	fmt.Printf("%d\n", len(s) + 8) // 11
-	fmt.Printf("%d\n", cap(s) + 8) // 12
-	fmt.Printf("%d\n", s[0] + 11)  // 13
+	fmt.Printf("%d\n", len(s)+8) // 11
+	fmt.Printf("%d\n", cap(s)+8) // 12
+	fmt.Printf("%d\n", s[0]+11)  // 13
 }
 
 //  Full slice expressions
@@ -84,11 +84,11 @@ func f4() {
 //  t[1] == 3
 
 func f5() {
-	var a = [5]int{1,2,3,4,5}
+	var a = [5]int{1, 2, 3, 4, 5}
 	var s []int = a[1:3:4]
-	fmt.Printf("%d\n", len(s) + 12) // 14
-	fmt.Printf("%d\n", cap(s) + 12) // 15
-	fmt.Printf("%d\n", s[0] + 14)  // 16
+	fmt.Printf("%d\n", len(s)+12) // 14
+	fmt.Printf("%d\n", cap(s)+12) // 15
+	fmt.Printf("%d\n", s[0]+14)   // 16
 }
 
 func main() {

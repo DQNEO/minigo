@@ -36,44 +36,43 @@ func f2() {
 	var slice []int = array2[0:2]
 	var slice2 []int
 	slice2 = copy_slice(slice)
-	fmt.Printf("%d\n", slice2[0]) // 11
-	fmt.Printf("%d\n", len(slice2) + 10) // 12
-	fmt.Printf("%d\n", cap(slice2) + 8) // 13
+	fmt.Printf("%d\n", slice2[0])      // 11
+	fmt.Printf("%d\n", len(slice2)+10) // 12
+	fmt.Printf("%d\n", cap(slice2)+8)  // 13
 }
 
-var array3 [5]int = [...]int{1,2,3,4,16}
+var array3 [5]int = [...]int{1, 2, 3, 4, 16}
 
 func f3() {
 	var slice []int = array3[0:2]
 	var slice2 []int = slice[0:5]
-	fmt.Printf("%d\n", len(slice2) + 9) // 14
-	fmt.Printf("%d\n", cap(slice2) + 10) // 15
-	fmt.Printf("%d\n", slice2[4]) // 16
+	fmt.Printf("%d\n", len(slice2)+9)  // 14
+	fmt.Printf("%d\n", cap(slice2)+10) // 15
+	fmt.Printf("%d\n", slice2[4])      // 16
 }
 
-var array4 [5]int = [...]int{1,2,3,4,5}
+var array4 [5]int = [...]int{1, 2, 3, 4, 5}
 
 func f4() {
 	var slice []int = array4[0:1]
 	var slice2 []int
 	slice2 = append(slice, 18)
-	fmt.Printf("%d\n", len(slice2) + 15) //17
-	fmt.Printf("%d\n", slice2[1]) // 18
+	fmt.Printf("%d\n", len(slice2)+15) //17
+	fmt.Printf("%d\n", slice2[1])      // 18
 }
 
-
 func f5() {
-	var array [2]int = [...]int{22,23}
+	var array [2]int = [...]int{22, 23}
 	var tmp []int = array[0:2]
 	var s []int
 	s = append(tmp, 19)
-	fmt.Printf("%d\n", s[2])                 // 19
-	fmt.Printf("%d\n", cap(s) /* 4 */ + 16 ) // 20
+	fmt.Printf("%d\n", s[2])               // 19
+	fmt.Printf("%d\n", cap(s) /* 4 */ +16) // 20
 	s = append(s, 1)
 	s = append(s, 1)
-	fmt.Printf("%d\n", cap(s) /* 8 */ + 13 ) // 21
-	fmt.Printf("%d\n", s[0])    // 22
-	fmt.Printf("%d\n", s[1])    // 23
+	fmt.Printf("%d\n", cap(s) /* 8 */ +13) // 21
+	fmt.Printf("%d\n", s[0])               // 22
+	fmt.Printf("%d\n", s[1])               // 23
 }
 
 func main() {
