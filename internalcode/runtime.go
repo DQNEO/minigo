@@ -30,8 +30,6 @@ func append(x []int, elm int) []int {
 		z = x[:zlen]
 	} else {
 		newcap := len(x) * 2
-		z = x[:zlen]
-		//z = malloc(newcap * 8)//make([]int, zlen, newcap)
 		z = makeSlice(zlen, newcap)
 		for i:=0;i<len(x);i++ {
 			z[i] = x[i]
