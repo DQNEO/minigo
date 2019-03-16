@@ -1,6 +1,6 @@
 package strngs
 
-func HasSuffix(s string) bool {
+func HasSuffix(s string, suffix string) bool {
 }
 
 func Contains(s string) bool {
