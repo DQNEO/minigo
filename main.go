@@ -12,10 +12,16 @@ var debugMode = false
 var parseOnly = false
 var resolveOnly = false
 
+func sharp(s string) {
+	print("# ")
+	println(s)
+}
+
 func parseOpts(args []string) []string {
 	var r []string
 
 	for _, opt := range args {
+		sharp(opt)
 		if opt == "-t" {
 			debugToken = true
 		}

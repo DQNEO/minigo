@@ -21,6 +21,10 @@ func println(s string) {
 	puts(s)
 }
 
+func print(s string) {
+	printf(s)
+}
+
 func recover() interface{} {
 }
 
