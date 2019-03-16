@@ -46,9 +46,23 @@ func f3() {
 	fmt.Printf("%d\n", len(array))
 }
 
+func receive_strings(a string, b string) {
+	fmt.Printf("%d\n", len(a))
+	fmt.Printf("%d\n", len(b))
+}
+
+func f4() {
+	var hello string = "01234567890"
+	fmt.Printf("%d\n", len(hello))
+	s1 := "012345678901"
+	s2 := "0123456789012"
+	receive_strings(s1, s2)
+}
+
 func main() {
 	f0()
 	f1()
 	f2()
 	f3()
+	f4()
 }
