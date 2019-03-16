@@ -874,7 +874,7 @@ func (e *ExprIndex) emitSave() {
 
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE:
+	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
 		e.collection.emit() // head address
 	case collectionType.getPrimType() == G_MAP:
 		e.emitMapSet()
@@ -886,7 +886,12 @@ func (e *ExprIndex) emitSave() {
 	emit("push %%rax # stash head address of collection")
 	e.index.emit()
 	emit("mov %%rax, %%rcx") // index
-	elmType := collectionType.elementType
+	var elmType *Gtype
+	if collectionType.isString() {
+		elmType = gByte
+	} else {
+		elmType = collectionType.elementType
+	}
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("mov $%d, %%rax # size of one element", size)
@@ -1647,6 +1652,14 @@ func emitSave3Elements(lhs Expr, offset int) {
 	}
 }
 
+func emitCallMallocDinamicSize(eSize Expr) {
+	eSize.emit()
+	emit("mov %%rax, %%rdi")
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+	// @TODO check malloc error
+}
+
 func emitCallMalloc(size int) {
 	emit("mov $%d, %%rdi", size)
 	emit("mov $0, %%rax")
@@ -2237,10 +2250,50 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e *ExprSlice) emit() {
-	e.emitToStack()
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("pop %%rax")
+	if e.collection.getGtype().isString() {
+		// s[n:m]
+		// new strlen: m - n
+		eNewStrlen := &ExprBinop{
+			tok : e.token(),
+			op: "-",
+			left: e.high,
+			right: e.low,
+		}
+		// mem size = strlen + 1
+		eMemSize := &ExprBinop{
+			tok : e.token(),
+			op: "+",
+			left: eNewStrlen,
+			right: &ExprNumberLiteral{
+				val:1,
+			},
+		}
+
+		// src address + low
+		e.collection.emit()
+		emit("push %%rax # src address")
+		e.low.emit()
+		emit("pop %%rbx")
+		emit("add %%rax, %%rbx")
+		emit("push %%rbx")
+
+		emitCallMallocDinamicSize(eMemSize)
+		emit("push %%rax # dst address")
+
+		eNewStrlen.emit()
+		emit("push %%rax # strlen")
+
+		emit("pop %%%s", RegsForCall[2])
+		emit("pop %%%s", RegsForCall[1])
+		emit("pop %%%s", RegsForCall[0])
+		emit("mov $0, %%rax")
+		emit("call .strcopy")
+	} else {
+		e.emitToStack()
+		emit("pop %%rcx")
+		emit("pop %%rbx")
+		emit("pop %%rax")
+	}
 }
 
 func (e *ExprSlice) emitToStack() {

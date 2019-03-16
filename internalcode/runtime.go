@@ -39,3 +39,11 @@ func append(x []int, elm int) []int {
 	z[len(x)] = elm
 	return z
 }
+
+func strcopy(src string, dest string, slen int) string {
+	for i:=0; i < slen ; i++ {
+		dest[i] = src[i]
+	}
+	dest[slen] = 0
+	return dest
+}
