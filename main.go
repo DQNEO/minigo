@@ -11,6 +11,12 @@ var debugParser = false
 var debugMode = false
 var parseOnly = false
 var resolveOnly = false
+var exit = false
+
+func printVersion() {
+	println("minigo 0.1.0")
+	println("Copyright (C) 2019 @DQNEO")
+}
 
 func parseOpts(args []string) []string {
 	var r []string
@@ -18,6 +24,11 @@ func parseOpts(args []string) []string {
 	for _, opt := range args {
 		debugln(opt)
 		debugf(opt)
+		if opt == "--version" {
+			printVersion()
+			exit = true
+			return nil
+		}
 		if opt == "-t" {
 			debugToken = true
 		}
@@ -84,6 +95,10 @@ func main() {
 
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
+	}
+
+	if exit {
+		return
 	}
 
 	if len(sourceFiles) == 0 {
