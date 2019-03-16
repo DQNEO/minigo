@@ -12,16 +12,12 @@ var debugMode = false
 var parseOnly = false
 var resolveOnly = false
 
-func sharp(s string) {
-	print("# ")
-	println(s)
-}
-
 func parseOpts(args []string) []string {
 	var r []string
 
 	for _, opt := range args {
-		sharp(opt)
+		debugln(opt)
+		debugf(opt)
 		if opt == "-t" {
 			debugToken = true
 		}
@@ -41,9 +37,9 @@ func parseOpts(args []string) []string {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
-			sharp("hasSuffix")
+			debugln("hasSuffix")
 			r = append(r, opt)
-			sharp("appended")
+			debugln("appended")
 		} else if opt == "-" {
 			return []string{"/dev/stdin"}
 		}
