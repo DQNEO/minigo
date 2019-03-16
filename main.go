@@ -82,6 +82,10 @@ func main() {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
+	if len(sourceFiles) == 0 {
+		println("No input files.")
+		return
+	}
 	// parser to parse imported
 	pForImport := &parser{}
 	// parse imported only
