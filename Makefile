@@ -14,6 +14,11 @@ test: all
 	./compile.sh
 	./test_as.sh
 
+travistest: all
+	./resolve *.go
+	./compile.sh
+	./test_as.sh
+
 parse: all
 	./parse *.go
 
