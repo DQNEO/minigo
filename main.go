@@ -73,8 +73,8 @@ var importOS bool
 func main() {
 	var sourceFiles []string
 
-	if len(os.Args) <= 1 {
-		println("[Help]")
+	if len(os.Args) == 0 {
+		println("ERROR: os.Args should not be empty")
 		return
 	}
 
