@@ -41,7 +41,9 @@ func parseOpts(args []string) []string {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
+			sharp("hasSuffix")
 			r = append(r, opt)
+			sharp("appended")
 		} else if opt == "-" {
 			return []string{"/dev/stdin"}
 		}
