@@ -9,6 +9,11 @@ internalcode.go: internalcode/runtime.go
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 
+child: minigo # selfhost
+	./minigo *.go > out/a.s
+	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c 'gcc -g -no-pie -o child out/a.s'
+
+
 test: all
 	./resolve *.go
 	./compile.sh
