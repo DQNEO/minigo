@@ -100,6 +100,8 @@ func main() {
 		}
 	}
 
+	_, importOS = imported["os"]
+
 	// parse
 	p := &parser{}
 	gp = p
@@ -157,7 +159,6 @@ func main() {
 	for _, compiledPkg := range compiledPackages {
 		importedPackages = append(importedPackages, compiledPkg)
 	}
-	_, importOS = p.importedNames["os"]
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 
 	var uniquedDynamicTypes map[string]int = map[string]int{}
