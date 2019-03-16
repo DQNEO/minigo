@@ -2253,10 +2253,19 @@ func (e *ExprSlice) emit() {
 	if e.collection.getGtype().isString() {
 		// s[n:m]
 		// new strlen: m - n
+		var high Expr
+		if e.high == nil {
+			high = &ExprLen{
+				tok : e.token(),
+				arg: e.collection,
+			}
+		} else {
+			high = e.high
+		}
 		eNewStrlen := &ExprBinop{
 			tok : e.token(),
 			op: "-",
-			left: e.high,
+			left: high,
 			right: e.low,
 		}
 		// mem size = strlen + 1
