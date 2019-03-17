@@ -91,6 +91,11 @@ func predeclareLibcFuncs(universe *scope) {
 			// No implementation thanks to the libc function.
 		},
 	})
+	universe.setFunc("exit", &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg: "libc",
+		},
+	})
 	universe.setFunc("open", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
