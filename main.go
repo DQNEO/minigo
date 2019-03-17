@@ -22,8 +22,6 @@ func parseOpts(args []string) []string {
 	var r []string
 
 	for _, opt := range args {
-		debugln(opt)
-		debugf(opt)
 		if opt == "--version" {
 			printVersion()
 			exit = true
@@ -48,9 +46,7 @@ func parseOpts(args []string) []string {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
-			debugln("hasSuffix")
 			r = append(r, opt)
-			debugln("appended")
 		} else if opt == "-" {
 			return []string{"/dev/stdin"}
 		}
