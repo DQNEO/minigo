@@ -18,6 +18,7 @@ test: all
 	./resolve *.go
 	./compile.sh
 	./test_as.sh
+	./test2.sh
 
 travistest: all
 	./resolve *.go

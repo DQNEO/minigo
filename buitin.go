@@ -15,6 +15,8 @@ func make(x interface{}) interface{} {
 }
 
 func panic(x interface{}) {
+	puts(x)
+	exit(1)
 }
 
 func println(s string) {
