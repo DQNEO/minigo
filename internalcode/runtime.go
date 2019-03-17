@@ -18,7 +18,11 @@ func malloc(size int) int {
 
 func makeSlice(newLen int, newCap int) []int {
 	var r []int
-	r = heap[heapIndex:newLen:heapIndex+newCap]
+	if heapIndex == 0 {
+		heapIndex = (heap + 0)
+	}
+	low := (heapIndex - heap) / intSize
+	r = heap[low:low+newLen:low+newCap]
 	heapIndex += newCap * intSize
 	return r
 }
@@ -26,17 +30,23 @@ func makeSlice(newLen int, newCap int) []int {
 func append(x []int, elm int) []int {
 	var z []int
 	zlen := len(x) + 1
+
 	if cap(x) >= zlen {
 		z = x[:zlen]
 	} else {
-		newcap := len(x) * 2
-		z = makeSlice(zlen, newcap)
+		var newcap int
+		if len(x) == 0 {
+			newcap = 8
+		} else {
+			newcap = len(x) * 2
+		}
+ 		z = makeSlice(zlen, newcap)
 		for i:=0;i<len(x);i++ {
 			z[i] = x[i]
 		}
 	}
 
-	z[len(x)] = elm
+	z[zlen -1] = elm
 	return z
 }
 
