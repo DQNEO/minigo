@@ -2605,7 +2605,7 @@ func (methodCall *ExprMethodcall) emit() {
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
-	assertNotNil2(relexpr, funcall.tok, funcall.rel)
+	assert(relexpr != nil, funcall.tok, "relexpr should NOT be nil")
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
 		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
