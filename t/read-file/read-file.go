@@ -13,6 +13,9 @@ func f1() {
 		panic("err")
 	}
 	fmt.Printf("%s", bytes)
+	if len(bytes) != 68 { // 68 is the size of the target file
+		panic("Error: size does not match")
+	}
 }
 
 func main() {
