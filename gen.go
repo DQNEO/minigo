@@ -141,9 +141,14 @@ func (f *DeclFunc) emitPrologue() {
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
-		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype)
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
+
+	for i:= len(f.localvars) -1 ; i>=0; i-- {
+		lvar := f.localvars[i]
+		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype)
+	}
+
 	if localarea != 0 {
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
