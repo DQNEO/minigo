@@ -773,6 +773,7 @@ func emitAssignPrimitive(left Expr, right Expr) {
 func emitSave(left Expr) {
 	switch left.(type) {
 	case *Relation:
+		emit("# %s %s = ...", left.(*Relation).name, left.getGtype())
 		left.(*Relation).emitSave()
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
