@@ -1598,7 +1598,14 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
-		emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
+		if structfield.strct.getGtype().typ == G_POINTER {
+			structfield.strct.emit() // emit address of the struct
+			emit("add $%d, %%rax", fieldType.offset+offset)
+			reg := getReg(size)
+			emit("mov (%%rax), %%%s", reg)
+		} else {
+			emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
+		}
 	case *ExprIndex:
 		//  e.g. arrayLiteral.values[i].getGtype().getPrimType()
 		indexExpr := lhs.(*ExprIndex)
