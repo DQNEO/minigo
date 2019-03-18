@@ -6,6 +6,7 @@ differ=0
 # for os.Args
 sample_file=/etc/resolv.conf
 cp $sample_file t/expected/open-read.txt
+cp $sample_file t/expected/read-file.txt
 function test_file {
     local basename=$1
     local expected=t/expected/${basename}.txt
