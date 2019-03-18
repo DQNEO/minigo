@@ -141,7 +141,7 @@ func (f *DeclFunc) emitPrologue() {
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
-		emit("# offset %d for variable \"%s\" of %s", offset, lvar.varname, lvar.gtype)
+		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype)
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 	if localarea != 0 {
