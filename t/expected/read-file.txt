@@ -1,0 +1,2 @@
+# This file is included on the metadata iso
+nameserver 192.168.65.1
