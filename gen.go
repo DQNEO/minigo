@@ -725,6 +725,7 @@ func (ast *StmtAssignment) emit() {
 		}
 
 		gtype := left.getGtype()
+		emit("# Assign to %T %s", left, gtype)
 		switch {
 		case gtype == nil:
 			// suppose left is "_"
