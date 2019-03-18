@@ -19,7 +19,7 @@ func readFile(filename string) []byte {
 }
 
 func f1() {
-	path := "/etc/hosts"
+	path := "t/min/min.go"
 	s := readFile(path)
 	bs := ByteStream{
 		filename:  path,
@@ -30,8 +30,8 @@ func f1() {
 	len1 := len(bs.source)
 	len2 := len(bsp.source)
 
-	fmt.Printf("len1=%d\n", len1)
-	fmt.Printf("len2=%d\n", len2)
+	fmt.Printf("%d\n", len1 - 64) // 1
+	fmt.Printf("%d\n", len2 - 63) // 2
 }
 
 func main() {
