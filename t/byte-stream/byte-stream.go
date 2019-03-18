@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 )
@@ -9,30 +8,6 @@ import (
 type ByteStream struct {
 	filename  string
 	source    []byte
-	nextIndex int
-	line      int
-	column    int
-}
-
-func NewByteStreamFromString(name string, contents string) *ByteStream {
-	return &ByteStream{
-		filename:  name,
-		source:    []byte(contents),
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-}
-
-func NewByteStreamFromFile(path string) *ByteStream {
-	s := readFile(path)
-	return &ByteStream{
-		filename:  path,
-		source:    s,
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
 }
 
 func readFile(filename string) []byte {
@@ -43,36 +18,20 @@ func readFile(filename string) []byte {
 	return bytes
 }
 
-func (bs *ByteStream) location() string {
-	return fmt.Sprintf("%s:%d:%d", bs.filename, bs.line, bs.column)
-}
-
-func (bs *ByteStream) get() (byte, error) {
-	if bs.nextIndex >= len(bs.source) {
-		return 0, errors.New("EOF")
-	}
-	r := bs.source[bs.nextIndex]
-	if r == '\n' {
-		bs.line++
-		bs.column = 1
-	}
-	bs.nextIndex++
-	bs.column++
-	return r, nil
-}
-
-func (bs *ByteStream) unget() {
-	bs.nextIndex--
-	r := bs.source[bs.nextIndex]
-	if r == '\n' {
-		bs.line--
-	}
-}
-
 func f1() {
-	filename := "/etc/hosts"
-	bs := NewByteStreamFromFile(filename)
-	fmt.Printf("%s\n", bs.source)
+	path := "/etc/hosts"
+	s := readFile(path)
+	bs := ByteStream{
+		filename:  path,
+		source:    s,
+	}
+	bsp := &bs
+
+	len1 := len(bs.source)
+	len2 := len(bsp.source)
+
+	fmt.Printf("len1=%d\n", len1)
+	fmt.Printf("len2=%d\n", len2)
 }
 
 func main() {
