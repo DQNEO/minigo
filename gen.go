@@ -2779,7 +2779,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			var staticCall IrStaticCall = getPackagedFuncName("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
-			TBI(slice.token(), "")
+			//TBI(slice.token(), "")
 		default:
 			TBI(slice.token(), "")
 		}
