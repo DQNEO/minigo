@@ -107,7 +107,14 @@ func main() {
 	// parse imported only
 	var imported map[identifier]bool = map[identifier]bool{}
 	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
+		s := readFile(sourceFile)
+		bs := &ByteStream{
+			filename:  sourceFile,
+			source:    s,
+			nextIndex: 0,
+			line:      1,
+			column:    0,
+		}
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
@@ -154,7 +161,14 @@ func main() {
 	p.currentPackageName = pkgname
 
 	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
+		s := readFile(sourceFile)
+		bs := &ByteStream{
+			filename:  sourceFile,
+			source:    s,
+			nextIndex: 0,
+			line:      1,
+			column:    0,
+		}
 		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
