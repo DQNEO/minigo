@@ -5,7 +5,7 @@ prog_name=minigo
 
 function compile {
     local basename=$1
-    local src=t/$basename/${basename}.go
+    local src=t/$basename/*.go
     local as_file=out/${basename}.s
     echo -n "compile $src  > $as_file ... "
     ./${prog_name} $src > $as_file
