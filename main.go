@@ -5,10 +5,11 @@ import (
 	"strings"
 )
 
-var debugAst = false
-var debugToken = false
-var debugParser = false
 var debugMode = false
+var debugToken = false
+
+var debugAst = false
+var debugParser = false
 var parseOnly = false
 var resolveOnly = false
 var exit = false
