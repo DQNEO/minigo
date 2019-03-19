@@ -27,7 +27,31 @@ func makeSlice(newLen int, newCap int) []int {
 	return r
 }
 
-func append(x []int, elm int) []int {
+func append1(x []byte, elm byte) []byte {
+	var z []byte
+	xlen := len(x)
+	zlen := xlen + 1
+
+	if cap(x) >= zlen {
+		z = x[:zlen]
+	} else {
+		var newcap int
+		if xlen == 0 {
+			newcap = 8
+		} else {
+			newcap = xlen * 2
+		}
+		z = makeSlice(zlen, newcap)
+		for i:=0;i<xlen;i++ {
+			z[i] = x[i]
+		}
+	}
+
+	z[xlen] = elm
+	return z
+}
+
+func append8(x []int, elm int) []int {
 	var z []int
 	xlen := len(x)
 	zlen := xlen + 1

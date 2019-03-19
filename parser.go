@@ -2020,6 +2020,19 @@ func (funcall *ExprFuncallOrConversion) isBuiltinCap() bool {
 	return decl == builinCap
 }
 
+func (funcall *ExprFuncallOrConversion) isBuiltinAppend() bool {
+	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		return false
+	}
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
+		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+	}
+
+	return decl == builtinAppend
+}
+
+
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {

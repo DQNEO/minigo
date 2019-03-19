@@ -103,6 +103,38 @@ type ExprCap struct {
 	arg Expr
 }
 
+// call of builtin append()
+type ExprAppend struct {
+	tok *Token
+	slice Expr
+	elm   Expr
+}
+
+func (e *ExprAppend) emit() {
+	assert(e.slice.getGtype().getPrimType() == G_SLICE, e.token(), "must be a slice")
+	sliceType := e.slice.getGtype()
+	switch sliceType.elementType.getSize() {
+	case 1: // byte
+		// sliceByte
+		TBI(e.token(), "")
+	case 8: // int, ptr
+		// sliceInt
+		TBI(e.token(), "")
+	case 24:
+		TBI(e.token(), "")
+	default:
+		TBI(e.token(), "")
+	}
+}
+
+func (e *ExprAppend) dump() {
+	TBI(e.token(), "")
+}
+
+func (e *ExprAppend) getGtype() *Gtype {
+	return e.slice.getGtype()
+}
+
 // local or global
 type DeclVar struct {
 	tok      *Token
@@ -415,3 +447,4 @@ func (node *ExprTypeSwitchGuard) token() *Token     { return node.tok }
 func (node *ExprMapLiteral) token() *Token          { return node.tok }
 func (node *ExprLen) token() *Token                 { return node.tok }
 func (node *ExprCap) token() *Token                 { return node.tok }
+func (node *ExprAppend) token() *Token              { return node.tok }

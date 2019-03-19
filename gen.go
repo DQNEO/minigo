@@ -2769,6 +2769,21 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		e.emit()
 		return
+	} else if funcall.isBuiltinAppend() {
+		slice := funcall.args[0]
+		switch slice.getGtype().elementType.getSize() {
+		case 1:
+			var staticCall IrStaticCall = getPackagedFuncName("", "append1")
+			staticCall.emit(funcall.args)
+		case 8:
+			var staticCall IrStaticCall = getPackagedFuncName("", "append8")
+			staticCall.emit(funcall.args)
+		case 24:
+			TBI(slice.token(), "")
+		default:
+			TBI(slice.token(), "")
+		}
+		return
 	}
 	var staticCall IrStaticCall = getPackagedFuncName(decl.pkg, funcall.fname)
 	staticCall.emit(funcall.args)
