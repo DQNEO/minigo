@@ -233,11 +233,32 @@ func read_char() string {
 		panic("invalid char literal")
 	}
 	if c == '\\' {
+		var sval string
 		c, err = getc()
+		switch c {
+		case 'n':
+			sval = "\n"
+		case 't':
+			sval = "\t"
+		case 'r':
+			sval = "\r"
+		case '\\':
+			sval = "\\"
+		case '\'':
+			sval = "'"
+		default:
+			errorf("unexpected char 1:%c", c)
+		}
+
+		end, _ := getc()
+		if end != '\'' {
+			errorf("unexpected char 2:%c",end)
+		}
+		return sval
 	}
 	end, _ := getc()
 	if end != '\'' {
-		panic("unexpected char")
+		errorf("unexpected char:%c",end)
 	}
 	return string([]byte{c})
 }
