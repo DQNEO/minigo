@@ -4,7 +4,7 @@ actual=out/actual.txt
 differ=0
 
 # for os.Args
-sample_file=/etc/resolv.conf
+sample_file=t/sample.txt
 cp $sample_file t/expected/open-read.txt
 cp $sample_file t/expected/read-file.txt
 function test_file {

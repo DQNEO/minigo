@@ -7,13 +7,13 @@ import (
 
 
 func f1() {
-	filename := "/etc/resolv.conf"
+	filename := "t/sample.txt"
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic("err")
 	}
 	fmt.Printf("%s", bytes)
-	if len(bytes) != 68 { // 68 is the size of the target file
+	if len(bytes) != 276 { // This is the size of the target file
 		panic("Error: size does not match")
 	}
 }

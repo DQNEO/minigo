@@ -1,2 +1,2 @@
 2
-/etc/resolv.conf
+t/sample.txt
