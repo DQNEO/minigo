@@ -19,7 +19,7 @@ var builinCap = &DeclFunc{
 	rettypes: []*Gtype{gInterface},
 }
 
-var buitinAppend = &DeclFunc{
+var builtinAppend = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
 
@@ -37,7 +37,7 @@ func setPredeclaredIdentifiers(universe *scope) {
 		funcdef: builinCap,
 	})
 	universe.setFunc("append", &ExprFuncRef{
-		funcdef: buitinAppend,
+		funcdef: builtinAppend,
 	})
 }
 
