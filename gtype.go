@@ -60,6 +60,9 @@ func (gtype *Gtype) getSource() *Gtype {
 }
 
 func (gtype *Gtype) getPrimType() GTYPE_TYPE {
+	if gtype == nil {
+		return G_UNKOWNE
+	}
 	return gtype.getSource().typ
 }
 

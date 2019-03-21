@@ -323,10 +323,22 @@ func (ast *ExprConstVariable) emit() {
 	}
 }
 
+func emit_intcast(gtype *Gtype) {
+	if gtype.getPrimType() == G_BYTE {
+		emit("movzbq %%al, %%rax")
+	}
+}
+
 func emit_comp_primitive(inst string, binop *ExprBinop) {
 	binop.left.emit()
+	if binop.left.getGtype().getPrimType() == G_BYTE {
+		emit_intcast(binop.left.getGtype())
+	}
 	emit("push %%rax")
 	binop.right.emit()
+	if binop.right.getGtype().getPrimType() == G_BYTE {
+		emit_intcast(binop.right.getGtype())
+	}
 	emit("pop %%rcx")
 	emit("cmp %%rax, %%rcx") // right, left
 	emit("%s %%al", inst)
