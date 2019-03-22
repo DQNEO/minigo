@@ -436,7 +436,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				tok = makeToken(T_PUNCT, "/")
 			}
 		case '(', ')', '[', ']', '{', '}', ',', ';':
-			tok = makeToken(T_PUNCT, string(c))
+			tok = makeToken(T_PUNCT, string([]byte{c}))
 		case '!':
 			c, _ := getc()
 			if c == '=' {
