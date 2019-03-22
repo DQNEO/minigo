@@ -67,9 +67,25 @@ func f3() {
 		println("error")
 	}
 }
+func f4() {
+	path := "t/min/min.go"
+	s := readFile(path)
+	_bs := ByteStream{
+		filename:  path,
+		source:    s,
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	bs = &_bs
+
+	tokens := tokenize(bs)
+	fmt.Printf("%d\n", len(tokens))
+}
 
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }

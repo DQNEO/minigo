@@ -269,7 +269,20 @@ func (ast *ExprVariable) emit() {
 	}
 
 	if ast.isGlobal {
-		emit("mov %s(%%rip), %%rax", ast.varname)
+		switch {
+		case ast.getGtype().typ == G_SLICE:
+			emit("#   emit slice variable")
+			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
+			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
+			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
+		case ast.getGtype().typ == G_MAP:
+			emit("#   emit map variable")
+			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
+			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
+			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
+		default:
+			emit("mov %s(%%rip), %%rax", ast.varname)
+		}
 	} else {
 		if ast.offset == 0 {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
