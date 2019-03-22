@@ -80,7 +80,7 @@ func f4() {
 	bs = &_bs
 
 	tokens := tokenize(bs)
-	fmt.Printf("%d\n", len(tokens))
+	fmt.Printf("%d\n", len(tokens) - 9) // 12
 }
 
 func main() {
