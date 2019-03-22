@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+var GENERATION int = 2
+
 var debugMode = true
 var debugToken = true
 

@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var GENERATION int = 1
+
 var debugMode = false
 var debugToken = false
 
