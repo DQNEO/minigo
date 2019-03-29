@@ -105,7 +105,7 @@ type ExprCap struct {
 
 // call of builtin append()
 type ExprAppend struct {
-	tok *Token
+	tok   *Token
 	slice Expr
 	elm   Expr
 }

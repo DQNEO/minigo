@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 )
 
-
 func f1() {
 	filename := "t/sample.txt"
 	bytes, err := ioutil.ReadFile(filename)

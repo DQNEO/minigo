@@ -282,5 +282,3 @@ func (ast *StmtDefer) dump() {
 func (e *ExprMapLiteral) dump() {
 	panic("implement me")
 }
-
-

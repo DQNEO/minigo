@@ -2032,7 +2032,6 @@ func (funcall *ExprFuncallOrConversion) isBuiltinAppend() bool {
 	return decl == builtinAppend
 }
 
-
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {

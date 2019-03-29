@@ -252,13 +252,13 @@ func read_char() string {
 
 		end, _ := getc()
 		if end != '\'' {
-			errorf("unexpected char 2:%c",end)
+			errorf("unexpected char 2:%c", end)
 		}
 		return sval
 	}
 	end, _ := getc()
 	if end != '\'' {
-		errorf("unexpected char:%c",end)
+		errorf("unexpected char:%c", end)
 	}
 	return string([]byte{c})
 }

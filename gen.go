@@ -144,7 +144,7 @@ func (f *DeclFunc) emitPrologue() {
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 
-	for i:= len(f.localvars) -1 ; i>=0; i-- {
+	for i := len(f.localvars) - 1; i >= 0; i-- {
 		lvar := f.localvars[i]
 		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype)
 	}
@@ -2295,25 +2295,25 @@ func (e *ExprSlice) emit() {
 		var high Expr
 		if e.high == nil {
 			high = &ExprLen{
-				tok : e.token(),
+				tok: e.token(),
 				arg: e.collection,
 			}
 		} else {
 			high = e.high
 		}
 		eNewStrlen := &ExprBinop{
-			tok : e.token(),
-			op: "-",
-			left: high,
+			tok:   e.token(),
+			op:    "-",
+			left:  high,
 			right: e.low,
 		}
 		// mem size = strlen + 1
 		eMemSize := &ExprBinop{
-			tok : e.token(),
-			op: "+",
+			tok:  e.token(),
+			op:   "+",
 			left: eNewStrlen,
 			right: &ExprNumberLiteral{
-				val:1,
+				val: 1,
 			},
 		}
 

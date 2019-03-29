@@ -36,10 +36,10 @@ func f2() {
 	var chars []byte
 	chars = append(chars, '7')
 	chars = append(chars, '8')
-	fmt.Printf("%d\n", len(chars) + 4) // 6
-	fmt.Printf("%c\n", chars[0]) // 7
-	fmt.Printf("%c\n", chars[1]) // 8
-	fmt.Printf("9\n") // 9
+	fmt.Printf("%d\n", len(chars)+4) // 6
+	fmt.Printf("%c\n", chars[0])     // 7
+	fmt.Printf("%c\n", chars[1])     // 8
+	fmt.Printf("9\n")                // 9
 
 	chars[0] = '1'
 	chars[1] = '0'
@@ -80,7 +80,7 @@ func f4() {
 	bs = &_bs
 
 	tokens := tokenize(bs)
-	fmt.Printf("%d\n", len(tokens) - 9) // 12
+	fmt.Printf("%d\n", len(tokens)-9) // 12
 }
 
 func main() {
