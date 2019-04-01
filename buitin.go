@@ -19,8 +19,13 @@ func panic(x interface{}) {
 	exit(1)
 }
 
-func println(s string) {
-	puts(s)
+func println(s interface{}) {
+	if s < 4096 {
+		// regard it as int
+		printf("%d\n", s)
+	} else {
+		puts(s)
+    }
 }
 
 func print(s string) {
