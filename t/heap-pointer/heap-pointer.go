@@ -24,15 +24,15 @@ func dummy1() {
 }
 
 func dummy2() {
-	var array [4]int = [...]int{0,0,0,10}
-	fmt.Printf("%d\n", array[3] - 9) // 1
+	var array [4]int = [...]int{0,1,0,0}
+	fmt.Printf("%d\n", array[1]) // 1
 }
 func f1() {
 	p := return_ptr()
 	dummy1()
 	dummy2()
-	fmt.Printf("%d\n", p.id)
-	fmt.Printf("%d\n", p.age)
+	fmt.Printf("%d\n", p.id) // 2
+	fmt.Printf("%d\n", p.age) // 3
 }
 
 func main() {
