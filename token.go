@@ -322,7 +322,7 @@ func in_array(item string, list []string) bool {
 */
 
 var semicolonToken = Token{
-	typ:  T_PUNCT,
+	typ:  "punct", // @FIXME: should be T_PUNCT
 	sval: ";",
 }
 

@@ -3052,6 +3052,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
 		for _, field := range gtype.relation.gtype.fields {
+			emit("# field:%s", field.fieldname)
 			if value == nil {
 				emitGlobalDeclInit(ptok, field, nil, containerName+"."+string(field.fieldname))
 				continue
@@ -3081,7 +3082,8 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
 		case *Relation:
-			emit(".quad 0 # TBI") // TBI
+			rel := value.(*Relation)
+			emit(".quad 0 # (TBI) rel:%s", rel.name)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
