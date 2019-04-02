@@ -1,7 +1,7 @@
 all: minigo
 
 minigo: *.go internalcode.go stdlib.go
-	go build -o minigo
+	go build -o minigo *.go
 
 internalcode.go: internalcode/runtime.go
 	./cp-internalcode.sh
