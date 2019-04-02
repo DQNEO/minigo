@@ -239,7 +239,16 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax", field.offset)
-		emit("mov (%%rax), %%rax")
+		emit("mov %%rax, %%rdx")
+		switch field.getPrimType() {
+		case G_SLICE,G_INTERFACE,G_MAP:
+			emit("mov (%%rdx), %%rax")
+			emit("mov %d(%%rdx), %%rbx", ptrSize)
+			emit("mov %d(%%rdx), %%rcx", ptrSize + ptrSize)
+		default:
+			emit("mov (%%rdx), %%rax")
+		}
+
 	case G_REL: // struct
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
@@ -251,7 +260,7 @@ func (a *ExprStructField) emit() {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# emit variable")
+	emit("# emit variable of type %s", ast.getGtype())
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
@@ -755,7 +764,7 @@ func (ast *StmtAssignment) emit() {
 		}
 
 		gtype := left.getGtype()
-		emit("# Assign to %T %s", left, gtype)
+		emit("# Assign %T %s = %T %s", left, gtype, right, right.getGtype())
 		switch {
 		case gtype == nil:
 			// suppose left is "_"
@@ -1884,6 +1893,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		return
 	}
 
+//	assert(rhs.getGtype().getPrimType() == G_SLICE, rhs.token(), "rsh should be slice type")
+
 	switch rhs.(type) {
 	case *Relation:
 		rel := rhs.(*Relation)
@@ -1932,6 +1943,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push $%d", strlen) // cap
 
 	default:
+		emit("# emit rhs of type %T %s", rhs, rhs.getGtype())
 		rhs.emit() // it should put values to rax,rbx,rcx
 		emit("push %%rax")
 		emit("push %%rbx")
@@ -2661,6 +2673,7 @@ func (e *ExprLen) emit() {
 	case gtype.typ == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
 	case gtype.typ == G_SLICE:
+		emit("# len(slice)")
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
