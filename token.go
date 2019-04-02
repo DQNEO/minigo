@@ -321,7 +321,7 @@ func in_array(item string, list []string) bool {
 
 */
 
-var semicolon = &Token{
+var semicolonToken = Token{
 	typ:  T_PUNCT,
 	sval: ";",
 }
@@ -399,7 +399,7 @@ func tokenize(_bs *ByteStream) []*Token {
 			if len(r) > 0 {
 				last := r[len(r)-1]
 				if autoSemicolonInsert(last) {
-					r = append(r, semicolon)
+					r = append(r, &semicolonToken)
 				}
 			}
 			continue
