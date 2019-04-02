@@ -67,6 +67,7 @@ func f3() {
 		println("error")
 	}
 }
+
 func f4() {
 	path := "t/min/min.go"
 	s := readFile(path)
@@ -80,7 +81,11 @@ func f4() {
 	bs = &_bs
 
 	tokens := tokenize(bs)
-	fmt.Printf("%d\n", len(tokens)-9) // 12
+	fmt.Printf("%d\n", len(tokens) - 14) // 26 - 14 = 12
+	fmt.Printf("----------\n")
+	for _, tok := range tokens {
+		fmt.Printf("%s\n", tok.sval)
+	}
 }
 
 func main() {

@@ -458,8 +458,14 @@ func (ast *ExprUop) emit() {
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
 			assignToStruct(e.invisiblevar, e)
+
+			emitCallMalloc(e.getGtype().getSize()) // => rax
+			emit("push %%rax")
 			// @TODO handle global vars
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
+			emit("push %%rax")
+			emitCopyStructFromStack(e.getGtype())
+
 		case *ExprStructField:
 			e := ast.operand.(*ExprStructField)
 			e.emitAddress()
@@ -1416,7 +1422,37 @@ func emitAddress(e Expr) {
 	}
 }
 
-// expect rhs address in the stack top
+
+// expect lhs address is in the stack top, rhs is in the second top
+func emitCopyStructFromStack(gtype *Gtype) {
+	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
+	emit("pop %%rax") // right
+	emit("pop %%rbx") // left
+	emit("push %%rcx")
+	emit("push %%r11")
+	emit("mov %%rax, %%rcx") // right
+	emit("mov %%rbx, %%rax") // left
+
+	var i int
+	for i = i; i < gtype.getSize(); i += 8 {
+		emit("movq %d(%%rcx), %%r11", i)
+		emit("movq %%r11, %d(%%rax)", i)
+	}
+	for i = i; i < gtype.getSize(); i += 4 {
+		emit("movl %d(%%rcx), %%r11", i)
+		emit("movl %%r11, %d(%%rax)", i)
+	}
+	for i = i; i < gtype.getSize(); i++ {
+		emit("movb %d(%%rcx), %%r11", i)
+		emit("movb %%r11, %d(%%rax)", i)
+	}
+
+	emit("pop %%r11")
+	emit("pop %%rcx")
+}
+
+
+// expect rhs address is in the stack top
 func emitCopyStruct(left Expr) {
 	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
 	emit("pop %%rax")
