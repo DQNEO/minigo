@@ -460,12 +460,14 @@ func (ast *ExprUop) emit() {
 			assignToStruct(e.invisiblevar, e)
 
 			emitCallMalloc(e.getGtype().getSize()) // => rax
-			emit("push %%rax")
+			emit("push %%rax") // to:ptr addr
 			// @TODO handle global vars
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
-			emit("push %%rax")
+			emit("push %%rax") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype())
-
+			emit("pop %%rax") // from
+			emit("pop %%rax") // to
+			// emit address
 		case *ExprStructField:
 			e := ast.operand.(*ExprStructField)
 			e.emitAddress()
@@ -954,7 +956,17 @@ func (e *ExprIndex) emitSave() {
 
 func (e *ExprStructField) emitSave() {
 	fieldType := e.getGtype()
-	emitOffsetSave(e.strct, 8, fieldType.offset)
+	if e.strct.getGtype().typ == G_POINTER {
+		emit("push %%rax # store rhs")
+		// structptr.field = x
+		e.strct.emit() // emit address
+		emit("add $%d, %%rax", fieldType.offset)
+		emit("mov %%rax, %%rbx")
+		emit("pop %%rax # load rhs")
+		emit("mov %%rax, (%%rbx)")
+	} else {
+		emitOffsetSave(e.strct, 8, fieldType.offset)
+	}
 }
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
@@ -1426,12 +1438,12 @@ func emitAddress(e Expr) {
 // expect lhs address is in the stack top, rhs is in the second top
 func emitCopyStructFromStack(gtype *Gtype) {
 	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
-	emit("pop %%rax") // right
-	emit("pop %%rbx") // left
+	emit("pop %%rax") // from
+	emit("pop %%rbx") // to
 	emit("push %%rcx")
 	emit("push %%r11")
-	emit("mov %%rax, %%rcx") // right
-	emit("mov %%rbx, %%rax") // left
+	emit("mov %%rax, %%rcx") // from
+	emit("mov %%rbx, %%rax") // to
 
 	var i int
 	for i = i; i < gtype.getSize(); i += 8 {
@@ -1449,6 +1461,10 @@ func emitCopyStructFromStack(gtype *Gtype) {
 
 	emit("pop %%r11")
 	emit("pop %%rcx")
+
+	// recover stack
+	emit("push %%rax") // to
+	emit("push %%rcx") // from
 }
 
 

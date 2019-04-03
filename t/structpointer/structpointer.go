@@ -34,9 +34,27 @@ func assign() {
 	fmt.Printf("%d\n", u.age)
 }
 
+type S struct {
+	dummy *int
+	id int
+}
+
+func f1() {
+	var p *S
+	p = &S{
+		id:123,
+	}
+
+	fmt.Printf("%d\n", p.id - 115) // 8
+
+	p.dummy = nil
+	fmt.Printf("%d\n", p.id - 114) // 9
+}
+
 func main() {
 	literal()
 	assign()
+	f1()
 }
 
 type User struct {
