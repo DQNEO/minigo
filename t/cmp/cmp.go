@@ -62,8 +62,16 @@ func f3() {
 	}
 }
 
+func f4() {
+	if 0 > 20 - 1 {
+		println("ERROR")
+	} else {
+		println("11")
+	}
+}
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }

@@ -661,7 +661,7 @@ func priority(op string) int {
 	case "==", "!=", "<", ">", ">=", "<=":
 		return 10
 	case "-", "+":
-		return 10
+		return 11
 	case "/", "%":
 		return 15
 	case "*":
