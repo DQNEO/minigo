@@ -2589,6 +2589,9 @@ func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
+	if origType == nil {
+		errorft(methodCall.token(), "origType should not be nil")
+	}
 	if origType.typ == G_INTERFACE {
 		return origType.imethods[methodCall.fname].rettypes
 	} else {
