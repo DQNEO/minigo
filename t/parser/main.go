@@ -7,7 +7,6 @@ var GENERATION int = 2
 var debugMode = true
 var debugToken = true
 var debugParser = true
-var importOS = true
 var gp *parser
 
 func f1() {

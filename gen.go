@@ -2923,7 +2923,7 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	emit("")
 }
 
-func emitMainFunc() {
+func emitMainFunc(importOS bool) {
 	fname := "main"
 	emit(".global	%s", fname)
 	emitLabel("%s:", fname)
@@ -3134,6 +3134,7 @@ type IrRoot struct {
 	stringLiterals []*ExprStringLiteral
 	methodTable    map[int][]string
 	hashedTypes    map[string]int
+	importOS       bool
 }
 
 var groot *IrRoot
@@ -3208,5 +3209,5 @@ func (root *IrRoot) emit() {
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
-	emitMainFunc()
+	emitMainFunc(root.importOS)
 }

@@ -82,7 +82,6 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 }
 
 var gp *parser // for debug
-var importOS bool
 
 func main() {
 	var sourceFiles []string
@@ -125,6 +124,7 @@ func main() {
 		}
 	}
 
+	var importOS bool
 	_, importOS = imported["os"]
 
 	// parse
@@ -225,6 +225,8 @@ func main() {
 	}
 	//debugf("methodTable=%v", methodTable)
 	ir.methodTable = methodTable
+	ir.importOS = importOS
+
 	ir.emit()
 }
 
