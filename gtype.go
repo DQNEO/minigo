@@ -67,10 +67,7 @@ func (gtype *Gtype) getPrimType() GTYPE_TYPE {
 }
 
 func (gtype *Gtype) isString() bool {
-	if gtype.typ == G_STRING {
-		return true
-	}
-	if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING {
+	if gtype.getPrimType() == G_STRING {
 		return true
 	}
 	return false

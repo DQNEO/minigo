@@ -549,9 +549,7 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 }
 
 func (binop *ExprBinop) emitComp() {
-	switch {
-	case binop.left.getGtype().typ == G_STRING ||
-		(binop.left.getGtype().typ == G_REL && binop.left.getGtype().relation.gtype.typ == G_STRING):
+	if binop.left.getGtype().isString() {
 		binop.emitCompareStrings()
 		return
 	}
