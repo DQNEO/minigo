@@ -6,7 +6,7 @@ import (
 )
 
 func f1() {
-	filename := "t/sample.txt"
+	filename := "t/data/sample.txt"
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic("err")

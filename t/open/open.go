@@ -6,13 +6,13 @@ const O_RDONLY = 0
 
 func f1() int {
 	var fd int
-	fd = open("/etc/hosts", O_RDONLY)
+	fd = open("t/min/min.go", O_RDONLY)
 	return fd
 }
 
 func f2() int {
 	var fd int
-	fd = open("/etc/foobar", O_RDONLY)
+	fd = open("/var/noexists.txt", O_RDONLY)
 	return fd
 }
 

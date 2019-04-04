@@ -1,2 +1,2 @@
 2
-t/sample.txt
+t/data/sample.txt

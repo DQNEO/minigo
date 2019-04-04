@@ -4,7 +4,7 @@ actual=out/actual.txt
 differ=0
 
 # for os.Args
-sample_file=t/sample.txt
+sample_file=t/data/sample.txt
 function test_file {
     local basename=$1
     local expected=t/expected/${basename}.txt
