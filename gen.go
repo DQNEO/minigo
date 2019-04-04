@@ -352,6 +352,7 @@ func emit_intcast(gtype *Gtype) {
 }
 
 func emit_comp_primitive(inst string, binop *ExprBinop) {
+	emit("# emit_comp_primitive")
 	binop.left.emit()
 	if binop.left.getGtype().getPrimType() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
