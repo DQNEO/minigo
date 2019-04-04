@@ -1,6 +1,6 @@
 package ioutil
 
-const MYBUFSIZ = 1024
+const MYBUFSIZ = 65536 * 2
 const O_RDONLY = 0
 
 func ReadFile(filename string) ([]byte, error) {

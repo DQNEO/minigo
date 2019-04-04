@@ -1,6 +1,6 @@
 package runtime
 
-var heap [1048576]int
+var heap [10485760]int
 var heapIndex int
 const intSize = 8
 
