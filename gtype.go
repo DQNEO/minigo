@@ -54,7 +54,8 @@ type Gtype struct {
 
 func (gtype *Gtype) getSource() *Gtype {
 	if gtype.typ == G_REL {
-		return gtype.relation.gtype
+		return gtype.relation.gtype.getSource()
+
 	}
 	return gtype
 }
