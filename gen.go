@@ -352,6 +352,7 @@ func emit_intcast(gtype *Gtype) {
 }
 
 func emit_comp_primitive(inst string, binop *ExprBinop) {
+	emit("# emit_comp_primitive")
 	binop.left.emit()
 	if binop.left.getGtype().getPrimType() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
@@ -548,9 +549,7 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 }
 
 func (binop *ExprBinop) emitComp() {
-	switch {
-	case binop.left.getGtype().typ == G_STRING ||
-		(binop.left.getGtype().typ == G_REL && binop.left.getGtype().relation.gtype.typ == G_STRING):
+	if binop.left.getGtype().isString() {
 		binop.emitCompareStrings()
 		return
 	}
@@ -2590,6 +2589,9 @@ func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
+	if origType == nil {
+		errorft(methodCall.token(), "origType should not be nil")
+	}
 	if origType.typ == G_INTERFACE {
 		return origType.imethods[methodCall.fname].rettypes
 	} else {

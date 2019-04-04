@@ -54,7 +54,8 @@ type Gtype struct {
 
 func (gtype *Gtype) getSource() *Gtype {
 	if gtype.typ == G_REL {
-		return gtype.relation.gtype
+		return gtype.relation.gtype.getSource()
+
 	}
 	return gtype
 }
@@ -67,10 +68,7 @@ func (gtype *Gtype) getPrimType() GTYPE_TYPE {
 }
 
 func (gtype *Gtype) isString() bool {
-	if gtype.typ == G_STRING {
-		return true
-	}
-	if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRING {
+	if gtype.getPrimType() == G_STRING {
 		return true
 	}
 	return false
