@@ -7,6 +7,8 @@ import (
 
 var GENERATION int = 1
 
+var allScopes map[identifier]*scope
+
 var debugMode = false
 var debugToken = false
 
@@ -81,8 +83,6 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	}
 }
 
-var gp *parser // for debug
-
 func main() {
 	var sourceFiles []string
 
@@ -129,9 +129,11 @@ func main() {
 
 	// parse
 	p := &parser{}
-	gp = p
+
 	p.methods = map[identifier]methods{}
 	p.scopes = map[identifier]*scope{}
+
+	allScopes = p.scopes
 
 	var bs *ByteStream
 	var astFiles []*SourceFile

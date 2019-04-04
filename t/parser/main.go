@@ -7,7 +7,7 @@ var GENERATION int = 2
 var debugMode = true
 var debugToken = true
 var debugParser = true
-var gp *parser
+var allScopes map[identifier]*scope
 
 func f1() {
 	path := "t/hello/hello.go"
