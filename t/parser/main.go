@@ -11,7 +11,7 @@ var importOS = true
 var gp *parser
 
 func f1() {
-	path := "t/min/min.go"
+	path := "t/hello/hello.go"
 	s := readFile(path)
 	_bs := ByteStream{
 		filename:  path,
@@ -28,9 +28,20 @@ func f1() {
 	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = nil
 	p.currentScope = nil
-	p.importedNames = nil
+	p.importedNames = map[identifier]bool{}
 	packageClause := p.parsePackageClause()
 	fmt.Printf("%s\n", packageClause.name)
+	importDecls := p.parseImportDecls()
+	// regsiter imported names
+	for _, importdecl := range importDecls {
+		for _, spec := range importdecl.specs {
+			var pkgName identifier
+			pkgName = getBaseNameFromImport(spec.path)
+			p.importedNames[pkgName] = true
+			fmt.Printf("%s\n", pkgName)
+		}
+	}
+
 }
 
 func main() {
