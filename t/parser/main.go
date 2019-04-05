@@ -23,16 +23,10 @@ func f1() {
 
 	// parser to parse imported
 	p := &parser{}
-
-	p.tokenStream = NewTokenStream(bs)
-	p.packageBlockScope = nil
-	p.currentScope = nil
-	p.importedNames = map[identifier]bool{}
-	packageClause := p.parsePackageClause()
-	fmt.Printf("%s\n", packageClause.name)
-	importDecls := p.parseImportDecls()
+	astFile := p.parseSourceFile(bs, nil, true)
+	fmt.Printf("%s\n", astFile.packageClause.name)
 	// regsiter imported names
-	for _, importdecl := range importDecls {
+	for _, importdecl := range astFile.importDecls {
 		for _, spec := range importdecl.specs {
 			var pkgName identifier
 			pkgName = getBaseNameFromImport(spec.path)
