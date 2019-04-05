@@ -10,7 +10,7 @@ var debugParser = true
 var allScopes map[identifier]*scope
 
 func f1() {
-	path := "t/hello/hello.go"
+	path := "t/data/gen.go.txt"
 	s := readFile(path)
 	_bs := ByteStream{
 		filename:  path,
