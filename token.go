@@ -586,7 +586,7 @@ func tokenize(_bs *ByteStream) []*Token {
 				tok = makeToken(T_PUNCT, "<")
 			}
 		default:
-			fmt.Printf("c='%c'\n", c)
+			fmt.Printf("c=%d\n", c)
 			panic("unknown char")
 		}
 		if debugToken {
