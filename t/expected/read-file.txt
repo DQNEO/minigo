@@ -1,9 +1,3 @@
-In a hole in the ground there lived a hobbit.
-Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell,
-nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat:
-it was a hobbit-hole, and that means comfort.
-
-J.R.R. Tolkien, The Hobbit
 package main
 
 import (
@@ -265,6 +259,17 @@ func (a *ExprStructField) emit() {
 	}
 }
 
+func getLoadInst(size int) string {
+	var inst string
+	if size == 1 {
+		inst = "movsbq"
+	} else {
+		inst = "mov"
+	}
+
+	return inst
+}
+
 func (ast *ExprVariable) emit() {
 	emit("# emit variable of type %s", ast.getGtype())
 	if ast.gtype.typ == G_ARRAY {
@@ -296,7 +301,8 @@ func (ast *ExprVariable) emit() {
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
 		default:
-			emit("mov %s(%%rip), %%rax", ast.varname)
+			inst := getLoadInst(ast.getGtype().getSize())
+			emit("%s %s(%%rip), %%rax", inst, ast.varname)
 		}
 	} else {
 		if ast.offset == 0 {
@@ -314,7 +320,8 @@ func (ast *ExprVariable) emit() {
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
 		default:
-			emit("mov %d(%%rbp), %%rax", ast.offset)
+			inst := getLoadInst(ast.getGtype().getSize())
+			emit("%s %d(%%rbp), %%rax", inst, ast.offset)
 		}
 	}
 }
@@ -2222,8 +2229,10 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
-		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
 
+		// dereference the content of an emelment
+		inst := getLoadInst(size)
+		emit("%s (%%rbx), %%rax", inst)
 	} else if array.getGtype().getPrimType() == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
