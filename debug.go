@@ -43,7 +43,11 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	if tok != nil {
 		tokString = tok.String()
 	}
-	errorf(format+"\n "+tokString, v...)
+	if GENERATION == 2 {
+		panic(format)
+	} else {
+		errorf(format+"\n "+tokString, v...)
+	}
 }
 
 func errorf(format string, v ...interface{}) {
