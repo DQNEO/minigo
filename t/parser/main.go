@@ -10,7 +10,7 @@ var debugParser = true
 var allScopes map[identifier]*scope
 
 func f1() {
-	path := "t/data/gen.go.txt"
+	path := "t/min/min.go"
 	s := readFile(path)
 	_bs := ByteStream{
 		filename:  path,
@@ -23,17 +23,13 @@ func f1() {
 
 	// parser to parse imported
 	p := &parser{}
-	astFile := p.parseSourceFile(bs, nil, true)
+	p.methods = map[identifier]methods{}
+	p.scopes = map[identifier]*scope{}
+
+	universe := newScope(nil)
+
+	astFile := p.parseSourceFile(bs, universe, false)
 	fmt.Printf("%s\n", astFile.packageClause.name)
-	// regsiter imported names
-	for _, importdecl := range astFile.importDecls {
-		for _, spec := range importdecl.specs {
-			var pkgName identifier
-			pkgName = getBaseNameFromImport(spec.path)
-			p.importedNames[pkgName] = true
-			fmt.Printf("%s\n", pkgName)
-		}
-	}
 
 }
 
