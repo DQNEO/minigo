@@ -2152,13 +2152,19 @@ func (decl *DeclVar) emit() {
 		// primitive types like int,bool,byte
 		rhs := decl.initval
 		if rhs == nil {
-			// assign zero value
-			rhs = &ExprNumberLiteral{}
+			if gtype.isString() {
+				rhs = &eEmptyString
+			} else {
+				// assign zero value
+				rhs = &ExprNumberLiteral{}
+			}
 		}
 		rhs.emit()
 		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset)
 	}
 }
+
+var eEmptyString = ExprStringLiteral{}
 
 func (decl *DeclType) emit() {
 	// nothing to do
@@ -3181,8 +3187,14 @@ func (root *IrRoot) emit() {
 
 	emit("")
 	emitComment("STRING LITERALS")
+
+	// empty string
+	eEmptyString.slabel = fmt.Sprintf("S%d", 0)
+	emitLabel(".%s:", eEmptyString.slabel)
+	emit(".string \"%s\"", eEmptyString.val)
+
 	for id, ast := range root.stringLiterals {
-		ast.slabel = fmt.Sprintf("S%d", id)
+		ast.slabel = fmt.Sprintf("S%d", id+1)
 		emitLabel(".%s:", ast.slabel)
 		// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 		// the assembler marks the end of each string with a 0 byte.
