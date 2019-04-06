@@ -70,7 +70,22 @@ func f6() {
 func f7() {
 	s := `11
 12`
-	fmt.Printf("%s\n", s)
+	fmt.Printf("%s\n", s) // 11 12
+}
+
+func f8() {
+	s := "dummy"
+	if s == "" {
+		println("ERROR")
+	}
+}
+
+func f9() {
+	var s2 string
+	fmt.Printf("%s", s2)
+	if s2 == "" {
+		println("13")
+	}
 }
 
 func main() {
@@ -81,4 +96,6 @@ func main() {
 	f5()
 	f6()
 	f7()
+	f8()
+	f9()
 }
