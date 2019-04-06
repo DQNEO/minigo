@@ -493,7 +493,7 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isPunct("["): // array literal, slice literal or type casting
 		gtype := p.parseType()
-		tok := p.peekToken()
+		tok = p.peekToken()
 		if tok.isPunct("(") {
 			// Conversion
 			return p.parseTypeConversion(gtype)
