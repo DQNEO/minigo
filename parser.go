@@ -1827,17 +1827,21 @@ func (p *parser) parseTypeDecl() *DeclType {
 func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	defer p.traceOut(p.traceIn())
 
-	switch {
-	case nextToken.isKeyword("func"):
+	if !nextToken.isTypeKeyword() {
+		errorft(nextToken, "invalid token")
+	}
+
+	switch nextToken.sval {
+	case "func":
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
-	case nextToken.isKeyword("var"):
+	case "var":
 		vardecl := p.parseVarDecl()
 		return &TopLevelDecl{vardecl: vardecl}
-	case nextToken.isKeyword("const"):
+	case "const":
 		constdecl := p.parseConstDecl()
 		return &TopLevelDecl{constdecl: constdecl}
-	case nextToken.isKeyword("type"):
+	case "type":
 		typedecl := p.parseTypeDecl()
 		return &TopLevelDecl{typedecl: typedecl}
 	}

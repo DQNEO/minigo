@@ -1090,9 +1090,13 @@ func (stmt *StmtSwitch) emit() {
 			for _, e := range caseClause.exprs {
 				e.emit()
 				emit("pop %%rcx # the subject value")
-				emit("cmp %%rax, %%rcx") // right, left
-				emit("sete %%al")
-				emit("movzb %%al, %%eax")
+				if e.getGtype().isString() {
+					emitStringsEqual(true, "%rax", "%rcx")
+				} else {
+					emit("cmp %%rax, %%rcx") // right, left
+					emit("sete %%al")
+					emit("movzb %%al, %%eax")
+				}
 				emit("test %%rax, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 				emit("push %%rcx # the subject value")
