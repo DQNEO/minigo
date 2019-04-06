@@ -1065,6 +1065,9 @@ func (stmt *StmtSwitch) emit() {
 		stmt.cond.emit()
 		emit("push %%rax")
 		emit("#")
+	} else {
+		// switch {
+		emit("# no condition")
 	}
 
 	// case exp1,exp2,..:
@@ -1085,6 +1088,13 @@ func (stmt *StmtSwitch) emit() {
 				emitStringsEqual(true, "%rax", "%rcx")
 				emit("test %%rax, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
+			}
+		} else if stmt.cond == nil {
+			for _, e := range caseClause.exprs {
+				e.emit()
+				emit("test %%rax, %%rax")
+				emit("jne %s # jump if matches", myCaseLabel)
+				emit("push %%rcx # the subject value")
 			}
 		} else {
 			for _, e := range caseClause.exprs {
