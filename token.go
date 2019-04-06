@@ -166,7 +166,7 @@ func readIdentifier(c0 byte) string {
 		c, err := getc()
 		if err != nil {
 			return string(chars)
-		}
+ 		}
 		if isLetter(c) || isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue

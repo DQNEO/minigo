@@ -46,7 +46,19 @@ func f2() {
 	fmt.Printf("%d\n", i+5) // 5
 }
 
+func f3() {
+	switch {
+	case 1+1 == 3 :
+		println("Error")
+	case 1+1 == 2:
+		println(6)
+	default:
+		println("Error")
+	}
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }
