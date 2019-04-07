@@ -16,9 +16,9 @@ type Map struct {
 }
 
 type Interface struct {
-	pointer       int
-	namedTypeId   int
-	dtypeId       int
+	pointer          int
+	receiverTypeId   int
+	dynamicTypeId    int
 }
 
 type MapData struct {
