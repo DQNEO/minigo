@@ -1,7 +1,0 @@
-* raise out of range error on slice index
-* improve Gtype.String()
-* re-organize dump/debug functions
-* convert Gtype to an interface?
-* emit expression of top-level var decls
-* redesign how to handle semicolon
-* git hook test pre-commit
