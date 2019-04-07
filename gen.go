@@ -1912,14 +1912,14 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	//debugf("dynamic type:%s", gtype)
-	dtypeId, ok := groot.hashedTypes[gtype.String()]
+	dynamicTypeId, ok := groot.hashedTypes[gtype.String()]
 	if !ok {
 		//debugf("types:%#v", groot.hashedTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
 		errorft(dynamicValue.token(), "type %s not found", gtype)
 	}
-	label := fmt.Sprintf("DT%d", dtypeId)
-	emit("lea .%s, %%rax# dtype %s", label, gtype.String())
+	label := fmt.Sprintf("DT%d", dynamicTypeId)
+	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("push %%rax")
 
 }
@@ -3174,8 +3174,8 @@ type IrRoot struct {
 var groot *IrRoot
 
 func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
-	dtypeId := root.hashedTypes[gtype.String()]
-	label := fmt.Sprintf("DT%d", dtypeId)
+	dynamicTypeId := root.hashedTypes[gtype.String()]
+	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	return label
 }
 
@@ -3201,12 +3201,12 @@ func (root *IrRoot) emit() {
 	}
 
 	emit("")
-	emitComment("Dinamic Types")
-	var dtypeId int // 0 means nil
+	emitComment("Dynamic Types")
+	var dynamicTypeId int // 0 means nil
 	for hashedType, _ := range root.hashedTypes {
-		dtypeId++
-		root.hashedTypes[hashedType] = dtypeId
-		label := fmt.Sprintf("DT%d", dtypeId)
+		dynamicTypeId++
+		root.hashedTypes[hashedType] = dynamicTypeId
+		label := fmt.Sprintf("DT%d", dynamicTypeId)
 		emitLabel(".%s:", label)
 		emit(".string \"%s\"", hashedType)
 	}
