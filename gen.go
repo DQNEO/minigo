@@ -1902,14 +1902,13 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emit("mov %%rcx, (%%rax)") // store value to heap
 	emit("push %%rax")         // address
 
-	namedType := dynamicValue.getGtype()
-	if namedType.typ == G_POINTER {
-		namedType = namedType.origType.relation.gtype
+	receiverType := dynamicValue.getGtype()
+	if receiverType.typ == G_POINTER {
+		receiverType = receiverType.origType.relation.gtype
 	}
-	//assert(namedType.typeId > 0,  dynamicValue.token(), "no typeId")
-	emit("mov $%d, %%rax # typeId", namedType.typeId)
-
-	emit("push %%rax") // namedType id
+	//assert(receiverType.typeId > 0,  dynamicValue.token(), "no typeId")
+	emit("mov $%d, %%rax # receiverTypeId", receiverType.typeId)
+	emit("push %%rax # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
 	//debugf("dynamic type:%s", gtype)
@@ -2655,15 +2654,15 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 				typ: G_STRING,
 			},
 		}
-		emit("# emit typeId")
+		emit("# emit receiverTypeId")
 		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 		emit("imul $8, %%rax")
 		emit("push %%rax")
-		emit("lea namedTypes(%%rip), %%rax")
+		emit("lea receiverTypes(%%rip), %%rax")
 		emit("pop %%rcx")
 		emit("add %%rcx, %%rax")
 		emit("# find method %s", call.methodName)
-		emit("mov (%%rax), %%r10") // address of namedTypeN
+		emit("mov (%%rax), %%r10") // address of receiverType
 
 		emit("mov $128, %%rax")  // copy len
 		emit("mov %%rax, %%r11") // copy len
@@ -3214,16 +3213,16 @@ func (root *IrRoot) emit() {
 
 	emitComment("Method table")
 
-	emitLabel("%s:", "namedTypes")
-	emit(".quad 0 # typeId:0")
+	emitLabel("%s:", "receiverTypes")
+	emit(".quad 0 # receiverTypeId:0")
 	for i := 1; i <= len(root.methodTable); i++ {
-		emit(".quad namedType%d # typeId:%d, %s", i, i, root.methodTable[i])
+		emit(".quad receiverType%d # receiverTypeId:%d, %s", i, i, root.methodTable[i])
 	}
 
 	var shortMethodNames map[string]string = map[string]string{}
 
 	for i := 1; i <= len(root.methodTable); i++ {
-		emitLabel("namedType%d:", i)
+		emitLabel("receiverType%d:", i)
 		for _, methodNameFull := range root.methodTable[i] {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
