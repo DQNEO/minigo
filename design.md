@@ -1,8 +1,8 @@
-package main
+# Internal Design Note
 
-//
-// This file is to declare internal design of this project.
-//
+## Data structure of composite types
+
+```
 type Slice struct {
 	pointer int
 	len     int
@@ -15,6 +15,12 @@ type Map struct {
 	cap     int
 }
 
+type Interface struct {
+	pointer       int
+	namedTypeId   int
+	dtypeId       int
+}
+
 type MapData struct {
 	elements []Element
 }
@@ -23,3 +29,5 @@ type Element struct {
 	key   *interface{}
 	value *interface{}
 }
+```
+
