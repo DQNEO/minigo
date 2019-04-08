@@ -271,7 +271,7 @@ func getLoadInst(size int) string {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# emit variable of type %s", ast.getGtype())
+	emit("# emit variable \"%s\" of type %s", ast.varname, ast.getGtype())
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
@@ -2134,6 +2134,8 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 // for local var
 func (decl *DeclVar) emit() {
+	emit("")
+	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
 	switch {
 	case gtype.typ == G_ARRAY:
