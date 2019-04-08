@@ -924,6 +924,54 @@ func (e *ExprIndex) emitMapSet() {
 	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
 }
 
+
+
+// save data from stack
+func (e *ExprIndex) emitSaveInterface() {
+	// load head address of the array
+	// load index
+	// multi index * size
+	// calc address = head address + offset
+	// copy value to the address
+
+	collectionType := e.collection.getGtype()
+	switch {
+	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
+		e.collection.emit() // head address
+	case collectionType.getPrimType() == G_MAP:
+		e.emitMapSet()
+		return
+	default:
+		TBI(e.token(), "unable to handle %s", collectionType)
+	}
+
+	emit("push %%rax # stash head address of collection")
+	e.index.emit()
+	emit("mov %%rax, %%rcx") // index
+	var elmType *Gtype
+	if collectionType.isString() {
+		elmType = gByte
+	} else {
+		elmType = collectionType.elementType
+	}
+	size := elmType.getSize()
+	assert(size > 0, nil, "size > 0")
+	emit("mov $%d, %%rax # size of one element", size)
+	emit("imul %%rcx, %%rax # index * size")
+	emit("push %%rax # store index * size")
+	emit("pop %%rcx # load index * size")
+	emit("pop %%rbx # load address of variable")
+	emit("add %%rcx , %%rbx # (index * size) + address")
+
+	emit("pop %%rax # load RHS value(c)")
+	emit("mov %%rax, 16(%%rbx)")
+	emit("pop %%rax # load RHS value(b)")
+	emit("mov %%rax, 8(%%rbx)")
+	emit("pop %%rax # load RHS value(a)")
+	emit("mov %%rax, (%%rbx)")
+}
+
+
 func (e *ExprIndex) emitSave() {
 	emit("push %%rax") // push RHS value
 
@@ -961,6 +1009,7 @@ func (e *ExprIndex) emitSave() {
 	emit("pop %%rcx # load index * size")
 	emit("pop %%rbx # load address of variable")
 	emit("add %%rcx , %%rbx # (index * size) + address")
+
 	emit("pop %%rax # load RHS value")
 	reg := getReg(size)
 	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
@@ -1751,7 +1800,8 @@ func emitSaveInterface(lhs Expr, offset int) {
 		fieldType := structfield.getGtype()
 		emitSaveInterface(structfield.strct, fieldType.offset+offset)
 	case *ExprIndex:
-		TBI(lhs.token(), "Unable to assign to %T", lhs)
+		indexExpr := lhs.(*ExprIndex)
+		indexExpr.emitSaveInterface()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
@@ -2078,13 +2128,21 @@ func assignToArray(lhs Expr, rhs Expr) {
 			assignToStruct(left, arrayLiteral.values[i])
 		}
 		return
-	default: // prrimitive type
+	default: // prrimitive type or interface
 		for i := 0; i < arrayType.length; i++ {
 			offsetByIndex := i * elmSize
 			switch rhs.(type) {
 			case nil:
 				// assign zero values
-				emit("mov $0, %%rax")
+				if elementType.getPrimType() == G_INTERFACE {
+					emit("push $0")
+					emit("push $0")
+					emit("push $0")
+					emitSaveInterface(lhs, offsetByIndex)
+					continue
+				} else {
+					emit("mov $0, %%rax")
+				}
 			case *ExprArrayLiteral:
 				arrayLiteral := rhs.(*ExprArrayLiteral)
 				if elementType.getPrimType() == G_INTERFACE {
@@ -2231,7 +2289,16 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
-		emit("mov (%%rbx), %%rax") // dereference the content of an emelment
+		if array.getGtype().elementType.getPrimType() == G_INTERFACE {
+			emit("# emit the element of interface type")
+			emit("mov %%rbx, %%rdx")
+			emit("mov (%%rdx), %%rax")
+			emit("mov 8(%%rdx), %%rbx")
+			emit("mov 16(%%rdx), %%rcx")
+		} else {
+			emit("# emit the element of primitive type")
+			emit("mov (%%rbx), %%rax")
+		}
 	} else if array.getGtype().typ == G_SLICE {
 		elmType := array.getGtype().elementType
 		emit("# emit address of the low index")
@@ -2907,7 +2974,8 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			var staticCall IrStaticCall = getPackagedFuncName("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
-			//TBI(slice.token(), "")
+			var staticCall IrStaticCall = getPackagedFuncName("", "append24")
+			staticCall.emit(funcall.args)
 		default:
 			TBI(slice.token(), "")
 		}

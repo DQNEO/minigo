@@ -75,6 +75,9 @@ func append8(x []int, elm int) []int {
 	return z
 }
 
+func append24(x []interface{}, elm interface{}) []interface{} {
+}
+
 func strcopy(src string, dest string, slen int) string {
 	for i:=0; i < slen ; i++ {
 		dest[i] = src[i]
