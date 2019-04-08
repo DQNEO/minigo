@@ -5,7 +5,6 @@ var GENERATION int = 2
 var debugMode = true
 var debugToken = true
 
-
 func f1() {
 	filename := "t/data/gen.go.txt"
 	s := readFile(filename)
@@ -25,9 +24,9 @@ func f1() {
 		panic("ERROR")
 	}
 	/*
-	for _, tok := range tokens {
-		fmt.Printf("%s:%s\n", string(tok.typ), tok.sval)
-	}
+		for _, tok := range tokens {
+			fmt.Printf("%s:%s\n", string(tok.typ), tok.sval)
+		}
 	*/
 }
 

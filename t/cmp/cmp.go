@@ -63,7 +63,7 @@ func f3() {
 }
 
 func f4() {
-	if 0 > 20 - 1 {
+	if 0 > 20-1 {
 		println("ERROR")
 	} else {
 		println("11")

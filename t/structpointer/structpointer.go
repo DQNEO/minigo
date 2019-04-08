@@ -36,19 +36,19 @@ func assign() {
 
 type S struct {
 	dummy *int
-	id int
+	id    int
 }
 
 func f1() {
 	var p *S
 	p = &S{
-		id:123,
+		id: 123,
 	}
 
-	fmt.Printf("%d\n", p.id - 115) // 8
+	fmt.Printf("%d\n", p.id-115) // 8
 
 	p.dummy = nil
-	fmt.Printf("%d\n", p.id - 114) // 9
+	fmt.Printf("%d\n", p.id-114) // 9
 }
 
 func main() {

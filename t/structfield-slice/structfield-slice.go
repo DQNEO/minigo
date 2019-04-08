@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type Gtype struct {
-	fields      []*Gtype
+	fields []*Gtype
 }
 
 func f1() {

@@ -241,10 +241,10 @@ func (a *ExprStructField) emit() {
 		emit("add $%d, %%rax", field.offset)
 		emit("mov %%rax, %%rdx")
 		switch field.getPrimType() {
-		case G_SLICE,G_INTERFACE,G_MAP:
+		case G_SLICE, G_INTERFACE, G_MAP:
 			emit("mov (%%rdx), %%rax")
 			emit("mov %d(%%rdx), %%rbx", ptrSize)
-			emit("mov %d(%%rdx), %%rcx", ptrSize + ptrSize)
+			emit("mov %d(%%rdx), %%rcx", ptrSize+ptrSize)
 		default:
 			emit("mov (%%rdx), %%rax")
 		}
@@ -474,7 +474,7 @@ func (ast *ExprUop) emit() {
 			assignToStruct(e.invisiblevar, e)
 
 			emitCallMalloc(e.getGtype().getSize()) // => rax
-			emit("push %%rax") // to:ptr addr
+			emit("push %%rax")                     // to:ptr addr
 			// @TODO handle global vars
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
 			emit("push %%rax") // from:address of invisible var
@@ -924,8 +924,6 @@ func (e *ExprIndex) emitMapSet() {
 	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
 }
 
-
-
 // save data from stack
 func (e *ExprIndex) emitSaveInterface() {
 	// load head address of the array
@@ -971,7 +969,6 @@ func (e *ExprIndex) emitSaveInterface() {
 	emit("pop %%rax # load RHS value(a)")
 	emit("mov %%rax, (%%rbx)")
 }
-
 
 func (e *ExprIndex) emitSave() {
 	emit("push %%rax") // push RHS value
@@ -1511,7 +1508,6 @@ func emitAddress(e Expr) {
 	}
 }
 
-
 // expect lhs address is in the stack top, rhs is in the second top
 func emitCopyStructFromStack(gtype *Gtype) {
 	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
@@ -1543,7 +1539,6 @@ func emitCopyStructFromStack(gtype *Gtype) {
 	emit("push %%rax") // to
 	emit("push %%rcx") // from
 }
-
 
 // expect rhs address is in the stack top
 func emitCopyStruct(left Expr) {
@@ -2022,7 +2017,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		return
 	}
 
-//	assert(rhs.getGtype().getPrimType() == G_SLICE, rhs.token(), "rsh should be slice type")
+	//	assert(rhs.getGtype().getPrimType() == G_SLICE, rhs.token(), "rsh should be slice type")
 
 	switch rhs.(type) {
 	case *Relation:

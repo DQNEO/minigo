@@ -152,7 +152,7 @@ func main() {
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
 	// parse std packages
 	for pkgName, _ := range imported {
-		pkgCode,ok := stdPkgs[pkgName]
+		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}

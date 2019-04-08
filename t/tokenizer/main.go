@@ -81,7 +81,7 @@ func f4() {
 	bs = &_bs
 
 	tokens := tokenize(bs)
-	fmt.Printf("%d\n", len(tokens) - 14) // 26 - 14 = 12
+	fmt.Printf("%d\n", len(tokens)-14) // 26 - 14 = 12
 	fmt.Printf("----------\n")
 	for _, tok := range tokens {
 		fmt.Printf("%s:%s\n", string(tok.typ), tok.sval)

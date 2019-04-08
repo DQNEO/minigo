@@ -33,7 +33,6 @@ func test_array_literal() {
 	fmt.Printf("%d\n", l+1) // 2
 }
 
-
 type Number struct {
 	id int
 }
@@ -66,18 +65,17 @@ func f4() {
 	var n *Number
 
 	n = &Number{
-		id:4,
+		id: 4,
 	}
 	ifc = n
 	fmt.Printf("%d\n", ifc.getId()) // 4
 
 	array[1] = ifc
-	fmt.Printf("%d\n", array[1].getId() + 1) // 5
+	fmt.Printf("%d\n", array[1].getId()+1) // 5
 
 	ifc2 = array[1]
-	fmt.Printf("%d\n", ifc2.getId() + 2) // 6
+	fmt.Printf("%d\n", ifc2.getId()+2) // 6
 }
-
 
 /*
 func f5() {

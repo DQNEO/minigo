@@ -48,7 +48,7 @@ func f2() {
 
 func f3() {
 	switch {
-	case 1+1 == 3 :
+	case 1+1 == 3:
 		println("Error")
 	case 1+1 == 2:
 		println(6)
