@@ -19,10 +19,10 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/DQNEO/minigo
     steps:
-      - checkout
+      # specify any bash command here prefixed with `run: `
       - run: sudo apt-get update
       - run: sudo apt-get install gdb
-      # specify any bash command here prefixed with `run: `
+      - checkout
       - run: make circlecitest
       #- run: go get -v -t -d ./...
       #- run: go test -v ./...
