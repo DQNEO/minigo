@@ -2036,6 +2036,18 @@ func (funcall *ExprFuncallOrConversion) isBuiltinAppend() bool {
 	return decl == builtinAppend
 }
 
+func (funcall *ExprFuncallOrConversion) isBuiltinDumpInterface() bool {
+	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		return false
+	}
+	decl := funcall.getFuncDef() // check existance
+	if decl == nil {
+		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
+	}
+
+	return decl == builtinDumpInterface
+}
+
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {

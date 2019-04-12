@@ -23,6 +23,10 @@ var builtinAppend = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
 
+var builtinDumpInterface = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
 	predeclareNil(universe)
@@ -38,6 +42,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 	})
 	universe.setFunc("append", &ExprFuncRef{
 		funcdef: builtinAppend,
+	})
+
+	universe.setFunc("dumpInterface", &ExprFuncRef{
+		funcdef: builtinDumpInterface,
 	})
 }
 

@@ -2980,6 +2980,26 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			TBI(slice.token(), "")
 		}
 		return
+	} else if funcall.isBuiltinDumpInterface() {
+		arg := funcall.args[0]
+
+		emit("lea .%s, %%rax", builtinStringKey1)
+		emit("push %%rax")
+		arg.emit()
+		emit("push %%rax  # interface ptr")
+		emit("push %%rbx  # interface receverTypeId")
+		emit("push %%rcx  # interface dynamicTypeId")
+
+		numRegs := 4
+		for i := numRegs - 1; i >= 0; i-- {
+			emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
+		}
+
+		emit("mov $0, %%rax")
+		emit("call %s", "printf")
+		emit("")
+
+		return
 	}
 	var staticCall IrStaticCall = getPackagedFuncName(decl.pkg, funcall.fname)
 	staticCall.emit(funcall.args)
@@ -3249,6 +3269,10 @@ func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
 	return label
 }
 
+// builtin string
+var builtinStringKey1 string = "SfmtDumpInterface"
+var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\\n"
+
 func (root *IrRoot) emit() {
 	groot = root
 	// generate code
@@ -3256,6 +3280,10 @@ func (root *IrRoot) emit() {
 
 	emit("")
 	emitComment("STRING LITERALS")
+
+	// emit builtin string
+	emitLabel(".%s:", builtinStringKey1)
+	emit(".string \"%s\"", builtinStringValue1)
 
 	// empty string
 	eEmptyString.slabel = fmt.Sprintf("S%d", 0)
