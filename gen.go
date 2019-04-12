@@ -1950,7 +1950,7 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emitCallMalloc(8)
 	emit("pop %%rcx")          // dynamicValue
 	emit("mov %%rcx, (%%rax)") // store value to heap
-	emit("push %%rax")         // address
+	emit("push %%rax # addr of dynamicValue")         // address
 
 	receiverType := dynamicValue.getGtype()
 	if receiverType.typ == G_POINTER {
@@ -2722,7 +2722,7 @@ type IrInterfaceMethodCall struct {
 }
 
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
-	emit("# emitCall %s", call.methodName)
+	emit("# emit interface method call \"%s\"", call.methodName)
 	if true {
 		mapType := &Gtype{
 			typ: G_MAP,
@@ -2733,7 +2733,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 				typ: G_STRING,
 			},
 		}
-		emit("# emit receiverTypeId")
+		emit("# emit receiverTypeId of %s", call.receiver.getGtype())
 		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 		emit("imul $8, %%rax")
 		emit("push %%rax")
