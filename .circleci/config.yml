@@ -20,7 +20,8 @@ jobs:
     working_directory: /go/src/github.com/DQNEO/minigo
     steps:
       - checkout
-
+      - run: sudo apt-get update
+      - run: sudo apt-get install gdb
       # specify any bash command here prefixed with `run: `
       - run: make circlecitest
       #- run: go get -v -t -d ./...
