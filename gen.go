@@ -671,7 +671,7 @@ func isUnderScore(e Expr) bool {
 //
 func (ast *StmtAssignment) emit() {
 	emit("")
-	emit("# Assignment")
+	emit("# StmtAssignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
@@ -784,6 +784,9 @@ func (ast *StmtAssignment) emit() {
 		}
 
 		gtype := left.getGtype()
+		if _, ok := left.(*Relation); ok {
+			emit("# \"%s\" = ", left.(*Relation).name)
+		}
 		emit("# Assign %T %s = %T %s", left, gtype, right, right.getGtype())
 		switch {
 		case gtype == nil:
@@ -2089,11 +2092,11 @@ func (variable *ExprVariable) saveSlice(offset int) {
 
 func (variable *ExprVariable) saveInterface(offset int) {
 	emit("# *ExprVariable.saveInterface()")
-	emit("pop %%rax")
+	emit("pop %%rax # dynamic type id")
 	variable.emitOffsetSave(8, offset+ptrSize+ptrSize)
-	emit("pop %%rax")
+	emit("pop %%rax # reciverTypeId")
 	variable.emitOffsetSave(8, offset+ptrSize)
-	emit("pop %%rax")
+	emit("pop %%rax # ptr")
 	variable.emitOffsetSave(8, offset)
 }
 
@@ -2943,7 +2946,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
 	}
 
-	// len()
+	// check if it's a builtin function
 	if funcall.isBuiltinLen() {
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
