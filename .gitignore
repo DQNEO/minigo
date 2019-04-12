@@ -3,6 +3,6 @@
 /minigo*
 a.go
 /stdlib.go
-internalcode.go
+/internalcode.go
 /a.s
 /child
