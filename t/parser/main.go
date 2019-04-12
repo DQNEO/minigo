@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 var GENERATION int = 2
 
 var debugMode = true
@@ -29,8 +27,7 @@ func f1() {
 	universe := newScope(nil)
 
 	astFile := p.parseSourceFile(bs, universe, false)
-	fmt.Printf("%s\n", astFile.packageClause.name)
-
+	astFile.dump()
 }
 
 func main() {

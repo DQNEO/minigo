@@ -1418,6 +1418,7 @@ func (f *StmtFor) emit() {
 
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
+		// return void
 		emit("mov $0, %%rax")
 		emit("leave")
 		emit("ret")
@@ -1431,10 +1432,24 @@ func (stmt *StmtReturn) emit() {
 	var retRegiIndex int
 	if len(stmt.exprs) == 1 {
 		expr := stmt.exprs[0]
-		expr.emit()
-		if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
-			emit("mov $0, %%rbx")
-			emit("mov $0, %%rcx")
+		rettype := stmt.rettypes[0]
+		if rettype.getPrimType() == G_INTERFACE && expr.getGtype().getPrimType() != G_INTERFACE {
+			if expr.getGtype() == nil {
+				emit("mov $0, %%rax")
+				emit("mov $0, %%rbx")
+				emit("mov $0, %%rcx")
+			} else {
+				convertDynamicTypeToInterface(expr)
+				emit("pop %%rcx")
+				emit("pop %%rbx")
+				emit("pop %%rax")
+			}
+		} else {
+			expr.emit()
+			if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
+				emit("mov $0, %%rbx")
+				emit("mov $0, %%rcx")
+			}
 		}
 		emit("leave")
 		emit("ret")
@@ -1953,6 +1968,9 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emit("push %%rax # addr of dynamicValue")         // address
 
 	receiverType := dynamicValue.getGtype()
+	if receiverType == nil {
+		errorft(dynamicValue.token(), "type is nil")
+	}
 	if receiverType.typ == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}

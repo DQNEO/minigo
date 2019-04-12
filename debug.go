@@ -11,6 +11,9 @@ func debugln(s string) {
 }
 
 func debugf(format string, v ...interface{}) {
+	if GENERATION == 2 {
+		//fmt.Printf("%s\n", format)
+	}
 	if !debugMode {
 		return
 	}
