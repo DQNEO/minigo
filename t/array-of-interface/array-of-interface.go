@@ -77,23 +77,29 @@ func f4() {
 	fmt.Printf("%d\n", ifc2.getId()+2) // 6
 }
 
-/*
 func f5() {
 	var stmts []Stmt
 	var s Stmt
+	var s2 Stmt
 	var n *Number
+	var id int
 	n = &Number{
-		id:123,
+		id:7,
 	}
 	s = n
-	fmt.Printf("%d\n", s.getId())
-
+	fmt.Printf("%d\n", s.getId()) // 7
 	stmts = append(stmts, s)
+	fmt.Printf("%d\n", len(stmts) + 7) // 8
+	s2 = stmts[0]
+	id = s2.getId()
+	fmt.Printf("%d\n", id + 2) // 9
+	fmt.Printf("%d\n", stmts[0].getId() + 3) // 10
 }
-*/
+
 
 func main() {
 	test_array_literal()
 	f3()
 	f4()
+	f5()
 }

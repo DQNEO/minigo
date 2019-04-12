@@ -75,7 +75,30 @@ func append8(x []int, elm int) []int {
 	return z
 }
 
+
 func append24(x []interface{}, elm interface{}) []interface{} {
+	//dumpInterface(elm)
+	var z []interface{}
+	xlen := len(x)
+	zlen := xlen + 1
+
+	if cap(x) >= zlen {
+		z = x[:zlen]
+	} else {
+		var newcap int
+		if xlen == 0 {
+			newcap = 8
+		} else {
+			newcap = xlen * 2
+		}
+		z = makeSlice(zlen, newcap)
+		for i:=0;i<xlen;i++ {
+			z[i] = x[i]
+		}
+	}
+
+	z[xlen] = elm
+	return z
 }
 
 func strcopy(src string, dest string, slen int) string {

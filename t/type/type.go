@@ -4,10 +4,11 @@ import "fmt"
 
 var myarray [2]myint = [2]myint{3, 2}
 
-func anytype(x interface{}, y interface{}) {
+
+func anytype(x interface{}) {
 	fmt.Printf("%d\n", x)
-	fmt.Printf("%d\n", y)
 }
+
 
 func f1() {
 	var a myint = '1'
@@ -16,7 +17,8 @@ func f1() {
 
 func f2() {
 	fmt.Printf("%d\n", myarray[1])
-	anytype(3, 4)
+	anytype(3)
+	anytype(4)
 }
 
 func main() {

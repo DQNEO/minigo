@@ -111,12 +111,12 @@ func (f *DeclFunc) emitPrologue() {
 	var regIndex int
 	for _, param := range params {
 		switch param.getGtype().getPrimType() {
-		case G_SLICE:
-			offset -= sliceSize
+		case G_SLICE, G_INTERFACE, G_MAP:
+			offset -= IntSize * 3
 			param.offset = offset
-			emit("push %%%s # slice cap", RegsForCall[regIndex+2])
-			emit("push %%%s # slice len", RegsForCall[regIndex+1])
-			emit("push %%%s # slice ptr", RegsForCall[regIndex])
+			emit("push %%%s # c", RegsForCall[regIndex+2])
+			emit("push %%%s # b", RegsForCall[regIndex+1])
+			emit("push %%%s # a", RegsForCall[regIndex])
 			regIndex += sliceWidth
 		default:
 			offset -= IntSize
@@ -2318,9 +2318,19 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 			emit("add $%d,  %%rbx", offset)
 		}
 
-		// dereference the content of an emelment
-		inst := getLoadInst(size)
-		emit("%s (%%rbx), %%rax", inst)
+		primType := array.getGtype().elementType.getPrimType()
+		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
+			emit("# emit the element of interface type")
+			emit("mov %%rbx, %%rdx")
+			emit("mov (%%rdx), %%rax")
+			emit("mov 8(%%rdx), %%rbx")
+			emit("mov 16(%%rdx), %%rcx")
+		} else {
+			// dereference the content of an emelment
+			inst := getLoadInst(size)
+			emit("# emit the element of primitive type")
+			emit("%s (%%rbx), %%rax", inst)
+		}
 	} else if array.getGtype().getPrimType() == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
@@ -3024,10 +3034,15 @@ func (ircall IrStaticCall) emit(args []Expr) {
 			arg.emit()
 		}
 
-		if arg.getGtype() != nil && arg.getGtype().getPrimType() == G_SLICE {
-			emit("push %%rax  # argument slice ptr")
-			emit("push %%rbx  # argument slice len")
-			emit("push %%rcx  # argument slice cap")
+		var primType GTYPE_TYPE = 0
+		if arg.getGtype() != nil {
+			primType = arg.getGtype().getPrimType()
+		}
+
+		if primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
+			emit("push %%rax  # argument 1/3")
+			emit("push %%rbx  # argument 2/3")
+			emit("push %%rcx  # argument 3/3")
 			numRegs += sliceWidth
 		} else {
 			emit("push %%rax  # argument primitive")
