@@ -27,6 +27,7 @@ func f1() {
 	universe := newScope(nil)
 
 	astFile := p.parseSourceFile(bs, universe, false)
+	debugNest = 0
 	astFile.dump()
 }
 

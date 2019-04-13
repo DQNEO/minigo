@@ -14,16 +14,22 @@ func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
 	}
+
+	var indents []byte
+
+	for i := 0; i < debugNest; i++ {
+		indents = append(indents, ' ')
+		indents = append(indents, ' ')
+	}
+
 	if GENERATION == 2 {
+		//fmt.Printf("# ")
+		//fmt.Printf(string(indents))
 		//fmt.Printf("%s\n", format)
 		return
 	}
-	spaces := "> "
-	for i := 0; i < debugNest; i++ {
-		spaces += "  "
-	}
 
-	fmt.Fprintf(os.Stderr, spaces+format+"\n", v...)
+	fmt.Fprintf(os.Stderr, string(indents)+format+"\n", v...)
 }
 
 func dumpToken(tok *Token) {
