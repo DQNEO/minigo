@@ -794,7 +794,7 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("[") {
 			// array or slice
 			tok := p.readToken()
-			// @TODO consider "..." case.
+			// @TODO consider "..." case in a composite literal.
 			// The notation ... specifies an array length
 			// equal to the maximum element index plus one.
 			if tok.isPunct("]") {
@@ -1031,7 +1031,7 @@ func (p *parser) parseForStmt() *StmtFor {
 
 	var cond Expr
 	if p.peekToken().isPunct("{") {
-		// inifinit loop : for { ... }
+		// inifinit loop : for { ___ }
 	} else {
 		p.requireBlock = true
 		cond = p.parseExpr()

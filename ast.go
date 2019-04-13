@@ -63,7 +63,7 @@ type ExprConstVariable struct {
 	iotaIndex int  // for iota
 }
 
-// ident(...)
+// ident( ___ )
 type ExprFuncallOrConversion struct {
 	tok   *Token
 	rel   *Relation
