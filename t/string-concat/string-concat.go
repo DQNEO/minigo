@@ -10,6 +10,15 @@ func f1() {
 	fmt.Printf("%s\n", x)
 }
 
+func f2() {
+	spaces := "> "
+	for i := 0; i < 3; i++ {
+		spaces += "xx"
+	}
+	fmt.Printf("%s\n", spaces)
+}
+
 func main() {
 	f1()
+	f2()
 }
