@@ -123,4 +123,11 @@ func predeclareLibcFuncs(universe *scope) {
 			rettypes: []*Gtype{gInt},
 		},
 	})
+
+	universe.setFunc("write", &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg:      "libc",
+			rettypes: []*Gtype{gInt},
+		},
+	})
 }
