@@ -18,10 +18,6 @@ func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
 	}
-	warnf(format, v...)
-}
-
-func warnf(format string, v ...interface{}) {
 	spaces := "> "
 	for i := 0; i < debugNest; i++ {
 		spaces += "  "
