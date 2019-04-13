@@ -1996,6 +1996,11 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("push %%rax")
 		emit("push %%rbx")
 		emit("push %%rcx")
+	case *ExprStructField:
+		rhs.emit()
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
