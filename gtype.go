@@ -365,7 +365,9 @@ func (e *ExprBinop) getGtype() *Gtype {
 	switch e.op {
 	case "<", ">", "<=", ">=", "!=", "==", "&&", "||":
 		return gBool
-	case "+", "-", "*", "%", "/":
+	case "+":
+		return e.left.getGtype()
+	case "-", "*", "%", "/":
 		return gInt
 	}
 	errorf("internal error")
