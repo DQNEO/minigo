@@ -33,7 +33,8 @@ func debugf(format string, v ...interface{}) {
 }
 
 func dumpToken(tok *Token) {
-	debugf(fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval))
+	s := fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval)
+	debugf(s)
 }
 
 var debugNest int
