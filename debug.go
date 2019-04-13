@@ -11,11 +11,11 @@ func debugln(s string) {
 }
 
 func debugf(format string, v ...interface{}) {
-	if GENERATION == 2 {
-		return
-		//fmt.Printf("%s\n", format)
-	}
 	if !debugMode {
+		return
+	}
+	if GENERATION == 2 {
+		//fmt.Printf("%s\n", format)
 		return
 	}
 	spaces := "> "
