@@ -1,37 +1,52 @@
 package main
 
-func doPrintf(format string, a []interface{}) {
+func doPrintf(format string, a []interface{}) string {
+	var buf [1024]byte
+	var numred int
 	switch len(a) {
 	case 0:
-			printf(format)
+		numred = sprintf(buf, format)
 	case 1:
 			var a0 interface{} = a[0]
-			printf(format, *a0)
+		numred = sprintf(buf, format, *a0)
+
 	case 2:
 			var a0 interface{} = a[0]
 			var a1 interface{} = a[1]
-			printf(format, *a0, *a1)
+		numred = sprintf(buf, format, *a0, *a1)
 	case 3:
 			var a0 interface{} = a[0]
 			var a1 interface{} = a[1]
 			var a2 interface{} = a[2]
-			printf(format, *a0, *a1, *a2)
+		numred = sprintf(buf, format, *a0, *a1, *a2)
 	case 4:
 		var a0 interface{} = a[0]
 		var a1 interface{} = a[1]
 		var a2 interface{} = a[2]
 		var a3 interface{} = a[3]
-		printf(format, *a0, *a1, *a2, *a3)
+		numred = sprintf(buf, format, *a0, *a1, *a2, *a3)
 	default:
 		printf("ERROR: doPrintf cannot handle more than 4 params")
 	}
+
+	// copy string to heap area
+	var b []slice
+	b = makeSlice(numred+1, numred+1)
+	strcopy(buf, b, numred)
+
+	// return heap
+	return b
+}
+
+func myPrintf(format string, a []interface{}) {
+	var s string = doPrintf(format, a)
+	printf(s)
 }
 
 func f0() {
 	var a []interface{}
-	doPrintf("hello\n", a)
+	myPrintf("hello\n", a)
 }
-
 
 func f1() {
 	var a []interface{}
@@ -39,7 +54,7 @@ func f1() {
 	var ifc interface{}
 	ifc = i
 	a = append(a, ifc)
-	doPrintf("%d\n", a)
+	myPrintf("%d\n", a)
 }
 
 func f2() {
@@ -53,7 +68,7 @@ func f2() {
 	a = nil
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	doPrintf("%d %d\n", a)
+	myPrintf("%d %d\n", a)
 }
 
 func f3() {
@@ -66,7 +81,7 @@ func f3() {
 	ifc2 = s2
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	doPrintf("%s %s\n", a)
+	myPrintf("%s %s\n", a)
 }
 
 func f4() {
@@ -79,7 +94,7 @@ func f4() {
 	ifc2 = i
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	doPrintf("%s %d\n", a)
+	myPrintf("%s %d\n", a)
 }
 
 func f5() {
@@ -96,7 +111,7 @@ func f5() {
 	a = append(a, ifc)
 	a = append(a, ifc2)
 	a = append(a, ifc3)
-	doPrintf("%s %d %d\n", a)
+	myPrintf("%s %d %d\n", a)
 }
 
 func main() {

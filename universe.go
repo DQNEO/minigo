@@ -99,6 +99,12 @@ func predeclareLibcFuncs(universe *scope) {
 			// No implementation thanks to the libc function.
 		},
 	})
+	universe.setFunc("sprintf", &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg: "libc",
+			rettypes: []*Gtype{gInt},
+		},
+	})
 	universe.setFunc("exit", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
