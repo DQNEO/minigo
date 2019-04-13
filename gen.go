@@ -586,7 +586,50 @@ func (binop *ExprBinop) emitComp() {
 	emit_comp_primitive(instruction, binop)
 }
 
+func emitStringConcate(left Expr, right Expr) {
+	emit("# emitStringConcate")
+	// newSize = strlen(left) + strlen(right) + 1
+	binop := &ExprBinop{
+		op: "+",
+		left: &ExprLen{
+			arg: left,
+		},
+		right: &ExprLen{
+			arg: right,
+		},
+	}
+	binop2 := &ExprBinop{
+		op: "+",
+		left: binop,
+		right: &ExprNumberLiteral{
+				val:1,
+		},
+	}
+
+	// strcat(newstring, left)
+	emitCallMallocDinamicSize(binop2) 	// malloc(newSize)
+	emit("push %%rax")
+	left.emit()
+	emit("push %%rax")
+	emit("pop %%rsi")
+	emit("pop %%rdi")
+	emit("mov $0, %%rax")
+	emit("call strcat")
+
+	emit("push %%rax")
+	right.emit()
+	emit("push %%rax")
+	emit("pop %%rsi")
+	emit("pop %%rdi")
+	emit("mov $0, %%rax")
+	emit("call strcat")
+}
+
 func (ast *ExprBinop) emit() {
+	if ast.op == "+" && ast.left.getGtype().isString() {
+		emitStringConcate(ast.left, ast.right)
+		return
+	}
 	switch ast.op {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
