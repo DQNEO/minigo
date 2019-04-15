@@ -3120,6 +3120,20 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	emit("")
 }
 
+func emitRuntimeArgs() {
+	emitLabel("runtime_args:")
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+
+	emit("# set Args")
+	emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
+	emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
+	emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
+
+	emit("mov $0, %%rax")
+	emitFuncEpilogue()
+
+}
 func emitMainFunc(importOS bool) {
 	fname := "main"
 	emit(".global	%s", fname)
@@ -3128,9 +3142,8 @@ func emitMainFunc(importOS bool) {
 	emit("mov %%rsp, %%rbp")
 	if importOS {
 		emit("# set Args")
-		emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
-		emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
-		emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
+		emit("mov $0, %%rax")
+		emit("call runtime_args")
 	} else {
 		emit("# No Args. os is not imported.")
 	}
@@ -3428,5 +3441,7 @@ func (root *IrRoot) emit() {
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
 	}
+
+	emitRuntimeArgs()
 	emitMainFunc(root.importOS)
 }

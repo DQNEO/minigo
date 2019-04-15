@@ -31,4 +31,7 @@ func Exit(i int) {
 func init() {
 	Stdout = &SStdout
 	Stderr = &SStderr
+
+	//runtime_args()
+	//Args = runtime_args()
 }
