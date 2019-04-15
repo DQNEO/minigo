@@ -3125,15 +3125,11 @@ func emitRuntimeArgs() {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	emit("# set Args")
-	emit("mov Argv(%%rip), %%rax")
-	emit("mov %%rax, 0+Args(%%rip)")  // set pointer (**argv)
+	emit("# set argv, argc, argc")
+	emit("mov Argv(%%rip), %%rax # ptr")
+	emit("mov Argc(%%rip), %%rbx # len")
+	emit("mov Argc(%%rip), %%rcx # cap")
 
-	emit("mov Argc(%%rip), %%rax")
-	emit("mov %%rax, 8+Args(%%rip)")  // set len (argc)
-	emit("mov %%rax, 16+Args(%%rip)") // set cap (argc)
-
-	emit("mov $0, %%rax")
 	emitFuncEpilogue()
 }
 
@@ -3153,6 +3149,22 @@ func emitMainFunc(importOS bool) {
 		emit("# set Args")
 		emit("mov $0, %%rax")
 		emit("call runtime_args")
+
+		emit("push %%rax")
+		emit("push %%rbx")
+		emit("push %%rcx")
+
+		var vr *ExprVariable
+		vr = &ExprVariable{
+			isGlobal:true,
+			gtype: &Gtype{
+				typ:G_SLICE,
+				size: IntSize * 3,
+			},
+			varname:"Args",
+		}
+		emitSave3Elements(vr, 0)
+		//vr.saveSlice(0)
 	}
 
 	// init imported packages
