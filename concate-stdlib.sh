@@ -8,8 +8,9 @@ echo ""
 for dir in stdlib/*
 do
     basename=${dir##*/}
-    code=$(cat stdlib/$basename/$basename.go)
-    echo -e "const ${basename}Code=\`\n$code\n\`"
+    echo "const ${basename}Code=\`"
+    cat stdlib/$basename/$basename.go
+    echo "\`"
     echo ""
 done
 
