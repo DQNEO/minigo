@@ -11,6 +11,5 @@ func f1() {
 }
 
 func main() {
-	os.Init()
 	f1()
 }

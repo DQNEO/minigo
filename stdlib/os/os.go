@@ -29,7 +29,7 @@ var Args []string
 func Exit(i int) {
 }
 
-func Init() {
+func init() {
 	Stdout = &SStdout
 	Stderr = &SStderr
 }

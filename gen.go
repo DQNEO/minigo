@@ -3134,6 +3134,14 @@ func emitMainFunc(importOS bool) {
 	} else {
 		emit("# No Args. os is not imported.")
 	}
+
+	// init imported packages
+	if importOS {
+		emit("# init os")
+		emit("mov $0, %%rax")
+		emit("call os.init")
+	}
+
 	emit("")
 	emit("mov $0, %%rax")
 	emit("call main.main")
