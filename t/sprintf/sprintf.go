@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var pbuf [1024]byte
 
 func doPrintf(format string, a []interface{}) string {
@@ -119,6 +121,26 @@ func f5() {
 	myPrintf("%s %d %d\n", a)
 }
 
+/*
+func dumpToken(tok *Token) {
+	s := fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval)
+	debugf(s)
+}
+*/
+
+func test_dumpToken() {
+	format := "tok: type=%-4s,sval=\"%s\"\n"
+	var s1 string = "int"
+	var s2 string = "123"
+	var ifcs []interface{}
+	var ifc1 interface{} = s1
+	var ifc2 interface{} = s2
+	ifcs = append(ifcs, ifc1)
+	ifcs = append(ifcs, ifc2)
+	var s string =  doPrintf(format, ifcs)
+	fmt.Printf(s)
+}
+
 func main() {
 	f0()
 	f1()
@@ -126,4 +148,5 @@ func main() {
 	f3()
 	f4()
 	f5()
+	test_dumpToken()
 }

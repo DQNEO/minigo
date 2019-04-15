@@ -4,3 +4,4 @@ hello
 hello world
 hello 123
 hello 123 456
+tok: type=int ,sval="123"
