@@ -3126,26 +3126,33 @@ func emitRuntimeArgs() {
 	emit("mov %%rsp, %%rbp")
 
 	emit("# set Args")
-	emit("mov %%rsi, 0+Args(%%rip)")  // set pointer (**argv)
-	emit("mov %%rdi, 8+Args(%%rip)")  // set len (argc)
-	emit("mov %%rdi, 16+Args(%%rip)") // set cap (argc)
+	emit("mov Argv(%%rip), %%rax")
+	emit("mov %%rax, 0+Args(%%rip)")  // set pointer (**argv)
+
+	emit("mov Argc(%%rip), %%rax")
+	emit("mov %%rax, 8+Args(%%rip)")  // set len (argc)
+	emit("mov %%rax, 16+Args(%%rip)") // set cap (argc)
 
 	emit("mov $0, %%rax")
 	emitFuncEpilogue()
-
 }
+
 func emitMainFunc(importOS bool) {
 	fname := "main"
 	emit(".global	%s", fname)
 	emitLabel("%s:", fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
+
+	emit("mov %%rsi, Argv(%%rip)")
+	emit("mov %%rdi, Argc(%%rip)")
+	emit("mov $0, %%rsi")
+	emit("mov $0, %%rdi")
+
 	if importOS {
 		emit("# set Args")
 		emit("mov $0, %%rax")
 		emit("call runtime_args")
-	} else {
-		emit("# No Args. os is not imported.")
 	}
 
 	// init imported packages

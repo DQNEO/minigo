@@ -23,8 +23,6 @@ func (f *File) Write(b string) (int, error) {
 	return n,nil
 }
 
-var Args []string
-
 func Exit(i int) {
 }
 

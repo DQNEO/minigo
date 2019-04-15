@@ -1,5 +1,9 @@
 package runtime
 
+var Argc int
+var Argv *int
+var Args []string
+
 var heap [10485760]int
 var heapIndex int
 const intSize = 8
