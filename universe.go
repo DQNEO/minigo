@@ -27,6 +27,18 @@ var builtinDumpInterface = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
+var builtinRunTimeArgs = &DeclFunc{
+	rettypes: []*Gtype{
+		&Gtype{
+			typ: G_SLICE,
+			size: IntSize * 3,
+			elementType: &Gtype{
+				typ:G_STRING,
+			},
+		},
+	},
+}
+
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
 	predeclareNil(universe)
@@ -46,6 +58,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 
 	universe.setFunc("dumpInterface", &ExprFuncRef{
 		funcdef: builtinDumpInterface,
+	})
+
+	universe.setFunc("runtime_args", &ExprFuncRef{
+		funcdef: builtinRunTimeArgs,
 	})
 }
 

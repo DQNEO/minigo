@@ -3121,7 +3121,7 @@ func (ircall IrStaticCall) emit(args []Expr) {
 }
 
 func emitRuntimeArgs() {
-	emitLabel("runtime_args:")
+	emitLabel(".runtime_args:")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -3144,28 +3144,6 @@ func emitMainFunc(importOS bool) {
 	emit("mov %%rdi, Argc(%%rip)")
 	emit("mov $0, %%rsi")
 	emit("mov $0, %%rdi")
-
-	if importOS {
-		emit("# set Args")
-		emit("mov $0, %%rax")
-		emit("call runtime_args")
-
-		emit("push %%rax")
-		emit("push %%rbx")
-		emit("push %%rcx")
-
-		var vr *ExprVariable
-		vr = &ExprVariable{
-			isGlobal:true,
-			gtype: &Gtype{
-				typ:G_SLICE,
-				size: IntSize * 3,
-			},
-			varname:"Args",
-		}
-		emitSave3Elements(vr, 0)
-		//vr.saveSlice(0)
-	}
 
 	// init imported packages
 	if importOS {

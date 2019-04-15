@@ -30,6 +30,8 @@ func init() {
 	Stdout = &SStdout
 	Stderr = &SStderr
 
-	//runtime_args()
-	//Args = runtime_args()
+	// runtime_args is written in assembly code
+	Args = runtime_args()
 }
+
+//func runtime_args() []string
