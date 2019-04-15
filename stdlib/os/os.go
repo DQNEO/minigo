@@ -1,16 +1,15 @@
 package os
 
-var Stdout *File
-
 var SStdout = File{
 	id:1,
 }
-
-var Stderr *File
-
 var SStderr = File{
 	id:2,
 }
+
+var Stderr *File
+var Stdout *File
+
 
 // File represents an open file descriptor.
 type File struct {
