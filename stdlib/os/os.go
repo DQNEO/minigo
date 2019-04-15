@@ -16,10 +16,10 @@ type File struct {
 	id int
 }
 
-func (f *File) Write(b string) (int, error) {
+func (f *File) Write(b []byte) (int, error) {
 	var fid int = f.id
 	var n int
-	n = write(fid, b, len(b))
+	n = write(fid, string(b), len(b))
 	return n,nil
 }
 

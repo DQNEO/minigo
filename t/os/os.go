@@ -4,10 +4,12 @@ import "os"
 
 func f1() {
 	var a = "hello stdout\n"
-	os.Stdout.Write(a)
+	var a2 []byte = []byte(a)
+	os.Stdout.Write(a2)
 
 	var b = "hello stderr\n"
-	os.Stderr.Write(b)
+	var b2 []byte = []byte(b)
+	os.Stderr.Write(b2)
 }
 
 func main() {

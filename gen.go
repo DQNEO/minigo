@@ -2121,9 +2121,12 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		stringVariable := stringVarname.expr.(*ExprVariable)
 		stringVariable.emit()
 		emit("push %%rax")
-		strlen := stringVariable.getGtype().length
-		emit("push $%d", strlen) // len
-		emit("push $%d", strlen) // cap
+		strlen := &ExprLen{
+			arg: stringVariable,
+		}
+		strlen.emit()
+		emit("push %%rax # len")
+		emit("push %%rax # cap")
 
 	default:
 		emit("# emit rhs of type %T %s", rhs, rhs.getGtype())
