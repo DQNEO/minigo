@@ -2,18 +2,15 @@ package main
 
 import "os"
 
-
 func f1() {
 	var a = "hello stdout\n"
-	os.Stdout = &os.SStdout
 	os.Stdout.Write(a)
 
 	var b = "hello stderr\n"
-	os.Stderr = &os.SStderr
 	os.Stderr.Write(b)
-
 }
 
 func main() {
+	os.Init()
 	f1()
 }
