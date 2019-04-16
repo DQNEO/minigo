@@ -45,7 +45,6 @@ func dumpToken(tok *Token) {
 
 	var s string = fmt.Sprintf(frmt, a)
 	os.Stderr.Write([]byte(s))
-	//debugf(s)
 }
 
 var debugNest int
