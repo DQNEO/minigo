@@ -2699,7 +2699,20 @@ func (e *ExprVaArg) emit() {
 }
 
 func (e *ExprConversion) emit() {
-	e.expr.emit()
+	emitComment("ExprConversion.emit()")
+	if e.gtype.isString() {
+		// s = string(bytes)
+		labelEnd := makeLabel()
+		e.expr.emit()
+		emit("push %%rax")
+		emit("test %%rax, %%rax")
+		emit("pop %%rax")
+		emit("jne %s", labelEnd)
+		emit("lea .%s(%%rip), %%rax # set empty strinf", eEmptyString.slabel)
+		emit("%s:", labelEnd)
+	} else {
+		e.expr.emit()
+	}
 }
 
 func (e *ExprStructLiteral) emit() {

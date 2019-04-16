@@ -340,8 +340,8 @@ type ExprVaArg struct {
 
 type ExprConversion struct {
 	tok   *Token
-	gtype *Gtype
-	expr  Expr
+	gtype *Gtype // to
+	expr  Expr   // from
 }
 
 // ExprCaseClause or TypeCaseClause
