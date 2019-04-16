@@ -26,15 +26,26 @@ func debugf(format string, v ...interface{}) {
 		//fmt.Printf("# ")
 		//fmt.Printf(string(indents))
 		//fmt.Printf("%s\n", format)
-		return
+		//return
 	}
 
-	fmt.Fprintf(os.Stderr, string(indents)+format+"\n", v...)
+	var s string = string(indents)+format+"\n"
+	os.Stderr.Write([]byte(s))
+	//fmt.Fprintf(os.Stderr, s, v...)
 }
 
 func dumpToken(tok *Token) {
-	s := fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval)
-	debugf(s)
+	var frmt string = "tok: type=%-8s, sval=\"%s\"\n"
+	var a []interface{}
+	var ifc interface{} = tok.typ
+	var ifc2 interface{} = tok.sval
+	a = nil
+	a = append(a, ifc)
+	a = append(a, ifc2)
+
+	var s string = fmt.Sprintf(frmt, a)
+	os.Stderr.Write([]byte(s))
+	//debugf(s)
 }
 
 var debugNest int
