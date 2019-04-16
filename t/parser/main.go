@@ -3,8 +3,8 @@ package main
 var GENERATION int = 2
 
 var debugMode = true
-var debugToken = true
-var debugParser = true
+var debugToken = false
+var debugParser = false
 var allScopes map[identifier]*scope
 
 func f1() {
