@@ -23,10 +23,6 @@ func debugf(format string, v ...interface{}) {
 	}
 
 	if GENERATION == 2 {
-		//fmt.Printf("# ")
-		//fmt.Printf(string(indents))
-		//fmt.Printf("%s\n", format)
-		//return
 	}
 
 	var s string = string(indents)+format+"\n"
