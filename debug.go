@@ -27,8 +27,7 @@ func debugf(format string, v ...interface{}) {
 
 	var s string = string(indents)+format+"\n"
 	var b []byte = []byte(s)
-	os.Stdout.Write(b)
-	//fmt.Printf("# %s\n", s)
+	os.Stderr.Write(b)
 	//fmt.Fprintf(os.Stderr, s, v...)
 }
 
