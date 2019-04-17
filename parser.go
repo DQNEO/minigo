@@ -1497,12 +1497,18 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 			if p.peekToken().isPunct("...") {
 				p.expect("...")
 				gtype := p.parseType()
+				sliceType := &Gtype{
+					typ: G_SLICE,
+					elementType:gtype,
+				}
 				variable := &ExprVariable{
 					tok:     tok,
 					varname: pname,
-					gtype:   gtype,
+					gtype:   sliceType,
+					isVariadic:true,
 				}
 				params = append(params, variable)
+				p.currentScope.setVar(pname, variable)
 				p.expect(")")
 				break
 			}

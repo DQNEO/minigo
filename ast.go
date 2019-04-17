@@ -53,6 +53,7 @@ type ExprVariable struct {
 	gtype    *Gtype
 	offset   int // for local variable
 	isGlobal bool
+	isVariadic bool
 }
 
 type ExprConstVariable struct {

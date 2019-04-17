@@ -2910,6 +2910,8 @@ func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := e.arg
 	gtype := arg.getGtype()
+	assert(gtype != nil, e.token(), "gtype should not be  nil:\n" + fmt.Sprintf("%#v", arg))
+
 	switch {
 	case gtype.typ == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
