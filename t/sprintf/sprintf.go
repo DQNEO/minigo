@@ -87,9 +87,9 @@ func dumpToken(tok *Token) {
 */
 
 func test_dumpToken() {
-	format := "tok: type=%-4s,sval=\"%s\"\n"
-	var s1 string = "int"
-	var s2 string = "123"
+	format := "string=%s,int=%d\n" // "string=abcdefg,int=12345"
+	var s1 string = "abcdefg"
+	var s2 int = 12345
 	var ifcs []interface{}
 	var ifc1 interface{} = s1
 	var ifc2 interface{} = s2
