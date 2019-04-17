@@ -4,7 +4,7 @@ var GENERATION int = 2
 
 var debugMode = true
 var debugToken = false
-var debugParser = false
+var debugParser = true
 var allScopes map[identifier]*scope
 
 func f1() {
