@@ -22,9 +22,6 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 
-	if GENERATION == 2 {
-	}
-
 	var s string = string(indents)+format+"\n"
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
