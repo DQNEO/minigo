@@ -25,9 +25,9 @@ func makeSlice(newLen int, newCap int) []int {
 	if heapIndex == 0 {
 		heapIndex = (heap + 0)
 	}
-	low := (heapIndex - heap) / intSize
+	low := (heapIndex - heap) / intSize + 1
 	r = heap[low:low+newLen:low+newCap]
-	heapIndex += newCap * intSize
+	heapIndex += (newCap + 1)* intSize
 	return r
 }
 
