@@ -2905,6 +2905,7 @@ func (methodCall *ExprMethodcall) emit() {
 	name := methodCall.getUniqueName()
 	var staticCall *IrStaticCall = &IrStaticCall{
 		symbol: getFuncSymbol(pkgname, name),
+		callee: funcref.funcdef,
 	}
 	staticCall.emit(args)
 }
@@ -3070,6 +3071,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		valueToAppend := funcall.args[1]
 		emit("# append(%s, %s)", slice.getGtype(), valueToAppend.getGtype())
 		var staticCall *IrStaticCall = &IrStaticCall{
+			callee: decl,
 		}
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
@@ -3115,12 +3117,14 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	}
 	var staticCall *IrStaticCall = &IrStaticCall{
 		symbol: getFuncSymbol(decl.pkg, funcall.fname),
+		callee: decl,
 	}
 	staticCall.emit(funcall.args)
 }
 
 type IrStaticCall struct {
 	symbol string
+	callee *DeclFunc
 }
 
 func (ircall *IrStaticCall) emit(args []Expr) {
