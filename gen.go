@@ -65,15 +65,15 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 }
 
 // main.f1 -> main.f1
-func getPackagedFuncName(pkg identifier, fname string) IrStaticCall {
+func getPackagedFuncName(pkg identifier, fname string) string {
 	if pkg == "libc" {
-		return IrStaticCall(fname)
+		return fname
 	}
 
-	return IrStaticCall(fmt.Sprintf("%s.%s", pkg, fname))
+	return fmt.Sprintf("%s.%s", pkg, fname)
 }
 
-func (f *DeclFunc) getUniqueName() IrStaticCall {
+func (f *DeclFunc) getUniqueName() string {
 	if f.receiver != nil {
 		// method
 		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
@@ -2892,7 +2892,9 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
-	var staticCall IrStaticCall = getPackagedFuncName(pkgname, name)
+	var staticCall *IrStaticCall = &IrStaticCall{
+		symbol: getPackagedFuncName(pkgname, name),
+	}
 	staticCall.emit(args)
 }
 
@@ -3053,15 +3055,17 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		return
 	} else if funcall.isBuiltinAppend() {
 		slice := funcall.args[0]
+		var staticCall *IrStaticCall = &IrStaticCall{
+		}
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
-			var staticCall IrStaticCall = getPackagedFuncName("", "append1")
+			staticCall.symbol = getPackagedFuncName("", "append1")
 			staticCall.emit(funcall.args)
 		case 8:
-			var staticCall IrStaticCall = getPackagedFuncName("", "append8")
+			staticCall.symbol = getPackagedFuncName("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
-			var staticCall IrStaticCall = getPackagedFuncName("", "append24")
+			staticCall.symbol = getPackagedFuncName("", "append24")
 			staticCall.emit(funcall.args)
 		default:
 			TBI(slice.token(), "")
@@ -3088,16 +3092,20 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		return
 	}
-	var staticCall IrStaticCall = getPackagedFuncName(decl.pkg, funcall.fname)
+	var staticCall *IrStaticCall = &IrStaticCall{
+		symbol: getPackagedFuncName(decl.pkg, funcall.fname),
+	}
 	staticCall.emit(funcall.args)
 }
 
-type IrStaticCall string
+type IrStaticCall struct {
+	symbol string
+}
 
-func (ircall IrStaticCall) emit(args []Expr) {
+func (ircall *IrStaticCall) emit(args []Expr) {
 	// nothing to do
 	emit("")
-	emit("# emitCall %s", ircall)
+	emit("# emitCall %s", ircall.symbol)
 
 	emit("# setting arguments %v", args)
 
@@ -3135,7 +3143,7 @@ func (ircall IrStaticCall) emit(args []Expr) {
 	}
 
 	emit("mov $0, %%rax")
-	emit("call %s", ircall)
+	emit("call %s", ircall.symbol)
 	emit("")
 }
 
