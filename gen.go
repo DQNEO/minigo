@@ -64,8 +64,8 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	return string(typename) + "$" + string(fname)
 }
 
-// main.f1 -> main.f1
-func getPackagedFuncName(pkg identifier, fname string) string {
+// "main","f1" -> "main.f1"
+func getFuncSymbol(pkg identifier, fname string) string {
 	if pkg == "libc" {
 		return fname
 	}
@@ -76,11 +76,11 @@ func getPackagedFuncName(pkg identifier, fname string) string {
 func (f *DeclFunc) getUniqueName() string {
 	if f.receiver != nil {
 		// method
-		return getPackagedFuncName(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
+		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
 	}
 
 	// other functions
-	return getPackagedFuncName(f.pkg, string(f.fname))
+	return getFuncSymbol(f.pkg, string(f.fname))
 }
 
 func (f *DeclFunc) emitPrologue() {
@@ -2904,7 +2904,7 @@ func (methodCall *ExprMethodcall) emit() {
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	var staticCall *IrStaticCall = &IrStaticCall{
-		symbol: getPackagedFuncName(pkgname, name),
+		symbol: getFuncSymbol(pkgname, name),
 	}
 	staticCall.emit(args)
 }
@@ -3073,10 +3073,10 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
-			staticCall.symbol = getPackagedFuncName("", "append1")
+			staticCall.symbol = getFuncSymbol("", "append1")
 			staticCall.emit(funcall.args)
 		case 8:
-			staticCall.symbol = getPackagedFuncName("", "append8")
+			staticCall.symbol = getFuncSymbol("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
 			if slice.getGtype().elementType.getPrimType() == G_INTERFACE && valueToAppend.getGtype().getPrimType() != G_INTERFACE {
@@ -3086,7 +3086,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 				}
 				funcall.args[1] = eConvertion
 			}
-			staticCall.symbol = getPackagedFuncName("", "append24")
+			staticCall.symbol = getFuncSymbol("", "append24")
 			staticCall.emit(funcall.args)
 		default:
 			TBI(slice.token(), "")
@@ -3114,7 +3114,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		return
 	}
 	var staticCall *IrStaticCall = &IrStaticCall{
-		symbol: getPackagedFuncName(decl.pkg, funcall.fname),
+		symbol: getFuncSymbol(decl.pkg, funcall.fname),
 	}
 	staticCall.emit(funcall.args)
 }
