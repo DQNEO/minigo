@@ -3115,6 +3115,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		return
 	}
+
 	var staticCall *IrStaticCall = &IrStaticCall{
 		symbol: getFuncSymbol(decl.pkg, funcall.fname),
 		callee: decl,
@@ -3132,15 +3133,14 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	emit("")
 	emit("# emitCall %s", ircall.symbol)
 
-	emit("# setting arguments %v", args)
-
 	var numRegs int
-	for _, arg := range args {
+	for i, arg := range args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
 			continue
 		} else {
+			emit("# arg %d", i)
 			arg.emit()
 		}
 
@@ -3148,7 +3148,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if arg.getGtype() != nil {
 			primType = arg.getGtype().getPrimType()
 		}
-
+		emit("#")
 		if primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
 			emit("push %%rax  # argument 1/3")
 			emit("push %%rbx  # argument 2/3")
