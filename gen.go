@@ -3143,7 +3143,12 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	emit("mov $0, %%rax")
-	emit("call %s", ircall.symbol)
+	if ircall.symbol == "fmt.Printf" {
+		// replace fmt.Printf by libc's printf
+		emit("call printf")
+	} else {
+		emit("call %s", ircall.symbol)
+	}
 	emit("")
 }
 

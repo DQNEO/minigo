@@ -1,7 +1,6 @@
 package fmt
 
-func Printf(format string, param interface{}) {
-	printf(format, param)
+func Printf(format string, a ...interface{}) {
 }
 
 func Sprintf(format string, param []interface{}) string {
