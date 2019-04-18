@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func receiveVarg(s string, a ...interface{}) {
 	puts("-")
 	println(len(a))
@@ -20,19 +18,16 @@ var format string = "format-%s-%d\n"
 
 func f1() {
 	var a []interface{}
-	var s string = "hello"
-	var i int = 123
-	a = append(a, s)
-	a = append(a, i)
+	a = append(a, "hello")
+	a = append(a, 123)
 	receiveVarg(format, a)
+	//receiveVarg(format, "hello", 123)
 }
 
 func f2() {
 	var a []interface{}
-	var s string = "hello"
-	var i int = 123
-	a = append(a, s)
-	a = append(a, i)
+	a = append(a, "hello")
+	a = append(a, 123)
 	receiveIfcSlice(format, a)
 }
 
