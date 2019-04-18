@@ -22,10 +22,8 @@ func f1() {
 	var a []interface{}
 	var s string = "hello"
 	var i int = 123
-	var ifc interface{} = s
-	var ifc2 interface{} = i
-	a = append(a, ifc)
-	a = append(a, ifc2)
+	a = append(a, s)
+	a = append(a, i)
 	receiveVarg(format, a)
 }
 
@@ -33,10 +31,8 @@ func f2() {
 	var a []interface{}
 	var s string = "hello"
 	var i int = 123
-	var ifc interface{} = s
-	var ifc2 interface{} = i
-	a = append(a, ifc)
-	a = append(a, ifc2)
+	a = append(a, s)
+	a = append(a, i)
 	receiveIfcSlice(format, a)
 }
 

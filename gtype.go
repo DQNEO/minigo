@@ -399,3 +399,7 @@ func (e *ExprVaArg) getGtype() *Gtype {
 func (e *ExprMapLiteral) getGtype() *Gtype {
 	return e.gtype
 }
+
+func (e *ExprConversionToInterface) getGtype() *Gtype {
+	return gInterface
+}

@@ -1482,10 +1482,7 @@ func (stmt *StmtReturn) emit() {
 				emit("mov $0, %%rbx")
 				emit("mov $0, %%rcx")
 			} else {
-				convertDynamicTypeToInterface(expr)
-				emit("pop %%rcx")
-				emit("pop %%rbx")
-				emit("pop %%rax")
+				emitConversionToInterface(expr)
 			}
 		} else {
 			expr.emit()
@@ -1997,7 +1994,12 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emitSave3Elements(lhs, 0)
 }
 
-func convertDynamicTypeToInterface(dynamicValue Expr) {
+func (e *ExprConversionToInterface) emit() {
+	emit("# ExprConversionToInterface")
+	emitConversionToInterface(e.expr)
+}
+
+func emitConversionToInterface(dynamicValue Expr) {
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
@@ -2028,6 +2030,9 @@ func convertDynamicTypeToInterface(dynamicValue Expr) {
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("push %%rax")
 
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("pop %%rax")
 }
 
 func isNil(e Expr) bool {
@@ -2060,7 +2065,10 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
-	convertDynamicTypeToInterface(rhs)
+	emitConversionToInterface(rhs)
+	emit("push %%rax")
+	emit("push %%rbx")
+	emit("push %%rcx")
 	emitSaveInterface(lhs, 0)
 }
 
@@ -2215,7 +2223,10 @@ func assignToArray(lhs Expr, rhs Expr) {
 					} else if arrayLiteral.values[i].getGtype().getPrimType() != G_INTERFACE {
 						// conversion of dynamic type => interface type
 						dynamicValue := arrayLiteral.values[i]
-						convertDynamicTypeToInterface(dynamicValue)
+						emitConversionToInterface(dynamicValue)
+						emit("push %%rax")
+						emit("push %%rbx")
+						emit("push %%rcx")
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
 					} else {
@@ -3054,7 +3065,10 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		e.emit()
 		return
 	} else if funcall.isBuiltinAppend() {
+		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
+		valueToAppend := funcall.args[1]
+		emit("# append(%s, %s)", slice.getGtype(), valueToAppend.getGtype())
 		var staticCall *IrStaticCall = &IrStaticCall{
 		}
 		switch slice.getGtype().elementType.getSize() {
@@ -3065,6 +3079,13 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			staticCall.symbol = getPackagedFuncName("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
+			if slice.getGtype().elementType.getPrimType() == G_INTERFACE && valueToAppend.getGtype().getPrimType() != G_INTERFACE {
+				eConvertion := &ExprConversionToInterface{
+					tok: valueToAppend.token(),
+					expr: valueToAppend,
+				}
+				funcall.args[1] = eConvertion
+			}
 			staticCall.symbol = getPackagedFuncName("", "append24")
 			staticCall.emit(funcall.args)
 		default:

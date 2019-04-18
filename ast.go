@@ -345,6 +345,11 @@ type ExprConversion struct {
 	expr  Expr   // from
 }
 
+type ExprConversionToInterface struct {
+	tok  *Token
+	expr Expr // dynamic type
+}
+
 // ExprCaseClause or TypeCaseClause
 type ExprCaseClause struct {
 	tok      *Token
@@ -442,10 +447,11 @@ func (node *ExprConversion) token() *Token          { return node.tok }
 func (node *ExprCaseClause) token() *Token          { return node.tok }
 func (node *StmtSwitch) token() *Token              { return node.tok }
 func (node *KeyedElement) token() *Token            { return node.tok }
-func (node *ExprStructLiteral) token() *Token       { return node.tok }
-func (node *ExprStructField) token() *Token         { return node.tok }
-func (node *ExprTypeSwitchGuard) token() *Token     { return node.tok }
-func (node *ExprMapLiteral) token() *Token          { return node.tok }
-func (node *ExprLen) token() *Token                 { return node.tok }
-func (node *ExprCap) token() *Token                 { return node.tok }
-func (node *ExprAppend) token() *Token              { return node.tok }
+func (node *ExprStructLiteral) token() *Token         { return node.tok }
+func (node *ExprStructField) token() *Token           { return node.tok }
+func (node *ExprTypeSwitchGuard) token() *Token       { return node.tok }
+func (node *ExprMapLiteral) token() *Token            { return node.tok }
+func (node *ExprLen) token() *Token                   { return node.tok }
+func (node *ExprCap) token() *Token                   { return node.tok }
+func (node *ExprAppend) token() *Token                { return node.tok }
+func (node *ExprConversionToInterface) token() *Token { return node.tok }

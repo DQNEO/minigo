@@ -282,3 +282,7 @@ func (ast *StmtDefer) dump() {
 func (e *ExprMapLiteral) dump() {
 	panic("implement me")
 }
+
+func (e *ExprConversionToInterface) dump() {
+	panic("implement me")
+}
