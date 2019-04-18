@@ -8,9 +8,6 @@ func Sprintf(format string, param []interface{}) string {
 	return doPrintf(format, param)
 }
 
-func Fprintf(file interface{}, format string, param ...interface{}) {
-}
-
 func Println(s string) {
 }
 
