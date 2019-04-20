@@ -48,12 +48,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	if tok != nil {
 		tokString = tok.String()
 	}
-	if GENERATION == 2 {
-		s := fmt.Sprintf(format + "\n " + tokString , v)
-		panic(s)
-	} else {
-		errorf(format+"\n "+tokString, v...)
-	}
+	errorf(format+"\n "+tokString, v...)
 }
 
 func errorf(format string, v ...interface{}) {
@@ -62,9 +57,8 @@ func errorf(format string, v ...interface{}) {
 		fmt.Printf("%v %v %v\n",
 			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
 	*/
-	var s string
 	//s += bs.location() + ": "
-	s += fmt.Sprintf(format, v...)
+	s := fmt.Sprintf(format, v...)
 	panic(s)
 }
 
