@@ -3134,13 +3134,33 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	emit("# emitCall %s", ircall.symbol)
 
 	var numRegs int
+	var param *ExprVariable
+	var isVariadicParam bool
+	var variadicArgs []Expr
 	for i, arg := range args {
+		if i < len(ircall.callee.params) {
+			param = ircall.callee.params[i]
+			if param.isVariadic {
+				if ircall.symbol != "fmt.Printf" {
+					// ignore fmt.Printf variadic
+					isVariadicParam = true
+				}
+			}
+		}
+		if isVariadicParam {
+			variadicArgs = append(variadicArgs, arg)
+			continue
+		}
+
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
 			continue
 		} else {
-			emit("# arg %d", i)
+			emit("# arg %d, isVariadicParam=%v", i, isVariadicParam)
+			if param != nil {
+				emit("# %s <- %s", param.getGtype(), arg.getGtype())
+			}
 			arg.emit()
 		}
 
@@ -3158,6 +3178,50 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			emit("push %%rax  # argument primitive")
 			numRegs += 1
 		}
+	}
+
+	if isVariadicParam {
+		emit("# passing variadic args")
+		lenArgs := len(variadicArgs)
+		if lenArgs == 0 {
+			// pass an empty slice
+			emit("push $0")
+			emit("push $0")
+			emit("push $0")
+		} else {
+			// var a []interface{}
+			for i, varg := range variadicArgs {
+				_, ok := varg.(*ExprVaArg)
+				if ok {
+					// ignore f(a ...) for now
+					continue
+				}
+				if i == 0 {
+					// make an empty slice
+					emit("push $0")
+					emit("push $0")
+					emit("push $0")
+				}
+				// conversion : var ifc = x
+				emitConversionToInterface(varg)
+				emit("push %%rax")
+				emit("push %%rbx")
+				emit("push %%rcx")
+				emit("# calling append24")
+				emit("pop %%r9  # ifc_c")
+				emit("pop %%r8  # ifc_b")
+				emit("pop %%rcx # ifc_a")
+				emit("pop %%rdx # cap")
+				emit("pop %%rsi # len")
+				emit("pop %%rdi # ptr")
+				emit("mov $0, %%rax")
+				emit("call .append24")
+				emit("push %%rax # slice.ptr")
+				emit("push %%rbx # slice.len")
+				emit("push %%rcx # slice.cap")
+			}
+		}
+		numRegs += 3
 	}
 
 	for i := numRegs - 1; i >= 0; i-- {

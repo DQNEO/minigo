@@ -17,11 +17,7 @@ func receiveIfcSlice(s string, a []interface{}) {
 var format string = "format-%s-%d\n"
 
 func f1() {
-	var a []interface{}
-	a = append(a, "hello")
-	a = append(a, 123)
-	receiveVarg(format, a)
-	//receiveVarg(format, "hello", 123)
+	receiveVarg(format, "hello", 123)
 }
 
 func f2() {
