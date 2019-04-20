@@ -3135,19 +3135,21 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 	var numRegs int
 	var param *ExprVariable
-	var isVariadicParam bool
+	var calleeHasVariadic bool
 	var variadicArgs []Expr
-	for i, arg := range args {
+	var arg Expr
+	var i int
+	for i, arg = range args {
 		if i < len(ircall.callee.params) {
 			param = ircall.callee.params[i]
 			if param.isVariadic {
 				if ircall.symbol != "fmt.Printf" {
 					// ignore fmt.Printf variadic
-					isVariadicParam = true
+					calleeHasVariadic = true
 				}
 			}
 		}
-		if isVariadicParam {
+		if calleeHasVariadic {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
@@ -3157,7 +3159,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			emit("mov $0, %%rax")
 			continue
 		} else {
-			emit("# arg %d, isVariadicParam=%v", i, isVariadicParam)
+			emit("# arg %d, calleeHasVariadic=%v", i, calleeHasVariadic)
 			if param != nil {
 				emit("# %s <- %s", param.getGtype(), arg.getGtype())
 			}
@@ -3180,7 +3182,17 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		}
 	}
 
-	if isVariadicParam {
+	// check if callee has a variadic
+	if !calleeHasVariadic {
+		if i+1 < len(ircall.callee.params) {
+			param = ircall.callee.params[i+1]
+			if param.isVariadic {
+				calleeHasVariadic = true
+			}
+		}
+	}
+
+	if calleeHasVariadic {
 		emit("# passing variadic args")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {

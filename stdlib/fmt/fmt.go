@@ -18,6 +18,10 @@ func doPrintf(format string, a []interface{}) string {
 	var a2 interface{}
 	var a3 interface{}
 	var numred int
+	if len(a) > 100 {
+		panic("runtime error: a in doPrintf is an invalid slice:" + format)
+	}
+
 	switch len(a) {
 	case 0:
 		numred = sprintf(pbuf, format)
@@ -41,7 +45,8 @@ func doPrintf(format string, a []interface{}) string {
 		a3 = a[3]
 		numred = sprintf(pbuf, format, *a0, *a1, *a2, *a3)
 	default:
-		printf("ERROR: doPrintf cannot handle more than 4 params")
+		printf("len(a)=%d\n", len(a))
+		panic("ERROR: doPrintf cannot handle more than 4 params")
 	}
 
 	// copy string to heap area

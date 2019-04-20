@@ -1,5 +1,12 @@
 package main
 
+import "fmt"
+import "os"
+
+func f0() {
+	debugf("hello debug with vaargs")
+}
+
 func receiveVarg(s string, a ...interface{}) {
 	puts("-")
 	println(len(a))
@@ -27,7 +34,17 @@ func f2() {
 	receiveIfcSlice(format, a)
 }
 
+func debugf(format string, v ...interface{}) {
+	var indents []byte
+
+	var format2 string = string(indents)+format+"\n"
+	s2 := fmt.Sprintf(format2, v)
+	var b []byte = []byte(s2)
+	os.Stdout.Write(b)
+}
+
 func main() {
+	f0()
 	f1()
 	f2()
 }
