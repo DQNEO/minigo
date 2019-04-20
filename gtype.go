@@ -392,8 +392,7 @@ func (e *ExprTypeAssertion) getGtype() *Gtype {
 }
 
 func (e *ExprVaArg) getGtype() *Gtype {
-	TBI(e.token(), "")
-	return nil
+	return e.expr.getGtype()
 }
 
 func (e *ExprMapLiteral) getGtype() *Gtype {

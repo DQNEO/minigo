@@ -334,9 +334,10 @@ type StmtDefer struct {
 	expr Expr
 }
 
+// f( ,...slice)
 type ExprVaArg struct {
 	tok  *Token
-	expr Expr
+	expr Expr // slice
 }
 
 type ExprConversion struct {

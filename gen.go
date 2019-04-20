@@ -2706,7 +2706,7 @@ func (ast *StmtDefer) emit() {
 }
 
 func (e *ExprVaArg) emit() {
-	TBI(e.token(), "")
+	e.expr.emit()
 }
 
 func (e *ExprConversion) emit() {
@@ -3145,26 +3145,23 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			if param.isVariadic {
 				if ircall.symbol != "fmt.Printf" {
 					// ignore fmt.Printf variadic
-					calleeHasVariadic = true
+					if _, ok := arg.(*ExprVaArg); !ok {
+						calleeHasVariadic = true
+					}
 				}
 			}
 		}
+
 		if calleeHasVariadic {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
 
-		if _, ok := arg.(*ExprVaArg); ok {
-			// skip VaArg for now
-			emit("mov $0, %%rax")
-			continue
-		} else {
-			emit("# arg %d, calleeHasVariadic=%v", i, calleeHasVariadic)
-			if param != nil {
-				emit("# %s <- %s", param.getGtype(), arg.getGtype())
-			}
-			arg.emit()
+		emit("# arg %d, calleeHasVariadic=%v", i, calleeHasVariadic)
+		if param != nil {
+			emit("# %s <- %T", param.getGtype(), arg.getGtype())
 		}
+		arg.emit()
 
 		var primType GTYPE_TYPE = 0
 		if arg.getGtype() != nil {
@@ -3205,11 +3202,6 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		} else {
 			// var a []interface{}
 			for i, varg := range variadicArgs {
-				_, ok := varg.(*ExprVaArg)
-				if ok {
-					// ignore f(a ...) for now
-					continue
-				}
 				if i == 0 {
 					// make an empty slice
 					emit("push $0")

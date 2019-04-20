@@ -34,6 +34,13 @@ func f2() {
 	receiveIfcSlice(format, a)
 }
 
+func f3() {
+	var a []interface{}
+	a = append(a, "hello")
+	a = append(a, 123)
+	receiveVarg(format, a...)
+}
+
 func debugf(format string, v ...interface{}) {
 	var indents []byte
 
@@ -47,4 +54,5 @@ func main() {
 	f0()
 	f1()
 	f2()
+	f3()
 }
