@@ -3135,7 +3135,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 	var numRegs int
 	var param *ExprVariable
-	var calleeHasVariadic bool
+	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var i int
@@ -3146,18 +3146,18 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				if ircall.symbol != "fmt.Printf" {
 					// ignore fmt.Printf variadic
 					if _, ok := arg.(*ExprVaArg); !ok {
-						calleeHasVariadic = true
+						collectVariadicArgs = true
 					}
 				}
 			}
 		}
 
-		if calleeHasVariadic {
+		if collectVariadicArgs {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
 
-		emit("# arg %d, calleeHasVariadic=%v", i, calleeHasVariadic)
+		emit("# arg %d, collectVariadicArgs=%v", i, collectVariadicArgs)
 		if param != nil {
 			emit("# %s <- %T", param.getGtype(), arg.getGtype())
 		}
@@ -3182,16 +3182,16 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	// check if callee has a variadic
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
-	if !calleeHasVariadic {
+	if !collectVariadicArgs {
 		if i+1 < len(ircall.callee.params) {
 			param = ircall.callee.params[i+1]
 			if param.isVariadic {
-				calleeHasVariadic = true
+				collectVariadicArgs = true
 			}
 		}
 	}
 
-	if calleeHasVariadic {
+	if collectVariadicArgs {
 		emit("# passing variadic args")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
