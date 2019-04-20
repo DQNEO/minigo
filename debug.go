@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 func debugln(s string) {
 	if !debugMode {
@@ -23,21 +25,13 @@ func debugf(format string, v ...interface{}) {
 	}
 
 	var format2 string = string(indents)+format+"\n"
-	s2 := fmt.Sprintf(format2, v)
+	s2 := fmt.Sprintf(format2, v...)
 	var b []byte = []byte(s2)
 	os.Stderr.Write(b)
 }
 
 func dumpToken(tok *Token) {
-	var frmt string = "tok: type=%-8s, sval=\"%s\"\n"
-	var a []interface{}
-	var ifc interface{} = tok.typ
-	var ifc2 interface{} = tok.sval
-	a = nil
-	a = append(a, ifc)
-	a = append(a, ifc2)
-
-	var s string = fmt.Sprintf(frmt, a)
+	var s string = fmt.Sprintf("tok: type=%-8s, sval=\"%s\"\n", tok.typ, tok.sval)
 	os.Stderr.Write([]byte(s))
 }
 

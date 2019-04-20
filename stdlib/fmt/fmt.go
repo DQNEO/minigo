@@ -3,8 +3,8 @@ package fmt
 func Printf(format string, a ...interface{}) {
 }
 
-func Sprintf(format string, param []interface{}) string {
-	return doPrintf(format, param)
+func Sprintf(format string, param ...interface{}) string {
+	return doPrintf(format, param...)
 }
 
 func Println(s string) {
@@ -12,7 +12,7 @@ func Println(s string) {
 
 var pbuf [1024]byte
 
-func doPrintf(format string, a []interface{}) string {
+func doPrintf(format string, a ...interface{}) string {
 	var a0 interface{}
 	var a1 interface{}
 	var a2 interface{}
