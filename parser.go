@@ -892,9 +892,10 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 
 	// Type or "=" or ";"
 	var val Expr
+	var gtype *Gtype
 	if !p.peekToken().isPunct("=") && !p.peekToken().isPunct(";") {
 		// expect Type
-		_ = p.parseType()
+		gtype = p.parseType()
 	}
 
 	if p.peekToken().isPunct(";") && lastExpr != nil {
@@ -909,6 +910,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		name:      newName,
 		val:       val,
 		iotaIndex: iotaIndex,
+		gtype: gtype,
 	}
 
 	p.currentScope.setConst(newName, variable)
