@@ -3183,6 +3183,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	// check if callee has a variadic
+	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
+	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !calleeHasVariadic {
 		if i+1 < len(ircall.callee.params) {
 			param = ircall.callee.params[i+1]
