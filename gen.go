@@ -2009,7 +2009,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		errorft(dynamicValue.token(), "type is nil")
+		errorft(dynamicValue.token(), "type is nil:%s", dynamicValue)
 	}
 	if receiverType.typ == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
@@ -2024,7 +2024,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if !ok {
 		//debugf("types:%#v", groot.hashedTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
-		errorft(dynamicValue.token(), "type %s not found", gtype)
+		errorft(dynamicValue.token(), "type %s not found for %s", gtype, dynamicValue)
 	}
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())

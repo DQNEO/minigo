@@ -12,7 +12,7 @@ var eIota = &ExprConstVariable{
 }
 
 var builinLen = &DeclFunc{
-	rettypes: []*Gtype{gInterface},
+	rettypes: []*Gtype{gInt},
 }
 
 var builinCap = &DeclFunc{
