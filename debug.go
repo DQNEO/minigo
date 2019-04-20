@@ -55,7 +55,8 @@ func errorft(tok *Token, format string, v ...interface{}) {
 		tokString = tok.String()
 	}
 	if GENERATION == 2 {
-		panic(format)
+		s := fmt.Sprintf(format + "\n " + tokString , v)
+		panic(s)
 	} else {
 		errorf(format+"\n "+tokString, v...)
 	}
