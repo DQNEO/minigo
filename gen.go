@@ -3447,6 +3447,12 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
+			rel, ok := uop.operand.(*Relation)
+			assert(ok, value.token(), "operand should be *Relation")
+			vr, ok := rel.expr.(*ExprVariable)
+			assert(ok, value.token(), "operand should be a variable")
+			assert(vr.isGlobal, value.token(), "operand should be a global variable")
+			emit(".quad %s", vr.varname)
 		default:
 			TBI(ptok, "unable to handle %T", value)
 		}
