@@ -1,13 +1,16 @@
 package main
 
+import "os"
+
 var GENERATION int = 2
 
 var debugMode = true
 var debugToken = false
-var debugParser = true
+var debugParser = false
 var allScopes map[identifier]*scope
 
 func f1() {
+	os.Stderr = os.Stdout
 	path := "t/min/min.go"
 	s := readFile(path)
 	_bs := ByteStream{

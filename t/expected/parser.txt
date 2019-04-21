@@ -1,0 +1,8 @@
+==== AST DUMP START ===
+package main
+funcdef f1
+  println
+    "0"
+funcdef main
+  f1
+==== AST DUMP END ===
