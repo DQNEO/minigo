@@ -3299,7 +3299,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		errorft(e.token(), "variable cannot be inteppreted at compile time")
+		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
 	case *Relation:
 		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
@@ -3363,7 +3363,17 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 						assert(ok, nil, "ok")
 						emit(".quad .%s # %s", stringLiteral.slabel)
 					} else {
-						emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype(), selector)
+						switch value.(type) {
+						case *Relation:
+							rel := value.(*Relation)
+							vr,ok := rel.expr.(*ExprVariable)
+							if !ok {
+								errorft(value.token(), "cannot compile")
+							}
+							emit(".quad %s # %s %s", vr.varname, value.getGtype(), selector)
+						default:
+							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype(), selector)
+						}
 					}
 				} else if size == 1 {
 					emit(".byte %d", evalIntExpr(value))
@@ -3374,6 +3384,8 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		}
 	} else if gtype.typ == G_SLICE {
 		switch value.(type) {
+		case nil:
+			return
 		case *ExprSliceLiteral:
 			// initialize a hidden array
 			lit := value.(*ExprSliceLiteral)
@@ -3393,7 +3405,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 			arrayDecl.emitGlobal()
 
 		default:
-			TBI(ptok, "unable to handle %s", gtype)
+			TBI(ptok, "unable to handle T=%s, value=%#v", gtype, value)
 		}
 	} else if gtype.typ == G_MAP {
 		// @TODO
@@ -3438,6 +3450,9 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		case *ExprConstVariable:
 			val = evalIntExpr(value)
 			emit(".quad %d # %s ", val, gtype)
+		case *ExprBinop:
+			val = evalIntExpr(value)
+			emit(".quad %d # %s ", val, gtype)
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
@@ -3457,10 +3472,14 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 				emit(".quad %s", vr.varname)
 			} else {
 				// var gv = &Struct{_}
-				labelRef :=  makeLabel() + "_globla_entity"
-				emit(".quad %s", labelRef)
-				emitLabel(labelRef + ":")
-				emitGlobalDeclInit(ptok, operand.getGtype(), operand, "")
+				entityLabel :=  makeLabel() + "_global_entity"
+				emit(".quad %s", entityLabel)
+				entity := &GlobalInternalEntity{
+					token: ptok,
+					label: entityLabel,
+					expr: operand,
+				}
+				globalInternalEntities = append(globalInternalEntities, entity)
 			}
 		default:
 			TBI(ptok, "unable to handle %T", value)
@@ -3468,7 +3487,20 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 	}
 }
 
+var globalInternalEntities []*GlobalInternalEntity
+type GlobalInternalEntity struct {
+	token *Token
+	label string
+	expr Expr
+}
+
+func (e *GlobalInternalEntity) emit() {
+	emitLabel(e.label + ":")
+	emitGlobalDeclInit(e.token, e.expr.getGtype(), e.expr, "")
+}
+
 func (decl *DeclVar) emitGlobal() {
+	emitLabel("# emitGlobal for %s" , decl.variable.varname)
 	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
 
@@ -3482,7 +3514,8 @@ func (decl *DeclVar) emitGlobal() {
 	right := decl.initval
 
 	emitLabel("%s: # %s", decl.variable.varname, gtype)
-	emitGlobalDeclInit(ptok, gtype, right, "")
+	emit("# initval=%#v", right)
+	emitGlobalDeclInit(ptok, right.getGtype(), right, "")
 }
 
 type IrRoot struct {
@@ -3574,6 +3607,12 @@ func (root *IrRoot) emit() {
 	for _, vardecl := range root.vars {
 		vardecl.emitGlobal()
 	}
+
+	// @TODO do this infinitly
+	for _, entity := range globalInternalEntities {
+		entity.emit()
+	}
+
 
 	emitComment("FUNCTIONS")
 	emit(".text")

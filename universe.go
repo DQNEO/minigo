@@ -3,10 +3,14 @@ package main
 // built-in types
 const sizeOfInterface = 8 * 3
 
-var gInterface = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
-var gInt = &Gtype{typ: G_INT, size: 8}
+var gInterface *Gtype = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
+var gInt  = &Gtype{typ: G_INT, size: 8}
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
+var gString = &Gtype{
+	typ:G_STRING,
+}
+
 var eIota = &ExprConstVariable{
 	name: "iota",
 }
@@ -27,17 +31,18 @@ var builtinDumpInterface = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
+var builtinRunTimeArgsRettypes1 *Gtype =&Gtype{
+	typ: G_SLICE,
+	size: IntSize * 3,
+	elementType: gString,
+}
+
 var builtinRunTimeArgs = &DeclFunc{
 	rettypes: []*Gtype{
-		&Gtype{
-			typ: G_SLICE,
-			size: IntSize * 3,
-			elementType: &Gtype{
-				typ:G_STRING,
-			},
-		},
+		builtinRunTimeArgsRettypes1,
 	},
-}
+	}
+
 
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
