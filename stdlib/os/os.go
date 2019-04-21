@@ -1,14 +1,14 @@
 package os
 
-var SStdout = File{
+var _Stdout = File{
 	id:1,
 }
-var SStderr = File{
+var _Stderr = File{
 	id:2,
 }
 
-var Stderr *File
-var Stdout *File
+var Stderr *File = &_Stderr
+var Stdout *File = &_Stdout
 
 
 // File represents an open file descriptor.
@@ -27,8 +27,6 @@ func Exit(i int) {
 }
 
 func init() {
-	Stdout = &SStdout
-	Stderr = &SStderr
 
 	// runtime_args is written in assembly code
 	Args = runtime_args()
