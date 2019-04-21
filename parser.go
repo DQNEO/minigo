@@ -108,7 +108,7 @@ func (p *parser) traceIn() int {
 	if !debugParser {
 		return 0
 	}
-	debugf("func %s is gonna read %s", getCallerName(2), p.peekToken())
+	debugf("func %s is gonna read %s", getCallerName(2), p.peekToken().sval)
 	debugNest++
 	return 0
 }
@@ -122,7 +122,7 @@ func (p *parser) traceOut(_ int) {
 		os.Exit(1)
 	}
 	debugNest--
-	debugf("func %s end after %s", getCallerName(2), p.lastToken())
+	debugf("func %s end after %s", getCallerName(2), p.lastToken().sval)
 }
 
 func (p *parser) readFuncallArgs() []Expr {
