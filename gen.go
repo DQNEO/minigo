@@ -1099,7 +1099,8 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 func (e *ExprSliceLiteral) emit() {
 	emit("# (*ExprSliceLiteral).emit()")
 	length := len(e.values)
-	emitCallMalloc(e.gtype.elementType.getSize() * length)
+	//emitCallMalloc(e.gtype.elementType.getSize() * length)
+	emitCallMalloc(e.gtype.getSize()) // why does this work??
 	emit("push %%rax # ptr")
 	for i, value := range e.values {
 		switch value.getGtype().getPrimType() {
