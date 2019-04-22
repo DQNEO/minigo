@@ -18,13 +18,13 @@ test: all
 	./resolve *.go
 	./compile.sh
 	./test_as.sh
-	./test2.sh
+	./testerror.sh
 
 circlecitest: all
 	./resolve *.go
 	./compile.sh
 	./test_as.sh
-	./test2.sh
+	./testerror.sh
 
 parse: all
 	./parse *.go

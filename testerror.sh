@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./minigo t2/panic/panic.go > out/a.s
+./minigo terror/panic/panic.go > out/a.s
 
 if [[ `uname` == "Darwin" ]];then
     # for MacOS
