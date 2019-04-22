@@ -11,7 +11,7 @@ var allScopes map[identifier]*scope
 
 func f1() {
 	os.Stderr = os.Stdout
-	path := "t/min/min.go"
+	path := "t2/min.go"
 	s := readFile(path)
 	_bs := ByteStream{
 		filename:  path,
