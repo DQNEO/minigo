@@ -1057,7 +1057,6 @@ func (p *parser) parseForStmt() *StmtFor {
 	}
 	p.enterNewScope()
 	p.currentForStmt = r
-	defer p.exitScope()
 
 	var cond Expr
 	if p.peekToken().isPunct("{") {
@@ -1114,6 +1113,7 @@ func (p *parser) parseForStmt() *StmtFor {
 
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
+	p.exitScope()
 	return r
 }
 
@@ -1153,6 +1153,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 		p.localuninferred = append(p.localuninferred, r.rng)
 	}
 	r.block = p.parseCompoundStmt()
+	p.exitScope()
 	return r
 }
 
@@ -1165,7 +1166,6 @@ func (p *parser) parseIfStmt() *StmtIf {
 		tok: ptok,
 	}
 	p.enterNewScope()
-	defer p.exitScope()
 	p.requireBlock = true
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
@@ -1197,6 +1197,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 			errorft(tok2, "Unexpected token")
 		}
 	}
+	p.exitScope()
 	return r
 }
 
@@ -1610,7 +1611,6 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	p.localvars = nil
 	var isMethod bool
 	p.enterNewScope()
-	defer p.exitScope()
 
 	var receiver *ExprVariable
 
@@ -1676,6 +1676,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	r.localvars = p.localvars
 
 	p.localvars = nil
+	p.exitScope()
 	return r
 }
 
