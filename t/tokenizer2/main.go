@@ -3,7 +3,7 @@ package main
 var GENERATION int = 2
 
 var debugMode = true
-var debugToken = true
+var debugToken = false
 
 func f1() {
 	filename := "t/data/gen.go.txt"
