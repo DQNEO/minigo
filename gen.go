@@ -1097,29 +1097,30 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 // rbx: len
 // rcx: cap
 func (e *ExprSliceLiteral) emit() {
+	emit("# (*ExprSliceLiteral).emit()")
 	length := len(e.values)
-	emitCallMalloc(e.gtype.getSize())
-	emit("push %%rax")
+	//emitCallMalloc(e.gtype.elementType.getSize() * length)
+	emitCallMalloc(e.gtype.getSize()) // why does this work??
+	emit("push %%rax # ptr")
 	for i, value := range e.values {
 		switch value.getGtype().getPrimType() {
 		case G_BYTE, G_INT, G_POINTER, G_STRING:
 			value.emit()
-			emit("pop %%rbx # head")
+			emit("pop %%rbx # ptr")
 			emit("mov %%rax, %d(%%rbx)", IntSize*i)
-			emit("push %%rbx # head")
+			emit("push %%rbx # ptr")
 		case G_INTERFACE, G_SLICE, G_MAP:
-			//@TODO this logic is not tested.
 			value.emit()
-			emit("pop %%rdx # head")
-			emit("mov %%rax, %d(%%rbx)", IntSize*i)
-			emit("mov %%rbx, %d(%%rbx)", IntSize*i+ptrSize)
-			emit("mov %%rcx, %d(%%rbx)", IntSize*i+ptrSize+ptrSize)
-			emit("push %%rdx # head")
+			emit("pop %%rdx # ptr")
+			emit("mov %%rax, %d(%%rdx)", IntSize*3*i)
+			emit("mov %%rbx, %d(%%rdx)", IntSize*3*i+ptrSize)
+			emit("mov %%rcx, %d(%%rdx)", IntSize*3*i+ptrSize+ptrSize)
+			emit("push %%rdx # ptr")
 		default:
 			TBI(e.token(), "")
 		}
 	}
-	emit("pop %%rax # head")
+	emit("pop %%rax # ptr")
 	emit("mov $%d, %%rbx # len", length)
 	emit("mov $%d, %%rcx # cap", length)
 }
