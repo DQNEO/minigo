@@ -1195,7 +1195,9 @@ func (stmt *StmtSwitch) emit() {
 				e.emit()
 				emit("pop %%rcx # the subject value")
 				if e.getGtype().isString() {
+					emit("push %%rcx")
 					emitStringsEqual(true, "%rax", "%rcx")
+					emit("pop %%rcx")
 				} else {
 					emit("cmp %%rax, %%rcx") // right, left
 					emit("sete %%al")
