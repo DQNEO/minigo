@@ -199,6 +199,7 @@ type StmtReturn struct {
 	tok      *Token
 	exprs    []Expr
 	rettypes []*Gtype
+	labelDeferHandler string
 }
 
 type StmtInc struct {
@@ -237,15 +238,18 @@ type ExprFuncRef struct {
 }
 
 type DeclFunc struct {
-	tok        *Token
-	pkg        identifier
-	receiver   *ExprVariable
-	fname      identifier
-	rettypes   []*Gtype
-	params     []*ExprVariable
-	isVariadic bool
-	localvars  []*ExprVariable
-	body       *StmtSatementList
+	tok               *Token
+	pkg               identifier
+	receiver          *ExprVariable
+	fname             identifier
+	rettypes          []*Gtype
+	params            []*ExprVariable
+	isVariadic        bool
+	localvars         []*ExprVariable
+	body              *StmtSatementList
+	stmtDefer         *StmtDefer
+	// every function has a defer handler
+	labelDeferHandler string
 }
 
 type TopLevelDecl struct {
@@ -332,6 +336,7 @@ type StmtExpr struct {
 type StmtDefer struct {
 	tok  *Token
 	expr Expr
+	label string // start of defer
 }
 
 // f( ,...slice)

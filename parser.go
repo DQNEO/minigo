@@ -1215,6 +1215,7 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 		tok:      ptok,
 		exprs:    exprs,
 		rettypes: p.currentFunc.rettypes,
+		labelDeferHandler:p.currentFunc.labelDeferHandler,
 	}
 }
 
@@ -1407,10 +1408,12 @@ func (p *parser) parseDeferStmt() *StmtDefer {
 	ptok := p.expectKeyword("defer")
 
 	callExpr := p.parsePrim()
-	return &StmtDefer{
+	stmtDefer := &StmtDefer{
 		tok:  ptok,
 		expr: callExpr,
 	}
+	p.currentFunc.stmtDefer = stmtDefer
+	return stmtDefer
 }
 
 // this is in function scope
@@ -1670,6 +1673,8 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.packageBlockScope.setFunc(fname, ref)
 	}
 
+	// every function has a defer_handler
+	r.labelDeferHandler = makeLabel() + "_defer_handler"
 	p.currentFunc = r
 	body := p.parseCompoundStmt()
 	r.body = body

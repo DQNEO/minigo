@@ -165,8 +165,16 @@ func align(n int, m int) int {
 	}
 }
 
-func emitFuncEpilogue() {
-	emit("")
+func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
+	emit("# func epilogue")
+	// every function has a defer handler
+	emit("%s: # defer handler", labelDeferHandler)
+
+	// if the function has a defer statement, jump to there
+	if stmtDefer != nil {
+		emit("jmp %s", stmtDefer.label)
+	}
+
 	emit("leave")
 	emit("ret")
 	emit("")
@@ -1461,12 +1469,18 @@ func (f *StmtFor) emit() {
 	f.emitForClause()
 }
 
+func (stmt *StmtReturn) emitDeferAndReturn() {
+	if stmt.labelDeferHandler != "" {
+		emit("# defer and return")
+		emit("jmp %s", stmt.labelDeferHandler)
+	}
+}
+
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		// return void
 		emit("mov $0, %%rax")
-		emit("leave")
-		emit("ret")
+		stmt.emitDeferAndReturn()
 		return
 	}
 
@@ -1493,8 +1507,7 @@ func (stmt *StmtReturn) emit() {
 				emit("mov $0, %%rcx")
 			}
 		}
-		emit("leave")
-		emit("ret")
+		stmt.emitDeferAndReturn()
 		return
 	}
 	for i, rettype := range stmt.rettypes {
@@ -1519,8 +1532,7 @@ func (stmt *StmtReturn) emit() {
 		emit("pop %%%s", retRegi[retRegiIndex-1-i])
 	}
 
-	emit("leave")
-	emit("ret")
+	stmt.emitDeferAndReturn()
 }
 
 func getReg(regSize int) string {
@@ -2690,6 +2702,9 @@ func (ast *StmtExpr) emit() {
 }
 
 func (ast *StmtDefer) emit() {
+	emit("# defer")
+	/*
+	// arguments should be evaluated immediately
 	var args []Expr
 	switch ast.expr.(type) {
 	case *ExprMethodcall:
@@ -2701,10 +2716,28 @@ func (ast *StmtDefer) emit() {
 	default:
 		errorft(ast.token(), "defer should be a funcall")
 	}
-	for _, arg := range args {
-		arg.emit()
+	*/
+	labelStart := makeLabel()  + "_defer"
+	labelEnd := makeLabel()  + "_defer"
+	ast.label = labelStart
+
+	emit("jmp %s", labelEnd)
+	emit("%s: # defer start", labelStart)
+
+	for i:=0 ; i < len(retRegi) ; i++ {
+		emit("push %%%s", retRegi[i])
 	}
-	// @TODO execute funcall
+
+	ast.expr.emit()
+
+	for i:= len(retRegi) - 1 ; i >= 0 ; i-- {
+		emit("pop %%%s", retRegi[i])
+	}
+
+	emit("leave")
+	emit("ret")
+	emit("%s: # defer end", labelEnd)
+
 }
 
 func (e *ExprVaArg) emit() {
@@ -3259,7 +3292,7 @@ func emitRuntimeArgs() {
 	emit("mov Argc(%%rip), %%rbx # len")
 	emit("mov Argc(%%rip), %%rcx # cap")
 
-	emitFuncEpilogue()
+	emitFuncEpilogue(".runtime_args_noop_handler",nil)
 }
 
 func emitMainFunc(importOS bool) {
@@ -3284,14 +3317,14 @@ func emitMainFunc(importOS bool) {
 	emit("")
 	emit("mov $0, %%rax")
 	emit("call main.main")
-	emitFuncEpilogue()
+	emitFuncEpilogue("noop_handler", nil,)
 }
 
 func (f *DeclFunc) emit() {
 	f.emitPrologue()
 	f.body.emit()
 	emit("mov $0, %%rax")
-	emitFuncEpilogue()
+	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
 
 func evalIntExpr(e Expr) int {
