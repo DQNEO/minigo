@@ -1903,14 +1903,12 @@ func emitCallMallocDinamicSize(eSize Expr) {
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
 	emit("call .malloc")
-	// @TODO check malloc error
 }
 
 func emitCallMalloc(size int) {
 	emit("mov $%d, %%rdi", size)
 	emit("mov $0, %%rax")
 	emit("call .malloc")
-	// @TODO check malloc error
 }
 
 // push addr, len, cap
