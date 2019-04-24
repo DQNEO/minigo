@@ -1,7 +1,7 @@
 package runtime
 
-var Argc int
-var Argv *int
+var runtimeArgc int
+var runtimeArgv *int
 var Args []string
 
 var heap [10485760]int

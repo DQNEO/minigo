@@ -3289,9 +3289,9 @@ func emitRuntimeArgs() {
 	emit("mov %%rsp, %%rbp")
 
 	emit("# set argv, argc, argc")
-	emit("mov Argv(%%rip), %%rax # ptr")
-	emit("mov Argc(%%rip), %%rbx # len")
-	emit("mov Argc(%%rip), %%rcx # cap")
+	emit("mov runtimeArgv(%%rip), %%rax # ptr")
+	emit("mov runtimeArgc(%%rip), %%rbx # len")
+	emit("mov runtimeArgc(%%rip), %%rcx # cap")
 
 	emitFuncEpilogue(".runtime_args_noop_handler",nil)
 }
@@ -3303,8 +3303,8 @@ func emitMainFunc(importOS bool) {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	emit("mov %%rsi, Argv(%%rip)")
-	emit("mov %%rdi, Argc(%%rip)")
+	emit("mov %%rsi, runtimeArgv(%%rip)")
+	emit("mov %%rdi, runtimeArgc(%%rip)")
 	emit("mov $0, %%rsi")
 	emit("mov $0, %%rdi")
 
