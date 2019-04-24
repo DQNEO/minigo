@@ -144,6 +144,7 @@ func print(s string) {
 }
 
 func recover() interface{} {
+	return nil
 }
 
 type error interface {
