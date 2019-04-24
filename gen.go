@@ -3308,6 +3308,11 @@ func emitMainFunc(importOS bool) {
 	emit("mov $0, %%rsi")
 	emit("mov $0, %%rdi")
 
+	// init runtime
+	emit("# init runtime")
+	emit("mov $0, %%rax")
+	emit("call .init")
+
 	// init imported packages
 	if importOS {
 		emit("# init os")

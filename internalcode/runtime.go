@@ -8,10 +8,11 @@ var heap [10485760]int
 var heapIndex int
 const intSize = 8
 
+func init() {
+	heapIndex = heap + 0 // set head address of heap
+}
+
 func malloc(size int) int {
-	if heapIndex == 0 {
-		heapIndex = (heap + 0)
-	}
 	if heapIndex + size - heap > len(heap) {
 		return 0
 	}
@@ -22,9 +23,6 @@ func malloc(size int) int {
 
 func makeSlice(newLen int, newCap int) []int {
 	var r []int
-	if heapIndex == 0 {
-		heapIndex = (heap + 0)
-	}
 	low := (heapIndex - heap) / intSize + 1
 	r = heap[low:low+newLen:low+newCap]
 	heapIndex += (newCap + 1)* intSize
