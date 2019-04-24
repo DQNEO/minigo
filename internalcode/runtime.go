@@ -141,7 +141,7 @@ func println(s interface{}) {
 		// regard it as int
 		printf("%d\n", s)
 	} else {
-		puts(s)
+		printf("%s\n", s)
 	}
 }
 
