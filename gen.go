@@ -1954,7 +1954,7 @@ func (lit *ExprMapLiteral) emitPush() {
 			emit("mov %%rcx, (%%rax)") // save value to heap
 		} else {
 			switch element.value.getGtype().getPrimType() {
-			case G_MAP:
+			case G_MAP, G_SLICE, G_INTERFACE:
 				// rax,rbx,rcx
 				element.value.emit()
 				emit("push %%rax") // ptr
