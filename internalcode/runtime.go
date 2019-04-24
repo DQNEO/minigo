@@ -145,8 +145,8 @@ func println(s interface{}) {
 	}
 }
 
-func print(s string) {
-	printf(s)
+func print(x interface{}) {
+	printf(x)
 }
 
 func recover() interface{} {
