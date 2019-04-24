@@ -14,8 +14,8 @@ type IdentBody struct {
 
 func (sc *scope) get(name identifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
-		v, ok := s.idents[name]
-		if ok {
+		v  := s.idents[name]
+		if v != nil {
 			return v
 		}
 	}
