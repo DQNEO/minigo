@@ -27,7 +27,7 @@ func f1() {
 	p.methods = map[identifier]methods{}
 	p.scopes = map[identifier]*scope{}
 
-	universe := newScope(nil)
+	universe := newScope(nil, "universe")
 
 	astFile := p.parseSourceFile(bs, universe, false)
 	debugNest = 0
