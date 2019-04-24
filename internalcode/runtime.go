@@ -4,7 +4,7 @@ var runtimeArgc int
 var runtimeArgv *int
 var Args []string //  Do not remove this. Actually this is real os.Args.
 
-var heap [10485760]int
+var heap [10485760]byte
 var heapIndex int
 
 var heapSlice [10485760]int
