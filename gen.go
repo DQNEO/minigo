@@ -1918,9 +1918,9 @@ func (lit *ExprMapLiteral) emitPush() {
 	// allocaated address of the map head
 	var size int
 	if length == 0 {
-		size = ptrSize * 2 * 256
+		size = ptrSize * 1024
 	} else {
-		size = length * ptrSize * 2 * 2 // 2*2 = key+value x double
+		size = length * ptrSize * 1024
 	}
 	emitCallMalloc(size)
 	emit("push %%rax") // map head
