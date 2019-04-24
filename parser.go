@@ -2072,51 +2072,19 @@ func (ast *StmtShortVarDecl) infer() {
 }
 
 func (funcall *ExprFuncallOrConversion) isBuiltinLen() bool {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		return false
-	}
-	decl := funcall.getFuncDef() // check existance
-	if decl == nil {
-		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
-	}
-
-	return decl == builinLen
+	return funcall.getFuncDef() == builinLen
 }
 
 func (funcall *ExprFuncallOrConversion) isBuiltinCap() bool {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		return false
-	}
-	decl := funcall.getFuncDef() // check existance
-	if decl == nil {
-		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
-	}
-
-	return decl == builinCap
+	return funcall.getFuncDef() == builinCap
 }
 
 func (funcall *ExprFuncallOrConversion) isBuiltinAppend() bool {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		return false
-	}
-	decl := funcall.getFuncDef() // check existance
-	if decl == nil {
-		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
-	}
-
-	return decl == builtinAppend
+	return funcall.getFuncDef() == builtinAppend
 }
 
 func (funcall *ExprFuncallOrConversion) isBuiltinDumpInterface() bool {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		return false
-	}
-	decl := funcall.getFuncDef() // check existance
-	if decl == nil {
-		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
-	}
-
-	return decl == builtinDumpInterface
+	return funcall.getFuncDef() == builtinDumpInterface
 }
 
 func (p *parser) resolve(universe *scope) {

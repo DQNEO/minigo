@@ -3078,10 +3078,9 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		return
 	}
 
-	decl := funcall.getFuncDef() // check existance
-	if decl == nil {
-		errorft(funcall.token(), "funcdef not found for funcall %s, rel=%v ", funcall.fname, funcall.rel)
-	}
+	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
+	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")
+	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
 	if funcall.isBuiltinLen() {
