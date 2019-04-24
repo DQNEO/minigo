@@ -134,7 +134,8 @@ func (ast *ExprStringLiteral) dump() {
 }
 
 func (a *Relation) dump() {
-	assert(a.expr != nil, nil, "ident.expr shout not be nil ")
+	assert(a != nil, nil, "ident shoud not be nil ")
+	assert(a.expr != nil, nil, "ident.expr shoud not be nil ")
 	a.expr.dump()
 }
 
