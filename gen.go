@@ -3084,7 +3084,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 	// check if it's a builtin function
 	switch decl {
-
 	case builinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
@@ -3093,7 +3092,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			arg: arg,
 		}
 		exprLen.emit()
-		return
 	case builinCap:
 		arg := funcall.args[0]
 		e := &ExprCap{
@@ -3101,7 +3099,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			arg: arg,
 		}
 		e.emit()
-		return
 	case builtinAppend:
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
@@ -3130,7 +3127,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		default:
 			TBI(slice.token(), "")
 		}
-		return
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 
@@ -3149,15 +3145,13 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("mov $0, %%rax")
 		emit("call %s", "printf")
 		emit("")
-
-		return
+	default:
+		var staticCall *IrStaticCall = &IrStaticCall{
+			symbol: getFuncSymbol(decl.pkg, funcall.fname),
+			callee: decl,
+		}
+		staticCall.emit(funcall.args)
 	}
-
-	var staticCall *IrStaticCall = &IrStaticCall{
-		symbol: getFuncSymbol(decl.pkg, funcall.fname),
-		callee: decl,
-	}
-	staticCall.emit(funcall.args)
 }
 
 type IrStaticCall struct {

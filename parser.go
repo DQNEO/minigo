@@ -2014,10 +2014,11 @@ func (ast *StmtShortVarDecl) infer() {
 				rightTypes = append(rightTypes, fcallOrConversion.rel.gtype)
 			} else {
 				fcall := fcallOrConversion
-				if fcall.getFuncDef() == nil {
+				funcdef := fcall.getFuncDef()
+				if funcdef == nil {
 					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
 				}
-				if fcall.isBuiltinLen() {
+				if funcdef == builinLen {
 					rightTypes = append(rightTypes, gInt)
 				} else {
 					for _, gtype := range fcall.getFuncDef().rettypes {
@@ -2069,22 +2070,6 @@ func (ast *StmtShortVarDecl) infer() {
 		variable.gtype = rightType
 	}
 
-}
-
-func (funcall *ExprFuncallOrConversion) isBuiltinLen() bool {
-	return funcall.getFuncDef() == builinLen
-}
-
-func (funcall *ExprFuncallOrConversion) isBuiltinCap() bool {
-	return funcall.getFuncDef() == builinCap
-}
-
-func (funcall *ExprFuncallOrConversion) isBuiltinAppend() bool {
-	return funcall.getFuncDef() == builtinAppend
-}
-
-func (funcall *ExprFuncallOrConversion) isBuiltinDumpInterface() bool {
-	return funcall.getFuncDef() == builtinDumpInterface
 }
 
 func (p *parser) resolve(universe *scope) {
