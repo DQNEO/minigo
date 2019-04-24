@@ -4,6 +4,8 @@ import "fmt"
 
 func main() {
 	var heapHead *int
+	var heapTail *int
+
 	var address *int
 	heapHead = malloc(0)
 
@@ -17,5 +19,7 @@ func main() {
 	*address = 3
 	fmt.Printf("%d\n", *address)
 
-	fmt.Printf("%d\n", (address-heapHead)-12) // 4
+	heapTail = malloc(0)
+
+	fmt.Printf("%d\n", (heapTail-heapHead)-20) // 4
 }
