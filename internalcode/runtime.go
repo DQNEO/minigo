@@ -153,14 +153,8 @@ const MiniGo int = 1
 func make(x interface{}) interface{} {
 }
 
-func panic(x interface{}) {
-	switch x.(type) {
-	case string:
-		s := x.(string)
-		printf("panic:%s\n", s)
-	default:
-		printf("panic:\n")
-	}
+func panic(s string) {
+	printf("panic:%s\n", s)
 	exit(1)
 }
 
