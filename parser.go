@@ -1001,8 +1001,8 @@ func (p *parser) parseIdentList() []identifier {
 	return r
 }
 
-func (p *parser) enterNewScope() {
-	p.currentScope = newScope(p.currentScope)
+func (p *parser) enterNewScope(name string) {
+	p.currentScope = newScope(p.currentScope, name)
 }
 
 func (p *parser) exitScope() {
@@ -1055,7 +1055,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	var r = &StmtFor{
 		tok: ptok,
 	}
-	p.enterNewScope()
+	p.enterNewScope("for")
 	p.currentForStmt = r
 
 	var cond Expr
@@ -1165,7 +1165,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	var r = &StmtIf{
 		tok: ptok,
 	}
-	p.enterNewScope()
+	p.enterNewScope("if")
 	p.requireBlock = true
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
@@ -1613,7 +1613,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	p.localvars = nil
 	var isMethod bool
-	p.enterNewScope()
+	p.enterNewScope("func")
 
 	var receiver *ExprVariable
 

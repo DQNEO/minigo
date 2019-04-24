@@ -75,7 +75,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 
 	// initialize a package
 	p.methods = map[identifier]methods{}
-	p.scopes[pkgname] = newScope(nil)
+	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	p.currentPackageName = pkgname
 
 	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
@@ -142,7 +142,7 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
-	universe := newScope(nil)
+	universe := newScope(nil, "universe")
 
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
@@ -169,7 +169,7 @@ func main() {
 	// initialize main package
 	var pkgname identifier = "main"
 	p.methods = map[identifier]methods{}
-	p.scopes[pkgname] = newScope(nil)
+	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	p.currentPackageName = pkgname
 
 	for _, sourceFile := range sourceFiles {
