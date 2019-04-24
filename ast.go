@@ -22,9 +22,9 @@ type Node interface {
 }
 
 type Relation struct {
-	tok  *Token
 	pkg  identifier
 	name identifier
+	tok  *Token
 
 	// either of expr(var, const, funcref) or gtype
 	expr  Expr
