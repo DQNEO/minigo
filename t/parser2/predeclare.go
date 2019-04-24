@@ -1,0 +1,1 @@
+../../predeclare.go
