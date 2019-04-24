@@ -14,6 +14,7 @@ func init() {
 
 func malloc(size int) int {
 	if heapIndex + size - heap > len(heap) {
+		panic("malloc exceeds heap capacity")
 		return 0
 	}
 	r := heapIndex
