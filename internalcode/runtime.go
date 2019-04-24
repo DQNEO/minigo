@@ -126,7 +126,13 @@ func make(x interface{}) interface{} {
 }
 
 func panic(x interface{}) {
-	puts(x)
+	switch x.(type) {
+	case string:
+		s := x.(string)
+		printf("panic:%s\n", s)
+	default:
+		printf("panic:\n")
+	}
 	exit(1)
 }
 
