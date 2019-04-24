@@ -8,12 +8,12 @@ var debugParser = true
 var allScopes map[identifier]*scope
 
 func f1() {
-	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
+	bs = NewByteStreamFromFile("t2/bootstrap.go")
 
 	p := &parser{}
 	p.methods = map[identifier]methods{}
 	p.scopes = map[identifier]*scope{}
-	universe := newScope(nil)
+	universe := newScope(nil, "universe")
 
 	astFile := p.parseSourceFile(bs, universe, false)
 	debugNest = 0
