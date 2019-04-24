@@ -111,7 +111,6 @@ func predeclareLibcFuncs(universe *scope) {
 	universe.setFunc("printf", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
-			// No implementation thanks to the libc function.
 		},
 	})
 	universe.setFunc("sprintf", &ExprFuncRef{
