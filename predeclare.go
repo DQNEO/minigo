@@ -108,12 +108,6 @@ func predeclareConsts(universe *scope) {
 }
 
 func predeclareLibcFuncs(universe *scope) {
-	universe.setFunc("puts", &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg: "libc",
-			// No implementation thanks to the libc function.
-		},
-	})
 	universe.setFunc("printf", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",

@@ -8,14 +8,14 @@ func f0() {
 }
 
 func receiveVarg(s string, a ...interface{}) {
-	puts("-")
+	println("-")
 	println(len(a))
 	println(*a[0])
 	println(*a[1])
 }
 
 func receiveIfcSlice(s string, a []interface{}) {
-	puts("-")
+	println("-")
 	println(len(a))
 	println(*a[0])
 	println(*a[1])
