@@ -3083,7 +3083,9 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
-	if funcall.isBuiltinLen() {
+	switch decl {
+
+	case builinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
 		exprLen := &ExprLen{
@@ -3092,7 +3094,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		exprLen.emit()
 		return
-	} else if funcall.isBuiltinCap() {
+	case builinCap:
 		arg := funcall.args[0]
 		e := &ExprCap{
 			tok: arg.token(),
@@ -3100,7 +3102,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		e.emit()
 		return
-	} else if funcall.isBuiltinAppend() {
+	case builtinAppend:
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
 		valueToAppend := funcall.args[1]
@@ -3129,7 +3131,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			TBI(slice.token(), "")
 		}
 		return
-	} else if funcall.isBuiltinDumpInterface() {
+	case builtinDumpInterface:
 		arg := funcall.args[0]
 
 		emit("lea .%s, %%rax", builtinStringKey1)
