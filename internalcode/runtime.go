@@ -26,7 +26,23 @@ func malloc(size int) int {
 	return r
 }
 
-func makeSlice(newLen int, newCap int) []int {
+func makeSlice1(newLen int, newCap int) []int {
+	var r []int
+	low := (heapSliceIndex - heapSlice) / intSize + 1
+	r = heapSlice[low:low+newLen:low+newCap]
+	heapSliceIndex += (newCap + 1)* intSize
+	return r
+}
+
+func makeSlice8(newLen int, newCap int) []int {
+	var r []int
+	low := (heapSliceIndex - heapSlice) / intSize + 1
+	r = heapSlice[low:low+newLen:low+newCap]
+	heapSliceIndex += (newCap + 1)* intSize
+	return r
+}
+
+func makeSlice24(newLen int, newCap int) []int {
 	var r []int
 	low := (heapSliceIndex - heapSlice) / intSize + 1
 	r = heapSlice[low:low+newLen:low+newCap]
@@ -48,7 +64,7 @@ func append1(x []byte, elm byte) []byte {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice(zlen, newcap)
+		z = makeSlice1(zlen, newcap)
 		for i:=0;i<xlen;i++ {
 			z[i] = x[i]
 		}
@@ -72,7 +88,7 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
- 		z = makeSlice(zlen, newcap)
+ 		z = makeSlice8(zlen, newcap)
 		for i:=0;i<xlen;i++ {
 			z[i] = x[i]
 		}
@@ -98,7 +114,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice(zlen, newcap)
+		z = makeSlice24(zlen, newcap)
 		for i:=0;i<xlen;i++ {
 			z[i] = x[i]
 		}
