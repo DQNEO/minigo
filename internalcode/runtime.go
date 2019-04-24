@@ -6,10 +6,14 @@ var Args []string //  Do not remove this. Actually this is real os.Args.
 
 var heap [10485760]int
 var heapIndex int
+
+var heapSlice [10485760]int
+var heapSliceIndex int
 const intSize = 8
 
 func init() {
 	heapIndex = heap + 0 // set head address of heap
+	heapSliceIndex = heapSlice + 0
 }
 
 func malloc(size int) int {
@@ -24,9 +28,9 @@ func malloc(size int) int {
 
 func makeSlice(newLen int, newCap int) []int {
 	var r []int
-	low := (heapIndex - heap) / intSize + 1
-	r = heap[low:low+newLen:low+newCap]
-	heapIndex += (newCap + 1)* intSize
+	low := (heapSliceIndex - heapSlice) / intSize + 1
+	r = heapSlice[low:low+newLen:low+newCap]
+	heapSliceIndex += (newCap + 1)* intSize
 	return r
 }
 
