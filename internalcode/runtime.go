@@ -112,3 +112,40 @@ func strcopy(src string, dest string, slen int) string {
 	dest[slen] = 0
 	return dest
 }
+
+const MiniGo int = 1
+
+// builin functions
+// https://golang.org/ref/spec#Predeclared_identifiers
+
+// Functions:
+//	append cap close complex copy delete imag len
+//	make new panic print println real recover
+
+func make(x interface{}) interface{} {
+}
+
+func panic(x interface{}) {
+	puts(x)
+	exit(1)
+}
+
+func println(s interface{}) {
+	if s < 4096 {
+		// regard it as int
+		printf("%d\n", s)
+	} else {
+		puts(s)
+	}
+}
+
+func print(s string) {
+	printf(s)
+}
+
+func recover() interface{} {
+}
+
+type error interface {
+	Error() string
+}

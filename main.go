@@ -144,10 +144,8 @@ func main() {
 
 	universe := newScope(nil, "universe")
 
+	// inject identifiers into the universe scope
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
-	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
-
-	bs = NewByteStreamFromString("builtin.memory", builtinCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 
 	setPredeclaredIdentifiers(universe)
