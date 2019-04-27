@@ -205,6 +205,7 @@ func main() {
 	uniquedDynamicTypes["int"] = 0
 	uniquedDynamicTypes["string"] = 0
 	uniquedDynamicTypes["byte"] = 0
+	uniquedDynamicTypes["bool"] = 0
 
 	for _, gtype := range p.alldynamictypes {
 		uniquedDynamicTypes[gtype.String()] = 0
