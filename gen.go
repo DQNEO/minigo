@@ -1103,14 +1103,18 @@ func (e *ExprSliceLiteral) emit() {
 	emitCallMalloc(e.gtype.getSize()) // why does this work??
 	emit("push %%rax # ptr")
 	for i, value := range e.values {
-		switch value.getGtype().getPrimType() {
-		case G_BYTE, G_INT, G_POINTER, G_STRING:
+		if e.gtype.elementType.getPrimType() == G_INTERFACE && value.getGtype().getPrimType() != G_INTERFACE {
+			emitConversionToInterface(value)
+		} else {
 			value.emit()
+		}
+
+		switch e.gtype.elementType.getPrimType() {
+		case G_BYTE, G_INT, G_POINTER, G_STRING:
 			emit("pop %%rbx # ptr")
 			emit("mov %%rax, %d(%%rbx)", IntSize*i)
 			emit("push %%rbx # ptr")
 		case G_INTERFACE, G_SLICE, G_MAP:
-			value.emit()
 			emit("pop %%rdx # ptr")
 			emit("mov %%rax, %d(%%rdx)", IntSize*3*i)
 			emit("mov %%rbx, %d(%%rdx)", IntSize*3*i+ptrSize)
