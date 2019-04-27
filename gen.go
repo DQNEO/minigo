@@ -2013,6 +2013,7 @@ func (e *ExprConversionToInterface) emit() {
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
+	emit("# emitConversionToInterface")
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
@@ -2041,11 +2042,10 @@ func emitConversionToInterface(dynamicValue Expr) {
 	}
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("push %%rax")
-
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("pop %%rax")
+	emit("mov %%rax, %%rcx # dynamicType")
+	emit("pop %%rbx # receiverTypeId")
+	emit("pop %%rax # addr of dynamicValue")
+	emit("")
 }
 
 func isNil(e Expr) bool {
