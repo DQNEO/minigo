@@ -220,7 +220,8 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		e = p.parseIndexOrSliceExpr(rel)
+		var collection Expr = rel // @TODO: it should do auto conversion on function call
+		e = p.parseIndexOrSliceExpr(collection)
 	} else {
 		// solo ident
 		e = rel

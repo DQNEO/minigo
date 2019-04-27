@@ -180,7 +180,13 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	TBI(e.token(), "")
+	debugf("ExprIndex:")
+	debugNest++
+	e.collection.dump()
+	e.low.dump()
+	e.high.dump()
+	e.max.dump()
+	debugNest--
 }
 
 func (e *ExprIndex) dump() {
