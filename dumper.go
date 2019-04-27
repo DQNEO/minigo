@@ -247,7 +247,12 @@ func (e *ExprSliceLiteral) dump() {
 }
 
 func (stmt *StmtReturn) dump() {
-	panic("implement me")
+	debugf("return")
+	debugNest++
+	for _, e := range stmt.exprs {
+		e.dump()
+	}
+	debugNest--
 }
 
 func (ast *StmtInc) dump() {

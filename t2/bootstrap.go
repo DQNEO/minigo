@@ -1,10 +1,14 @@
 package runtime
 
+var heap [10485760]byte
 var heapTail *int
 
-func f1(size int) *int {
-	if heapTail + size > 0 {
+func malloc(size int) *int {
+	if heapTail+ size > len(heap) + heap  {
+		panic("malloc exceeds heap capacity")
 		return 0
 	}
+	r := heapTail
+	heapTail += size
+	return r
 }
-
