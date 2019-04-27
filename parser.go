@@ -1284,11 +1284,14 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 		left:  left,
 		right: rights[0],
 	}
-	return &StmtAssignment{
+	var right Expr = binop // FIXME: this is a workaround
+	s := &StmtAssignment{
 		tok:    ptok,
 		lefts:  []Expr{left},
-		rights: []Expr{binop},
+		rights: []Expr{right},
 	}
+	// dumpInterface(s.rights[0])
+	return s
 }
 
 func (p *parser) shortVarDecl(e Expr) {
