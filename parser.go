@@ -13,17 +13,17 @@ type parser struct {
 	// per function or block
 	currentFunc         *DeclFunc
 	localvars           []*ExprVariable
+	requireBlock        bool // workaround for parsing "{" as a block starter
+	inCase              int  // > 0  while in reading case compound stmts
+	constSpecIndex      int
+	currentForStmt      *StmtFor
 
 	// per file
 	tokenStream         *TokenStream
 	packageBlockScope   *scope
 	currentScope        *scope
-
 	importedNames       map[identifier]bool
-	requireBlock        bool // workaround for parsing "{" as a block starter
-	inCase              int  // > 0  while in reading case compound stmts
-	constSpecIndex      int
-	currentForStmt      *StmtFor
+
 
 	// per package
 	currentPackageName  identifier
