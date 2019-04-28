@@ -142,8 +142,7 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
-	universe := newScope(nil, "universe")
-	setPredeclaredIdentifiers(universe)
+	universe := newUniverse()
 
 	// inject identifiers into the universe scope
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)

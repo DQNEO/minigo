@@ -44,6 +44,12 @@ var builtinRunTimeArgs = &DeclFunc{
 	}
 
 
+func newUniverse() *scope {
+	universe := newScope(nil, "universe")
+	setPredeclaredIdentifiers(universe)
+	return universe
+}
+
 // https://golang.org/ref/spec#Predeclared_identifiers
 func setPredeclaredIdentifiers(universe *scope) {
 	predeclareNil(universe)
