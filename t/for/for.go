@@ -21,7 +21,25 @@ func f2() {
 	}
 }
 
+
+func f3() {
+	var x int = 1
+	for {
+		if x == 0 {
+			for {
+				return
+			}
+			fmt.Printf("ERROR")
+			return
+		}
+		x = 16
+		break
+	}
+	fmt.Printf("%d\n", x)
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }

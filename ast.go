@@ -185,6 +185,7 @@ type StmtFor struct {
 	block         *StmtSatementList
 	labelEndBlock string
 	labelEndLoop  string
+	outer *StmtFor // to manage lables in nested for-statements
 }
 
 type StmtIf struct {

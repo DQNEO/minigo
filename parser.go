@@ -1010,6 +1010,10 @@ func (p *parser) exitScope() {
 	p.currentScope = p.currentScope.outer
 }
 
+func (p *parser) exitForBlock() {
+	p.currentForStmt = p.currentForStmt.outer
+}
+
 func (clause *ForRangeClause) infer() {
 	collectionType := clause.rangeexpr.getGtype()
 	//debugf("collectionType = %s", collectionType)
@@ -1055,10 +1059,10 @@ func (p *parser) parseForStmt() *StmtFor {
 
 	var r = &StmtFor{
 		tok: ptok,
+		outer: p.currentForStmt,
 	}
-	p.enterNewScope("for")
 	p.currentForStmt = r
-
+	p.enterNewScope("for")
 	var cond Expr
 	if p.peekToken().isPunct("{") {
 		// inifinit loop : for { ___ }
@@ -1115,6 +1119,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	p.expect("{")
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
+	p.exitForBlock()
 	return r
 }
 
@@ -1141,6 +1146,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.expect("{")
 	var r = &StmtFor{
 		tok: tokRange,
+		outer: p.currentForStmt,
 		rng: &ForRangeClause{
 			tok:                 tokRange,
 			invisibleMapCounter: p.newVariable("", gInt),
@@ -1155,6 +1161,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	}
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
+	p.exitForBlock()
 	return r
 }
 
@@ -1397,7 +1404,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.expect(":")
 			compound := p.parseCompoundStmt()
 			r.dflt = compound
-			return r // @FIXME break doesnt work here. why ??
+			break
 		} else {
 			errorft(tok, "internal error")
 		}
