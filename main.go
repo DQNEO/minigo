@@ -77,9 +77,10 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	bs = NewByteStreamFromString(filename, code)
 
 	// initialize a package
-	p.methods = map[identifier]methods{}
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	p.currentPackageName = pkgname
+	p.methods = map[identifier]methods{}
+
+	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 
@@ -168,9 +169,10 @@ func main() {
 
 	// initialize main package
 	var pkgname identifier = "main"
-	p.methods = map[identifier]methods{}
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	p.currentPackageName = pkgname
+	p.methods = map[identifier]methods{}
+
+	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	for _, sourceFile := range sourceFiles {
 		s := readFile(sourceFile)
