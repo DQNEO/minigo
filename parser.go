@@ -14,23 +14,23 @@ type parser struct {
 
 	// per file
 
-	// per package
-
 	tokenStream         *TokenStream
-	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
 	currentFunc         *DeclFunc
 	localvars           []*ExprVariable
-	methods             map[identifier]methods
-	globaluninferred    []*ExprVariable
-	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int  // > 0  while in reading case compound stmts
 	constSpecIndex      int
-	currentPackageName  identifier
 	currentForStmt      *StmtFor
+
+	// per package
+	currentPackageName  identifier
+	methods             map[identifier]methods
+	unresolvedRelations []*Relation
+	globaluninferred    []*ExprVariable
+	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
 	scopes              map[identifier]*scope
