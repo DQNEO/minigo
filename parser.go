@@ -11,14 +11,14 @@ const __func__ string = "__func__"
 
 type parser struct {
 	// per function or block
+	currentFunc         *DeclFunc
+	localvars           []*ExprVariable
 
 	// per file
-
 	tokenStream         *TokenStream
 	packageBlockScope   *scope
 	currentScope        *scope
-	currentFunc         *DeclFunc
-	localvars           []*ExprVariable
+
 	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int  // > 0  while in reading case compound stmts
