@@ -10,11 +10,18 @@ import (
 const __func__ string = "__func__"
 
 type parser struct {
+	// per function or block
+
+	// per file
+
+	// per package
+
+	// global state
+
 	tokenStream         *TokenStream
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
-	concreteNamedTypes  []*DeclType
 	scopes              map[identifier]*scope
 	currentFunc         *DeclFunc
 	stringLiterals      []*ExprStringLiteral
@@ -27,8 +34,11 @@ type parser struct {
 	inCase              int  // > 0  while in reading case compound stmts
 	constSpecIndex      int
 	currentPackageName  identifier
-	alldynamictypes     []*Gtype
 	currentForStmt      *StmtFor
+
+	// ambivalent
+	concreteNamedTypes  []*DeclType
+	alldynamictypes     []*Gtype
 }
 
 type methods map[identifier]*ExprFuncRef
