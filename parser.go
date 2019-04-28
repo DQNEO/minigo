@@ -16,15 +16,11 @@ type parser struct {
 
 	// per package
 
-	// global state
-
 	tokenStream         *TokenStream
 	unresolvedRelations []*Relation
 	packageBlockScope   *scope
 	currentScope        *scope
-	scopes              map[identifier]*scope
 	currentFunc         *DeclFunc
-	stringLiterals      []*ExprStringLiteral
 	localvars           []*ExprVariable
 	methods             map[identifier]methods
 	globaluninferred    []*ExprVariable
@@ -35,6 +31,10 @@ type parser struct {
 	constSpecIndex      int
 	currentPackageName  identifier
 	currentForStmt      *StmtFor
+
+	// global state
+	scopes              map[identifier]*scope
+	stringLiterals      []*ExprStringLiteral
 
 	// ambivalent
 	concreteNamedTypes  []*DeclType
