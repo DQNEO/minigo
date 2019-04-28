@@ -143,12 +143,12 @@ func main() {
 	var astFiles []*SourceFile
 
 	universe := newScope(nil, "universe")
+	setPredeclaredIdentifiers(universe)
 
 	// inject identifiers into the universe scope
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 
-	setPredeclaredIdentifiers(universe)
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
