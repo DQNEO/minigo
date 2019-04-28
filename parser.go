@@ -196,6 +196,13 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		name: firstIdent,
 		pkg:  p.currentPackageName, // @TODO is this right?
 	}
+	if rel.name == "__func__" {
+		sliteral := &ExprStringLiteral{
+			val: string(p.currentFunc.fname),
+		}
+		rel.expr = sliteral
+		p.addStringLiteral(sliteral)
+	}
 	p.tryResolve(pkg, rel)
 
 	next := p.peekToken()
@@ -1840,14 +1847,6 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		return
 	}
 
-	if rel.name == "__func__" {
-		sliteral := &ExprStringLiteral{
-			val: string(p.currentFunc.fname),
-		}
-		rel.expr = sliteral
-		p.addStringLiteral(sliteral)
-		return
-	}
 	if pkg == "" {
 		relbody := p.currentScope.get(rel.name)
 		if relbody != nil {
