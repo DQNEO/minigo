@@ -3148,6 +3148,11 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("mov $0, %%rax")
 		emit("call %s", "printf")
 		emit("")
+	case builtinAsComment:
+		arg := funcall.args[0]
+		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
+			emit("# %s", stringLiteral.val)
+		}
 	default:
 		var staticCall *IrStaticCall = &IrStaticCall{
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),

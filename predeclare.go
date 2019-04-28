@@ -31,6 +31,10 @@ var builtinDumpInterface = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
+var builtinAsComment = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 var builtinRunTimeArgsRettypes1 *Gtype =&Gtype{
 	typ: G_SLICE,
 	size: IntSize * 3,
@@ -69,6 +73,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 
 	universe.setFunc("dumpInterface", &ExprFuncRef{
 		funcdef: builtinDumpInterface,
+	})
+
+	universe.setFunc("asComment", &ExprFuncRef{
+		funcdef: builtinAsComment,
 	})
 
 	universe.setFunc("runtime_args", &ExprFuncRef{

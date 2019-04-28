@@ -18,8 +18,11 @@ var parseOnly = false
 var resolveOnly = false
 var exit = false
 
+// placeholders for my builtin functions
 func dumpInterface(x interface{}) {
+}
 
+func asComment(s string) {
 }
 
 func printVersion() {
