@@ -91,6 +91,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 }
 
 func main() {
+	// parsing arguments
 	var sourceFiles []string
 
 	if len(os.Args) == 0 {
@@ -110,9 +111,9 @@ func main() {
 		println("No input files.")
 		return
 	}
-	// parser to parse imported
+
+	// analyze imports of the given go files
 	pForImport := &parser{}
-	// parse imported only
 	var imported map[identifier]bool = map[identifier]bool{}
 	for _, sourceFile := range sourceFiles {
 		s := readFile(sourceFile)
@@ -134,7 +135,7 @@ func main() {
 	var importOS bool
 	_, importOS = imported["os"]
 
-	// parse
+	// parser starts
 	p := &parser{}
 
 	p.methods = map[identifier]methods{}
@@ -145,12 +146,11 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
+	// setup universe scopes
 	universe := newUniverse()
-
-	// inject identifiers into the universe scope
+	// inject runtime things into the universes
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
-
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
