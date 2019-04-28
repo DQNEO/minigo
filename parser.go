@@ -1970,6 +1970,7 @@ func (p *parser) isGlobal() bool {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
 
+	// init function or local scope
 	p.currentFunc = nil
 	p.localvars = nil
 	p.requireBlock = false
