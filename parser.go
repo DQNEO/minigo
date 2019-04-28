@@ -18,7 +18,6 @@ type parser struct {
 	scopes              map[identifier]*scope
 	currentFunc         *DeclFunc
 	stringLiterals      []*ExprStringLiteral
-	globalvars          []*ExprVariable
 	localvars           []*ExprVariable
 	methods             map[identifier]methods
 	globaluninferred    []*ExprVariable
@@ -762,7 +761,6 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
 		}
-		p.globalvars = append(p.globalvars, variable)
 	} else {
 		variable = &ExprVariable{
 			tok:      p.lastToken(),
