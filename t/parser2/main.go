@@ -17,6 +17,18 @@ func f1() {
 	astFile := p.parseSourceFile(bs, universe, false)
 	debugNest = 0
 	astFile.dump()
+
+	filename := "stdlib/fmt/fmt.go"
+	bs = NewByteStreamFromFile(filename)
+
+	// initialize a package
+	p.methods = map[identifier]methods{}
+	p.scopes["fmt"] = newScope(nil, "fmt")
+	p.currentPackageName = "fmt"
+	debugParser = true
+	asf := p.parseSourceFile(bs, p.scopes["fmt"], false)
+	p.resolve(universe)
+	asf.dump()
 }
 
 func main() {

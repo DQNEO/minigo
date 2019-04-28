@@ -1397,7 +1397,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.expect(":")
 			compound := p.parseCompoundStmt()
 			r.dflt = compound
-			break
+			return r // @FIXME break doesnt work here. why ??
 		} else {
 			errorft(tok, "internal error")
 		}
