@@ -97,7 +97,7 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice8(zlen, newcap)
+ 		z = makeSlice8(zlen, newcap)
 		for i:=0;i<xlen;i++ {
 			z[i] = x[i]
 		}
@@ -171,12 +171,9 @@ func print(x interface{}) {
 	printf(x)
 }
 
-
-/*
 func recover() interface{} {
 	return nil
 }
-*/
 
 type error interface {
 	Error() string
