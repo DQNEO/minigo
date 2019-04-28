@@ -10,25 +10,35 @@ import (
 const __func__ string = "__func__"
 
 type parser struct {
-	tokenStream         *TokenStream
-	unresolvedRelations []*Relation
-	packageBlockScope   *scope
-	currentScope        *scope
-	concreteNamedTypes  []*DeclType
-	scopes              map[identifier]*scope
+	// per function or block
 	currentFunc         *DeclFunc
-	stringLiterals      []*ExprStringLiteral
 	localvars           []*ExprVariable
-	methods             map[identifier]methods
-	globaluninferred    []*ExprVariable
-	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
-	importedNames       map[identifier]bool
 	requireBlock        bool // workaround for parsing "{" as a block starter
 	inCase              int  // > 0  while in reading case compound stmts
 	constSpecIndex      int
-	currentPackageName  identifier
-	alldynamictypes     []*Gtype
 	currentForStmt      *StmtFor
+
+	// per file
+	tokenStream         *TokenStream
+	packageBlockScope   *scope
+	currentScope        *scope
+	importedNames       map[identifier]bool
+
+
+	// per package
+	currentPackageName  identifier
+	methods             map[identifier]methods
+	unresolvedRelations []*Relation
+	globaluninferred    []*ExprVariable
+	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
+
+	// global state
+	scopes              map[identifier]*scope
+	stringLiterals      []*ExprStringLiteral
+
+	// ambivalent
+	concreteNamedTypes  []*DeclType
+	alldynamictypes     []*Gtype
 }
 
 type methods map[identifier]*ExprFuncRef
@@ -1959,6 +1969,14 @@ func (p *parser) isGlobal() bool {
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
+
+	p.currentFunc = nil
+	p.localvars = nil
+	p.requireBlock = false
+	p.inCase = 0
+	p.constSpecIndex = 0
+	p.currentForStmt = nil
+
 
 	// initialize parser's status per file
 	p.tokenStream = NewTokenStream(bs)
