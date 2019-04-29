@@ -8,7 +8,7 @@ var debugParser = true
 var allScopes map[identifier]*scope
 
 func f1() {
-	bs = NewByteStreamFromFile("t2/bootstrap.go")
+	bs = NewByteStreamFromFile("internalcode/runtime.go")
 
 	p := &parser{}
 	p.methods = map[identifier]methods{}
