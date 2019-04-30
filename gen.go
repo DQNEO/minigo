@@ -547,8 +547,26 @@ func (binop *ExprBinop) emitCompareStrings() {
 		equal = true
 	}
 
+	labelElse := makeLabel()
+	labelEnd := makeLabel()
+
 	binop.left.emit()
+
+	// convert nil to the empty string
+	emit("cmp $0, %%rax")
+	emit("sete %%al")
+	emit("movzb %%al, %%eax")
+	emit("test %%rax, %%rax")
+	emit("mov $0, %%rax")
+	emit("je %s", labelElse)
+	eEmpty := &eEmptyString
+	eEmpty.emit()
+	emit("jmp %s", labelEnd)
+	emit("%s:", labelElse)
+	binop.left.emit()
+	emit("%s:", labelEnd)
 	emit("push %%rax")
+
 	binop.right.emit()
 	emit("pop %%rcx")
 	emit("# rax = right, rcx = left")
