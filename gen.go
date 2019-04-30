@@ -530,6 +530,7 @@ func (ast *ExprUop) emit() {
 }
 
 func (binop *ExprBinop) emitCompareStrings() {
+	emit("# emitCompareStrings")
 	var equal bool
 	switch binop.op {
 	case "<":
@@ -570,6 +571,7 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 }
 
 func (binop *ExprBinop) emitComp() {
+	emit("# emitComp")
 	if binop.left.getGtype().isString() {
 		binop.emitCompareStrings()
 		return
