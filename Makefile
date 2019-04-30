@@ -14,16 +14,18 @@ stdlib.go: stdlib/*/*.go
 
 minigo2: *.go minigo # 2nd generation
 	./minigo *.go > out/a.s
-	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c 'gcc -g -no-pie -o minigo2 out/a.s'
+	./compat-run.sh gcc -g -no-pie -o minigo2 out/a.s
 
-
-test: all minigo2
+test: all
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
+	make minigo2
+	./compat-run.sh ./minigo2 --version
 
 circlecitest: all
 	make minigo2
+	./compat-run.sh ./minigo2 --version
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
