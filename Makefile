@@ -20,7 +20,7 @@ test: all minigo2
 	./testerror.sh
 
 circlecitest: all
-	./resolve *.go
+	make minigo2
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
