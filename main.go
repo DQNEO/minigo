@@ -156,6 +156,9 @@ func main() {
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
 	// parse std packages
+
+	stdPkgs := makeStdLib()
+
 	for pkgName, _ := range imported {
 		var pkgCode string
 		var ok bool
