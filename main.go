@@ -217,7 +217,7 @@ func main() {
 	for _, gtype := range p.alldynamictypes {
 		uniquedDynamicTypes[gtype.String()] = 0
 	}
-	ir.hashedTypes = uniquedDynamicTypes
+	ir.uniquedDynamicTypes = uniquedDynamicTypes
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.concreteNamedTypes {
