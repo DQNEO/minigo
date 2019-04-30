@@ -1,4 +1,7 @@
-all: minigo
+all: minigo out
+
+out:
+	mkdir out
 
 minigo: *.go internalcode.go stdlib.go
 	go build -o minigo *.go
