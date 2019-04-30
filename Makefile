@@ -14,8 +14,7 @@ minigo2: *.go minigo # 2nd generation
 	docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c 'gcc -g -no-pie -o minigo2 out/a.s'
 
 
-test: all
-	./resolve *.go
+test: all minigo2
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
