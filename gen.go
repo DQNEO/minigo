@@ -2342,7 +2342,9 @@ func (decl *DeclVar) emit() {
 	}
 }
 
-var eEmptyString = ExprStringLiteral{}
+var eEmptyString = ExprStringLiteral{
+	val:"",
+}
 
 func (decl *DeclType) emit() {
 	// nothing to do
