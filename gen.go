@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -40,15 +41,21 @@ func getHidddenArrayId() int {
 }
 
 func emit(format string, v ...interface{}) {
-	fmt.Printf("\t"+format+"\n", v...)
+	s := fmt.Sprintf("\t"+format+"\n", v...)
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
 }
 
 func emitComment(format string, v ...interface{}) {
-	fmt.Printf("/* "+format+" */\n", v...)
+	s := fmt.Sprintf("/* "+format+" */\n", v...)
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
 }
 
 func emitLabel(format string, v ...interface{}) {
-	fmt.Printf(format+"\n", v...)
+	s := fmt.Sprintf(format+"\n", v...)
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
 }
 
 // Mytype.method -> Mytype#method
