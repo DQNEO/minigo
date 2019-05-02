@@ -189,12 +189,13 @@ func main() {
 		return
 	}
 	p.resolve(universe)
-	if resolveOnly {
-		return
-	}
 
 	if debugAst {
 		astFiles[len(astFiles)-1].dump()
+	}
+
+	if resolveOnly {
+		return
 	}
 
 	var importedPackages []*stdpkg
