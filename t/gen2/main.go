@@ -12,10 +12,10 @@ var allScopes map[identifier]*scope
 var debugMode = true
 var debugToken = false
 
-var debugAst = false
+var debugAst = true
 var debugParser = false
 var parseOnly = false
-var resolveOnly = false
+var resolveOnly = true
 var exit = false
 
 func printVersion() {
@@ -147,6 +147,9 @@ func main() {
 	// inject runtime things into the universes
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
+	if debugAst {
+		astFiles[0].dump()
+	}
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
