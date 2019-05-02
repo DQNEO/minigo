@@ -6,7 +6,7 @@ const O_RDONLY = 0
 func ReadFile(filename string) ([]byte, error) {
 	var fd int
 	var buf []byte
-	buf = makeSlice24(MYBUFSIZ, MYBUFSIZ)
+	buf = makeSlice(MYBUFSIZ, MYBUFSIZ, 24)
 	fd = open(filename, O_RDONLY)
 	var nbtyes int
 	nbtyes = read(fd, buf, MYBUFSIZ)

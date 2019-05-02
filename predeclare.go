@@ -27,6 +27,14 @@ var builtinAppend = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
 
+var builtinMakeSlice = &DeclFunc{
+	rettypes: []*Gtype{builtinRunTimeArgsRettypes1},
+}
+
+var builtinDumpSlice = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 var builtinDumpInterface = &DeclFunc{
 	rettypes: []*Gtype{},
 }
@@ -69,6 +77,13 @@ func setPredeclaredIdentifiers(universe *scope) {
 	})
 	universe.setFunc("append", &ExprFuncRef{
 		funcdef: builtinAppend,
+	})
+	universe.setFunc("makeSlice", &ExprFuncRef{
+		funcdef: builtinMakeSlice,
+	})
+
+	universe.setFunc("dumpSlice", &ExprFuncRef{
+		funcdef: builtinDumpSlice,
 	})
 
 	universe.setFunc("dumpInterface", &ExprFuncRef{

@@ -22,6 +22,9 @@ var exit = false
 func dumpInterface(x interface{}) {
 }
 
+func dumpSlice(x []int) {
+}
+
 func asComment(s string) {
 }
 
@@ -215,7 +218,8 @@ func main() {
 	uniquedDynamicTypes["bool"] = -1
 
 	for _, gtype := range p.alldynamictypes {
-		uniquedDynamicTypes[gtype.String()] = -1
+		g := gtype.String()
+		uniquedDynamicTypes[g] = -1
 	}
 	ir.uniquedDynamicTypes = uniquedDynamicTypes
 
@@ -241,7 +245,6 @@ func main() {
 			methodTable[typeId] = append(methodTable[typeId], string(funcdecl.getUniqueName()))
 		}
 	}
-	//debugf("methodTable=%v", methodTable)
 	ir.methodTable = methodTable
 	ir.importOS = importOS
 
@@ -265,7 +268,6 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 				if decl.vardecl != nil {
 					root.vars = append(root.vars, decl.vardecl)
 				} else if decl.funcdecl != nil {
-					//debugf("register func to ir:%v", decl.funcdecl)
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}
 			}
@@ -277,10 +279,10 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 			if decl.vardecl != nil {
 				root.vars = append(root.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
-				//debugf("register func to ir:%v", decl.funcdecl)
 				root.funcs = append(root.funcs, decl.funcdecl)
 			}
 		}
 	}
+
 	return root
 }

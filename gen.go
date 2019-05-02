@@ -3154,6 +3154,31 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		default:
 			TBI(slice.token(), "")
 		}
+	case builtinMakeSlice:
+		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+		var staticCall *IrStaticCall = &IrStaticCall{
+			callee: decl,
+		}
+		staticCall.symbol = getFuncSymbol("", "makeSlice")
+		staticCall.emit(funcall.args)
+	case builtinDumpSlice:
+		arg := funcall.args[0]
+
+		emit("lea .%s, %%rax", builtinStringKey2)
+		emit("push %%rax")
+		arg.emit()
+		emit("push %%rax  # array")
+		emit("push %%rbx  # len")
+		emit("push %%rcx  # cap")
+
+		numRegs := 4
+		for i := numRegs - 1; i >= 0; i-- {
+			emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
+		}
+
+		emit("mov $0, %%rax")
+		emit("call %s", "printf")
+		emit("")
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 
@@ -3351,6 +3376,29 @@ func emitMainFunc(importOS bool) {
 	emit("mov $0, %%rax")
 	emit("call main.main")
 	emitFuncEpilogue("noop_handler", nil,)
+
+	// makeSlice
+	emitLabel("%s:", ".makeSlice")
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+	emit("")
+	emit("push %%rdi") // -8
+	emit("push %%rsi") // -16
+	emit("push %%rdx") // -24
+
+	emit("mov -16(%%rbp), %%rax # newcap")
+	emit("mov -24(%%rbp), %%rcx # unit")
+	emit("imul %%rcx, %%rax")
+	emit("add $16, %%rax") // pure buffer
+	emit("mov %%rax, %%rdi")
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+	emit("mov -8(%%rbp), %%rbx # newlen")
+	emit("mov -16(%%rbp), %%rcx # newcap")
+
+	emit("leave")
+	emit("ret")
+	emit("")
 }
 
 func (f *DeclFunc) emit() {
@@ -3606,6 +3654,8 @@ func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
 // builtin string
 var builtinStringKey1 string = "SfmtDumpInterface"
 var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\\n"
+var builtinStringKey2 string = "SfmtDumpSlice"
+var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
 func (root *IrRoot) emit() {
 	groot = root
@@ -3618,6 +3668,8 @@ func (root *IrRoot) emit() {
 	// emit builtin string
 	emitLabel(".%s:", builtinStringKey1)
 	emit(".string \"%s\"", builtinStringValue1)
+	emitLabel(".%s:", builtinStringKey2)
+	emit(".string \"%s\"", builtinStringValue2)
 
 	// empty string
 	eEmptyString.slabel = fmt.Sprintf("S%d", 0)
