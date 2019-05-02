@@ -246,7 +246,7 @@ func (a *ExprStructField) emit() {
 		}
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
-		emit("add $%d, %%rax", field.offset)
+		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
 		emit("mov %%rax, %%rdx")
 		switch field.getPrimType() {
 		case G_SLICE, G_INTERFACE, G_MAP:
@@ -437,16 +437,17 @@ func (rel *Relation) emitSave() {
 }
 
 func (variable *ExprVariable) emitOffsetSave(size int, offset int) {
-	emit("# ExprVariable.emitOffsetSave")
+	emit("# ExprVariable.emitOffsetSave(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().typ == G_POINTER && offset > 0 {
 		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
 		emit("push %%rax # save the value")
 		variable.emit()
 		emit("mov %%rax, %%rcx")
-		emit("add $%d, %%rcx", offset)
+		emit("add $%d, %%rcx # offset", offset)
 		emit("pop %%rax")
 		emit("mov %%rax, (%%rcx)")
+		emit("#")
 		return
 	}
 	if variable.isGlobal {
@@ -1904,6 +1905,7 @@ func emitSaveInterface(lhs Expr, offset int) {
 
 // take slice values from stack
 func emitSave3Elements(lhs Expr, offset int) {
+	emit("# emitSave3Elements(%T, offset %d)", lhs, offset)
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
@@ -1914,7 +1916,9 @@ func emitSave3Elements(lhs Expr, offset int) {
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
-		emitSave3Elements(structfield.strct, fieldType.offset+offset)
+		fieldOffset := fieldType.offset
+		emit("# fieldOffset=%d (%s)", fieldOffset, fieldType.fieldname)
+		emitSave3Elements(structfield.strct, fieldOffset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
 		indexExpr.emitSave()
@@ -2187,11 +2191,11 @@ func assignToSlice(lhs Expr, rhs Expr) {
 
 func (variable *ExprVariable) saveSlice(offset int) {
 	emit("# *ExprVariable.saveSlice()")
-	emit("pop %%rax")
+	emit("pop %%rax # 3rd")
 	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen)
-	emit("pop %%rax")
+	emit("pop %%rax # 2nd")
 	variable.emitOffsetSave(8, offset+ptrSize)
-	emit("pop %%rax")
+	emit("pop %%rax # 1st")
 	variable.emitOffsetSave(8, offset)
 }
 
