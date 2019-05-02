@@ -209,13 +209,13 @@ func main() {
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 
 	var uniquedDynamicTypes map[string]int = map[string]int{}
-	uniquedDynamicTypes["int"] = 0
-	uniquedDynamicTypes["string"] = 0
-	uniquedDynamicTypes["byte"] = 0
-	uniquedDynamicTypes["bool"] = 0
+	uniquedDynamicTypes["int"] = -1
+	uniquedDynamicTypes["string"] = -1
+	uniquedDynamicTypes["byte"] = -1
+	uniquedDynamicTypes["bool"] = -1
 
 	for _, gtype := range p.alldynamictypes {
-		uniquedDynamicTypes[gtype.String()] = 0
+		uniquedDynamicTypes[gtype.String()] = -1
 	}
 	ir.uniquedDynamicTypes = uniquedDynamicTypes
 
