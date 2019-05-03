@@ -3462,9 +3462,9 @@ func (decl *DeclVar) emitData() {
 	right := decl.initval
 
 	emit(".data 0")
-	emitLabel("%s: # %s", decl.variable.varname, gtype)
+	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype)
 	emit("# initval=%#v", right)
-	emitGlobalDeclInit(ptok, right.getGtype(), right, "")
+	doEmitData(ptok, right.getGtype(), right, "")
 }
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
@@ -3477,7 +3477,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string) {
+func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string) {
 	primType := gtype.getPrimType()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
@@ -3492,7 +3492,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 			selector := fmt.Sprintf("%s[%d]", containerName, i)
 			if i >= len(values) {
 				// zero value
-				emitGlobalDeclInit(ptok, elmType, nil, selector)
+				doEmitData(ptok, elmType, nil, selector)
 			} else {
 				value := arrayliteral.values[i]
 				assertNotNil(value != nil, nil)
@@ -3518,7 +3518,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 				} else if size == 1 {
 					emit(".byte %d", evalIntExpr(value))
 				} else {
-					emitGlobalDeclInit(ptok, gtype.elementType, value, selector)
+					doEmitData(ptok, gtype.elementType, value, selector)
 				}
 			}
 		}
@@ -3566,7 +3566,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# field:%s", field.fieldname)
 			if value == nil {
-				emitGlobalDeclInit(ptok, field, nil, containerName+"."+string(field.fieldname))
+				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname))
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
@@ -3577,7 +3577,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 				//continue
 			}
 			gtype := field
-			emitGlobalDeclInit(ptok, gtype, value, containerName+"."+string(field.fieldname))
+			doEmitData(ptok, gtype, value, containerName+"."+string(field.fieldname))
 		}
 	} else {
 		var val int
@@ -3612,14 +3612,8 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 				emit(".quad %s", vr.varname)
 			} else {
 				// var gv = &Struct{_}
-				entityLabel :=  makeLabel() + "_global_entity"
-				emit(".quad %s", entityLabel)
-				entity := &GlobalInternalEntity{
-					token: ptok,
-					label: entityLabel,
-					expr: operand,
-				}
-				globalInternalEntities = append(globalInternalEntities, entity)
+				depth := 0
+				emitDataAddr(operand, depth)
 			}
 		default:
 			TBI(ptok, "unable to handle %T", value)
@@ -3627,16 +3621,14 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 	}
 }
 
-var globalInternalEntities []*GlobalInternalEntity
-type GlobalInternalEntity struct {
-	token *Token
-	label string
-	expr Expr
-}
-
-func (e *GlobalInternalEntity) emit() {
-	emitLabel(e.label + ":")
-	emitGlobalDeclInit(e.token, e.expr.getGtype(), e.expr, "")
+// this logic is stolen from 8cc.
+func emitDataAddr(operand Expr, depth int) {
+	emit(".data %d", depth + 1)
+	label :=  makeLabel()
+	emit("%s:", label)
+	doEmitData(nil, operand.getGtype(), operand, "")
+	emit(".data %d", depth)
+	emit(".quad %s", label)
 }
 
 func (decl *DeclVar) emitGlobal() {
@@ -3746,12 +3738,6 @@ func (root *IrRoot) emit() {
 	for _, vardecl := range root.vars {
 		vardecl.emitGlobal()
 	}
-
-	// @TODO do this infinitly
-	for _, entity := range globalInternalEntities {
-		entity.emit()
-	}
-
 
 	emitComment("FUNCTIONS")
 	emit(".text")
