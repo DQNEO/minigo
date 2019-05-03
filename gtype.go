@@ -7,7 +7,7 @@ type GTYPE_TYPE int
 const undefinedSize = -1
 
 const (
-	G_UNKOWNE   = iota
+	G_UNKOWNE GTYPE_TYPE  = iota
 	G_DEPENDENT // depends on other expression
 	G_REL
 	// below are primitives which are declared in the universe block

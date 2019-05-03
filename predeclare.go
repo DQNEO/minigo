@@ -46,7 +46,9 @@ var builtinAsComment = &DeclFunc{
 var builtinRunTimeArgsRettypes1 *Gtype =&Gtype{
 	typ: G_SLICE,
 	size: IntSize * 3,
-	elementType: gString,
+	elementType: &Gtype{
+		typ:G_STRING,
+	},
 }
 
 var builtinRunTimeArgs = &DeclFunc{

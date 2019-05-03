@@ -3441,7 +3441,12 @@ func evalIntExpr(e Expr) int {
 
 		}
 	case *ExprConstVariable:
-		return evalIntExpr(e.(*ExprConstVariable).val)
+		cnst := e.(*ExprConstVariable)
+		constVal, ok := cnst.val.(*Relation)
+		if ok && constVal.name == "iota" {
+			return cnst.iotaIndex
+		}
+		return evalIntExpr(cnst.val)
 	default:
 		errorft(e.token(), "unkown type %T", e)
 	}
@@ -3588,7 +3593,12 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			val = value.(*ExprNumberLiteral).val
 			emit(".quad %d # %s %s", val, gtype, containerName)
 		case *ExprConstVariable:
-			val = evalIntExpr(value)
+			cnst := value.(*ExprConstVariable)
+			val = evalIntExpr(cnst)
+			emit(".quad %d # %s ", val, gtype)
+		case *ExprVariable:
+			vr := value.(*ExprVariable)
+			val = evalIntExpr(vr)
 			emit(".quad %d # %s ", val, gtype)
 		case *ExprBinop:
 			val = evalIntExpr(value)
@@ -3598,7 +3608,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad .%s", stringLiteral.slabel)
 		case *Relation:
 			rel := value.(*Relation)
-			emit(".quad 0 # (TBI) rel:%s", rel.name)
+			doEmitData(ptok, gtype, rel.expr, "rel")
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
