@@ -3677,7 +3677,9 @@ var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 func (root *IrRoot) emit() {
 	groot = root
 	// generate code
-	emit(".data")
+
+	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
+	emit(".data 0")
 
 	emit("")
 	emitComment("STRING LITERALS")
