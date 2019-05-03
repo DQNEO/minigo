@@ -147,6 +147,7 @@ func main() {
 	// inject runtime things into the universes
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
+	p.resolve(nil)
 	if debugAst {
 		astFiles[0].dump()
 	}
