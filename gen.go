@@ -3444,7 +3444,10 @@ func evalIntExpr(e Expr) int {
 		cnst := e.(*ExprConstVariable)
 		constVal, ok := cnst.val.(*Relation)
 		if ok && constVal.name == "iota" {
-			return cnst.iotaIndex
+			val, ok := constVal.expr.(*ExprConstVariable)
+			if ok && val == eIota {
+				return cnst.iotaIndex
+			}
 		}
 		return evalIntExpr(cnst.val)
 	default:

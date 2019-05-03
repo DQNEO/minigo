@@ -6,8 +6,7 @@ var a = 1 // @TODO try a = b when possible
 var b = 1
 var c = '2'
 
-var x = iota
-var iota = 0
+var x = 0
 
 func main() {
 	fmt.Printf("%d\n", x)
