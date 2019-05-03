@@ -3456,6 +3456,16 @@ func (decl *DeclVar) emitBss() {
 	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
 }
 
+func (decl *DeclVar) emitData() {
+	ptok := decl.token()
+	gtype := decl.variable.gtype
+	right := decl.initval
+
+	emitLabel("%s: # %s", decl.variable.varname, gtype)
+	emit("# initval=%#v", right)
+	emitGlobalDeclInit(ptok, right.getGtype(), right, "")
+}
+
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	for _, field := range e.fields {
 		if field.key == fieldname {
@@ -3636,13 +3646,7 @@ func (decl *DeclVar) emitGlobal() {
 	if decl.initval == nil {
 		decl.emitBss()
 	} else {
-		ptok := decl.token()
-		gtype := decl.variable.gtype
-		right := decl.initval
-
-		emitLabel("%s: # %s", decl.variable.varname, gtype)
-		emit("# initval=%#v", right)
-		emitGlobalDeclInit(ptok, right.getGtype(), right, "")
+		decl.emitData()
 	}
 }
 
