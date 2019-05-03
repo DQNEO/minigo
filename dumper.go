@@ -14,9 +14,20 @@ func (a *DeclFunc) dump() {
 }
 
 func (a *StmtShortVarDecl) dump() {
-	//for _, left := range a.lefts {
-
-	//}
+	debugf("shot var decl")
+	debugf("left")
+	debugNest++
+	for _, left := range a.lefts {
+		left.dump()
+	}
+	debugNest--
+	debugf("=")
+	debugf("right")
+	debugNest++
+	for _, right := range a.rights {
+		right.dump()
+	}
+	debugNest--
 }
 func (ast *StmtAssignment) dump() {
 	debugf("assign")
