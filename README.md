@@ -47,3 +47,17 @@ root@da1ca5837dac:/mnt# gcc -g -no-pie a.s
 root@da1ca5837dac:/mnt# ./a.out
 hello world
 ```
+
+# How to do "self compile"
+
+```
+root@ff3a028b3564:/mnt# make
+root@ff3a028b3564:/mnt# ./minigo --version
+minigo 0.1.0
+Copyright (C) 2019 @DQNEO
+root@ff3a028b3564:/mnt# ./minigo *.go > /tmp/minigo2.s
+root@ff3a028b3564:/mnt# gcc -no-pie -o minigo2 /tmp/minigo2.s
+root@ff3a028b3564:/mnt# ./minigo2 --version
+minigo 0.1.0
+Copyright (C) 2019 @DQNEO
+```
