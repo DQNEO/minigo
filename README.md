@@ -31,14 +31,14 @@ MIT License
 
 # How to run
 
-Currently the generated code can only run on Linux.
-So you need Docker to run it.
+Currently the generated code can run only on Linux.
+So I would recommend you to use Docker.
 
 ```
 $ docker run --rm -it -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 ```
 
-After entering container, you can make and run it.
+After entering the container, you can make and run it.
 
 ```
 root@da1ca5837dac:/mnt# make
