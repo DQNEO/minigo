@@ -3466,7 +3466,8 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 }
 
 func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string) {
-	if gtype.typ == G_ARRAY {
+	primType := gtype.getPrimType()
+	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
 		var values []Expr
 		if ok {
@@ -3509,7 +3510,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 				}
 			}
 		}
-	} else if gtype.typ == G_SLICE {
+	} else if primType == G_SLICE {
 		switch value.(type) {
 		case nil:
 			return
@@ -3534,12 +3535,12 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		default:
 			TBI(ptok, "unable to handle T=%s, value=%#v", gtype, value)
 		}
-	} else if gtype.typ == G_MAP {
+	} else if primType == G_MAP || primType == G_INTERFACE  {
 		// @TODO
 		emit(".quad 0")
 		emit(".quad 0")
 		emit(".quad 0")
-	} else if gtype == gBool || (gtype.typ == G_REL && gtype.relation.gtype == gBool) {
+	} else if primType == G_BOOL  {
 		if value == nil {
 			// zero value
 			emit(".quad %d # %s %s", 0, gtype, containerName)
@@ -3547,7 +3548,7 @@ func emitGlobalDeclInit(ptok *Token /* left type */, gtype *Gtype, value /* null
 		}
 		val := evalIntExpr(value)
 		emit(".quad %d # %s %s", val, gtype, containerName)
-	} else if gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT {
+	} else if primType  == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
 		for _, field := range gtype.relation.gtype.fields {
