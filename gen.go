@@ -3634,16 +3634,15 @@ func (decl *DeclVar) emitGlobal() {
 
 	if decl.initval == nil {
 		decl.emitBss()
-		return
+	} else {
+		ptok := decl.token()
+		gtype := decl.variable.gtype
+		right := decl.initval
+
+		emitLabel("%s: # %s", decl.variable.varname, gtype)
+		emit("# initval=%#v", right)
+		emitGlobalDeclInit(ptok, right.getGtype(), right, "")
 	}
-
-	ptok := decl.token()
-	gtype := decl.variable.gtype
-	right := decl.initval
-
-	emitLabel("%s: # %s", decl.variable.varname, gtype)
-	emit("# initval=%#v", right)
-	emitGlobalDeclInit(ptok, right.getGtype(), right, "")
 }
 
 type IrRoot struct {
