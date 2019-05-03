@@ -3461,6 +3461,7 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
+	emit(".data 0")
 	emitLabel("%s: # %s", decl.variable.varname, gtype)
 	emit("# initval=%#v", right)
 	emitGlobalDeclInit(ptok, right.getGtype(), right, "")
