@@ -35,9 +35,9 @@ type parser struct {
 	// global state
 	scopes              map[identifier]*scope
 	stringLiterals      []*ExprStringLiteral
+	concreteNamedTypes  []*DeclType
 
 	// ambivalent
-	concreteNamedTypes  []*DeclType
 	alldynamictypes     []*Gtype
 }
 
