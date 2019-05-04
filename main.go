@@ -82,6 +82,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	// initialize a package
 	p.currentPackageName = pkgname
 	p.methods = map[identifier]methods{}
+	p.unresolvedRelations = nil
 	p.globaluninferred = nil
 	p.localuninferred = nil
 
@@ -143,9 +144,10 @@ func main() {
 
 	// parser starts
 	p := &parser{}
+	p.scopes = map[identifier]*scope{}
 
 	p.methods = map[identifier]methods{}
-	p.scopes = map[identifier]*scope{}
+	p.unresolvedRelations = nil
 	p.globaluninferred = nil
 	p.localuninferred = nil
 
@@ -182,6 +184,7 @@ func main() {
 	var pkgname identifier = "main"
 	p.currentPackageName = pkgname
 	p.methods = map[identifier]methods{}
+	p.unresolvedRelations = nil
 	p.globaluninferred = nil
 	p.localuninferred = nil
 
