@@ -80,12 +80,7 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	bs = NewByteStreamFromString(filename, code)
 
 	// initialize a package
-	p.currentPackageName = pkgname
-	p.methods = map[identifier]methods{}
-	p.unresolvedRelations = nil
-	p.globaluninferred = nil
-	p.localuninferred = nil
-
+	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
@@ -146,11 +141,7 @@ func main() {
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
 
-	p.currentPackageName = ""
-	p.methods = map[identifier]methods{}
-	p.unresolvedRelations = nil
-	p.globaluninferred = nil
-	p.localuninferred = nil
+	p.initPackage("")
 
 	allScopes = p.scopes
 
@@ -183,11 +174,7 @@ func main() {
 
 	// initialize main package
 	var pkgname identifier = "main"
-	p.currentPackageName = pkgname
-	p.methods = map[identifier]methods{}
-	p.unresolvedRelations = nil
-	p.globaluninferred = nil
-	p.localuninferred = nil
+	p.initPackage(pkgname)
 
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 

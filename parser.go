@@ -41,7 +41,16 @@ type parser struct {
 	alldynamictypes     []*Gtype
 }
 
+
 type methods map[identifier]*ExprFuncRef
+
+func (p *parser) initPackage(pkgname identifier) {
+	p.currentPackageName = pkgname
+	p.methods = map[identifier]methods{}
+	p.unresolvedRelations = nil
+	p.globaluninferred = nil
+	p.localuninferred = nil
+}
 
 func (p *parser) assert(cond bool, msg string) {
 	assert(cond, p.lastToken(), msg)
