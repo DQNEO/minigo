@@ -138,6 +138,7 @@ func main() {
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
 
+	p.currentPackageName = ""
 	p.methods = map[identifier]methods{}
 	p.unresolvedRelations = nil
 	p.globaluninferred = nil
