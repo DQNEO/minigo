@@ -35,7 +35,7 @@ type signature struct {
 
 type Gtype struct {
 	typ          GTYPE_TYPE
-	typeId       int                       // 0:unkonwn
+	typeId       int                       // for receiverTypeId. 0:unkonwn
 	dependendson Expr                      // for G_DEPENDENT
 	relation     *Relation                 // for G_REL
 	size         int                       // for scalar type like int, bool, byte, for struct

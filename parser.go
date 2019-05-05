@@ -33,9 +33,9 @@ type parser struct {
 	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
-	scopes              map[identifier]*scope
-	stringLiterals      []*ExprStringLiteral
-	concreteNamedTypes  []*DeclType
+	scopes         map[identifier]*scope
+	stringLiterals []*ExprStringLiteral
+	allNamedTypes  []*DeclType
 
 	// ambivalent
 	alldynamictypes     []*Gtype
@@ -1913,7 +1913,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 		gtype: gtype,
 	}
 
-	p.concreteNamedTypes = append(p.concreteNamedTypes, r)
+	p.allNamedTypes = append(p.allNamedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }

@@ -216,7 +216,7 @@ func main() {
 	ir.uniquedDynamicTypes = uniquedDynamicTypes
 
 	var typeId = 1 // start with 1 because we want to zero as error
-	for _, concreteNamedType := range p.concreteNamedTypes {
+	for _, concreteNamedType := range p.allNamedTypes {
 		concreteNamedType.gtype.typeId = typeId
 		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
 		typeId++
