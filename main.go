@@ -241,7 +241,7 @@ func main() {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
 			typeId := gtype.relation.gtype.typeId
-			methodTable[typeId] = append(methodTable[typeId], string(funcdecl.getUniqueName()))
+			methodTable[typeId] = append(methodTable[typeId], funcdecl.getSymbol())
 		}
 	}
 	ir.methodTable = methodTable

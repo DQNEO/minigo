@@ -82,7 +82,7 @@ func getFuncSymbol(pkg identifier, fname string) string {
 	return fmt.Sprintf("%s.%s", pkg, fname)
 }
 
-func (f *DeclFunc) getUniqueName() string {
+func (f *DeclFunc) getSymbol() string {
 	if f.receiver != nil {
 		// method
 		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
@@ -93,8 +93,7 @@ func (f *DeclFunc) getUniqueName() string {
 }
 
 func (f *DeclFunc) emitPrologue() {
-	uniquName := f.getUniqueName()
-	emitLabel("%s:", uniquName)
+	emitLabel("%s:", f.getSymbol())
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
