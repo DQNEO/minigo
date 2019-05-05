@@ -1645,6 +1645,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok := p.expectKeyword("func")
 
 	p.localvars = nil
+	assert(len(p.localvars) == 0,  ptok,"localvars should be zero")
 	var isMethod bool
 	p.enterNewScope("func")
 
