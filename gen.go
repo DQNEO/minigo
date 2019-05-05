@@ -3222,6 +3222,8 @@ func (funcall *ExprFuncallOrConversion) emit() {
 }
 
 type IrStaticCall struct {
+	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
+	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	symbol string
 	callee *DeclFunc
 }
