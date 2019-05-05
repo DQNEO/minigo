@@ -868,7 +868,7 @@ func (ast *StmtAssignment) emit() {
 		if _, ok := left.(*Relation); ok {
 			emit("# \"%s\" = ", left.(*Relation).name)
 		}
-		emit("# Assign %T %s = %T %s", left, gtype, right, right.getGtype())
+		//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
 		switch {
 		case gtype == nil:
 			// suppose left is "_"
