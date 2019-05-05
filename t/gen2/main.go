@@ -250,7 +250,6 @@ type stdpkg struct {
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
 	root := &IrRoot{
-		stringLiterals: stringLiterals,
 	}
 
 	for _, pkg := range stdpkgs {
@@ -275,5 +274,6 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 		}
 	}
 
+	root.stringLiterals = stringLiterals // a dirtyworkaround
 	return root
 }
