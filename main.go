@@ -140,7 +140,6 @@ func main() {
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
-
 	p.initPackage("")
 
 	allScopes = p.scopes
@@ -154,6 +153,9 @@ func main() {
 	bs = NewByteStreamFromString("internalcode.memory", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 	p.resolve(nil)
+	if debugAst {
+		astFiles[0].dump()
+	}
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
@@ -175,7 +177,6 @@ func main() {
 	// initialize main package
 	var pkgname identifier = "main"
 	p.initPackage(pkgname)
-
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	for _, sourceFile := range sourceFiles {
@@ -195,12 +196,12 @@ func main() {
 		return
 	}
 	p.resolve(universe)
-	if resolveOnly {
-		return
-	}
-
 	if debugAst {
 		astFiles[len(astFiles)-1].dump()
+	}
+
+	if resolveOnly {
+		return
 	}
 
 	var importedPackages []*stdpkg

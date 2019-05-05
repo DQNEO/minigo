@@ -188,7 +188,6 @@ func main() {
 		return
 	}
 	p.resolve(universe)
-
 	if debugAst {
 		astFiles[len(astFiles)-1].dump()
 	}
