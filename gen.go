@@ -135,7 +135,7 @@ func (f *DeclFunc) emitPrologue() {
 	}
 
 	if len(f.localvars) > 0 {
-		emit("# Allocating stack for localvars")
+		emit("# Allocating stack for localvars len=%d", len(f.localvars))
 	}
 
 	var localarea int
