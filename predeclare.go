@@ -175,4 +175,11 @@ func predeclareLibcFuncs(universe *scope) {
 			rettypes: []*Gtype{gInt},
 		},
 	})
+
+	universe.setFunc("atoi", &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg:      "libc",
+			rettypes: []*Gtype{gInt},
+		},
+	})
 }

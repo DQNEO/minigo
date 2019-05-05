@@ -1,6 +1,8 @@
 package strconv
 
-func Atoi() (int , error) {
-
+func Atoi(s string) (int , error) {
+	var i int
+	i = atoi(s)
+	return i, nil
 }
 
