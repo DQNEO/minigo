@@ -39,6 +39,10 @@ var builtinDumpInterface = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
+var builtinAssertInterface = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 var builtinAsComment = &DeclFunc{
 	rettypes: []*Gtype{},
 }
@@ -90,6 +94,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 
 	universe.setFunc("dumpInterface", &ExprFuncRef{
 		funcdef: builtinDumpInterface,
+	})
+
+	universe.setFunc("assertInterface", &ExprFuncRef{
+		funcdef: builtinAssertInterface,
 	})
 
 	universe.setFunc("asComment", &ExprFuncRef{

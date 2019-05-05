@@ -1913,7 +1913,10 @@ func emitSaveInterface(lhs Expr, offset int) {
 
 // take slice values from stack
 func emitSave3Elements(lhs Expr, offset int) {
-	emit("# emitSave3Elements(%T, offset %d)", lhs, offset)
+	dumpInterface(lhs)
+	assertInterface(lhs)
+	//emit("# emitSave3Elements(%T, offset %d)", lhs, offset)
+	emit("# emitSave3Elements(?, offset %d)", offset)
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
@@ -2124,6 +2127,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
+	assertInterface(lhs)
 	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
 		emit("# initialize slice with a zero value")
@@ -3211,6 +3215,38 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("mov $0, %%rax")
 		emit("call %s", "printf")
 		emit("")
+	case builtinAssertInterface:
+		emit("# builtinAssertInterface")
+		labelEnd := makeLabel()
+		arg := funcall.args[0]
+		arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
+		emit("mov $0, %%rdx")
+
+		// (ptr != nil && rcx == nil) => Error
+		emit("cmp %%rax, %%rdx")
+		emit("setne %%al") // rax != 0
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("je %s", labelEnd)
+
+		emit("cmp %%rcx, %%rdx")
+		emit("sete %%al") // rcx == 0
+		emit("movzb %%al, %%eax")
+		emit("test %%rax, %%rax")
+		emit("je %s", labelEnd)
+
+		slabel := makeLabel()
+		emit(".data 0")
+		emitLabel("%s:", slabel)
+		emit(".string \"%s\"", "assertInterface failed")
+		emit(".text")
+		emit("lea %s, %%rdi", slabel)
+		emit("mov $0, %%rax")
+		emit("call %s", ".panic")
+
+		emitLabel("%s:", labelEnd)
+		emit("")
+
 	case builtinAsComment:
 		arg := funcall.args[0]
 		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {

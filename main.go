@@ -22,6 +22,10 @@ var exit = false
 func dumpInterface(x interface{}) {
 }
 
+func assertInterface(x interface{}) {
+
+}
+
 func dumpSlice(x []int) {
 }
 
