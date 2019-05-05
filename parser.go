@@ -36,9 +36,7 @@ type parser struct {
 	scopes         map[identifier]*scope
 	stringLiterals []*ExprStringLiteral
 	allNamedTypes  []*DeclType
-
-	// ambivalent
-	alldynamictypes     []*Gtype
+	allDynamicTypes []*Gtype
 }
 
 
@@ -793,7 +791,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 }
 
 func (p *parser) registerDynamicType(gtype *Gtype) *Gtype {
-	p.alldynamictypes = append(p.alldynamictypes, gtype)
+	p.allDynamicTypes = append(p.allDynamicTypes, gtype)
 	return gtype
 }
 
