@@ -123,7 +123,7 @@ func (gtype *Gtype) String() string {
 		return "byte"
 	case G_ARRAY:
 		elm := gtype.elementType
-		return fmt.Sprintf("[%d]%s", gtype.length, elm)
+		return fmt.Sprintf("[%d]%s", gtype.length, elm.String())
 	case G_STRUCT:
 		var r = "struct{"
 		for _, field := range gtype.fields {
@@ -135,9 +135,9 @@ func (gtype *Gtype) String() string {
 		return "structfield"
 	case G_POINTER:
 		origType := gtype.origType
-		return fmt.Sprintf("*%s", origType)
+		return fmt.Sprintf("*%s", origType.String())
 	case G_SLICE:
-		return fmt.Sprintf("[]%s", gtype.elementType)
+		return fmt.Sprintf("[]%s", gtype.elementType.String())
 	case G_STRING:
 		return "string"
 	case G_INTERFACE:

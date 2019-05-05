@@ -44,7 +44,7 @@ func (ast *StmtAssignment) dump() {
 func (a *DeclVar) dump() {
 	if a.initval == nil {
 		debugf("decl var %s %s",
-			a.variable.varname, a.variable.gtype)
+			a.variable.varname, a.variable.gtype.String())
 	} else {
 		debugf("decl var")
 		debugNest++
