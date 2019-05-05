@@ -55,12 +55,18 @@ func (a *DeclVar) dump() {
 }
 
 func (a *DeclConst) dump() {
-	debugf("decl consts %v", a.consts)
+	debugf("decl consts")
+	debugNest++
+	for _, cnst := range a.consts {
+		debugf("const %s", cnst.name)
+		cnst.val.dump()
+	}
+	debugNest--
 }
 
 func (a *DeclType) dump() {
-	debugf("decl type def %v gtype(%v)",
-		a.name, a.gtype)
+	debugf("decl type def %s %s",
+		a.name, a.gtype.String())
 }
 
 func (stmt *StmtIf) dump() {
@@ -233,8 +239,8 @@ func (e *ExprTypeSwitchGuard) dump() {
 }
 
 func (f *StmtFor) dump() {
-	debugf("for")
 	if f.rng != nil {
+		debugf("for range")
 		debugNest++
 		f.rng.indexvar.dump()
 		if f.rng.valuevar != nil {
@@ -244,7 +250,16 @@ func (f *StmtFor) dump() {
 		f.rng.rangeexpr.dump()
 		debugNest--
 	} else if f.cls != nil {
-		debugf("for %v", f.cls)
+		debugf("for clause")
+		if f.cls.init != nil {
+			f.cls.init.dump()
+		}
+		if f.cls.cond != nil {
+			f.cls.cond.dump()
+		}
+		if f.cls.post != nil {
+			f.cls.post.dump()
+		}
 	}
 	debugNest++
 	f.block.dump()
@@ -273,11 +288,13 @@ func (stmt *StmtReturn) dump() {
 }
 
 func (ast *StmtInc) dump() {
-	panic("implement me")
+	debugf("++")
+	ast.operand.dump()
 }
 
 func (ast *StmtDec) dump() {
-	panic("implement me")
+	debugf("--")
+	ast.operand.dump()
 }
 
 func (ast *StmtSatementList) dump() {
