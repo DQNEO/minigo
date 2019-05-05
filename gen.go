@@ -2140,7 +2140,11 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *Relation:
 		rel := rhs.(*Relation)
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			// already initialied above
+			emit("# initialize slice with a zero value")
+			emit("push $0")
+			emit("push $0")
+			emit("push $0")
+			emitSave3Elements(lhs, 0)
 			return
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
