@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var GENERATION int = 1
+var GENERATION int = 2
 
 var allScopes map[identifier]*scope
 
