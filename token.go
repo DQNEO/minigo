@@ -193,6 +193,11 @@ func read_string() string {
 			chars = append(chars, c)
 			continue
 		}
+		if c == '\n' {
+			chars = append(chars, '\\')
+			chars = append(chars, 'n')
+			continue
+		}
 		if c != '"' {
 			chars = append(chars, c)
 			continue

@@ -88,9 +88,29 @@ func f4() {
 	}
 }
 
+func f5() {
+	debugToken = false
+	path := "t/data/string.txt"
+	s := readFile(path)
+	_bs := ByteStream{
+		filename:  path,
+		source:    s,
+		nextIndex: 0,
+		line:      1,
+		column:    0,
+	}
+	bs = &_bs
+
+	tokens := tokenize(bs)
+	tok := tokens[0]
+	fmt.Printf("----------\n")
+	fmt.Printf("[%s]\n", tok.sval)
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
 	f4()
+	f5()
 }
