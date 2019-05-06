@@ -2053,7 +2053,7 @@ func (ast *StmtShortVarDecl) infer() {
 				if funcdef == nil {
 					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
 				}
-				if funcdef == builinLen {
+				if funcdef == builtinLen {
 					rightTypes = append(rightTypes, gInt)
 				} else {
 					for _, gtype := range fcall.getFuncDef().rettypes {

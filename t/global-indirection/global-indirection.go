@@ -38,12 +38,12 @@ type DeclFunc struct {
 	rettypes          []*Gtype
 }
 
-var builinLen = &DeclFunc{
+var builtinLen = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
 
 func f3() {
-	fmt.Printf("%d\n", len(builinLen.rettypes) + 3) // 4
+	fmt.Printf("%d\n", len(builtinLen.rettypes) + 3) // 4
 }
 
 func main() {

@@ -108,7 +108,7 @@ func strcopy(src string, dest string, slen int) string {
 
 const MiniGo int = 1
 
-// builin functions
+// builtin functions
 // https://golang.org/ref/spec#Predeclared_identifiers
 
 // Functions:

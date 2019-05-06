@@ -3124,7 +3124,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 	// check if it's a builtin function
 	switch decl {
-	case builinLen:
+	case builtinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
 		exprLen := &ExprLen{
@@ -3132,7 +3132,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			arg: arg,
 		}
 		exprLen.emit()
-	case builinCap:
+	case builtinCap:
 		arg := funcall.args[0]
 		e := &ExprCap{
 			tok: arg.token(),

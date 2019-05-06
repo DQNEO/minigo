@@ -15,11 +15,11 @@ var eIota = &ExprConstVariable{
 	name: "iota",
 }
 
-var builinLen = &DeclFunc{
+var builtinLen = &DeclFunc{
 	rettypes: []*Gtype{gInt},
 }
 
-var builinCap = &DeclFunc{
+var builtinCap = &DeclFunc{
 	rettypes: []*Gtype{gInterface},
 }
 
@@ -76,10 +76,10 @@ func setPredeclaredIdentifiers(universe *scope) {
 	predeclareLibcFuncs(universe)
 
 	universe.setFunc("len", &ExprFuncRef{
-		funcdef: builinLen,
+		funcdef: builtinLen,
 	})
 	universe.setFunc("cap", &ExprFuncRef{
-		funcdef: builinCap,
+		funcdef: builtinCap,
 	})
 	universe.setFunc("append", &ExprFuncRef{
 		funcdef: builtinAppend,
