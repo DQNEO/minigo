@@ -757,6 +757,7 @@ func (ast *StmtAssignment) emit() {
 	// The number of operands on the left hand side must match the number of values.
 	isOnetoOneAssignment := (len(ast.rights) > 1)
 	if isOnetoOneAssignment {
+		emit("# one to one")
 		// a,b,c = expr1,expr2,expr3
 		if len(ast.lefts) != len(ast.rights) {
 			errorft(ast.token(), "number of exprs does not match")
@@ -786,6 +787,7 @@ func (ast *StmtAssignment) emit() {
 		}
 		return
 	} else {
+		emit("# one to multi")
 		// a,b,c = expr
 		numLeft := len(ast.lefts)
 		numRight := 0
@@ -3514,7 +3516,7 @@ func (decl *DeclVar) emitData() {
 	emit(".data 0")
 	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype)
 	emit("# initval=%#v", right)
-	doEmitData(ptok, right.getGtype(), right, "")
+	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
@@ -3527,7 +3529,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string) {
+func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
 	primType := gtype.getPrimType()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
@@ -3542,7 +3544,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			selector := fmt.Sprintf("%s[%d]", containerName, i)
 			if i >= len(values) {
 				// zero value
-				doEmitData(ptok, elmType, nil, selector)
+				doEmitData(ptok, elmType, nil, selector, depth)
 			} else {
 				value := arrayliteral.values[i]
 				assertNotNil(value != nil, nil)
@@ -3568,7 +3570,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				} else if size == 1 {
 					emit(".byte %d", evalIntExpr(value))
 				} else {
-					doEmitData(ptok, gtype.elementType, value, selector)
+					doEmitData(ptok, gtype.elementType, value, selector, depth)
 				}
 			}
 		}
@@ -3579,21 +3581,14 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprSliceLiteral:
 			// initialize a hidden array
 			lit := value.(*ExprSliceLiteral)
-			lit.invisiblevar.varname = identifier(fmt.Sprintf("$hiddenArray$%d", getHidddenArrayId()))
-			emit(".quad %s", lit.invisiblevar.varname)      // address of the hidden array
-			emit(".quad %d", lit.invisiblevar.gtype.length) // len
-			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 			arrayLiteral := &ExprArrayLiteral{
 				gtype:  lit.invisiblevar.gtype,
 				values: lit.values,
 			}
-			arrayDecl := &DeclVar{
-				tok:      ptok,
-				variable: lit.invisiblevar,
-				initval:  arrayLiteral,
-			}
-			arrayDecl.emitGlobal()
-
+			var expr Expr = arrayLiteral
+			emitDataAddr(expr, depth) // emit underlying array
+			emit(".quad %d", lit.invisiblevar.gtype.length) // len
+			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		default:
 			TBI(ptok, "unable to handle T=%s, value=%#v", gtype, value)
 		}
@@ -3616,7 +3611,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# field:%s", field.fieldname)
 			if value == nil {
-				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname))
+				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname), depth)
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
@@ -3627,7 +3622,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				//continue
 			}
 			gtype := field
-			doEmitData(ptok, gtype, value, containerName+"."+string(field.fieldname))
+			doEmitData(ptok, gtype, value, containerName+"."+string(field.fieldname), depth)
 		}
 	} else {
 		var val int
@@ -3653,7 +3648,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad .%s", stringLiteral.slabel)
 		case *Relation:
 			rel := value.(*Relation)
-			doEmitData(ptok, gtype, rel.expr, "rel")
+			doEmitData(ptok, gtype, rel.expr, "rel", depth)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
@@ -3667,7 +3662,6 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				emit(".quad %s", vr.varname)
 			} else {
 				// var gv = &Struct{_}
-				depth := 0
 				emitDataAddr(operand, depth)
 			}
 		default:
@@ -3681,7 +3675,7 @@ func emitDataAddr(operand Expr, depth int) {
 	emit(".data %d", depth + 1)
 	label :=  makeLabel()
 	emit("%s:", label)
-	doEmitData(nil, operand.getGtype(), operand, "")
+	doEmitData(nil, operand.getGtype(), operand, "", depth + 1)
 	emit(".data %d", depth)
 	emit(".quad %s", label)
 }
