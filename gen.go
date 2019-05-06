@@ -32,14 +32,6 @@ const ptrSize int = 8
 const sliceWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
-var hiddenArrayId = 1
-
-func getHidddenArrayId() int {
-	r := hiddenArrayId
-	hiddenArrayId++
-	return r
-}
-
 func emit(format string, v ...interface{}) {
 	s := fmt.Sprintf("\t"+format+"\n", v...)
 	var b []byte = []byte(s)
