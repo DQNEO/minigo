@@ -1920,7 +1920,8 @@ func emitSave3Elements(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		emitSave3Elements(rel.expr, offset)
+		var expr Expr =  rel.expr
+		emitSave3Elements(expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.saveSlice(offset)
@@ -2323,17 +2324,18 @@ func (decl *DeclVar) emit() {
 	emit("")
 	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
+	var varname Expr = decl.varname
 	switch {
 	case gtype.typ == G_ARRAY:
-		assignToArray(decl.varname, decl.initval)
+		assignToArray(varname, decl.initval)
 	case gtype.typ == G_SLICE:
-		assignToSlice(decl.varname, decl.initval)
+		assignToSlice(varname, decl.initval)
 	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
-		assignToStruct(decl.varname, decl.initval)
+		assignToStruct(varname, decl.initval)
 	case gtype.getPrimType() == G_MAP:
-		assignToMap(decl.varname, decl.initval)
+		assignToMap(varname, decl.initval)
 	case gtype.getPrimType() == G_INTERFACE:
-		assignToInterface(decl.varname, decl.initval)
+		assignToInterface(varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
 		// primitive types like int,bool,byte
