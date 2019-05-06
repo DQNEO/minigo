@@ -757,6 +757,7 @@ func (ast *StmtAssignment) emit() {
 	// The number of operands on the left hand side must match the number of values.
 	isOnetoOneAssignment := (len(ast.rights) > 1)
 	if isOnetoOneAssignment {
+		emit("# one to one")
 		// a,b,c = expr1,expr2,expr3
 		if len(ast.lefts) != len(ast.rights) {
 			errorft(ast.token(), "number of exprs does not match")
@@ -786,6 +787,7 @@ func (ast *StmtAssignment) emit() {
 		}
 		return
 	} else {
+		emit("# one to multi")
 		// a,b,c = expr
 		numLeft := len(ast.lefts)
 		numRight := 0
