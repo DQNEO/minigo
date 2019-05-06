@@ -1913,7 +1913,6 @@ func emitSaveInterface(lhs Expr, offset int) {
 
 // take slice values from stack
 func emitSave3Elements(lhs Expr, offset int) {
-	dumpInterface(lhs)
 	assertInterface(lhs)
 	//emit("# emitSave3Elements(%T, offset %d)", lhs, offset)
 	emit("# emitSave3Elements(?, offset %d)", offset)
