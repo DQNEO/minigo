@@ -3285,7 +3285,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			continue
 		}
 
-		emit("# arg %d, collectVariadicArgs=%v", i, collectVariadicArgs)
+		emit("# arg %d, collectVariadicArgs=%d", i, collectVariadicArgs)
 		if param != nil {
 			emit("# %s <- %T", param.getGtype(), arg.getGtype())
 		}
