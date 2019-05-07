@@ -18,20 +18,6 @@ var parseOnly = false
 var resolveOnly = false
 var exit = false
 
-// placeholders for my builtin functions
-func dumpInterface(x interface{}) {
-}
-
-func assertInterface(x interface{}) {
-
-}
-
-func dumpSlice(x []int) {
-}
-
-func asComment(s string) {
-}
-
 func printVersion() {
 	println("minigo 0.1.0")
 	println("Copyright (C) 2019 @DQNEO")
