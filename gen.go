@@ -441,7 +441,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().typ == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
-		emit("push %%rax # save the value")
+		emit("push %%rax")
 		variable.emit()
 		emit("mov %%rax, %%rcx")
 		emit("add $%d, %%rcx # offset", offset)
