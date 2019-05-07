@@ -2910,7 +2910,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("push %%rax")
 
-	emit("# setting arguments %v", args)
+	emit("# setting arguments (len=%d)", len(args))
 
 	receiver := args[0]
 	emit("mov $0, %%rax")
