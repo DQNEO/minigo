@@ -2182,7 +2182,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push %%rax # cap")
 
 	default:
-		emit("# emit rhs of type %T %s", rhs, rhs.getGtype())
+		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
 		rhs.emit() // it should put values to rax,rbx,rcx
 		emit("push %%rax")
 		emit("push %%rbx")
@@ -3287,7 +3287,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 		emit("# arg %d, collectVariadicArgs=%d", i, collectVariadicArgs)
 		if param != nil {
-			emit("# %s <- %T", param.getGtype(), arg.getGtype())
+			//emit("# %s <- %s", param.getGtype().String(), arg.getGtype().String())
 		}
 		arg.emit()
 
