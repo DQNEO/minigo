@@ -2147,17 +2147,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
-		// copy address
 		rvariable.emit()
-		emit("push %%rax")
-
-		// copy len
-		emit("mov %d(%%rbp), %%rax", rvariable.offset+ptrSize)
-		emit("push %%rax")
-
-		// copy cap
-		emit("mov %d(%%rbp), %%rax", rvariable.offset+ptrSize+sliceOffsetForLen)
-		emit("push %%rax")
+		emit("push %%rax # ptr")
+		emit("push %%rbx # len")
+		emit("push %%rcx # cap")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
