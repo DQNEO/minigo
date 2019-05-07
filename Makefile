@@ -22,10 +22,14 @@ test: all
 	./testerror.sh
 	make minigo2
 	./compat-run.sh ./minigo2 --version
+	./compat-run.sh ./minigo2 t/min/min.go > out/a.s
+	./as
 
 circlecitest: all
 	make minigo2
 	./compat-run.sh ./minigo2 --version
+	./compat-run.sh ./minigo2 t/min/min.go > out/a.s
+	./as
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
