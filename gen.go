@@ -2832,7 +2832,6 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	}
 	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
 	origType := typeToBeloing.relation.gtype
-	//debugf("origType = %v", origType)
 	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), fmt.Sprintf("origType should not be nil:%#v", typeToBeloing.relation))
 	return origType
 }
@@ -2986,7 +2985,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	assert(relexpr != nil, funcall.token(), fmt.Sprintf("relexpr should NOT be nil for %s", funcall.fname))
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
-		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef but %v", funcref, funcall.fname)
+		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef (%s)", funcall.fname)
 	}
 	assertNotNil(funcref.funcdef != nil, nil)
 	return funcref.funcdef
