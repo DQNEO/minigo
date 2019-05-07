@@ -18,23 +18,22 @@ minigo.s: *.go minigo
 minigo2: minigo.s # 2nd generation
 	./compat-run.sh gcc -g -no-pie -o minigo2 minigo.s
 
-test: all
-	./compile.sh
-	./test_as.sh
-	./testerror.sh
-	make minigo2
+test2gen: minigo2
 	./compat-run.sh ./minigo2 --version
 	./compat-run.sh ./minigo2 t/min/min.go > out/a.s
 	./as
 
-circlecitest: all
-	make minigo2
-	./compat-run.sh ./minigo2 --version
-	./compat-run.sh ./minigo2 t/min/min.go > out/a.s
-	./as
+test: all
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
+	make test2gen
+
+circlecitest: all
+	./compile.sh
+	./test_as.sh
+	./testerror.sh
+	make test2gen
 
 parse: all
 	./parse *.go
