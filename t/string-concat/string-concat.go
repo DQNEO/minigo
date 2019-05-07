@@ -18,7 +18,22 @@ func f2() {
 	fmt.Printf("%s\n", spaces)
 }
 
+
+var seq int = 0
+
+func foo() string {
+	seq++
+	return "foo"
+}
+
+func f3() {
+	label := foo() + foo() + "bar"
+	fmt.Printf("%s\n", label) // "foofoobar"
+	fmt.Printf("%d\n", seq) // 2
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }

@@ -617,39 +617,41 @@ func (binop *ExprBinop) emitComp() {
 
 func emitStringConcate(left Expr, right Expr) {
 	emit("# emitStringConcate")
-	// newSize = strlen(left) + strlen(right) + 1
-	binop := &ExprBinop{
-		op: "+",
-		left: &ExprLen{
-			arg: left,
-		},
-		right: &ExprLen{
-			arg: right,
-		},
-	}
-	binop2 := &ExprBinop{
-		op: "+",
-		left: binop,
-		right: &ExprNumberLiteral{
-				val:1,
-		},
-	}
-
-	// strcat(newstring, left)
-	emitCallMallocDinamicSize(binop2) 	// malloc(newSize)
-	emit("push %%rax")
 	left.emit()
-	emit("push %%rax")
-	emit("pop %%rsi")
-	emit("pop %%rdi")
+	emit("push %%rax # left string")
+	emit("mov %%rax, %%rdi")
+	emit("mov $0, %%rax")
+	emit("call strlen # get left len")
+	emit("push %%rax # left len")
+	right.emit()
+	emit("push %%rax # right string")
+	emit("mov %%rax, %%rdi")
+	emit("mov $0, %%rax")
+	emit("call strlen # get right len")
+	emit("push %%rax # right len")
+
+	emit("pop %%rax # right len")
+	emit("pop %%rcx # right string")
+	emit("pop %%rbx # left len")
+	emit("pop %%rdx # left string")
+
+	emit("push %%rcx # right string")
+	emit("push %%rdx # left  string")
+
+	// newSize = strlen(left) + strlen(right) + 1
+	emit("add %%rax, %%rbx # len + len")
+	emit("add $1, %%rbx # + 1 (null byte)")
+	emit("mov %%rbx, %%rdi")
+	emit("mov $0, %%rax")
+	emit("call .malloc")
+
+	emit("mov %%rax, %%rdi # new string")
+	emit("pop %%rsi # left string")
 	emit("mov $0, %%rax")
 	emit("call strcat")
 
-	emit("push %%rax")
-	right.emit()
-	emit("push %%rax")
-	emit("pop %%rsi")
-	emit("pop %%rdi")
+	emit("mov %%rax, %%rdi # new string")
+	emit("pop %%rsi # right string")
 	emit("mov $0, %%rax")
 	emit("call strcat")
 }
