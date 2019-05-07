@@ -125,7 +125,7 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("bool", gBool)
 	universe.setGtype("byte", gByte)
 	universe.setGtype("int", gInt)
-	universe.setGtype("string", &Gtype{typ: G_STRING, length: 0})
+	universe.setGtype("string", gString)
 	universe.setGtype("uint8", gByte)
 }
 
