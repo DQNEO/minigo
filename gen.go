@@ -263,7 +263,7 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field, 0)
 	default:
-		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype())
+		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String())
 	}
 }
 
@@ -279,7 +279,7 @@ func getLoadInst(size int) string {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# emit variable \"%s\" of type %s", ast.varname, ast.getGtype())
+	emit("# emit variable \"%s\" of type %s", ast.varname, ast.getGtype().String())
 	if ast.gtype.typ == G_ARRAY {
 		ast.emitAddress(0)
 		return
