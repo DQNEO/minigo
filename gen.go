@@ -433,13 +433,13 @@ func (rel *Relation) emitSave() {
 		errorft(rel.token(), "left.rel.expr is nil")
 	}
 	variable := rel.expr.(*ExprVariable)
-	variable.emitOffsetSave(variable.getGtype().getSize(), 0)
+	variable.emitOffsetSave(variable.getGtype().getSize(), 0, false)
 }
 
-func (variable *ExprVariable) emitOffsetSave(size int, offset int) {
+func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirection bool) {
 	emit("# ExprVariable.emitOffsetSave(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
-	if variable.getGtype().typ == G_POINTER && offset > 0 {
+	if variable.getGtype().typ == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
 		emit("push %%rax # save the value")
 		variable.emit()
@@ -1832,7 +1832,7 @@ func emitOffsetSave(lhs Expr, size int, offset int) {
 		emitOffsetSave(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.emitOffsetSave(size, offset)
+		variable.emitOffsetSave(size, offset, false)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
@@ -2202,21 +2202,21 @@ func assignToSlice(lhs Expr, rhs Expr) {
 func (variable *ExprVariable) saveSlice(offset int) {
 	emit("# *ExprVariable.saveSlice()")
 	emit("pop %%rax # 3rd")
-	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen)
+	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen, false)
 	emit("pop %%rax # 2nd")
-	variable.emitOffsetSave(8, offset+ptrSize)
+	variable.emitOffsetSave(8, offset+ptrSize, false)
 	emit("pop %%rax # 1st")
-	variable.emitOffsetSave(8, offset)
+	variable.emitOffsetSave(8, offset,true)
 }
 
 func (variable *ExprVariable) saveInterface(offset int) {
 	emit("# *ExprVariable.saveInterface()")
 	emit("pop %%rax # dynamic type id")
-	variable.emitOffsetSave(8, offset+ptrSize+ptrSize)
+	variable.emitOffsetSave(8, offset+ptrSize+ptrSize, false)
 	emit("pop %%rax # reciverTypeId")
-	variable.emitOffsetSave(8, offset+ptrSize)
+	variable.emitOffsetSave(8, offset+ptrSize, false)
 	emit("pop %%rax # ptr")
-	variable.emitOffsetSave(8, offset)
+	variable.emitOffsetSave(8, offset, true)
 }
 
 // copy each element
