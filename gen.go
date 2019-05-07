@@ -3258,6 +3258,14 @@ type IrStaticCall struct {
 	callee *DeclFunc
 }
 
+func bool2string(bol bool) string {
+	if bol {
+		return "true"
+	} else {
+		return "false"
+	}
+}
+
 func (ircall *IrStaticCall) emit(args []Expr) {
 	// nothing to do
 	emit("")
@@ -3287,7 +3295,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			continue
 		}
 
-		emit("# arg %d, collectVariadicArgs=%d", i, collectVariadicArgs)
+		emit("# arg %d, collectVariadicArgs=%s", i, bool2string(collectVariadicArgs))
 		if param != nil {
 			//emit("# %s <- %s", param.getGtype().String(), arg.getGtype().String())
 		}
