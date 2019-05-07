@@ -252,11 +252,12 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 	root := &IrRoot{
 	}
 
+	var declvars []*DeclVar
 	for _, pkg := range stdpkgs {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
-					root.vars = append(root.vars, decl.vardecl)
+					declvars= append(declvars, decl.vardecl)
 				} else if decl.funcdecl != nil {
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}
@@ -267,7 +268,7 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 	for _, f := range files {
 		for _, decl := range f.topLevelDecls {
 			if decl.vardecl != nil {
-				root.vars = append(root.vars, decl.vardecl)
+				declvars = append(declvars, decl.vardecl)
 			} else if decl.funcdecl != nil {
 				root.funcs = append(root.funcs, decl.funcdecl)
 			}
@@ -275,5 +276,6 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 	}
 
 	root.stringLiterals = stringLiterals // a dirtyworkaround
+	root.vars = declvars
 	return root
 }
