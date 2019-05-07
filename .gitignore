@@ -1,6 +1,7 @@
 /out
 /minigo
-/minigo*
+/minigo.s
+/minigo2
 a.go
 /stdlib.go
 /internalcode.go

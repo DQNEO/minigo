@@ -12,9 +12,11 @@ internalcode.go: internalcode/runtime.go
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 
-minigo2: *.go minigo # 2nd generation
-	./minigo *.go > out/a.s
-	./compat-run.sh gcc -g -no-pie -o minigo2 out/a.s
+minigo.s: *.go minigo
+	./minigo *.go > minigo.s
+
+minigo2: minigo.s # 2nd generation
+	./compat-run.sh gcc -g -no-pie -o minigo2 minigo.s
 
 test: all
 	./compile.sh
