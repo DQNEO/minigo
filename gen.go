@@ -146,7 +146,7 @@ func (f *DeclFunc) emitPrologue() {
 
 	for i := len(f.localvars) - 1; i >= 0; i-- {
 		lvar := f.localvars[i]
-		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype)
+		emit("# offset %d for variable \"%s\" of %s", lvar.offset, lvar.varname, lvar.gtype.String())
 	}
 
 	if localarea != 0 {
@@ -904,7 +904,7 @@ func emitAssignPrimitive(left Expr, right Expr) {
 func emitSave(left Expr) {
 	switch left.(type) {
 	case *Relation:
-		emit("# %s %s = ", left.(*Relation).name, left.getGtype())
+		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
 		left.(*Relation).emitSave()
 	case *ExprIndex:
 		left.(*ExprIndex).emitSave()
