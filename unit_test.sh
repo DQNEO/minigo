@@ -37,7 +37,7 @@ function as_run {
 function run_unit_test {
     echo -n "unit_test $src ... "
     compile
-    as_run
+    as_run 2>/dev/null
     if [[ $? -ne 0 ]];then
         echo failed
         return 1
