@@ -28,6 +28,7 @@ func f2() {
 		"keybar": "valuebar",
 	}
 
+	fmt.Printf("9%s\n", lmap["noexists"])
 	fmt.Printf("%s\n", lmap[keyFoo])
 	fmt.Printf("%s\n", lmap["keybar"])
 
