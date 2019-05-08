@@ -2,5 +2,5 @@
 set -ex
 make --silent
 
-./minigo "$@" > out/a.s
-./as out/a.s
+./minigo "$@" > /tmp/a.s
+./as /tmp/a.s
