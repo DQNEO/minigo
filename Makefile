@@ -24,8 +24,9 @@ minigo2: /tmp/out/minigo.s # 2nd generation
 
 test2gen: minigo2
 	./minigo2 --version
-	./minigo2 t/min/min.go > /tmp/out/min2.s
-	./as /tmp/out/min2.s
+	./unit_test.sh  minigo2 min 2
+	./unit_test.sh  minigo2 hello 2
+
 
 test1gen: all
 	./test1gen.sh
@@ -33,12 +34,11 @@ test1gen: all
 test: all
 	make test1gen
 	make test2gen
-	diff --strip-trailing-cr /tmp/out/min2.s /tmp/out/min.s
+
 
 circlecitest: all
 	make test1gen
 	make test2gen
-	diff --strip-trailing-cr /tmp/out/min2.s /tmp/out/min.s
 
 parse: all
 	./parse *.go

@@ -1,29 +1,32 @@
 #!/bin/bash
 
-prog_name=$1
-test_name=$2
+progname=$1
+basename=$2
+suffix=$3
 
-set -u
 out_dir=/tmp/out
+
+if [[ -z $suffix ]];then
+    as_file=$out_dir/${basename}.s
+else
+    as_file=$out_dir/${basename}.${suffix}.s
+fi
+src=t/$basename/*.go
+expected=t/expected/${basename}.txt
+bin_file=$out_dir/${basename}.bin
+obj_file=$out_dir/${basename}.o
+
 actual=$out_dir/actual.txt
 # for os.Args
 ARGS=t/data/sample.txt
 
 function compile {
-    local basename=$1
-    local src=t/$basename/*.go
-    local as_file=$out_dir/${basename}.s
     echo -n "compile $src  > $as_file ... "
-    ./${prog_name} $src > $as_file
+    ./${progname} $src > $as_file
     echo ok
 }
 
 function as_run {
-    local basename=$1
-    local expected=t/expected/${basename}.txt
-    local bin_file=$out_dir/${basename}.bin
-    local as_file=$out_dir/${basename}.s
-    local obj_file=$out_dir/${basename}.o
     rm -f $actual
     echo -n "as_run $as_file  ... "
     as -o $obj_file $as_file
@@ -35,8 +38,8 @@ function as_run {
 }
 
 function run_unit_test {
-    compile $test_name
-    as_run $test_name
+    compile
+    as_run
     if [[ $? -ne 0 ]];then
         echo failed
         return 1
