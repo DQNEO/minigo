@@ -16,21 +16,15 @@ function compile {
     echo ok
 }
 
-for testfile in t/expected/*.txt
-do
-    name=$(basename -s .txt $testfile)
-    compile $name
-done
 
-
-function test_file {
+function as_run {
     local basename=$1
     local expected=t/expected/${basename}.txt
     local bin_file=/tmp/out/${basename}.bin
     local as_file=/tmp/out/${basename}.s
     local obj_file=/tmp/out/${basename}.o
     rm -f $actual
-    echo -n "test_file $as_file  ... "
+    echo -n "as_run $as_file  ... "
     as -o $obj_file $as_file
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
@@ -46,7 +40,8 @@ function test_file {
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    test_file $name
+    compile $name
+    as_run $name
 done
 
 if [[ $differ -eq 0 ]];then
