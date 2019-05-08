@@ -24,10 +24,7 @@ test2gen: minigo2
 	./as out/min2.s
 
 test1gen: all
-	./compile.sh
-	./test_as.sh
-	./testerror.sh
-
+	./test1gen.sh
 
 test: all
 	make test1gen
