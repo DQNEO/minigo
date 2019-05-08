@@ -29,8 +29,9 @@ func f2() {
 	}
 
 	fmt.Printf("9%s\n", lmap["noexists"])
-	fmt.Printf("%s\n", lmap[keyFoo])
-	fmt.Printf("%s\n", lmap["keybar"])
+	fmt.Printf("%s\n", lmap[keyFoo]) // "valuefoo"
+	fmt.Printf("%s\n", lmap["keybar"]) // "valuebar"
+
 
 	fmt.Printf("len=%d\n", len(lmap))
 
