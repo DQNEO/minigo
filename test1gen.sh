@@ -17,7 +17,6 @@ function compile {
     echo ok
 }
 
-
 function as_run {
     local basename=$1
     local expected=t/expected/${basename}.txt
