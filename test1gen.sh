@@ -1,7 +1,6 @@
 #!/bin/bash
 set -u
 
-prog_name=minigo
 out_dir=/tmp/out
 actual=$out_dir/actual.txt
 # for os.Args
@@ -34,21 +33,26 @@ function as_run {
 }
 
 function run_unit_test {
-    local ame=$1
+    local prog_name=$1
+    local ame=$2
     compile $name
     as_run $name
     if [[ $? -ne 0 ]];then
-        differ=1
         echo failed
+        return 1
     else
         echo ok
+        return 0
     fi
 }
 
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    run_unit_test $name
+    run_unit_test minigo $name
+    if [[ $? -ne 0 ]];then
+        differ=1
+    fi
 done
 
 if [[ $differ -eq 0 ]];then
