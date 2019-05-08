@@ -2000,9 +2000,8 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
-			var pkgName identifier
-			pkgName = getBaseNameFromImport(spec.path)
-			p.importedNames[pkgName] = true
+			pkgName := getBaseNameFromImport(spec.path)
+			p.importedNames[identifier(pkgName)] = true
 		}
 	}
 
@@ -2027,17 +2026,16 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	}
 }
 
-func getBaseNameFromImport(path string) identifier {
-	var baseName identifier
+func getBaseNameFromImport(path string) string {
+	var r string
 	if strings.Contains(path, "/") {
 		words := strings.Split(path, "/")
-		baseName = identifier(words[len(words)-1])
+		r = words[len(words)-1]
 	} else {
-		baseName = identifier(path)
+		r =  path
 	}
 
-	return baseName
-
+	return r
 }
 
 func (ast *StmtShortVarDecl) infer() {

@@ -117,7 +117,8 @@ func main() {
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
-				imported[getBaseNameFromImport(spec.path)] = true
+				baseName := getBaseNameFromImport(spec.path)
+				imported[identifier(baseName)] = true
 			}
 		}
 	}
