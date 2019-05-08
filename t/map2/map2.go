@@ -38,7 +38,9 @@ func f2() {
 	lmap["19"] = "13"
 	fmt.Printf("%s\n", lmap["19"]) // 13
 
-	fmt.Printf("%d\n", len(lmap) + 11 ) // 14
+	lenmap := len(lmap) // 3
+	fmt.Printf("%d\n", lenmap + 11 ) // 14
+
 	lmap["15"] = "16"
 	lmap["17"] = "18"
 	lmap["19"] = "20"
