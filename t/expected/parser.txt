@@ -1,8 +1,8 @@
-==== AST DUMP START ===
+=== AST File t2/min.go ===
 package main
 funcdef f1
   println
     "0"
 funcdef main
   f1
-==== AST DUMP END ===
+===
