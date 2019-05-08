@@ -2516,9 +2516,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("%s: # begin loop ", labelBegin)
 
 	labelIncr := makeLabel()
-	// break if i < len
-	emit("cmp %%r11, %%r13") // len > i
-	emit("setl %%al")
+
+	emit("cmp %%r11, %%r13") // right, left
+	emit("setl %%al # eval(r13(i) < r11(len))")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	if mapValueType.isString() {
@@ -2526,10 +2526,10 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	} else {
 		emit("mov $0, %%rax # key not found")
 	}
-	emit("mov $0, %%rcx") // ok = false
-	emit("je %s  # jump if false", labelEnd)
+	emit("mov $0, %%rcx # ok = false")
+	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
 
-	// check if index value matches
+	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
 	emit("imul $16, %%rax")    // i * 16
 	emit("mov %%r10, %%rcx")   // head
@@ -2558,7 +2558,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	}
 
 	emit("test %%rax, %%rax")
-	emit("je %s  # jump if false", labelIncr)
+	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
