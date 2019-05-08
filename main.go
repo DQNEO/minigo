@@ -202,12 +202,12 @@ func main() {
 
 	var uniquedDynamicTypes map[string]int = map[string]int{}
 
-	for _, gtypeAsString := range builtinTypesAsString {
-		uniquedDynamicTypes[gtypeAsString] = -1
+	for _, gs := range builtinTypesAsString {
+		uniquedDynamicTypes[gs] = -1
 	}
 	for _, gtype := range p.allDynamicTypes {
-		g := gtype.String()
-		uniquedDynamicTypes[g] = -1
+		gs := gtype.String()
+		uniquedDynamicTypes[gs] = -1
 	}
 	ir.uniquedDynamicTypes = uniquedDynamicTypes
 

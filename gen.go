@@ -3741,12 +3741,12 @@ func (root *IrRoot) emit() {
 	emit("")
 	emitComment("Dynamic Types")
 	var dynamicTypeId int // 0 means nil
-	for hashedType, _ := range root.uniquedDynamicTypes {
+	for gs, _ := range root.uniquedDynamicTypes {
 		dynamicTypeId++
-		root.uniquedDynamicTypes[hashedType] = dynamicTypeId
+		root.uniquedDynamicTypes[gs] = dynamicTypeId
 		label := fmt.Sprintf("DT%d", dynamicTypeId)
 		emitLabel(".%s:", label)
-		emit(".string \"%s\"", hashedType)
+		emit(".string \"%s\"", gs)
 	}
 
 	emitComment("Method table")
