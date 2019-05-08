@@ -4,7 +4,7 @@ set -eu
 prog_name=minigo
 actual=/tmp/out/actual.txt
 # for os.Args
-sample_file=t/data/sample.txt
+ARGS=t/data/sample.txt
 differ=0
 
 function compile {
@@ -29,7 +29,7 @@ function as_run {
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
-    $bin_file $sample_file > $actual
+    $bin_file $ARGS > $actual
     diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         differ=1
