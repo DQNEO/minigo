@@ -930,8 +930,8 @@ func (e *ExprIndex) emitMapSet() {
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit("cmp $0, %%rcx")
-	emit("setne %%al")
+	emit("cmp $1, %%rbx # ok == true")
+	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	emit("je %s  # jump to append if not found", labelAppend)
@@ -1849,6 +1849,7 @@ func emitOffsetSave(lhs Expr, size int, offset int) {
 }
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
+	emit("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
@@ -2516,9 +2517,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("%s: # begin loop ", labelBegin)
 
 	labelIncr := makeLabel()
-	// break if i < len
-	emit("cmp %%r11, %%r13") // len > i
-	emit("setl %%al")
+
+	emit("cmp %%r11, %%r13") // right, left
+	emit("setl %%al # eval(r13(i) < r11(len))")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	if mapValueType.isString() {
@@ -2526,10 +2527,10 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	} else {
 		emit("mov $0, %%rax # key not found")
 	}
-	emit("mov $0, %%rcx") // ok = false
-	emit("je %s  # jump if false", labelEnd)
+	emit("mov $0, %%rbx # ok = false")
+	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
 
-	// check if index value matches
+	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
 	emit("imul $16, %%rax")    // i * 16
 	emit("mov %%r10, %%rcx")   // head
@@ -2558,14 +2559,15 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	}
 
 	emit("test %%rax, %%rax")
-	emit("je %s  # jump if false", labelIncr)
+	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
 	if deref {
 		emit("mov (%%rax), %%rax # dereference")
 	}
-	emit("jmp %s", labelEnd)
+	emit("mov $1, %%rbx # ok = true")
+	emit("jmp %s # exit loop", labelEnd)
 
 	emit("%s: # incr", labelIncr)
 	emit("add $1, %%r13") // i++
@@ -3038,6 +3040,7 @@ func (e *ExprLen) emit() {
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case gtype.getPrimType() == G_MAP:
+		emit("# emit len(map)")
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")

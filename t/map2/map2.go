@@ -35,10 +35,15 @@ func f2() {
 
 	fmt.Printf("%d\n", len(lmap) + 10) // 12
 
+	var lenmap int
+
 	lmap["19"] = "13"
+	lenmap = len(lmap) // 3
+
 	fmt.Printf("%s\n", lmap["19"]) // 13
 
-	fmt.Printf("%d\n", len(lmap) + 11 ) // 14
+	fmt.Printf("%d\n", lenmap + 11 ) // 14
+
 	lmap["15"] = "16"
 	lmap["17"] = "18"
 	lmap["19"] = "20"
@@ -47,7 +52,53 @@ func f2() {
 	}
 }
 
+func f3() {
+	var lmap map[int]int = map[int]int{
+		1: 2,
+		3: 21,
+	}
+	var ok bool
+	var val int
+	val, ok = lmap[3]
+	fmt.Printf("%d\n", val) // 21
+	if ok {
+		fmt.Printf("%d\n", 22)
+	}
+
+	val, ok = lmap[2]
+	if !ok {
+		fmt.Printf("%d\n", 23)
+	}
+	fmt.Printf("%d\n", val + 24) //24
+}
+
+var keyFoo2 string = "keyfoo"
+
+func f4() {
+	keyFoo := "keyfoo"
+	var lmap map[string]string = map[string]string{
+		keyFoo:   "26",
+		"keybar": "valuebar",
+	}
+
+	var ok bool
+	var v string
+	v, ok = lmap[keyFoo2]
+	if ok {
+		fmt.Printf("%d\n", 25)
+	}
+	fmt.Printf("%s\n", v) // 26
+
+	v, ok = lmap["noexits"]
+	if !ok {
+		fmt.Printf("%d\n", 27)
+	}
+	fmt.Printf("28%s\n", v) // 28
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
+	f4()
 }
