@@ -37,11 +37,16 @@ function as_run {
     echo ok
 }
 
+function run_unit_test {
+    local ame=$1
+    compile $name
+    as_run $name
+}
+
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    compile $name
-    as_run $name
+    run_unit_test $name
 done
 
 if [[ $differ -eq 0 ]];then
