@@ -1849,6 +1849,7 @@ func emitOffsetSave(lhs Expr, size int, offset int) {
 }
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
+	emit("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
@@ -3039,6 +3040,7 @@ func (e *ExprLen) emit() {
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case gtype.getPrimType() == G_MAP:
+		emit("# emit len(map)")
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
