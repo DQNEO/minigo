@@ -20,8 +20,8 @@ minigo2: minigo.s # 2nd generation
 
 test2gen: minigo2
 	./compat-run.sh ./minigo2 --version
-	./compat-run.sh ./minigo2 t/min/min.go > out/a.s
-	./as
+	./compat-run.sh ./minigo2 t/min/min.go > out/min2.s
+	./as out/min2.s
 
 test: all
 	./compile.sh

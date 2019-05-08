@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 make --silent
+
 ./minigo "$@" > out/a.s
-./as
+./as out/a.s

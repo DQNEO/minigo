@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+file=$1
 set -ux
-file=out/a.s
+echo $file
 
-[[ -e $file ]] || echo "$file ooes not exist"
+[[ $file == ""  ]] &&  { echo "not input" ; exit 1 ;}
+[[ -e $file ]] || { echo "file not found: $file"; exit 1; }
 
 cmd="gcc -g -no-pie $file && ./a.out " # || gdb --batch --eval-command=run ./a.out"
 if [[ `uname` == "Darwin" ]];then
