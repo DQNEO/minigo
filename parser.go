@@ -2019,6 +2019,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 
 	return &SourceFile{
 		tok:           packageClause.tok,
+		name: bs.filename,
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,

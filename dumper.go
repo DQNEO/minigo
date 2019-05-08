@@ -87,7 +87,7 @@ func (s *StmtSatementList) dump() {
 */
 
 func (a *SourceFile) dump() {
-	debugf("==== AST DUMP START ===")
+	debugf("=== AST File %s ===", a.name)
 	a.packageClause.dump()
 	for _, imprt := range a.importDecls {
 		for _, spec := range imprt.specs {
@@ -105,7 +105,7 @@ func (a *SourceFile) dump() {
 			decl.constdecl.dump()
 		}
 	}
-	debugf("==== AST DUMP END ===")
+	debugf("===")
 }
 
 func (ast *ExprFuncallOrConversion) dump() {

@@ -264,6 +264,7 @@ type TopLevelDecl struct {
 
 type SourceFile struct {
 	tok           *Token
+	name          string
 	packageClause *PackageClause
 	importDecls   []*ImportDecl
 	topLevelDecls []*TopLevelDecl
