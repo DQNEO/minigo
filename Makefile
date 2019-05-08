@@ -31,7 +31,6 @@ minigo2: /tmp/out/minigo.s
 
 
 test2gen: minigo2
-	./minigo2 --version
 	./unit_test.sh  minigo2 min 2
 	./unit_test.sh  minigo2 hello 2
 
