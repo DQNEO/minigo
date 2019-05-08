@@ -122,10 +122,7 @@ func main() {
 	}
 
 	var importOS bool
-	importedOS, _ := imported["os"]
-	if importedOS  {
-		importOS = true
-	}
+	_, importOS = imported["os"]
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
