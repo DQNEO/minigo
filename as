@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 file=$1
 set -ux
-echo $file
 
 [[ $file == ""  ]] &&  { echo "not input" ; exit 1 ;}
 [[ -e $file ]] || { echo "file not found: $file"; exit 1; }
