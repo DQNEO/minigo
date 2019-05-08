@@ -76,6 +76,9 @@ func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *s
 	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 
 	p.resolve(universe)
+	if debugAst {
+		asf.dump()
+	}
 	return &stdpkg{
 		name:  pkgname,
 		files: []*SourceFile{asf},
