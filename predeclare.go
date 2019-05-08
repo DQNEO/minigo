@@ -129,6 +129,8 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("uint8", gByte)
 }
 
+var builtinTypesAsString []string = []string{"bool", "byte", "int", "string"}
+
 // Constants:
 // true false iota
 func predeclareConsts(universe *scope) {
