@@ -21,14 +21,11 @@ actual=$out_dir/actual.txt
 ARGS=t/data/sample.txt
 
 function compile {
-    echo -n "compile $src  > $as_file ... "
     ./${progname} $src > $as_file
-    echo ok
 }
 
 function as_run {
     rm -f $actual
-    echo -n "as_run $as_file  ... "
     as -o $obj_file $as_file
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
@@ -38,6 +35,7 @@ function as_run {
 }
 
 function run_unit_test {
+    echo -n "unit_test $src ... "
     compile
     as_run
     if [[ $? -ne 0 ]];then
