@@ -55,7 +55,7 @@ func f3() {
 	var ok bool
 	var val int
 	val, ok = lmap[3]
-	fmt.Printf("%d\n", val)
+	fmt.Printf("%d\n", val) // 21
 	if ok {
 		fmt.Printf("%d\n", 22)
 	}
@@ -88,12 +88,12 @@ func f4() {
 	if !ok {
 		fmt.Printf("%d\n", 27)
 	}
-	fmt.Printf("27%s\n", v) // 28
+	fmt.Printf("28%s\n", v) // 28
 }
 
 func main() {
 	f1()
 	f2()
-	//f3()
-	//f4()
+	f3()
+	f4()
 }

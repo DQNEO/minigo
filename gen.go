@@ -2526,7 +2526,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	} else {
 		emit("mov $0, %%rax # key not found")
 	}
-	emit("mov $0, %%rcx # ok = false")
+	emit("mov $0, %%rbx # ok = false")
 	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
 
 	emit("# check if key matches")
@@ -2565,7 +2565,8 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	if deref {
 		emit("mov (%%rax), %%rax # dereference")
 	}
-	emit("jmp %s", labelEnd)
+	emit("mov $1, %%rbx # ok = true")
+	emit("jmp %s # exit loop", labelEnd)
 
 	emit("%s: # incr", labelIncr)
 	emit("add $1, %%r13") // i++
