@@ -7,7 +7,7 @@ import (
 var GENERATION int = 2
 
 var debugMode = true
-var debugToken = true
+var debugToken = false
 
 func f1() {
 	path := "t/min/min.go"
