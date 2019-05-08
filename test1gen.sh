@@ -2,7 +2,8 @@
 set -u
 
 prog_name=minigo
-actual=/tmp/out/actual.txt
+out_dir=/tmp/out
+actual=$out_dir/actual.txt
 # for os.Args
 ARGS=t/data/sample.txt
 differ=0
@@ -10,7 +11,7 @@ differ=0
 function compile {
     local basename=$1
     local src=t/$basename/*.go
-    local as_file=/tmp/out/${basename}.s
+    local as_file=$out_dir/${basename}.s
     echo -n "compile $src  > $as_file ... "
     ./${prog_name} $src > $as_file
     echo ok
@@ -20,9 +21,9 @@ function compile {
 function as_run {
     local basename=$1
     local expected=t/expected/${basename}.txt
-    local bin_file=/tmp/out/${basename}.bin
-    local as_file=/tmp/out/${basename}.s
-    local obj_file=/tmp/out/${basename}.o
+    local bin_file=$out_dir/${basename}.bin
+    local as_file=$out_dir/${basename}.s
+    local obj_file=$out_dir/${basename}.o
     rm -f $actual
     echo -n "as_run $as_file  ... "
     as -o $obj_file $as_file
