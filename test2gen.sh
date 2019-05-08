@@ -1,7 +1,47 @@
 #!/bin/bash
 
 set -eu
-for testname in min hello byte-cmp 'if' println
+
+test_names="
+anytype-switch
+anytype
+arith
+assign-to-indexexpr
+assign
+backquote
+byte-cmp
+cmp
+const
+conversion
+fizzbuzz
+for
+forcond
+funcref
+heap
+hello
+if
+incr
+internal
+map-of-map
+map
+min
+multi
+newline
+open
+pointer
+println
+read-file
+slice2
+sprintf
+string-concat
+string-index
+string
+test
+var
+write
+"
+
+for testname in $test_names
 do
     ./unit_test.sh  minigo2 $testname 2
 done
