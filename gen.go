@@ -751,7 +751,7 @@ func (ast *StmtAssignment) emit() {
 	// The number of operands on the left hand side must match the number of values.
 	isOnetoOneAssignment := (len(ast.rights) > 1)
 	if isOnetoOneAssignment {
-		emit("# one to one")
+		emit("# multi(%d) = multi(%d)", len(ast.lefts), len(ast.rights))
 		// a,b,c = expr1,expr2,expr3
 		if len(ast.lefts) != len(ast.rights) {
 			errorft(ast.token(), "number of exprs does not match")
@@ -781,9 +781,9 @@ func (ast *StmtAssignment) emit() {
 		}
 		return
 	} else {
-		emit("# one to multi")
-		// a,b,c = expr
 		numLeft := len(ast.lefts)
+		emit("# multi(%d) = expr", numLeft)
+		// a,b,c = expr
 		numRight := 0
 		right := ast.rights[0]
 
@@ -802,6 +802,7 @@ func (ast *StmtAssignment) emit() {
 			indexExpr := right.(*ExprIndex)
 			if indexExpr.collection.getGtype().getPrimType() == G_MAP {
 				// map get
+				emit("# v, ok = map[k]")
 				leftsMayBeTwo = true
 			}
 			numRight++
@@ -884,8 +885,8 @@ func (ast *StmtAssignment) emit() {
 		}
 		if leftsMayBeTwo && len(ast.lefts) == 2 {
 			okVariable := ast.lefts[1]
-			// @TODO consider big data like slice, struct, etd
-			emit("mov %%rbx, %%rax") // ok
+			// @TODO consider big data like slice, struct, etc
+			emit("mov %%rbx, %%rax # emit okValue") // ok
 			emitSave(okVariable)
 		}
 		return
