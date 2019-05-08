@@ -31,18 +31,18 @@ function as_run {
     gcc -no-pie -o $bin_file $obj_file
     $bin_file $ARGS > $actual
     diff -u $expected $actual
-    if [[ $? -ne 0 ]];then
-        differ=1
-        echo failed
-    else
-        echo ok
-    fi
 }
 
 function run_unit_test {
     local ame=$1
     compile $name
     as_run $name
+    if [[ $? -ne 0 ]];then
+        differ=1
+        echo failed
+    else
+        echo ok
+    fi
 }
 
 for testfile in t/expected/*.txt
