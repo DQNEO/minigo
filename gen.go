@@ -2506,6 +2506,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		mapType = mapType.relation.gtype
 	}
 	mapKeyType := mapType.mapKey
+	mapValueType := mapType.mapValue
 
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
@@ -2520,7 +2521,11 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("setl %%al")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
-	emit("mov $0, %%rax") // key not found. set zero value.
+	if mapValueType.isString() {
+		emitEmptyString()
+	} else {
+		emit("mov $0, %%rax # key not found")
+	}
 	emit("mov $0, %%rcx") // ok = false
 	emit("je %s  # jump if false", labelEnd)
 
