@@ -33,6 +33,10 @@ minigo2: /tmp/out/minigo.s
 test2gen: minigo2
 	./unit_test.sh  minigo2 min 2
 	./unit_test.sh  minigo2 hello 2
+	./unit_test.sh  minigo2 byte-cmp 2
+	./unit_test.sh  minigo2 if 2
+	./unit_test.sh  minigo2 println 2
+
 
 test: all
 	make test1gen
