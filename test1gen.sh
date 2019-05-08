@@ -34,8 +34,10 @@ function as_run {
     diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         differ=1
+        echo failed
+    else
+        echo ok
     fi
-    echo ok
 }
 
 function run_unit_test {
