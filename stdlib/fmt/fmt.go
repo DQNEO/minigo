@@ -50,7 +50,7 @@ func doPrintf(format string, a ...interface{}) string {
 	}
 
 	// copy string to heap area
-	var b []slice
+	var b []interface{}
 	b = makeSlice(numred+1, numred+1, 24)
 	strcopy(pbuf, b, numred)
 
