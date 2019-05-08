@@ -23,17 +23,19 @@ test2gen: minigo2
 	./compat-run.sh ./minigo2 t/min/min.go > out/min2.s
 	./as out/min2.s
 
-test: all
+test1gen: all
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
+
+
+test: all
+	make test1gen
 	make test2gen
 	diff out/min2.s out/min.s
 
 circlecitest: all
-	./compile.sh
-	./test_as.sh
-	./testerror.sh
+	make test1gen
 	make test2gen
 	diff out/min2.s out/min.s
 
