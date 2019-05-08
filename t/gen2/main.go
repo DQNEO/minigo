@@ -113,14 +113,7 @@ func main() {
 	pForImport := &parser{}
 	var imported map[identifier]bool = map[identifier]bool{}
 	for _, sourceFile := range sourceFiles {
-		s := readFile(sourceFile)
-		bs := &ByteStream{
-			filename:  sourceFile,
-			source:    s,
-			nextIndex: 0,
-			line:      1,
-			column:    0,
-		}
+		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
