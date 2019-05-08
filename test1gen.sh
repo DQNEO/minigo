@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -u
 
 prog_name=minigo
 actual=/tmp/out/actual.txt
@@ -56,7 +56,7 @@ else
     exit 1
 fi
 
-
+set -e
 ./testerror.sh
 
 echo "All tests passed"
