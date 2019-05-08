@@ -28,12 +28,14 @@ test: all
 	./test_as.sh
 	./testerror.sh
 	make test2gen
+	diff out/min2.s out/min.s
 
 circlecitest: all
 	./compile.sh
 	./test_as.sh
 	./testerror.sh
 	make test2gen
+	diff out/min2.s out/min.s
 
 parse: all
 	./parse *.go
