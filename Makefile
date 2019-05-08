@@ -7,34 +7,37 @@ all: minigo /tmp/out
 /tmp/out:
 	mkdir /tmp/out
 
-minigo: *.go internalcode.go stdlib.go
-	go build -o minigo *.go
-
 internalcode.go: internalcode/runtime.go
 	./cp-internalcode.sh
 
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 
+# 1st gen compiler
+minigo: *.go internalcode.go stdlib.go
+	go build -o minigo *.go
+
+
+test1gen: all
+	./test1gen.sh
+
+# 2nd gen assembly
 /tmp/out/minigo.s: *.go minigo
 	./minigo *.go > /tmp/out/minigo.s
 
-minigo2: /tmp/out/minigo.s # 2nd generation
+# 2nd gen compiler
+minigo2: /tmp/out/minigo.s
 	gcc -g -no-pie -o minigo2 /tmp/out/minigo.s
+
 
 test2gen: minigo2
 	./minigo2 --version
 	./unit_test.sh  minigo2 min 2
 	./unit_test.sh  minigo2 hello 2
 
-
-test1gen: all
-	./test1gen.sh
-
 test: all
 	make test1gen
 	make test2gen
-
 
 circlecitest: all
 	make test1gen
