@@ -39,6 +39,14 @@ type parser struct {
 	allDynamicTypes []*Gtype
 }
 
+func (p *parser) clearLocalState() {
+	p.currentFunc = nil
+	p.localvars = nil
+	p.requireBlock = false
+	p.inCase = 0
+	p.constSpecIndex = 0
+	p.currentForStmt = nil
+}
 
 type methods map[identifier]*ExprFuncRef
 
@@ -1978,14 +1986,7 @@ func (p *parser) isGlobal() bool {
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
 
-	// init function or local scope
-	p.currentFunc = nil
-	p.localvars = nil
-	p.requireBlock = false
-	p.inCase = 0
-	p.constSpecIndex = 0
-	p.currentForStmt = nil
-
+	p.clearLocalState()
 
 	// initialize parser's status per file
 	p.tokenStream = NewTokenStream(bs)
