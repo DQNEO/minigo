@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 )
 
 const __func__ string = "__func__"
@@ -2024,18 +2023,6 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
 	}
-}
-
-func getBaseNameFromImport(path string) string {
-	var r string
-	if strings.Contains(path, "/") {
-		words := strings.Split(path, "/")
-		r = words[len(words)-1]
-	} else {
-		r =  path
-	}
-
-	return r
 }
 
 func (ast *StmtShortVarDecl) infer() {
