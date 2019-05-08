@@ -1,7 +1,11 @@
-all: minigo out
+# All the commands are supposed to run on Linux.
+# I use Docker like below.
+# docker run -it --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 
-out:
-	mkdir out
+all: minigo /tmp/out
+
+/tmp/out:
+	mkdir /tmp/out
 
 minigo: *.go internalcode.go stdlib.go
 	go build -o minigo *.go
@@ -12,16 +16,16 @@ internalcode.go: internalcode/runtime.go
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 
-minigo.s: *.go minigo
-	./minigo *.go > minigo.s
+/tmp/out/minigo.s: *.go minigo
+	./minigo *.go > /tmp/out/minigo.s
 
-minigo2: minigo.s # 2nd generation
-	./compat-run.sh gcc -g -no-pie -o minigo2 minigo.s
+minigo2: /tmp/out/minigo.s # 2nd generation
+	gcc -g -no-pie -o minigo2 /tmp/out/minigo.s
 
 test2gen: minigo2
-	./compat-run.sh ./minigo2 --version
-	./compat-run.sh ./minigo2 t/min/min.go > out/min2.s
-	./as out/min2.s
+	./minigo2 --version
+	./minigo2 t/min/min.go > /tmp/out/min2.s
+	./as /tmp/out/min2.s
 
 test1gen: all
 	./test1gen.sh
@@ -29,12 +33,12 @@ test1gen: all
 test: all
 	make test1gen
 	make test2gen
-	diff --strip-trailing-cr out/min2.s out/min.s
+	diff --strip-trailing-cr /tmp/out/min2.s /tmp/out/min.s
 
 circlecitest: all
 	make test1gen
 	make test2gen
-	diff --strip-trailing-cr out/min2.s out/min.s
+	diff --strip-trailing-cr /tmp/out/min2.s /tmp/out/min.s
 
 parse: all
 	./parse *.go
@@ -42,7 +46,7 @@ parse: all
 clean:
 	rm -f minigo*
 	rm -f a.s a.out
-	rm -f out/*
+	rm -f /tmp/out/*
 	rm -f stdlib.go
 	rm -f internalcode.go
 
