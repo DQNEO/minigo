@@ -219,7 +219,8 @@ func (e *ExprTypeAssertion) dump() {
 }
 
 func (e *ExprVaArg) dump() {
-	panic("implement me")
+	debugf("...")
+	e.expr.dump()
 }
 
 func (e *ExprConversion) dump() {
