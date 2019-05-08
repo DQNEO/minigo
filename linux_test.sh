@@ -1,6 +1,6 @@
 #!/bin/bash
 
-actual=out/actual.txt
+actual=/tmp/out/actual.txt
 differ=0
 
 # for os.Args
@@ -8,9 +8,9 @@ sample_file=t/data/sample.txt
 function test_file {
     local basename=$1
     local expected=t/expected/${basename}.txt
-    local bin_file=out/${basename}.bin
-    local as_file=out/${basename}.s
-    local obj_file=out/${basename}.o
+    local bin_file=/tmp/out/${basename}.bin
+    local as_file=/tmp/out/${basename}.s
+    local obj_file=/tmp/out/${basename}.o
     rm -f $actual
     echo -n "test_file $as_file  ... "
     as -o $obj_file $as_file
@@ -18,21 +18,12 @@ function test_file {
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
     $bin_file $sample_file > $actual
-    if [[ $? -ne 0 ]];then
-        differ=1
-        echo "FAILED"
-        gdb  --batch --eval-command=run $bin_file
-        return
-    fi
-
     diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         differ=1
     fi
     echo ok
 }
-
-[[ -d  ./out ]] || mkdir ./out
 
 for testfile in t/expected/*.txt
 do

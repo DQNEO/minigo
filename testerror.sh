@@ -1,14 +1,8 @@
 #!/bin/bash
 
-./minigo terror/panic/panic.go > out/a.s
+./minigo terror/panic/panic.go > /tmp/out/a.s
 
-if [[ `uname` == "Darwin" ]];then
-    # for MacOS
-    docker run --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential bash -c 'gcc -g -no-pie out/a.s && ./a.out >/dev/null'
-else
-    # for Linux
-    gcc -g -no-pie out/a.s && ./a.out >/dev/null
-fi
+gcc -g -no-pie /tmp/out/a.s && ./a.out >/dev/null
 
 if [[ $? -ne 1 ]]; then
     echo "FAILED"
