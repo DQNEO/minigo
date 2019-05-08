@@ -32,12 +32,12 @@ test1gen: all
 test: all
 	make test1gen
 	make test2gen
-	diff out/min2.s out/min.s
+	diff --strip-trailing-cr out/min2.s out/min.s
 
 circlecitest: all
 	make test1gen
 	make test2gen
-	diff out/min2.s out/min.s
+	diff --strip-trailing-cr out/min2.s out/min.s
 
 parse: all
 	./parse *.go
