@@ -3252,7 +3252,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	case builtinAsComment:
 		arg := funcall.args[0]
 		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
-			emit("# %s", stringLiteral.val)
+			emitLabel("# %s", stringLiteral.val)
 		}
 	default:
 		var staticCall *IrStaticCall = &IrStaticCall{
