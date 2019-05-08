@@ -200,16 +200,15 @@ func main() {
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 
-	var uniquedDynamicTypes map[string]int = map[string]int{}
-
-	for _, gs := range builtinTypesAsString {
-		uniquedDynamicTypes[gs] = -1
-	}
+	var uniquedDTypes []string = builtinTypesAsString
 	for _, gtype := range p.allDynamicTypes {
 		gs := gtype.String()
-		uniquedDynamicTypes[gs] = -1
+		if !in_array(gs, uniquedDTypes) {
+			uniquedDTypes = append(uniquedDTypes, gs)
+		}
 	}
-	ir.uniquedDynamicTypes = uniquedDynamicTypes
+
+	ir.uniquedDTypes = uniquedDTypes
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.allNamedTypes {

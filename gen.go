@@ -2070,8 +2070,8 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	//debugf("dynamic type:%s", gtype)
-	dynamicTypeId, ok := groot.uniquedDynamicTypes[gtype.String()]
-	if !ok {
+	dynamicTypeId := get_index(gtype.String(), groot.uniquedDTypes)
+	if dynamicTypeId == -1 {
 		//debugf("types:%#v", groot.uniquedDynamicTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
 		errorft(dynamicValue.token(), "type %s not found for %s", gtype, dynamicValue)
@@ -3691,14 +3691,14 @@ type IrRoot struct {
 	funcs               []*DeclFunc
 	stringLiterals      []*ExprStringLiteral
 	methodTable         map[int][]string
-	uniquedDynamicTypes map[string]int
+	uniquedDTypes []string
 	importOS            bool
 }
 
 var groot *IrRoot
 
 func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
-	dynamicTypeId := root.uniquedDynamicTypes[gtype.String()]
+	dynamicTypeId := get_index(gtype.String(), root.uniquedDTypes)
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	return label
 }
@@ -3740,10 +3740,7 @@ func (root *IrRoot) emit() {
 
 	emit("")
 	emitComment("Dynamic Types")
-	var dynamicTypeId int // 0 means nil
-	for gs, _ := range root.uniquedDynamicTypes {
-		dynamicTypeId++
-		root.uniquedDynamicTypes[gs] = dynamicTypeId
+	for dynamicTypeId,gs := range root.uniquedDTypes {
 		label := fmt.Sprintf("DT%d", dynamicTypeId)
 		emitLabel(".%s:", label)
 		emit(".string \"%s\"", gs)
