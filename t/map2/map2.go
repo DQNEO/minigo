@@ -35,10 +35,13 @@ func f2() {
 
 	fmt.Printf("%d\n", len(lmap) + 10) // 12
 
+	var lenmap int
+
 	lmap["19"] = "13"
+	lenmap = len(lmap) // 3
+
 	fmt.Printf("%s\n", lmap["19"]) // 13
 
-	lenmap := len(lmap) // 3
 	fmt.Printf("%d\n", lenmap + 11 ) // 14
 
 	lmap["15"] = "16"

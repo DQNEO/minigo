@@ -930,8 +930,8 @@ func (e *ExprIndex) emitMapSet() {
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit("cmp $0, %%rcx")
-	emit("setne %%al")
+	emit("cmp $1, %%rbx # ok == true")
+	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	emit("je %s  # jump to append if not found", labelAppend)
