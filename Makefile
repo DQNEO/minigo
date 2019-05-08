@@ -40,9 +40,6 @@ circlecitest: all
 	make test1gen
 	make test2gen
 
-parse: all
-	./parse *.go
-
 clean:
 	rm -f minigo*
 	rm -f a.s a.out
