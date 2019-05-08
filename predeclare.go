@@ -11,6 +11,8 @@ var gString = &Gtype{
 	typ:G_STRING,
 }
 
+var builtinTypesAsString []string = []string{"bool", "byte", "int", "string"}
+
 var eIota = &ExprConstVariable{
 	name: "iota",
 }
@@ -128,8 +130,6 @@ func predeclareTypes(universe *scope) {
 	universe.setGtype("string", gString)
 	universe.setGtype("uint8", gByte)
 }
-
-var builtinTypesAsString []string = []string{"bool", "byte", "int", "string"}
 
 // Constants:
 // true false iota
