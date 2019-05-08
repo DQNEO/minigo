@@ -560,8 +560,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emit("test %%rax, %%rax")
 	emit("mov $0, %%rax")
 	emit("je %s", labelElse)
-	eEmpty := &eEmptyString
-	eEmpty.emit()
+	emitEmptyString()
 	emit("jmp %s", labelEnd)
 	emit("%s:", labelElse)
 	binop.left.emit()
@@ -2496,6 +2495,11 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 	}
 }
 
+func emitEmptyString() {
+	eEmpty := &eEmptyString
+	eEmpty.emit()
+}
+
 func emitMapGet(mapType *Gtype, deref bool) {
 	if mapType.typ == G_REL {
 		// @TODO handle infinite chain of relations
@@ -2791,7 +2795,7 @@ func (e *ExprConversion) emit() {
 		emit("test %%rax, %%rax")
 		emit("pop %%rax")
 		emit("jne %s", labelEnd)
-		emit("lea .%s(%%rip), %%rax # set empty strinf", eEmptyString.slabel)
+		emitEmptyString()
 		emit("%s:", labelEnd)
 	} else {
 		e.expr.emit()
