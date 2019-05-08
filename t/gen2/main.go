@@ -12,10 +12,10 @@ var allScopes map[identifier]*scope
 var debugMode = true
 var debugToken = false
 
-var debugAst = true
+var debugAst = false
 var debugParser = false
 var parseOnly = false
-var resolveOnly = true
+var resolveOnly = false
 var exit = false
 
 func printVersion() {
@@ -130,8 +130,10 @@ func main() {
 	}
 
 	var importOS bool
-	_, importOS = imported["os"]
-
+	importedOS, _ := imported["os"]
+	if importedOS  {
+		importOS = true
+	}
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
