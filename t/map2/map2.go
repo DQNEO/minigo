@@ -32,9 +32,12 @@ func f2() {
 	fmt.Printf("%s\n", lmap[keyFoo])
 	fmt.Printf("%s\n", lmap["keybar"])
 
+	fmt.Printf("len=%d\n", len(lmap))
+
 	lmap["keyadded"] = "valueadded"
 	fmt.Printf("%s\n", lmap["keyadded"])
 
+	fmt.Printf("len=%d\n", len(lmap))
 	for k, v := range lmap {
 		fmt.Printf("%s\n", k)
 		fmt.Printf("%s\n", v)

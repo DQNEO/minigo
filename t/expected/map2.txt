@@ -9,7 +9,9 @@
 9
 valuefoo
 valuebar
+len=2
 valueadded
+len=3
 keyfoo
 valuefoo
 keybar
