@@ -39,10 +39,6 @@ test: all
 	make test1gen
 	make test2gen
 
-circlecitest: all
-	make test1gen
-	make test2gen
-
 clean:
 	rm -f minigo*
 	rm -f a.s a.out
