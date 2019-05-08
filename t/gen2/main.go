@@ -12,10 +12,10 @@ var allScopes map[identifier]*scope
 var debugMode = true
 var debugToken = false
 
-var debugAst = false
+var debugAst = true
 var debugParser = false
 var parseOnly = false
-var resolveOnly = false
+var resolveOnly = true
 var exit = false
 
 func printVersion() {
