@@ -2505,6 +2505,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
 	}
+	mapKeyType := mapType.mapKey
 
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
@@ -2530,7 +2531,6 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("add %%rax, %%rcx")   // head + i * 16
 	emit("mov (%%rcx), %%rax") // emit index address
 
-	mapKeyType := mapType.mapKey
 	assert(mapKeyType != nil, nil, "key typ should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
