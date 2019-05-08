@@ -9,30 +9,38 @@ func HasSuffix(s string, suffix string) bool {
 	return false
 }
 
+// Contains reports whether substr is within s.
 func Contains(s string, substr string) bool {
+	return Index(s, substr) >= 0
+}
+
+func Index(s string, substr string) int {
 	bytes := []byte(s)
 	bsub := []byte(substr)
 	var in bool
-	var index int
-	for _, b := range bytes {
+	var subIndex int
+	var r int = -1 // not found
+	for i, b := range bytes {
 		if !in && b == bsub[0] {
 			in = true
-			index = 0
+			r = i
+			subIndex = 0
 		}
 
 		if in {
-			if b == bsub[index] {
-				if index == len(bsub) - 1 {
-					return true
+			if b == bsub[subIndex] {
+				if subIndex == len(bsub) - 1 {
+					return r
 				}
 			} else {
 				in = false
-				index = 0
+				r = -1
+				subIndex = 0
 			}
 		}
 	}
 
-	return false
+	return -1
 }
 
 // "foo/bar", "/" => []string{"foo", "bar"}
