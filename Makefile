@@ -38,6 +38,7 @@ test2gen: minigo2
 test: all
 	make test1gen
 	make test2gen
+	./bulldozer-test.sh
 
 clean:
 	rm -f minigo*
