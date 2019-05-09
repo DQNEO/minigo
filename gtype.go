@@ -274,9 +274,7 @@ func (e *ExprSlice) getGtype() *Gtype {
 }
 
 func (e *ExprIndex) getGtype() *Gtype {
-	//debugf("collection=%T", e.collection)
-	assertNotNil(e.collection.getGtype() != nil, e.token())
-	//debugf("collection.gtype=%v", e.collection.getGtype())
+	assert(e.collection.getGtype() != nil, e.token(), "collection type should not be nil")
 	gtype := e.collection.getGtype()
 	if gtype.typ == G_REL {
 		gtype = gtype.relation.gtype
@@ -307,9 +305,8 @@ func (e *ExprIndex) getSecondGtype() *Gtype {
 }
 
 func (e *ExprStructField) getGtype() *Gtype {
-	//debugf("e.strct =  %T, %s", e.strct, e.strct)
 	gstruct := e.strct.getGtype()
-	assertNotNil(gstruct != nil, e.tok)
+
 	assert(gstruct != gInt, e.tok, "struct should not be gInt")
 
 	var strctType *Gtype
