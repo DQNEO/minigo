@@ -57,9 +57,6 @@ func (ts *TokenStream) isEnd() bool {
 }
 
 func (tok *Token) String() string {
-	if GENERATION == 2 {
-		return tok.sval + " " + tok.filename
-	}
 	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
 		tok.sval, tok.filename, tok.line, tok.column)
 }
