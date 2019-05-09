@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 )
 
@@ -44,7 +45,6 @@ type TokenStream struct {
 func NewTokenStream(bs *ByteStream) *TokenStream {
 	tokens := tokenize(bs)
 	assert(len(tokens) > 0, nil, "tokens should have length")
-
 	return &TokenStream{
 		tokens: tokens,
 		index:  0,
@@ -585,7 +585,7 @@ func tokenize(_bs *ByteStream) []*Token {
 			panic("unknown char")
 		}
 		if debugToken {
-			dumpToken(tok)
+			tok.dump()
 		}
 		r = append(r, tok)
 	}
@@ -593,25 +593,7 @@ func tokenize(_bs *ByteStream) []*Token {
 	return r
 }
 
-func (tok *Token) render() string {
-	switch tok.typ {
-	case T_CHAR:
-		return fmt.Sprintf("'%s'", tok.sval)
-	case T_PUNCT:
-		return fmt.Sprintf("%s", tok.sval)
-	case T_STRING:
-		return fmt.Sprintf("\"%s\"", tok.sval)
-	default:
-		return fmt.Sprintf("%s", tok.sval)
-	}
+func (tok *Token) dump() {
+	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.sval)
+	os.Stderr.Write([]byte(s))
 }
-
-/*
-func renderTokens(tokens []*Token) {
-	debugf("==== Start Render Tokens ===")
-	for _, tok := range tokens {
-		debugf(tok.render())
-	}
-	debugf("==== End Render Tokens ===")
-}
-*/

@@ -9,11 +9,12 @@ var GENERATION int = 1
 
 var allScopes map[identifier]*scope
 
-var debugMode = false
+var debugMode = false // execute debugf() or not
 var debugToken = false
 
 var debugAst = false
 var debugParser = false
+var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
 var exit = false
@@ -43,6 +44,9 @@ func parseOpts(args []string) []string {
 		}
 		if opt == "-d" {
 			debugMode = true
+		}
+		if opt == "--tokenize-only" {
+			tokenizeOnly = true
 		}
 		if opt == "--parse-only" {
 			parseOnly = true
@@ -107,6 +111,14 @@ func main() {
 		return
 	}
 
+	if tokenizeOnly {
+		for _, sourceFile := range sourceFiles {
+			debugf("--- file:%s", sourceFile)
+			bs := NewByteStreamFromFile(sourceFile)
+			NewTokenStream(bs)
+		}
+		return
+	}
 	// analyze imports of the given go files
 	pForImport := &parser{}
 	var imported map[identifier]bool = map[identifier]bool{}

@@ -23,11 +23,6 @@ func debugf(format string, v ...interface{}) {
 	os.Stderr.Write(b)
 }
 
-func dumpToken(tok *Token) {
-	var s string = fmt.Sprintf("tok: type=%-8s, sval=\"%s\"\n", tok.typ, tok.sval)
-	os.Stderr.Write([]byte(s))
-}
-
 var debugNest int
 
 // States "To Be Implemented"
