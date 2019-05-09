@@ -9,7 +9,7 @@ func assertInterface(x interface{}) {
 
 }
 
-func dumpSlice(x []int) {
+func dumpSlice(x interface{}) {
 }
 
 func asComment(s string) {
