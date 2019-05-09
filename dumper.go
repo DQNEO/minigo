@@ -224,7 +224,11 @@ func (e *ExprVaArg) dump() {
 }
 
 func (e *ExprConversion) dump() {
-	panic("implement me")
+	debugf("conversion")
+	debugNest++
+	debugf("toType:%s", e.gtype.String())
+	e.expr.dump()
+	debugNest--
 }
 
 func (e *ExprStructLiteral) dump() {
