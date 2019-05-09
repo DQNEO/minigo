@@ -234,7 +234,10 @@ func (e *ExprConversion) dump() {
 func (e *ExprStructLiteral) dump() {
 	debugf("%s{", e.strctname.name)
 	for _, field := range e.fields {
-		debugf("  %v:%v", field.key, field.value)
+		debugf("  field %s:", field.key)
+		debugNest++
+		field.value.dump()
+		debugNest--
 	}
 	debugf("}")
 }
