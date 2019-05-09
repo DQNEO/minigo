@@ -5,13 +5,6 @@ import (
 	"os"
 )
 
-func debugln(s string) {
-	if !debugMode {
-		return
-	}
-	fmt.Printf("# %s\n", s)
-}
-
 func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
