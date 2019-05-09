@@ -1806,11 +1806,11 @@ func (p *parser) parseStructDef() *Gtype {
 		fieldname := tok.getIdent()
 		p.skip()
 		gtype := p.parseType()
-		fieldtype := *gtype
+		fieldtype := gtype
 		//fieldtype.origType = gtype
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = undefinedSize // will be calculated later
-		fields = append(fields, &fieldtype)
+		fields = append(fields, fieldtype)
 		p.expect(";")
 	}
 	// calc offset
