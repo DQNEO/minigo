@@ -172,7 +172,8 @@ func (ast *ExprUop) dump() {
 }
 
 func (a *ExprStructField) dump() {
-	debugf("%s.%s", a.strct, a.fieldname)
+	a.strct.dump()
+	debugf("  .%s", a.fieldname)
 }
 
 func (stmt *ExprCaseClause) dump() {
