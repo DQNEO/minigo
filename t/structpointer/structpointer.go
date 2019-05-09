@@ -51,10 +51,34 @@ func f1() {
 	fmt.Printf("%d\n", p.id-114) // 9
 }
 
+
+type Item struct {
+	id int
+}
+
+func f2() {
+	var items []*Item
+
+	for i:=10;i<13;i++ {
+		item := Item{
+			id:i,
+		}
+		var p *Item  = &item
+		// fmt.Printf("%p\n", p) // This should vary in each iteration.
+		items = append(items, p)
+	}
+
+	for _, item := range items {
+		fmt.Printf("%d\n", item.id) // 10,11,12
+	}
+
+}
+
 func main() {
 	literal()
 	assign()
 	f1()
+	f2()
 }
 
 type User struct {
