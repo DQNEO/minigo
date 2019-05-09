@@ -595,5 +595,6 @@ func tokenize(_bs *ByteStream) []*Token {
 
 func (tok *Token) dump() {
 	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.sval)
-	os.Stderr.Write([]byte(s))
+	var b []byte = []byte(s)
+	os.Stderr.Write(b)
 }
