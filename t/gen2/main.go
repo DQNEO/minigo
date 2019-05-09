@@ -12,10 +12,10 @@ var allScopes map[identifier]*scope
 var debugMode = true
 var debugToken = false
 
-var debugAst = false
+var debugAst = true
 var debugParser = false
 var tokenizeOnly = false
-var parseOnly = false
+var parseOnly = true
 var resolveOnly = false
 var exit = false
 
@@ -102,7 +102,7 @@ func main() {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	sourceFiles = []string{"t/hello/hello.go"}
+	sourceFiles = []string{"parser.go"}
 
 	if exit {
 		return
