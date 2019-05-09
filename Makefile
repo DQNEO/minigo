@@ -2,7 +2,7 @@
 # I use Docker like below.
 # docker run -it --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 
-all: minigo minigo2 /tmp/out
+all: /tmp/out minigo minigo2
 
 /tmp/out:
 	mkdir /tmp/out
