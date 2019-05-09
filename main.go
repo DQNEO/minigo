@@ -121,20 +121,22 @@ func main() {
 	}
 	// analyze imports of the given go files
 	pForImport := &parser{}
-	var imported map[identifier]bool = map[identifier]bool{}
+	var imported []string
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				imported[identifier(baseName)] = true
+				if !in_array(baseName, imported) {
+					imported = append(imported, baseName)
+				}
 			}
 		}
 	}
 
 	var importOS bool
-	_, importOS = imported["os"]
+	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
@@ -161,7 +163,8 @@ func main() {
 
 	stdPkgs := makeStdLib()
 
-	for pkgName, _ := range imported {
+	for _, spkgName := range imported {
+		pkgName := identifier(spkgName)
 		var pkgCode string
 		var ok bool
 		pkgCode, ok = stdPkgs[pkgName]
