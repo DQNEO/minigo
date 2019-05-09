@@ -149,7 +149,7 @@ func (gtype *Gtype) String() string {
 	case G_MAP:
 		return "map"
 	default:
-		errorf("gtype.String() error: type=%d", gtype.typ)
+		errorf("gtype.String() error: invalid gtype.type=%d", gtype.typ)
 	}
 	return ""
 }
