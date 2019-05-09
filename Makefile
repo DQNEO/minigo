@@ -2,7 +2,7 @@
 # I use Docker like below.
 # docker run -it --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 
-all: minigo /tmp/out
+all: minigo minigo2 /tmp/out
 
 /tmp/out:
 	mkdir /tmp/out
@@ -24,6 +24,7 @@ test1gen: all
 # 2nd gen assembly
 /tmp/out/minigo.s: *.go minigo
 	./minigo *.go > /tmp/out/minigo.s
+	cp /tmp/out/minigo.s minigo.s
 
 # 2nd gen compiler
 minigo2: /tmp/out/minigo.s
