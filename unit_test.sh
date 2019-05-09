@@ -35,7 +35,7 @@ function as_run {
 }
 
 function run_unit_test {
-    echo -n "unit_test $src ... "
+    echo -n "unit_test $basename ... "
     compile
     as_run 2>/dev/null
     if [[ $? -ne 0 ]];then
