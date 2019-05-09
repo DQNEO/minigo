@@ -1671,13 +1671,14 @@ func emitCopyStruct(left Expr) {
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
-	emit("# assignToStruct")
+	emit("# assignToStruct start")
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
 	assert(rhs == nil || (rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
+	emit("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
 		//debugf("%#v", fieldtype)
 		switch {
@@ -1730,6 +1731,8 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emitOffsetSave(lhs, regSize, fieldtype.offset)
 		}
 	}
+
+	emit("# initialize struct with zero values: end")
 
 	if rhs == nil {
 		return
@@ -1823,6 +1826,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "")
 	}
 
+	emit("# assignToStruct end")
 }
 
 const sliceOffsetForLen = 8
