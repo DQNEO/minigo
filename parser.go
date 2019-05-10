@@ -353,7 +353,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 }
 
 // https://golang.org/ref/spec#Type_assertions
-func (p *parser) parseTypeAssertion(e Expr) Expr {
+func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.expect("(")
@@ -389,7 +389,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		p.skip()
 		if p.peekToken().isPunct("(") {
 			// type assertion
-			return p.parseTypeAssertion(e)
+			return p.parseTypeAssertionOrTypeSwitchGuad(e)
 		}
 
 		// https://golang.org/ref/spec#Selectors
