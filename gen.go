@@ -235,15 +235,36 @@ func (a *ExprStructField) emitAddress() {
 	emit("add $%d, %%rax", field.offset)
 }
 
+func (structfield *ExprStructField) calcOffset() {
+	fieldType := structfield.getGtype()
+	if fieldType.offset != undefinedSize {
+		return
+	}
+
+	structType := structfield.strct.getGtype()
+	switch structType.getPrimType() {
+	case G_POINTER:
+		origType := structType.origType.relation.gtype
+		if origType.size == undefinedSize {
+			origType.calcStructOffset()
+		}
+	case G_STRUCT:
+		structType.calcStructOffset()
+	default:
+		errorf("invalid case")
+	}
+
+	if fieldType.offset == undefinedSize {
+		errorf("filed type %s [named %s] offset should not be minus.", fieldType.String(), structfield.fieldname)
+	}
+}
+
 func (a *ExprStructField) emit() {
 	emit("# ExprStructField.emit()")
+	a.calcOffset()
 	switch a.strct.getGtype().typ {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
-		// very dirty hack
-		if strcttype.size == undefinedSize {
-			strcttype.calcStructOffset()
-		}
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
@@ -1889,10 +1910,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		variable.emitOffsetLoad(size, offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
+		structfield.calcOffset()
 		fieldType := structfield.getGtype()
-		if fieldType.offset == undefinedSize {
-			errorf("filed type %s [named %s] offset should not be minus.", fieldType.String(), structfield.fieldname)
-		}
 		if structfield.strct.getGtype().typ == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
