@@ -9,6 +9,8 @@ do
     ./unit_test.sh minigo2 $name 2
     if [[ $? -ne 0 ]];then
         differ=1
+    else
+        echo $name >> success.txt
     fi
 done
 
