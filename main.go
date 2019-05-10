@@ -194,14 +194,17 @@ func main() {
 	}
 
 	if parseOnly {
+		if debugAst {
+			astFiles[len(astFiles)-1].dump()
+		}
 		return
 	}
 	p.resolve(universe)
-	if debugAst {
-		astFiles[len(astFiles)-1].dump()
-	}
 
 	if resolveOnly {
+		if debugAst {
+			astFiles[len(astFiles)-1].dump()
+		}
 		return
 	}
 

@@ -18,7 +18,7 @@ done
 echo tokinzer ok
 
 # Compare AST output
-for f in *.go
+for f in  debugbuiltin.go
 do
     ./minigo  --parse-only -d -a $f 2> /tmp/${f}.1.ast
     ./minigo2 --parse-only -d -a $f 2> /tmp/${f}.2.ast
