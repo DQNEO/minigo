@@ -1892,6 +1892,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		if structfield.strct.getGtype().typ == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
+			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
 			emit("add $%d, %%rax", fieldType.offset+offset)
 			reg := getReg(size)
 			emit("mov (%%rax), %%%s", reg)
