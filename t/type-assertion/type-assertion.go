@@ -54,11 +54,35 @@ func (p *Point2) calc() int {
 	return p.c * p.d
 }
 
-func main() {
+func f1()  {
 	var x int
 	x = do(true)
 	fmt.Printf("%d\n", x-2) // 1
 
 	x = do(false)
 	fmt.Printf("%d\n", x-4) // 2
+}
+
+func f2() {
+	var i myInterface = nil
+	var ok bool
+	var p *Point
+	p, ok = i.(*Point)
+	if !ok {
+		fmt.Printf("3\n") // 3
+	} else {
+		fmt.Printf("ERROR\n")
+	}
+
+	if p == nil {
+		fmt.Printf("4\n") // 4
+	} else {
+		fmt.Printf("ERROR\n")
+	}
+
+}
+
+func main() {
+	f1()
+	f2()
 }
