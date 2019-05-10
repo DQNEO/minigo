@@ -333,7 +333,15 @@ func (ast *StmtDefer) dump() {
 }
 
 func (e *ExprMapLiteral) dump() {
-	panic("implement me")
+	debugf("map literal T %s", e.gtype.String())
+	debugNest++
+	for _, element := range e.elements {
+		debugf("element key:")
+		element.key.dump()
+		debugf("element value:")
+		element.value.dump()
+	}
+	debugNest--
 }
 
 func (e *ExprConversionToInterface) dump() {

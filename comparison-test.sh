@@ -18,7 +18,7 @@ done
 echo tokinzer ok
 
 # Compare AST output
-for f in  debugbuiltin.go util.go debug.go byte_stream.go
+for f in  debugbuiltin.go util.go debug.go byte_stream.go scope.go
 do
     ./minigo  --parse-only -d -a $f 2> /tmp/${f}.1.ast
     ./minigo2 --parse-only -d -a $f 2> /tmp/${f}.2.ast
