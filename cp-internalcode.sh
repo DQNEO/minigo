@@ -5,7 +5,7 @@ code=$(cat internalcode/runtime.go)
 cat > internalcode.go <<EOF
 package main
 
-var internalRuntimeCode = \`
+var internalRuntimeCode string = \`
 $code
 \`
 EOF
