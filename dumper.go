@@ -220,7 +220,9 @@ func (e *ExprIndex) dump() {
 }
 
 func (e *ExprTypeAssertion) dump() {
-	panic("implement me:ExprTypeAssertion")
+	debugf("type assertion")
+	e.expr.dump()
+	debugf(".(%s)", e.gtype.String())
 }
 
 func (e *ExprVaArg) dump() {
@@ -248,7 +250,8 @@ func (e *ExprStructLiteral) dump() {
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
-	panic("implement me:ExprTypeSwitchGuard")
+	debugf("switch")
+	e.expr.dump()
 }
 
 func (f *StmtFor) dump() {
