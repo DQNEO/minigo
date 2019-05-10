@@ -184,7 +184,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type")
+	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type, but got " + strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
