@@ -124,6 +124,8 @@ func (gtype *Gtype) String() string {
 		return "NO_TYPE"
 	}
 	switch gtype.typ {
+	case G_DEPENDENT:
+		return "dependent"
 	case G_REL:
 		if gtype.relation.pkg == "" {
 			//errorf("pkg is empty: %s", gtype.relation.name)
