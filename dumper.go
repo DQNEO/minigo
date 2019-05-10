@@ -220,7 +220,7 @@ func (e *ExprIndex) dump() {
 }
 
 func (e *ExprTypeAssertion) dump() {
-	panic("implement me")
+	panic("implement me:ExprTypeAssertion")
 }
 
 func (e *ExprVaArg) dump() {
@@ -248,7 +248,7 @@ func (e *ExprStructLiteral) dump() {
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
-	panic("implement me")
+	panic("implement me:ExprTypeSwitchGuard")
 }
 
 func (f *StmtFor) dump() {
@@ -288,7 +288,7 @@ func (e *ExprCap) dump() {
 }
 
 func (e *ExprSliceLiteral) dump() {
-	panic("implement me")
+	panic("implement me: ExprSliceLiteral")
 }
 
 func (stmt *StmtReturn) dump() {
