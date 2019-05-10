@@ -342,9 +342,13 @@ func (e *ExprMapLiteral) dump() {
 	debugNest++
 	for _, element := range e.elements {
 		debugf("element key:")
+		debugNest++
 		element.key.dump()
+		debugNest--
 		debugf("element value:")
+		debugNest++
 		element.value.dump()
+		debugNest--
 	}
 	debugNest--
 }
