@@ -1890,6 +1890,9 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
+		if fieldType.offset == undefinedSize {
+			errorf("filed type %s [named %s] offset should not be minus.", fieldType.String(), structfield.fieldname)
+		}
 		if structfield.strct.getGtype().typ == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
