@@ -41,6 +41,33 @@ func f3() {
 	fmt.Printf("%d\n", x) // 2
 }
 
+func f4() {
+	var i myInterface
+
+	switch i.(type) {
+	case *Point:
+		fmt.Printf("ERROR\n")
+	default:
+		fmt.Printf("3\n")
+	}
+
+	switch i.(type) {
+	case nil:
+		fmt.Printf("4\n")
+	default:
+		fmt.Printf("ERROR\n")
+	}
+
+
+	switch i.(type) {
+	case nil:
+		fmt.Printf("5\n")
+	default:
+		fmt.Printf("ERROR")
+	}
+
+}
+
 type myInterface interface {
 	sum() int
 }
@@ -65,4 +92,5 @@ func (p *Point2) sum() int {
 
 func main() {
 	f3()
+	f4()
 }

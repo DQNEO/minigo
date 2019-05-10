@@ -1235,8 +1235,13 @@ func (stmt *StmtSwitch) emit() {
 		if stmt.isTypeSwitch {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				typeLabel := groot.getTypeLabel(gtype)
-				emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
+				if gtype.isNil() {
+					emit("mov $0, %%rax")
+				} else {
+					typeLabel := groot.getTypeLabel(gtype)
+					emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
+				}
+
 				emit("pop %%rcx # the subject type")
 				emit("push %%rcx # the subject value")
 				emitStringsEqual(true, "%rax", "%rcx")
