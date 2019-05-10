@@ -24,6 +24,7 @@ incr
 internal
 map-of-map
 map
+map2
 min
 multi
 newline
@@ -36,6 +37,7 @@ sprintf
 string-concat
 string-index
 string
+switch
 test
 var
 write
