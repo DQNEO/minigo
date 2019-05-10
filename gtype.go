@@ -120,6 +120,9 @@ func (gtype *Gtype) getSize() int {
 }
 
 func (gtype *Gtype) String() string {
+	if gtype == nil {
+		return "NO_TYPE"
+	}
 	switch gtype.typ {
 	case G_REL:
 		if gtype.relation.pkg == "" {

@@ -127,7 +127,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf("var %s T %s", ast.varname, ast.gtype.String())
+	debugf("var %s T %s", ast.varname, ast.getGtype().String())
 }
 
 func (ast *ExprConstVariable) dump() {
