@@ -52,6 +52,18 @@ type Gtype struct {
 	mapValue *Gtype // for map
 }
 
+func (gtype *Gtype) isNil() bool {
+	if gtype == nil {
+		return true
+	}
+	if gtype.typ == G_REL {
+		return gtype.relation.gtype == nil
+
+	}
+	return false
+}
+
+
 func (gtype *Gtype) getSource() *Gtype {
 	if gtype.typ == G_REL {
 		return gtype.relation.gtype.getSource()
@@ -108,6 +120,9 @@ func (gtype *Gtype) getSize() int {
 }
 
 func (gtype *Gtype) String() string {
+	if gtype == nil {
+		return "NO_TYPE"
+	}
 	switch gtype.typ {
 	case G_REL:
 		if gtype.relation.pkg == "" {

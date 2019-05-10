@@ -5,13 +5,6 @@ import (
 	"os"
 )
 
-func debugln(s string) {
-	if !debugMode {
-		return
-	}
-	fmt.Printf("# %s\n", s)
-}
-
 func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
@@ -28,11 +21,6 @@ func debugf(format string, v ...interface{}) {
 	s2 := fmt.Sprintf(format2, v...)
 	var b []byte = []byte(s2)
 	os.Stderr.Write(b)
-}
-
-func dumpToken(tok *Token) {
-	var s string = fmt.Sprintf("tok: type=%-8s, sval=\"%s\"\n", tok.typ, tok.sval)
-	os.Stderr.Write([]byte(s))
 }
 
 var debugNest int

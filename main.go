@@ -9,14 +9,16 @@ var GENERATION int = 1
 
 var allScopes map[identifier]*scope
 
-var debugMode = false
+var debugMode = false // execute debugf() or not
 var debugToken = false
 
 var debugAst = false
 var debugParser = false
+var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
 var exit = false
+var slientForStdlib = true
 
 func printVersion() {
 	println("minigo 0.1.0")
@@ -43,6 +45,9 @@ func parseOpts(args []string) []string {
 		}
 		if opt == "-d" {
 			debugMode = true
+		}
+		if opt == "--tokenize-only" {
+			tokenizeOnly = true
 		}
 		if opt == "--parse-only" {
 			parseOnly = true
@@ -107,22 +112,32 @@ func main() {
 		return
 	}
 
+	if tokenizeOnly {
+		for _, sourceFile := range sourceFiles {
+			debugf("--- file:%s", sourceFile)
+			bs := NewByteStreamFromFile(sourceFile)
+			NewTokenStream(bs)
+		}
+		return
+	}
 	// analyze imports of the given go files
 	pForImport := &parser{}
-	var imported map[identifier]bool = map[identifier]bool{}
+	var imported []string
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				imported[identifier(baseName)] = true
+				if !in_array(baseName, imported) {
+					imported = append(imported, baseName)
+				}
 			}
 		}
 	}
 
 	var importOS bool
-	_, importOS = imported["os"]
+	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*scope{}
@@ -132,6 +147,15 @@ func main() {
 
 	var bs *ByteStream
 	var astFiles []*SourceFile
+
+	var _debugAst bool
+	var _debugParer bool
+	if slientForStdlib {
+		_debugAst = debugAst
+		_debugParer = debugParser
+		debugAst = false
+		debugParser = false
+	}
 
 	// setup universe scopes
 	universe := newUniverse()
@@ -149,7 +173,8 @@ func main() {
 
 	stdPkgs := makeStdLib()
 
-	for pkgName, _ := range imported {
+	for _, spkgName := range imported {
+		pkgName := identifier(spkgName)
 		var pkgCode string
 		var ok bool
 		pkgCode, ok = stdPkgs[pkgName]
@@ -160,6 +185,10 @@ func main() {
 		compiledPackages[pkgName] = pkg
 	}
 
+	if slientForStdlib {
+		debugAst = _debugAst
+		debugParser = _debugParer
+	}
 	// initialize main package
 	var pkgname identifier = "main"
 	p.initPackage(pkgname)
@@ -179,6 +208,9 @@ func main() {
 	}
 
 	if parseOnly {
+		if debugAst {
+			astFiles[len(astFiles)-1].dump()
+		}
 		return
 	}
 	p.resolve(universe)

@@ -6,7 +6,7 @@ differ=0
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    ./unit_test.sh minigo $name
+    ./unit_test.sh minigo2 $name 2
     if [[ $? -ne 0 ]];then
         differ=1
     fi

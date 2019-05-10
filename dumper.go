@@ -127,7 +127,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf("var %s T %s", ast.varname, ast.gtype.String())
+	debugf("var %s T %s", ast.varname, ast.getGtype().String())
 }
 
 func (ast *ExprConstVariable) dump() {
@@ -152,7 +152,11 @@ func (ast *ExprStringLiteral) dump() {
 
 func (a *Relation) dump() {
 	assert(a != nil, nil, "ident shoud not be nil ")
-	assert(a.expr != nil, nil, "ident.expr shoud not be nil for " + string(a.name))
+	//assert(a.expr != nil, nil, "ident.expr shoud not be nil for " + string(a.name))
+	if a.expr == nil && a.gtype == nil {
+		debugf("rel %s (UNRESOLVED)" , a.name)
+		return
+	}
 	a.expr.dump()
 }
 
@@ -172,7 +176,8 @@ func (ast *ExprUop) dump() {
 }
 
 func (a *ExprStructField) dump() {
-	debugf("%s.%s", a.strct, a.fieldname)
+	a.strct.dump()
+	debugf("  .%s", a.fieldname)
 }
 
 func (stmt *ExprCaseClause) dump() {
@@ -215,7 +220,7 @@ func (e *ExprIndex) dump() {
 }
 
 func (e *ExprTypeAssertion) dump() {
-	panic("implement me")
+	panic("implement me:ExprTypeAssertion")
 }
 
 func (e *ExprVaArg) dump() {
@@ -224,19 +229,26 @@ func (e *ExprVaArg) dump() {
 }
 
 func (e *ExprConversion) dump() {
-	panic("implement me")
+	debugf("conversion")
+	debugNest++
+	debugf("toType:%s", e.gtype.String())
+	e.expr.dump()
+	debugNest--
 }
 
 func (e *ExprStructLiteral) dump() {
 	debugf("%s{", e.strctname.name)
 	for _, field := range e.fields {
-		debugf("  %v:%v", field.key, field.value)
+		debugf("  field %s:", field.key)
+		debugNest++
+		field.value.dump()
+		debugNest--
 	}
 	debugf("}")
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
-	panic("implement me")
+	panic("implement me:ExprTypeSwitchGuard")
 }
 
 func (f *StmtFor) dump() {
@@ -276,7 +288,7 @@ func (e *ExprCap) dump() {
 }
 
 func (e *ExprSliceLiteral) dump() {
-	panic("implement me")
+	panic("implement me: ExprSliceLiteral")
 }
 
 func (stmt *StmtReturn) dump() {
@@ -305,11 +317,11 @@ func (ast *StmtSatementList) dump() {
 }
 
 func (ast *StmtContinue) dump() {
-	panic("implement me")
+	panic("implement me: StmtContinue")
 }
 
 func (ast *StmtBreak) dump() {
-	panic("implement me")
+	panic("implement me: StmtBreak")
 }
 
 func (ast *StmtExpr) dump() {
@@ -317,13 +329,21 @@ func (ast *StmtExpr) dump() {
 }
 
 func (ast *StmtDefer) dump() {
-	panic("implement me")
+	panic("implement me: StmtDefer")
 }
 
 func (e *ExprMapLiteral) dump() {
-	panic("implement me")
+	debugf("map literal T %s", e.gtype.String())
+	debugNest++
+	for _, element := range e.elements {
+		debugf("element key:")
+		element.key.dump()
+		debugf("element value:")
+		element.value.dump()
+	}
+	debugNest--
 }
 
 func (e *ExprConversionToInterface) dump() {
-	panic("implement me")
+	panic("implement me: ExprConversionToInterface")
 }

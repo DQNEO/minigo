@@ -31,11 +31,11 @@ function as_run {
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     gcc -no-pie -o $bin_file $obj_file
     $bin_file $ARGS > $actual
-    diff -u $expected $actual
+    diff -uq $expected $actual
 }
 
 function run_unit_test {
-    echo -n "unit_test $src ... "
+    echo -n "unit_test $basename ... "
     compile
     as_run 2>/dev/null
     if [[ $? -ne 0 ]];then
