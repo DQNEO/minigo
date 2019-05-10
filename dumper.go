@@ -317,11 +317,11 @@ func (ast *StmtSatementList) dump() {
 }
 
 func (ast *StmtContinue) dump() {
-	panic("implement me")
+	panic("implement me: StmtContinue")
 }
 
 func (ast *StmtBreak) dump() {
-	panic("implement me")
+	panic("implement me: StmtBreak")
 }
 
 func (ast *StmtExpr) dump() {
@@ -329,7 +329,7 @@ func (ast *StmtExpr) dump() {
 }
 
 func (ast *StmtDefer) dump() {
-	panic("implement me")
+	panic("implement me: StmtDefer")
 }
 
 func (e *ExprMapLiteral) dump() {
@@ -345,5 +345,5 @@ func (e *ExprMapLiteral) dump() {
 }
 
 func (e *ExprConversionToInterface) dump() {
-	panic("implement me")
+	panic("implement me: ExprConversionToInterface")
 }
