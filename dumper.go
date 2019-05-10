@@ -334,7 +334,10 @@ func (ast *StmtExpr) dump() {
 }
 
 func (ast *StmtDefer) dump() {
-	panic("implement me: StmtDefer")
+	debugf("defer")
+	debugNest++
+	ast.expr.dump()
+	debugNest--
 }
 
 func (e *ExprMapLiteral) dump() {
