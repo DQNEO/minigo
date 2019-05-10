@@ -18,6 +18,7 @@ var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
 var exit = false
+var slientForStdlib = true
 
 func printVersion() {
 	println("minigo 0.1.0")
@@ -147,6 +148,15 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
+	var _debugAst bool
+	var _debugParer bool
+	if slientForStdlib {
+		_debugAst = debugAst
+		_debugParer = debugParser
+		debugAst = false
+		debugParser = false
+	}
+
 	// setup universe scopes
 	universe := newUniverse()
 	// inject runtime things into the universes
@@ -175,6 +185,10 @@ func main() {
 		compiledPackages[pkgName] = pkg
 	}
 
+	if slientForStdlib {
+		debugAst = _debugAst
+		debugParser = _debugParer
+	}
 	// initialize main package
 	var pkgname identifier = "main"
 	p.initPackage(pkgname)
