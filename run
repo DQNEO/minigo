@@ -3,4 +3,5 @@ set -ex
 make --silent
 
 ./minigo "$@" > /tmp/a.s
+cp /tmp/a.s a.s
 ./as /tmp/a.s
