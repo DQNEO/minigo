@@ -3,11 +3,11 @@ package main
 // built-in types
 const sizeOfInterface = 8 * 3
 
-var gInterface *Gtype = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
-var gInt  *Gtype  = &Gtype{typ: G_INT, size: 8}
-var gByte  *Gtype = &Gtype{typ: G_BYTE, size: 1}
-var gBool  *Gtype = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
-var gString  *Gtype = &Gtype{
+var gInterface = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
+var gInt  = &Gtype{typ: G_INT, size: 8}
+var gByte = &Gtype{typ: G_BYTE, size: 1}
+var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
+var gString = &Gtype{
 	typ:G_STRING,
 }
 
