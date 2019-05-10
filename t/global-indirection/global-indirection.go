@@ -5,14 +5,13 @@ import "fmt"
 var GlobalInt int = 1
 var GlobalPtr *int = &GlobalInt
 
-var pp1 *Point = &Point{x: 1, y: 2,}
-var pp2 *Point = &Point{x: 3, y: 4,}
+var pp1 *Point = &Point{x: 1, y: 2}
+var pp2 *Point = &Point{x: 3, y: 4}
 
 type Point struct {
 	x int
 	y int
 }
-
 
 func f1() {
 	fmt.Printf("%d\n", *GlobalPtr) // 1
@@ -24,18 +23,18 @@ func f2() {
 }
 
 type Gtype struct {
-	typ int
+	typ  int
 	size int
 }
 
-var gInt  = &Gtype{typ: 1, size: 8}
+var gInt = &Gtype{typ: 1, size: 8}
 
 type DeclFunc struct {
-	tok               string
-	pkg               string
-	receiver          *int
-	fname             string
-	rettypes          []*Gtype
+	tok      string
+	pkg      string
+	receiver *int
+	fname    string
+	rettypes []*Gtype
 }
 
 var builtinLen = &DeclFunc{
@@ -43,7 +42,7 @@ var builtinLen = &DeclFunc{
 }
 
 func f3() {
-	fmt.Printf("%d\n", len(builtinLen.rettypes) + 3) // 4
+	fmt.Printf("%d\n", len(builtinLen.rettypes)+3) // 4
 }
 
 func main() {
@@ -51,4 +50,3 @@ func main() {
 	f2()
 	f3()
 }
-

@@ -54,7 +54,7 @@ func (p *Point2) calc() int {
 	return p.c * p.d
 }
 
-func f1()  {
+func f1() {
 	var x int
 	x = do(true)
 	fmt.Printf("%d\n", x-2) // 1

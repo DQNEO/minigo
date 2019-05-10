@@ -154,7 +154,7 @@ func (a *Relation) dump() {
 	assert(a != nil, nil, "ident shoud not be nil ")
 	//assert(a.expr != nil, nil, "ident.expr shoud not be nil for " + string(a.name))
 	if a.expr == nil && a.gtype == nil {
-		debugf("rel %s (UNRESOLVED)" , a.name)
+		debugf("rel %s (UNRESOLVED)", a.name)
 		return
 	}
 	a.expr.dump()

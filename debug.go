@@ -17,7 +17,7 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 
-	var format2 string = string(indents)+format+"\n"
+	var format2 string = string(indents) + format + "\n"
 	s2 := fmt.Sprintf(format2, v...)
 	var b []byte = []byte(s2)
 	os.Stderr.Write(b)

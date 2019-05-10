@@ -24,16 +24,15 @@ func f1() {
 func f2() {
 	keyFoo := "15"
 	var lmap map[string]string = map[string]string{
-		keyFoo:   "10",
-		"17": "11",
+		keyFoo: "10",
+		"17":   "11",
 	}
 
 	fmt.Printf("9%s\n", lmap["noexists"])
 	fmt.Printf("%s\n", lmap["15"]) // 10
 	fmt.Printf("%s\n", lmap["17"]) // 11
 
-
-	fmt.Printf("%d\n", len(lmap) + 10) // 12
+	fmt.Printf("%d\n", len(lmap)+10) // 12
 
 	var lenmap int
 
@@ -42,13 +41,13 @@ func f2() {
 
 	fmt.Printf("%s\n", lmap["19"]) // 13
 
-	fmt.Printf("%d\n", lenmap + 11 ) // 14
+	fmt.Printf("%d\n", lenmap+11) // 14
 
 	lmap["15"] = "16"
 	lmap["17"] = "18"
 	lmap["19"] = "20"
 	for k, v := range lmap {
-		fmt.Printf("%s\n%s\n", k,v) // 15,16,17,18,19,20
+		fmt.Printf("%s\n%s\n", k, v) // 15,16,17,18,19,20
 	}
 }
 
@@ -69,7 +68,7 @@ func f3() {
 	if !ok {
 		fmt.Printf("%d\n", 23)
 	}
-	fmt.Printf("%d\n", val + 24) //24
+	fmt.Printf("%d\n", val+24) //24
 }
 
 var keyFoo2 string = "keyfoo"

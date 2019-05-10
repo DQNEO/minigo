@@ -6,21 +6,21 @@ func f1() {
 	var bytes []byte
 	var s string
 	s = string(bytes)
-	fmt.Printf("%s0\n", s) // 0
-	fmt.Printf("%d\n", len(bytes) + 1) // 1
-	fmt.Printf("%d\n", len(s) + 2) // 2
+	fmt.Printf("%s0\n", s)           // 0
+	fmt.Printf("%d\n", len(bytes)+1) // 1
+	fmt.Printf("%d\n", len(s)+2)     // 2
 }
 
 func f2() {
 	var s string
-	fmt.Printf("%s3\n", s) // 3
-	fmt.Printf("%d\n", len(s) + 4) // 4
+	fmt.Printf("%s3\n", s)       // 3
+	fmt.Printf("%d\n", len(s)+4) // 4
 }
 
 func f3() {
 	var s string = ""
-	fmt.Printf("%s5\n", s) // 5
-	fmt.Printf("%d\n", len(s) + 6) // 6
+	fmt.Printf("%s5\n", s)       // 5
+	fmt.Printf("%d\n", len(s)+6) // 6
 }
 
 func f4() {
@@ -28,7 +28,7 @@ func f4() {
 	var bytes []byte
 	bytes = []byte(s)
 	fmt.Printf("%s7\n", string(bytes)) // 7
-	fmt.Printf("%d\n", len(bytes) + 8) // 8
+	fmt.Printf("%d\n", len(bytes)+8)   // 8
 }
 
 func f5() {

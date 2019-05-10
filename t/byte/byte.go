@@ -42,7 +42,6 @@ func fappend() {
 	fmt.Printf("%s\n", chars) // 10
 }
 
-
 func main() {
 	ghello()
 	lworld()

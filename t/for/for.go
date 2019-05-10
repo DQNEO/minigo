@@ -21,7 +21,6 @@ func f2() {
 	}
 }
 
-
 func f3() {
 	var x int = 1
 	for {

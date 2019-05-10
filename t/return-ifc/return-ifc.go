@@ -15,15 +15,14 @@ func (a *A) emit() int {
 }
 
 func return_ifc() Expr {
-	a := &A{i:7}
+	a := &A{i: 7}
 	return a
 }
 
 func f1() {
 	x := return_ifc()
-	fmt.Printf("%d\n", x.emit() - 6)
+	fmt.Printf("%d\n", x.emit()-6)
 }
-
 
 /*
 func f2() int {

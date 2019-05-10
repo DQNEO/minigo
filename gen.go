@@ -1969,7 +1969,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		var expr Expr =  rel.expr
+		var expr Expr = rel.expr
 		emitSave3Elements(expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
@@ -2107,9 +2107,9 @@ func emitConversionToInterface(dynamicValue Expr) {
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
-	emit("pop %%rcx")          // dynamicValue
-	emit("mov %%rcx, (%%rax)") // store value to heap
-	emit("push %%rax # addr of dynamicValue")         // address
+	emit("pop %%rcx")                         // dynamicValue
+	emit("mov %%rcx, (%%rax)")                // store value to heap
+	emit("push %%rax # addr of dynamicValue") // address
 
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
@@ -2255,7 +2255,7 @@ func (variable *ExprVariable) saveSlice(offset int) {
 	emit("pop %%rax # 2nd")
 	variable.emitOffsetSave(8, offset+ptrSize, false)
 	emit("pop %%rax # 1st")
-	variable.emitOffsetSave(8, offset,true)
+	variable.emitOffsetSave(8, offset, true)
 }
 
 func (variable *ExprVariable) saveInterface(offset int) {
@@ -2396,7 +2396,7 @@ func (decl *DeclVar) emit() {
 }
 
 var eEmptyString = ExprStringLiteral{
-	val:"",
+	val: "",
 }
 
 func (decl *DeclType) emit() {
@@ -2810,33 +2810,33 @@ func (ast *StmtExpr) emit() {
 func (ast *StmtDefer) emit() {
 	emit("# defer")
 	/*
-	// arguments should be evaluated immediately
-	var args []Expr
-	switch ast.expr.(type) {
-	case *ExprMethodcall:
-		call := ast.expr.(*ExprMethodcall)
-		args = call.args
-	case *ExprFuncallOrConversion:
-		call := ast.expr.(*ExprFuncallOrConversion)
-		args = call.args
-	default:
-		errorft(ast.token(), "defer should be a funcall")
-	}
+		// arguments should be evaluated immediately
+		var args []Expr
+		switch ast.expr.(type) {
+		case *ExprMethodcall:
+			call := ast.expr.(*ExprMethodcall)
+			args = call.args
+		case *ExprFuncallOrConversion:
+			call := ast.expr.(*ExprFuncallOrConversion)
+			args = call.args
+		default:
+			errorft(ast.token(), "defer should be a funcall")
+		}
 	*/
-	labelStart := makeLabel()  + "_defer"
-	labelEnd := makeLabel()  + "_defer"
+	labelStart := makeLabel() + "_defer"
+	labelEnd := makeLabel() + "_defer"
 	ast.label = labelStart
 
 	emit("jmp %s", labelEnd)
 	emit("%s: # defer start", labelStart)
 
-	for i:=0 ; i < len(retRegi) ; i++ {
+	for i := 0; i < len(retRegi); i++ {
 		emit("push %%%s", retRegi[i])
 	}
 
 	ast.expr.emit()
 
-	for i:= len(retRegi) - 1 ; i >= 0 ; i-- {
+	for i := len(retRegi) - 1; i >= 0; i-- {
 		emit("pop %%%s", retRegi[i])
 	}
 
@@ -3065,7 +3065,7 @@ func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := e.arg
 	gtype := arg.getGtype()
-	assert(gtype != nil, e.token(), "gtype should not be  nil:\n" + fmt.Sprintf("%#v", arg))
+	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
 	switch {
 	case gtype.typ == G_ARRAY:
@@ -3222,7 +3222,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		case 24:
 			if slice.getGtype().elementType.getPrimType() == G_INTERFACE && valueToAppend.getGtype().getPrimType() != G_INTERFACE {
 				eConvertion := &ExprConversionToInterface{
-					tok: valueToAppend.token(),
+					tok:  valueToAppend.token(),
 					expr: valueToAppend,
 				}
 				funcall.args[1] = eConvertion
@@ -3465,7 +3465,7 @@ func emitRuntimeArgs() {
 	emit("mov runtimeArgc(%%rip), %%rbx # len")
 	emit("mov runtimeArgc(%%rip), %%rcx # cap")
 
-	emitFuncEpilogue(".runtime_args_noop_handler",nil)
+	emitFuncEpilogue(".runtime_args_noop_handler", nil)
 }
 
 func emitMainFunc(importOS bool) {
@@ -3495,7 +3495,7 @@ func emitMainFunc(importOS bool) {
 	emit("")
 	emit("mov $0, %%rax")
 	emit("call main.main")
-	emitFuncEpilogue("noop_handler", nil,)
+	emitFuncEpilogue("noop_handler", nil)
 
 	// makeSlice
 	emitLabel("%s:", ".makeSlice")
@@ -3623,7 +3623,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						switch value.(type) {
 						case *Relation:
 							rel := value.(*Relation)
-							vr,ok := rel.expr.(*ExprVariable)
+							vr, ok := rel.expr.(*ExprVariable)
 							if !ok {
 								errorft(value.token(), "cannot compile")
 							}
@@ -3651,18 +3651,18 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				values: lit.values,
 			}
 			var expr Expr = arrayLiteral
-			emitDataAddr(expr, depth) // emit underlying array
+			emitDataAddr(expr, depth)                       // emit underlying array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		default:
 			TBI(ptok, "unable to handle T=%s, value=%#v", gtype, value)
 		}
-	} else if primType == G_MAP || primType == G_INTERFACE  {
+	} else if primType == G_MAP || primType == G_INTERFACE {
 		// @TODO
 		emit(".quad 0")
 		emit(".quad 0")
 		emit(".quad 0")
-	} else if primType == G_BOOL  {
+	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
 			emit(".quad %d # %s %s", 0, gtype, containerName)
@@ -3670,7 +3670,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		}
 		val := evalIntExpr(value)
 		emit(".quad %d # %s %s", val, gtype, containerName)
-	} else if primType  == G_STRUCT {
+	} else if primType == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
 		for _, field := range gtype.relation.gtype.fields {
@@ -3737,16 +3737,16 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 
 // this logic is stolen from 8cc.
 func emitDataAddr(operand Expr, depth int) {
-	emit(".data %d", depth + 1)
-	label :=  makeLabel()
+	emit(".data %d", depth+1)
+	label := makeLabel()
 	emit("%s:", label)
-	doEmitData(nil, operand.getGtype(), operand, "", depth + 1)
+	doEmitData(nil, operand.getGtype(), operand, "", depth+1)
 	emit(".data %d", depth)
 	emit(".quad %s", label)
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitLabel("# emitGlobal for %s" , decl.variable.varname)
+	emitLabel("# emitGlobal for %s", decl.variable.varname)
 	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
 
@@ -3758,12 +3758,12 @@ func (decl *DeclVar) emitGlobal() {
 }
 
 type IrRoot struct {
-	vars                []*DeclVar
-	funcs               []*DeclFunc
-	stringLiterals      []*ExprStringLiteral
-	methodTable         map[int][]string
-	uniquedDTypes []string
-	importOS            bool
+	vars           []*DeclVar
+	funcs          []*DeclFunc
+	stringLiterals []*ExprStringLiteral
+	methodTable    map[int][]string
+	uniquedDTypes  []string
+	importOS       bool
 }
 
 var groot *IrRoot
@@ -3811,7 +3811,7 @@ func (root *IrRoot) emit() {
 
 	emit("")
 	emitComment("Dynamic Types")
-	for dynamicTypeId,gs := range root.uniquedDTypes {
+	for dynamicTypeId, gs := range root.uniquedDTypes {
 		label := fmt.Sprintf("DT%d", dynamicTypeId)
 		emitLabel(".%s:", label)
 		emit(".string \"%s\"", gs)

@@ -7,8 +7,8 @@ type GTYPE_TYPE int
 const undefinedSize = -1
 
 const (
-	G_UNKOWNE GTYPE_TYPE  = iota
-	G_DEPENDENT // depends on other expression
+	G_UNKOWNE   GTYPE_TYPE = iota
+	G_DEPENDENT            // depends on other expression
 	G_REL
 	// below are primitives which are declared in the universe block
 	G_INT
@@ -62,7 +62,6 @@ func (gtype *Gtype) isNil() bool {
 	}
 	return false
 }
-
 
 func (gtype *Gtype) getSource() *Gtype {
 	if gtype.typ == G_REL {
@@ -184,7 +183,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type, but got " + strct.String())
+	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type, but got "+strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int

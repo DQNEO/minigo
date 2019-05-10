@@ -273,15 +273,14 @@ type stdpkg struct {
 
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
-	root := &IrRoot{
-	}
+	root := &IrRoot{}
 
 	var declvars []*DeclVar
 	for _, pkg := range stdpkgs {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
-					declvars= append(declvars, decl.vardecl)
+					declvars = append(declvars, decl.vardecl)
 				} else if decl.funcdecl != nil {
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}

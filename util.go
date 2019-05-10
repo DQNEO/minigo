@@ -8,7 +8,7 @@ func getBaseNameFromImport(path string) string {
 		words := strings.Split(path, "/")
 		r = words[len(words)-1]
 	} else {
-		r =  path
+		r = path
 	}
 
 	return r

@@ -23,11 +23,10 @@ func f2() {
 
 func f3() {
 	s := strings.Split("foo/bar", "/")
-	fmt.Printf("%d\n", len(s) + 1) // 3
-	fmt.Printf("%s\n", s[0]) // foo
-	fmt.Printf("%s\n", s[1]) // bar
+	fmt.Printf("%d\n", len(s)+1) // 3
+	fmt.Printf("%s\n", s[0])     // foo
+	fmt.Printf("%s\n", s[1])     // bar
 }
-
 
 func main() {
 	f1()

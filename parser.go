@@ -10,19 +10,18 @@ const __func__ string = "__func__"
 
 type parser struct {
 	// per function or block
-	currentFunc         *DeclFunc
-	localvars           []*ExprVariable
-	requireBlock        bool // workaround for parsing "{" as a block starter
-	inCase              int  // > 0  while in reading case compound stmts
-	constSpecIndex      int
-	currentForStmt      *StmtFor
+	currentFunc    *DeclFunc
+	localvars      []*ExprVariable
+	requireBlock   bool // workaround for parsing "{" as a block starter
+	inCase         int  // > 0  while in reading case compound stmts
+	constSpecIndex int
+	currentForStmt *StmtFor
 
 	// per file
-	tokenStream         *TokenStream
-	packageBlockScope   *scope
-	currentScope        *scope
-	importedNames       map[identifier]bool
-
+	tokenStream       *TokenStream
+	packageBlockScope *scope
+	currentScope      *scope
+	importedNames     map[identifier]bool
 
 	// per package
 	currentPackageName  identifier
@@ -32,9 +31,9 @@ type parser struct {
 	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
-	scopes         map[identifier]*scope
-	stringLiterals []*ExprStringLiteral
-	allNamedTypes  []*DeclType
+	scopes          map[identifier]*scope
+	stringLiterals  []*ExprStringLiteral
+	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
 }
 
@@ -965,7 +964,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		name:      newName,
 		val:       val,
 		iotaIndex: iotaIndex,
-		gtype: gtype,
+		gtype:     gtype,
 	}
 
 	p.currentScope.setConst(newName, variable)
@@ -1087,7 +1086,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	ptok := p.expectKeyword("for")
 
 	var r = &StmtFor{
-		tok: ptok,
+		tok:   ptok,
 		outer: p.currentForStmt,
 	}
 	p.currentForStmt = r
@@ -1174,7 +1173,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.requireBlock = false
 	p.expect("{")
 	var r = &StmtFor{
-		tok: tokRange,
+		tok:   tokRange,
 		outer: p.currentForStmt,
 		rng: &ForRangeClause{
 			tok:                 tokRange,
@@ -1249,10 +1248,10 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 		exprs = nil
 	}
 	return &StmtReturn{
-		tok:      ptok,
-		exprs:    exprs,
-		rettypes: p.currentFunc.rettypes,
-		labelDeferHandler:p.currentFunc.labelDeferHandler,
+		tok:               ptok,
+		exprs:             exprs,
+		rettypes:          p.currentFunc.rettypes,
+		labelDeferHandler: p.currentFunc.labelDeferHandler,
 	}
 }
 
@@ -1584,14 +1583,14 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				sliceType := &Gtype{
-					typ: G_SLICE,
-					elementType:gtype,
+					typ:         G_SLICE,
+					elementType: gtype,
 				}
 				variable := &ExprVariable{
-					tok:     tok,
-					varname: pname,
-					gtype:   sliceType,
-					isVariadic:true,
+					tok:        tok,
+					varname:    pname,
+					gtype:      sliceType,
+					isVariadic: true,
 				}
 				params = append(params, variable)
 				p.currentScope.setVar(pname, variable)
@@ -1652,7 +1651,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok := p.expectKeyword("func")
 
 	p.localvars = nil
-	assert(len(p.localvars) == 0,  ptok,"localvars should be zero")
+	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
 	var isMethod bool
 	p.enterNewScope("func")
 
@@ -2018,7 +2017,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 
 	return &SourceFile{
 		tok:           packageClause.tok,
-		name: bs.filename,
+		name:          bs.filename,
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
