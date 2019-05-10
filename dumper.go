@@ -288,7 +288,12 @@ func (e *ExprCap) dump() {
 }
 
 func (e *ExprSliceLiteral) dump() {
-	panic("implement me: ExprSliceLiteral")
+	debugf("slice %s", e.gtype.String())
+	debugNest++
+	for _, v := range e.values {
+		v.dump()
+	}
+	debugNest--
 }
 
 func (stmt *StmtReturn) dump() {
