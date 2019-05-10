@@ -573,10 +573,31 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emitStringsEqual(equal, "%rcx", "%rax")
 }
 
+func emitConvertNilToEmptyString(regi string) {
+	emit("# emitConvertNilToEmptyString")
+	emit("mov %s, %%rax", regi)
+	emit("push %%rax")
+	emit("# convert nil to an empty string")
+	emit("test %%rax, %%rax")
+	emit("pop %%rax")
+	labelEnd := makeLabel()
+	emit("jne %s # jump if not nil", labelEnd)
+	emit("# if nil then")
+	emitEmptyString()
+	emit("%s:", labelEnd)
+}
+
 // call strcmp
 func emitStringsEqual(equal bool, leftReg string, rightReg string) {
+	emit("push %s", rightReg) // stash
+
+	emitConvertNilToEmptyString(leftReg)
 	emit("mov %s, %%rsi", leftReg)
-	emit("mov %s, %%rdi", rightReg)
+
+	emit("pop %%rax # right string")
+	emitConvertNilToEmptyString("%rax")
+
+	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
 	emit("call strcmp")
 	emit("cmp $0, %%rax") // retval == 0
@@ -2732,10 +2753,15 @@ func (e *ExprTypeAssertion) emit() {
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
 		emitStringsEqual(true, "%rax", "%rcx")
 
-		emit("mov %%rax, %%rbx") // move flag
+		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
 		// @TODO consider big data like slice, struct, etd
-		emit("pop %%rax")          // load ptr
+		emit("pop %%rax # load ptr")
+		emit("mov %%rax, %%rcx")
+		emit("test %%rcx, %%rcx")
+		labelEnd := makeLabel()
+		emit("je %s # jmp if nil", labelEnd)
 		emit("mov (%%rax), %%rax") // deref
+		emitLabel("%s:", labelEnd)
 	}
 }
 
