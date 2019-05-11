@@ -884,6 +884,7 @@ func (p *parser) parseType() *Gtype {
 
 // local decl infer
 func (decl *DeclVar) infer() {
+	debugf("infering DeclVar")
 	gtype := decl.initval.getGtype()
 	assertNotNil(gtype != nil, decl.initval.token())
 	decl.variable.gtype = gtype
@@ -1043,6 +1044,7 @@ func (p *parser) exitForBlock() {
 }
 
 func (clause *ForRangeClause) infer() {
+	debugf("infering ForRangeClause")
 	collectionType := clause.rangeexpr.getGtype()
 	//debugf("collectionType = %s", collectionType)
 	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
@@ -2027,6 +2029,7 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 }
 
 func (ast *StmtShortVarDecl) infer() {
+	debugf("infering StmtShortVarDecl")
 	var rightTypes []*Gtype
 	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
@@ -2122,6 +2125,7 @@ func (p *parser) resolveMethods() {
 
 //  infer recursively all the types of global variables
 func (variable *ExprVariable) infer() {
+	debugf("infering ExprVariable")
 	if variable.gtype.typ != G_DEPENDENT {
 		// done
 		return
