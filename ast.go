@@ -13,10 +13,6 @@ type Stmt interface {
 	dump()
 }
 
-type Inferer interface {
-	infer()
-}
-
 type Node interface {
 	token() *Token
 }
