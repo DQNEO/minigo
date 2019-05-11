@@ -339,11 +339,11 @@ func (ast *StmtSatementList) dump() {
 }
 
 func (ast *StmtContinue) dump() {
-	panic("implement me: StmtContinue")
+	debugf("continue")
 }
 
 func (ast *StmtBreak) dump() {
-	panic("implement me: StmtBreak")
+	debugf("break")
 }
 
 func (ast *StmtExpr) dump() {
