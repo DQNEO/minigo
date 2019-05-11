@@ -1989,7 +1989,7 @@ func (p *parser) resolve(universe *scope) {
 		p.tryResolve("", rel)
 	}
 
-	debugf("resolving packageMethods ...")
+	debugf("resolving packageMethods %s ...", p.packageName)
 	p.resolveMethods()
 	debugf("inferring types ...")
 
