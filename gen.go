@@ -2592,7 +2592,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
 		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 		}
 		return funcref.funcdef.rettypes
 	}
@@ -2629,7 +2629,7 @@ func (methodCall *ExprMethodcall) emit() {
 
 	funcref, ok := origType.methods[methodCall.fname]
 	if !ok {
-		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype())
+		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
