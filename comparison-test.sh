@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -e
 # test tokenizer
 make
 
@@ -24,7 +23,7 @@ do
     ./minigo  --parse-only -d -a $f 2> /tmp/${f}.1.ast
     ./minigo2 --parse-only -d -a $f 2> /tmp/${f}.2.ast
 
-    diff /tmp/${f}.1.ast /tmp/${f}.2.ast
+    diff /tmp/${f}.1.ast /tmp/${f}.2.ast || exit 1
 done
 
 echo parser ok
