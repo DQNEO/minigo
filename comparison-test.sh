@@ -20,6 +20,7 @@ echo tokinzer ok
 for f in  debugbuiltin.go util.go debug.go byte_stream.go scope.go \
     internalcode.go predeclare.go stdlib.go main.go dumper.go gtype.go ast.go token.go
 do
+    echo parse $f
     ./minigo  --parse-only -d -a $f 2> /tmp/${f}.1.ast
     ./minigo2 --parse-only -d -a $f 2> /tmp/${f}.2.ast
 
