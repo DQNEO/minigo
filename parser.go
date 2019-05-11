@@ -2104,7 +2104,7 @@ func (p *parser) resolve(universe *scope) {
 
 	debugf("resolving methods ...")
 	p.resolveMethods()
-	debugf("inferring methods ...")
+	debugf("inferring types ...")
 	p.inferTypes()
 }
 
@@ -2144,9 +2144,11 @@ func (variable *ExprVariable) infer() {
 }
 
 func (p *parser) inferTypes() {
+	debugf("infering globals")
 	for _, variable := range p.globaluninferred {
 		variable.infer()
 	}
+	debugf("infering locals")
 	for _, ast := range p.localuninferred {
 		ast.infer()
 	}
