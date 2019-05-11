@@ -28,4 +28,11 @@ do
     echo "ok"
 done
 
+echo -n "parsing *.go ...  "
+./minigo  --parse-only -d -a *.go 2> /tmp/all.1.ast
+./minigo2 --parse-only -d -a *.go 2> /tmp/all.2.ast
+
+diff /tmp/all.1.ast /tmp/all.2.ast || exit 1
+echo "ok"
+
 echo "parser ok"
