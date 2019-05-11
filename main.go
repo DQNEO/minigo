@@ -209,14 +209,18 @@ func main() {
 
 	if parseOnly {
 		if debugAst {
-			astFiles[len(astFiles)-1].dump()
+			for _, af := range astFiles {
+				af.dump()
+			}
 		}
 		return
 	}
 	debugf("resolving main package...")
 	p.resolve(universe)
 	if debugAst {
-		astFiles[len(astFiles)-1].dump()
+		for _, af := range astFiles {
+			af.dump()
+		}
 	}
 
 	if resolveOnly {
