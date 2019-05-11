@@ -24,11 +24,11 @@ type parser struct {
 	importedNames     map[identifier]bool
 
 	// per package
-	currentPackageName  identifier
-	methods             map[identifier]methods
-	unresolvedRelations []*Relation
-	globaluninferred    []*ExprVariable
-	localuninferred     []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	packageName                identifier
+	packageMethods             map[identifier]methods
+	packageUnresolvedRelations []*Relation
+	packageUninferredGlobals   []*ExprVariable
+	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
 	scopes          map[identifier]*scope
@@ -49,11 +49,11 @@ func (p *parser) clearLocalState() {
 type methods map[identifier]*ExprFuncRef
 
 func (p *parser) initPackage(pkgname identifier) {
-	p.currentPackageName = pkgname
-	p.methods = map[identifier]methods{}
-	p.unresolvedRelations = nil
-	p.globaluninferred = nil
-	p.localuninferred = nil
+	p.packageName = pkgname
+	p.packageMethods = map[identifier]methods{}
+	p.packageUnresolvedRelations = nil
+	p.packageUninferredGlobals = nil
+	p.packageUninferredLocals = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -216,7 +216,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	rel := &Relation{
 		tok:  firstIdentToken,
 		name: firstIdent,
-		pkg:  p.currentPackageName, // @TODO is this right?
+		pkg:  p.packageName, // @TODO is this right?
 	}
 	if rel.name == "__func__" {
 		sliteral := &ExprStringLiteral{
@@ -815,7 +815,7 @@ func (p *parser) parseType() *Gtype {
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
-				pkg:  p.currentPackageName,
+				pkg:  p.packageName,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -909,10 +909,10 @@ func (p *parser) parseVarDecl() *DeclVar {
 	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
 		tok: ptok,
-		pkg: p.currentPackageName,
+		pkg: p.packageName,
 		varname: &Relation{
 			expr: variable,
-			pkg:  p.currentPackageName,
+			pkg:  p.packageName,
 		},
 		variable: variable,
 		initval:  initval,
@@ -923,9 +923,9 @@ func (p *parser) parseVarDecl() *DeclVar {
 				typ:          G_DEPENDENT,
 				dependendson: initval,
 			}
-			p.globaluninferred = append(p.globaluninferred, variable)
+			p.packageUninferredGlobals = append(p.packageUninferredGlobals, variable)
 		} else {
-			p.localuninferred = append(p.localuninferred, r)
+			p.packageUninferredLocals = append(p.packageUninferredLocals, r)
 		}
 	}
 	p.currentScope.setVar(newName, variable)
@@ -1141,7 +1141,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	}
 	p.currentForStmt = r
 	if infer {
-		p.localuninferred = append(p.localuninferred, r.rng)
+		p.packageUninferredLocals = append(p.packageUninferredLocals, r.rng)
 	}
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
@@ -1308,7 +1308,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.localuninferred = append(p.localuninferred, r)
+	p.packageUninferredLocals = append(p.packageUninferredLocals, r)
 	return r
 }
 
@@ -1635,7 +1635,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	r := &DeclFunc{
 		tok:        ptok,
-		pkg:        p.currentPackageName,
+		pkg:        p.packageName,
 		receiver:   receiver,
 		fname:      fname,
 		rettypes:   rettypes,
@@ -1656,13 +1656,13 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.typ == G_REL, "methods must belong to a named type")
+		p.assert(typeToBelong.typ == G_REL, "packageMethods must belong to a named type")
 		var methods methods
 		var ok bool
-		methods, ok = p.methods[typeToBelong.relation.name]
+		methods, ok = p.packageMethods[typeToBelong.relation.name]
 		if !ok {
 			methods = map[identifier]*ExprFuncRef{}
-			p.methods[typeToBelong.relation.name] = methods
+			p.packageMethods[typeToBelong.relation.name] = methods
 		}
 		methods[fname] = ref
 	} else {
@@ -1837,7 +1837,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 			}
 		} else {
 			if rel.name != "_" {
-				p.unresolvedRelations = append(p.unresolvedRelations, rel)
+				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
 			}
 		}
 	} else {
@@ -1984,25 +1984,25 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
-	for _, rel := range p.unresolvedRelations {
+	for _, rel := range p.packageUnresolvedRelations {
 		debugf("resolving %s ...", rel.name)
 		p.tryResolve("", rel)
 	}
 
-	debugf("resolving methods ...")
+	debugf("resolving packageMethods ...")
 	p.resolveMethods()
 	debugf("inferring types ...")
 
-	inferTypes(p.globaluninferred, p.localuninferred)
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 }
 
-// copy methods from p.nameTypes to gtype.methods of each type
+// copy packageMethods from p.nameTypes to gtype.packageMethods of each type
 func (p *parser) resolveMethods() {
-	for typeName, methods := range p.methods {
+	for typeName, methods := range p.packageMethods {
 		gtype := p.packageBlockScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", p.packageBlockScope.idents)
-			errorf("typaneme %s is not found in the package scope %s", typeName, p.currentPackageName)
+			errorf("typaneme %s is not found in the package scope %s", typeName, p.packageName)
 		}
 		gtype.methods = methods
 	}
