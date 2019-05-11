@@ -181,16 +181,30 @@ func (a *ExprStructField) dump() {
 }
 
 func (stmt *ExprCaseClause) dump() {
-	//stmt.exprs.dump()
-	//stmt.compound.dump()
+	debugf("case")
+	debugNest++
+	for _, expr := range stmt.exprs {
+		expr.dump()
+	}
+	for _, gtype := range stmt.gtypes {
+		debugf("%s", gtype.String())
+	}
+	stmt.compound.dump()
+	debugNest--
 }
 
 func (stmt *StmtSwitch) dump() {
-	stmt.cond.dump()
-	for _, c := range stmt.cases {
-		c.dump()
+	debugf("switch")
+	if stmt.cond != nil {
+		stmt.cond.dump()
 	}
-	//stmt.dflt.dump()
+	for _, _case := range stmt.cases {
+		_case.dump()
+	}
+	if stmt.dflt != nil {
+		debugf("default")
+		stmt.dflt.dump()
+	}
 }
 
 func (e *ExprNilLiteral) dump() {
