@@ -18,7 +18,8 @@ echo tokinzer ok
 
 # Compare AST output
 for f in  debugbuiltin.go util.go debug.go byte_stream.go scope.go \
-    internalcode.go predeclare.go stdlib.go main.go dumper.go gtype.go ast.go token.go
+    internalcode.go predeclare.go stdlib.go main.go dumper.go gtype.go ast.go token.go \
+    parser.go
 do
     echo parse $f
     ./minigo  --parse-only -d -a $f 2> /tmp/${f}.1.ast
