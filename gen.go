@@ -2949,33 +2949,31 @@ type IrInterfaceMethodCall struct {
 
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emit interface method call \"%s\"", call.methodName)
-	if true {
-		mapType := &Gtype{
-			typ: G_MAP,
-			mapKey: &Gtype{
-				typ: G_STRING,
-			},
-			mapValue: &Gtype{
-				typ: G_STRING,
-			},
-		}
-		emit("# emit receiverTypeId of %s", call.receiver.getGtype())
-		emitOffsetLoad(call.receiver, ptrSize, ptrSize)
-		emit("imul $8, %%rax")
-		emit("push %%rax")
-		emit("lea receiverTypes(%%rip), %%rax")
-		emit("pop %%rcx")
-		emit("add %%rcx, %%rax")
-		emit("# find method %s", call.methodName)
-		emit("mov (%%rax), %%r10") // address of receiverType
-
-		emit("mov $128, %%rax")  // copy len
-		emit("mov %%rax, %%r11") // copy len
-
-		emit("lea .M%s, %%rax", call.methodName) // index value
-		emit("mov %%rax, %%r12")                 // index value
-		emitMapGet(mapType, false)
+	mapType := &Gtype{
+		typ: G_MAP,
+		mapKey: &Gtype{
+			typ: G_STRING,
+		},
+		mapValue: &Gtype{
+			typ: G_STRING,
+		},
 	}
+	emit("# emit receiverTypeId of %s", call.receiver.getGtype())
+	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
+	emit("imul $8, %%rax")
+	emit("push %%rax")
+	emit("lea receiverTypes(%%rip), %%rax")
+	emit("pop %%rcx")
+	emit("add %%rcx, %%rax")
+	emit("# find method %s", call.methodName)
+	emit("mov (%%rax), %%r10") // address of receiverType
+
+	emit("mov $128, %%rax")  // copy len
+	emit("mov %%rax, %%r11") // copy len
+
+	emit("lea .M%s, %%rax", call.methodName) // index value
+	emit("mov %%rax, %%r12")                 // index value
+	emitMapGet(mapType, false)
 
 	emit("push %%rax")
 
