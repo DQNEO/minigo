@@ -216,12 +216,18 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	debugf("ExprIndex:")
+	debugf("ExprSlice:")
 	debugNest++
 	e.collection.dump()
-	e.low.dump()
-	e.high.dump()
-	e.max.dump()
+	if e.low != nil {
+		e.low.dump()
+	}
+	if e.high != nil {
+		e.high.dump()
+	}
+	if e.max != nil {
+		e.max.dump()
+	}
 	debugNest--
 }
 
