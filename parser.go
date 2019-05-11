@@ -2096,10 +2096,13 @@ func (ast *StmtShortVarDecl) infer() {
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.unresolvedRelations {
+		debugf("resolving %s ...", rel.name)
 		p.tryResolve("", rel)
 	}
 
+	debugf("resolving methods ...")
 	p.resolveMethods()
+	debugf("inferring methods ...")
 	p.inferTypes()
 }
 

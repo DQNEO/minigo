@@ -213,6 +213,7 @@ func main() {
 		}
 		return
 	}
+	debugf("resolving main package...")
 	p.resolve(universe)
 	if debugAst {
 		astFiles[len(astFiles)-1].dump()
