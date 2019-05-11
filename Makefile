@@ -23,7 +23,8 @@ test1gen: all
 
 # 2nd gen assembly
 /tmp/out/minigo.s: *.go minigo
-	./minigo *.go > /tmp/out/minigo.s
+	# Exclude _debugbuiltin.go
+	./minigo [a-z]*.go > /tmp/out/minigo.s
 	cp /tmp/out/minigo.s minigo.s
 
 # 2nd gen compiler
