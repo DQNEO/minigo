@@ -474,7 +474,8 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	if variable.isGlobal {
 		emitGsave(size, variable.varname, offset)
 	} else {
-		emitLsave(size, variable.offset+offset)
+		comment := "save to " + string(variable.varname)
+		emitLsave(size, variable.offset+offset, comment)
 	}
 }
 
@@ -1442,9 +1443,9 @@ func getReg(regSize int) string {
 	return reg
 }
 
-func emitLsave(regSize int, loff int) {
+func emitLsave(regSize int, loff int, comment string) {
 	reg := getReg(regSize)
-	emit("mov %%%s, %d(%%rbp)", reg, loff)
+	emit("mov %%%s, %d(%%rbp) # %s", reg, loff, comment)
 }
 
 func emitGsave(regSize int, varname identifier, offset int) {
@@ -2137,7 +2138,8 @@ func (decl *DeclVar) emit() {
 			}
 		}
 		rhs.emit()
-		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset)
+		comment := "initialize " + string(decl.variable.varname)
+		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset, comment)
 	}
 }
 
