@@ -303,16 +303,16 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
 		f.rng.rangeexpr.emit()
-		emit("mov %%rax, %%rcx")
+		emit("mov %%rax, %%rcx # ptr")
 
 		emit("## mapCounter.emit()")
 		mapCounter.emit()
 
 		//assert(f.rng.valuevar.getGtype().getSize() <= 8, f.rng.token(), "invalid size")
 		emit("## eval value")
-		emit("imul $16, %%rax")
-		emit("add $8, %%rax")
-		emit("add %%rax, %%rcx")
+		emit("imul $16, %%rax  # counter * 16")
+		emit("add $8, %%rax    # counter * 16 + 8")
+		emit("add %%rax, %%rcx # mapHead + (counter * 16 + 8)")
 		emit("mov (%%rcx), %%rdx")
 
 		switch f.rng.valuevar.getGtype().getPrimType() {
