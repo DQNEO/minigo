@@ -1880,7 +1880,9 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 				errorft(rel.token(), "Bad type relbody %v", relbody)
 			}
 		} else {
-			p.unresolvedRelations = append(p.unresolvedRelations, rel)
+			if rel.name != "_" {
+				p.unresolvedRelations = append(p.unresolvedRelations, rel)
+			}
 		}
 	} else {
 		// foreign package
