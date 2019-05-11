@@ -1992,7 +1992,8 @@ func (p *parser) resolve(universe *scope) {
 	debugf("resolving methods ...")
 	p.resolveMethods()
 	debugf("inferring types ...")
-	p.inferTypes()
+
+	inferTypes(p.globaluninferred, p.localuninferred)
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
