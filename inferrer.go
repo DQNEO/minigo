@@ -5,13 +5,13 @@ type Inferrer interface {
 	infer()
 }
 
-func inferTypes(globaluninferred []*ExprVariable, localuninferred []Inferrer) {
+func inferTypes(globals []*ExprVariable, locals []Inferrer) {
 	debugf("infering globals")
-	for _, variable := range globaluninferred {
+	for _, variable := range globals {
 		variable.infer()
 	}
 	debugf("infering locals")
-	for _, ast := range localuninferred {
+	for _, ast := range locals {
 		ast.infer()
 	}
 }
