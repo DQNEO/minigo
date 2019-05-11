@@ -2441,12 +2441,12 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	emit("")
 }
 
-func loadCollectIndex(array Expr, index Expr, offset int) {
+func loadCollectIndex(collection Expr, index Expr, offset int) {
 	emit("# loadCollectIndex")
-	if array.getGtype().typ == G_ARRAY {
-		elmType := array.getGtype().elementType
-		emit("# array.emit()")
-		array.emit()       // emit address
+	if collection.getGtype().typ == G_ARRAY {
+		elmType := collection.getGtype().elementType
+		emit("# collection.emit()")
+		collection.emit()  // emit address
 		emit("push %%rax") // store address of variable
 
 		index.emit()
@@ -2463,7 +2463,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
-		if array.getGtype().elementType.getPrimType() == G_INTERFACE {
+		if collection.getGtype().elementType.getPrimType() == G_INTERFACE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
 			emit("mov (%%rdx), %%rax")
@@ -2473,10 +2473,10 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 			emit("# emit the element of primitive type")
 			emit("mov (%%rbx), %%rax")
 		}
-	} else if array.getGtype().typ == G_SLICE {
-		elmType := array.getGtype().elementType
+	} else if collection.getGtype().typ == G_SLICE {
+		elmType := collection.getGtype().elementType
 		emit("# emit address of the low index")
-		array.emit()       // eval pointer value
+		collection.emit()  // eval pointer value
 		emit("push %%rax") // store head address
 
 		index.emit() // index
@@ -2492,7 +2492,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 			emit("add $%d,  %%rbx", offset)
 		}
 
-		primType := array.getGtype().elementType.getPrimType()
+		primType := collection.getGtype().elementType.getPrimType()
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
@@ -2505,7 +2505,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 			emit("# emit the element of primitive type")
 			emit("%s (%%rbx), %%rax", inst)
 		}
-	} else if array.getGtype().getPrimType() == G_MAP {
+	} else if collection.getGtype().getPrimType() == G_MAP {
 		// e.g. x[key]
 		emit("# emit map index expr")
 		emit("# r10: map header address")
@@ -2515,7 +2515,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 
 		// rax: found value (zero if not found)
 		// rcx: ok (found: address of the index,  not found:0)
-		_map := array
+		_map := collection
 		emit("# emit mapData head address")
 		_map.emit()
 		emit("mov %%rax, %%r10 # copy head address")
@@ -2523,8 +2523,8 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		emit("mov %%rax, %%r11 # copy len ")
 		index.emit()
 		emit("mov %%rax, %%r12 # index value")
-		emitMapGet(array.getGtype(), true)
-	} else if array.getGtype().getPrimType() == G_STRING {
+		emitMapGet(collection.getGtype(), true)
+	} else if collection.getGtype().getPrimType() == G_STRING {
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:
 		//
@@ -2534,7 +2534,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		// a[x] may not be assigned to
 
 		emit("# load head address of the string")
-		array.emit()       // emit address
+		collection.emit()  // emit address
 		emit("push %%rax") // store address of variable
 		index.emit()
 		emit("mov %%rax, %%rcx")  // load  index * 1
@@ -2545,7 +2545,7 @@ func loadCollectIndex(array Expr, index Expr, offset int) {
 		}
 		emit("mov (%%rbx), %%rax") // dereference the content of an emelment	} else {
 	} else {
-		TBI(array.token(), "unable to handle %s", array.getGtype())
+		TBI(collection.token(), "unable to handle %s", collection.getGtype())
 	}
 }
 
