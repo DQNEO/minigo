@@ -78,6 +78,15 @@ func (gtype *Gtype) getPrimType() GTYPE_TYPE {
 	return gtype.getSource().typ
 }
 
+func (gtype *Gtype) is24Width() bool {
+	switch gtype.getPrimType() {
+	case G_INTERFACE,G_MAP,G_SLICE:
+		return true
+	default:
+		return false
+	}
+}
+
 func (gtype *Gtype) isString() bool {
 	if gtype.getPrimType() == G_STRING {
 		return true

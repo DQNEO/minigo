@@ -324,7 +324,7 @@ func (ast *ExprVariable) emit() {
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
-		case ast.getGtype().typ == G_MAP:
+		case ast.getGtype().getPrimType() == G_MAP:
 			emit("#   emit map variable")
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
@@ -343,7 +343,7 @@ func (ast *ExprVariable) emit() {
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
-		case ast.getGtype().typ == G_MAP:
+		case ast.getGtype().getPrimType() == G_MAP:
 			emit("#   emit map variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
@@ -927,8 +927,8 @@ func (ast *StmtAssignment) emit() {
 		}
 		if leftsMayBeTwo && len(ast.lefts) == 2 {
 			okVariable := ast.lefts[1]
-			// @TODO consider big data like slice, struct, etc
-			emit("mov %%rbx, %%rax # emit okValue") // ok
+			okRegister := mapOkRegister(right.getGtype().is24Width())
+			emit("mov %%%s, %%rax # emit okValue", okRegister)
 			emitSave(okVariable)
 		}
 		return
@@ -964,7 +964,7 @@ func emitSave(left Expr) {
 }
 
 // save data from stack
-func (e *ExprIndex) emitSaveInterface() {
+func (e *ExprIndex) emitSave3Elements() {
 	// load head address of the array
 	// load index
 	// multi index * size
@@ -976,7 +976,7 @@ func (e *ExprIndex) emitSaveInterface() {
 	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
 		e.collection.emit() // head address
 	case collectionType.getPrimType() == G_MAP:
-		e.emitMapSet()
+		e.emitMapSet(true)
 		return
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
@@ -1023,7 +1023,7 @@ func (e *ExprIndex) emitSave() {
 	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
 		e.collection.emit() // head address
 	case collectionType.getPrimType() == G_MAP:
-		e.emitMapSet()
+		e.emitMapSet(false)
 		return
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
@@ -1771,7 +1771,7 @@ func emitSaveInterface(lhs Expr, offset int) {
 		emitSaveInterface(structfield.strct, fieldType.offset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitSaveInterface()
+		indexExpr.emitSave3Elements()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
@@ -1798,7 +1798,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 		emitSave3Elements(structfield.strct, fieldOffset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitSave()
+		indexExpr.emitSave3Elements()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}

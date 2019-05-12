@@ -84,6 +84,14 @@ func loadMapIndexExpr(_map Expr, index Expr) {
 	emitMapGet(_map.getGtype(), true)
 }
 
+func mapOkRegister(is24Width bool) string {
+	if is24Width {
+		return "rdx"
+	} else {
+		return "rbx"
+	}
+}
+
 func emitMapGet(mapType *Gtype, deref bool) {
 	if mapType.typ == G_REL {
 		// @TODO handle infinite chain of relations
@@ -110,7 +118,10 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	} else {
 		emit("mov $0, %%rax # key not found")
 	}
-	emit("mov $0, %%rbx # ok = false")
+
+	okRegister := mapOkRegister(mapValueType.is24Width())
+	emit("mov $0, %%%s # ok = false", okRegister)
+
 	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
 
 	emit("# check if key matches")
@@ -146,10 +157,20 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("# Value found!")
 	emit("mov 8(%%rcx), %%rax # set the found value address")
+	emit("mov %%rcx, %%r12 # stash key address")
 	if deref {
-		emit("mov (%%rax), %%rax # dereference")
+		if mapValueType.is24Width() {
+			emit("mov %%rax, %%r13 # stash")
+			emit("mov (%%r13), %%rax # deref 1st")
+			emit("mov 8(%%r13), %%rbx # deref 2nd")
+			emit("mov 16(%%r13), %%rcx # deref 3rd")
+		} else {
+			emit("mov (%%rax), %%rax # dereference")
+		}
 	}
-	emit("mov $1, %%rbx # ok = true")
+
+	emit("mov $1, %%%s # ok = true", okRegister)
+
 	emit("jmp %s # exit loop", labelEnd)
 
 	emit("%s: # incr", labelIncr)
@@ -161,7 +182,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 // m[k] = v
 // append key and value to the tail of map data, and increment its length
-func (e *ExprIndex) emitMapSet() {
+func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 
 	labelAppend := makeLabel()
 	labelSave := makeLabel()
@@ -169,14 +190,14 @@ func (e *ExprIndex) emitMapSet() {
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit("cmp $1, %%rbx # ok == true")
+	emit("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	emit("je %s  # jump to append if not found", labelAppend)
 
 	// update
-	emit("push %%rcx") // push address of the key
+	emit("push %%r12") // push address of the key
 	emit("jmp %s", labelSave)
 
 	// append
@@ -229,17 +250,31 @@ func (e *ExprIndex) emitMapSet() {
 	// save value
 
 	// malloc(8)
-	emit("mov $%d, %%rdi", 8) // malloc 8 bytes
+	var size int = 8
+	if isWidth24 {
+		size = 24
+	}
+	emit("mov $%d, %%rdi", size) // malloc size
 	emit("mov $0, %%rax")
 	emit("call .malloc")
 
 	emit("pop %%rcx")           // map tail address
 	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
 
-	emit("pop %%rcx") // rhs value
+	if isWidth24 {
+		emit("pop %%rdx") // rhs value 3/3
+		emit("pop %%rcx") // rhs value 2/3
+		emit("pop %%rbx") // rhs value 1/3
+		// save value
+		emit("mov %%rbx, (%%rax)")
+		emit("mov %%rcx, 8(%%rax)")
+		emit("mov %%rdx, 16(%%rax)")
+	} else {
+		emit("pop %%rcx") // rhs value
+		// save value
+		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
 
-	// save value
-	emit("mov %%rcx, (%%rax)") // save value address to the malloced area
+	}
 }
 
 func (f *StmtFor) emitRangeForMap() {

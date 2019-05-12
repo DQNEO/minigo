@@ -1657,14 +1657,20 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		}
 
 		p.assert(typeToBelong.typ == G_REL, "packageMethods must belong to a named type")
-		var methods methods
+		var mthds methods
 		var ok bool
-		methods, ok = p.packageMethods[typeToBelong.relation.name]
+		typeName := typeToBelong.relation.name
+		mthds, ok = p.packageMethods[typeName]
 		if !ok {
-			methods = map[identifier]*ExprFuncRef{}
-			p.packageMethods[typeToBelong.relation.name] = methods
+			mthds = map[identifier]*ExprFuncRef{}
+			p.packageMethods[typeName] = mthds
 		}
-		methods[fname] = ref
+
+		mthds[fname] = ref
+		pm := p.packageMethods
+		pm[typeName] = mthds
+		p.packageMethods = pm
+
 	} else {
 		p.packageBlockScope.setFunc(fname, ref)
 	}
