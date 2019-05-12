@@ -8,6 +8,7 @@ anytype
 arith
 assign-to-indexexpr
 assign
+atoi
 backquote
 byte-cmp
 cmp
