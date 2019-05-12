@@ -145,7 +145,7 @@ func (ast *StmtShortVarDecl) infer() {
 
 	if len(ast.lefts) > len(rightTypes) {
 		// @TODO this check is too loose.
-		errorft(ast.tok, "number of lhs and rhs does not match")
+		errorft(ast.tok, "number of lhs and rhs does not match (%d <=> %d)", len(ast.lefts), len(rightTypes))
 	}
 	for i, e := range ast.lefts {
 		rel := e.(*Relation) // a brand new rel
