@@ -854,7 +854,7 @@ func (ast *StmtAssignment) emit() {
 
 		if leftsMayBeTwo {
 			if numLeft > 2 {
-				errorft(ast.token(), "number of exprs does not match")
+				errorft(ast.token(), "number of exprs does not match. numLeft=%d", numLeft)
 			}
 		} else {
 			if numLeft != numRight {
