@@ -36,3 +36,13 @@ diff /tmp/all.1.ast /tmp/all.2.ast || exit 1
 echo "ok"
 
 echo "parser ok"
+
+exit
+
+echo -n "resolving *.go ...  "
+./minigo  --resolve-only -d -a *.go 2> /tmp/all.1.resolved
+./minigo2 --resolve-only -d -a *.go 2> /tmp/all.2.resolved
+
+diff /tmp/all.1.resolved /tmp/all.2.resolved || exit 1
+echo "resolver ok"
+
