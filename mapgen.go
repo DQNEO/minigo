@@ -99,7 +99,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	}
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
-
+	is24Width := mapValueType.is24Width()
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
@@ -113,13 +113,18 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("setl %%al # eval(r13(i) < r11(len))")
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
-	if mapValueType.isString() {
+	if is24Width {
+		emit("mov $0, %%rax # NOT FOUND")
+		emit("mov $0, %%rbx # NOT FOUND")
+		emit("mov $0, %%rcx # NOT FOUND")
+
+	} else if mapValueType.isString() {
 		emitEmptyString()
 	} else {
 		emit("mov $0, %%rax # key not found")
 	}
 
-	okRegister := mapOkRegister(mapValueType.is24Width())
+	okRegister := mapOkRegister(is24Width)
 	emit("mov $0, %%%s # ok = false", okRegister)
 
 	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)

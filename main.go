@@ -231,6 +231,7 @@ func main() {
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
 
+	debugf("ir is created")
 	var uniquedDTypes []string = builtinTypesAsString
 	for _, gtype := range p.allDynamicTypes {
 		gs := gtype.String()
@@ -240,6 +241,7 @@ func main() {
 	}
 
 	ir.uniquedDTypes = uniquedDTypes
+	debugf("set uniquedDtypes")
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.allNamedTypes {
@@ -247,7 +249,20 @@ func main() {
 		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
 		typeId++
 	}
+	debugf("set concreteNamedType")
 
+	composeMethodTable(ir)
+	ir.importOS = importOS
+
+	ir.emit()
+}
+
+type stdpkg struct {
+	name  identifier
+	files []*SourceFile
+}
+
+func composeMethodTable(ir *IrRoot) {
 	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
@@ -260,18 +275,15 @@ func main() {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
 			typeId := gtype.relation.gtype.typeId
-			methodTable[typeId] = append(methodTable[typeId], funcdecl.getSymbol())
+			symbol := funcdecl.getSymbol()
+			methods := methodTable[typeId]
+			methods = append(methods, symbol)
+			methodTable[typeId] = methods
 		}
 	}
+	debugf("set methodTable")
+
 	ir.methodTable = methodTable
-	ir.importOS = importOS
-
-	ir.emit()
-}
-
-type stdpkg struct {
-	name  identifier
-	files []*SourceFile
 }
 
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
