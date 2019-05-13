@@ -54,7 +54,11 @@ func (sc *scope) set(name identifier, elm *IdentBody) {
 }
 
 func (sc *scope) getGtype(name identifier) *Gtype {
-	elm, ok := sc.idents[name]
+	if sc == nil {
+		errorf("sc is nil")
+	}
+	idents := sc.idents
+	elm, ok := idents[name]
 	if !ok {
 		return nil
 	}
