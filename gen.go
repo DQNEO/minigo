@@ -3419,7 +3419,13 @@ func (root *IrRoot) emit() {
 
 	for i := 1; i <= len(root.methodTable); i++ {
 		emitLabel("receiverType%d:", i)
-		for _, methodNameFull := range root.methodTable[i] {
+		mt := root.methodTable
+		methods,ok := mt[i]
+		if !ok {
+			debugf("methods not found in methodTable %d", i)
+			continue
+		}
+		for _, methodNameFull := range methods {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
 			emit(".quad .M%s # key", shortMethodName)
