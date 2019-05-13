@@ -1993,13 +1993,13 @@ var allScopes map[identifier]*scope
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
-		debugf("resolving %s ...", rel.name)
+		//debugf("resolving %s ...", rel.name)
 		p.tryResolve("", rel)
 	}
 
-	debugf("resolving packageMethods %s ...", p.packageName)
+	//debugf("resolving packageMethods %s ...", p.packageName)
 	p.resolveMethods()
-	debugf("inferring types ...")
+	//debugf("inferring types ...")
 
 	allScopes = p.scopes
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)

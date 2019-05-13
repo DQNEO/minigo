@@ -213,7 +213,6 @@ func main() {
 		}
 		return
 	}
-	debugf("resolving main package...")
 	p.resolve(universe)
 	if debugAst {
 		for _, af := range astFiles {
@@ -225,6 +224,7 @@ func main() {
 		return
 	}
 
+	debugf("resolve done")
 	var importedPackages []*stdpkg
 	for _, compiledPkg := range compiledPackages {
 		importedPackages = append(importedPackages, compiledPkg)

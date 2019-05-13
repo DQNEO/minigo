@@ -6,11 +6,11 @@ type Inferrer interface {
 }
 
 func inferTypes(globals []*ExprVariable, locals []Inferrer) {
-	debugf("infering globals")
+	//debugf("infering globals")
 	for _, variable := range globals {
 		variable.infer()
 	}
-	debugf("infering locals")
+	//debugf("infering locals")
 	for _, ast := range locals {
 		ast.infer()
 	}
@@ -18,7 +18,7 @@ func inferTypes(globals []*ExprVariable, locals []Inferrer) {
 
 //  infer recursively all the types of global variables
 func (variable *ExprVariable) infer() {
-	debugf("infering ExprVariable")
+	//debugf("infering ExprVariable")
 	if variable.gtype.typ != G_DEPENDENT {
 		// done
 		return
@@ -42,14 +42,14 @@ func (variable *ExprVariable) infer() {
 
 // local decl infer
 func (decl *DeclVar) infer() {
-	debugf("infering DeclVar")
+	//debugf("infering DeclVar")
 	gtype := decl.initval.getGtype()
 	assertNotNil(gtype != nil, decl.initval.token())
 	decl.variable.gtype = gtype
 }
 
 func (clause *ForRangeClause) infer() {
-	debugf("infering ForRangeClause")
+	//debugf("infering ForRangeClause")
 	collectionType := clause.rangeexpr.getGtype()
 	//debugf("collectionType = %s", collectionType)
 	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
@@ -87,7 +87,7 @@ func (clause *ForRangeClause) infer() {
 }
 
 func (ast *StmtShortVarDecl) infer() {
-	debugf("infering StmtShortVarDecl")
+	//debugf("infering StmtShortVarDecl")
 	var rightTypes []*Gtype
 	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
