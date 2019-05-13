@@ -40,8 +40,6 @@ echo "parser ok"
 ./minigo2 --resolve-only -d *.go 2> /tmp/all.2.resolved
 echo "resolve-only ok"
 
-exit
-
 echo -n "resolving *.go ...  "
 ./minigo  --resolve-only -d -a *.go 2> /tmp/all.1.resolved
 ./minigo2 --resolve-only -d -a *.go 2> /tmp/all.2.resolved
