@@ -1988,6 +1988,8 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	}
 }
 
+var allScopes map[identifier]*scope
+
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
@@ -1999,6 +2001,7 @@ func (p *parser) resolve(universe *scope) {
 	p.resolveMethods()
 	debugf("inferring types ...")
 
+	allScopes = p.scopes
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 }
 

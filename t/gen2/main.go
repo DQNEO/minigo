@@ -7,8 +7,6 @@ import (
 
 var GENERATION int = 2
 
-var allScopes map[identifier]*scope
-
 var debugMode = true
 var debugToken = false
 

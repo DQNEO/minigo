@@ -7,7 +7,6 @@ var GENERATION int = 2
 var debugMode = true
 var debugToken = false
 var debugParser = false
-var allScopes map[identifier]*scope
 
 func f1() {
 	os.Stderr = os.Stdout
