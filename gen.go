@@ -1805,6 +1805,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 }
 
 func emitCallMallocDinamicSize(eSize Expr) {
+	dumpInterface(eSize)
 	eSize.emit()
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
@@ -2308,6 +2309,7 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e *ExprSlice) emit() {
+	emit("# *ExprSlice.emit")
 	if e.collection.getGtype().isString() {
 		// s[n:m]
 		// new strlen: m - n
@@ -2327,7 +2329,7 @@ func (e *ExprSlice) emit() {
 			right: e.low,
 		}
 		// mem size = strlen + 1
-		eMemSize := &ExprBinop{
+		memSize := &ExprBinop{
 			tok:  e.token(),
 			op:   "+",
 			left: eNewStrlen,
@@ -2344,7 +2346,9 @@ func (e *ExprSlice) emit() {
 		emit("add %%rax, %%rbx")
 		emit("push %%rbx")
 
-		emitCallMallocDinamicSize(eMemSize)
+		emit("# calling emitCallMallocDinamicSize")
+		var exprMemSize Expr = memSize
+		emitCallMallocDinamicSize(exprMemSize)
 		emit("push %%rax # dst address")
 
 		eNewStrlen.emit()
