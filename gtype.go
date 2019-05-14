@@ -356,7 +356,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	return nil
 }
 
-func (e ExprArrayLiteral) getGtype() *Gtype {
+func (e *ExprArrayLiteral) getGtype() *Gtype {
 	return e.gtype
 }
 
