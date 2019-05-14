@@ -3291,7 +3291,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s %s", val, gtype, containerName)
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
-			val = evalIntExpr(cnst)
+			var ifc Expr = cnst
+			val = evalIntExpr(ifc) // @FIXME: a dirty workaround
 			emit(".quad %d # %s ", val, gtype)
 		case *ExprVariable:
 			vr := value.(*ExprVariable)
