@@ -2798,7 +2798,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
 		valueToAppend := funcall.args[1]
-		emit("# append(%s, %s)", slice.getGtype(), valueToAppend.getGtype())
+		emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
 		var staticCall *IrStaticCall = &IrStaticCall{
 			callee: decl,
 		}
