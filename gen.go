@@ -3186,6 +3186,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 }
 
 func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
+	emit("# doEmitData: containerName=%s, depth=%d, gtype=%s", containerName, depth, gtype.String())
 	primType := gtype.getPrimType()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
