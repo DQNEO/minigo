@@ -3168,6 +3168,7 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
+	emit("# emitData()")
 	emit(".data 0")
 	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype.String())
 	emit("# right.gtype = %s", right.getGtype().String())
