@@ -1805,7 +1805,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 }
 
 func emitCallMallocDinamicSize(eSize Expr) {
-	dumpInterface(eSize)
+	assertInterface(eSize)
 	eSize.emit()
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
