@@ -3169,8 +3169,8 @@ func (decl *DeclVar) emitData() {
 	right := decl.initval
 
 	emit(".data 0")
-	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype)
-	emit("# initval=%#v", right)
+	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype.String())
+	emit("# right.gtype = %s", right.getGtype().String())
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
@@ -3245,7 +3245,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		default:
-			TBI(ptok, "unable to handle T=%s, value=%#v", gtype, value)
+			TBI(ptok, "unable to handle gtype %s", gtype.String())
 		}
 	} else if primType == G_MAP || primType == G_INTERFACE {
 		// @TODO
@@ -3320,7 +3320,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				emitDataAddr(operand, depth)
 			}
 		default:
-			TBI(ptok, "unable to handle %T", value)
+			TBI(ptok, "unable to handle %d", primType)
 		}
 	}
 }
