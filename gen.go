@@ -1632,8 +1632,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			case fieldtype.typ == G_ARRAY:
 				initvalues, ok := field.value.(*ExprArrayLiteral)
 				assert(ok, nil, "ok")
-				fieldtype := strcttyp.getField(field.key)
-				arrayType := fieldtype
+				arrayType := strcttyp.getField(field.key)
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
 				switch {
@@ -1646,7 +1645,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				default:
 					for i, val := range initvalues.values {
 						val.emit()
-						emitOffsetSave(variable, elmSize, fieldtype.offset+i*elmSize)
+						emitOffsetSave(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
 			case fieldtype.typ == G_SLICE:
