@@ -81,7 +81,7 @@ func (gtype *Gtype) getPrimType() GTYPE_TYPE {
 
 func (gtype *Gtype) is24Width() bool {
 	switch gtype.getPrimType() {
-	case G_INTERFACE,G_MAP,G_SLICE:
+	case G_INTERFACE, G_MAP, G_SLICE:
 		return true
 	default:
 		return false

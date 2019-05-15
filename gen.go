@@ -1595,7 +1595,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emitOffsetSave(lhs, regSize, fieldtype.offset)
 		}
 	}
-
 	emit("# initialize struct with zero values: end")
 
 	if rhs == nil {
@@ -2639,9 +2638,9 @@ func (methodCall *ExprMethodcall) emit() {
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	var staticCall *IrStaticCall = &IrStaticCall{
-		symbol: getFuncSymbol(pkgname, name),
-		callee: funcref.funcdef,
-		isMethodCall:true,
+		symbol:       getFuncSymbol(pkgname, name),
+		callee:       funcref.funcdef,
+		isMethodCall: true,
 	}
 	staticCall.emit(args)
 }
@@ -2920,8 +2919,8 @@ func (funcall *ExprFuncallOrConversion) emit() {
 type IrStaticCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
-	symbol string
-	callee *DeclFunc
+	symbol       string
+	callee       *DeclFunc
 	isMethodCall bool
 }
 
@@ -2973,7 +2972,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 		// do not convert receiver
 		if !ircall.isMethodCall || i != 0 {
-			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf"{
+			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf" {
 				emit("# has a corresponding param")
 
 				var fromGtype *Gtype
@@ -3000,7 +2999,6 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
 			i, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
-
 
 		if doConvertToInterface {
 			emit("# doConvertToInterface !!!")
@@ -3479,7 +3477,7 @@ func (root *IrRoot) emit() {
 	for i := 1; i <= len(root.methodTable); i++ {
 		emitLabel("receiverType%d:", i)
 		mt := root.methodTable
-		methods,ok := mt[i]
+		methods, ok := mt[i]
 		if !ok {
 			debugf("methods not found in methodTable %d", i)
 			continue

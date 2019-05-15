@@ -36,15 +36,15 @@ type DeclFunc struct {
 }
 
 var builtinLenGlobal = &DeclFunc{
-	tok:"tok",
-	rettypes: []*Gtype{&gIntE,&gIntE},
+	tok:      "tok",
+	rettypes: []*Gtype{&gIntE, &gIntE},
 }
 
 func f3() {
 	retTypes := builtinLenGlobal.rettypes
-	fmt.Printf("%d\n", len(retTypes) + 2) // 4
+	fmt.Printf("%d\n", len(retTypes)+2) // 4
 	var gi *Gtype = retTypes[0]
-	fmt.Printf("%d\n", gi.typ - 2) // 5
+	fmt.Printf("%d\n", gi.typ-2) // 5
 }
 
 /*
@@ -59,7 +59,7 @@ func f4() {
 	var gi *Gtype = retTypes[0]
 	fmt.Printf("%d\n", gi.size - 1) // 7
 }
- */
+*/
 
 func main() {
 	f1()

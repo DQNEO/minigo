@@ -452,5 +452,3 @@ func (lit *ExprMapLiteral) emitPush() {
 	emit("push $%d", length) // len
 	emit("push $%d", length) // cap
 }
-
-
