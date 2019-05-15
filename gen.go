@@ -3261,11 +3261,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad %d # %s %s", 0, gtype, containerName)
+			emit(".quad %d # %s %s", 0, gtype.String(), containerName)
 			return
 		}
 		val := evalIntExpr(value)
-		emit(".quad %d # %s %s", val, gtype, containerName)
+		emit(".quad %d # %s %s", val, gtype.String(), containerName)
 	} else if primType == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
@@ -3299,22 +3299,22 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		var val int
 		switch value.(type) {
 		case nil:
-			emit(".quad %d # %s %s zero value", 0, gtype, containerName)
+			emit(".quad %d # %s %s zero value", 0, gtype.String(), containerName)
 		case *ExprNumberLiteral:
 			val = value.(*ExprNumberLiteral).val
-			emit(".quad %d # %s %s", val, gtype, containerName)
+			emit(".quad %d # %s %s", val, gtype.String(), containerName)
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
 			var ifc Expr = cnst
 			val = evalIntExpr(ifc) // @FIXME: a dirty workaround
-			emit(".quad %d # %s ", val, gtype)
+			emit(".quad %d # %s ", val, gtype.String())
 		case *ExprVariable:
 			vr := value.(*ExprVariable)
 			val = evalIntExpr(vr)
-			emit(".quad %d # %s ", val, gtype)
+			emit(".quad %d # %s ", val, gtype.String())
 		case *ExprBinop:
 			val = evalIntExpr(value)
-			emit(".quad %d # %s ", val, gtype)
+			emit(".quad %d # %s ", val, gtype.String())
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
