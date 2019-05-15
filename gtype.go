@@ -166,6 +166,8 @@ func (gtype *Gtype) String() string {
 		return fmt.Sprintf("[]%s", gtype.elementType.String())
 	case G_STRING:
 		return "string"
+	case G_FUNC:
+		return "func"
 	case G_INTERFACE:
 		if len(gtype.imethods) == 0 {
 			return "interface{}"
@@ -233,7 +235,10 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), "")
 	if e.rel.expr != nil {
-		return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
+		funcref, ok := e.rel.expr.(*ExprFuncRef)
+		assert(ok, e.token(), "it should be a ExprFuncRef")
+		firstRetType := funcref.funcdef.rettypes[0]
+		return firstRetType
 	} else if e.rel.gtype != nil {
 		return e.rel.gtype
 	}

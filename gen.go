@@ -502,7 +502,8 @@ func (ast *ExprUop) emit() {
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
-			assignToStruct(e.invisiblevar, e)
+			ivv := e.invisiblevar
+			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize()) // => rax
 			emit("push %%rax")                     // to:ptr addr
@@ -1860,7 +1861,11 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		errorft(dynamicValue.token(), "type is nil:%s", dynamicValue)
+		emit("# emit nil for interface")
+		emit("mov $0, %%rax")
+		emit("mov $0, %%rbx")
+		emit("mov $0, %%rcx")
+		return
 	}
 	if receiverType.typ == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
@@ -2638,6 +2643,7 @@ func (methodCall *ExprMethodcall) emit() {
 	var staticCall *IrStaticCall = &IrStaticCall{
 		symbol: getFuncSymbol(pkgname, name),
 		callee: funcref.funcdef,
+		isMethodCall:true,
 	}
 	staticCall.emit(args)
 }
@@ -2918,6 +2924,7 @@ type IrStaticCall struct {
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	symbol string
 	callee *DeclFunc
+	isMethodCall bool
 }
 
 func bool2string(bol bool) string {
@@ -2940,6 +2947,13 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	var arg Expr
 	var i int
 	for i, arg = range args {
+		var fromGtype string = ""
+		if arg.getGtype() != nil {
+			emit("# get fromGtype")
+			dumpInterface(arg)
+			fromGtype = arg.getGtype().String()
+		}
+		emit("# from %s", fromGtype)
 		if i < len(ircall.callee.params) {
 			param = ircall.callee.params[i]
 			if param.isVariadic {
@@ -2957,18 +2971,51 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			continue
 		}
 
-		emit("# arg %d, collectVariadicArgs=%s", i, bool2string(collectVariadicArgs))
-		if param != nil {
-			//emit("# %s <- %s", param.getGtype().String(), arg.getGtype().String())
+		var doConvertToInterface bool
+
+		// do not convert receiver
+		if !ircall.isMethodCall || i != 0 {
+			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf"{
+				emit("# has a corresponding param")
+
+				var fromGtype *Gtype
+				if arg.getGtype() != nil {
+					fromGtype = arg.getGtype()
+					emit("# fromGtype:%s", fromGtype.String())
+				}
+
+				var toGtype *Gtype
+				if param.getGtype() != nil {
+					toGtype = param.getGtype()
+					emit("# toGtype:%s", toGtype.String())
+				}
+
+				if toGtype != nil && toGtype.getPrimType() == G_INTERFACE && fromGtype != nil && fromGtype.getPrimType() != G_INTERFACE {
+					doConvertToInterface = true
+				}
+			}
 		}
-		arg.emit()
+
+		if ircall.symbol == ".println" {
+			doConvertToInterface = false
+		}
+
+		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
+			i, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
+
+
+		if doConvertToInterface {
+			emit("# doConvertToInterface !!!")
+			emitConversionToInterface(arg)
+		} else {
+			arg.emit()
+		}
 
 		var primType GTYPE_TYPE = 0
 		if arg.getGtype() != nil {
 			primType = arg.getGtype().getPrimType()
 		}
-		emit("#")
-		if primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
+		if doConvertToInterface || primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
 			emit("push %%rax  # argument 1/3")
 			emit("push %%rbx  # argument 2/3")
 			emit("push %%rcx  # argument 3/3")
