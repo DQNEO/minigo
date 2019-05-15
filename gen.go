@@ -2332,7 +2332,7 @@ func (e *ExprSlice) emit() {
 			right: e.low,
 		}
 		// mem size = strlen + 1
-		memSize := &ExprBinop{
+		eMemSize := &ExprBinop{
 			tok:  e.token(),
 			op:   "+",
 			left: eNewStrlen,
@@ -2349,9 +2349,7 @@ func (e *ExprSlice) emit() {
 		emit("add %%rax, %%rbx")
 		emit("push %%rbx")
 
-		emit("# calling emitCallMallocDinamicSize")
-		var exprMemSize Expr = memSize
-		emitCallMallocDinamicSize(exprMemSize)
+		emitCallMallocDinamicSize(eMemSize)
 		emit("push %%rax # dst address")
 
 		eNewStrlen.emit()
@@ -3350,8 +3348,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s %s", val, gtype.String(), containerName)
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
-			var ifc Expr = cnst
-			val = evalIntExpr(ifc) // @FIXME: a dirty workaround
+			val = evalIntExpr(cnst)
 			emit(".quad %d # %s ", val, gtype.String())
 		case *ExprVariable:
 			vr := value.(*ExprVariable)
