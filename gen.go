@@ -374,7 +374,7 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	assertNotNil(ast.val != nil, nil)
+	assert(ast.val != nil, nil, "ExprConstVariable.val should not be nil")
 	rel, ok := ast.val.(*Relation)
 	if ok && rel.expr == eIota {
 		// replace the iota expr by a index number
