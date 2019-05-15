@@ -898,7 +898,6 @@ func (p *parser) parseVarDecl() *DeclVar {
 		initval = p.parseExpr()
 	} else {
 		typ = p.parseType()
-		p.assertNotNil(typ)
 		tok := p.readToken()
 		if tok.isPunct("=") {
 			initval = p.parseExpr()

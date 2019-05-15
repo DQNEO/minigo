@@ -489,7 +489,7 @@ func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 }
 
 func (ast *ExprUop) emit() {
-	//debugf("emitting ExprUop")
+	emit("# emitting ExprUop")
 	if ast.op == "&" {
 		switch ast.operand.(type) {
 		case *Relation:
@@ -1535,6 +1535,7 @@ func emitCopyStruct(left Expr) {
 
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
+
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
@@ -1543,7 +1544,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
-		//debugf("%#v", fieldtype)
 		switch {
 		case fieldtype.typ == G_ARRAY:
 			arrayType := fieldtype
@@ -1805,7 +1805,6 @@ func emitSave3Elements(lhs Expr, offset int) {
 }
 
 func emitCallMallocDinamicSize(eSize Expr) {
-	assertInterface(eSize)
 	eSize.emit()
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
@@ -2309,7 +2308,6 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e *ExprSlice) emit() {
-	emit("# *ExprSlice.emit")
 	if e.collection.getGtype().isString() {
 		// s[n:m]
 		// new strlen: m - n
