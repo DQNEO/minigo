@@ -14,6 +14,7 @@ atoi
 backquote
 byte-cmp
 byte
+cap
 cmp
 const
 conversion
