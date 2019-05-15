@@ -3217,13 +3217,13 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						emit(".quad .%s # %s", stringLiteral.slabel)
 					} else {
 						switch value.(type) {
+						case *ExprUop:
+							uop := value.(*ExprUop)
+							rel, ok := uop.operand.(*Relation)
+							assert(ok, uop.token(), "only variable is allowed")
+							emit(".quad %s # %s %s", rel.name, value.getGtype(), selector)
 						case *Relation:
-							rel := value.(*Relation)
-							vr, ok := rel.expr.(*ExprVariable)
-							if !ok {
-								errorft(value.token(), "cannot compile")
-							}
-							emit(".quad %s # %s %s", vr.varname, value.getGtype(), selector)
+							assert(false, value.token(), "variable here is not allowed")
 						default:
 							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype(), selector)
 						}
@@ -3270,7 +3270,17 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		containerName = containerName + "." + string(gtype.relation.name)
 		gtype.relation.gtype.calcStructOffset()
 		for _, field := range gtype.relation.gtype.fields {
-			emit("# field:%s", field.fieldname)
+			emit("# padding=%d", field.padding)
+			switch field.padding {
+			case 1:
+				emit(".byte 0 # padding")
+			case 4:
+				emit(".double 0 # padding")
+			case 8:
+				emit(".quad 0 # padding")
+			default:
+			}
+			emit("# field:offesr=%d, fieldname=%s", field.offset, field.fieldname)
 			if value == nil {
 				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname), depth)
 				continue

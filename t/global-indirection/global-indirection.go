@@ -27,26 +27,43 @@ type Gtype struct {
 	size int
 }
 
-var gInt = &Gtype{typ: 1, size: 8}
+var gIntE = Gtype{typ: 7, size: 8}
+var gInt = &gIntE
 
 type DeclFunc struct {
 	tok      string
-	pkg      string
-	receiver *int
-	fname    string
 	rettypes []*Gtype
 }
 
-var builtinLen = &DeclFunc{
-	rettypes: []*Gtype{gInt},
+var builtinLenGlobal = &DeclFunc{
+	tok:"tok",
+	rettypes: []*Gtype{&gIntE,&gIntE},
 }
 
 func f3() {
-	fmt.Printf("%d\n", len(builtinLen.rettypes)+3) // 4
+	retTypes := builtinLenGlobal.rettypes
+	fmt.Printf("%d\n", len(retTypes) + 2) // 4
+	var gi *Gtype = retTypes[0]
+	fmt.Printf("%d\n", gi.typ - 2) // 5
 }
+
+/*
+func f4() {
+	var builtinLenLocal = &DeclFunc{
+		tok:"tok",
+		rettypes: []*Gtype{&gIntE,&gIntE},
+	}
+
+	retTypes := builtinLenLocal.rettypes
+	fmt.Printf("%d\n", len(retTypes) + 4) // 6
+	var gi *Gtype = retTypes[0]
+	fmt.Printf("%d\n", gi.size - 1) // 7
+}
+ */
 
 func main() {
 	f1()
 	f2()
 	f3()
+	//f4()
 }

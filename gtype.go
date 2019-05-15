@@ -43,6 +43,7 @@ type Gtype struct {
 	fields       []*Gtype                  // for struct
 	fieldname    identifier                // for struct field
 	offset       int                       // for struct field
+	padding      int                       // for struct field
 	length       int                       // for array, string(len without the terminating \0)
 	elementType  *Gtype                    // for array, slice
 	imethods     map[identifier]*signature // for interface
@@ -203,7 +204,9 @@ func (strct *Gtype) calcStructOffset() {
 			align = MaxAlign
 		}
 		if offset%align != 0 {
-			offset += align - offset%align
+			padding := align - offset%align
+			fieldtype.padding = padding
+			offset += padding
 		}
 		fieldtype.offset = offset
 		offset += fieldtype.getSize()
