@@ -3480,7 +3480,7 @@ func (root *IrRoot) emit() {
 		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 	}
 
-	var shortMethodNames map[string]string = map[string]string{}
+	var shortMethodNames []string
 
 	for i := 1; i <= len(root.methodTable); i++ {
 		emitLabel("receiverType%d:", i)
@@ -3495,12 +3495,14 @@ func (root *IrRoot) emit() {
 			shortMethodName := splitted[1]
 			emit(".quad .M%s # key", shortMethodName)
 			emit(".quad %s # method", methodNameFull)
-			shortMethodNames[shortMethodName] = shortMethodName
+			if !in_array(shortMethodName, shortMethodNames) {
+				shortMethodNames = append(shortMethodNames, shortMethodName)
+			}
 		}
 	}
 
 	emitComment("METHOD NAMES")
-	for shortMethodName := range shortMethodNames {
+	for _, shortMethodName := range shortMethodNames {
 		emitLabel(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
 	}
