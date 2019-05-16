@@ -13,7 +13,7 @@ jobs:
     #working_directory: /go/src/github.com/DQNEO/minigo
     steps:
       # specify any bash command here prefixed with `run: `
-      - run: apt-get update
-      - run: apt-get install git
+      - run: apt-get update -y
+      - run: apt-get install -y git
       - run: git clone https://github.com/DQNEO/minigo
       - run: make test -C minigo
