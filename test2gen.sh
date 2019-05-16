@@ -1,94 +1,25 @@
 #!/bin/bash
+set -u
 
-set -eu
+differ=0
 
-test_names="
-anytype-switch
-anytype
-append-int
-argv
-arith
-array-of-interface
-array
-assign-to-indexexpr
-assign
-atoi
-backquote
-byte-cmp
-byte-stream
-byte
-cap
-cmp
-const
-conversion
-fizzbuzz
-for
-forcond
-forrange
-forrangeshort
-func
-funcref
-global-array-string
-global-indirection
-heap-structref
-heap
-hello
-if
-incr
-infer
-interface-assign
-interface
-internal
-iota
-len
-map-of-map
-map
-map2
-method
-min
-multi
-multireturn
-newline
-offset-load
-open-read
-open
-os
-pointer
-println
-read-file
-return-ifc
-slice-literal
-slice-string
-slice
-slice2
-sprintf
-string-concat
-string-index
-string
-strings
-struct-copy
-struct-field-array
-struct
-structfield-slice
-structpointer-field
-structpointer
-switch
-test
-tokenizer
-tokenizer2
-type-assertion
-type
-typeswitch
-util
-vaarg
-var
-write
-zero-value
-"
-
-for testname in $test_names
+for testfile in t/expected/*.txt
 do
-    ./unit_test.sh  minigo2 $testname 2
+    name=$(basename -s .txt $testfile)
+    ./unit_test.sh minigo2 $name 2
+    if [[ $? -ne 0 ]];then
+        differ=1
+    fi
 done
 
-echo "All 2gen tests passed."
+if [[ $differ -eq 0 ]];then
+    :
+else
+    echo "FAILED"
+    exit 1
+fi
+
+set -e
+./testerror.sh
+
+echo "All tests passed"
