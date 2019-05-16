@@ -5,9 +5,8 @@
 A Go compiler from scratch.
 
 # Description
-`minigo` is a Go compiler made from scratch.
-
-The compiler can compile itself.
+`minigo` is a small Go compiler made from scratch.
+It can compile itself.
 
 * No dependency on yacc/lex
 * No dependency on external libraries
