@@ -3056,8 +3056,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			emit("push $0")
 		} else {
 			// var a []interface{}
-			for i, varg := range variadicArgs {
-				if i == 0 {
+			for vargIndex, varg := range variadicArgs {
+				if vargIndex == 0 {
 					// make an empty slice
 					emit("push $0")
 					emit("push $0")
