@@ -1,4 +1,4 @@
-# Mini Go Compiler
+# Minigo
 
 [![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
 
