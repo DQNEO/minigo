@@ -5,7 +5,9 @@
 A Go compiler from scratch.
 
 # Description
-`minigo` is yet another Go compiler made from scratch.
+`minigo` is a Go compiler made from scratch.
+
+The compiler can compile itself.
 
 * No dependency on yacc/lex
 * No dependency on external libraries
@@ -13,16 +15,21 @@ A Go compiler from scratch.
 
 It depends only on gcc as an assenmbler and linker, and on libc as a runtime.
 
-# Notes
 
-The design is influenced from
+`minigo` supports x86-64 Linux only.
+ 
+# Design
+
+I made this without reading the original Go compiler.
+
+`minigo` inherits most of the design from the followings.
 
 * 8cc (https://github.com/rui314/8cc)
 * 8cc.go (https://github.com/DQNEO/8cc.go)
 
 # How to run
 
-Currently the generated code can run only on Linux.
+You need Linux.
 So I would recommend you to use Docker.
 
 ```
