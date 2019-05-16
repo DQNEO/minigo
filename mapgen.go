@@ -11,7 +11,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 			typ: G_STRING,
 		},
 	}
-	emit("# emit receiverTypeId of %s", call.receiver.getGtype())
+	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
 	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
 	emit("imul $8, %%rax")
 	emit("push %%rax")
