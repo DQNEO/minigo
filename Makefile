@@ -27,8 +27,7 @@ test1gen: all
 
 # 2nd gen assembly
 /tmp/out/minigo.s: *.go minigo
-	# Exclude _debugbuiltin.go
-	./minigo [a-z]*.go > /tmp/out/minigo.s
+	./minigo *.go > /tmp/out/minigo.s
 	cp /tmp/out/minigo.s .
 
 # 2nd gen compiler
@@ -36,7 +35,7 @@ minigo2: /tmp/out/minigo.s
 	gcc -g -no-pie -o minigo2 /tmp/out/minigo.s
 
 minigo2.s: minigo2 *.go
-	./minigo2 [a-z]*.go > /tmp/out/minigo2.s
+	./minigo2 *.go > /tmp/out/minigo2.s
 	cp /tmp/out/minigo2.s .
 
 test2gen: minigo2
