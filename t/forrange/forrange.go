@@ -70,9 +70,9 @@ func f7() {
 	var slice = []int{1, 1, 1}
 	var i int
 	for i, _ = range slice {
-		fmt.Printf("%d\n", i + 17) // 17,18,19
+		fmt.Printf("%d\n", i+17) // 17,18,19
 	}
-	fmt.Printf("%d\n", i + 18) // 20
+	fmt.Printf("%d\n", i+18) // 20
 }
 
 func main() {

@@ -376,7 +376,7 @@ func (rel *Relation) emit() {
 func (ast *ExprConstVariable) emit() {
 	emit("# *ExprConstVariable.emit() name=%s iotaindex=%d", ast.name, ast.iotaIndex)
 	assert(ast.iotaIndex < 10000, ast.token(), "iotaindex is too large")
-	assert(ast.val != nil, ast.token(), "const.val for should not be nil:" + string(ast.name))
+	assert(ast.val != nil, ast.token(), "const.val for should not be nil:"+string(ast.name))
 	rel, ok := ast.val.(*Relation)
 	if ok {
 		emit("# rel=%s", rel.name)
@@ -1324,7 +1324,7 @@ func (f *StmtFor) emitRangeForList() {
 				arg: f.rng.rangeexpr, // len(expr)
 			},
 			right: &ExprNumberLiteral{
-				val:1,
+				val: 1,
 			},
 		},
 	}
