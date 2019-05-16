@@ -2,6 +2,7 @@
 set -u
 
 differ=0
+rm -f success.txt
 
 for testfile in t/expected/*.txt
 do
