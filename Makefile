@@ -31,6 +31,9 @@ test1gen: all
 minigo2: /tmp/out/minigo.s
 	gcc -g -no-pie -o minigo2 /tmp/out/minigo.s
 
+minigo2.s: minigo2 *.go
+	./minigo2 [a-z]*.go > /tmp/out/minigo2.s
+	ln -fs /tmp/out/minigo2.s .
 
 test2gen: minigo2
 	./test2gen.sh
