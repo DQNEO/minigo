@@ -988,7 +988,8 @@ func (p *parser) parseConstDecl() *DeclConst {
 		}
 	} else {
 		// single definition
-		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nil, 0)}
+		var nilExpr Expr = nil // @FIXME a dirty workaround. Passing nil literal to an interface parameter does not work.
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, 0)}
 	}
 
 	r := &DeclConst{
