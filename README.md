@@ -46,17 +46,19 @@ After entering the container, you can build and run it.
 # ./minigo --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
+
 # ./minigo *.go > /tmp/minigo2.s
 # gcc -no-pie -o minigo2 /tmp/minigo2.s
 # ./minigo2 --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
-# ./minigo2 *.go > /tmp/minigo3.s
+
 ```
 
 You will see that the contents of 2nd generation compiler and 3rd generation compiler are identical.
 
 ```
+# ./minigo2 *.go > /tmp/minigo3.s
 # diff /tmp/minigo2.s /tmp/minigo3.s
 ```
 
