@@ -1252,7 +1252,7 @@ func (stmt *StmtSwitch) emit() {
 }
 
 func (f *StmtFor) emitRangeForList() {
-	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 

@@ -283,7 +283,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 }
 
 func (f *StmtFor) emitRangeForMap() {
-	emit("# for range %T", f.rng.rangeexpr.getGtype())
+	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()
