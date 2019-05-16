@@ -1253,6 +1253,7 @@ func (stmt *StmtSwitch) emit() {
 }
 
 func (f *StmtFor) emitRangeForList() {
+	emit("")
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
@@ -1261,21 +1262,8 @@ func (f *StmtFor) emitRangeForList() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
-	// check if 0 == len(list)
-	conditionEmpty := &ExprBinop{
-		op: "==",
-		left: &ExprNumberLiteral{
-			val: 0,
-		},
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
-	conditionEmpty.emit()
-	emit("test %%rax, %%rax")
-	emit("jne %s  # if true, go to loop end", f.labelEndLoop)
-
 	// i = 0
+	emit("# init index")
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
 			f.rng.indexvar,
@@ -1286,8 +1274,23 @@ func (f *StmtFor) emitRangeForList() {
 			},
 		},
 	}
-	emit("# init index")
 	initstmt.emit()
+
+	emit("%s: # begin loop ", labelBegin)
+
+	// i < len(list)
+	condition := &ExprBinop{
+		op:   "<",
+		left: f.rng.indexvar, // i
+		// @TODO
+		// The range expression x is evaluated once before beginning the loop
+		right: &ExprLen{
+			arg: f.rng.rangeexpr, // len(expr)
+		},
+	}
+	condition.emit()
+	emit("test %%rax, %%rax")
+	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
 	// v = s[i]
 	var assignVar *StmtAssignment
@@ -1306,24 +1309,28 @@ func (f *StmtFor) emitRangeForList() {
 		assignVar.emit()
 	}
 
-	emit("%s: # begin loop ", labelBegin)
-
-	// i < len(list)
-	condition := &ExprBinop{
-		op:   "<",
-		left: f.rng.indexvar, // i
-		// @TODO
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
-	condition.emit()
-	emit("test %%rax, %%rax")
-	emit("je %s  # if false, go to loop end", f.labelEndLoop)
-
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
+
+	// break if i == len(list) - 1
+	condition2 := &ExprBinop{
+		op:   "==",
+		left: f.rng.indexvar, // i
+		// @TODO2
+		// The range expression x is evaluated once before beginning the loop
+		right: &ExprBinop{
+			op: "-",
+			left: &ExprLen{
+				arg: f.rng.rangeexpr, // len(expr)
+			},
+			right: &ExprNumberLiteral{
+				val:1,
+			},
+		},
+	}
+	condition2.emit()
+	emit("test %%rax, %%rax")
+	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
 	// i++
 	indexIncr := &StmtInc{
@@ -1331,10 +1338,6 @@ func (f *StmtFor) emitRangeForList() {
 	}
 	indexIncr.emit()
 
-	// v = s[i]
-	if f.rng.valuevar != nil {
-		assignVar.emit()
-	}
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
 }
