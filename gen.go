@@ -1189,7 +1189,7 @@ func (stmt *StmtSwitch) emit() {
 					emit("mov $0, %%rax")
 				} else {
 					typeLabel := groot.getTypeLabel(gtype)
-					emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype)
+					emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, gtype.String())
 				}
 
 				emit("pop %%rcx # the subject type")
