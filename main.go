@@ -167,6 +167,7 @@ func main() {
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
+	var uniqPackageNames []string
 	// parse std packages
 
 	stdPkgs := makeStdLib()
@@ -181,6 +182,9 @@ func main() {
 		}
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
+		if !in_array(string(pkgName), uniqPackageNames) {
+			uniqPackageNames = append(uniqPackageNames, string(pkgName))
+		}
 	}
 
 	if slientForStdlib {
@@ -226,7 +230,8 @@ func main() {
 
 	debugf("resolve done")
 	var importedPackages []*stdpkg
-	for _, compiledPkg := range compiledPackages {
+	for _, pkgName := range uniqPackageNames {
+		compiledPkg := compiledPackages[identifier(pkgName)]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
