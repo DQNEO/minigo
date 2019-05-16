@@ -2956,7 +2956,6 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		var fromGtype string = ""
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
-			dumpInterface(arg)
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
