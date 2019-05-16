@@ -3270,11 +3270,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 							uop := value.(*ExprUop)
 							rel, ok := uop.operand.(*Relation)
 							assert(ok, uop.token(), "only variable is allowed")
-							emit(".quad %s # %s %s", rel.name, value.getGtype(), selector)
+							emit(".quad %s # %s %s", rel.name, value.getGtype().String(), selector)
 						case *Relation:
 							assert(false, value.token(), "variable here is not allowed")
 						default:
-							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype(), selector)
+							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
 						}
 					}
 				} else if size == 1 {
