@@ -19,12 +19,17 @@ It depends only on gcc as an assenmbler and linker, and on libc as a runtime.
  
 # Design
 
-I made this without reading the original Go compiler.
+I made this almost without reading the original Go compiler.
 
 `minigo` inherits most of the design from the followings.
 
 * 8cc (https://github.com/rui314/8cc)
 * 8cc.go (https://github.com/DQNEO/8cc.go)
+
+There are several stages in the compilation proccess.
+
+[go source] -> byte_stream.go -> [byte stream] -> token.go -> [token stream] -> parser.go -> [AST] -> gen.go -> [assembly code]
+
 
 # How to run
 
