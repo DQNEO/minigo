@@ -2,6 +2,7 @@
 /minigo
 /minigo.s
 /minigo2
+/minigo2.s
 a.go
 /stdlib.go
 /internalcode.go
