@@ -47,3 +47,11 @@ echo -n "resolving *.go ...  "
 diff /tmp/all.1.resolved /tmp/all.2.resolved || exit 1
 echo "resolver ok"
 
+./minigo  *.go > /tmp/all.1.s
+./minigo2 *.go > /tmp/all.2.s
+
+diff /tmp/all.1.s /tmp/all.2.s || exit 1
+echo "compile ok"
+
+echo "All comparison ok"
+
