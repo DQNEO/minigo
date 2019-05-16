@@ -3263,7 +3263,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 					if value.getGtype().typ == G_STRING {
 						stringLiteral, ok := value.(*ExprStringLiteral)
 						assert(ok, nil, "ok")
-						emit(".quad .%s # %s", stringLiteral.slabel)
+						emit(".quad .%s", stringLiteral.slabel)
 					} else {
 						switch value.(type) {
 						case *ExprUop:
