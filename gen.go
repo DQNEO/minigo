@@ -2448,7 +2448,7 @@ func (e *ExprTypeAssertion) emit() {
 		emit("push %%rax")
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
-		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype)
+		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
 		emitStringsEqual(true, "%rax", "%rcx")
 
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
