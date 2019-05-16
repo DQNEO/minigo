@@ -25,7 +25,7 @@ test1gen: all
 /tmp/out/minigo.s: *.go minigo
 	# Exclude _debugbuiltin.go
 	./minigo [a-z]*.go > /tmp/out/minigo.s
-	cp /tmp/out/minigo.s minigo.s
+	ln -fs /tmp/out/minigo.s .
 
 # 2nd gen compiler
 minigo2: /tmp/out/minigo.s
