@@ -2955,16 +2955,16 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
-	var i int
-	for i, arg = range args {
+	var argIndex int
+	for argIndex, arg = range args {
 		var fromGtype string = ""
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if i < len(ircall.callee.params) {
-			param = ircall.callee.params[i]
+		if argIndex < len(ircall.callee.params) {
+			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
 				if ircall.symbol != "fmt.Printf" {
 					// ignore fmt.Printf variadic
@@ -2983,7 +2983,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		var doConvertToInterface bool
 
 		// do not convert receiver
-		if !ircall.isMethodCall || i != 0 {
+		if !ircall.isMethodCall || argIndex != 0 {
 			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf" {
 				emit("# has a corresponding param")
 
@@ -3010,7 +3010,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		}
 
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
-			i, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
+			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
 		if doConvertToInterface {
 			emit("# doConvertToInterface !!!")
@@ -3038,8 +3038,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
-		if i+1 < len(ircall.callee.params) {
-			param = ircall.callee.params[i+1]
+		if argIndex+1 < len(ircall.callee.params) {
+			param = ircall.callee.params[argIndex+1]
 			if param.isVariadic {
 				collectVariadicArgs = true
 			}
