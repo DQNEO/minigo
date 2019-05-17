@@ -47,7 +47,7 @@ After entering the container, you can build and run it.
 # ./minigo t/hello/hello.go > a.s
 # gcc -g -no-pie a.s
 # ./a.out
-# hello world
+hello world
 ```
 
 # How to do "self compile"
