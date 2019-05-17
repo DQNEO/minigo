@@ -7,14 +7,7 @@ var debugToken = false
 
 func f1() {
 	filename := "t/data/gen.go.txt"
-	s := readFile(filename)
-	bs := &ByteStream{
-		filename:  filename,
-		source:    s,
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
+	bs := NewByteStreamFromFile(filename)
 	tokens := tokenize(bs)
 	expectedLen := 17977
 	if len(tokens) == expectedLen {
