@@ -11,19 +11,9 @@ var debugParser = false
 func f1() {
 	os.Stderr = os.Stdout
 	path := "t2/min.go"
-	s := readFile(path)
-	_bs := ByteStream{
-		filename:  path,
-		source:    s,
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-	bs = &_bs
-
+	bs := NewByteStreamFromFile(path)
 	// parser to parse imported
 	p := &parser{}
-	p.methods = map[identifier]methods{}
 	p.scopes = map[identifier]*scope{}
 
 	universe := newUniverse()
