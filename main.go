@@ -70,7 +70,7 @@ type pkgsource struct {
 
 func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
-	bs = NewByteStreamFromString(filename, code)
+	bs := NewByteStreamFromString(filename, code)
 
 	// initialize a package
 	p.initPackage(pkgname)

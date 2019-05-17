@@ -12,19 +12,18 @@ var debugToken = false
 func f3() {
 	path := "t/min/min.go"
 	s := readFile(path)
-	_bs := &ByteStream{
+	bs := &ByteStream{
 		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
 		column:    0,
 	}
-	bs = _bs
 
 	var c byte
 	c, _ = bs.get()
 	tn := &Tokenizer{
-		bs:_bs,
+		bs:bs,
 	}
 	ident := tn.readIdentifier(c)
 	fmt.Printf("%s\n", ident)
@@ -33,14 +32,13 @@ func f3() {
 func f4() {
 	path := "t/min/min.go"
 	s := readFile(path)
-	_bs := ByteStream{
+	bs := &ByteStream{
 		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
 		column:    0,
 	}
-	bs = &_bs
 
 	tokens := tokenize(bs)
 	fmt.Printf("%d\n", len(tokens)) // 26
@@ -54,14 +52,13 @@ func f5() {
 	debugToken = false
 	path := "t/data/string.txt"
 	s := readFile(path)
-	_bs := ByteStream{
+	bs := &ByteStream{
 		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
 		column:    0,
 	}
-	bs = &_bs
 
 	tokens := tokenize(bs)
 	tok := tokens[0]
