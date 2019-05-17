@@ -26,7 +26,7 @@ I made this almost without reading the original Go compiler.
 * 8cc (https://github.com/rui314/8cc)
 * 8cc.go (https://github.com/DQNEO/8cc.go)
 
-There are several stages in the compilation proccess.
+There are several steps in the compilation proccess.
 
 [go source] -> byte_stream.go -> [byte stream] -> token.go -> [token stream] -> parser.go -> [AST] -> gen.go -> [assembly code]
 
