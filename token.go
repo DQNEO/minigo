@@ -117,6 +117,10 @@ func (tok *Token) isSemicolon() bool {
 	return tok.isPunct(";")
 }
 
+type Tokenizer struct {
+	bs *ByteStream
+}
+
 func read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
@@ -371,9 +375,13 @@ func isIn(c byte, set []byte) bool {
 
 func tokenize(_bs *ByteStream) []*Token {
 	bs = _bs
+	var tn = &Tokenizer{
+		bs:bs,
+	}
+
 	var r []*Token
 	for {
-		c, err := bs.get()
+		c, err := tn.bs.get()
 		if err != nil {
 			return r
 		}
@@ -414,7 +422,7 @@ func tokenize(_bs *ByteStream) []*Token {
 			skipSpace()
 			continue
 		case '/':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '/' {
 				skipLine()
 				continue
@@ -424,152 +432,152 @@ func tokenize(_bs *ByteStream) []*Token {
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "/=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "/")
 			}
 		case '(', ')', '[', ']', '{', '}', ',', ';':
 			tok = makeToken(T_PUNCT, string([]byte{c}))
 		case '!':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "!=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "!")
 			}
 		case '%':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "%=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "%")
 			}
 		case '*':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "*=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "*")
 			}
 		case ':':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, ":=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, ":")
 			}
 		case '=':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "==")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "=")
 			}
 		case '^':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "^=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "^")
 			}
 		case '&':
-			c, _ := bs.get()
+			c, _ := tn.bs.get()
 			if c == '&' {
 				tok = makeToken(T_PUNCT, "&&")
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "&=")
 			} else if c == '^' {
-				c, _ := bs.get()
+				c, _ := tn.bs.get()
 				if c == '=' {
 					tok = makeToken(T_PUNCT, "&^=")
 				} else {
-					bs.unget()
+					tn.bs.unget()
 					tok = makeToken(T_PUNCT, "&^")
 				}
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "&")
 			}
 		case '+':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '+' {
 				tok = makeToken(T_PUNCT, "++")
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "+=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "+")
 			}
 		case '-':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '-' {
 				tok = makeToken(T_PUNCT, "--")
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "-=")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "-")
 			}
 		case '|':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, "|=")
 			} else if c == '|' {
 				tok = makeToken(T_PUNCT, "||")
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "|")
 			}
 		case '.':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '.' {
-				c, _ = bs.get()
+				c, _ = tn.bs.get()
 				if c == '.' {
 					tok = makeToken(T_PUNCT, "...")
 				} else {
 					panic("invalid token '..'")
 				}
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, ".")
 			}
 		case '>':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '=' {
 				tok = makeToken(T_PUNCT, ">=")
 			} else if c == '>' {
-				c, _ = bs.get()
+				c, _ = tn.bs.get()
 				if c == '=' {
 					tok = makeToken(T_PUNCT, ">>=")
 				} else {
-					bs.unget()
+					tn.bs.unget()
 					tok = makeToken(T_PUNCT, ">>")
 				}
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, ">")
 			}
 		case '<':
-			c, _ = bs.get()
+			c, _ = tn.bs.get()
 			if c == '-' {
 				tok = makeToken(T_PUNCT, "<-")
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "<=")
 			} else if c == '<' {
-				c, _ = bs.get()
+				c, _ = tn.bs.get()
 				if c == '=' {
 					tok = makeToken(T_PUNCT, "<<=")
 				} else {
-					bs.unget()
+					tn.bs.unget()
 					tok = makeToken(T_PUNCT, "<<")
 				}
 			} else {
-				bs.unget()
+				tn.bs.unget()
 				tok = makeToken(T_PUNCT, "<")
 			}
 		default:
