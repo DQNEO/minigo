@@ -115,7 +115,9 @@ func main() {
 	}
 	// analyze imports of the given go files
 	pForImport := &parser{}
-	var imported []string
+	// "fmt" depends on "os. So inject it in advance.
+	// Actually, dependency graph should be analyzed.
+	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
@@ -168,6 +170,7 @@ func main() {
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
+		debugf("compile stdlib %s", spkgName)
 		pkgName := identifier(spkgName)
 		var pkgCode string
 		var ok bool

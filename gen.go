@@ -1863,7 +1863,7 @@ func (e *ExprConversionToInterface) emit() {
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
-	emit("# emitConversionToInterface")
+	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
@@ -2966,11 +2966,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
-				if ircall.symbol != "fmt.Printf" {
-					// ignore fmt.Printf variadic
-					if _, ok := arg.(*ExprVaArg); !ok {
-						collectVariadicArgs = true
-					}
+				if _, ok := arg.(*ExprVaArg); !ok {
+					collectVariadicArgs = true
 				}
 			}
 		}
@@ -2984,7 +2981,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
-			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf" {
+			if param != nil && ircall.symbol != "printf" {
 				emit("# has a corresponding param")
 
 				var fromGtype *Gtype
@@ -3064,7 +3061,11 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 					emit("push $0")
 				}
 				// conversion : var ifc = x
-				emitConversionToInterface(varg)
+				if varg.getGtype().getPrimType() == G_INTERFACE {
+					varg.emit()
+				} else {
+					emitConversionToInterface(varg)
+				}
 				emit("push %%rax")
 				emit("push %%rbx")
 				emit("push %%rcx")
@@ -3093,12 +3094,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	emit("mov $0, %%rax")
-	if ircall.symbol == "fmt.Printf" {
-		// replace fmt.Printf by libc's printf
-		emit("call printf")
-	} else {
-		emit("call %s", ircall.symbol)
-	}
+	emit("call %s", ircall.symbol)
 	emit("")
 }
 
@@ -3288,6 +3284,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				}
 			}
 		}
+		emit(".quad 0 # nil terminator")
+
 	} else if primType == G_SLICE {
 		switch value.(type) {
 		case nil:
