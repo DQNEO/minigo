@@ -73,6 +73,12 @@ You will see that the contents of 2nd generation compiler and 3rd generation com
 # diff /tmp/minigo2.s /tmp/minigo3.s
 ```
 
+# Test
+
+```
+# make test
+```
+
 # AUTHOR
 [@DQNEO](https://twitter.com/DQNEO)
 
