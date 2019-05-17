@@ -362,15 +362,6 @@ func (tn *Tokenizer) skipBlockComment() {
 	}
 }
 
-func isIn(c byte, set []byte) bool {
-	for _, c2 := range set {
-		if c == c2 {
-			return true
-		}
-	}
-	return false
-}
-
 func Tokenize(bs *ByteStream) []*Token {
 
 	var tn = &Tokenizer{

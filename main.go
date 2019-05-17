@@ -63,11 +63,6 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-type pkgsource struct {
-	name identifier
-	code string
-}
-
 func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
 	bs := NewByteStreamFromString(filename, code)
