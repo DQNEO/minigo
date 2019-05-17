@@ -197,14 +197,7 @@ func main() {
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	for _, sourceFile := range sourceFiles {
-		s := readFile(sourceFile)
-		bs := &ByteStream{
-			filename:  sourceFile,
-			source:    s,
-			nextIndex: 0,
-			line:      1,
-			column:    0,
-		}
+		bs := NewByteStreamFromFile(sourceFile)
 		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
