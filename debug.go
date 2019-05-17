@@ -52,11 +52,7 @@ func errorf(format string, v ...interface{}) {
 
 func assert(cond bool, tok *Token, msg string) {
 	if !cond {
-		if GENERATION == 2 {
-			panic(fmt.Sprintf("assertion failed:%s", msg))
-		} else {
-			panic(fmt.Sprintf("assertion failed: %s %s", msg, tok))
-		}
+		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok.String()))
 	}
 }
 
