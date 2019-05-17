@@ -121,14 +121,14 @@ type Tokenizer struct {
 	bs *ByteStream
 }
 
-func read_number(c0 byte) string {
+func (tn *Tokenizer) read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
 		c, err := bs.get()
 		if err != nil {
 			return string(chars)
 		}
-		if isUnicodeDigit(c) {
+		if tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
@@ -139,31 +139,31 @@ func read_number(c0 byte) string {
 }
 
 // https://golang.org/ref/spec#unicode_letter
-func isUnicodeLetter(b byte) bool {
+func (tn *Tokenizer) isUnicodeLetter(b byte) bool {
 	// tentative implementation
 	return ('a' <= b && b <= 'z') || ('A' <= b && b <= 'Z')
 }
 
 // https://golang.org/ref/spec#unicode_digit
-func isUnicodeDigit(c byte) bool {
+func (tn *Tokenizer) isUnicodeDigit(c byte) bool {
 	// tentative implementation
 	return '0' <= c && c <= '9'
 }
 
 // https://golang.org/ref/spec#Letters_and_digits
-func isLetter(b byte) bool {
-	return isUnicodeLetter(b) || b == '_'
+func (tn *Tokenizer) isLetter(b byte) bool {
+	return tn.isUnicodeLetter(b) || b == '_'
 }
 
 // https://golang.org/ref/spec#Identifiers
-func readIdentifier(c0 byte) string {
+func (tn *Tokenizer) readIdentifier(c0 byte) string {
 	var chars = []byte{c0}
 	for {
 		c, err := bs.get()
 		if err != nil {
 			return string(chars)
 		}
-		if isLetter(c) || isUnicodeDigit(c) {
+		if tn.isLetter(c) || tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
@@ -173,7 +173,7 @@ func readIdentifier(c0 byte) string {
 	}
 }
 
-func read_string() string {
+func (tn *Tokenizer) read_string() string {
 	var chars []byte
 	for {
 		c, err := bs.get()
@@ -200,7 +200,7 @@ func read_string() string {
 	}
 }
 
-func read_raw_string() string {
+func (tn *Tokenizer) read_raw_string() string {
 	var chars []byte
 	for {
 		c, err := bs.get()
@@ -233,7 +233,7 @@ func read_raw_string() string {
 	}
 }
 
-func read_char() string {
+func (tn *Tokenizer) read_char() string {
 	c, err := bs.get()
 	if err != nil {
 		panic("invalid char literal")
@@ -269,17 +269,17 @@ func read_char() string {
 	return string([]byte{c})
 }
 
-func isSpace(c byte) bool {
+func (tn *Tokenizer) isSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\r'
 }
 
-func skipSpace() {
+func (tn *Tokenizer) skipSpace() {
 	for {
 		c, err := bs.get()
 		if err != nil {
 			return
 		}
-		if isSpace(c) {
+		if tn.isSpace(c) {
 			continue
 		} else {
 			bs.unget()
@@ -318,7 +318,7 @@ var semicolonToken = Token{
 }
 
 // https://golang.org/ref/spec#Semicolons
-func autoSemicolonInsert(last *Token) bool {
+func (tn *Tokenizer) autoSemicolonInsert(last *Token) bool {
 	if last.isTypeIdent() {
 		return true
 	}
@@ -336,7 +336,7 @@ func autoSemicolonInsert(last *Token) bool {
 	return false
 }
 
-func skipLine() {
+func (tn *Tokenizer) skipLine() {
 	for {
 		c, err := bs.get()
 		if err != nil || c == '\n' {
@@ -346,7 +346,7 @@ func skipLine() {
 	}
 }
 
-func skipBlockComment() {
+func (tn *Tokenizer) skipBlockComment() {
 	var hasReadAsterisk bool
 
 	for {
@@ -393,41 +393,41 @@ func tokenize(_bs *ByteStream) []*Token {
 			// Insert semicolon
 			if len(r) > 0 {
 				last := r[len(r)-1]
-				if autoSemicolonInsert(last) {
+				if tn.autoSemicolonInsert(last) {
 					r = append(r, &semicolonToken)
 				}
 			}
 			continue
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			sval := read_number(c)
+			sval := tn.read_number(c)
 			tok = makeToken(T_INT, sval)
 		case '_', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
-			sval := readIdentifier(c)
+			sval := tn.readIdentifier(c)
 			if in_array(sval, keywords) {
 				tok = makeToken(T_KEYWORWD, sval)
 			} else {
 				tok = makeToken(T_IDENT, sval)
 			}
 		case '\'':
-			sval := read_char()
+			sval := tn.read_char()
 			tok = makeToken(T_CHAR, sval)
 		case '"':
-			sval := read_string()
+			sval := tn.read_string()
 			tok = makeToken(T_STRING, sval)
 		case '`':
-			sval := read_raw_string()
+			sval := tn.read_raw_string()
 			tok = makeToken(T_STRING, sval)
 		case ' ', '\t':
-			skipSpace()
+			tn.skipSpace()
 			continue
 		case '/':
 			c, _ = tn.bs.get()
 			if c == '/' {
-				skipLine()
+				tn.skipLine()
 				continue
 			} else if c == '*' {
-				skipBlockComment()
+				tn.skipBlockComment()
 				continue
 			} else if c == '=' {
 				tok = makeToken(T_PUNCT, "/=")

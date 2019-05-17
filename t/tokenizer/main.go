@@ -12,18 +12,21 @@ var debugToken = false
 func f3() {
 	path := "t/min/min.go"
 	s := readFile(path)
-	_bs := ByteStream{
+	_bs := &ByteStream{
 		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
 		column:    0,
 	}
-	bs = &_bs
+	bs = _bs
 
 	var c byte
 	c, _ = bs.get()
-	ident := readIdentifier(c)
+	tn := &Tokenizer{
+		bs:_bs,
+	}
+	ident := tn.readIdentifier(c)
 	fmt.Printf("%s\n", ident)
 }
 
