@@ -21,7 +21,7 @@ It depends only on gcc as an assenmbler and linker, and on libc as a runtime.
 
 I made this almost without reading the original Go compiler.
 
-`minigo` inherits most of the design from the followings.
+`minigo` inherits most of its design from the followings.
 
 * 8cc (https://github.com/rui314/8cc)
 * 8cc.go (https://github.com/DQNEO/8cc.go)
