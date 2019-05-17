@@ -223,17 +223,8 @@ func main() {
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
-
 	debugf("ir is created")
-	var uniquedDTypes []string = builtinTypesAsString
-	for _, gtype := range p.allDynamicTypes {
-		gs := gtype.String()
-		if !in_array(gs, uniquedDTypes) {
-			uniquedDTypes = append(uniquedDTypes, gs)
-		}
-	}
-
-	ir.uniquedDTypes = uniquedDTypes
+	ir.setDynamicTypes(p.allDynamicTypes)
 	debugf("set uniquedDtypes")
 
 	var typeId = 1 // start with 1 because we want to zero as error
@@ -244,7 +235,7 @@ func main() {
 	}
 	debugf("set concreteNamedType")
 
-	composeMethodTable(ir)
+	ir.composeMethodTable()
 	ir.importOS = importOS
 
 	ir.emit()
@@ -255,7 +246,7 @@ type stdpkg struct {
 	files []*SourceFile
 }
 
-func composeMethodTable(ir *IrRoot) {
+func (ir *IrRoot) composeMethodTable() {
 	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
@@ -309,4 +300,16 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 	root.stringLiterals = stringLiterals // a dirtyworkaround
 	root.vars = declvars
 	return root
+}
+
+func (ir *IrRoot) setDynamicTypes(allDynamicTypes []*Gtype) {
+	var uniquedDTypes []string = builtinTypesAsString
+	for _, gtype := range allDynamicTypes {
+		gs := gtype.String()
+		if !in_array(gs, uniquedDTypes) {
+			uniquedDTypes = append(uniquedDTypes, gs)
+		}
+	}
+
+	ir.uniquedDTypes = uniquedDTypes
 }
