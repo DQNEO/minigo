@@ -8,7 +8,7 @@ var debugToken = false
 func f1() {
 	filename := "t/data/gen.go.txt"
 	bs := NewByteStreamFromFile(filename)
-	tokens := tokenize(bs)
+	tokens := Tokenize(bs)
 	expectedLen := 17977
 	if len(tokens) == expectedLen {
 		println("1")
