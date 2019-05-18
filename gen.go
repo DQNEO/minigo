@@ -1894,7 +1894,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if dynamicTypeId == -1 {
 		//debugf("types:%#v", groot.uniquedDynamicTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
-		errorft(dynamicValue.token(), "type %s not found for %s", gtype, dynamicValue)
+		errorft(dynamicValue.token(), "type %s not found in uniquedDTypes", gtype.String())
 	}
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
