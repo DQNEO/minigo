@@ -820,11 +820,11 @@ func (ast *StmtAssignment) emit() {
 			}
 			gtype := left.getGtype()
 			switch {
-			case gtype.kind == G_ARRAY:
+			case gtype.getKind() == G_ARRAY:
 				assignToArray(left, right)
-			case gtype.kind == G_SLICE:
+			case gtype.getKind() == G_SLICE:
 				assignToSlice(left, right)
-			case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
+			case gtype.getKind() ==  G_STRUCT:
 				assignToStruct(left, right)
 			case gtype.getKind() == G_INTERFACE:
 				assignToInterface(left, right)
