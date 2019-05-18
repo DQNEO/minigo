@@ -63,23 +63,23 @@ func (gtype *Gtype) isNil() bool {
 	return false
 }
 
-func (gtype *Gtype) getSource() *Gtype {
+func (gtype *Gtype) Underlying() *Gtype {
 	if gtype.kind == G_NAMED {
-		return gtype.relation.gtype.getSource()
+		return gtype.relation.gtype.Underlying()
 
 	}
 	return gtype
 }
 
-func (gtype *Gtype) getPrimType() GTYPE_KIND {
+func (gtype *Gtype) getKind() GTYPE_KIND {
 	if gtype == nil {
 		return G_UNKOWNE
 	}
-	return gtype.getSource().kind
+	return gtype.Underlying().kind
 }
 
 func (gtype *Gtype) is24Width() bool {
-	switch gtype.getPrimType() {
+	switch gtype.getKind() {
 	case G_INTERFACE, G_MAP, G_SLICE:
 		return true
 	default:
@@ -88,7 +88,7 @@ func (gtype *Gtype) is24Width() bool {
 }
 
 func (gtype *Gtype) isString() bool {
-	if gtype.getPrimType() == G_STRING {
+	if gtype.getKind() == G_STRING {
 		return true
 	}
 	return false
