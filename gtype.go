@@ -48,7 +48,6 @@ type Gtype struct {
 	elementType    *Gtype                    // for array, slice
 	imethods       map[identifier]*signature // for interface
 	methods        map[identifier]*ExprFuncRef // for G_NAMED
-	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
 }
