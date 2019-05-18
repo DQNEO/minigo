@@ -460,7 +460,7 @@ func (p *parser) parseMapType() *Gtype {
 	p.expect("]")
 	mapValue := p.parseType()
 	return &Gtype{
-		typ:      G_MAP,
+		kind:     G_MAP,
 		mapKey:   mapKey,
 		mapValue: mapValue,
 	}
@@ -549,9 +549,9 @@ func (p *parser) parsePrim() Expr {
 		}
 
 		values := p.parseArrayLiteral()
-		switch gtype.typ {
+		switch gtype.kind {
 		case G_ARRAY:
-			if gtype.typ == G_ARRAY {
+			if gtype.kind == G_ARRAY {
 				if gtype.length == 0 {
 					gtype.length = len(values)
 				} else {
@@ -573,7 +573,7 @@ func (p *parser) parsePrim() Expr {
 				gtype:  gtype,
 				values: values,
 				invisiblevar: p.newVariable("", &Gtype{
-					typ:         G_ARRAY,
+					kind:        G_ARRAY,
 					elementType: gtype.elementType,
 					length:      len(values),
 				}),
@@ -677,7 +677,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
 			strctliteral.invisiblevar = p.newVariable("", &Gtype{
-				typ:      G_REL,
+				kind:     G_REL,
 				relation: strctliteral.strctname,
 			})
 		}
@@ -822,7 +822,7 @@ func (p *parser) parseType() *Gtype {
 			}
 			p.tryResolve("", rel)
 			gtype = &Gtype{
-				typ:      G_REL,
+				kind:     G_REL,
 				relation: rel,
 			}
 			return p.registerDynamicType(gtype)
@@ -833,7 +833,7 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("*") {
 			// pointer
 			gtype = &Gtype{
-				typ:      G_POINTER,
+				kind:     G_POINTER,
 				origType: p.parseType(),
 			}
 			return p.registerDynamicType(gtype)
@@ -855,7 +855,7 @@ func (p *parser) parseType() *Gtype {
 				// slice
 				typ := p.parseType()
 				gtype = &Gtype{
-					typ:         G_SLICE,
+					kind:        G_SLICE,
 					elementType: typ,
 				}
 				return p.registerDynamicType(gtype)
@@ -864,7 +864,7 @@ func (p *parser) parseType() *Gtype {
 				p.expect("]")
 				typ := p.parseType()
 				gtype = &Gtype{
-					typ:         G_ARRAY,
+					kind:        G_ARRAY,
 					length:      tok.getIntval(),
 					elementType: typ,
 				}
@@ -921,7 +921,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	if typ == nil {
 		if p.isGlobal() {
 			variable.gtype = &Gtype{
-				typ:          G_DEPENDENT,
+				kind:         G_DEPENDENT,
 				dependendson: initval,
 			}
 			p.packageUninferredGlobals = append(p.packageUninferredGlobals, variable)
@@ -1541,7 +1541,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				sliceType := &Gtype{
-					typ:         G_SLICE,
+					kind:        G_SLICE,
 					elementType: gtype,
 				}
 				variable := &ExprVariable{
@@ -1652,13 +1652,13 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	if isMethod {
 		var typeToBelong *Gtype
-		if receiver.gtype.typ == G_POINTER {
+		if receiver.gtype.kind == G_POINTER {
 			typeToBelong = receiver.gtype.origType
 		} else {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.typ == G_REL, "packageMethods must belong to a named type")
+		p.assert(typeToBelong.kind == G_REL, "packageMethods must belong to a named type")
 		var mthds methods
 		var ok bool
 		typeName := typeToBelong.relation.name
@@ -1779,7 +1779,7 @@ func (p *parser) parseStructDef() *Gtype {
 	// calc offset
 	p.expect(";")
 	return &Gtype{
-		typ:    G_STRUCT,
+		kind:   G_STRUCT,
 		size:   undefinedSize, // will be calculated later
 		fields: fields,
 	}
@@ -1816,7 +1816,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.expect("}")
 
 	gtype := &Gtype{
-		typ:      G_INTERFACE,
+		kind:     G_INTERFACE,
 		imethods: methods,
 	}
 

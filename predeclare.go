@@ -3,14 +3,14 @@ package main
 // built-in types
 const sizeOfInterface = 8 * 3
 
-var sInterface = Gtype{typ: G_INTERFACE, size: sizeOfInterface}
+var sInterface = Gtype{kind: G_INTERFACE, size: sizeOfInterface}
 var gInterface = &sInterface
-var sInt = Gtype{typ: G_INT, size: 8}
+var sInt = Gtype{kind: G_INT, size: 8}
 var gInt = &sInt
-var gByte = &Gtype{typ: G_BYTE, size: 1}
-var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
+var gByte = &Gtype{kind: G_BYTE, size: 1}
+var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
-	typ: G_STRING,
+	kind: G_STRING,
 }
 
 var builtinTypesAsString []string = []string{"bool", "byte", "int", "string"}
@@ -52,10 +52,10 @@ var builtinAsComment = &DeclFunc{
 }
 
 var sBuiltinRunTimeArgsRettypes1 Gtype = Gtype{
-	typ:  G_SLICE,
+	kind: G_SLICE,
 	size: IntSize * 3,
 	elementType: &Gtype{
-		typ: G_STRING,
+		kind: G_STRING,
 	},
 }
 

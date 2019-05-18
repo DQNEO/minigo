@@ -3,12 +3,12 @@ package main
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
-		typ: G_MAP,
+		kind: G_MAP,
 		mapKey: &Gtype{
-			typ: G_STRING,
+			kind: G_STRING,
 		},
 		mapValue: &Gtype{
-			typ: G_STRING,
+			kind: G_STRING,
 		},
 	}
 	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
@@ -93,7 +93,7 @@ func mapOkRegister(is24Width bool) string {
 }
 
 func emitMapGet(mapType *Gtype, deref bool) {
-	if mapType.typ == G_REL {
+	if mapType.kind == G_REL {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
 	}
@@ -136,7 +136,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("add %%rax, %%rcx")   // head + i * 16
 	emit("mov (%%rcx), %%rax") // emit index address
 
-	assert(mapKeyType != nil, nil, "key typ should not be nil:"+mapType.String())
+	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}

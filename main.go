@@ -252,7 +252,7 @@ func (ir *IrRoot) composeMethodTable() {
 		if funcdecl.receiver != nil {
 			//debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
-			if gtype.typ == G_POINTER {
+			if gtype.kind == G_POINTER {
 				gtype = gtype.origType
 			}
 			if gtype.relation == nil {
