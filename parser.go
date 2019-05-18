@@ -677,7 +677,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
 			strctliteral.invisiblevar = p.newVariable("", &Gtype{
-				kind:     G_REL,
+				kind:     G_NAMED,
 				relation: strctliteral.strctname,
 			})
 		}
@@ -822,7 +822,7 @@ func (p *parser) parseType() *Gtype {
 			}
 			p.tryResolve("", rel)
 			gtype = &Gtype{
-				kind:     G_REL,
+				kind:     G_NAMED,
 				relation: rel,
 			}
 			return p.registerDynamicType(gtype)
@@ -1658,7 +1658,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.kind == G_REL, "packageMethods must belong to a named type")
+		p.assert(typeToBelong.kind == G_NAMED, "packageMethods must belong to a named type")
 		var mthds methods
 		var ok bool
 		typeName := typeToBelong.relation.name

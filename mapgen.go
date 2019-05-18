@@ -93,7 +93,7 @@ func mapOkRegister(is24Width bool) string {
 }
 
 func emitMapGet(mapType *Gtype, deref bool) {
-	if mapType.kind == G_REL {
+	if mapType.kind == G_NAMED {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
 	}

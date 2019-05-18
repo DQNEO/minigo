@@ -9,7 +9,7 @@ const undefinedSize = -1
 const (
 	G_UNKOWNE   GTYPE_KIND = iota
 	G_DEPENDENT             // depends on other expression
-	G_REL
+	G_NAMED
 	// below are primitives which are declared in the universe block
 	G_INT
 	G_BOOL
@@ -37,7 +37,7 @@ type Gtype struct {
 	kind           GTYPE_KIND
 	receiverTypeId int                     // for receiverTypeId. 0:unkonwn
 	dependendson   Expr                    // for G_DEPENDENT
-	relation       *Relation               // for G_REL
+	relation       *Relation               // for G_NAMED
 	size           int                     // for scalar type like int, bool, byte, for struct
 	origType       *Gtype                  // for pointer
 	fields         []*Gtype                // for struct
@@ -47,7 +47,7 @@ type Gtype struct {
 	length         int                       // for array, string(len without the terminating \0)
 	elementType    *Gtype                    // for array, slice
 	imethods       map[identifier]*signature // for interface
-	methods        map[identifier]*ExprFuncRef
+	methods        map[identifier]*ExprFuncRef // for G_NAMED
 	// for fixed array
 	mapKey   *Gtype // for map
 	mapValue *Gtype // for map
@@ -57,7 +57,7 @@ func (gtype *Gtype) isNil() bool {
 	if gtype == nil {
 		return true
 	}
-	if gtype.kind == G_REL {
+	if gtype.kind == G_NAMED {
 		return gtype.relation.gtype == nil
 
 	}
@@ -65,7 +65,7 @@ func (gtype *Gtype) isNil() bool {
 }
 
 func (gtype *Gtype) getSource() *Gtype {
-	if gtype.kind == G_REL {
+	if gtype.kind == G_NAMED {
 		return gtype.relation.gtype.getSource()
 
 	}
@@ -98,7 +98,7 @@ func (gtype *Gtype) isString() bool {
 func (gtype *Gtype) getSize() int {
 	assertNotNil(gtype != nil, nil)
 	assert(gtype.kind != G_DEPENDENT, nil, "type should be inferred")
-	if gtype.kind == G_REL {
+	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
 			errorf("relation not resolved: %s", gtype)
 		}
@@ -135,11 +135,11 @@ func (gtype *Gtype) String() string {
 	switch gtype.kind {
 	case G_DEPENDENT:
 		return "dependent"
-	case G_REL:
+	case G_NAMED:
 		if gtype.relation.pkg == "" {
 			//errorf("pkg is empty: %s", gtype.relation.name)
 		}
-		return fmt.Sprintf("G_REL(%s.%s)",
+		return fmt.Sprintf("G_NAMED(%s.%s)",
 			gtype.relation.pkg, gtype.relation.name)
 	case G_INT:
 		return "int"
@@ -227,7 +227,7 @@ func (rel *Relation) getGtype() *Gtype {
 
 func (e *ExprStructLiteral) getGtype() *Gtype {
 	return &Gtype{
-		kind:     G_REL,
+		kind:     G_NAMED,
 		relation: e.strctname,
 	}
 }
@@ -313,7 +313,7 @@ func (e *ExprSlice) getGtype() *Gtype {
 func (e *ExprIndex) getGtype() *Gtype {
 	assert(e.collection.getGtype() != nil, e.token(), "collection type should not be nil")
 	gtype := e.collection.getGtype()
-	if gtype.kind == G_REL {
+	if gtype.kind == G_NAMED {
 		gtype = gtype.relation.gtype
 	}
 

@@ -278,7 +278,7 @@ func (a *ExprStructField) emit() {
 			emit("mov (%%rdx), %%rax")
 		}
 
-	case G_REL: // struct
+	case G_NAMED: // struct
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
@@ -824,7 +824,7 @@ func (ast *StmtAssignment) emit() {
 				assignToArray(left, right)
 			case gtype.kind == G_SLICE:
 				assignToSlice(left, right)
-			case gtype.kind == G_REL && gtype.relation.gtype.kind == G_STRUCT:
+			case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
 				assignToStruct(left, right)
 			case gtype.getPrimType() == G_INTERFACE:
 				assignToInterface(left, right)
@@ -927,7 +927,7 @@ func (ast *StmtAssignment) emit() {
 			assignToArray(left, right)
 		case gtype.kind == G_SLICE:
 			assignToSlice(left, right)
-		case gtype.kind == G_REL && gtype.relation.gtype.kind == G_STRUCT:
+		case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
 			assignToStruct(left, right)
 		case gtype.getPrimType() == G_INTERFACE:
 			assignToInterface(left, right)
@@ -1085,7 +1085,7 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	assert(ok, e.tok, "should be *Relation")
 	vr, ok := rel.expr.(*ExprVariable)
 	assert(ok, e.tok, "should be *ExprVariable")
-	assert(vr.gtype.kind == G_REL, e.tok, "expect G_REL, but got "+vr.gtype.String())
+	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
@@ -1554,7 +1554,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	assert(rhs == nil || (rhs.getGtype().kind == G_REL && rhs.getGtype().relation.gtype.kind == G_STRUCT),
+	assert(rhs == nil || (rhs.getGtype().kind == G_NAMED && rhs.getGtype().relation.gtype.kind == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
@@ -1565,7 +1565,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			elementType := arrayType.elementType
 			elmSize := arrayType.elementType.getSize()
 			switch {
-			case elementType.kind == G_REL && elementType.relation.gtype.kind == G_STRUCT:
+			case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 				left := &ExprStructField{
 					strct:     lhs,
 					fieldname: fieldtype.fieldname,
@@ -1591,7 +1591,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("push $0")
 			emit("push $0")
 			emitSave3Elements(lhs, fieldtype.offset)
-		case fieldtype.kind == G_REL && fieldtype.relation.gtype.kind == G_STRUCT:
+		case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
 				fieldname: fieldtype.fieldname,
@@ -1650,7 +1650,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
 				switch {
-				case elementType.kind == G_REL && elementType.relation.gtype.kind == G_STRUCT:
+				case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 					left := &ExprStructField{
 						strct:     lhs,
 						fieldname: fieldtype.fieldname,
@@ -1683,7 +1683,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 					fieldname: field.key,
 				}
 				assignToInterface(left, field.value)
-			case fieldtype.kind == G_REL && fieldtype.relation.gtype.kind == G_STRUCT:
+			case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
@@ -2044,7 +2044,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 	elmSize := elementType.getSize()
 	assert(rhs == nil || rhs.getGtype().kind == G_ARRAY, nil, "rhs should be array")
 	switch {
-	case elementType.kind == G_REL && elementType.relation.gtype.kind == G_STRUCT:
+	case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 		//TBI
 		for i := 0; i < arrayType.length; i++ {
 			left := &ExprIndex{
@@ -2136,7 +2136,7 @@ func (decl *DeclVar) emit() {
 		assignToArray(varname, decl.initval)
 	case gtype.kind == G_SLICE:
 		assignToSlice(varname, decl.initval)
-	case gtype.kind == G_REL && gtype.relation.gtype.kind == G_STRUCT:
+	case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
 		assignToStruct(varname, decl.initval)
 	case gtype.getPrimType() == G_MAP:
 		assignToMap(varname, decl.initval)
@@ -2565,7 +2565,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(methodCall.receiver != nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
-	assert(gtype.kind == G_REL || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
+	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
 	if gtype.kind == G_POINTER {
 		typeToBeloing = gtype.origType
@@ -2573,7 +2573,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.kind == G_REL, methodCall.tok, "method must belong to a named type")
+	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, "method must belong to a named type")
 	origType := typeToBeloing.relation.gtype
 	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), fmt.Sprintf("origType should not be nil:%#v", typeToBeloing.relation))
 	return origType
