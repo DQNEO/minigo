@@ -1863,14 +1863,7 @@ func (e *ExprConversionToInterface) emit() {
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
-	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
-	dynamicValue.emit()
-	emit("push %%rax")
-	emitCallMalloc(8)
-	emit("pop %%rcx")                         // dynamicValue
-	emit("mov %%rcx, (%%rax)")                // store value to heap
-	emit("push %%rax # addr of dynamicValue") // address
-
+	//assert(dynamicValue.getGtype()!=nil, dynamicValue.token(), "gtype is nil")
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
 		emit("# emit nil for interface")
@@ -1879,6 +1872,15 @@ func emitConversionToInterface(dynamicValue Expr) {
 		emit("mov $0, %%rcx")
 		return
 	}
+
+	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
+	dynamicValue.emit()
+	emit("push %%rax")
+	emitCallMalloc(8)
+	emit("pop %%rcx")                         // dynamicValue
+	emit("mov %%rcx, (%%rax)")                // store value to heap
+	emit("push %%rax # addr of dynamicValue") // address
+
 	if receiverType.typ == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}

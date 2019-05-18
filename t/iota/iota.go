@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 const (
-	a0 = iota
+	a0 int = iota
 	a1
 	a2
 )
