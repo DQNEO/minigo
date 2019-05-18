@@ -1882,8 +1882,8 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if receiverType.typ == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
-	//assert(receiverType.typeId > 0,  dynamicValue.token(), "no typeId")
-	emit("mov $%d, %%rax # receiverTypeId", receiverType.typeId)
+	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
+	emit("mov $%d, %%rax # receiverTypeId", receiverType.receiverTypeId)
 	emit("push %%rax # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
@@ -2447,7 +2447,7 @@ func (e *ExprTypeAssertion) emit() {
 		// x.(T) asserts that the dynamic type of x is identical to the type T.
 
 		e.expr.emit() // emit interface
-		// rax(ptr), rbx(typeId of method table), rcx(hashed typeId)
+		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
 		emit("push %%rax")
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)

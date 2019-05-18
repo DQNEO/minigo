@@ -229,8 +229,8 @@ func main() {
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.allNamedTypes {
-		concreteNamedType.gtype.typeId = typeId
-		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
+		concreteNamedType.gtype.receiverTypeId = typeId
+		//debugf("concreteNamedType: id=%d, name=%s", receiverTypeId, concreteNamedType.name)
 		typeId++
 	}
 	debugf("set concreteNamedType")
@@ -247,7 +247,7 @@ type stdpkg struct {
 }
 
 func (ir *IrRoot) composeMethodTable() {
-	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
+	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
 			//debugf("funcdecl:%v", funcdecl)
@@ -258,7 +258,7 @@ func (ir *IrRoot) composeMethodTable() {
 			if gtype.relation == nil {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
-			typeId := gtype.relation.gtype.typeId
+			typeId := gtype.relation.gtype.receiverTypeId
 			symbol := funcdecl.getSymbol()
 			methods := methodTable[typeId]
 			methods = append(methods, symbol)

@@ -34,16 +34,16 @@ type signature struct {
 }
 
 type Gtype struct {
-	typ          GTYPE_TYPE
-	typeId       int                       // for receiverTypeId. 0:unkonwn
-	dependendson Expr                      // for G_DEPENDENT
-	relation     *Relation                 // for G_REL
-	size         int                       // for scalar type like int, bool, byte, for struct
-	origType     *Gtype                    // for pointer
-	fields       []*Gtype                  // for struct
-	fieldname    identifier                // for struct field
-	offset       int                       // for struct field
-	padding      int                       // for struct field
+	typ            GTYPE_TYPE
+	receiverTypeId int                     // for receiverTypeId. 0:unkonwn
+	dependendson   Expr                    // for G_DEPENDENT
+	relation       *Relation               // for G_REL
+	size           int                     // for scalar type like int, bool, byte, for struct
+	origType       *Gtype                  // for pointer
+	fields         []*Gtype                // for struct
+	fieldname      identifier              // for struct field
+	offset         int                     // for struct field
+	padding        int                     // for struct field
 	length       int                       // for array, string(len without the terminating \0)
 	elementType  *Gtype                    // for array, slice
 	imethods     map[identifier]*signature // for interface
