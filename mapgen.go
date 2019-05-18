@@ -3,12 +3,12 @@ package main
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
-		typ: G_MAP,
+		kind: G_MAP,
 		mapKey: &Gtype{
-			typ: G_STRING,
+			kind: G_STRING,
 		},
 		mapValue: &Gtype{
-			typ: G_STRING,
+			kind: G_STRING,
 		},
 	}
 	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
@@ -35,7 +35,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	receiver := args[0]
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
-	assert(receiverType.getPrimType() == G_INTERFACE, nil, "should be interface")
+	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
 
 	// dereference: convert an interface value to a concrete value
 	receiver.emit()
@@ -93,7 +93,7 @@ func mapOkRegister(is24Width bool) string {
 }
 
 func emitMapGet(mapType *Gtype, deref bool) {
-	if mapType.typ == G_REL {
+	if mapType.kind == G_NAMED {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
 	}
@@ -136,7 +136,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("add %%rax, %%rcx")   // head + i * 16
 	emit("mov (%%rcx), %%rax") // emit index address
 
-	assert(mapKeyType != nil, nil, "key typ should not be nil:"+mapType.String())
+	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
 		emit("mov (%%rax), %%rax") // dereference
 	}
@@ -230,7 +230,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	e.index.emit()
 	emit("push %%rax") // index value
 
-	mapType := e.collection.getGtype().getSource()
+	mapType := e.collection.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 
 	if mapKeyType.isString() {
@@ -355,7 +355,7 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("add %%rax, %%rcx # mapHead + (counter * 16 + 8)")
 		emit("mov (%%rcx), %%rdx")
 
-		switch f.rng.valuevar.getGtype().getPrimType() {
+		switch f.rng.valuevar.getGtype().getKind() {
 		case G_SLICE, G_MAP:
 			emit("mov (%%rdx), %%rax")
 			emit("mov 8(%%rdx), %%rbx")
@@ -426,7 +426,7 @@ func (lit *ExprMapLiteral) emitPush() {
 			emit("pop %%rcx")          // value of value
 			emit("mov %%rcx, (%%rax)") // save value to heap
 		} else {
-			switch element.value.getGtype().getPrimType() {
+			switch element.value.getGtype().getKind() {
 			case G_MAP, G_SLICE, G_INTERFACE:
 				// rax,rbx,rcx
 				element.value.emit()

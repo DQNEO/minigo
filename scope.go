@@ -1,9 +1,9 @@
 package main
 
-type scope struct {
+type Scope struct {
 	idents map[identifier]*IdentBody
 	name   string
-	outer  *scope
+	outer  *Scope
 }
 
 type IdentBody struct {
@@ -12,7 +12,7 @@ type IdentBody struct {
 	expr  Expr
 }
 
-func (sc *scope) get(name identifier) *IdentBody {
+func (sc *Scope) get(name identifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
 		v, ok := s.idents[name]
 		if ok {
@@ -22,38 +22,38 @@ func (sc *scope) get(name identifier) *IdentBody {
 	return nil
 }
 
-func (sc *scope) setFunc(name identifier, funcref *ExprFuncRef) {
+func (sc *Scope) setFunc(name identifier, funcref *ExprFuncRef) {
 	sc.set(name, &IdentBody{
 		expr: funcref,
 	})
 }
 
-func (sc *scope) setConst(name identifier, cnst *ExprConstVariable) {
+func (sc *Scope) setConst(name identifier, cnst *ExprConstVariable) {
 	sc.set(name, &IdentBody{
 		expr: cnst,
 	})
 }
 
-func (sc *scope) setVar(name identifier, variable *ExprVariable) {
+func (sc *Scope) setVar(name identifier, variable *ExprVariable) {
 	sc.set(name, &IdentBody{
 		expr: variable,
 	})
 }
 
-func (sc *scope) setGtype(name identifier, gtype *Gtype) {
+func (sc *Scope) setGtype(name identifier, gtype *Gtype) {
 	sc.set(name, &IdentBody{
 		gtype: gtype,
 	})
 }
 
-func (sc *scope) set(name identifier, elm *IdentBody) {
+func (sc *Scope) set(name identifier, elm *IdentBody) {
 	if elm == nil {
 		panic("nil cannot be set")
 	}
 	sc.idents[name] = elm
 }
 
-func (sc *scope) getGtype(name identifier) *Gtype {
+func (sc *Scope) getGtype(name identifier) *Gtype {
 	if sc == nil {
 		errorf("sc is nil")
 	}
@@ -68,8 +68,8 @@ func (sc *scope) getGtype(name identifier) *Gtype {
 	return elm.gtype
 }
 
-func newScope(outer *scope, name string) *scope {
-	return &scope{
+func newScope(outer *Scope, name string) *Scope {
+	return &Scope{
 		outer:  outer,
 		name:   name,
 		idents: map[identifier]*IdentBody{},

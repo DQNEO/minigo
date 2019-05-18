@@ -3,14 +3,14 @@ package main
 // built-in types
 const sizeOfInterface = 8 * 3
 
-var sInterface = Gtype{typ: G_INTERFACE, size: sizeOfInterface}
+var sInterface = Gtype{kind: G_INTERFACE, size: sizeOfInterface}
 var gInterface = &sInterface
-var sInt = Gtype{typ: G_INT, size: 8}
+var sInt = Gtype{kind: G_INT, size: 8}
 var gInt = &sInt
-var gByte = &Gtype{typ: G_BYTE, size: 1}
-var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
+var gByte = &Gtype{kind: G_BYTE, size: 1}
+var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
-	typ: G_STRING,
+	kind: G_STRING,
 }
 
 var builtinTypesAsString []string = []string{"bool", "byte", "int", "string", "func"}
@@ -52,10 +52,10 @@ var builtinAsComment = &DeclFunc{
 }
 
 var sBuiltinRunTimeArgsRettypes1 Gtype = Gtype{
-	typ:  G_SLICE,
+	kind: G_SLICE,
 	size: IntSize * 3,
 	elementType: &Gtype{
-		typ: G_STRING,
+		kind: G_STRING,
 	},
 }
 
@@ -65,14 +65,14 @@ var builtinRunTimeArgs = &DeclFunc{
 	},
 }
 
-func newUniverse() *scope {
+func newUniverse() *Scope {
 	universe := newScope(nil, "universe")
 	setPredeclaredIdentifiers(universe)
 	return universe
 }
 
 // https://golang.org/ref/spec#Predeclared_identifiers
-func setPredeclaredIdentifiers(universe *scope) {
+func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareNil(universe)
 	predeclareTypes(universe)
 	predeclareConsts(universe)
@@ -114,7 +114,7 @@ func setPredeclaredIdentifiers(universe *scope) {
 
 // Zero value:
 // nil
-func predeclareNil(universe *scope) {
+func predeclareNil(universe *Scope) {
 	universe.set("nil", &IdentBody{
 		expr: &ExprNilLiteral{},
 	})
@@ -124,7 +124,7 @@ func predeclareNil(universe *scope) {
 // bool byte complex64 complex128 error float32 float64
 // int int8 int16 int32 int64 rune string
 // uint uint8 uint16 uint32 uint64 uintptr
-func predeclareTypes(universe *scope) {
+func predeclareTypes(universe *Scope) {
 	universe.setGtype("bool", gBool)
 	universe.setGtype("byte", gByte)
 	universe.setGtype("int", gInt)
@@ -134,7 +134,7 @@ func predeclareTypes(universe *scope) {
 
 // Constants:
 // true false iota
-func predeclareConsts(universe *scope) {
+func predeclareConsts(universe *Scope) {
 	universe.setConst("true", &ExprConstVariable{
 		name:  "true",
 		gtype: gBool,
@@ -149,7 +149,7 @@ func predeclareConsts(universe *scope) {
 	universe.setConst("iota", eIota)
 }
 
-func predeclareLibcFuncs(universe *scope) {
+func predeclareLibcFuncs(universe *Scope) {
 	universe.setFunc("printf", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
