@@ -1519,7 +1519,7 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable,  []*Gtype) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
@@ -1528,7 +1528,6 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 	p.expect("(")
 
 	var params []*ExprVariable
-	var isVariadic bool
 
 	tok = p.peekToken()
 	if tok.isPunct(")") {
@@ -1576,7 +1575,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 	next := p.peekToken()
 	if next.isPunct("{") || next.isSemicolon() {
-		return fname, params, isVariadic, nil
+		return fname, params, nil
 	}
 
 	var rettypes []*Gtype
@@ -1600,7 +1599,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 		rettypes = []*Gtype{p.parseType()}
 	}
 
-	return fname, params, isVariadic, rettypes
+	return fname, params, rettypes
 }
 
 func (p *parser) parseFuncDef() *DeclFunc {
@@ -1631,7 +1630,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.expect(")")
 	}
 
-	fname, params, isVariadic, rettypes := p.parseFuncSignature()
+	fname, params, rettypes := p.parseFuncSignature()
 
 	ptok2 := p.expect("{")
 
@@ -1642,7 +1641,6 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		fname:      fname,
 		rettypes:   rettypes,
 		params:     params,
-		isVariadic: isVariadic,
 	}
 
 	ref := &ExprFuncRef{
@@ -1798,7 +1796,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			break
 		}
 
-		fname, params, isVariadic, rettypes := p.parseFuncSignature()
+		fname, params, rettypes := p.parseFuncSignature()
 		p.expect(";")
 
 		var paramTypes []*Gtype
@@ -1808,7 +1806,6 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 		method := &signature{
 			fname:      fname,
 			paramTypes: paramTypes,
-			isVariadic: isVariadic,
 			rettypes:   rettypes,
 		}
 		methods[fname] = method

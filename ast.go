@@ -209,7 +209,6 @@ type DeclFunc struct {
 	fname      identifier
 	rettypes   []*Gtype
 	params     []*ExprVariable
-	isVariadic bool
 	localvars  []*ExprVariable
 	body       *StmtSatementList
 	stmtDefer  *StmtDefer

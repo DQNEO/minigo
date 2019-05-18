@@ -29,7 +29,6 @@ const (
 type signature struct {
 	fname      identifier
 	paramTypes []*Gtype
-	isVariadic bool
 	rettypes   []*Gtype
 }
 
