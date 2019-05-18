@@ -14,4 +14,3 @@ func dumpSlice(x interface{}) {
 
 func asComment(s string) {
 }
-

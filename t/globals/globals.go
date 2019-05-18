@@ -126,6 +126,7 @@ func assign5() {
 	fmt.Printf("%d\n", gpoints[1].X+4) // 32
 }
 
+/*
 func assign6() {
 	gpolygon = Polygon{
 		line2: [...]Point{
@@ -147,6 +148,8 @@ func assign6() {
 	fmt.Printf("%d\n", gpolygon.line2[1].Y) // 33
 }
 
+*/
+
 func main() {
 	eval()
 	evalnested()
@@ -156,7 +159,7 @@ func main() {
 	assign3()
 	assign4()
 	assign5()
-	assign6()
+	//assign6()
 }
 
 var gint int = 1
@@ -201,6 +204,7 @@ var gpoints [3]Point = [...]Point{
 	},
 }
 
+/*
 var gpolygon Polygon = Polygon{
 	line2: [...]Point{
 		Point{
@@ -217,6 +221,7 @@ var gpolygon Polygon = Polygon{
 		},
 	},
 }
+*/
 
 var gstructhasarray StructHasArray
 

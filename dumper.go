@@ -154,7 +154,7 @@ func (a *Relation) dump() {
 	assert(a != nil, nil, "ident shoud not be nil ")
 	//assert(a.expr != nil, nil, "ident.expr shoud not be nil for " + string(a.name))
 	if a.expr == nil && a.gtype == nil {
-		debugf("rel %s (UNRESOLVED)" , a.name)
+		debugf("rel %s (UNRESOLVED)", a.name)
 		return
 	}
 	a.expr.dump()
@@ -181,16 +181,30 @@ func (a *ExprStructField) dump() {
 }
 
 func (stmt *ExprCaseClause) dump() {
-	//stmt.exprs.dump()
-	//stmt.compound.dump()
+	debugf("case")
+	debugNest++
+	for _, expr := range stmt.exprs {
+		expr.dump()
+	}
+	for _, gtype := range stmt.gtypes {
+		debugf("%s", gtype.String())
+	}
+	stmt.compound.dump()
+	debugNest--
 }
 
 func (stmt *StmtSwitch) dump() {
-	stmt.cond.dump()
-	for _, c := range stmt.cases {
-		c.dump()
+	debugf("switch")
+	if stmt.cond != nil {
+		stmt.cond.dump()
 	}
-	//stmt.dflt.dump()
+	for _, _case := range stmt.cases {
+		_case.dump()
+	}
+	if stmt.dflt != nil {
+		debugf("default")
+		stmt.dflt.dump()
+	}
 }
 
 func (e *ExprNilLiteral) dump() {
@@ -202,12 +216,18 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	debugf("ExprIndex:")
+	debugf("ExprSlice:")
 	debugNest++
 	e.collection.dump()
-	e.low.dump()
-	e.high.dump()
-	e.max.dump()
+	if e.low != nil {
+		e.low.dump()
+	}
+	if e.high != nil {
+		e.high.dump()
+	}
+	if e.max != nil {
+		e.max.dump()
+	}
 	debugNest--
 }
 
@@ -220,7 +240,9 @@ func (e *ExprIndex) dump() {
 }
 
 func (e *ExprTypeAssertion) dump() {
-	panic("implement me:ExprTypeAssertion")
+	debugf("type assertion")
+	e.expr.dump()
+	debugf(".(%s)", e.gtype.String())
 }
 
 func (e *ExprVaArg) dump() {
@@ -248,7 +270,8 @@ func (e *ExprStructLiteral) dump() {
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
-	panic("implement me:ExprTypeSwitchGuard")
+	debugf("switch")
+	e.expr.dump()
 }
 
 func (f *StmtFor) dump() {
@@ -322,11 +345,11 @@ func (ast *StmtSatementList) dump() {
 }
 
 func (ast *StmtContinue) dump() {
-	panic("implement me: StmtContinue")
+	debugf("continue")
 }
 
 func (ast *StmtBreak) dump() {
-	panic("implement me: StmtBreak")
+	debugf("break")
 }
 
 func (ast *StmtExpr) dump() {
@@ -334,7 +357,10 @@ func (ast *StmtExpr) dump() {
 }
 
 func (ast *StmtDefer) dump() {
-	panic("implement me: StmtDefer")
+	debugf("defer")
+	debugNest++
+	ast.expr.dump()
+	debugNest--
 }
 
 func (e *ExprMapLiteral) dump() {
@@ -342,9 +368,13 @@ func (e *ExprMapLiteral) dump() {
 	debugNest++
 	for _, element := range e.elements {
 		debugf("element key:")
+		debugNest++
 		element.key.dump()
+		debugNest--
 		debugf("element value:")
+		debugNest++
 		element.value.dump()
+		debugNest--
 	}
 	debugNest--
 }

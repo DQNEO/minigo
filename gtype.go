@@ -7,8 +7,8 @@ type GTYPE_TYPE int
 const undefinedSize = -1
 
 const (
-	G_UNKOWNE GTYPE_TYPE  = iota
-	G_DEPENDENT // depends on other expression
+	G_UNKOWNE   GTYPE_TYPE = iota
+	G_DEPENDENT            // depends on other expression
 	G_REL
 	// below are primitives which are declared in the universe block
 	G_INT
@@ -43,6 +43,7 @@ type Gtype struct {
 	fields       []*Gtype                  // for struct
 	fieldname    identifier                // for struct field
 	offset       int                       // for struct field
+	padding      int                       // for struct field
 	length       int                       // for array, string(len without the terminating \0)
 	elementType  *Gtype                    // for array, slice
 	imethods     map[identifier]*signature // for interface
@@ -63,7 +64,6 @@ func (gtype *Gtype) isNil() bool {
 	return false
 }
 
-
 func (gtype *Gtype) getSource() *Gtype {
 	if gtype.typ == G_REL {
 		return gtype.relation.gtype.getSource()
@@ -77,6 +77,15 @@ func (gtype *Gtype) getPrimType() GTYPE_TYPE {
 		return G_UNKOWNE
 	}
 	return gtype.getSource().typ
+}
+
+func (gtype *Gtype) is24Width() bool {
+	switch gtype.getPrimType() {
+	case G_INTERFACE, G_MAP, G_SLICE:
+		return true
+	default:
+		return false
+	}
 }
 
 func (gtype *Gtype) isString() bool {
@@ -157,6 +166,8 @@ func (gtype *Gtype) String() string {
 		return fmt.Sprintf("[]%s", gtype.elementType.String())
 	case G_STRING:
 		return "string"
+	case G_FUNC:
+		return "func"
 	case G_INTERFACE:
 		if len(gtype.imethods) == 0 {
 			return "interface{}"
@@ -184,7 +195,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type")
+	assert(strct.typ == G_STRUCT, nil, "assume G_STRUCT type, but got "+strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
@@ -195,7 +206,9 @@ func (strct *Gtype) calcStructOffset() {
 			align = MaxAlign
 		}
 		if offset%align != 0 {
-			offset += align - offset%align
+			padding := align - offset%align
+			fieldtype.padding = padding
+			offset += padding
 		}
 		fieldtype.offset = offset
 		offset += fieldtype.getSize()
@@ -222,7 +235,10 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), "")
 	if e.rel.expr != nil {
-		return e.rel.expr.(*ExprFuncRef).funcdef.rettypes[0]
+		funcref, ok := e.rel.expr.(*ExprFuncRef)
+		assert(ok, e.token(), "it should be a ExprFuncRef")
+		firstRetType := funcref.funcdef.rettypes[0]
+		return firstRetType
 	} else if e.rel.gtype != nil {
 		return e.rel.gtype
 	}
@@ -237,7 +253,11 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 	}
 
 	// refetch gtype from the package block scope
-	// I don't know why. mabye management of gtypes is broken
+	// I forgot the reason to do this :(
+	_, ok := allScopes[gtype.relation.pkg]
+	if !ok {
+		errorft(e.token(), "ExprMethodcall.getGtype(): socope \"%s\" does not exist in allScopes ", gtype.relation.pkg)
+	}
 	pgtype := allScopes[gtype.relation.pkg].getGtype(gtype.relation.name)
 	if pgtype == nil {
 		errorft(e.token(), "%s is not found in the scope", gtype)
@@ -344,7 +364,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	return nil
 }
 
-func (e ExprArrayLiteral) getGtype() *Gtype {
+func (e *ExprArrayLiteral) getGtype() *Gtype {
 	return e.gtype
 }
 

@@ -4,11 +4,9 @@ import "fmt"
 
 var myarray [2]myint = [2]myint{3, 2}
 
-
 func anytype(x interface{}) {
-	fmt.Printf("%d\n", x)
+	fmt.Printf("%d\n", *x)
 }
-
 
 func f1() {
 	var a myint = '1'

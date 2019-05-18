@@ -2,7 +2,6 @@ package main
 
 import "fmt"
 
-
 func myPrintf(format string, a []interface{}) {
 	var s string = fmt.Sprintf(format, a...)
 	printf(s)
@@ -95,7 +94,7 @@ func test_dumpToken() {
 	var ifc2 interface{} = s2
 	ifcs = append(ifcs, ifc1)
 	ifcs = append(ifcs, ifc2)
-	var s string =  fmt.Sprintf(format, ifcs...)
+	var s string = fmt.Sprintf(format, ifcs...)
 	fmt.Printf(s)
 }
 

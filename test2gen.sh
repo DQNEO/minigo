@@ -1,49 +1,25 @@
 #!/bin/bash
+set -u
 
-set -eu
+differ=0
 
-test_names="
-anytype-switch
-anytype
-arith
-assign-to-indexexpr
-assign
-backquote
-byte-cmp
-cmp
-const
-conversion
-fizzbuzz
-for
-forcond
-funcref
-heap
-hello
-if
-incr
-internal
-map-of-map
-map
-min
-multi
-newline
-open
-pointer
-println
-read-file
-slice2
-sprintf
-string-concat
-string-index
-string
-test
-var
-write
-"
-
-for testname in $test_names
+for testfile in t/expected/*.txt
 do
-    ./unit_test.sh  minigo2 $testname 2
+    name=$(basename -s .txt $testfile)
+    ./unit_test.sh minigo2 $name 2
+    if [[ $? -ne 0 ]];then
+        differ=1
+    fi
 done
 
-echo "All 2gen tests passed."
+if [[ $differ -eq 0 ]];then
+    :
+else
+    echo "FAILED"
+    exit 1
+fi
+
+set -e
+./testerror.sh
+
+echo "All tests passed"

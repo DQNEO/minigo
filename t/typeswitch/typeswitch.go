@@ -58,7 +58,6 @@ func f4() {
 		fmt.Printf("ERROR\n")
 	}
 
-
 	switch i.(type) {
 	case nil:
 		fmt.Printf("5\n")

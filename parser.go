@@ -10,31 +10,30 @@ const __func__ string = "__func__"
 
 type parser struct {
 	// per function or block
-	currentFunc         *DeclFunc
-	localvars           []*ExprVariable
-	requireBlock        bool // workaround for parsing "{" as a block starter
-	inCase              int  // > 0  while in reading case compound stmts
-	constSpecIndex      int
-	currentForStmt      *StmtFor
+	currentFunc    *DeclFunc
+	localvars      []*ExprVariable
+	requireBlock   bool // workaround for parsing "{" as a block starter
+	inCase         int  // > 0  while in reading case compound stmts
+	constSpecIndex int
+	currentForStmt *StmtFor
 
 	// per file
-	tokenStream         *TokenStream
-	packageBlockScope   *scope
-	currentScope        *scope
-	importedNames       map[identifier]bool
-
+	tokenStream       *TokenStream
+	packageBlockScope *scope
+	currentScope      *scope
+	importedNames     map[identifier]bool
 
 	// per package
-	currentPackageName  identifier
-	methods             map[identifier]methods
-	unresolvedRelations []*Relation
-	globaluninferred    []*ExprVariable
-	localuninferred     []Inferer // VarDecl, StmtShortVarDecl or RangeClause
+	packageName                identifier
+	packageMethods             map[identifier]methods
+	packageUnresolvedRelations []*Relation
+	packageUninferredGlobals   []*ExprVariable
+	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
-	scopes         map[identifier]*scope
-	stringLiterals []*ExprStringLiteral
-	allNamedTypes  []*DeclType
+	scopes          map[identifier]*scope
+	stringLiterals  []*ExprStringLiteral
+	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
 }
 
@@ -50,11 +49,11 @@ func (p *parser) clearLocalState() {
 type methods map[identifier]*ExprFuncRef
 
 func (p *parser) initPackage(pkgname identifier) {
-	p.currentPackageName = pkgname
-	p.methods = map[identifier]methods{}
-	p.unresolvedRelations = nil
-	p.globaluninferred = nil
-	p.localuninferred = nil
+	p.packageName = pkgname
+	p.packageMethods = map[identifier]methods{}
+	p.packageUnresolvedRelations = nil
+	p.packageUninferredGlobals = nil
+	p.packageUninferredLocals = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -67,7 +66,9 @@ func (p *parser) assertNotNil(x interface{}) {
 
 func (p *parser) peekToken() *Token {
 	if p.tokenStream.isEnd() {
-		return makeToken("EOF", "")
+		return &Token{
+			typ:      "EOF",
+		}
 	}
 	r := p.tokenStream.tokens[p.tokenStream.index]
 	return r
@@ -217,7 +218,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	rel := &Relation{
 		tok:  firstIdentToken,
 		name: firstIdent,
-		pkg:  p.currentPackageName, // @TODO is this right?
+		pkg:  p.packageName, // @TODO is this right?
 	}
 	if rel.name == "__func__" {
 		sliteral := &ExprStringLiteral{
@@ -353,7 +354,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 }
 
 // https://golang.org/ref/spec#Type_assertions
-func (p *parser) parseTypeAssertion(e Expr) Expr {
+func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.expect("(")
@@ -389,7 +390,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		p.skip()
 		if p.peekToken().isPunct("(") {
 			// type assertion
-			return p.parseTypeAssertion(e)
+			return p.parseTypeAssertionOrTypeSwitchGuad(e)
 		}
 
 		// https://golang.org/ref/spec#Selectors
@@ -816,7 +817,7 @@ func (p *parser) parseType() *Gtype {
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
-				pkg:  p.currentPackageName,
+				pkg:  p.packageName,
 				name: ident,
 			}
 			p.tryResolve("", rel)
@@ -883,13 +884,6 @@ func (p *parser) parseType() *Gtype {
 	return nil
 }
 
-// local decl infer
-func (decl *DeclVar) infer() {
-	gtype := decl.initval.getGtype()
-	assertNotNil(gtype != nil, decl.initval.token())
-	decl.variable.gtype = gtype
-}
-
 func (p *parser) parseVarDecl() *DeclVar {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
@@ -906,7 +900,6 @@ func (p *parser) parseVarDecl() *DeclVar {
 		initval = p.parseExpr()
 	} else {
 		typ = p.parseType()
-		p.assertNotNil(typ)
 		tok := p.readToken()
 		if tok.isPunct("=") {
 			initval = p.parseExpr()
@@ -917,10 +910,10 @@ func (p *parser) parseVarDecl() *DeclVar {
 	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
 		tok: ptok,
-		pkg: p.currentPackageName,
+		pkg: p.packageName,
 		varname: &Relation{
 			expr: variable,
-			pkg:  p.currentPackageName,
+			pkg:  p.packageName,
 		},
 		variable: variable,
 		initval:  initval,
@@ -931,9 +924,9 @@ func (p *parser) parseVarDecl() *DeclVar {
 				typ:          G_DEPENDENT,
 				dependendson: initval,
 			}
-			p.globaluninferred = append(p.globaluninferred, variable)
+			p.packageUninferredGlobals = append(p.packageUninferredGlobals, variable)
 		} else {
-			p.localuninferred = append(p.localuninferred, r)
+			p.packageUninferredLocals = append(p.packageUninferredLocals, r)
 		}
 	}
 	p.currentScope.setVar(newName, variable)
@@ -965,7 +958,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		name:      newName,
 		val:       val,
 		iotaIndex: iotaIndex,
-		gtype: gtype,
+		gtype:     gtype,
 	}
 
 	p.currentScope.setConst(newName, variable)
@@ -997,7 +990,8 @@ func (p *parser) parseConstDecl() *DeclConst {
 		}
 	} else {
 		// single definition
-		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nil, 0)}
+		var nilExpr Expr = nil // @FIXME a dirty workaround. Passing nil literal to an interface parameter does not work.
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, 0)}
 	}
 
 	r := &DeclConst{
@@ -1043,43 +1037,6 @@ func (p *parser) exitForBlock() {
 	p.currentForStmt = p.currentForStmt.outer
 }
 
-func (clause *ForRangeClause) infer() {
-	collectionType := clause.rangeexpr.getGtype()
-	//debugf("collectionType = %s", collectionType)
-	indexvar, ok := clause.indexvar.expr.(*ExprVariable)
-	assert(ok, nil, "ok")
-
-	var indexType *Gtype
-	switch collectionType.typ {
-	case G_ARRAY, G_SLICE:
-		indexType = gInt
-	case G_MAP:
-		indexType = collectionType.mapKey
-	default:
-		// @TODO consider map etc.
-		TBI(clause.tok, "unable to handle %s", collectionType)
-	}
-	indexvar.gtype = indexType
-
-	if clause.valuevar != nil {
-		valuevar, ok := clause.valuevar.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
-
-		var elementType *Gtype
-		if collectionType.typ == G_ARRAY {
-			elementType = collectionType.elementType
-		} else if collectionType.typ == G_SLICE {
-			elementType = collectionType.elementType
-		} else if collectionType.typ == G_MAP {
-			elementType = collectionType.mapValue
-		} else {
-			errorft(clause.token(), "internal error")
-		}
-		//debugf("for i, v %s := rannge %v", elementType, collectionType)
-		valuevar.gtype = elementType
-	}
-}
-
 // https://golang.org/ref/spec#For_statements
 func (p *parser) parseForStmt() *StmtFor {
 	p.traceIn(__func__)
@@ -1087,7 +1044,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	ptok := p.expectKeyword("for")
 
 	var r = &StmtFor{
-		tok: ptok,
+		tok:   ptok,
 		outer: p.currentForStmt,
 	}
 	p.currentForStmt = r
@@ -1174,7 +1131,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.requireBlock = false
 	p.expect("{")
 	var r = &StmtFor{
-		tok: tokRange,
+		tok:   tokRange,
 		outer: p.currentForStmt,
 		rng: &ForRangeClause{
 			tok:                 tokRange,
@@ -1186,7 +1143,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	}
 	p.currentForStmt = r
 	if infer {
-		p.localuninferred = append(p.localuninferred, r.rng)
+		p.packageUninferredLocals = append(p.packageUninferredLocals, r.rng)
 	}
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
@@ -1249,10 +1206,10 @@ func (p *parser) parseReturnStmt() *StmtReturn {
 		exprs = nil
 	}
 	return &StmtReturn{
-		tok:      ptok,
-		exprs:    exprs,
-		rettypes: p.currentFunc.rettypes,
-		labelDeferHandler:p.currentFunc.labelDeferHandler,
+		tok:               ptok,
+		exprs:             exprs,
+		rettypes:          p.currentFunc.rettypes,
+		labelDeferHandler: p.currentFunc.labelDeferHandler,
 	}
 }
 
@@ -1353,7 +1310,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.localuninferred = append(p.localuninferred, r)
+	p.packageUninferredLocals = append(p.packageUninferredLocals, r)
 	return r
 }
 
@@ -1584,14 +1541,14 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				sliceType := &Gtype{
-					typ: G_SLICE,
-					elementType:gtype,
+					typ:         G_SLICE,
+					elementType: gtype,
 				}
 				variable := &ExprVariable{
-					tok:     tok,
-					varname: pname,
-					gtype:   sliceType,
-					isVariadic:true,
+					tok:        tok,
+					varname:    pname,
+					gtype:      sliceType,
+					isVariadic: true,
 				}
 				params = append(params, variable)
 				p.currentScope.setVar(pname, variable)
@@ -1652,7 +1609,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok := p.expectKeyword("func")
 
 	p.localvars = nil
-	assert(len(p.localvars) == 0,  ptok,"localvars should be zero")
+	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
 	var isMethod bool
 	p.enterNewScope("func")
 
@@ -1680,7 +1637,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	r := &DeclFunc{
 		tok:        ptok,
-		pkg:        p.currentPackageName,
+		pkg:        p.packageName,
 		receiver:   receiver,
 		fname:      fname,
 		rettypes:   rettypes,
@@ -1701,15 +1658,21 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.typ == G_REL, "methods must belong to a named type")
-		var methods methods
+		p.assert(typeToBelong.typ == G_REL, "packageMethods must belong to a named type")
+		var mthds methods
 		var ok bool
-		methods, ok = p.methods[typeToBelong.relation.name]
+		typeName := typeToBelong.relation.name
+		mthds, ok = p.packageMethods[typeName]
 		if !ok {
-			methods = map[identifier]*ExprFuncRef{}
-			p.methods[typeToBelong.relation.name] = methods
+			mthds = map[identifier]*ExprFuncRef{}
+			p.packageMethods[typeName] = mthds
 		}
-		methods[fname] = ref
+
+		mthds[fname] = ref
+		pm := p.packageMethods
+		pm[typeName] = mthds
+		p.packageMethods = pm
+
 	} else {
 		p.packageBlockScope.setFunc(fname, ref)
 	}
@@ -1881,7 +1844,9 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 				errorft(rel.token(), "Bad type relbody %v", relbody)
 			}
 		} else {
-			p.unresolvedRelations = append(p.unresolvedRelations, rel)
+			if rel.name != "_" {
+				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
+			}
 		}
 	} else {
 		// foreign package
@@ -2018,132 +1983,38 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 
 	return &SourceFile{
 		tok:           packageClause.tok,
-		name: bs.filename,
+		name:          bs.filename,
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
 	}
 }
 
-func (ast *StmtShortVarDecl) infer() {
-	var rightTypes []*Gtype
-	for _, rightExpr := range ast.rights {
-		switch rightExpr.(type) {
-		case *ExprFuncallOrConversion:
-			fcallOrConversion := rightExpr.(*ExprFuncallOrConversion)
-			if fcallOrConversion.rel.gtype != nil {
-				// Conversion
-				rightTypes = append(rightTypes, fcallOrConversion.rel.gtype)
-			} else {
-				fcall := fcallOrConversion
-				funcdef := fcall.getFuncDef()
-				if funcdef == nil {
-					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
-				}
-				if funcdef == builtinLen {
-					rightTypes = append(rightTypes, gInt)
-				} else {
-					for _, gtype := range fcall.getFuncDef().rettypes {
-						rightTypes = append(rightTypes, gtype)
-					}
-				}
-			}
-		case *ExprMethodcall:
-			fcall := rightExpr.(*ExprMethodcall)
-			rettypes := fcall.getRettypes()
-			for _, gtype := range rettypes {
-				rightTypes = append(rightTypes, gtype)
-			}
-		case *ExprTypeAssertion:
-			assertion := rightExpr.(*ExprTypeAssertion)
-			rightTypes = append(rightTypes, assertion.gtype)
-			rightTypes = append(rightTypes, gBool)
-		case *ExprIndex:
-			e := rightExpr.(*ExprIndex)
-			gtype := e.getGtype()
-			assertNotNil(gtype != nil, e.tok)
-			rightTypes = append(rightTypes, gtype)
-			//debugf("rightExpr.gtype=%s", gtype)
-			secondGtype := rightExpr.(*ExprIndex).getSecondGtype()
-			if secondGtype != nil {
-				rightTypes = append(rightTypes, secondGtype)
-			}
-		default:
-			if rightExpr == nil {
-				errorft(ast.token(), "rightExpr is nil")
-			}
-			gtype := rightExpr.getGtype()
-			if gtype == nil {
-				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
-			}
-			//debugf("infered type %s", gtype)
-			rightTypes = append(rightTypes, gtype)
-		}
-	}
-
-	if len(ast.lefts) > len(rightTypes) {
-		// @TODO this check is too loose.
-		errorft(ast.tok, "number of lhs and rhs does not match")
-	}
-	for i, e := range ast.lefts {
-		rel := e.(*Relation) // a brand new rel
-		variable := rel.expr.(*ExprVariable)
-		rightType := rightTypes[i]
-		variable.gtype = rightType
-	}
-
-}
+var allScopes map[identifier]*scope
 
 func (p *parser) resolve(universe *scope) {
 	p.packageBlockScope.outer = universe
-	for _, rel := range p.unresolvedRelations {
+	for _, rel := range p.packageUnresolvedRelations {
+		//debugf("resolving %s ...", rel.name)
 		p.tryResolve("", rel)
 	}
 
+	//debugf("resolving packageMethods %s ...", p.packageName)
 	p.resolveMethods()
-	p.inferTypes()
+	//debugf("inferring types ...")
+
+	allScopes = p.scopes
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 }
 
-// copy methods from p.nameTypes to gtype.methods of each type
+// copy packageMethods from p.nameTypes to gtype.packageMethods of each type
 func (p *parser) resolveMethods() {
-	for typeName, methods := range p.methods {
+	for typeName, methods := range p.packageMethods {
 		gtype := p.packageBlockScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", p.packageBlockScope.idents)
-			errorf("typaneme %s is not found in the package scope %s", typeName, p.currentPackageName)
+			errorf("typaneme %s is not found in the package scope %s", typeName, p.packageName)
 		}
 		gtype.methods = methods
-	}
-}
-
-//  infer recursively all the types of global variables
-func (variable *ExprVariable) infer() {
-	if variable.gtype.typ != G_DEPENDENT {
-		// done
-		return
-	}
-	e := variable.gtype.dependendson
-	dependType := e.getGtype()
-	if dependType.typ != G_DEPENDENT {
-		variable.gtype = dependType
-		return
-	}
-
-	rel, ok := e.(*Relation)
-	if !ok {
-		errorft(e.token(), "unexpected type %T", e)
-	}
-	vr, ok := rel.expr.(*ExprVariable)
-	vr.infer() // recursive call
-	variable.gtype = e.getGtype()
-	//debugf("infered type=%s", variable.gtype)
-}
-
-func (p *parser) inferTypes() {
-	for _, variable := range p.globaluninferred {
-		variable.infer()
-	}
-	for _, ast := range p.localuninferred {
-		ast.infer()
 	}
 }

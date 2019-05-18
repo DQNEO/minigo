@@ -2,7 +2,7 @@ package main
 
 type scope struct {
 	idents map[identifier]*IdentBody
-	name string
+	name   string
 	outer  *scope
 }
 
@@ -54,7 +54,11 @@ func (sc *scope) set(name identifier, elm *IdentBody) {
 }
 
 func (sc *scope) getGtype(name identifier) *Gtype {
-	elm, ok := sc.idents[name]
+	if sc == nil {
+		errorf("sc is nil")
+	}
+	idents := sc.idents
+	elm, ok := idents[name]
 	if !ok {
 		return nil
 	}
@@ -67,7 +71,7 @@ func (sc *scope) getGtype(name identifier) *Gtype {
 func newScope(outer *scope, name string) *scope {
 	return &scope{
 		outer:  outer,
-		name: name,
+		name:   name,
 		idents: map[identifier]*IdentBody{},
 	}
 }

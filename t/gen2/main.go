@@ -7,17 +7,16 @@ import (
 
 var GENERATION int = 2
 
-var allScopes map[identifier]*scope
-
 var debugMode = true
 var debugToken = false
 
-var debugAst = true
+var debugAst = false
 var debugParser = false
 var tokenizeOnly = false
-var parseOnly = true
-var resolveOnly = false
+var parseOnly = false
+var resolveOnly = true
 var exit = false
+var slientForStdlib = false
 
 func printVersion() {
 	println("minigo 0.1.0")
@@ -102,7 +101,7 @@ func main() {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
 
-	sourceFiles = []string{"parser.go"}
+	sourceFiles = []string{"t/os/os.go"}
 
 	if exit {
 		return
@@ -149,6 +148,15 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
+	var _debugAst bool
+	var _debugParer bool
+	if slientForStdlib {
+		_debugAst = debugAst
+		_debugParer = debugParser
+		debugAst = false
+		debugParser = false
+	}
+
 	// setup universe scopes
 	universe := newUniverse()
 	// inject runtime things into the universes
@@ -177,6 +185,10 @@ func main() {
 		compiledPackages[pkgName] = pkg
 	}
 
+	if slientForStdlib {
+		debugAst = _debugAst
+		debugParser = _debugParer
+	}
 	// initialize main package
 	var pkgname identifier = "main"
 	p.initPackage(pkgname)
@@ -196,11 +208,19 @@ func main() {
 	}
 
 	if parseOnly {
+		if debugAst {
+			for _, af := range astFiles {
+				af.dump()
+			}
+		}
 		return
 	}
+	debugf("resolving main package...")
 	p.resolve(universe)
 	if debugAst {
-		astFiles[len(astFiles)-1].dump()
+		for _, af := range astFiles {
+			af.dump()
+		}
 	}
 
 	if resolveOnly {
@@ -258,15 +278,14 @@ type stdpkg struct {
 
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
-	root := &IrRoot{
-	}
+	root := &IrRoot{}
 
 	var declvars []*DeclVar
 	for _, pkg := range stdpkgs {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
-					declvars= append(declvars, decl.vardecl)
+					declvars = append(declvars, decl.vardecl)
 				} else if decl.funcdecl != nil {
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}

@@ -2,10 +2,7 @@
 # I use Docker like below.
 # docker run -it --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --rm -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 
-all: /tmp/out minigo minigo2
-
-/tmp/out:
-	mkdir /tmp/out
+all: minigo
 
 internalcode.go: internalcode/runtime.go
 	./cp-internalcode.sh
@@ -17,33 +14,33 @@ stdlib.go: stdlib/*/*.go
 minigo: *.go internalcode.go stdlib.go
 	go build -o minigo *.go
 
-
-test1gen: all
-	./test1gen.sh
-
 # 2nd gen assembly
-/tmp/out/minigo.s: *.go minigo
-	./minigo *.go > /tmp/out/minigo.s
-	cp /tmp/out/minigo.s minigo.s
+minigo.s: minigo
+	./minigo *.go > /tmp/minigo.s
+	cp /tmp/minigo.s minigo.s
 
 # 2nd gen compiler
-minigo2: /tmp/out/minigo.s
-	gcc -g -no-pie -o minigo2 /tmp/out/minigo.s
+minigo2: minigo.s
+	gcc -g -no-pie -o minigo2 minigo.s
 
+minigo2.s: minigo2 minigo *.go
+	./minigo2 *.go > /tmp/minigo2.s
+	cp /tmp/minigo2.s minigo2.s
 
-test2gen: minigo2
+selfhost: minigo2.s
+	diff minigo2.s minigo.s && echo ok
+
+test: minigo minigo2
+	./test1gen.sh
 	./test2gen.sh
-
-
-test: all
-	make test1gen
-	make test2gen
 	./comparison-test.sh
 
 clean:
-	rm -f minigo*
+	rm -f minigo minigo2
+	rm -f minigo*.s
 	rm -f a.s a.out
 	rm -f /tmp/out/*
+	rm -r /tmp/minigo*
 	rm -f stdlib.go
 	rm -f internalcode.go
 

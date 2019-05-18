@@ -2,8 +2,12 @@
 /minigo
 /minigo.s
 /minigo2
+/minigo2.s
+/minigo3
+/minigo3.s
 a.go
 /stdlib.go
 /internalcode.go
 /a.s
 /child
+/tmp/

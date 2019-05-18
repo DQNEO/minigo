@@ -17,7 +17,7 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 
-	var format2 string = string(indents)+format+"\n"
+	var format2 string = string(indents) + format + "\n"
 	s2 := fmt.Sprintf(format2, v...)
 	var b []byte = []byte(s2)
 	os.Stderr.Write(b)
@@ -52,11 +52,7 @@ func errorf(format string, v ...interface{}) {
 
 func assert(cond bool, tok *Token, msg string) {
 	if !cond {
-		if GENERATION == 2 {
-			panic(fmt.Sprintf("assertion failed:%s", msg))
-		} else {
-			panic(fmt.Sprintf("assertion failed: %s %s", msg, tok))
-		}
+		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok.String()))
 	}
 }
 

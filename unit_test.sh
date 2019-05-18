@@ -5,6 +5,7 @@ basename=$2
 suffix=$3
 
 out_dir=/tmp/out
+mkdir -p $out_dir
 
 if [[ -z $suffix ]];then
     as_file=$out_dir/${basename}.s

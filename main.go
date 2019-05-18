@@ -7,8 +7,6 @@ import (
 
 var GENERATION int = 1
 
-var allScopes map[identifier]*scope
-
 var debugMode = false // execute debugf() or not
 var debugToken = false
 
@@ -65,14 +63,9 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-type pkgsource struct {
-	name identifier
-	code string
-}
-
 func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
-	bs = NewByteStreamFromString(filename, code)
+	bs := NewByteStreamFromString(filename, code)
 
 	// initialize a package
 	p.initPackage(pkgname)
@@ -169,6 +162,7 @@ func main() {
 
 	// add std packages
 	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
+	var uniqPackageNames []string
 	// parse std packages
 
 	stdPkgs := makeStdLib()
@@ -183,6 +177,9 @@ func main() {
 		}
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
 		compiledPackages[pkgName] = pkg
+		if !in_array(string(pkgName), uniqPackageNames) {
+			uniqPackageNames = append(uniqPackageNames, string(pkgName))
+		}
 	}
 
 	if slientForStdlib {
@@ -195,48 +192,40 @@ func main() {
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
 	for _, sourceFile := range sourceFiles {
-		s := readFile(sourceFile)
-		bs := &ByteStream{
-			filename:  sourceFile,
-			source:    s,
-			nextIndex: 0,
-			line:      1,
-			column:    0,
-		}
+		bs := NewByteStreamFromFile(sourceFile)
 		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
 
 	if parseOnly {
 		if debugAst {
-			astFiles[len(astFiles)-1].dump()
+			for _, af := range astFiles {
+				af.dump()
+			}
 		}
 		return
 	}
 	p.resolve(universe)
 	if debugAst {
-		astFiles[len(astFiles)-1].dump()
+		for _, af := range astFiles {
+			af.dump()
+		}
 	}
 
 	if resolveOnly {
 		return
 	}
 
+	debugf("resolve done")
 	var importedPackages []*stdpkg
-	for _, compiledPkg := range compiledPackages {
+	for _, pkgName := range uniqPackageNames {
+		compiledPkg := compiledPackages[identifier(pkgName)]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
-
-	var uniquedDTypes []string = builtinTypesAsString
-	for _, gtype := range p.allDynamicTypes {
-		gs := gtype.String()
-		if !in_array(gs, uniquedDTypes) {
-			uniquedDTypes = append(uniquedDTypes, gs)
-		}
-	}
-
-	ir.uniquedDTypes = uniquedDTypes
+	debugf("ir is created")
+	ir.setDynamicTypes(p.allDynamicTypes)
+	debugf("set uniquedDtypes")
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.allNamedTypes {
@@ -244,7 +233,20 @@ func main() {
 		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
 		typeId++
 	}
+	debugf("set concreteNamedType")
 
+	ir.composeMethodTable()
+	ir.importOS = importOS
+
+	ir.emit()
+}
+
+type stdpkg struct {
+	name  identifier
+	files []*SourceFile
+}
+
+func (ir *IrRoot) composeMethodTable() {
 	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
@@ -257,31 +259,27 @@ func main() {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
 			typeId := gtype.relation.gtype.typeId
-			methodTable[typeId] = append(methodTable[typeId], funcdecl.getSymbol())
+			symbol := funcdecl.getSymbol()
+			methods := methodTable[typeId]
+			methods = append(methods, symbol)
+			methodTable[typeId] = methods
 		}
 	}
+	debugf("set methodTable")
+
 	ir.methodTable = methodTable
-	ir.importOS = importOS
-
-	ir.emit()
-}
-
-type stdpkg struct {
-	name  identifier
-	files []*SourceFile
 }
 
 func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
 
-	root := &IrRoot{
-	}
+	root := &IrRoot{}
 
 	var declvars []*DeclVar
 	for _, pkg := range stdpkgs {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
-					declvars= append(declvars, decl.vardecl)
+					declvars = append(declvars, decl.vardecl)
 				} else if decl.funcdecl != nil {
 					root.funcs = append(root.funcs, decl.funcdecl)
 				}
@@ -302,4 +300,16 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 	root.stringLiterals = stringLiterals // a dirtyworkaround
 	root.vars = declvars
 	return root
+}
+
+func (ir *IrRoot) setDynamicTypes(allDynamicTypes []*Gtype) {
+	var uniquedDTypes []string = builtinTypesAsString
+	for _, gtype := range allDynamicTypes {
+		gs := gtype.String()
+		if !in_array(gs, uniquedDTypes) {
+			uniquedDTypes = append(uniquedDTypes, gs)
+		}
+	}
+
+	ir.uniquedDTypes = uniquedDTypes
 }

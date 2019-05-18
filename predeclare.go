@@ -3,12 +3,14 @@ package main
 // built-in types
 const sizeOfInterface = 8 * 3
 
-var gInterface = &Gtype{typ: G_INTERFACE, size: sizeOfInterface}
-var gInt  = &Gtype{typ: G_INT, size: 8}
+var sInterface = Gtype{typ: G_INTERFACE, size: sizeOfInterface}
+var gInterface = &sInterface
+var sInt = Gtype{typ: G_INT, size: 8}
+var gInt = &sInt
 var gByte = &Gtype{typ: G_BYTE, size: 1}
 var gBool = &Gtype{typ: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
-	typ:G_STRING,
+	typ: G_STRING,
 }
 
 var builtinTypesAsString []string = []string{"bool", "byte", "int", "string"}
@@ -18,19 +20,19 @@ var eIota = &ExprConstVariable{
 }
 
 var builtinLen = &DeclFunc{
-	rettypes: []*Gtype{gInt},
+	rettypes: []*Gtype{&sInt},
 }
 
 var builtinCap = &DeclFunc{
-	rettypes: []*Gtype{gInterface},
+	rettypes: []*Gtype{&sInt},
 }
 
 var builtinAppend = &DeclFunc{
-	rettypes: []*Gtype{gInt},
+	rettypes: []*Gtype{&sInt},
 }
 
 var builtinMakeSlice = &DeclFunc{
-	rettypes: []*Gtype{builtinRunTimeArgsRettypes1},
+	rettypes: []*Gtype{&sBuiltinRunTimeArgsRettypes1},
 }
 
 var builtinDumpSlice = &DeclFunc{
@@ -49,20 +51,19 @@ var builtinAsComment = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
-var builtinRunTimeArgsRettypes1 *Gtype =&Gtype{
-	typ: G_SLICE,
+var sBuiltinRunTimeArgsRettypes1 Gtype = Gtype{
+	typ:  G_SLICE,
 	size: IntSize * 3,
 	elementType: &Gtype{
-		typ:G_STRING,
+		typ: G_STRING,
 	},
 }
 
 var builtinRunTimeArgs = &DeclFunc{
 	rettypes: []*Gtype{
-		builtinRunTimeArgsRettypes1,
+		&sBuiltinRunTimeArgsRettypes1,
 	},
-	}
-
+}
 
 func newUniverse() *scope {
 	universe := newScope(nil, "universe")
@@ -156,7 +157,7 @@ func predeclareLibcFuncs(universe *scope) {
 	})
 	universe.setFunc("sprintf", &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: "libc",
+			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})

@@ -66,6 +66,15 @@ func f6() {
 
 }
 
+func f7() {
+	var slice = []int{1, 1, 1}
+	var i int
+	for i, _ = range slice {
+		fmt.Printf("%d\n", i+17) // 17,18,19
+	}
+	fmt.Printf("%d\n", i+18) // 20
+}
+
 func main() {
 	f1()
 	f2()
@@ -73,6 +82,7 @@ func main() {
 	f4()
 	f5()
 	f6()
+	f7()
 }
 
 type Hobbit struct {
