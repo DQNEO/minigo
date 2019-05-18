@@ -19,8 +19,8 @@ type parser struct {
 
 	// per file
 	tokenStream       *TokenStream
-	packageBlockScope *scope
-	currentScope      *scope
+	packageBlockScope *Scope
+	currentScope      *Scope
 	importedNames     map[identifier]bool
 
 	// per package
@@ -31,7 +31,7 @@ type parser struct {
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
-	scopes          map[identifier]*scope
+	scopes          map[identifier]*Scope
 	stringLiterals  []*ExprStringLiteral
 	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
@@ -1945,7 +1945,7 @@ func (p *parser) isGlobal() bool {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *SourceFile {
 
 	p.clearLocalState()
 
@@ -1987,9 +1987,9 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	}
 }
 
-var allScopes map[identifier]*scope
+var allScopes map[identifier]*Scope
 
-func (p *parser) resolve(universe *scope) {
+func (p *parser) resolve(universe *Scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
 		//debugf("resolving %s ...", rel.name)

@@ -63,7 +63,7 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
+func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
 	bs := NewByteStreamFromString(filename, code)
 
@@ -133,7 +133,7 @@ func main() {
 	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
-	p.scopes = map[identifier]*scope{}
+	p.scopes = map[identifier]*Scope{}
 	p.initPackage("")
 
 	allScopes = p.scopes
