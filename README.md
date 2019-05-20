@@ -64,12 +64,16 @@ Copyright (C) 2019 @DQNEO
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 
+# ./minigo2 *.go > /tmp/minigo3.s
+# gcc -no-pie -o minigo3 /tmp/minigo3.s
+# ./minigo3 --version
+minigo 0.1.0
+Copyright (C) 2019 @DQNEO
 ```
 
 You will see that the contents of 2nd generation compiler and 3rd generation compiler are identical.
 
 ```
-# ./minigo2 *.go > /tmp/minigo3.s
 # diff /tmp/minigo2.s /tmp/minigo3.s
 ```
 
