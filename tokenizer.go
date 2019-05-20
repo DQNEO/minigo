@@ -230,12 +230,7 @@ func (tn *Tokenizer) skipBlockComment() {
 	}
 }
 
-func Tokenize(bs *ByteStream) []*Token {
-
-	var tn = &Tokenizer{
-		bs:bs,
-	}
-
+func (tn *Tokenizer) tokenize() []*Token {
 	var r []*Token
 	for {
 		c, err := tn.bs.get()
@@ -450,4 +445,10 @@ func Tokenize(bs *ByteStream) []*Token {
 	return r
 }
 
+func Tokenize(bs *ByteStream) []*Token {
+	var tn = &Tokenizer{
+		bs:bs,
+	}
+	return tn.tokenize()
+}
 
