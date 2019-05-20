@@ -3063,7 +3063,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 					emit("push $0")
 				}
 				// conversion : var ifc = x
-				if varg.getGtype().getPrimType() == G_INTERFACE {
+				if varg.getGtype().getKind() == G_INTERFACE {
 					varg.emit()
 				} else {
 					emitConversionToInterface(varg)
