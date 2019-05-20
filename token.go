@@ -115,10 +115,6 @@ func (tok *Token) isSemicolon() bool {
 	return tok.isPunct(";")
 }
 
-type Tokenizer struct {
-	bs *ByteStream
-}
-
 func (tn *Tokenizer) read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
