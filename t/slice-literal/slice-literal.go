@@ -15,25 +15,38 @@ func (p *Point) getId() int {
 	return p.x
 }
 
+/*
 func f0() {
 	var slice []int = []int{1, 2, 3}
 	fmt.Printf("%d\n", slice[2]-2)   // 1
 	fmt.Printf("%d\n", len(slice)-1) // 2
 }
+ */
 
 func f1() {
-	var e Ifc = &Point{
+	pp := &Point{
 		x: 1,
 		y: 2,
 	}
-	fmt.Printf("%d\n", e.getId()+2) // 3
+	var e Ifc = pp
+	printf("pp=%p\n", pp)
+	dumpInterface(e)
+	printf("*e=%p\n", *e)
+	fmt.Printf("3=%d\n", e.getId()+2) // 3
 	var slice []Ifc = []Ifc{e, e, e}
-
-	fmt.Printf("%d\n", len(slice)+1)       // 4
-	fmt.Printf("%d\n", slice[2].getId()+4) // 5
+	fmt.Printf("4=%d\n", len(slice)+1)       // 4
+	var e2 Ifc
+	e2 = slice[1]
+	dumpInterface(e2)
+	asComment("AAA")
+	z := e2.getId()
+	asComment("BBB")
+	printf("z=%d\n", z)
+	fmt.Printf("%d\n", z) // 5
+	return
 }
 
 func main() {
-	f0()
+	//f0()
 	f1()
 }
