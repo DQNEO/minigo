@@ -1098,7 +1098,7 @@ func (e *ExprSliceLiteral) emit() {
 	length := len(e.values)
 	//emitCallMalloc(e.gtype.elementType.getSize() * length)
 	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
-	emitCallMalloc(e.gtype.getSize()) // why does this work??
+	emitCallMalloc(e.gtype.getSize() * length) // why does this work??
 	emit("push %%rax # ptr")
 	for i, value := range e.values {
 		if e.gtype.elementType.getKind() == G_INTERFACE && value.getGtype().getKind() != G_INTERFACE {
