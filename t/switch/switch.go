@@ -49,11 +49,11 @@ func f2() {
 func f3() {
 	switch {
 	case 1+1 == 3:
-		println("Error")
+		fmt.Printf("Error\n")
 	case 1+1 == 2:
-		println(6)
+		fmt.Printf("%d\n", 6)
 	default:
-		println("Error")
+		fmt.Printf("Error\n")
 	}
 }
 
