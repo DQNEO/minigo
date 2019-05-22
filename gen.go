@@ -1863,7 +1863,6 @@ func (e *ExprConversionToInterface) emit() {
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
-	//assert(dynamicValue.getGtype()!=nil, dynamicValue.token(), "gtype is nil")
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
 		emit("# receiverType is nil. emit nil for interface")
