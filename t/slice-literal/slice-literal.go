@@ -22,18 +22,14 @@ func f0() {
 }
 
 func f1() {
-	pp := &Point{
+	var e Ifc = &Point{
 		x: 1,
 		y: 2,
 	}
-	var e Ifc = pp
 	fmt.Printf("%d\n", e.getId()+2) // 3
 	var slice []Ifc = []Ifc{e, e, e}
-	fmt.Printf("%d\n", len(slice)+1) // 4
-	var e2 Ifc
-	e2 = slice[1]
-	fmt.Printf("%d\n", e2.getId()+ 4) // 5
-	return
+	fmt.Printf("%d\n", len(slice)+1)        // 4
+	fmt.Printf("%d\n", slice[2].getId()+ 4) // 5
 }
 
 func main() {
