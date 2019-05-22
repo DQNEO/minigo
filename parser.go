@@ -946,7 +946,6 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex
 		gtype = p.parseType()
 	}
 
-
 	if p.peekToken().isPunct(";") && lastExpr != nil {
 		val = lastExpr
 	} else {

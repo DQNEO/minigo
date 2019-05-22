@@ -170,7 +170,6 @@ func main() {
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
-		debugf("compile stdlib %s", spkgName)
 		pkgName := identifier(spkgName)
 		var pkgCode string
 		var ok bool
