@@ -16,4 +16,6 @@ jobs:
       - run: apt-get update -y
       - run: apt-get install -y git
       - run: git clone https://github.com/DQNEO/minigo
+      - run: git -C minigo checkout $CIRCLE_SHA1
+      - run: git -C minigo show @
       - run: PATH="/usr/lib/go-1.10/bin:$PATH" make test -C minigo
