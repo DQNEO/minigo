@@ -1873,7 +1873,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		emit("# emit nil for interface")
+		emit("# receiverType is nil. emit nil for interface")
 		emit("mov $0, %%rax")
 		emit("mov $0, %%rbx")
 		emit("mov $0, %%rcx")
@@ -1892,7 +1892,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if dynamicTypeId == -1 {
 		//debugf("types:%#v", groot.uniquedDynamicTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
-		errorft(dynamicValue.token(), "type %s not found for %s", gtype, dynamicValue)
+		errorft(dynamicValue.token(), "type %s not found in uniquedDTypes", gtype.String())
 	}
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
@@ -3047,7 +3047,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	if collectVariadicArgs {
-		emit("# passing variadic args")
+		emit("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
 			// pass an empty slice
@@ -3058,7 +3058,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
 				if vargIndex == 0 {
-					// make an empty slice
+					emit("# make an empty slice to append")
 					emit("push $0")
 					emit("push $0")
 					emit("push $0")
