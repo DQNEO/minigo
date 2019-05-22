@@ -1866,7 +1866,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	//assert(dynamicValue.getGtype()!=nil, dynamicValue.token(), "gtype is nil")
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		emit("# emit nil for interface")
+		emit("# receiverType is nil. emit nil for interface")
 		emit("mov $0, %%rax")
 		emit("mov $0, %%rbx")
 		emit("mov $0, %%rcx")
@@ -3046,7 +3046,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	if collectVariadicArgs {
-		emit("# passing variadic args")
+		emit("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
 			// pass an empty slice
@@ -3057,7 +3057,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
 				if vargIndex == 0 {
-					// make an empty slice
+					emit("# make an empty slice to append")
 					emit("push $0")
 					emit("push $0")
 					emit("push $0")

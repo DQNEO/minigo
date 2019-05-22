@@ -1,6 +1,10 @@
 package fmt
 
-import "os"
+import (
+	"os"
+
+	"github.com/kubernetes/kubernetes/test/e2e/framework"
+)
 
 func Printf(format string, a ...interface{}) {
 	s := doPrintf(format, a...)

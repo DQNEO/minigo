@@ -9,31 +9,43 @@ const (
 )
 
 const (
-	b0 = iota
+	b0 int = iota
 	b1 = iota
 	b2 = iota
 )
 
 const (
-	c0 = iota
+	c0 int = iota
 	c1
 	c2
 )
 
 const (
-	d0 = 7
+	d0 int = 7
 	d1
 	d2 = iota
 	d3
 )
 
-func main() {
+func f0() {
 	fmt.Printf("%d\n", a0)
+}
+
+func f1() {
 	fmt.Printf("%d\n", a1)
 	fmt.Printf("%d\n", a2)
+}
+
+func f3() {
 	fmt.Printf("%d\n", b0)
 	fmt.Printf("%d\n", b1)
 	fmt.Printf("%d\n", b2)
+}
+
+func main() {
+	f0()
+	f1()
+	f3()
 	fmt.Printf("%d\n", c0)
 	fmt.Printf("%d\n", c1)
 	fmt.Printf("%d\n", c2)

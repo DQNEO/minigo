@@ -933,7 +933,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	return r
 }
 
-func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVariable {
+func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex int) *ExprConstVariable {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	newName := p.expectIdent()
@@ -946,6 +946,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		gtype = p.parseType()
 	}
 
+
 	if p.peekToken().isPunct(";") && lastExpr != nil {
 		val = lastExpr
 	} else {
@@ -953,6 +954,11 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		val = p.parseExpr()
 	}
 	p.expect(";")
+
+	if gtype == nil && lastGtype != nil {
+		gtype = lastGtype
+	}
+
 
 	variable := &ExprConstVariable{
 		name:      newName,
@@ -974,12 +980,16 @@ func (p *parser) parseConstDecl() *DeclConst {
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
 	var lastExpr Expr
+	var lastGtype *Gtype
 
 	if p.peekToken().isPunct("(") {
 		p.readToken()
 		for {
 			// multi definitions
-			cnst := p.parseConstDeclSingle(lastExpr, iotaIndex)
+			cnst := p.parseConstDeclSingle(lastExpr, lastGtype, iotaIndex)
+			if cnst.getGtype() != nil {
+				lastGtype = cnst.getGtype()
+			}
 			lastExpr = cnst.val
 			iotaIndex++
 			cnsts = append(cnsts, cnst)
@@ -991,7 +1001,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 	} else {
 		// single definition
 		var nilExpr Expr = nil // @FIXME a dirty workaround. Passing nil literal to an interface parameter does not work.
-		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, 0)}
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, nil, 0)}
 	}
 
 	r := &DeclConst{
