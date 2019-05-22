@@ -15,7 +15,6 @@ func (p *Point) getId() int {
 	return p.x
 }
 
-
 func f0() {
 	var slice []int = []int{1, 2, 3}
 	fmt.Printf("%d\n", slice[2]-2)   // 1
