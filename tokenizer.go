@@ -433,8 +433,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tok = tn.makeToken(T_PUNCT, "<")
 			}
 		default:
-			fmt.Printf("c=%d\n", c)
-			panic("unknown char")
+			panic(fmt.Sprintf("unknown char:%d",c))
 		}
 		if debugToken {
 			tok.dump()
