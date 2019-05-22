@@ -954,7 +954,7 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex
 	}
 	p.expect(";")
 
-	if gtype == nil && lastGtype != nil {
+	if gtype == nil {
 		gtype = lastGtype
 	}
 
