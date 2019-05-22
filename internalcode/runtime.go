@@ -124,12 +124,7 @@ func panic(s string) {
 }
 
 func println(s interface{}) {
-	if s < 4096 {
-		// regard it as int
-		printf("%d\n", s)
-	} else {
-		printf("%s\n", s)
-	}
+	printf("%s\n", s)
 }
 
 func print(x interface{}) {

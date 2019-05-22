@@ -12,7 +12,8 @@ func ghello() {
 	fmt.Printf("%c", hello[4])
 	fmt.Printf("%s", "\n")
 
-	fmt.Printf("%s\n", hello)
+	s := string(hello[:])
+	fmt.Printf("%s\n", s)
 
 }
 
