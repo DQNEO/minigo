@@ -1797,8 +1797,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		var expr Expr = rel.expr
-		emitSave3Elements(expr, offset)
+		emitSave3Elements(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.saveSlice(offset)
@@ -3297,8 +3296,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				gtype:  lit.invisiblevar.gtype,
 				values: lit.values,
 			}
-			var expr Expr = arrayLiteral
-			emitDataAddr(expr, depth)                       // emit underlying array
+
+			emitDataAddr(arrayLiteral, depth)               // emit underlying array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		default:
