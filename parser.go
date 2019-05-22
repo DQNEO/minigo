@@ -67,7 +67,7 @@ func (p *parser) assertNotNil(x interface{}) {
 func (p *parser) peekToken() *Token {
 	if p.tokenStream.isEnd() {
 		return &Token{
-			typ:      "EOF",
+			typ: "EOF",
 		}
 	}
 	r := p.tokenStream.tokens[p.tokenStream.index]
@@ -957,7 +957,6 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex
 		gtype = lastGtype
 	}
 
-
 	variable := &ExprConstVariable{
 		name:      newName,
 		val:       val,
@@ -1527,7 +1526,7 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable,  []*Gtype) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
@@ -1643,12 +1642,12 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
-		tok:        ptok,
-		pkg:        p.packageName,
-		receiver:   receiver,
-		fname:      fname,
-		rettypes:   rettypes,
-		params:     params,
+		tok:      ptok,
+		pkg:      p.packageName,
+		receiver: receiver,
+		fname:    fname,
+		rettypes: rettypes,
+		params:   params,
 	}
 
 	ref := &ExprFuncRef{

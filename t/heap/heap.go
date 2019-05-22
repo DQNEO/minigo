@@ -21,5 +21,5 @@ func main() {
 	heapA := malloc(8)
 	heapB := malloc(0)
 
-	fmt.Printf("%d\n", (heapB-heapA) - 4) // 4
+	fmt.Printf("%d\n", (heapB-heapA)-4) // 4
 }

@@ -433,7 +433,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tok = tn.makeToken(T_PUNCT, "<")
 			}
 		default:
-			panic(fmt.Sprintf("unknown char:%d",c))
+			panic(fmt.Sprintf("unknown char:%d", c))
 		}
 		if debugToken {
 			tok.dump()
@@ -446,8 +446,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 
 func Tokenize(bs *ByteStream) []*Token {
 	var tn = &Tokenizer{
-		bs:bs,
+		bs: bs,
 	}
 	return tn.tokenize()
 }
-

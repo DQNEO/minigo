@@ -10,8 +10,8 @@ const (
 
 const (
 	b0 int = iota
-	b1 = iota
-	b2 = iota
+	b1     = iota
+	b2     = iota
 )
 
 const (

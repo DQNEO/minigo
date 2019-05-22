@@ -824,7 +824,7 @@ func (ast *StmtAssignment) emit() {
 				assignToArray(left, right)
 			case gtype.getKind() == G_SLICE:
 				assignToSlice(left, right)
-			case gtype.getKind() ==  G_STRUCT:
+			case gtype.getKind() == G_STRUCT:
 				assignToStruct(left, right)
 			case gtype.getKind() == G_INTERFACE:
 				assignToInterface(left, right)

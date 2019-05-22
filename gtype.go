@@ -8,7 +8,7 @@ const undefinedSize = -1
 
 const (
 	G_UNKOWNE   GTYPE_KIND = iota
-	G_DEPENDENT             // depends on other expression
+	G_DEPENDENT            // depends on other expression
 	G_NAMED
 	// below are primitives which are declared in the universe block
 	G_INT
@@ -34,21 +34,21 @@ type signature struct {
 
 type Gtype struct {
 	kind           GTYPE_KIND
-	receiverTypeId int                     // for receiverTypeId. 0:unkonwn
-	dependendson   Expr                    // for G_DEPENDENT
-	relation       *Relation               // for G_NAMED
-	size           int                     // for scalar type like int, bool, byte, for struct
-	origType       *Gtype                  // for pointer
-	fields         []*Gtype                // for struct
-	fieldname      identifier              // for struct field
-	offset         int                     // for struct field
-	padding        int                     // for struct field
-	length         int                       // for array, string(len without the terminating \0)
-	elementType    *Gtype                    // for array, slice
-	imethods       map[identifier]*signature // for interface
+	receiverTypeId int                         // for receiverTypeId. 0:unkonwn
+	dependendson   Expr                        // for G_DEPENDENT
+	relation       *Relation                   // for G_NAMED
+	size           int                         // for scalar type like int, bool, byte, for struct
+	origType       *Gtype                      // for pointer
+	fields         []*Gtype                    // for struct
+	fieldname      identifier                  // for struct field
+	offset         int                         // for struct field
+	padding        int                         // for struct field
+	length         int                         // for array, string(len without the terminating \0)
+	elementType    *Gtype                      // for array, slice
+	imethods       map[identifier]*signature   // for interface
 	methods        map[identifier]*ExprFuncRef // for G_NAMED
-	mapKey   *Gtype // for map
-	mapValue *Gtype // for map
+	mapKey         *Gtype                      // for map
+	mapValue       *Gtype                      // for map
 }
 
 func (gtype *Gtype) isNil() bool {
