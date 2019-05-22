@@ -251,8 +251,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		var collection Expr = rel // @TODO: it should do auto conversion on function call
-		e = p.parseIndexOrSliceExpr(collection)
+		e = p.parseIndexOrSliceExpr(rel)
 	} else {
 		// solo ident
 		e = rel
@@ -1287,11 +1286,11 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 		left:  left,
 		right: rights[0],
 	}
-	var right Expr = binop // FIXME: this is a workaround
+
 	s := &StmtAssignment{
 		tok:    ptok,
 		lefts:  []Expr{left},
-		rights: []Expr{right},
+		rights: []Expr{binop},
 	}
 	// dumpInterface(s.rights[0])
 	return s

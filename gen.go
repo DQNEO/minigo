@@ -2129,7 +2129,7 @@ func (decl *DeclVar) emit() {
 	emit("")
 	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
-	var varname Expr = decl.varname
+	varname := decl.varname
 	switch {
 	case gtype.kind == G_ARRAY:
 		assignToArray(varname, decl.initval)
