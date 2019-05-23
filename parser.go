@@ -356,7 +356,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expect("(")
+	p.expect("(")
 
 	if p.peekToken().isKeyword("type") {
 		p.skip()
@@ -375,7 +375,7 @@ func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 		}
 		return p.succeedingExpr(e)
 	}
-	errorft(ptok, "internal error")
+
 	return nil
 }
 
