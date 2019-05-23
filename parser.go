@@ -1063,6 +1063,21 @@ func (p *parser) parseForStmt() *StmtFor {
 		p.requireBlock = true
 		cond = p.parseExpr()
 		p.requireBlock = false
+
+		if cond == nil {
+			// for ; cond; post { ___ }
+			cls := &ForForClause{}
+			cls.init = nil
+			cls.cond = p.parseStmt()
+			p.expect(";")
+			cls.post = p.parseStmt()
+			r.cls = cls
+			p.expect("{")
+			r.block = p.parseCompoundStmt()
+			p.exitScope()
+			p.exitForBlock()
+			return r
+		}
 	}
 	if p.peekToken().isPunct("{") {
 		// single cond
