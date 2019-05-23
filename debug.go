@@ -40,12 +40,6 @@ func errorft(tok *Token, format string, v ...interface{}) {
 }
 
 func errorf(format string, v ...interface{}) {
-	/*
-		currentTokenIndex := ts.index - 1
-		fmt.Printf("%v %v %v\n",
-			ts.getToken(currentTokenIndex-2), ts.getToken(currentTokenIndex-1), ts.getToken(currentTokenIndex))
-	*/
-	//s += bs.location() + ": "
 	s := fmt.Sprintf(format, v...)
 	panic(s)
 }

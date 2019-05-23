@@ -19,13 +19,13 @@ func inferTypes(globals []*ExprVariable, locals []Inferrer) {
 //  infer recursively all the types of global variables
 func (variable *ExprVariable) infer() {
 	//debugf("infering ExprVariable")
-	if variable.gtype.typ != G_DEPENDENT {
+	if variable.gtype.kind != G_DEPENDENT {
 		// done
 		return
 	}
 	e := variable.gtype.dependendson
 	dependType := e.getGtype()
-	if dependType.typ != G_DEPENDENT {
+	if dependType.kind != G_DEPENDENT {
 		variable.gtype = dependType
 		return
 	}
@@ -56,7 +56,7 @@ func (clause *ForRangeClause) infer() {
 	assert(ok, nil, "ok")
 
 	var indexType *Gtype
-	switch collectionType.typ {
+	switch collectionType.kind {
 	case G_ARRAY, G_SLICE:
 		indexType = gInt
 	case G_MAP:
@@ -72,11 +72,11 @@ func (clause *ForRangeClause) infer() {
 		assert(ok, nil, "ok")
 
 		var elementType *Gtype
-		if collectionType.typ == G_ARRAY {
+		if collectionType.kind == G_ARRAY {
 			elementType = collectionType.elementType
-		} else if collectionType.typ == G_SLICE {
+		} else if collectionType.kind == G_SLICE {
 			elementType = collectionType.elementType
-		} else if collectionType.typ == G_MAP {
+		} else if collectionType.kind == G_MAP {
 			elementType = collectionType.mapValue
 		} else {
 			errorft(clause.token(), "internal error")

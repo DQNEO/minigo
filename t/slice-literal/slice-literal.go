@@ -28,7 +28,6 @@ func f1() {
 	}
 	fmt.Printf("%d\n", e.getId()+2) // 3
 	var slice []Ifc = []Ifc{e, e, e}
-
 	fmt.Printf("%d\n", len(slice)+1)       // 4
 	fmt.Printf("%d\n", slice[2].getId()+4) // 5
 }

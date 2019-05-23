@@ -4,7 +4,7 @@ import "fmt"
 
 func myPrintf(format string, a []interface{}) {
 	var s string = fmt.Sprintf(format, a...)
-	printf(s)
+	fmt.Printf(s)
 }
 
 func f0() {

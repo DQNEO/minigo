@@ -8,17 +8,17 @@ func f0() {
 }
 
 func receiveVarg(s string, a ...interface{}) {
-	println("-")
-	println(len(a))
-	println(*a[0])
-	println(*a[1])
+	fmt.Printf("-\n")
+	fmt.Printf("%d\n", len(a))
+	fmt.Printf("%s\n", a[0])
+	fmt.Printf("%d\n", a[1])
 }
 
 func receiveIfcSlice(s string, a []interface{}) {
-	println("-")
-	println(len(a))
-	println(*a[0])
-	println(*a[1])
+	fmt.Printf("-\n")
+	fmt.Printf("%d\n", len(a))
+	fmt.Printf("%s\n", a[0])
+	fmt.Printf("%d\n", a[1])
 }
 
 var format string = "format-%s-%d\n"

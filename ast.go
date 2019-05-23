@@ -203,16 +203,15 @@ type ExprFuncRef struct {
 }
 
 type DeclFunc struct {
-	tok        *Token
-	pkg        identifier
-	receiver   *ExprVariable
-	fname      identifier
-	rettypes   []*Gtype
-	params     []*ExprVariable
-	isVariadic bool
-	localvars  []*ExprVariable
-	body       *StmtSatementList
-	stmtDefer  *StmtDefer
+	tok       *Token
+	pkg       identifier
+	receiver  *ExprVariable
+	fname     identifier
+	rettypes  []*Gtype
+	params    []*ExprVariable
+	localvars []*ExprVariable
+	body      *StmtSatementList
+	stmtDefer *StmtDefer
 	// every function has a defer handler
 	labelDeferHandler string
 }

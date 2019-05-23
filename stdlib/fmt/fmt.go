@@ -1,6 +1,13 @@
 package fmt
 
+import (
+	"os"
+)
+
 func Printf(format string, a ...interface{}) {
+	s := doPrintf(format, a...)
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
 }
 
 func Sprintf(format string, param ...interface{}) string {

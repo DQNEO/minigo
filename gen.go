@@ -55,7 +55,7 @@ func emitLabel(format string, v ...interface{}) {
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
-	if gtype.typ == G_POINTER {
+	if gtype.kind == G_POINTER {
 		typename = gtype.origType.relation.name
 	} else {
 		typename = gtype.relation.name
@@ -110,7 +110,7 @@ func (f *DeclFunc) emitPrologue() {
 
 	var regIndex int
 	for _, param := range params {
-		switch param.getGtype().getPrimType() {
+		switch param.getGtype().getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
 			offset -= IntSize * 3
 			param.offset = offset
@@ -199,7 +199,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		loadStructField(variable, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
-		if field.typ == G_ARRAY {
+		if field.kind == G_ARRAY {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
@@ -242,7 +242,7 @@ func (structfield *ExprStructField) calcOffset() {
 	}
 
 	structType := structfield.strct.getGtype()
-	switch structType.getPrimType() {
+	switch structType.getKind() {
 	case G_POINTER:
 		origType := structType.origType.relation.gtype
 		if origType.size == undefinedSize {
@@ -262,14 +262,14 @@ func (structfield *ExprStructField) calcOffset() {
 func (a *ExprStructField) emit() {
 	emit("# ExprStructField.emit()")
 	a.calcOffset()
-	switch a.strct.getGtype().typ {
+	switch a.strct.getGtype().kind {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
 		emit("mov %%rax, %%rdx")
-		switch field.getPrimType() {
+		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
 			emit("mov (%%rdx), %%rax")
 			emit("mov %d(%%rdx), %%rbx", ptrSize)
@@ -278,7 +278,7 @@ func (a *ExprStructField) emit() {
 			emit("mov (%%rdx), %%rax")
 		}
 
-	case G_REL: // struct
+	case G_NAMED: // struct
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
@@ -301,10 +301,10 @@ func getLoadInst(size int) string {
 
 func (ast *ExprVariable) emit() {
 	emit("# emit variable \"%s\" of type %s", ast.varname, ast.getGtype().String())
-	if ast.gtype.typ == G_ARRAY {
+	if ast.gtype.kind == G_ARRAY {
 		ast.emitAddress(0)
 		return
-	} else if ast.gtype.getPrimType() == G_INTERFACE {
+	} else if ast.gtype.getKind() == G_INTERFACE {
 		if ast.isGlobal {
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
@@ -319,12 +319,12 @@ func (ast *ExprVariable) emit() {
 
 	if ast.isGlobal {
 		switch {
-		case ast.getGtype().typ == G_SLICE:
+		case ast.getGtype().kind == G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
-		case ast.getGtype().getPrimType() == G_MAP:
+		case ast.getGtype().getKind() == G_MAP:
 			emit("#   emit map variable")
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
@@ -338,12 +338,12 @@ func (ast *ExprVariable) emit() {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
 		}
 		switch {
-		case ast.getGtype().typ == G_SLICE:
+		case ast.getGtype().kind == G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
-		case ast.getGtype().getPrimType() == G_MAP:
+		case ast.getGtype().getKind() == G_MAP:
 			emit("#   emit map variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
@@ -399,7 +399,7 @@ func (ast *ExprConstVariable) emit() {
 }
 
 func emit_intcast(gtype *Gtype) {
-	if gtype.getPrimType() == G_BYTE {
+	if gtype.getKind() == G_BYTE {
 		emit("movzbq %%al, %%rax")
 	}
 }
@@ -407,12 +407,12 @@ func emit_intcast(gtype *Gtype) {
 func emit_comp_primitive(inst string, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
 	binop.left.emit()
-	if binop.left.getGtype().getPrimType() == G_BYTE {
+	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
 	emit("push %%rax")
 	binop.right.emit()
-	if binop.right.getGtype().getPrimType() == G_BYTE {
+	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
 	}
 	emit("pop %%rcx")
@@ -471,8 +471,8 @@ func (rel *Relation) emitSave() {
 func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirection bool) {
 	emit("# ExprVariable.emitOffsetSave(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
-	if variable.getGtype().typ == G_POINTER && (offset > 0 || forceIndirection) {
-		assert(variable.getGtype().typ == G_POINTER, variable.token(), "")
+	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
+		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
 		emit("push %%rax")
 		variable.emit()
 		emit("mov %%rax, %%rcx")
@@ -820,13 +820,13 @@ func (ast *StmtAssignment) emit() {
 			}
 			gtype := left.getGtype()
 			switch {
-			case gtype.typ == G_ARRAY:
+			case gtype.getKind() == G_ARRAY:
 				assignToArray(left, right)
-			case gtype.typ == G_SLICE:
+			case gtype.getKind() == G_SLICE:
 				assignToSlice(left, right)
-			case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+			case gtype.getKind() == G_STRUCT:
 				assignToStruct(left, right)
-			case gtype.getPrimType() == G_INTERFACE:
+			case gtype.getKind() == G_INTERFACE:
 				assignToInterface(left, right)
 			default:
 				// suppose primitive
@@ -854,7 +854,7 @@ func (ast *StmtAssignment) emit() {
 			numRight++
 		case *ExprIndex:
 			indexExpr := right.(*ExprIndex)
-			if indexExpr.collection.getGtype().getPrimType() == G_MAP {
+			if indexExpr.collection.getGtype().getKind() == G_MAP {
 				// map get
 				emit("# v, ok = map[k]")
 				leftsMayBeTwo = true
@@ -899,10 +899,10 @@ func (ast *StmtAssignment) emit() {
 						continue
 					}
 					assert(left.getGtype() != nil, left.token(), "should not be nil")
-					if left.getGtype().typ == G_SLICE {
+					if left.getGtype().kind == G_SLICE {
 						// @TODO: Does this work ?
 						emitSave3Elements(left, 0)
-					} else if left.getGtype().getPrimType() == G_INTERFACE {
+					} else if left.getGtype().getKind() == G_INTERFACE {
 						// @TODO: Does this work ?
 						emitSaveInterface(left, 0)
 					} else {
@@ -923,15 +923,15 @@ func (ast *StmtAssignment) emit() {
 		case gtype == nil:
 			// suppose left is "_"
 			right.emit()
-		case gtype.typ == G_ARRAY:
+		case gtype.getKind() == G_ARRAY:
 			assignToArray(left, right)
-		case gtype.typ == G_SLICE:
+		case gtype.getKind() == G_SLICE:
 			assignToSlice(left, right)
-		case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+		case gtype.getKind() == G_STRUCT:
 			assignToStruct(left, right)
-		case gtype.getPrimType() == G_INTERFACE:
+		case gtype.getKind() == G_INTERFACE:
 			assignToInterface(left, right)
-		case gtype.getPrimType() == G_MAP:
+		case gtype.getKind() == G_MAP:
 			assignToMap(left, right)
 		default:
 			// suppose primitive
@@ -985,9 +985,9 @@ func (e *ExprIndex) emitSave3Elements() {
 
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
+	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
 		e.collection.emit() // head address
-	case collectionType.getPrimType() == G_MAP:
+	case collectionType.getKind() == G_MAP:
 		e.emitMapSet(true)
 		return
 	default:
@@ -1032,9 +1032,9 @@ func (e *ExprIndex) emitSave() {
 
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.getPrimType() == G_ARRAY, collectionType.getPrimType() == G_SLICE, collectionType.getPrimType() == G_STRING:
+	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
 		e.collection.emit() // head address
-	case collectionType.getPrimType() == G_MAP:
+	case collectionType.getKind() == G_MAP:
 		e.emitMapSet(false)
 		return
 	default:
@@ -1067,7 +1067,7 @@ func (e *ExprIndex) emitSave() {
 
 func (e *ExprStructField) emitSave() {
 	fieldType := e.getGtype()
-	if e.strct.getGtype().typ == G_POINTER {
+	if e.strct.getGtype().kind == G_POINTER {
 		emit("push %%rax # store rhs")
 		// structptr.field = x
 		e.strct.emit() // emit address
@@ -1085,7 +1085,7 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	assert(ok, e.tok, "should be *Relation")
 	vr, ok := rel.expr.(*ExprVariable)
 	assert(ok, e.tok, "should be *ExprVariable")
-	assert(vr.gtype.typ == G_REL, e.tok, "expect G_REL, but got "+vr.gtype.String())
+	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
@@ -1096,18 +1096,17 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 func (e *ExprSliceLiteral) emit() {
 	emit("# (*ExprSliceLiteral).emit()")
 	length := len(e.values)
-	//emitCallMalloc(e.gtype.elementType.getSize() * length)
 	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
-	emitCallMalloc(e.gtype.getSize()) // why does this work??
+	emitCallMalloc(e.gtype.getSize() * length)
 	emit("push %%rax # ptr")
 	for i, value := range e.values {
-		if e.gtype.elementType.getPrimType() == G_INTERFACE && value.getGtype().getPrimType() != G_INTERFACE {
+		if e.gtype.elementType.getKind() == G_INTERFACE && value.getGtype().getKind() != G_INTERFACE {
 			emitConversionToInterface(value)
 		} else {
 			value.emit()
 		}
 
-		switch e.gtype.elementType.getPrimType() {
+		switch e.gtype.elementType.getKind() {
 		case G_BYTE, G_INT, G_POINTER, G_STRING:
 			emit("pop %%rbx # ptr")
 			emit("mov %%rax, %d(%%rbx)", IntSize*i)
@@ -1256,7 +1255,7 @@ func (f *StmtFor) emitRangeForList() {
 	emit("")
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().typ == G_ARRAY || f.rng.rangeexpr.getGtype().typ == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
+	assert(f.rng.rangeexpr.getGtype().kind == G_ARRAY || f.rng.rangeexpr.getGtype().kind == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE")
 
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()
@@ -1368,7 +1367,7 @@ func (f *StmtFor) emitForClause() {
 
 func (f *StmtFor) emit() {
 	if f.rng != nil {
-		if f.rng.rangeexpr.getGtype().typ == G_MAP {
+		if f.rng.rangeexpr.getGtype().kind == G_MAP {
 			f.emitRangeForMap()
 		} else {
 			f.emitRangeForList()
@@ -1401,7 +1400,7 @@ func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 1 {
 		expr := stmt.exprs[0]
 		rettype := stmt.rettypes[0]
-		if rettype.getPrimType() == G_INTERFACE && expr.getGtype().getPrimType() != G_INTERFACE {
+		if rettype.getKind() == G_INTERFACE && expr.getGtype().getKind() != G_INTERFACE {
 			if expr.getGtype() == nil {
 				emit("mov $0, %%rax")
 				emit("mov $0, %%rbx")
@@ -1411,7 +1410,7 @@ func (stmt *StmtReturn) emit() {
 			}
 		} else {
 			expr.emit()
-			if expr.getGtype() == nil && stmt.rettypes[0].typ == G_SLICE {
+			if expr.getGtype() == nil && stmt.rettypes[0].kind == G_SLICE {
 				emit("mov $0, %%rbx")
 				emit("mov $0, %%rcx")
 			}
@@ -1423,7 +1422,7 @@ func (stmt *StmtReturn) emit() {
 		expr := stmt.exprs[i]
 		expr.emit()
 		//		rettype := stmt.rettypes[i]
-		if expr.getGtype() == nil && rettype.typ == G_SLICE {
+		if expr.getGtype() == nil && rettype.kind == G_SLICE {
 			emit("mov $0, %%rbx")
 			emit("mov $0, %%rcx")
 		}
@@ -1500,15 +1499,15 @@ func emitCopyStructFromStack(gtype *Gtype) {
 	emit("mov %%rbx, %%rax") // to
 
 	var i int
-	for i = i; i < gtype.getSize(); i += 8 {
+	for ; i < gtype.getSize(); i += 8 {
 		emit("movq %d(%%rcx), %%r11", i)
 		emit("movq %%r11, %d(%%rax)", i)
 	}
-	for i = i; i < gtype.getSize(); i += 4 {
+	for ; i < gtype.getSize(); i += 4 {
 		emit("movl %d(%%rcx), %%r11", i)
 		emit("movl %%r11, %d(%%rax)", i)
 	}
-	for i = i; i < gtype.getSize(); i++ {
+	for ; i < gtype.getSize(); i++ {
 		emit("movb %d(%%rcx), %%r11", i)
 		emit("movb %%r11, %d(%%rax)", i)
 	}
@@ -1531,15 +1530,15 @@ func emitCopyStruct(left Expr) {
 	emitAddress(left)
 
 	var i int
-	for i = i; i < left.getGtype().getSize(); i += 8 {
+	for ; i < left.getGtype().getSize(); i += 8 {
 		emit("movq %d(%%rcx), %%r11", i)
 		emit("movq %%r11, %d(%%rax)", i)
 	}
-	for i = i; i < left.getGtype().getSize(); i += 4 {
+	for ; i < left.getGtype().getSize(); i += 4 {
 		emit("movl %d(%%rcx), %%r11", i)
 		emit("movl %%r11, %d(%%rax)", i)
 	}
-	for i = i; i < left.getGtype().getSize(); i++ {
+	for ; i < left.getGtype().getSize(); i++ {
 		emit("movb %d(%%rcx), %%r11", i)
 		emit("movb %%r11, %d(%%rax)", i)
 	}
@@ -1554,18 +1553,18 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	assert(rhs == nil || (rhs.getGtype().typ == G_REL && rhs.getGtype().relation.gtype.typ == G_STRUCT),
+	assert(rhs == nil || (rhs.getGtype().kind == G_NAMED && rhs.getGtype().relation.gtype.kind == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
 		switch {
-		case fieldtype.typ == G_ARRAY:
+		case fieldtype.kind == G_ARRAY:
 			arrayType := fieldtype
 			elementType := arrayType.elementType
 			elmSize := arrayType.elementType.getSize()
 			switch {
-			case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+			case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 				left := &ExprStructField{
 					strct:     lhs,
 					fieldname: fieldtype.fieldname,
@@ -1579,25 +1578,25 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				}
 			}
 
-		case fieldtype.typ == G_SLICE:
+		case fieldtype.kind == G_SLICE:
 			emit("# initialize slice with a zero value")
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
 			emitSave3Elements(lhs, fieldtype.offset)
-		case fieldtype.typ == G_MAP:
+		case fieldtype.kind == G_MAP:
 			emit("# initialize slice with a zero value")
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
 			emitSave3Elements(lhs, fieldtype.offset)
-		case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
+		case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
 				fieldname: fieldtype.fieldname,
 			}
 			assignToStruct(left, nil)
-		case fieldtype.getPrimType() == G_INTERFACE:
+		case fieldtype.getKind() == G_INTERFACE:
 			emit("push $0")
 			emit("push $0")
 			emit("push $0")
@@ -1616,7 +1615,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	}
 	variable := lhs
 
-	strcttyp := rhs.getGtype().getSource()
+	strcttyp := rhs.getGtype().Underlying()
 
 	switch rhs.(type) {
 	case *Relation:
@@ -1643,14 +1642,14 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			fieldtype := strcttyp.getField(field.key)
 
 			switch {
-			case fieldtype.typ == G_ARRAY:
+			case fieldtype.kind == G_ARRAY:
 				initvalues, ok := field.value.(*ExprArrayLiteral)
 				assert(ok, nil, "ok")
 				arrayType := strcttyp.getField(field.key)
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
 				switch {
-				case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+				case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 					left := &ExprStructField{
 						strct:     lhs,
 						fieldname: fieldtype.fieldname,
@@ -1662,28 +1661,28 @@ func assignToStruct(lhs Expr, rhs Expr) {
 						emitOffsetSave(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
-			case fieldtype.typ == G_SLICE:
+			case fieldtype.kind == G_SLICE:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
-			case fieldtype.getPrimType() == G_MAP:
+			case fieldtype.getKind() == G_MAP:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToMap(left, field.value)
-			case fieldtype.getPrimType() == G_INTERFACE:
+			case fieldtype.getKind() == G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToInterface(left, field.value)
-			case fieldtype.typ == G_REL && fieldtype.relation.gtype.typ == G_STRUCT:
+			case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
@@ -1741,7 +1740,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		structfield := lhs.(*ExprStructField)
 		structfield.calcOffset()
 		fieldType := structfield.getGtype()
-		if structfield.strct.getGtype().typ == G_POINTER {
+		if structfield.strct.getGtype().kind == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
 			emit("add $%d, %%rax", fieldType.offset+offset)
@@ -1751,7 +1750,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 			emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 		}
 	case *ExprIndex:
-		//  e.g. arrayLiteral.values[i].getGtype().getPrimType()
+		//  e.g. arrayLiteral.values[i].getGtype().getKind()
 		indexExpr := lhs.(*ExprIndex)
 		loadCollectIndex(indexExpr.collection, indexExpr.index, offset)
 	case *ExprMethodcall:
@@ -1760,7 +1759,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		rettypes := mcall.getRettypes()
 		assert(len(rettypes) == 1, lhs.token(), "rettype should be single")
 		rettype := rettypes[0]
-		assert(rettype.getPrimType() == G_POINTER, lhs.token(), "only pointer is supported")
+		assert(rettype.getKind() == G_POINTER, lhs.token(), "only pointer is supported")
 		mcall.emit()
 		emit("# START DEBUG")
 		emit("add $%d, %%rax", offset)
@@ -1798,8 +1797,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		var expr Expr = rel.expr
-		emitSave3Elements(expr, offset)
+		emitSave3Elements(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.saveSlice(offset)
@@ -1863,7 +1861,16 @@ func (e *ExprConversionToInterface) emit() {
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
-	emit("# emitConversionToInterface")
+	receiverType := dynamicValue.getGtype()
+	if receiverType == nil {
+		emit("# receiverType is nil. emit nil for interface")
+		emit("mov $0, %%rax")
+		emit("mov $0, %%rbx")
+		emit("mov $0, %%rcx")
+		return
+	}
+
+	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
 	emit("push %%rax")
 	emitCallMalloc(8)
@@ -1871,19 +1878,11 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("mov %%rcx, (%%rax)")                // store value to heap
 	emit("push %%rax # addr of dynamicValue") // address
 
-	receiverType := dynamicValue.getGtype()
-	if receiverType == nil {
-		emit("# emit nil for interface")
-		emit("mov $0, %%rax")
-		emit("mov $0, %%rbx")
-		emit("mov $0, %%rcx")
-		return
-	}
-	if receiverType.typ == G_POINTER {
+	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
-	//assert(receiverType.typeId > 0,  dynamicValue.token(), "no typeId")
-	emit("mov $%d, %%rax # receiverTypeId", receiverType.typeId)
+	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
+	emit("mov $%d, %%rax # receiverTypeId", receiverType.receiverTypeId)
 	emit("push %%rax # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
@@ -1892,7 +1891,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if dynamicTypeId == -1 {
 		//debugf("types:%#v", groot.uniquedDynamicTypes)
 		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
-		errorft(dynamicValue.token(), "type %s not found for %s", gtype, dynamicValue)
+		errorft(dynamicValue.token(), "type %s not found in uniquedDTypes", gtype.String())
 	}
 	label := fmt.Sprintf("DT%d", dynamicTypeId)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
@@ -1923,7 +1922,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	}
 
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
-	if rhs.getGtype().getPrimType() == G_INTERFACE {
+	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
 		emit("push %%rax")
 		emit("push %%rbx")
@@ -1942,7 +1941,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	assertInterface(lhs)
-	//assert(rhs == nil || rhs.getGtype().typ == G_SLICE, nil, "should be a slice literal or nil")
+	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
 		emit("# initialize slice with a zero value")
 		emit("push $0")
@@ -1952,7 +1951,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		return
 	}
 
-	//	assert(rhs.getGtype().getPrimType() == G_SLICE, rhs.token(), "rsh should be slice type")
+	//	assert(rhs.getGtype().getKind() == G_SLICE, rhs.token(), "rsh should be slice type")
 
 	switch rhs.(type) {
 	case *Relation:
@@ -1987,8 +1986,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		//
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*ExprConversion)
-		assert(conversion.gtype.typ == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().typ == G_STRING || conversion.expr.getGtype().relation.gtype.typ == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
+		assert(conversion.gtype.kind == G_SLICE, rhs.token(), "must be a slice of bytes")
+		assert(conversion.expr.getGtype().kind == G_STRING || conversion.expr.getGtype().relation.gtype.kind == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
 		stringVarname, ok := conversion.expr.(*Relation)
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
@@ -2042,9 +2041,9 @@ func assignToArray(lhs Expr, rhs Expr) {
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
-	assert(rhs == nil || rhs.getGtype().typ == G_ARRAY, nil, "rhs should be array")
+	assert(rhs == nil || rhs.getGtype().kind == G_ARRAY, nil, "rhs should be array")
 	switch {
-	case elementType.typ == G_REL && elementType.relation.gtype.typ == G_STRUCT:
+	case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
 		//TBI
 		for i := 0; i < arrayType.length; i++ {
 			left := &ExprIndex{
@@ -2066,7 +2065,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 			switch rhs.(type) {
 			case nil:
 				// assign zero values
-				if elementType.getPrimType() == G_INTERFACE {
+				if elementType.getKind() == G_INTERFACE {
 					emit("push $0")
 					emit("push $0")
 					emit("push $0")
@@ -2077,7 +2076,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 				}
 			case *ExprArrayLiteral:
 				arrayLiteral := rhs.(*ExprArrayLiteral)
-				if elementType.getPrimType() == G_INTERFACE {
+				if elementType.getKind() == G_INTERFACE {
 					if i >= len(arrayLiteral.values) {
 						// zero value
 						emit("push $0")
@@ -2085,7 +2084,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 						emit("push $0")
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
-					} else if arrayLiteral.values[i].getGtype().getPrimType() != G_INTERFACE {
+					} else if arrayLiteral.values[i].getGtype().getKind() != G_INTERFACE {
 						// conversion of dynamic type => interface type
 						dynamicValue := arrayLiteral.values[i]
 						emitConversionToInterface(dynamicValue)
@@ -2130,17 +2129,17 @@ func (decl *DeclVar) emit() {
 	emit("")
 	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
-	var varname Expr = decl.varname
+	varname := decl.varname
 	switch {
-	case gtype.typ == G_ARRAY:
+	case gtype.kind == G_ARRAY:
 		assignToArray(varname, decl.initval)
-	case gtype.typ == G_SLICE:
+	case gtype.kind == G_SLICE:
 		assignToSlice(varname, decl.initval)
-	case gtype.typ == G_REL && gtype.relation.gtype.typ == G_STRUCT:
+	case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
 		assignToStruct(varname, decl.initval)
-	case gtype.getPrimType() == G_MAP:
+	case gtype.getKind() == G_MAP:
 		assignToMap(varname, decl.initval)
-	case gtype.getPrimType() == G_INTERFACE:
+	case gtype.getKind() == G_INTERFACE:
 		assignToInterface(varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
@@ -2179,7 +2178,7 @@ func (ast *StmtSatementList) emit() {
 }
 
 func emitCollectIndexSave(array Expr, index Expr, offset int) {
-	assert(array.getGtype().typ == G_ARRAY, array.token(), "should be array")
+	assert(array.getGtype().kind == G_ARRAY, array.token(), "should be array")
 	elmType := array.getGtype().elementType
 	emit("push %%rax # STACK 1 : the value") // stash value
 
@@ -2208,7 +2207,7 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 
 func loadCollectIndex(collection Expr, index Expr, offset int) {
 	emit("# loadCollectIndex")
-	if collection.getGtype().typ == G_ARRAY {
+	if collection.getGtype().kind == G_ARRAY {
 		elmType := collection.getGtype().elementType
 		emit("# collection.emit()")
 		collection.emit()  // emit address
@@ -2228,7 +2227,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
-		if collection.getGtype().elementType.getPrimType() == G_INTERFACE {
+		if collection.getGtype().elementType.getKind() == G_INTERFACE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
 			emit("mov (%%rdx), %%rax")
@@ -2238,7 +2237,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 			emit("# emit the element of primitive type")
 			emit("mov (%%rbx), %%rax")
 		}
-	} else if collection.getGtype().typ == G_SLICE {
+	} else if collection.getGtype().kind == G_SLICE {
 		elmType := collection.getGtype().elementType
 		emit("# emit address of the low index")
 		collection.emit()  // eval pointer value
@@ -2257,7 +2256,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 			emit("add $%d,  %%rbx", offset)
 		}
 
-		primType := collection.getGtype().elementType.getPrimType()
+		primType := collection.getGtype().elementType.getKind()
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
@@ -2270,9 +2269,9 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 			emit("# emit the element of primitive type")
 			emit("%s (%%rbx), %%rax", inst)
 		}
-	} else if collection.getGtype().getPrimType() == G_MAP {
+	} else if collection.getGtype().getKind() == G_MAP {
 		loadMapIndexExpr(collection, index)
-	} else if collection.getGtype().getPrimType() == G_STRING {
+	} else if collection.getGtype().getKind() == G_STRING {
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:
 		//
@@ -2439,15 +2438,15 @@ func (e ExprArrayLiteral) emit() {
 
 // https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
-	assert(e.expr.getGtype().getPrimType() == G_INTERFACE, e.token(), "expr must be an Interface type")
-	if e.gtype.getPrimType() == G_INTERFACE {
+	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), "expr must be an Interface type")
+	if e.gtype.getKind() == G_INTERFACE {
 		TBI(e.token(), "")
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.
 
 		e.expr.emit() // emit interface
-		// rax(ptr), rbx(typeId of method table), rcx(hashed typeId)
+		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
 		emit("push %%rax")
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
@@ -2565,15 +2564,15 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(methodCall.receiver != nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
-	assert(gtype.typ == G_REL || gtype.typ == G_POINTER || gtype.typ == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
+	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
 	var typeToBeloing *Gtype
-	if gtype.typ == G_POINTER {
+	if gtype.kind == G_POINTER {
 		typeToBeloing = gtype.origType
 		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:"+gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.typ == G_REL, methodCall.tok, "method must belong to a named type")
+	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, "method must belong to a named type")
 	origType := typeToBeloing.relation.gtype
 	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), fmt.Sprintf("origType should not be nil:%#v", typeToBeloing.relation))
 	return origType
@@ -2604,7 +2603,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	if origType == nil {
 		errorft(methodCall.token(), "origType should not be nil")
 	}
-	if origType.typ == G_INTERFACE {
+	if origType.kind == G_INTERFACE {
 		return origType.imethods[methodCall.fname].rettypes
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
@@ -2634,7 +2633,7 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 
 func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
-	if origType.typ == G_INTERFACE {
+	if origType.kind == G_INTERFACE {
 		methodCall.emitInterfaceMethodCall()
 		return
 	}
@@ -2676,9 +2675,9 @@ func (e *ExprLen) emit() {
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
 	switch {
-	case gtype.typ == G_ARRAY:
+	case gtype.kind == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
-	case gtype.typ == G_SLICE:
+	case gtype.kind == G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
 		case *Relation:
@@ -2705,7 +2704,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getPrimType() == G_MAP:
+	case gtype.getKind() == G_MAP:
 		emit("# emit len(map)")
 		switch arg.(type) {
 		case *Relation:
@@ -2719,7 +2718,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getPrimType() == G_STRING:
+	case gtype.getKind() == G_STRING:
 		arg.emit()
 		emit("mov %%rax, %%rdi")
 		emit("mov $0, %%rax")
@@ -2734,9 +2733,9 @@ func (e *ExprCap) emit() {
 	arg := e.arg
 	gtype := arg.getGtype()
 	switch {
-	case gtype.typ == G_ARRAY:
+	case gtype.kind == G_ARRAY:
 		emit("mov $%d, %%rax", gtype.length)
-	case gtype.typ == G_SLICE:
+	case gtype.kind == G_SLICE:
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
@@ -2753,7 +2752,7 @@ func (e *ExprCap) emit() {
 			emit("mov $%d, %%rax", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
-			if sliceExpr.collection.getGtype().typ == G_ARRAY {
+			if sliceExpr.collection.getGtype().kind == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
 					op:  "-",
@@ -2770,9 +2769,9 @@ func (e *ExprCap) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getPrimType() == G_MAP:
+	case gtype.getKind() == G_MAP:
 		TBI(arg.token(), "unable to handle %T", arg)
-	case gtype.getPrimType() == G_STRING:
+	case gtype.getKind() == G_STRING:
 		TBI(arg.token(), "unable to handle %T", arg)
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
@@ -2828,7 +2827,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			staticCall.symbol = getFuncSymbol("", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
-			if slice.getGtype().elementType.getPrimType() == G_INTERFACE && valueToAppend.getGtype().getPrimType() != G_INTERFACE {
+			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 				eConvertion := &ExprConversionToInterface{
 					tok:  valueToAppend.token(),
 					expr: valueToAppend,
@@ -2966,11 +2965,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
-				if ircall.symbol != "fmt.Printf" {
-					// ignore fmt.Printf variadic
-					if _, ok := arg.(*ExprVaArg); !ok {
-						collectVariadicArgs = true
-					}
+				if _, ok := arg.(*ExprVaArg); !ok {
+					collectVariadicArgs = true
 				}
 			}
 		}
@@ -2984,7 +2980,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
-			if param != nil && ircall.symbol != "fmt.Printf" && ircall.symbol != "printf" {
+			if param != nil && ircall.symbol != "printf" {
 				emit("# has a corresponding param")
 
 				var fromGtype *Gtype
@@ -2999,7 +2995,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 					emit("# toGtype:%s", toGtype.String())
 				}
 
-				if toGtype != nil && toGtype.getPrimType() == G_INTERFACE && fromGtype != nil && fromGtype.getPrimType() != G_INTERFACE {
+				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
 					doConvertToInterface = true
 				}
 			}
@@ -3019,9 +3015,9 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			arg.emit()
 		}
 
-		var primType GTYPE_TYPE = 0
+		var primType GTYPE_KIND = 0
 		if arg.getGtype() != nil {
-			primType = arg.getGtype().getPrimType()
+			primType = arg.getGtype().getKind()
 		}
 		if doConvertToInterface || primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
 			emit("push %%rax  # argument 1/3")
@@ -3047,7 +3043,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	if collectVariadicArgs {
-		emit("# passing variadic args")
+		emit("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
 			// pass an empty slice
@@ -3058,13 +3054,17 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
 				if vargIndex == 0 {
-					// make an empty slice
+					emit("# make an empty slice to append")
 					emit("push $0")
 					emit("push $0")
 					emit("push $0")
 				}
 				// conversion : var ifc = x
-				emitConversionToInterface(varg)
+				if varg.getGtype().getKind() == G_INTERFACE {
+					varg.emit()
+				} else {
+					emitConversionToInterface(varg)
+				}
 				emit("push %%rax")
 				emit("push %%rbx")
 				emit("push %%rcx")
@@ -3093,12 +3093,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	emit("mov $0, %%rax")
-	if ircall.symbol == "fmt.Printf" {
-		// replace fmt.Printf by libc's printf
-		emit("call printf")
-	} else {
-		emit("call %s", ircall.symbol)
-	}
+	emit("call %s", ircall.symbol)
 	emit("")
 }
 
@@ -3244,7 +3239,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 
 func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
 	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
-	primType := gtype.getPrimType()
+	primType := gtype.getKind()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
 		var values []Expr
@@ -3264,7 +3259,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				assertNotNil(value != nil, nil)
 				size := elmType.getSize()
 				if size == 8 {
-					if value.getGtype().typ == G_STRING {
+					if value.getGtype().kind == G_STRING {
 						stringLiteral, ok := value.(*ExprStringLiteral)
 						assert(ok, nil, "ok")
 						emit(".quad .%s", stringLiteral.slabel)
@@ -3288,6 +3283,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				}
 			}
 		}
+		emit(".quad 0 # nil terminator")
+
 	} else if primType == G_SLICE {
 		switch value.(type) {
 		case nil:
@@ -3299,8 +3296,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				gtype:  lit.invisiblevar.gtype,
 				values: lit.values,
 			}
-			var expr Expr = arrayLiteral
-			emitDataAddr(expr, depth)                       // emit underlying array
+
+			emitDataAddr(arrayLiteral, depth)               // emit underlying array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		default:

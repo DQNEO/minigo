@@ -31,6 +31,7 @@ selfhost: minigo2.s
 	diff minigo2.s minigo.s && echo ok
 
 test: minigo minigo2
+	make vet
 	./test1gen.sh
 	./test2gen.sh
 	./comparison-test.sh
@@ -40,9 +41,12 @@ clean:
 	rm -f minigo*.s
 	rm -f a.s a.out
 	rm -f /tmp/out/*
-	rm -r /tmp/minigo*
+	rm -rf /tmp/minigo*
 	rm -f stdlib.go
 	rm -f internalcode.go
 
 fmt:
 	gofmt -w *.go t/*/*.go
+
+vet:
+	go vet *.go

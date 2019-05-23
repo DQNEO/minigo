@@ -7,7 +7,6 @@ func main() {
 	var heapTail *int
 
 	var address *int
-	heapHead = malloc(0)
 
 	address = malloc(8)
 	*address = 1
@@ -19,7 +18,8 @@ func main() {
 	*address = 3
 	fmt.Printf("%d\n", *address)
 
-	heapTail = malloc(0)
+	heapA := malloc(8)
+	heapB := malloc(0)
 
-	fmt.Printf("%d\n", (heapTail-heapHead)-20) // 4
+	fmt.Printf("%d\n", (heapB-heapA)-4) // 4
 }

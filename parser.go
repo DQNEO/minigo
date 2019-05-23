@@ -19,8 +19,8 @@ type parser struct {
 
 	// per file
 	tokenStream       *TokenStream
-	packageBlockScope *scope
-	currentScope      *scope
+	packageBlockScope *Scope
+	currentScope      *Scope
 	importedNames     map[identifier]bool
 
 	// per package
@@ -31,7 +31,7 @@ type parser struct {
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// global state
-	scopes          map[identifier]*scope
+	scopes          map[identifier]*Scope
 	stringLiterals  []*ExprStringLiteral
 	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
@@ -67,7 +67,7 @@ func (p *parser) assertNotNil(x interface{}) {
 func (p *parser) peekToken() *Token {
 	if p.tokenStream.isEnd() {
 		return &Token{
-			typ:      "EOF",
+			typ: "EOF",
 		}
 	}
 	r := p.tokenStream.tokens[p.tokenStream.index]
@@ -251,8 +251,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		}
 	} else if next.isPunct("[") {
 		// index access
-		var collection Expr = rel // @TODO: it should do auto conversion on function call
-		e = p.parseIndexOrSliceExpr(collection)
+		e = p.parseIndexOrSliceExpr(rel)
 	} else {
 		// solo ident
 		e = rel
@@ -357,7 +356,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expect("(")
+	p.expect("(")
 
 	if p.peekToken().isKeyword("type") {
 		p.skip()
@@ -376,8 +375,6 @@ func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 		}
 		return p.succeedingExpr(e)
 	}
-	errorft(ptok, "internal error")
-	return nil
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
@@ -460,7 +457,7 @@ func (p *parser) parseMapType() *Gtype {
 	p.expect("]")
 	mapValue := p.parseType()
 	return &Gtype{
-		typ:      G_MAP,
+		kind:     G_MAP,
 		mapKey:   mapKey,
 		mapValue: mapValue,
 	}
@@ -549,9 +546,9 @@ func (p *parser) parsePrim() Expr {
 		}
 
 		values := p.parseArrayLiteral()
-		switch gtype.typ {
+		switch gtype.kind {
 		case G_ARRAY:
-			if gtype.typ == G_ARRAY {
+			if gtype.kind == G_ARRAY {
 				if gtype.length == 0 {
 					gtype.length = len(values)
 				} else {
@@ -573,7 +570,7 @@ func (p *parser) parsePrim() Expr {
 				gtype:  gtype,
 				values: values,
 				invisiblevar: p.newVariable("", &Gtype{
-					typ:         G_ARRAY,
+					kind:        G_ARRAY,
 					elementType: gtype.elementType,
 					length:      len(values),
 				}),
@@ -677,7 +674,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
 			strctliteral.invisiblevar = p.newVariable("", &Gtype{
-				typ:      G_REL,
+				kind:     G_NAMED,
 				relation: strctliteral.strctname,
 			})
 		}
@@ -773,8 +770,6 @@ func (p *parser) parseExprInt(prior int) Expr {
 			return ast
 		}
 	}
-
-	return ast
 }
 
 func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
@@ -808,7 +803,6 @@ func (p *parser) parseType() *Gtype {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	var gtype *Gtype
-	ptok := p.peekToken()
 
 	for {
 		tok := p.readToken()
@@ -822,7 +816,7 @@ func (p *parser) parseType() *Gtype {
 			}
 			p.tryResolve("", rel)
 			gtype = &Gtype{
-				typ:      G_REL,
+				kind:     G_NAMED,
 				relation: rel,
 			}
 			return p.registerDynamicType(gtype)
@@ -833,7 +827,7 @@ func (p *parser) parseType() *Gtype {
 		} else if tok.isPunct("*") {
 			// pointer
 			gtype = &Gtype{
-				typ:      G_POINTER,
+				kind:     G_POINTER,
 				origType: p.parseType(),
 			}
 			return p.registerDynamicType(gtype)
@@ -855,7 +849,7 @@ func (p *parser) parseType() *Gtype {
 				// slice
 				typ := p.parseType()
 				gtype = &Gtype{
-					typ:         G_SLICE,
+					kind:        G_SLICE,
 					elementType: typ,
 				}
 				return p.registerDynamicType(gtype)
@@ -864,7 +858,7 @@ func (p *parser) parseType() *Gtype {
 				p.expect("]")
 				typ := p.parseType()
 				gtype = &Gtype{
-					typ:         G_ARRAY,
+					kind:        G_ARRAY,
 					length:      tok.getIntval(),
 					elementType: typ,
 				}
@@ -880,8 +874,6 @@ func (p *parser) parseType() *Gtype {
 		}
 
 	}
-	errorft(ptok, "Unkown type")
-	return nil
 }
 
 func (p *parser) parseVarDecl() *DeclVar {
@@ -921,7 +913,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	if typ == nil {
 		if p.isGlobal() {
 			variable.gtype = &Gtype{
-				typ:          G_DEPENDENT,
+				kind:         G_DEPENDENT,
 				dependendson: initval,
 			}
 			p.packageUninferredGlobals = append(p.packageUninferredGlobals, variable)
@@ -933,7 +925,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	return r
 }
 
-func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVariable {
+func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex int) *ExprConstVariable {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	newName := p.expectIdent()
@@ -953,6 +945,10 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, iotaIndex int) *ExprConstVa
 		val = p.parseExpr()
 	}
 	p.expect(";")
+
+	if gtype == nil {
+		gtype = lastGtype
+	}
 
 	variable := &ExprConstVariable{
 		name:      newName,
@@ -974,12 +970,16 @@ func (p *parser) parseConstDecl() *DeclConst {
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
 	var lastExpr Expr
+	var lastGtype *Gtype
 
 	if p.peekToken().isPunct("(") {
 		p.readToken()
 		for {
 			// multi definitions
-			cnst := p.parseConstDeclSingle(lastExpr, iotaIndex)
+			cnst := p.parseConstDeclSingle(lastExpr, lastGtype, iotaIndex)
+			if cnst.getGtype() != nil {
+				lastGtype = cnst.getGtype()
+			}
 			lastExpr = cnst.val
 			iotaIndex++
 			cnsts = append(cnsts, cnst)
@@ -991,7 +991,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 	} else {
 		// single definition
 		var nilExpr Expr = nil // @FIXME a dirty workaround. Passing nil literal to an interface parameter does not work.
-		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, 0)}
+		cnsts = []*ExprConstVariable{p.parseConstDeclSingle(nilExpr, nil, 0)}
 	}
 
 	r := &DeclConst{
@@ -1022,7 +1022,6 @@ func (p *parser) parseIdentList() []identifier {
 			return r
 		}
 	}
-	return r
 }
 
 func (p *parser) enterNewScope(name string) {
@@ -1056,6 +1055,21 @@ func (p *parser) parseForStmt() *StmtFor {
 		p.requireBlock = true
 		cond = p.parseExpr()
 		p.requireBlock = false
+
+		if cond == nil {
+			// for ; cond; post { ___ }
+			cls := &ForForClause{}
+			cls.init = nil
+			cls.cond = p.parseStmt()
+			p.expect(";")
+			cls.post = p.parseStmt()
+			r.cls = cls
+			p.expect("{")
+			r.block = p.parseCompoundStmt()
+			p.exitScope()
+			p.exitForBlock()
+			return r
+		}
 	}
 	if p.peekToken().isPunct("{") {
 		// single cond
@@ -1237,7 +1251,6 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 			return r
 		}
 	}
-	return r
 }
 
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
@@ -1278,11 +1291,11 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 		left:  left,
 		right: rights[0],
 	}
-	var right Expr = binop // FIXME: this is a workaround
+
 	s := &StmtAssignment{
 		tok:    ptok,
 		lefts:  []Expr{left},
-		rights: []Expr{right},
+		rights: []Expr{binop},
 	}
 	// dumpInterface(s.rights[0])
 	return s
@@ -1516,10 +1529,9 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 		stmt := p.parseStmt()
 		r.stmts = append(r.stmts, stmt)
 	}
-	return nil
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gtype) {
+func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
@@ -1528,7 +1540,6 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 	p.expect("(")
 
 	var params []*ExprVariable
-	var isVariadic bool
 
 	tok = p.peekToken()
 	if tok.isPunct(")") {
@@ -1541,7 +1552,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 				p.expect("...")
 				gtype := p.parseType()
 				sliceType := &Gtype{
-					typ:         G_SLICE,
+					kind:        G_SLICE,
 					elementType: gtype,
 				}
 				variable := &ExprVariable{
@@ -1576,7 +1587,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 
 	next := p.peekToken()
 	if next.isPunct("{") || next.isSemicolon() {
-		return fname, params, isVariadic, nil
+		return fname, params, nil
 	}
 
 	var rettypes []*Gtype
@@ -1600,7 +1611,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, bool, []*Gty
 		rettypes = []*Gtype{p.parseType()}
 	}
 
-	return fname, params, isVariadic, rettypes
+	return fname, params, rettypes
 }
 
 func (p *parser) parseFuncDef() *DeclFunc {
@@ -1631,18 +1642,17 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.expect(")")
 	}
 
-	fname, params, isVariadic, rettypes := p.parseFuncSignature()
+	fname, params, rettypes := p.parseFuncSignature()
 
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
-		tok:        ptok,
-		pkg:        p.packageName,
-		receiver:   receiver,
-		fname:      fname,
-		rettypes:   rettypes,
-		params:     params,
-		isVariadic: isVariadic,
+		tok:      ptok,
+		pkg:      p.packageName,
+		receiver: receiver,
+		fname:    fname,
+		rettypes: rettypes,
+		params:   params,
 	}
 
 	ref := &ExprFuncRef{
@@ -1652,13 +1662,13 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	if isMethod {
 		var typeToBelong *Gtype
-		if receiver.gtype.typ == G_POINTER {
+		if receiver.gtype.kind == G_POINTER {
 			typeToBelong = receiver.gtype.origType
 		} else {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.typ == G_REL, "packageMethods must belong to a named type")
+		p.assert(typeToBelong.kind == G_NAMED, "packageMethods must belong to a named type")
 		var mthds methods
 		var ok bool
 		typeName := typeToBelong.relation.name
@@ -1779,7 +1789,7 @@ func (p *parser) parseStructDef() *Gtype {
 	// calc offset
 	p.expect(";")
 	return &Gtype{
-		typ:    G_STRUCT,
+		kind:   G_STRUCT,
 		size:   undefinedSize, // will be calculated later
 		fields: fields,
 	}
@@ -1798,7 +1808,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			break
 		}
 
-		fname, params, isVariadic, rettypes := p.parseFuncSignature()
+		fname, params, rettypes := p.parseFuncSignature()
 		p.expect(";")
 
 		var paramTypes []*Gtype
@@ -1808,7 +1818,6 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 		method := &signature{
 			fname:      fname,
 			paramTypes: paramTypes,
-			isVariadic: isVariadic,
 			rettypes:   rettypes,
 		}
 		methods[fname] = method
@@ -1816,7 +1825,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.expect("}")
 
 	gtype := &Gtype{
-		typ:      G_INTERFACE,
+		kind:     G_INTERFACE,
 		imethods: methods,
 	}
 
@@ -1936,7 +1945,6 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 		ast := p.parseTopLevelDecl(tok)
 		r = append(r, ast)
 	}
-	return r
 }
 
 func (p *parser) isGlobal() bool {
@@ -1948,7 +1956,7 @@ func (p *parser) isGlobal() bool {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, importOnly bool) *SourceFile {
+func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *SourceFile {
 
 	p.clearLocalState()
 
@@ -1990,9 +1998,9 @@ func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *scope, impor
 	}
 }
 
-var allScopes map[identifier]*scope
+var allScopes map[identifier]*Scope
 
-func (p *parser) resolve(universe *scope) {
+func (p *parser) resolve(universe *Scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
 		//debugf("resolving %s ...", rel.name)

@@ -16,7 +16,7 @@ func f3() {
 	var c byte
 	c, _ = bs.get()
 	tn := &Tokenizer{
-		bs:bs,
+		bs: bs,
 	}
 	ident := tn.readIdentifier(c)
 	fmt.Printf("%s\n", ident)

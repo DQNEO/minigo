@@ -63,7 +63,7 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-func parseStdPkg(p *parser, universe *scope, pkgname identifier, code string) *stdpkg {
+func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *stdpkg {
 	filename := string(pkgname) + ".memory"
 	bs := NewByteStreamFromString(filename, code)
 
@@ -115,7 +115,9 @@ func main() {
 	}
 	// analyze imports of the given go files
 	pForImport := &parser{}
-	var imported []string
+	// "fmt" depends on "os. So inject it in advance.
+	// Actually, dependency graph should be analyzed.
+	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		astFile := pForImport.parseSourceFile(bs, nil, true)
@@ -133,7 +135,7 @@ func main() {
 	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
-	p.scopes = map[identifier]*scope{}
+	p.scopes = map[identifier]*Scope{}
 	p.initPackage("")
 
 	allScopes = p.scopes
@@ -229,8 +231,8 @@ func main() {
 
 	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range p.allNamedTypes {
-		concreteNamedType.gtype.typeId = typeId
-		//debugf("concreteNamedType: id=%d, name=%s", typeId, concreteNamedType.name)
+		concreteNamedType.gtype.receiverTypeId = typeId
+		//debugf("concreteNamedType: id=%d, name=%s", receiverTypeId, concreteNamedType.name)
 		typeId++
 	}
 	debugf("set concreteNamedType")
@@ -247,18 +249,18 @@ type stdpkg struct {
 }
 
 func (ir *IrRoot) composeMethodTable() {
-	var methodTable map[int][]string = map[int][]string{} // typeId : []methodTable
+	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
 	for _, funcdecl := range ir.funcs {
 		if funcdecl.receiver != nil {
 			//debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
-			if gtype.typ == G_POINTER {
+			if gtype.kind == G_POINTER {
 				gtype = gtype.origType
 			}
 			if gtype.relation == nil {
 				errorf("no relation for %#v", funcdecl.receiver.getGtype())
 			}
-			typeId := gtype.relation.gtype.typeId
+			typeId := gtype.relation.gtype.receiverTypeId
 			symbol := funcdecl.getSymbol()
 			methods := methodTable[typeId]
 			methods = append(methods, symbol)

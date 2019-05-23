@@ -37,8 +37,16 @@ func f3() {
 	fmt.Printf("%d\n", x)
 }
 
+func f4() {
+	var i int = 17
+	for ; i <= 19; i++ {
+		fmt.Printf("%d\n", i)
+	}
+}
+
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }
