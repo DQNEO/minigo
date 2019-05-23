@@ -39,7 +39,7 @@ func f3() {
 
 func f4() {
 	var i int = 17
-	for ; i <= 19 ; i++ {
+	for ; i <= 19; i++ {
 		fmt.Printf("%d\n", i)
 	}
 }
