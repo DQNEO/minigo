@@ -1022,7 +1022,6 @@ func (p *parser) parseIdentList() []identifier {
 			return r
 		}
 	}
-	return r
 }
 
 func (p *parser) enterNewScope(name string) {
@@ -1252,7 +1251,6 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 			return r
 		}
 	}
-	return r
 }
 
 func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
@@ -1531,7 +1529,6 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 		stmt := p.parseStmt()
 		r.stmts = append(r.stmts, stmt)
 	}
-	return nil
 }
 
 func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
@@ -1948,7 +1945,6 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 		ast := p.parseTopLevelDecl(tok)
 		r = append(r, ast)
 	}
-	return r
 }
 
 func (p *parser) isGlobal() bool {

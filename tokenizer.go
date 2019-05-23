@@ -440,8 +440,6 @@ func (tn *Tokenizer) tokenize() []*Token {
 		}
 		r = append(r, tok)
 	}
-
-	return r
 }
 
 func Tokenize(bs *ByteStream) []*Token {
