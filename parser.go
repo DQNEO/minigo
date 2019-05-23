@@ -375,8 +375,6 @@ func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 		}
 		return p.succeedingExpr(e)
 	}
-
-	return nil
 }
 
 func (p *parser) succeedingExpr(e Expr) Expr {
@@ -772,8 +770,6 @@ func (p *parser) parseExprInt(prior int) Expr {
 			return ast
 		}
 	}
-
-	return ast
 }
 
 func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
@@ -807,7 +803,6 @@ func (p *parser) parseType() *Gtype {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	var gtype *Gtype
-	ptok := p.peekToken()
 
 	for {
 		tok := p.readToken()
@@ -879,8 +874,6 @@ func (p *parser) parseType() *Gtype {
 		}
 
 	}
-	errorft(ptok, "Unkown type")
-	return nil
 }
 
 func (p *parser) parseVarDecl() *DeclVar {
