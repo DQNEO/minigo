@@ -15,7 +15,6 @@ var debugParser = false
 var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
-var exit = false
 var slientForStdlib = true
 
 func printVersion() {
@@ -29,7 +28,6 @@ func parseOpts(args []string) []string {
 	for _, opt := range args {
 		if opt == "--version" {
 			printVersion()
-			exit = true
 			return nil
 		}
 		if opt == "-t" {
@@ -94,10 +92,6 @@ func main() {
 
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
-	}
-
-	if exit {
-		return
 	}
 
 	if len(sourceFiles) == 0 {
