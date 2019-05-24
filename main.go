@@ -206,8 +206,6 @@ func main() {
 	}
 
 	setTypeIds(p.allNamedTypes)
-
-	debugf("resolve done")
 	ir := makeIR(csl , mainPkg , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
