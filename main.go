@@ -194,11 +194,11 @@ func main() {
 	var pkgname identifier = "main"
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
-
+	var mainAstFiles []*SourceFile
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
-		astFiles = append(astFiles, asf)
+		mainAstFiles = append(mainAstFiles, asf)
 	}
 
 	if parseOnly {
@@ -223,6 +223,9 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
+	for _, a := range mainAstFiles {
+		astFiles = append(astFiles, a)
+	}
 	ir := makeIR(csl , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
