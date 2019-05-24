@@ -86,11 +86,6 @@ func main() {
 
 	allScopes = p.scopes
 
-	_debugAst := debugAst
-	_debugParer := debugParser
-	debugAst = false
-	debugParser = false
-
 	// setup universe scopes
 	universe := newUniverse()
 	// inject builtin functions into the universe
@@ -105,8 +100,6 @@ func main() {
 	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
 	stdlibs := compileStdLibs(p, universe, imported)
-	debugAst = _debugAst
-	debugParser = _debugParer
 
 	// compile the main package
 	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
