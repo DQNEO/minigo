@@ -93,21 +93,22 @@ func main() {
 
 	// setup universe scopes
 	universe := newUniverse()
-	// inject builtin things into the universes
+	// inject builtin functions into the universe
 	bs1 := NewByteStreamFromString("internal_universe.go", internalUniverseCode)
 	internalUniverse := p.parseSourceFile(bs1, universe, false)
 	p.resolve(nil)
-	// inject runtime things into the universes
+	// inject runtime things into the universe
 	bs2 := NewByteStreamFromString("internal_runtime.go", internalRuntimeCode)
 	internalRuntime := p.parseSourceFile(bs2, universe, false)
 	p.resolve(nil)
 
+	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
 	stdlibs := compileStdLibs(p, universe, imported)
 	debugAst = _debugAst
 	debugParser = _debugParer
 
-	// initialize main package
+	// compile the main package
 	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
 	if parseOnly {
 		if debugAst {
@@ -123,7 +124,6 @@ func main() {
 	if resolveOnly {
 		return
 	}
-
 	setTypeIds(p.allNamedTypes)
 	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
