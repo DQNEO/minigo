@@ -7,6 +7,9 @@ all: minigo
 internalcode.go: internalcode/runtime.go
 	./cp-internalcode.sh
 
+universe.go: internalcode/universe.go
+	./cp-internalcode.sh
+
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 

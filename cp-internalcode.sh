@@ -9,3 +9,13 @@ var internalRuntimeCode string = \`
 $code
 \`
 EOF
+
+code=$(cat internalcode/universe.go)
+
+cat > universe.go <<EOF
+package main
+
+var internalUniverseCode string = \`
+$code
+\`
+EOF

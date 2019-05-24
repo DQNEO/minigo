@@ -8,6 +8,7 @@
 a.go
 /stdlib.go
 /internalcode.go
+/universe.go
 /a.s
 /child
 /tmp/
