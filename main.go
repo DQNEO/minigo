@@ -15,7 +15,6 @@ var debugParser = false
 var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
-var slientForStdlib = true
 
 func printVersion() {
 	println("minigo 0.1.0")
@@ -99,21 +98,18 @@ func main() {
 	var bs *ByteStream
 	var astFiles []*SourceFile
 
-	var _debugAst bool
-	var _debugParer bool
-	if slientForStdlib {
-		_debugAst = debugAst
-		_debugParer = debugParser
-		debugAst = false
-		debugParser = false
-	}
+	_debugAst := debugAst
+	_debugParer := debugParser
+	debugAst = false
+	debugParser = false
 
 	// setup universe scopes
 	universe := newUniverse()
-	// inject runtime things into the universes
+	// inject builtin things into the universes
 	bs = NewByteStreamFromString("internal_universe.go", internalUniverseCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 	p.resolve(nil)
+	// inject runtime things into the universes
 	bs = NewByteStreamFromString("internal_runtime.go", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 	p.resolve(nil)
@@ -122,10 +118,8 @@ func main() {
 	}
 
 	libs := compileStdLibs(p, universe, imported)
-	if slientForStdlib {
-		debugAst = _debugAst
-		debugParser = _debugParer
-	}
+	debugAst = _debugAst
+	debugParser = _debugParer
 
 	// initialize main package
 	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
