@@ -1,4 +1,4 @@
-package _x_
+package runtime
 
 var runtimeArgc int
 var runtimeArgv *int

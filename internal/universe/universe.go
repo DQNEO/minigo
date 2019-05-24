@@ -1,4 +1,4 @@
-package _x_
+package universe
 
 // builtin functions
 // https://golang.org/ref/spec#Predeclared_identifiers
