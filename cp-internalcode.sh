@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -eu
-code=$(cat internalcode/runtime.go)
+code=$(cat internal/runtime/runtime.go)
 
-cat > internalcode.go <<EOF
+cat > internal_runtime.go <<EOF
 package main
 
 var internalRuntimeCode string = \`
@@ -10,9 +10,9 @@ $code
 \`
 EOF
 
-code=$(cat internalcode/universe.go)
+code=$(cat internal/universe/universe.go)
 
-cat > universe.go <<EOF
+cat > internal_universe.go <<EOF
 package main
 
 var internalUniverseCode string = \`

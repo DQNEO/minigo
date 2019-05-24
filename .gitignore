@@ -6,9 +6,9 @@
 /minigo3
 /minigo3.s
 a.go
+/internal_universe.go
+/internal_runtime.go
 /stdlib.go
-/internalcode.go
-/universe.go
 /a.s
 /child
 /tmp/
