@@ -132,8 +132,6 @@ func main() {
 	}
 
 	imported := parseImports(sourceFiles)
-	var importOS bool
-	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*Scope{}
@@ -166,10 +164,11 @@ func main() {
 	}
 
 	// add std packages
-	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
-	var uniqPackageNames []string
 	// parse std packages
-
+	var csl *compiledStdlib = &compiledStdlib{
+		compiledPackages: map[identifier]*stdpkg{},
+		uniqImportedPackageNames:nil,
+	}
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
@@ -181,9 +180,9 @@ func main() {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		compiledPackages[pkgName] = pkg
-		if !in_array(string(pkgName), uniqPackageNames) {
-			uniqPackageNames = append(uniqPackageNames, string(pkgName))
+		csl.compiledPackages[pkgName] = pkg
+		if !in_array(string(pkgName), csl.uniqImportedPackageNames) {
+			csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkgName))
 		}
 	}
 
@@ -224,96 +223,16 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
-	var importedPackages []*stdpkg
-	for _, pkgName := range uniqPackageNames {
-		compiledPkg := compiledPackages[identifier(pkgName)]
-		importedPackages = append(importedPackages, compiledPkg)
-	}
-	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
-	ir.setDynamicTypes(p.allDynamicTypes)
-	ir.composeMethodTable()
-	ir.importOS = importOS
-
+	ir := makeIR(csl , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
 
-func setTypeIds(namedTypes []*DeclType) {
-	var typeId = 1 // start with 1 because we want to zero as error
-	for _, concreteNamedType := range namedTypes {
-		concreteNamedType.gtype.receiverTypeId = typeId
-		typeId++
-	}
+type compiledStdlib struct {
+	compiledPackages map[identifier]*stdpkg
+	uniqImportedPackageNames []string
 }
 
 type stdpkg struct {
 	name  identifier
 	files []*SourceFile
-}
-
-func (ir *IrRoot) composeMethodTable() {
-	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
-	for _, funcdecl := range ir.funcs {
-		if funcdecl.receiver != nil {
-			//debugf("funcdecl:%v", funcdecl)
-			gtype := funcdecl.receiver.getGtype()
-			if gtype.kind == G_POINTER {
-				gtype = gtype.origType
-			}
-			if gtype.relation == nil {
-				errorf("no relation for %#v", funcdecl.receiver.getGtype())
-			}
-			typeId := gtype.relation.gtype.receiverTypeId
-			symbol := funcdecl.getSymbol()
-			methods := methodTable[typeId]
-			methods = append(methods, symbol)
-			methodTable[typeId] = methods
-		}
-	}
-	debugf("set methodTable")
-
-	ir.methodTable = methodTable
-}
-
-func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
-
-	root := &IrRoot{}
-
-	var declvars []*DeclVar
-	for _, pkg := range stdpkgs {
-		for _, f := range pkg.files {
-			for _, decl := range f.topLevelDecls {
-				if decl.vardecl != nil {
-					declvars = append(declvars, decl.vardecl)
-				} else if decl.funcdecl != nil {
-					root.funcs = append(root.funcs, decl.funcdecl)
-				}
-			}
-		}
-	}
-
-	for _, f := range files {
-		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
-			}
-		}
-	}
-
-	root.stringLiterals = stringLiterals // a dirtyworkaround
-	root.vars = declvars
-	return root
-}
-
-func (ir *IrRoot) setDynamicTypes(allDynamicTypes []*Gtype) {
-	var uniquedDTypes []string = builtinTypesAsString
-	for _, gtype := range allDynamicTypes {
-		gs := gtype.String()
-		if !in_array(gs, uniquedDTypes) {
-			uniquedDTypes = append(uniquedDTypes, gs)
-		}
-	}
-
-	ir.uniquedDTypes = uniquedDTypes
 }
