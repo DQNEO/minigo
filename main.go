@@ -191,17 +191,7 @@ func main() {
 		debugParser = _debugParer
 	}
 	// initialize main package
-	var pkgname identifier = "main"
-	p.initPackage(pkgname)
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
-	var mainAstFiles []*SourceFile
-	var mainPkg  = &Package{}
-	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
-		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
-		mainAstFiles = append(mainAstFiles, asf)
-	}
-	mainPkg.files = mainAstFiles
+	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -227,6 +217,22 @@ func main() {
 	ir.emit()
 }
 
+func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *Package {
+	p.initPackage(pkgname)
+	p.scopes[pkgname] = newScope(nil, string(pkgname))
+	var astFiles []*SourceFile
+	for _, sourceFile := range sourceFiles {
+		bs := NewByteStreamFromFile(sourceFile)
+		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+		astFiles = append(astFiles, asf)
+	}
+
+	mainPkg := &Package{
+	}
+	mainPkg.files = astFiles
+	return mainPkg
+}
+
 type compiledStdlib struct {
 	compiledPackages map[identifier]*stdpkg
 	uniqImportedPackageNames []string
@@ -238,6 +244,7 @@ type stdpkg struct {
 }
 
 type Package struct {
+	name identifier
 	files []*SourceFile
 }
 
