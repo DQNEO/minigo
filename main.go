@@ -142,28 +142,3 @@ func main() {
 	ir := makeIR(libs, mainPkg , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
-
-func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdlib {
-
-	// add std packages
-	// parse std packages
-	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages: map[identifier]*stdpkg{},
-		uniqImportedPackageNames:nil,
-	}
-	stdPkgs := makeStdLib()
-
-	for _, spkgName := range imported {
-		pkgName := identifier(spkgName)
-		var pkgCode string
-		var ok bool
-		pkgCode, ok = stdPkgs[pkgName]
-		if !ok {
-			errorf("package '" + string(pkgName) + "' is not a standard library.")
-		}
-		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		libs.AddPackage(pkg)
-	}
-
-	return libs
-}
