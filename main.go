@@ -103,7 +103,7 @@ func main() {
 	p.resolve(nil)
 
 	imported := parseImports(sourceFiles)
-	libs := compileStdLibs(p, universe, imported)
+	stdlibs := compileStdLibs(p, universe, imported)
 	debugAst = _debugAst
 	debugParser = _debugParer
 
@@ -125,6 +125,6 @@ func main() {
 	}
 
 	setTypeIds(p.allNamedTypes)
-	ir := makeIR(internalUniverse, internalRuntime, libs, mainPkg , p.stringLiterals, p.allDynamicTypes)
+	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
