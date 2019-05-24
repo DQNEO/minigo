@@ -166,10 +166,11 @@ func main() {
 	}
 
 	// add std packages
-	var compiledPackages map[identifier]*stdpkg = map[identifier]*stdpkg{}
-	var uniqPackageNames []string
 	// parse std packages
-
+	var csl *compiledStdlib = &compiledStdlib{
+		compiledPackages: map[identifier]*stdpkg{},
+		uniqImportedPackageNames:nil,
+	}
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
@@ -181,9 +182,9 @@ func main() {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		compiledPackages[pkgName] = pkg
-		if !in_array(string(pkgName), uniqPackageNames) {
-			uniqPackageNames = append(uniqPackageNames, string(pkgName))
+		csl.compiledPackages[pkgName] = pkg
+		if !in_array(string(pkgName), csl.uniqImportedPackageNames) {
+			csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkgName))
 		}
 	}
 
@@ -224,17 +225,16 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
-	var importedPackages []*stdpkg
-	for _, pkgName := range uniqPackageNames {
-		compiledPkg := compiledPackages[identifier(pkgName)]
-		importedPackages = append(importedPackages, compiledPkg)
-	}
-	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
+	ir := ast2ir(csl , astFiles, p.stringLiterals)
 	ir.setDynamicTypes(p.allDynamicTypes)
 	ir.composeMethodTable()
 	ir.importOS = importOS
-
 	ir.emit()
+}
+
+type compiledStdlib struct {
+	compiledPackages map[identifier]*stdpkg
+	uniqImportedPackageNames []string
 }
 
 func setTypeIds(namedTypes []*DeclType) {
@@ -274,18 +274,23 @@ func (ir *IrRoot) composeMethodTable() {
 	ir.methodTable = methodTable
 }
 
-func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(csl *compiledStdlib, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+	var importedPackages []*stdpkg
 
-	root := &IrRoot{}
+	for _, pkgName := range csl.uniqImportedPackageNames {
+		compiledPkg := csl.compiledPackages[identifier(pkgName)]
+		importedPackages = append(importedPackages, compiledPkg)
+	}
 
 	var declvars []*DeclVar
-	for _, pkg := range stdpkgs {
+	var funcs []*DeclFunc
+	for _, pkg := range importedPackages {
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
 				if decl.vardecl != nil {
 					declvars = append(declvars, decl.vardecl)
 				} else if decl.funcdecl != nil {
-					root.funcs = append(root.funcs, decl.funcdecl)
+					funcs = append(funcs, decl.funcdecl)
 				}
 			}
 		}
@@ -296,13 +301,16 @@ func ast2ir(stdpkgs []*stdpkg, files []*SourceFile, stringLiterals []*ExprString
 			if decl.vardecl != nil {
 				declvars = append(declvars, decl.vardecl)
 			} else if decl.funcdecl != nil {
-				root.funcs = append(root.funcs, decl.funcdecl)
+				funcs = append(funcs, decl.funcdecl)
 			}
 		}
 	}
 
+	root := &IrRoot{}
+
 	root.stringLiterals = stringLiterals // a dirtyworkaround
 	root.vars = declvars
+	root.funcs = funcs
 	return root
 }
 
