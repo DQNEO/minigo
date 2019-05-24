@@ -113,6 +113,7 @@ func main() {
 	// inject runtime things into the universes
 	bs = NewByteStreamFromString("internal_universe.go", internalUniverseCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
+	p.resolve(nil)
 	bs = NewByteStreamFromString("internal_runtime.go", internalRuntimeCode)
 	astFiles = append(astFiles, p.parseSourceFile(bs, universe, false))
 	p.resolve(nil)
