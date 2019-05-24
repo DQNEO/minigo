@@ -79,7 +79,6 @@ func main() {
 		return
 	}
 
-	imported := parseImports(sourceFiles)
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*Scope{}
@@ -103,6 +102,7 @@ func main() {
 	internalRuntime := p.parseSourceFile(bs2, universe, false)
 	p.resolve(nil)
 
+	imported := parseImports(sourceFiles)
 	libs := compileStdLibs(p, universe, imported)
 	debugAst = _debugAst
 	debugParser = _debugParer
