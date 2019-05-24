@@ -64,11 +64,7 @@ func main() {
 	// parsing arguments
 	var sourceFiles []string
 
-	if len(os.Args) == 0 {
-		println("ERROR: os.Args should not be empty")
-		return
-	}
-
+	assert(len(os.Args) > 0, nil,"os.Args should not be empty")
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
