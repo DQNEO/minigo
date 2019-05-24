@@ -61,49 +61,6 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-// analyze imports of given go files
-func parseImports(sourceFiles []string) []string {
-
-	pForImport := &parser{}
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	var imported []string = []string{"os"}
-	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
-		astFile := pForImport.parseSourceFile(bs, nil, true)
-		for _, importDecl := range astFile.importDecls {
-			for _, spec := range importDecl.specs {
-				baseName := getBaseNameFromImport(spec.path)
-				if !in_array(baseName, imported) {
-					imported = append(imported, baseName)
-				}
-			}
-		}
-	}
-
-	return imported
-}
-
-func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *stdpkg {
-	filename := string(pkgname) + ".memory"
-	bs := NewByteStreamFromString(filename, code)
-
-	// initialize a package
-	p.initPackage(pkgname)
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
-
-	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
-
-	p.resolve(universe)
-	if debugAst {
-		asf.dump()
-	}
-	return &stdpkg{
-		name:  pkgname,
-		files: []*SourceFile{asf},
-	}
-}
-
 func main() {
 	// parsing arguments
 	var sourceFiles []string
@@ -163,26 +120,7 @@ func main() {
 		astFiles[0].dump()
 	}
 
-	// add std packages
-	// parse std packages
-	var csl *compiledStdlib = &compiledStdlib{
-		compiledPackages: map[identifier]*stdpkg{},
-		uniqImportedPackageNames:nil,
-	}
-	stdPkgs := makeStdLib()
-
-	for _, spkgName := range imported {
-		pkgName := identifier(spkgName)
-		var pkgCode string
-		var ok bool
-		pkgCode, ok = stdPkgs[pkgName]
-		if !ok {
-			errorf("package '" + string(pkgName) + "' is not a standard library.")
-		}
-		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		csl.AddPackage(pkg)
-	}
-
+	libs := compileStdLibs(p, universe, imported)
 	if slientForStdlib {
 		debugAst = _debugAst
 		debugParser = _debugParer
@@ -206,6 +144,31 @@ func main() {
 	}
 
 	setTypeIds(p.allNamedTypes)
-	ir := makeIR(csl , mainPkg , astFiles, p.stringLiterals, p.allDynamicTypes)
+	ir := makeIR(libs, mainPkg , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
+}
+
+func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdlib {
+
+	// add std packages
+	// parse std packages
+	var libs *compiledStdlib = &compiledStdlib{
+		compiledPackages: map[identifier]*stdpkg{},
+		uniqImportedPackageNames:nil,
+	}
+	stdPkgs := makeStdLib()
+
+	for _, spkgName := range imported {
+		pkgName := identifier(spkgName)
+		var pkgCode string
+		var ok bool
+		pkgCode, ok = stdPkgs[pkgName]
+		if !ok {
+			errorf("package '" + string(pkgName) + "' is not a standard library.")
+		}
+		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
+		libs.AddPackage(pkg)
+	}
+
+	return libs
 }
