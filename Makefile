@@ -4,14 +4,17 @@
 
 all: minigo
 
-internalcode.go: internalcode/runtime.go
+internal_runtime.go: internal/runtime/*.go
+	./cp-internalcode.sh
+
+internal_universe.go: internal/universe/*.go
 	./cp-internalcode.sh
 
 stdlib.go: stdlib/*/*.go
 	./concate-stdlib.sh > stdlib.go
 
 # 1st gen compiler
-minigo: *.go internalcode.go stdlib.go
+minigo: *.go internal_runtime.go internal_universe.go stdlib.go
 	go build -o minigo *.go
 
 # 2nd gen assembly
@@ -43,7 +46,7 @@ clean:
 	rm -f /tmp/out/*
 	rm -rf /tmp/minigo*
 	rm -f stdlib.go
-	rm -f internalcode.go
+	rm -f internal_*.go
 
 fmt:
 	gofmt -w *.go t/*/*.go
