@@ -190,6 +190,7 @@ func main() {
 		debugAst = _debugAst
 		debugParser = _debugParer
 	}
+
 	// initialize main package
 	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
 	if parseOnly {
@@ -210,10 +211,7 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
-	for _, f := range mainPkg.files {
-		astFiles = append(astFiles, f)
-	}
-	ir := makeIR(csl , astFiles, p.stringLiterals, p.allDynamicTypes)
+	ir := makeIR(csl , mainPkg , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
 
