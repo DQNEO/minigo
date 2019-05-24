@@ -1,5 +1,13 @@
 package main
 
+func dumpTokenForFiles(sourceFiles []string) {
+	for _, sourceFile := range sourceFiles {
+		debugf("--- file:%s", sourceFile)
+		bs := NewByteStreamFromFile(sourceFile)
+		NewTokenStream(bs)
+	}
+}
+
 func (pkg *Package) dump() {
 	for _, f := range pkg.files {
 		f.dump()
