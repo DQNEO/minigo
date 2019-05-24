@@ -132,8 +132,6 @@ func main() {
 	}
 
 	imported := parseImports(sourceFiles)
-	var importOS bool
-	importOS = in_array("os", imported)
 	// parser starts
 	p := &parser{}
 	p.scopes = map[identifier]*Scope{}
@@ -225,10 +223,7 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
-	ir := ast2ir(csl , astFiles, p.stringLiterals)
-	ir.setDynamicTypes(p.allDynamicTypes)
-	ir.composeMethodTable()
-	ir.importOS = importOS
+	ir := ast2ir(csl , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
 
@@ -274,7 +269,7 @@ func (ir *IrRoot) composeMethodTable() {
 	ir.methodTable = methodTable
 }
 
-func ast2ir(csl *compiledStdlib, files []*SourceFile, stringLiterals []*ExprStringLiteral) *IrRoot {
+func ast2ir(csl *compiledStdlib, files []*SourceFile, stringLiterals []*ExprStringLiteral, allDynamicTypes []*Gtype) *IrRoot {
 	var importedPackages []*stdpkg
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
@@ -311,6 +306,9 @@ func ast2ir(csl *compiledStdlib, files []*SourceFile, stringLiterals []*ExprStri
 	root.stringLiterals = stringLiterals // a dirtyworkaround
 	root.vars = declvars
 	root.funcs = funcs
+	root.setDynamicTypes(allDynamicTypes)
+	root.importOS = in_array("os", csl.uniqImportedPackageNames)
+	root.composeMethodTable()
 	return root
 }
 
