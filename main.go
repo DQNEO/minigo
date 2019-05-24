@@ -180,10 +180,7 @@ func main() {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}
 		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
-		csl.compiledPackages[pkgName] = pkg
-		if !in_array(string(pkgName), csl.uniqImportedPackageNames) {
-			csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkgName))
-		}
+		csl.AddPackage(pkg)
 	}
 
 	if slientForStdlib {
@@ -234,6 +231,13 @@ func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *Pac
 type compiledStdlib struct {
 	compiledPackages map[identifier]*stdpkg
 	uniqImportedPackageNames []string
+}
+
+func (csl *compiledStdlib) AddPackage(pkg *stdpkg) {
+	csl.compiledPackages[pkg.name] = pkg
+	if !in_array(string(pkg.name), csl.uniqImportedPackageNames) {
+		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
+	}
 }
 
 type stdpkg struct {
