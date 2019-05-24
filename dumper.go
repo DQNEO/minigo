@@ -1,5 +1,11 @@
 package main
 
+func (pkg *Package) dump() {
+	for _, f := range pkg.files {
+		f.dump()
+	}
+}
+
 func (a *PackageClause) dump() {
 	debugf("package %s", a.name)
 }
