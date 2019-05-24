@@ -195,25 +195,22 @@ func main() {
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	var mainAstFiles []*SourceFile
+	var mainPkg  = &Package{}
 	for _, sourceFile := range sourceFiles {
 		bs := NewByteStreamFromFile(sourceFile)
 		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
 		mainAstFiles = append(mainAstFiles, asf)
 	}
-
+	mainPkg.files = mainAstFiles
 	if parseOnly {
 		if debugAst {
-			for _, af := range astFiles {
-				af.dump()
-			}
+			mainPkg.dump()
 		}
 		return
 	}
 	p.resolve(universe)
 	if debugAst {
-		for _, af := range astFiles {
-			af.dump()
-		}
+		mainPkg.dump()
 	}
 
 	if resolveOnly {
@@ -223,8 +220,8 @@ func main() {
 	setTypeIds(p.allNamedTypes)
 
 	debugf("resolve done")
-	for _, a := range mainAstFiles {
-		astFiles = append(astFiles, a)
+	for _, f := range mainPkg.files {
+		astFiles = append(astFiles, f)
 	}
 	ir := makeIR(csl , astFiles, p.stringLiterals, p.allDynamicTypes)
 	ir.emit()
@@ -238,4 +235,14 @@ type compiledStdlib struct {
 type stdpkg struct {
 	name  identifier
 	files []*SourceFile
+}
+
+type Package struct {
+	files []*SourceFile
+}
+
+func (pkg *Package) dump() {
+	for _, f := range pkg.files {
+		f.dump()
+	}
 }
