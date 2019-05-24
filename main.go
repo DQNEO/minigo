@@ -221,6 +221,8 @@ func main() {
 		return
 	}
 
+	setTypeIds(p.allNamedTypes)
+
 	debugf("resolve done")
 	var importedPackages []*stdpkg
 	for _, pkgName := range uniqPackageNames {
@@ -228,22 +230,19 @@ func main() {
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	ir := ast2ir(importedPackages, astFiles, p.stringLiterals)
-	debugf("ir is created")
 	ir.setDynamicTypes(p.allDynamicTypes)
-	debugf("set uniquedDtypes")
-
-	var typeId = 1 // start with 1 because we want to zero as error
-	for _, concreteNamedType := range p.allNamedTypes {
-		concreteNamedType.gtype.receiverTypeId = typeId
-		//debugf("concreteNamedType: id=%d, name=%s", receiverTypeId, concreteNamedType.name)
-		typeId++
-	}
-	debugf("set concreteNamedType")
-
 	ir.composeMethodTable()
 	ir.importOS = importOS
 
 	ir.emit()
+}
+
+func setTypeIds(namedTypes []*DeclType) {
+	var typeId = 1 // start with 1 because we want to zero as error
+	for _, concreteNamedType := range namedTypes {
+		concreteNamedType.gtype.receiverTypeId = typeId
+		typeId++
+	}
 }
 
 type stdpkg struct {
