@@ -35,9 +35,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 
 	for _, spkgName := range imported {
 		pkgName := identifier(spkgName)
-		var pkgCode string
-		var ok bool
-		pkgCode, ok = stdPkgs[pkgName]
+		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}
