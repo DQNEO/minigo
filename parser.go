@@ -1951,12 +1951,23 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
+
+func (p *parser) parseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *SourceFile {
+	bs := NewByteStreamFromString(filename, code)
+	return p.parseByteStream(bs, packageBlockScope, importOnly)
+}
+
+func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly bool) *SourceFile {
+	bs := NewByteStreamFromFile(filename)
+	return p.parseByteStream(bs, packageBlockScope, importOnly)
+}
+
 // https://golang.org/ref/spec#Source_file_organization
 // Each source file consists of
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseSourceFile(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *SourceFile {
+func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *SourceFile {
 
 	p.clearLocalState()
 

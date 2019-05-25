@@ -9,8 +9,7 @@ func parseImports(sourceFiles []string) []string {
 	// Actually, dependency graph should be analyzed.
 	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
-		astFile := pForImport.parseSourceFile(bs, nil, true)
+		astFile := pForImport.parseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
@@ -50,14 +49,12 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 }
 
 func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *stdpkg {
-	filename := string(pkgname) + ".memory"
-	bs := NewByteStreamFromString(filename, code)
-
 	// initialize a package
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
-	asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+	filename := string(pkgname) + ".memory"
+	asf := p.parseString(filename, code, p.scopes[pkgname], false)
 
 	p.resolve(universe)
 	if debugAst {
@@ -74,8 +71,7 @@ func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *Pac
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 	var astFiles []*SourceFile
 	for _, sourceFile := range sourceFiles {
-		bs := NewByteStreamFromFile(sourceFile)
-		asf := p.parseSourceFile(bs, p.scopes[pkgname], false)
+		asf := p.parseFile(sourceFile, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
 

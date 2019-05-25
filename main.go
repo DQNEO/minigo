@@ -88,13 +88,12 @@ func main() {
 
 	// setup universe scopes
 	universe := newUniverse()
+
 	// inject builtin functions into the universe
-	bs1 := NewByteStreamFromString("internal_universe.go", internalUniverseCode)
-	internalUniverse := p.parseSourceFile(bs1, universe, false)
+	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
 	// inject runtime things into the universe
-	bs2 := NewByteStreamFromString("internal_runtime.go", internalRuntimeCode)
-	internalRuntime := p.parseSourceFile(bs2, universe, false)
+	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
 
 	// compile stdlibs which are imporetd from userland
