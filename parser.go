@@ -1952,12 +1952,12 @@ func (p *parser) isGlobal() bool {
 }
 
 
-func (p *parser) parseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *SourceFile {
+func (p *parser) parseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
 	return p.parseByteStream(bs, packageBlockScope, importOnly)
 }
 
-func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly bool) *SourceFile {
+func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromFile(filename)
 	return p.parseByteStream(bs, packageBlockScope, importOnly)
 }
@@ -1967,7 +1967,7 @@ func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *SourceFile {
+func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *AstFile {
 
 	p.clearLocalState()
 
@@ -1989,7 +1989,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	}
 
 	if importOnly {
-		return &SourceFile{
+		return &AstFile{
 			tok:           packageClause.tok,
 			packageClause: packageClause,
 			importDecls:   importDecls,
@@ -2000,7 +2000,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	topLevelDecls := p.parseTopLevelDecls()
 
-	return &SourceFile{
+	return &AstFile{
 		tok:           packageClause.tok,
 		name:          bs.filename,
 		packageClause: packageClause,

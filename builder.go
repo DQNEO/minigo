@@ -28,7 +28,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	// add std packages
 	// parse std packages
 	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages: map[identifier]*Package{},
+		compiledPackages: map[identifier]*AstPackage{},
 		uniqImportedPackageNames:nil,
 	}
 	stdPkgs := makeStdLib()
@@ -48,7 +48,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	return libs
 }
 
-func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *Package {
+func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *AstPackage {
 	// initialize a package
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
@@ -60,41 +60,35 @@ func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *P
 	if debugAst {
 		asf.dump()
 	}
-	return &Package{
+	return &AstPackage{
 		name:  pkgname,
-		files: []*SourceFile{asf},
+		files: []*AstFile{asf},
 	}
 }
 
-func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *Package {
+func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *AstPackage {
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
-	var astFiles []*SourceFile
+	var astFiles []*AstFile
 	for _, sourceFile := range sourceFiles {
 		asf := p.parseFile(sourceFile, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
 
-	return &Package{
+	return &AstPackage{
 		name: pkgname,
 		files: astFiles,
 	}
 }
 
 type compiledStdlib struct {
-	compiledPackages map[identifier]*Package
+	compiledPackages map[identifier]*AstPackage
 	uniqImportedPackageNames []string
 }
 
-func (csl *compiledStdlib) AddPackage(pkg *Package) {
+func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 	csl.compiledPackages[pkg.name] = pkg
 	if !in_array(string(pkg.name), csl.uniqImportedPackageNames) {
 		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 	}
 }
-
-type Package struct {
-	name identifier
-	files []*SourceFile
-}
-

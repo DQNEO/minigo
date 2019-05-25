@@ -1,5 +1,18 @@
 package main
 
+type AstPackage struct {
+	name identifier
+	files []*AstFile
+}
+
+type AstFile struct {
+	tok           *Token
+	name          string
+	packageClause *PackageClause
+	importDecls   []*ImportDecl
+	topLevelDecls []*TopLevelDecl
+}
+
 type Expr interface {
 	token() *Token
 	emit()
@@ -225,14 +238,6 @@ type TopLevelDecl struct {
 	typedecl  *DeclType
 }
 
-type SourceFile struct {
-	tok           *Token
-	name          string
-	packageClause *PackageClause
-	importDecls   []*ImportDecl
-	topLevelDecls []*TopLevelDecl
-}
-
 type DeclType struct {
 	tok   *Token
 	name  identifier
@@ -395,21 +400,21 @@ func (node *StmtIf) token() *Token                    { return node.tok }
 func (node *StmtReturn) token() *Token                { return node.tok }
 func (node *StmtInc) token() *Token                   { return node.tok }
 func (node *StmtDec) token() *Token                   { return node.tok }
-func (node *PackageClause) token() *Token             { return node.tok }
-func (node *ImportSpec) token() *Token                { return node.tok }
-func (node *ImportDecl) token() *Token                { return node.tok }
-func (node *StmtSatementList) token() *Token          { return node.tok }
-func (node *ExprFuncRef) token() *Token               { return node.tok }
-func (node *DeclFunc) token() *Token                  { return node.tok }
-func (node *TopLevelDecl) token() *Token              { return node.tok }
-func (node *SourceFile) token() *Token                { return node.tok }
-func (node *DeclType) token() *Token                  { return node.tok }
-func (node *ExprSlice) token() *Token                 { return node.tok }
-func (node *ExprIndex) token() *Token                 { return node.tok }
-func (node *ExprArrayLiteral) token() *Token          { return node.tok }
-func (node *ExprSliceLiteral) token() *Token          { return node.tok }
-func (node *ExprTypeAssertion) token() *Token         { return node.tok }
-func (node *StmtContinue) token() *Token              { return node.tok }
+func (node *PackageClause) token() *Token     { return node.tok }
+func (node *ImportSpec) token() *Token        { return node.tok }
+func (node *ImportDecl) token() *Token        { return node.tok }
+func (node *StmtSatementList) token() *Token  { return node.tok }
+func (node *ExprFuncRef) token() *Token       { return node.tok }
+func (node *DeclFunc) token() *Token          { return node.tok }
+func (node *TopLevelDecl) token() *Token      { return node.tok }
+func (node *AstFile) token() *Token           { return node.tok }
+func (node *DeclType) token() *Token          { return node.tok }
+func (node *ExprSlice) token() *Token         { return node.tok }
+func (node *ExprIndex) token() *Token         { return node.tok }
+func (node *ExprArrayLiteral) token() *Token  { return node.tok }
+func (node *ExprSliceLiteral) token() *Token  { return node.tok }
+func (node *ExprTypeAssertion) token() *Token { return node.tok }
+func (node *StmtContinue) token() *Token      { return node.tok }
 func (node *StmtBreak) token() *Token                 { return node.tok }
 func (node *StmtExpr) token() *Token                  { return node.tok }
 func (node *StmtDefer) token() *Token                 { return node.tok }

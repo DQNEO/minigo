@@ -8,7 +8,7 @@ func dumpTokenForFiles(sourceFiles []string) {
 	}
 }
 
-func (pkg *Package) dump() {
+func (pkg *AstPackage) dump() {
 	for _, f := range pkg.files {
 		f.dump()
 	}
@@ -100,7 +100,7 @@ func (s *StmtSatementList) dump() {
 }
 */
 
-func (a *SourceFile) dump() {
+func (a *AstFile) dump() {
 	debugf("=== AST File %s ===", a.name)
 	a.packageClause.dump()
 	for _, imprt := range a.importDecls {
