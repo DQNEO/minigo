@@ -28,7 +28,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	// add std packages
 	// parse std packages
 	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages: map[identifier]*stdpkg{},
+		compiledPackages: map[identifier]*Package{},
 		uniqImportedPackageNames:nil,
 	}
 	stdPkgs := makeStdLib()
@@ -48,7 +48,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	return libs
 }
 
-func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *stdpkg {
+func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *Package {
 	// initialize a package
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
@@ -60,7 +60,7 @@ func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *s
 	if debugAst {
 		asf.dump()
 	}
-	return &stdpkg{
+	return &Package{
 		name:  pkgname,
 		files: []*SourceFile{asf},
 	}
@@ -75,27 +75,22 @@ func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *Pac
 		astFiles = append(astFiles, asf)
 	}
 
-	mainPkg := &Package{
+	return &Package{
+		name: pkgname,
+		files: astFiles,
 	}
-	mainPkg.files = astFiles
-	return mainPkg
 }
 
 type compiledStdlib struct {
-	compiledPackages map[identifier]*stdpkg
+	compiledPackages map[identifier]*Package
 	uniqImportedPackageNames []string
 }
 
-func (csl *compiledStdlib) AddPackage(pkg *stdpkg) {
+func (csl *compiledStdlib) AddPackage(pkg *Package) {
 	csl.compiledPackages[pkg.name] = pkg
 	if !in_array(string(pkg.name), csl.uniqImportedPackageNames) {
 		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 	}
-}
-
-type stdpkg struct {
-	name  identifier
-	files []*SourceFile
 }
 
 type Package struct {
