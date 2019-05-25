@@ -29,9 +29,9 @@ type parser struct {
 	packageUnresolvedRelations []*Relation
 	packageUninferredGlobals   []*ExprVariable
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
-	stringLiterals             []*ExprStringLiteral
-	namedTypes                 []*DeclType
-	dynamicTypes []*Gtype
+	packageStringLiterals      []*ExprStringLiteral
+	packageNamedTypes          []*DeclType
+	packageDynamicTypes        []*Gtype
 }
 
 func (p *parser) clearLocalState() {
@@ -51,9 +51,9 @@ func (p *parser) initPackage(pkgname identifier) {
 	p.packageUnresolvedRelations = nil
 	p.packageUninferredGlobals = nil
 	p.packageUninferredLocals = nil
-	p.stringLiterals = nil
-	p.namedTypes = nil
-	p.dynamicTypes = nil
+	p.packageStringLiterals = nil
+	p.packageNamedTypes = nil
+	p.packageDynamicTypes = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -195,7 +195,7 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
-	p.stringLiterals = append(p.stringLiterals, ast)
+	p.packageStringLiterals = append(p.packageStringLiterals, ast)
 }
 
 // expr which begins with an ident.
@@ -794,7 +794,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 }
 
 func (p *parser) registerDynamicType(gtype *Gtype) *Gtype {
-	p.dynamicTypes = append(p.dynamicTypes, gtype)
+	p.packageDynamicTypes = append(p.packageDynamicTypes, gtype)
 	return gtype
 }
 
@@ -1891,7 +1891,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 		gtype: gtype,
 	}
 
-	p.namedTypes = append(p.namedTypes, r)
+	p.packageNamedTypes = append(p.packageNamedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }
@@ -2027,9 +2027,9 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		name: pkgname,
 		scope: pkgScope,
 		files: astFiles,
-		namedTypes: p.namedTypes,
-		stringLiterals: p.stringLiterals,
-		dynamicTypes:p.dynamicTypes,
+		namedTypes: p.packageNamedTypes,
+		stringLiterals: p.packageStringLiterals,
+		dynamicTypes:p.packageDynamicTypes,
 	}
 }
 

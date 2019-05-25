@@ -88,20 +88,20 @@ func main() {
 	var globalStringLiterals []*ExprStringLiteral
 
 	// inject builtin functions into the universe
-	parserForInternal.stringLiterals = nil
+	parserForInternal.packageStringLiterals = nil
 	internalUniverse := parserForInternal.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	parserForInternal.resolve(nil)
 	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
-	for _, sl := range parserForInternal.stringLiterals {
+	for _, sl := range parserForInternal.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
 	// inject runtime things into the universe
-	parserForInternal.stringLiterals = nil
+	parserForInternal.packageStringLiterals = nil
 	internalRuntime := parserForInternal.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	parserForInternal.resolve(nil)
 	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
-	for _, sl := range parserForInternal.stringLiterals {
+	for _, sl := range parserForInternal.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
