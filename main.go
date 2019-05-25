@@ -101,7 +101,7 @@ func main() {
 	stdlibs := compileStdLibs(p, universe, imported)
 
 	// compile the main package
-	mainPkg := compileInputFiles(p, identifier("main"), sourceFiles)
+	mainPkg := ParseSources(p, identifier("main"), sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -116,6 +116,7 @@ func main() {
 	if resolveOnly {
 		return
 	}
+
 	setTypeIds(p.allNamedTypes)
 	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , p.stringLiterals, p.allDynamicTypes)
 	ir.emit()

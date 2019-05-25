@@ -40,45 +40,12 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
 		var codes []string = []string{pkgCode}
-		pkg := compileStdLib(p, pkgName, codes)
+		pkg := ParseSources(p, pkgName, codes, true)
 		p.resolve(universe)
 		libs.AddPackage(pkg)
 	}
 
 	return libs
-}
-
-func compileStdLib(p *parser, pkgname identifier, codes []string) *AstPackage {
-	p.initPackage(pkgname)
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
-
-	var astFiles []*AstFile
-	for _, code := range codes {
-		var filename string = string(pkgname) + ".memory"
-		asf := p.parseString(filename, code, p.scopes[pkgname], false)
-		astFiles = append(astFiles, asf)
-	}
-
-	return &AstPackage{
-		name:  pkgname,
-		files: astFiles,
-	}
-}
-
-func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *AstPackage {
-	p.initPackage(pkgname)
-	p.scopes[pkgname] = newScope(nil, string(pkgname))
-
-	var astFiles []*AstFile
-	for _, sourceFile := range sourceFiles {
-		asf := p.parseFile(sourceFile, p.scopes[pkgname], false)
-		astFiles = append(astFiles, asf)
-	}
-
-	return &AstPackage{
-		name: pkgname,
-		files: astFiles,
-	}
 }
 
 type compiledStdlib struct {
