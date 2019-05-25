@@ -41,6 +41,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 		}
 		var codes []string = []string{pkgCode}
 		pkg := compileStdLib(p, pkgName, universe, codes)
+		p.resolve(universe)
 		libs.AddPackage(pkg)
 	}
 
@@ -57,8 +58,6 @@ func compileStdLib(p *parser, pkgname identifier, universe *Scope, codes []strin
 		asf := p.parseString(filename, code, p.scopes[pkgname], false)
 		astFiles = append(astFiles, asf)
 	}
-
-	p.resolve(universe)
 
 	return &AstPackage{
 		name:  pkgname,
