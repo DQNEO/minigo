@@ -2045,8 +2045,6 @@ func (p *parser) resolve(universe *Scope) {
 	//debugf("resolving packageMethods %s ...", p.packageName)
 	p.resolveMethods()
 	//debugf("inferring types ...")
-
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 }
 
 // copy packageMethods from p.nameTypes to gtype.packageMethods of each type

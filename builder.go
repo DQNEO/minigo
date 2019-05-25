@@ -43,6 +43,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 		pkg := ParseSources(p, pkgName, codes, true)
 		p.resolve(universe)
 		allScopes[pkgName] = pkg.scope
+		inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 		libs.AddPackage(pkg)
 	}
 

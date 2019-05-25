@@ -92,6 +92,7 @@ func main() {
 	p.stringLiterals = nil
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	for _, sl := range p.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
@@ -100,6 +101,7 @@ func main() {
 	p.stringLiterals = nil
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	for _, sl := range p.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
@@ -118,6 +120,7 @@ func main() {
 	}
 	p.resolve(universe)
 	allScopes[mainPkg.name] = mainPkg.scope
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	if debugAst {
 		mainPkg.dump()
 	}
