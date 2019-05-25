@@ -57,9 +57,6 @@ func compileStdLib(p *parser, pkgname identifier, universe *Scope, codes []strin
 	for _, code := range codes {
 		var filename string = string(pkgname) + ".memory"
 		asf := p.parseString(filename, code, p.scopes[pkgname], false)
-		if debugAst {
-			asf.dump()
-		}
 		astFiles = append(astFiles, asf)
 	}
 
