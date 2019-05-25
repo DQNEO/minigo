@@ -6,6 +6,7 @@ type AstPackage struct {
 	files          []*AstFile
 	stringLiterals []*ExprStringLiteral
 	namedTypes     []*DeclType
+	dynamicTypes []*Gtype
 }
 
 type AstFile struct {

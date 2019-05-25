@@ -34,6 +34,10 @@ func makeIR(internalUniverse *AstFile, internalRuntime *AstFile, csl *compiledSt
 		for _, sl := range pkg.stringLiterals {
 			stringLiterals = append(stringLiterals, sl)
 		}
+
+		for _, dt := range pkg.dynamicTypes {
+			allDynamicTypes = append(allDynamicTypes, dt)
+		}
 	}
 
 	var files []*AstFile
@@ -41,6 +45,10 @@ func makeIR(internalUniverse *AstFile, internalRuntime *AstFile, csl *compiledSt
 	files = append(files, internalRuntime)
 	for _, f := range mainPkg.files {
 		files = append(files, f)
+	}
+
+	for _, dt := range mainPkg.dynamicTypes {
+		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
 	for _, f := range files {
