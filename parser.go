@@ -1950,7 +1950,6 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
-
 func (p *parser) parseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
 	return p.parseByteStream(bs, packageBlockScope, importOnly)
@@ -2025,10 +2024,10 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	}
 
 	return &AstPackage{
-		name: pkgname,
-		scope: pkgScope,
-		files: astFiles,
-		namedTypes: p.namedTypes,
+		name:           pkgname,
+		scope:          pkgScope,
+		files:          astFiles,
+		namedTypes:     p.namedTypes,
 		stringLiterals: p.stringLiterals,
 	}
 }

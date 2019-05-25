@@ -28,8 +28,8 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	// add std packages
 	// parse std packages
 	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages: map[identifier]*AstPackage{},
-		uniqImportedPackageNames:nil,
+		compiledPackages:         map[identifier]*AstPackage{},
+		uniqImportedPackageNames: nil,
 	}
 	stdPkgs := makeStdLib()
 
@@ -52,7 +52,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 }
 
 type compiledStdlib struct {
-	compiledPackages map[identifier]*AstPackage
+	compiledPackages         map[identifier]*AstPackage
 	uniqImportedPackageNames []string
 }
 
