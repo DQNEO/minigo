@@ -64,7 +64,7 @@ func main() {
 	// parsing arguments
 	var sourceFiles []string
 
-	assert(len(os.Args) > 0, nil,"os.Args should not be empty")
+	assert(len(os.Args) > 0, nil, "os.Args should not be empty")
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
 	}
@@ -131,6 +131,6 @@ func main() {
 		return
 	}
 
-	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , globalStringLiterals)
+	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals)
 	ir.emit()
 }
