@@ -2026,10 +2026,9 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		astFiles = append(astFiles, astFile)
 	}
 
-	p.scopes[pkgname] = pkgScope
-
 	return &AstPackage{
 		name: pkgname,
+		scope: pkgScope,
 		files: astFiles,
 		stringLiterals: p.stringLiterals,
 	}

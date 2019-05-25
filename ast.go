@@ -2,6 +2,7 @@ package main
 
 type AstPackage struct {
 	name identifier
+	scope *Scope
 	files []*AstFile
 	stringLiterals  []*ExprStringLiteral
 }

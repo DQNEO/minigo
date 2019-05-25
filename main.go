@@ -118,6 +118,7 @@ func main() {
 		}
 		return
 	}
+	p.scopes[mainPkg.name] = mainPkg.scope
 	p.resolve(universe)
 	if debugAst {
 		mainPkg.dump()
