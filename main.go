@@ -88,13 +88,23 @@ func main() {
 
 	// setup universe scopes
 	universe := newUniverse()
+	var globalStringLiterals []*ExprStringLiteral
 
 	// inject builtin functions into the universe
+	p.stringLiterals = nil
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
+	for _, sl := range p.stringLiterals {
+		globalStringLiterals = append(globalStringLiterals, sl)
+	}
+
 	// inject runtime things into the universe
+	p.stringLiterals = nil
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
+	for _, sl := range p.stringLiterals {
+		globalStringLiterals = append(globalStringLiterals, sl)
+	}
 
 	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
@@ -118,6 +128,6 @@ func main() {
 	}
 
 	setTypeIds(p.allNamedTypes)
-	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , p.stringLiterals, p.allDynamicTypes)
+	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , globalStringLiterals, p.allDynamicTypes)
 	ir.emit()
 }

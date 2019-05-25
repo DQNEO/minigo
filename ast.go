@@ -3,6 +3,7 @@ package main
 type AstPackage struct {
 	name identifier
 	files []*AstFile
+	stringLiterals  []*ExprStringLiteral
 }
 
 type AstFile struct {

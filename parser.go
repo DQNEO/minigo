@@ -29,10 +29,10 @@ type parser struct {
 	packageUnresolvedRelations []*Relation
 	packageUninferredGlobals   []*ExprVariable
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	stringLiterals  []*ExprStringLiteral
 
 	// global state
 	scopes          map[identifier]*Scope
-	stringLiterals  []*ExprStringLiteral
 	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
 }
@@ -54,6 +54,7 @@ func (p *parser) initPackage(pkgname identifier) {
 	p.packageUnresolvedRelations = nil
 	p.packageUninferredGlobals = nil
 	p.packageUninferredLocals = nil
+	p.stringLiterals = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -2028,6 +2029,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	return &AstPackage{
 		name: pkgname,
 		files: astFiles,
+		stringLiterals: p.stringLiterals,
 	}
 }
 
