@@ -2047,7 +2047,6 @@ func (p *parser) resolve(universe *Scope) {
 	p.resolveMethods()
 	//debugf("inferring types ...")
 
-	allScopes = p.scopes
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 }
 
