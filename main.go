@@ -116,8 +116,8 @@ func main() {
 		}
 		return
 	}
-	allScopes[mainPkg.name] = mainPkg.scope
 	p.resolve(universe)
+	allScopes[mainPkg.name] = mainPkg.scope
 	if debugAst {
 		mainPkg.dump()
 	}

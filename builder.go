@@ -41,8 +41,8 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseSources(p, pkgName, codes, true)
-		allScopes[pkgName] = pkg.scope
 		p.resolve(universe)
+		allScopes[pkgName] = pkg.scope
 		libs.AddPackage(pkg)
 	}
 
