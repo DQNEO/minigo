@@ -40,7 +40,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
 		var codes []string = []string{pkgCode}
-		pkg := compileStdLib(p, pkgName, universe, codes)
+		pkg := compileStdLib(p, pkgName, codes)
 		p.resolve(universe)
 		libs.AddPackage(pkg)
 	}
@@ -48,7 +48,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	return libs
 }
 
-func compileStdLib(p *parser, pkgname identifier, universe *Scope, codes []string) *AstPackage {
+func compileStdLib(p *parser, pkgname identifier, codes []string) *AstPackage {
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
