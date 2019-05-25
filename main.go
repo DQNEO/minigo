@@ -81,10 +81,8 @@ func main() {
 
 	// parser starts
 	p := &parser{}
-	p.scopes = map[identifier]*Scope{}
+	allScopes = map[identifier]*Scope{}
 	p.initPackage("")
-
-	allScopes = p.scopes
 
 	// setup universe scopes
 	universe := newUniverse()
@@ -118,8 +116,7 @@ func main() {
 		}
 		return
 	}
-	p.scopes[mainPkg.name] = mainPkg.scope
-	allScopes = p.scopes
+	allScopes[mainPkg.name] = mainPkg.scope
 	p.resolve(universe)
 	if debugAst {
 		mainPkg.dump()

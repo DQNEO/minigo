@@ -32,7 +32,6 @@ type parser struct {
 	stringLiterals  []*ExprStringLiteral
 
 	// global state
-	scopes          map[identifier]*Scope
 	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
 }
@@ -1860,7 +1859,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		}
 	} else {
 		// foreign package
-		relbody := p.scopes[pkg].get(rel.name)
+		relbody := allScopes[pkg].get(rel.name)
 		if relbody == nil {
 			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}
