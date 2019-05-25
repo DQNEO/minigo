@@ -23,7 +23,7 @@ func parseImports(sourceFiles []string) []string {
 	return imported
 }
 
-func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdlib {
+func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 
 	// add std packages
 	// parse std packages
@@ -40,6 +40,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
 		var codes []string = []string{pkgCode}
+		p := &parser{}
 		pkg := ParseSources(p, pkgName, codes, true)
 		p.resolve(universe)
 		allScopes[pkgName] = pkg.scope

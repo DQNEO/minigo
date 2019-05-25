@@ -108,19 +108,20 @@ func main() {
 	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
 	allScopes = map[identifier]*Scope{}
-	stdlibs := compileStdLibs(p, universe, imported)
+	stdlibs := compileStdLibs(universe, imported)
 
 	// compile the main package
-	mainPkg := ParseSources(p, identifier("main"), sourceFiles, false)
+	mainParser := &parser{}
+	mainPkg := ParseSources(mainParser, identifier("main"), sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
 		}
 		return
 	}
-	p.resolve(universe)
+	mainParser.resolve(universe)
 	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	inferTypes(mainParser.packageUninferredGlobals, mainParser.packageUninferredLocals)
 	setTypeIds(mainPkg.namedTypes)
 	if debugAst {
 		mainPkg.dump()
