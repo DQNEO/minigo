@@ -41,34 +41,38 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 		if !ok {
 			errorf("package '" + string(pkgName) + "' is not a standard library.")
 		}
-		pkg := parseStdPkg(p, universe, pkgName, pkgCode)
+		pkg := compileStdLib(p, pkgName, universe, pkgCode)
 		libs.AddPackage(pkg)
 	}
 
 	return libs
 }
 
-func parseStdPkg(p *parser, universe *Scope, pkgname identifier, code string) *AstPackage {
-	// initialize a package
+func compileStdLib(p *parser, pkgname identifier, universe *Scope, code string) *AstPackage {
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
 
+	var astFiles []*AstFile
+
 	filename := string(pkgname) + ".memory"
 	asf := p.parseString(filename, code, p.scopes[pkgname], false)
+	astFiles = append(astFiles, asf)
 
 	p.resolve(universe)
 	if debugAst {
 		asf.dump()
 	}
+
 	return &AstPackage{
 		name:  pkgname,
-		files: []*AstFile{asf},
+		files: astFiles,
 	}
 }
 
 func compileInputFiles(p *parser, pkgname identifier, sourceFiles []string) *AstPackage {
 	p.initPackage(pkgname)
 	p.scopes[pkgname] = newScope(nil, string(pkgname))
+
 	var astFiles []*AstFile
 	for _, sourceFile := range sourceFiles {
 		asf := p.parseFile(sourceFile, p.scopes[pkgname], false)
