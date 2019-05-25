@@ -1,8 +1,9 @@
 // Semantic Analyzer to produce IR struct
 package main
 
+var typeId int = 1 // start with 1 because we want to zero as error
+
 func setTypeIds(namedTypes []*DeclType) {
-	var typeId = 1 // start with 1 because we want to zero as error
 	for _, concreteNamedType := range namedTypes {
 		concreteNamedType.gtype.receiverTypeId = typeId
 		typeId++

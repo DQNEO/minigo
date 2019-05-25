@@ -5,6 +5,7 @@ type AstPackage struct {
 	scope *Scope
 	files []*AstFile
 	stringLiterals  []*ExprStringLiteral
+	namedTypes      []*DeclType
 }
 
 type AstFile struct {

@@ -29,10 +29,10 @@ type parser struct {
 	packageUnresolvedRelations []*Relation
 	packageUninferredGlobals   []*ExprVariable
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
-	stringLiterals  []*ExprStringLiteral
+	stringLiterals             []*ExprStringLiteral
+	namedTypes                 []*DeclType
 
 	// global state
-	allNamedTypes   []*DeclType
 	allDynamicTypes []*Gtype
 }
 
@@ -54,6 +54,7 @@ func (p *parser) initPackage(pkgname identifier) {
 	p.packageUninferredGlobals = nil
 	p.packageUninferredLocals = nil
 	p.stringLiterals = nil
+	p.namedTypes = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -1874,8 +1875,6 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 }
 
-var typeId int
-
 func (p *parser) parseTypeDecl() *DeclType {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
@@ -1893,7 +1892,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 		gtype: gtype,
 	}
 
-	p.allNamedTypes = append(p.allNamedTypes, r)
+	p.namedTypes = append(p.namedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }
@@ -2029,6 +2028,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		name: pkgname,
 		scope: pkgScope,
 		files: astFiles,
+		namedTypes: p.namedTypes,
 		stringLiterals: p.stringLiterals,
 	}
 }

@@ -44,6 +44,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 		p.resolve(universe)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+		setTypeIds(pkg.namedTypes)
 		libs.AddPackage(pkg)
 	}
 

@@ -121,6 +121,7 @@ func main() {
 	p.resolve(universe)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	setTypeIds(mainPkg.namedTypes)
 	if debugAst {
 		mainPkg.dump()
 	}
@@ -129,7 +130,6 @@ func main() {
 		return
 	}
 
-	setTypeIds(p.allNamedTypes)
 	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , globalStringLiterals, p.allDynamicTypes)
 	ir.emit()
 }
