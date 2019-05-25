@@ -130,6 +130,6 @@ func main() {
 		return
 	}
 
-	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , globalStringLiterals, p.allDynamicTypes)
+	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg , globalStringLiterals)
 	ir.emit()
 }

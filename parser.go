@@ -31,9 +31,7 @@ type parser struct {
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 	stringLiterals             []*ExprStringLiteral
 	namedTypes                 []*DeclType
-
-	// global state
-	allDynamicTypes []*Gtype
+	dynamicTypes []*Gtype
 }
 
 func (p *parser) clearLocalState() {
@@ -55,6 +53,7 @@ func (p *parser) initPackage(pkgname identifier) {
 	p.packageUninferredLocals = nil
 	p.stringLiterals = nil
 	p.namedTypes = nil
+	p.dynamicTypes = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -795,7 +794,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 }
 
 func (p *parser) registerDynamicType(gtype *Gtype) *Gtype {
-	p.allDynamicTypes = append(p.allDynamicTypes, gtype)
+	p.dynamicTypes = append(p.dynamicTypes, gtype)
 	return gtype
 }
 
@@ -2030,6 +2029,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		files: astFiles,
 		namedTypes: p.namedTypes,
 		stringLiterals: p.stringLiterals,
+		dynamicTypes:p.dynamicTypes,
 	}
 }
 
