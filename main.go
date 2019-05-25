@@ -80,28 +80,28 @@ func main() {
 	}
 
 	// parser starts
-	p := &parser{}
-	p.initPackage("")
+	parserForInternal := &parser{}
+	parserForInternal.initPackage("")
 
 	// setup universe scopes
 	universe := newUniverse()
 	var globalStringLiterals []*ExprStringLiteral
 
 	// inject builtin functions into the universe
-	p.stringLiterals = nil
-	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolve(nil)
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.stringLiterals {
+	parserForInternal.stringLiterals = nil
+	internalUniverse := parserForInternal.parseString("internal_universe.go", internalUniverseCode, universe, false)
+	parserForInternal.resolve(nil)
+	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
+	for _, sl := range parserForInternal.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
 	// inject runtime things into the universe
-	p.stringLiterals = nil
-	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolve(nil)
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.stringLiterals {
+	parserForInternal.stringLiterals = nil
+	internalRuntime := parserForInternal.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	parserForInternal.resolve(nil)
+	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
+	for _, sl := range parserForInternal.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
@@ -111,17 +111,17 @@ func main() {
 	stdlibs := compileStdLibs(universe, imported)
 
 	// compile the main package
-	mainParser := &parser{}
-	mainPkg := ParseSources(mainParser, identifier("main"), sourceFiles, false)
+	parserForMain := &parser{}
+	mainPkg := ParseSources(parserForMain, identifier("main"), sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
 		}
 		return
 	}
-	mainParser.resolve(universe)
+	parserForMain.resolve(universe)
 	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(mainParser.packageUninferredGlobals, mainParser.packageUninferredLocals)
+	inferTypes(parserForMain.packageUninferredGlobals, parserForMain.packageUninferredLocals)
 	setTypeIds(mainPkg.namedTypes)
 	if debugAst {
 		mainPkg.dump()
