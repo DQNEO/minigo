@@ -80,28 +80,28 @@ func main() {
 	}
 
 	// parser starts
-	parserForInternal := &parser{}
-	parserForInternal.initPackage("")
+	pi := &parser{}
+	pi.initPackage("")
 
 	// setup universe scopes
 	universe := newUniverse()
 	var globalStringLiterals []*ExprStringLiteral
 
 	// inject builtin functions into the universe
-	parserForInternal.packageStringLiterals = nil
-	internalUniverse := parserForInternal.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	parserForInternal.resolve(nil)
-	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
-	for _, sl := range parserForInternal.packageStringLiterals {
+	pi.packageStringLiterals = nil
+	internalUniverse := pi.parseString("internal_universe.go", internalUniverseCode, universe, false)
+	pi.resolve(nil)
+	inferTypes(pi.packageUninferredGlobals, pi.packageUninferredLocals)
+	for _, sl := range pi.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
 	// inject runtime things into the universe
-	parserForInternal.packageStringLiterals = nil
-	internalRuntime := parserForInternal.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	parserForInternal.resolve(nil)
-	inferTypes(parserForInternal.packageUninferredGlobals, parserForInternal.packageUninferredLocals)
-	for _, sl := range parserForInternal.packageStringLiterals {
+	pi.packageStringLiterals = nil
+	internalRuntime := pi.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	pi.resolve(nil)
+	inferTypes(pi.packageUninferredGlobals, pi.packageUninferredLocals)
+	for _, sl := range pi.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
@@ -109,28 +109,7 @@ func main() {
 	imported := parseImports(sourceFiles)
 	allScopes = map[identifier]*Scope{}
 	stdlibs := compileStdLibs(universe, imported)
-
-	// compile the main package
-	parserForMain := &parser{}
-	mainPkg := ParseSources(parserForMain, identifier("main"), sourceFiles, false)
-	if parseOnly {
-		if debugAst {
-			mainPkg.dump()
-		}
-		return
-	}
-	parserForMain.resolve(universe)
-	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(parserForMain.packageUninferredGlobals, parserForMain.packageUninferredLocals)
-	setTypeIds(mainPkg.namedTypes)
-	if debugAst {
-		mainPkg.dump()
-	}
-
-	if resolveOnly {
-		return
-	}
-
+	mainPkg := compileMainFiles(universe, sourceFiles)
 	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals)
 	ir.emit()
 }

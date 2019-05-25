@@ -23,6 +23,31 @@ func parseImports(sourceFiles []string) []string {
 	return imported
 }
 
+func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
+	// compile the main package
+	pm := &parser{}
+	mainPkg := ParseSources(pm, identifier("main"), sourceFiles, false)
+	if parseOnly {
+		if debugAst {
+			mainPkg.dump()
+		}
+		return nil
+	}
+	pm.resolve(universe)
+	allScopes[mainPkg.name] = mainPkg.scope
+	inferTypes(pm.packageUninferredGlobals, pm.packageUninferredLocals)
+	setTypeIds(mainPkg.namedTypes)
+	if debugAst {
+		mainPkg.dump()
+	}
+
+	if resolveOnly {
+		return nil
+	}
+
+	return mainPkg
+}
+
 func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 
 	// add std packages
