@@ -81,7 +81,6 @@ func main() {
 
 	// parser starts
 	p := &parser{}
-	allScopes = map[identifier]*Scope{}
 	p.initPackage("")
 
 	// setup universe scopes
@@ -108,6 +107,7 @@ func main() {
 
 	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
+	allScopes = map[identifier]*Scope{}
 	stdlibs := compileStdLibs(p, universe, imported)
 
 	// compile the main package
