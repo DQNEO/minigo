@@ -50,8 +50,8 @@ func compileMainPkg(universe *Scope, sourceFiles []string) *AstPackage {
 
 
 
-func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdlib {
-
+func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
+	p := &parser{}
 	// add std packages
 	// parse std packages
 	var libs *compiledStdlib = &compiledStdlib{

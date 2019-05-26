@@ -82,40 +82,48 @@ func main() {
 	// setup universe scopes
 	universe := newUniverse()
 
-	// inject builtin functions into the universe
+	u := compileUniverse(universe)
+	r := compileRuntime(universe)
+
+	imported := parseImports(sourceFiles)
+	allScopes = map[identifier]*Scope{}
+
+	libs := compileStdLibs(universe, imported)
+	m := compileMainPkg(universe,sourceFiles)
+	if m == nil {
+		return
+	}
+
+	ir := makeIR(u, r, libs, m)
+	ir.emit()
+}
+
+// inject builtin functions into the universe scope
+func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	pUniverse := &AstPackage{
+	return  &AstPackage{
 		name:"",
 		files:[]*AstFile{internalUniverse},
 		stringLiterals:p.packageStringLiterals,
 		dynamicTypes:p.packageDynamicTypes,
 	}
+}
 
-	// inject runtime things into the universe
-	p = &parser{}
+// inject runtime things into the universe scope
+func compileRuntime(universe *Scope) *AstPackage {
+	p := &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	pRuntime := &AstPackage{
+	return &AstPackage{
 		name:"",
 		files:[]*AstFile{internalRuntime},
 		stringLiterals:p.packageStringLiterals,
 		dynamicTypes:p.packageDynamicTypes,
 	}
-
-	imported := parseImports(sourceFiles)
-	allScopes = map[identifier]*Scope{}
-	stdlibs := compileStdLibs(p, universe, imported)
-	mainPkg := compileMainPkg(universe,sourceFiles)
-	if mainPkg == nil {
-		return
-	}
-
-	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg)
-	ir.emit()
 }
