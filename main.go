@@ -98,33 +98,3 @@ func main() {
 	ir := makeIR(u, r, libs, m)
 	ir.emit()
 }
-
-// inject builtin functions into the universe scope
-func compileUniverse(universe *Scope) *AstPackage {
-	p := &parser{}
-	p.initPackage("")
-	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolve(nil)
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	return  &AstPackage{
-		name:"",
-		files:[]*AstFile{internalUniverse},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
-	}
-}
-
-// inject runtime things into the universe scope
-func compileRuntime(universe *Scope) *AstPackage {
-	p := &parser{}
-	p.initPackage("")
-	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolve(nil)
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	return &AstPackage{
-		name:"",
-		files:[]*AstFile{internalRuntime},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
-	}
-}
