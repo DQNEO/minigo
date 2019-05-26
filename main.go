@@ -86,9 +86,10 @@ func main() {
 	r := compileRuntime(universe)
 
 	imported := parseImports(sourceFiles)
-	allScopes = map[identifier]*Scope{}
 
+	allScopes = map[identifier]*Scope{}
 	libs := compileStdLibs(universe, imported)
+
 	m := compileMainPkg(universe,sourceFiles)
 	if m == nil {
 		return
