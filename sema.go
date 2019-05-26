@@ -10,7 +10,23 @@ func setTypeIds(namedTypes []*DeclType) {
 	}
 }
 
-func makeIR(internalUniverse *AstFile, internalRuntime *AstFile, csl *compiledStdlib, mainPkg *AstPackage, stringLiterals []*ExprStringLiteral, allDynamicTypes []*Gtype) *IrRoot {
+func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
+	var stringLiterals []*ExprStringLiteral
+	var dynamicTypes []*Gtype
+
+	for _, sl := range internalUniverse.stringLiterals {
+		stringLiterals = append(stringLiterals, sl)
+	}
+	for _, dt := range internalUniverse.dynamicTypes {
+		dynamicTypes = append(dynamicTypes, dt)
+	}
+	for _, sl := range internalRuntime.stringLiterals {
+		stringLiterals = append(stringLiterals, sl)
+	}
+	for _, dt := range internalRuntime.dynamicTypes {
+		dynamicTypes = append(dynamicTypes, dt)
+	}
+
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
@@ -36,19 +52,19 @@ func makeIR(internalUniverse *AstFile, internalRuntime *AstFile, csl *compiledSt
 		}
 
 		for _, dt := range pkg.dynamicTypes {
-			allDynamicTypes = append(allDynamicTypes, dt)
+			dynamicTypes = append(dynamicTypes, dt)
 		}
 	}
 
 	var files []*AstFile
-	files = append(files, internalUniverse)
-	files = append(files, internalRuntime)
+	files = append(files, internalUniverse.files[0])
+	files = append(files, internalRuntime.files[0])
 	for _, f := range mainPkg.files {
 		files = append(files, f)
 	}
 
 	for _, dt := range mainPkg.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
+		dynamicTypes = append(dynamicTypes, dt)
 	}
 
 	for _, f := range files {
@@ -69,15 +85,15 @@ func makeIR(internalUniverse *AstFile, internalRuntime *AstFile, csl *compiledSt
 	root.stringLiterals = stringLiterals
 	root.vars = declvars
 	root.funcs = funcs
-	root.setDynamicTypes(allDynamicTypes)
+	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
 	root.composeMethodTable()
 	return root
 }
 
-func (ir *IrRoot) setDynamicTypes(allDynamicTypes []*Gtype) {
+func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 	var uniquedDTypes []string = builtinTypesAsString
-	for _, gtype := range allDynamicTypes {
+	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
 		if !in_array(gs, uniquedDTypes) {
 			uniquedDTypes = append(uniquedDTypes, gs)

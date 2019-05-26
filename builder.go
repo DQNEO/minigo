@@ -23,6 +23,35 @@ func parseImports(sourceFiles []string) []string {
 	return imported
 }
 
+// inject builtin functions into the universe scope
+func compileUniverse(universe *Scope) *AstPackage {
+	p := &parser{}
+	p.initPackage("")
+	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
+	p.resolve(nil)
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	return  &AstPackage{
+		name:"",
+		files:[]*AstFile{internalUniverse},
+		stringLiterals:p.packageStringLiterals,
+		dynamicTypes:p.packageDynamicTypes,
+	}
+}
+
+// inject runtime things into the universe scope
+func compileRuntime(universe *Scope) *AstPackage {
+	p := &parser{}
+	p.initPackage("")
+	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	p.resolve(nil)
+	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	return &AstPackage{
+		name:"",
+		files:[]*AstFile{internalRuntime},
+		stringLiterals:p.packageStringLiterals,
+		dynamicTypes:p.packageDynamicTypes,
+	}
+}
 
 func compileMainPkg(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
@@ -48,12 +77,8 @@ func compileMainPkg(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
-
-
-func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdlib {
-
-	// add std packages
-	// parse std packages
+// parse standard libraries
+func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
@@ -61,6 +86,7 @@ func compileStdLibs(p *parser, universe *Scope, imported []string) *compiledStdl
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
+		p := &parser{}
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
