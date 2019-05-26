@@ -112,31 +112,13 @@ func main() {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
-	// compile stdlibs which are imporetd from userland
 	imported := parseImports(sourceFiles)
 	allScopes = map[identifier]*Scope{}
 	stdlibs := compileStdLibs(p, universe, imported)
-
-	// compile the main package
-	mainPkg := ParseSources(p, identifier("main"), sourceFiles, false)
-	if parseOnly {
-		if debugAst {
-			mainPkg.dump()
-		}
+	mainPkg := compileMainPkg(universe,sourceFiles)
+	if mainPkg == nil {
 		return
 	}
-	p.resolve(universe)
-	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	setTypeIds(mainPkg.namedTypes)
-	if debugAst {
-		mainPkg.dump()
-	}
-
-	if resolveOnly {
-		return
-	}
-
 	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
 	ir.emit()
 }
