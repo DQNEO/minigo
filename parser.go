@@ -2028,7 +2028,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		files:          astFiles,
 		namedTypes:     p.packageNamedTypes,
 		stringLiterals: p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
+		dynamicTypes:   p.packageDynamicTypes,
 	}
 }
 
