@@ -103,6 +103,7 @@ func main() {
 	p.packageStringLiterals = nil
 
 	// inject runtime things into the universe
+	p = &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
