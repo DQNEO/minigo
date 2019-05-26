@@ -97,7 +97,7 @@ func main() {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
-	for _, dt := range p.dynamicTypes {
+	for _, dt := range pi.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 	// inject runtime things into the universe
@@ -108,7 +108,7 @@ func main() {
 	for _, sl := range pi.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
-	for _, dt := range p.dynamicTypes {
+	for _, dt := range pi.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
