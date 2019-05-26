@@ -79,14 +79,12 @@ func main() {
 		return
 	}
 
-	// parser starts
-	p := &parser{}
-	p.initPackage("")
-
 	// setup universe scopes
 	universe := newUniverse()
+
 	// inject builtin functions into the universe
-	p.packageStringLiterals = nil
+	p := &parser{}
+	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
@@ -109,6 +107,7 @@ func main() {
 		stringLiterals:p.packageStringLiterals,
 		dynamicTypes:p.packageDynamicTypes,
 	}
+
 	imported := parseImports(sourceFiles)
 	allScopes = map[identifier]*Scope{}
 	stdlibs := compileStdLibs(p, universe, imported)
