@@ -100,8 +100,10 @@ func main() {
 	for _, dt := range p.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
-	// inject runtime things into the universe
 	p.packageStringLiterals = nil
+
+	// inject runtime things into the universe
+	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
