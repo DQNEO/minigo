@@ -97,6 +97,7 @@ func main() {
 		name:"",
 		files:[]*AstFile{internalUniverse},
 		stringLiterals:p.packageStringLiterals,
+		dynamicTypes:p.packageDynamicTypes,
 	}
 
 	for _, sl := range pUniverse.stringLiterals {
