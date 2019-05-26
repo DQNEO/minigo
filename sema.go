@@ -10,8 +10,22 @@ func setTypeIds(namedTypes []*DeclType) {
 	}
 }
 
-func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage, stringLiterals []*ExprStringLiteral, allDynamicTypes []*Gtype) *IrRoot {
+func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage, stringLiterals []*ExprStringLiteral, dynamicTypes []*Gtype) *IrRoot {
 	var importedPackages []*AstPackage
+
+	for _, sl := range internalUniverse.stringLiterals {
+		stringLiterals = append(stringLiterals, sl)
+	}
+	for _, dt := range internalUniverse.dynamicTypes {
+		dynamicTypes = append(dynamicTypes, dt)
+	}
+	for _, sl := range internalRuntime.stringLiterals {
+		stringLiterals = append(stringLiterals, sl)
+	}
+	for _, dt := range internalRuntime.dynamicTypes {
+		dynamicTypes = append(dynamicTypes, dt)
+	}
+
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
 		compiledPkg := csl.compiledPackages[identifier(pkgName)]
@@ -36,7 +50,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		}
 
 		for _, dt := range pkg.dynamicTypes {
-			allDynamicTypes = append(allDynamicTypes, dt)
+			dynamicTypes = append(dynamicTypes, dt)
 		}
 	}
 
@@ -48,7 +62,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	}
 
 	for _, dt := range mainPkg.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
+		dynamicTypes = append(dynamicTypes, dt)
 	}
 
 	for _, f := range files {
@@ -69,15 +83,15 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	root.stringLiterals = stringLiterals
 	root.vars = declvars
 	root.funcs = funcs
-	root.setDynamicTypes(allDynamicTypes)
+	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
 	root.composeMethodTable()
 	return root
 }
 
-func (ir *IrRoot) setDynamicTypes(allDynamicTypes []*Gtype) {
+func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 	var uniquedDTypes []string = builtinTypesAsString
-	for _, gtype := range allDynamicTypes {
+	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
 		if !in_array(gs, uniquedDTypes) {
 			uniquedDTypes = append(uniquedDTypes, gs)

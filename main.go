@@ -120,19 +120,6 @@ func main() {
 	var globalStringLiterals []*ExprStringLiteral
 	var allDynamicTypes []*Gtype
 
-	for _, sl := range pUniverse.stringLiterals {
-		globalStringLiterals = append(globalStringLiterals, sl)
-	}
-	for _, dt := range pUniverse.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
-	}
-	for _, sl := range pRuntime.stringLiterals {
-		globalStringLiterals = append(globalStringLiterals, sl)
-	}
-	for _, dt := range pRuntime.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
-	}
-
 	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
 	ir.emit()
 }
