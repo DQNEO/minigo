@@ -77,12 +77,8 @@ func compileMainPkg(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
-
-
+// parse standard libraries
 func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
-	p := &parser{}
-	// add std packages
-	// parse std packages
 	var libs *compiledStdlib = &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
@@ -90,6 +86,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
+		p := &parser{}
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
