@@ -79,7 +79,7 @@ func main() {
 		return
 	}
 
-	// setup universe scopes
+	// setup the universe scope
 	universe := newUniverse()
 
 	u := compileUniverse(universe)
