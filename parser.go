@@ -48,12 +48,6 @@ type methods map[identifier]*ExprFuncRef
 func (p *parser) initPackage(pkgname identifier) {
 	p.packageName = pkgname
 	p.packageMethods = map[identifier]methods{}
-	p.packageUnresolvedRelations = nil
-	p.packageUninferredGlobals = nil
-	p.packageUninferredLocals = nil
-	p.packageStringLiterals = nil
-	p.packageNamedTypes = nil
-	p.packageDynamicTypes = nil
 }
 
 func (p *parser) assert(cond bool, msg string) {
