@@ -117,9 +117,6 @@ func main() {
 		return
 	}
 
-	var globalStringLiterals []*ExprStringLiteral
-	var allDynamicTypes []*Gtype
-
-	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
+	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg)
 	ir.emit()
 }
