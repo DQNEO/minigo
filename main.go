@@ -85,9 +85,6 @@ func main() {
 
 	// setup universe scopes
 	universe := newUniverse()
-	var globalStringLiterals []*ExprStringLiteral
-	var allDynamicTypes []*Gtype
-
 	// inject builtin functions into the universe
 	p.packageStringLiterals = nil
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
@@ -98,13 +95,6 @@ func main() {
 		files:[]*AstFile{internalUniverse},
 		stringLiterals:p.packageStringLiterals,
 		dynamicTypes:p.packageDynamicTypes,
-	}
-
-	for _, sl := range pUniverse.stringLiterals {
-		globalStringLiterals = append(globalStringLiterals, sl)
-	}
-	for _, dt := range pUniverse.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
 	// inject runtime things into the universe
@@ -119,13 +109,6 @@ func main() {
 		stringLiterals:p.packageStringLiterals,
 		dynamicTypes:p.packageDynamicTypes,
 	}
-	for _, sl := range pRuntime.stringLiterals {
-		globalStringLiterals = append(globalStringLiterals, sl)
-	}
-	for _, dt := range pRuntime.dynamicTypes {
-		allDynamicTypes = append(allDynamicTypes, dt)
-	}
-
 	imported := parseImports(sourceFiles)
 	allScopes = map[identifier]*Scope{}
 	stdlibs := compileStdLibs(p, universe, imported)
@@ -133,6 +116,23 @@ func main() {
 	if mainPkg == nil {
 		return
 	}
+
+	var globalStringLiterals []*ExprStringLiteral
+	var allDynamicTypes []*Gtype
+
+	for _, sl := range pUniverse.stringLiterals {
+		globalStringLiterals = append(globalStringLiterals, sl)
+	}
+	for _, dt := range pUniverse.dynamicTypes {
+		allDynamicTypes = append(allDynamicTypes, dt)
+	}
+	for _, sl := range pRuntime.stringLiterals {
+		globalStringLiterals = append(globalStringLiterals, sl)
+	}
+	for _, dt := range pRuntime.dynamicTypes {
+		allDynamicTypes = append(allDynamicTypes, dt)
+	}
+
 	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
 	ir.emit()
 }
