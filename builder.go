@@ -53,7 +53,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	}
 }
 
-func compileMainPkg(universe *Scope, sourceFiles []string) *AstPackage {
+func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	p := &parser{}
 	mainPkg := ParseSources(p, identifier("main"), sourceFiles, false)
