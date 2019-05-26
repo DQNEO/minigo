@@ -89,26 +89,26 @@ func main() {
 	var allDynamicTypes []*Gtype
 
 	// inject builtin functions into the universe
-	p.stringLiterals = nil
+	p.packageStringLiterals = nil
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.stringLiterals {
+	for _, sl := range p.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
-	for _, dt := range p.dynamicTypes {
+	for _, dt := range p.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 	// inject runtime things into the universe
-	p.stringLiterals = nil
+	p.packageStringLiterals = nil
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.stringLiterals {
+	for _, sl := range p.packageStringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
-	for _, dt := range p.dynamicTypes {
+	for _, dt := range p.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
