@@ -93,11 +93,17 @@ func main() {
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.packageStringLiterals {
+	pUniverse := &AstPackage{
+		name:"",
+		files:[]*AstFile{internalUniverse},
+		stringLiterals:p.packageStringLiterals,
+	}
+
+	for _, sl := range pUniverse.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
 
-	for _, dt := range p.packageDynamicTypes {
+	for _, dt := range pUniverse.dynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
@@ -121,6 +127,6 @@ func main() {
 	if mainPkg == nil {
 		return
 	}
-	ir := makeIR(internalUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
+	ir := makeIR(pUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
 	ir.emit()
 }
