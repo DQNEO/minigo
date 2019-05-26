@@ -100,7 +100,6 @@ func main() {
 	for _, dt := range p.packageDynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
-	p.packageStringLiterals = nil
 
 	// inject runtime things into the universe
 	p = &parser{}
