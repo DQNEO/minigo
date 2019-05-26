@@ -10,7 +10,7 @@ func setTypeIds(namedTypes []*DeclType) {
 	}
 }
 
-func makeIR(internalUniverse *AstPackage, internalRuntime *AstFile, csl *compiledStdlib, mainPkg *AstPackage, stringLiterals []*ExprStringLiteral, allDynamicTypes []*Gtype) *IrRoot {
+func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage, stringLiterals []*ExprStringLiteral, allDynamicTypes []*Gtype) *IrRoot {
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
@@ -42,7 +42,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstFile, csl *compile
 
 	var files []*AstFile
 	files = append(files, internalUniverse.files[0])
-	files = append(files, internalRuntime)
+	files = append(files, internalRuntime.files[0])
 	for _, f := range mainPkg.files {
 		files = append(files, f)
 	}

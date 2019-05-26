@@ -103,7 +103,6 @@ func main() {
 	for _, sl := range pUniverse.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
-
 	for _, dt := range pUniverse.dynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
@@ -114,10 +113,16 @@ func main() {
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	p.resolve(nil)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	for _, sl := range p.packageStringLiterals {
+	pRuntime := &AstPackage{
+		name:"",
+		files:[]*AstFile{internalRuntime},
+		stringLiterals:p.packageStringLiterals,
+		dynamicTypes:p.packageDynamicTypes,
+	}
+	for _, sl := range pRuntime.stringLiterals {
 		globalStringLiterals = append(globalStringLiterals, sl)
 	}
-	for _, dt := range p.packageDynamicTypes {
+	for _, dt := range pRuntime.dynamicTypes {
 		allDynamicTypes = append(allDynamicTypes, dt)
 	}
 
@@ -128,6 +133,6 @@ func main() {
 	if mainPkg == nil {
 		return
 	}
-	ir := makeIR(pUniverse, internalRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
+	ir := makeIR(pUniverse, pRuntime, stdlibs, mainPkg, globalStringLiterals, allDynamicTypes)
 	ir.emit()
 }
