@@ -56,14 +56,14 @@ func (clause *ForRangeClause) infer() {
 	assert(ok, nil, "ok")
 
 	var indexType *Gtype
-	switch collectionType.kind {
+	switch collectionType.getKind() {
 	case G_ARRAY, G_SLICE:
 		indexType = gInt
 	case G_MAP:
 		indexType = collectionType.mapKey
 	default:
 		// @TODO consider map etc.
-		TBI(clause.tok, "unable to handle %s", collectionType)
+		TBI(clause.tok, "unable to handle %d ", collectionType.getKind())
 	}
 	indexvar.gtype = indexType
 
@@ -72,11 +72,11 @@ func (clause *ForRangeClause) infer() {
 		assert(ok, nil, "ok")
 
 		var elementType *Gtype
-		if collectionType.kind == G_ARRAY {
+		if collectionType.getKind() == G_ARRAY {
 			elementType = collectionType.elementType
-		} else if collectionType.kind == G_SLICE {
+		} else if collectionType.getKind() == G_SLICE {
 			elementType = collectionType.elementType
-		} else if collectionType.kind == G_MAP {
+		} else if collectionType.getKind() == G_MAP {
 			elementType = collectionType.mapValue
 		} else {
 			errorft(clause.token(), "internal error")

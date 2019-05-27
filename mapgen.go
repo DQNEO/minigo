@@ -328,7 +328,7 @@ func (f *StmtFor) emitRangeForMap() {
 	emit("imul $16, %%rax")
 	emit("push %%rax")
 	f.rng.rangeexpr.emit() // emit address of map data head
-	mapType := f.rng.rangeexpr.getGtype()
+	mapType := f.rng.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 
 	emit("pop %%rcx")
