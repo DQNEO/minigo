@@ -28,13 +28,13 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolve(nil)
+	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	return  &AstPackage{
-		name:"",
-		files:[]*AstFile{internalUniverse},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
+	return &AstPackage{
+		name:           "",
+		files:          []*AstFile{internalUniverse},
+		stringLiterals: p.packageStringLiterals,
+		dynamicTypes:   p.packageDynamicTypes,
 	}
 }
 
@@ -43,13 +43,13 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolve(nil)
+	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return &AstPackage{
-		name:"",
-		files:[]*AstFile{internalRuntime},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
+		name:           "",
+		files:          []*AstFile{internalRuntime},
+		stringLiterals: p.packageStringLiterals,
+		dynamicTypes:   p.packageDynamicTypes,
 	}
 }
 
@@ -63,7 +63,8 @@ func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 		}
 		return nil
 	}
-	p.resolve(universe)
+	resolveInPackage(mainPkg, universe)
+	p.resolveMethods()
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	setTypeIds(mainPkg.namedTypes)
@@ -94,7 +95,8 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseSources(p, pkgName, codes, true)
-		p.resolve(universe)
+		resolveInPackage(pkg, universe)
+		p.resolveMethods()
 		allScopes[pkgName] = pkg.scope
 		inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 		setTypeIds(pkg.namedTypes)

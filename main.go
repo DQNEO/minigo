@@ -90,7 +90,7 @@ func main() {
 	allScopes = map[identifier]*Scope{}
 	libs := compileStdLibs(universe, imported)
 
-	m := compileMainPackage(universe,sourceFiles)
+	m := compileMainPackage(universe, sourceFiles)
 	if m == nil {
 		return
 	}

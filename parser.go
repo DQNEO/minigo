@@ -18,20 +18,20 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	tokenStream       *TokenStream
-	packageBlockScope *Scope
-	currentScope      *Scope
-	importedNames     map[identifier]bool
+	tokenStream         *TokenStream
+	packageBlockScope   *Scope
+	currentScope        *Scope
+	importedNames       map[identifier]bool
+	unresolvedRelations []*Relation
 
 	// per package
-	packageName                identifier
-	packageMethods             map[identifier]methods
-	packageUnresolvedRelations []*Relation
-	packageUninferredGlobals   []*ExprVariable
-	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
-	packageStringLiterals      []*ExprStringLiteral
-	packageNamedTypes          []*DeclType
-	packageDynamicTypes        []*Gtype
+	packageName              identifier
+	packageMethods           map[identifier]methods
+	packageUninferredGlobals []*ExprVariable
+	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	packageStringLiterals    []*ExprStringLiteral
+	packageNamedTypes        []*DeclType
+	packageDynamicTypes      []*Gtype
 }
 
 func (p *parser) clearLocalState() {
@@ -1837,19 +1837,9 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	}
 
 	if pkg == "" {
-		relbody := p.currentScope.get(rel.name)
-		if relbody != nil {
-			if relbody.gtype != nil {
-				rel.gtype = relbody.gtype
-			} else if relbody.expr != nil {
-				rel.expr = relbody.expr
-			} else {
-				errorft(rel.token(), "Bad type relbody %v", relbody)
-			}
-		} else {
-			if rel.name != "_" {
-				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
-			}
+		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
+		if relbody == nil && rel.name != "_" {
+				p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {
 		// foreign package
@@ -1967,6 +1957,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 	p.importedNames = map[identifier]bool{}
+	p.unresolvedRelations = nil
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
@@ -1991,12 +1982,25 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	topLevelDecls := p.parseTopLevelDecls()
 
+	var stillUnresolved []*Relation
+
+	for _, rel := range p.unresolvedRelations {
+		if rel.gtype != nil || rel.expr != nil {
+			continue
+		}
+		resolve(p.currentScope, rel)
+		if rel.expr == nil && rel.gtype == nil {
+			stillUnresolved = append(stillUnresolved, rel)
+		}
+	}
+
 	return &AstFile{
 		tok:           packageClause.tok,
 		name:          bs.filename,
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
+		unresolved:    stillUnresolved,
 	}
 }
 
@@ -2024,18 +2028,6 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		stringLiterals: p.packageStringLiterals,
 		dynamicTypes:   p.packageDynamicTypes,
 	}
-}
-
-func (p *parser) resolve(universe *Scope) {
-	p.packageBlockScope.outer = universe
-	for _, rel := range p.packageUnresolvedRelations {
-		//debugf("resolving %s ...", rel.name)
-		p.tryResolve("", rel)
-	}
-
-	//debugf("resolving packageMethods %s ...", p.packageName)
-	p.resolveMethods()
-	//debugf("inferring types ...")
 }
 
 // copy packageMethods from p.nameTypes to gtype.packageMethods of each type
