@@ -18,6 +18,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
+	packageName    identifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
@@ -30,8 +31,6 @@ type parser struct {
 	dynamicTypes   []*Gtype
 	methods        map[identifier]methods
 
-	// per package
-	packageName    identifier
 }
 
 func (p *parser) clearLocalState() {
