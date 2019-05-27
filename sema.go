@@ -10,6 +10,33 @@ func setTypeIds(namedTypes []*DeclType) {
 	}
 }
 
+func resolve(sc *Scope, rel *Relation) *IdentBody {
+	relbody := sc.get(rel.name)
+	if relbody != nil {
+		if relbody.gtype != nil {
+			rel.gtype = relbody.gtype
+		} else if relbody.expr != nil {
+			rel.expr = relbody.expr
+		} else {
+			errorft(rel.token(), "Bad type relbody %v", relbody)
+		}
+	}
+	return relbody
+}
+
+func resolveInPackage(pkg *AstPackage, universe *Scope) {
+	packageScope := pkg.scope
+	packageScope.outer = universe
+	for _, file := range pkg.files {
+		for _, rel := range file.unresolved {
+			relbody := resolve(packageScope, rel)
+			if relbody == nil {
+				errorft(rel.token(), "unresolved identifier %s", rel.name)
+			}
+		}
+	}
+}
+
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var stringLiterals []*ExprStringLiteral
 	var dynamicTypes []*Gtype
