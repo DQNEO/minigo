@@ -23,6 +23,7 @@ type AstFile struct {
 	stringLiterals    []*ExprStringLiteral
 	dynamicTypes      []*Gtype
 	namedTypes        []*DeclType
+	methods           map[identifier]methods
 }
 
 type Expr interface {

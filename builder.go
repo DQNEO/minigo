@@ -30,7 +30,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	f := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 
 	//debugf("len p.methods = %d", len(p.methods))
-	resolveMethods(p.methods, p.packageBlockScope)
+	resolveMethods(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	return &AstPackage{
 		name:           "",
@@ -45,7 +45,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	f := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	resolveMethods(p.methods, p.packageBlockScope)
+	resolveMethods(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	return &AstPackage{
 		name:           "",
