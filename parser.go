@@ -2032,10 +2032,6 @@ func (p *parser) resolve(universe *Scope) {
 		//debugf("resolving %s ...", rel.name)
 		p.tryResolve("", rel)
 	}
-
-	//debugf("resolving packageMethods %s ...", p.packageName)
-	p.resolveMethods()
-	//debugf("inferring types ...")
 }
 
 // copy packageMethods from p.nameTypes to gtype.packageMethods of each type
