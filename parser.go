@@ -2014,8 +2014,8 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 
 	var astFiles []*AstFile
 
-	var packageUninferredGlobals []*ExprVariable
-	var packageUninferredLocals  []Inferrer
+	var uninferredGlobals []*ExprVariable
+	var uninferredLocals []Inferrer
 	var stringLiterals []*ExprStringLiteral
 	var dynamicTypes   []*Gtype
 	var namedTypes     []*DeclType
@@ -2034,10 +2034,10 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 		}
 		astFiles = append(astFiles, astFile)
 		for _, g := range astFile.uninferredGlobals {
-			packageUninferredGlobals = append(packageUninferredGlobals, g)
+			uninferredGlobals = append(uninferredGlobals, g)
 		}
 		for _, l := range astFile.uninferredLocals {
-			packageUninferredLocals = append(packageUninferredLocals, l)
+			uninferredLocals = append(uninferredLocals, l)
 		}
 		for _, s := range astFile.stringLiterals {
 			stringLiterals = append(stringLiterals, s)
@@ -2072,8 +2072,8 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 		namedTypes:        namedTypes,
 		stringLiterals:    stringLiterals,
 		dynamicTypes:      dynamicTypes,
-		uninferredGlobals: packageUninferredGlobals,
-		uninferredLocals:  packageUninferredLocals,
+		uninferredGlobals: uninferredGlobals,
+		uninferredLocals:  uninferredLocals,
 		methods:           allmethods,
 	}
 }
