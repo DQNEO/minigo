@@ -28,10 +28,10 @@ type parser struct {
 	stringLiterals []*ExprStringLiteral
 	namedTypes     []*DeclType
 	dynamicTypes   []*Gtype
+	methods        map[identifier]methods
 
 	// per package
 	packageName    identifier
-	methods        map[identifier]methods
 }
 
 func (p *parser) clearLocalState() {
@@ -1963,7 +1963,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.stringLiterals = nil
 	p.dynamicTypes = nil
 	p.namedTypes = nil
-
+	p.methods =  map[identifier]methods{}
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
 
@@ -2011,6 +2011,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		stringLiterals:    p.stringLiterals,
 		dynamicTypes:      p.dynamicTypes,
 		namedTypes:        p.namedTypes,
+		methods:           p.methods,
 	}
 }
 
@@ -2025,6 +2026,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	var stringLiterals []*ExprStringLiteral
 	var dynamicTypes   []*Gtype
 	var namedTypes     []*DeclType
+	var allmethods     map[identifier]methods = map[identifier]methods{}
 
 	for _, source := range sources {
 		var astFile *AstFile
@@ -2050,6 +2052,18 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		for _, n := range astFile.namedTypes {
 			namedTypes = append(namedTypes, n)
 		}
+
+		for typeName, methods := range astFile.methods {
+			for mname, ref := range methods {
+				almthds, ok := allmethods[typeName]
+				if !ok {
+					almthds = map[identifier]*ExprFuncRef{}
+					allmethods[typeName] = almthds
+				}
+				almthds[mname] = ref
+				allmethods[typeName] = almthds
+			}
+		}
 	}
 
 	return &AstPackage{
@@ -2061,13 +2075,13 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		dynamicTypes:      dynamicTypes,
 		uninferredGlobals: packageUninferredGlobals,
 		uninferredLocals:  packageUninferredLocals,
-
+		methods:           allmethods,
 	}
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
-func resolveMethods(p *parser, packageScope *Scope) {
-	for typeName, methods := range p.methods {
+func resolveMethods(methods map[identifier]methods, packageScope *Scope) {
+	for typeName, methods := range methods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", packageScope.idents)

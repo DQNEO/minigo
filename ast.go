@@ -9,6 +9,7 @@ type AstPackage struct {
 	uninferredGlobals []*ExprVariable
 	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 	stringLiterals    []*ExprStringLiteral
+	methods           map[identifier]methods
 }
 
 type AstFile struct {
@@ -23,6 +24,7 @@ type AstFile struct {
 	stringLiterals    []*ExprStringLiteral
 	dynamicTypes      []*Gtype
 	namedTypes        []*DeclType
+	methods           map[identifier]methods
 }
 
 type Expr interface {
