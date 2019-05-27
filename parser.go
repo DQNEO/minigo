@@ -221,7 +221,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)
 	}
-	p.tryResolve(pkg, rel)
+	p.tryResolve(pkg, rel, true)
 
 	next := p.peekToken()
 
@@ -808,7 +808,7 @@ func (p *parser) parseType() *Gtype {
 				pkg:  p.packageName,
 				name: ident,
 			}
-			p.tryResolve("", rel)
+			p.tryResolve("", rel, true)
 			gtype = &Gtype{
 				kind:     G_NAMED,
 				relation: rel,
@@ -1831,7 +1831,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg identifier, rel *Relation) {
+func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
@@ -1847,7 +1847,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 				errorft(rel.token(), "Bad type relbody %v", relbody)
 			}
 		} else {
-			if rel.name != "_" {
+			if add && rel.name != "_" {
 				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
 			}
 		}
@@ -1991,6 +1991,20 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	topLevelDecls := p.parseTopLevelDecls()
 
+	debugf("unrsolved len=%d", len(p.packageUnresolvedRelations))
+	var stillUnresolved []*Relation
+
+	for _, unrel := range p.packageUnresolvedRelations {
+		//debugf("trying resolve rel %s", unrel.name)
+		p.tryResolve("", unrel, false)
+		if unrel.expr == nil && unrel.gtype == nil {
+			stillUnresolved = append(stillUnresolved, unrel)
+		}
+	}
+
+	p.packageUnresolvedRelations = stillUnresolved
+	debugf("still unrsolved len=%d", len(p.packageUnresolvedRelations))
+
 	return &AstFile{
 		tok:           packageClause.tok,
 		name:          bs.filename,
@@ -2030,7 +2044,7 @@ func (p *parser) resolve(universe *Scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
 		//debugf("resolving %s ...", rel.name)
-		p.tryResolve("", rel)
+		p.tryResolve("", rel, false)
 	}
 }
 
