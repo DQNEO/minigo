@@ -2005,6 +2005,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		unresolved:        stillUnresolved,
 		uninferredGlobals: p.uninferredGlobals,
 		uninferredLocals:  p.uninferredLocals,
+		stringLiterals:    p.stringLiterals,
 	}
 }
 
@@ -2016,6 +2017,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 
 	var packageUninferredGlobals []*ExprVariable
 	var packageUninferredLocals  []Inferrer
+	var stringLiterals []*ExprStringLiteral
 
 
 	for _, source := range sources {
@@ -2033,6 +2035,9 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		for _, l := range astFile.uninferredLocals {
 			packageUninferredLocals = append(packageUninferredLocals, l)
 		}
+		for _, s := range astFile.stringLiterals {
+			stringLiterals = append(stringLiterals, s)
+		}
 	}
 
 	return &AstPackage{
@@ -2040,7 +2045,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		scope:             pkgScope,
 		files:             astFiles,
 		namedTypes:        p.namedTypes,
-		stringLiterals:    p.stringLiterals,
+		stringLiterals:    stringLiterals,
 		dynamicTypes:      p.dynamicTypes,
 		uninferredGlobals: packageUninferredGlobals,
 		uninferredLocals:  packageUninferredLocals,

@@ -4,11 +4,11 @@ type AstPackage struct {
 	name              identifier
 	scope             *Scope
 	files             []*AstFile
-	stringLiterals    []*ExprStringLiteral
 	namedTypes        []*DeclType
 	dynamicTypes      []*Gtype
 	uninferredGlobals []*ExprVariable
 	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	stringLiterals    []*ExprStringLiteral
 }
 
 type AstFile struct {
@@ -20,6 +20,7 @@ type AstFile struct {
 	unresolved        []*Relation
 	uninferredGlobals []*ExprVariable
 	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	stringLiterals    []*ExprStringLiteral
 }
 
 type Expr interface {
