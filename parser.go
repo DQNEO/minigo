@@ -1960,6 +1960,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.unresolvedRelations = nil
 	p.uninferredGlobals = nil
 	p.uninferredLocals = nil
+	p.stringLiterals = nil
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
