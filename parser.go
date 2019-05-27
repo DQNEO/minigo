@@ -2002,7 +2002,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	}
 
 
-	p.packageUnresolvedRelations = stillUnresolved
+	//p.packageUnresolvedRelations = stillUnresolved
 
 	return &AstFile{
 		tok:           packageClause.tok,
@@ -2040,11 +2040,13 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	}
 }
 
-func resolveInPackage(p *parser, universe *Scope) {
+func resolveInPackage(pkg *AstPackage, p *parser, universe *Scope) {
 	p.packageBlockScope.outer = universe
-	for _, rel := range p.packageUnresolvedRelations {
-		//debugf("resolving %s ...", rel.name)
-		p.tryResolve("", rel, false)
+	for _, file := range pkg.files {
+		for _, rel := range file.unresolved {
+			//debugf("resolving %s ...", rel.name)
+			p.tryResolve("", rel, false)
+		}
 	}
 }
 
