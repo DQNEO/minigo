@@ -28,8 +28,10 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolveMethods()
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+
+	//debugf("len p.methods = %d", len(p.packageMethods))
+	resolveMethods(p, p.packageBlockScope)
+	inferTypes(internalUniverse.packageUninferredGlobals, internalUniverse.packageUninferredLocals)
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{internalUniverse},
@@ -43,8 +45,8 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolveMethods()
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	resolveMethods(p, p.packageBlockScope)
+	inferTypes(internalRuntime.packageUninferredGlobals, internalRuntime.packageUninferredLocals)
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{internalRuntime},
@@ -64,9 +66,9 @@ func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 		return nil
 	}
 	resolveInPackage(mainPkg, universe)
-	p.resolveMethods()
+	resolveMethods(p, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+	inferTypes(mainPkg.packageUninferredGlobals, mainPkg.packageUninferredLocals)
 	setTypeIds(mainPkg.namedTypes)
 	if debugAst {
 		mainPkg.dump()
@@ -96,9 +98,9 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		var codes []string = []string{pkgCode}
 		pkg := ParseSources(p, pkgName, codes, true)
 		resolveInPackage(pkg, universe)
-		p.resolveMethods()
+		resolveMethods(p, pkg.scope)
 		allScopes[pkgName] = pkg.scope
-		inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
+		inferTypes(pkg.packageUninferredGlobals, pkg.packageUninferredLocals)
 		setTypeIds(pkg.namedTypes)
 		libs.AddPackage(pkg)
 	}

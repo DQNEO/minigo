@@ -7,6 +7,8 @@ type AstPackage struct {
 	stringLiterals []*ExprStringLiteral
 	namedTypes     []*DeclType
 	dynamicTypes   []*Gtype
+	packageUninferredGlobals []*ExprVariable
+	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 }
 
 type AstFile struct {
@@ -16,6 +18,8 @@ type AstFile struct {
 	importDecls   []*ImportDecl
 	topLevelDecls []*TopLevelDecl
 	unresolved    []*Relation
+	packageUninferredGlobals []*ExprVariable
+	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 }
 
 type Expr interface {
