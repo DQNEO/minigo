@@ -1986,11 +1986,13 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	var stillUnresolved []*Relation
 
-	for _, unrel := range p.unresolvedRelations {
-		//debugf("trying resolve rel %s", unrel.name)
-		p.tryResolve("", unrel, false)
-		if unrel.expr == nil && unrel.gtype == nil {
-			stillUnresolved = append(stillUnresolved, unrel)
+	for _, rel := range p.unresolvedRelations {
+		if rel.gtype != nil || rel.expr != nil {
+			continue
+		}
+		resolve(p.currentScope, rel)
+		if rel.expr == nil && rel.gtype == nil {
+			stillUnresolved = append(stillUnresolved, rel)
 		}
 	}
 
