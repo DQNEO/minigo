@@ -4,12 +4,12 @@ package main
 // analyze imports of given go files
 func parseImports(sourceFiles []string) []string {
 
-	pForImport := &parser{}
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
 	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
-		astFile := pForImport.parseFile(sourceFile, nil, true)
+		p := &parser{}
+		astFile := p.parseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
