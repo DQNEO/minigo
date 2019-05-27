@@ -1,25 +1,25 @@
 package main
 
 type AstPackage struct {
-	name           identifier
-	scope          *Scope
-	files          []*AstFile
-	stringLiterals []*ExprStringLiteral
-	namedTypes     []*DeclType
-	dynamicTypes   []*Gtype
-	packageUninferredGlobals []*ExprVariable
-	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	name              identifier
+	scope             *Scope
+	files             []*AstFile
+	stringLiterals    []*ExprStringLiteral
+	namedTypes        []*DeclType
+	dynamicTypes      []*Gtype
+	uninferredGlobals []*ExprVariable
+	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 }
 
 type AstFile struct {
-	tok           *Token
-	name          string
-	packageClause *PackageClause
-	importDecls   []*ImportDecl
-	topLevelDecls []*TopLevelDecl
-	unresolved    []*Relation
-	packageUninferredGlobals []*ExprVariable
-	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	tok               *Token
+	name              string
+	packageClause     *PackageClause
+	importDecls       []*ImportDecl
+	topLevelDecls     []*TopLevelDecl
+	unresolved        []*Relation
+	uninferredGlobals []*ExprVariable
+	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 }
 
 type Expr interface {

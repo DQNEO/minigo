@@ -1997,14 +1997,14 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	}
 
 	return &AstFile{
-		tok:           packageClause.tok,
-		name:          bs.filename,
-		packageClause: packageClause,
-		importDecls:   importDecls,
-		topLevelDecls: topLevelDecls,
-		unresolved:    stillUnresolved,
-		packageUninferredGlobals: p.uninferredGlobals,
-		packageUninferredLocals: p.uninferredLocals,
+		tok:               packageClause.tok,
+		name:              bs.filename,
+		packageClause:     packageClause,
+		importDecls:       importDecls,
+		topLevelDecls:     topLevelDecls,
+		unresolved:        stillUnresolved,
+		uninferredGlobals: p.uninferredGlobals,
+		uninferredLocals:  p.uninferredLocals,
 	}
 }
 
@@ -2027,23 +2027,23 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 			astFile = p.parseFile(source, pkgScope, false)
 		}
 		astFiles = append(astFiles, astFile)
-		for _, g := range astFile.packageUninferredGlobals {
+		for _, g := range astFile.uninferredGlobals {
 			packageUninferredGlobals = append(packageUninferredGlobals, g)
 		}
-		for _, l := range astFile.packageUninferredLocals {
+		for _, l := range astFile.uninferredLocals {
 			packageUninferredLocals = append(packageUninferredLocals, l)
 		}
 	}
 
 	return &AstPackage{
-		name:           pkgname,
-		scope:          pkgScope,
-		files:          astFiles,
-		namedTypes:     p.packageNamedTypes,
-		stringLiterals: p.packageStringLiterals,
-		dynamicTypes:   p.packageDynamicTypes,
-		packageUninferredGlobals: packageUninferredGlobals,
-		packageUninferredLocals:packageUninferredLocals,
+		name:              pkgname,
+		scope:             pkgScope,
+		files:             astFiles,
+		namedTypes:        p.packageNamedTypes,
+		stringLiterals:    p.packageStringLiterals,
+		dynamicTypes:      p.packageDynamicTypes,
+		uninferredGlobals: packageUninferredGlobals,
+		uninferredLocals:  packageUninferredLocals,
 	}
 }
 
