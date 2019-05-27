@@ -28,7 +28,6 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolve(nil)
 	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return  &AstPackage{
@@ -44,7 +43,6 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolve(nil)
 	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return &AstPackage{
