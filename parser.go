@@ -23,12 +23,12 @@ type parser struct {
 	currentScope        *Scope
 	importedNames       map[identifier]bool
 	unresolvedRelations []*Relation
+	uninferredGlobals   []*ExprVariable
+	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// per package
 	packageName              identifier
 	packageMethods           map[identifier]methods
-	packageUninferredGlobals []*ExprVariable
-	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 	packageStringLiterals    []*ExprStringLiteral
 	packageNamedTypes        []*DeclType
 	packageDynamicTypes      []*Gtype
@@ -910,9 +910,9 @@ func (p *parser) parseVarDecl() *DeclVar {
 				kind:         G_DEPENDENT,
 				dependendson: initval,
 			}
-			p.packageUninferredGlobals = append(p.packageUninferredGlobals, variable)
+			p.uninferredGlobals = append(p.uninferredGlobals, variable)
 		} else {
-			p.packageUninferredLocals = append(p.packageUninferredLocals, r)
+			p.uninferredLocals = append(p.uninferredLocals, r)
 		}
 	}
 	p.currentScope.setVar(newName, variable)
@@ -1151,7 +1151,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	}
 	p.currentForStmt = r
 	if infer {
-		p.packageUninferredLocals = append(p.packageUninferredLocals, r.rng)
+		p.uninferredLocals = append(p.uninferredLocals, r.rng)
 	}
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
@@ -1317,7 +1317,7 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 		lefts:  lefts,
 		rights: rights,
 	}
-	p.packageUninferredLocals = append(p.packageUninferredLocals, r)
+	p.uninferredLocals = append(p.uninferredLocals, r)
 	return r
 }
 
@@ -1958,6 +1958,8 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.currentScope = packageBlockScope
 	p.importedNames = map[identifier]bool{}
 	p.unresolvedRelations = nil
+	p.uninferredGlobals = nil
+	p.uninferredLocals = nil
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
@@ -2001,6 +2003,8 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
 		unresolved:    stillUnresolved,
+		packageUninferredGlobals: p.uninferredGlobals,
+		packageUninferredLocals: p.uninferredLocals,
 	}
 }
 
@@ -2009,6 +2013,11 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile
+
+	var packageUninferredGlobals []*ExprVariable
+	var packageUninferredLocals  []Inferrer
+
+
 	for _, source := range sources {
 		var astFile *AstFile
 		if onMemory {
@@ -2018,6 +2027,12 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 			astFile = p.parseFile(source, pkgScope, false)
 		}
 		astFiles = append(astFiles, astFile)
+		for _, g := range astFile.packageUninferredGlobals {
+			packageUninferredGlobals = append(packageUninferredGlobals, g)
+		}
+		for _, l := range astFile.packageUninferredLocals {
+			packageUninferredLocals = append(packageUninferredLocals, l)
+		}
 	}
 
 	return &AstPackage{
@@ -2027,6 +2042,8 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		namedTypes:     p.packageNamedTypes,
 		stringLiterals: p.packageStringLiterals,
 		dynamicTypes:   p.packageDynamicTypes,
+		packageUninferredGlobals: packageUninferredGlobals,
+		packageUninferredLocals:packageUninferredLocals,
 	}
 }
 
