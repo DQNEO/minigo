@@ -53,10 +53,6 @@ func compileRuntime(universe *Scope) *AstPackage {
 	}
 }
 
-func resolveInPackage(p *parser, universe *Scope) {
-	p.resolve(universe)
-}
-
 func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	p := &parser{}

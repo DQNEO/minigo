@@ -2040,7 +2040,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	}
 }
 
-func (p *parser) resolve(universe *Scope) {
+func resolveInPackage(p *parser, universe *Scope) {
 	p.packageBlockScope.outer = universe
 	for _, rel := range p.packageUnresolvedRelations {
 		//debugf("resolving %s ...", rel.name)
