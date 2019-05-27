@@ -27,11 +27,11 @@ type parser struct {
 	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 
 	// per package
-	packageName              identifier
-	packageMethods           map[identifier]methods
-	packageStringLiterals    []*ExprStringLiteral
-	packageNamedTypes        []*DeclType
-	packageDynamicTypes      []*Gtype
+	packageName    identifier
+	methods        map[identifier]methods
+	stringLiterals []*ExprStringLiteral
+	namedTypes     []*DeclType
+	dynamicTypes   []*Gtype
 }
 
 func (p *parser) clearLocalState() {
@@ -47,7 +47,7 @@ type methods map[identifier]*ExprFuncRef
 
 func (p *parser) initPackage(pkgname identifier) {
 	p.packageName = pkgname
-	p.packageMethods = map[identifier]methods{}
+	p.methods = map[identifier]methods{}
 }
 
 func (p *parser) assert(cond bool, msg string) {
@@ -189,7 +189,7 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
-	p.packageStringLiterals = append(p.packageStringLiterals, ast)
+	p.stringLiterals = append(p.stringLiterals, ast)
 }
 
 // expr which begins with an ident.
@@ -788,7 +788,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 }
 
 func (p *parser) registerDynamicType(gtype *Gtype) *Gtype {
-	p.packageDynamicTypes = append(p.packageDynamicTypes, gtype)
+	p.dynamicTypes = append(p.dynamicTypes, gtype)
 	return gtype
 }
 
@@ -1662,20 +1662,20 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.kind == G_NAMED, "packageMethods must belong to a named type")
+		p.assert(typeToBelong.kind == G_NAMED, "methods must belong to a named type")
 		var mthds methods
 		var ok bool
 		typeName := typeToBelong.relation.name
-		mthds, ok = p.packageMethods[typeName]
+		mthds, ok = p.methods[typeName]
 		if !ok {
 			mthds = map[identifier]*ExprFuncRef{}
-			p.packageMethods[typeName] = mthds
+			p.methods[typeName] = mthds
 		}
 
 		mthds[fname] = ref
-		pm := p.packageMethods
+		pm := p.methods
 		pm[typeName] = mthds
-		p.packageMethods = pm
+		p.methods = pm
 
 	} else {
 		p.packageBlockScope.setFunc(fname, ref)
@@ -1875,7 +1875,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 		gtype: gtype,
 	}
 
-	p.packageNamedTypes = append(p.packageNamedTypes, r)
+	p.namedTypes = append(p.namedTypes, r)
 	p.currentScope.setGtype(newName, gtype)
 	return r
 }
@@ -2039,17 +2039,17 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		name:              pkgname,
 		scope:             pkgScope,
 		files:             astFiles,
-		namedTypes:        p.packageNamedTypes,
-		stringLiterals:    p.packageStringLiterals,
-		dynamicTypes:      p.packageDynamicTypes,
+		namedTypes:        p.namedTypes,
+		stringLiterals:    p.stringLiterals,
+		dynamicTypes:      p.dynamicTypes,
 		uninferredGlobals: packageUninferredGlobals,
 		uninferredLocals:  packageUninferredLocals,
 	}
 }
 
-// copy packageMethods from p.nameTypes to gtype.packageMethods of each type
+// copy methods from p.nameTypes to gtype.methods of each type
 func resolveMethods(p *parser, packageScope *Scope) {
-	for typeName, methods := range p.packageMethods {
+	for typeName, methods := range p.methods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", packageScope.idents)
