@@ -15,6 +15,7 @@ type AstFile struct {
 	packageClause *PackageClause
 	importDecls   []*ImportDecl
 	topLevelDecls []*TopLevelDecl
+	unresolved    []*Relation
 }
 
 type Expr interface {

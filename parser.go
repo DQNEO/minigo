@@ -1991,7 +1991,6 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	topLevelDecls := p.parseTopLevelDecls()
 
-	debugf("unrsolved len=%d", len(p.packageUnresolvedRelations))
 	var stillUnresolved []*Relation
 
 	for _, unrel := range p.packageUnresolvedRelations {
@@ -2002,8 +2001,8 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		}
 	}
 
+
 	p.packageUnresolvedRelations = stillUnresolved
-	debugf("still unrsolved len=%d", len(p.packageUnresolvedRelations))
 
 	return &AstFile{
 		tok:           packageClause.tok,
@@ -2011,6 +2010,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
+		unresolved: stillUnresolved,
 	}
 }
 
