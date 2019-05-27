@@ -2010,9 +2010,6 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 }
 
 func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPackage {
-	p := &parser{
-		packageName:pkgname,
-	}
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile
@@ -2026,6 +2023,9 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 
 	for _, source := range sources {
 		var astFile *AstFile
+		p := &parser{
+			packageName:pkgname,
+		}
 		if onMemory {
 			var filename string = string(pkgname) + ".memory"
 			astFile = p.parseString(filename, source, pkgScope, false)
