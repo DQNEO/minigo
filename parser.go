@@ -221,7 +221,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)
 	}
-	p.tryResolve(pkg, rel, true)
+	p.tryResolve(pkg, rel)
 
 	next := p.peekToken()
 
@@ -808,7 +808,7 @@ func (p *parser) parseType() *Gtype {
 				pkg:  p.packageName,
 				name: ident,
 			}
-			p.tryResolve("", rel, true)
+			p.tryResolve("", rel)
 			gtype = &Gtype{
 				kind:     G_NAMED,
 				relation: rel,
@@ -1831,7 +1831,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
+func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
@@ -1839,7 +1839,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
 	if pkg == "" {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
 		if relbody == nil {
-			if add && rel.name != "_" {
+			if rel.name != "_" {
 				p.unresolvedRelations = append(p.unresolvedRelations, rel)
 			}
 		}
