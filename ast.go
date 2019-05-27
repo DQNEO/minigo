@@ -21,6 +21,7 @@ type AstFile struct {
 	uninferredGlobals []*ExprVariable
 	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 	stringLiterals    []*ExprStringLiteral
+	dynamicTypes      []*Gtype
 }
 
 type Expr interface {

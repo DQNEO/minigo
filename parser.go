@@ -1961,6 +1961,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.uninferredGlobals = nil
 	p.uninferredLocals = nil
 	p.stringLiterals = nil
+	p.dynamicTypes = nil
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
@@ -2007,6 +2008,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		uninferredGlobals: p.uninferredGlobals,
 		uninferredLocals:  p.uninferredLocals,
 		stringLiterals:    p.stringLiterals,
+		dynamicTypes:      p.dynamicTypes,
 	}
 }
 
@@ -2019,7 +2021,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	var packageUninferredGlobals []*ExprVariable
 	var packageUninferredLocals  []Inferrer
 	var stringLiterals []*ExprStringLiteral
-
+	var dynamicTypes   []*Gtype
 
 	for _, source := range sources {
 		var astFile *AstFile
@@ -2039,6 +2041,9 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		for _, s := range astFile.stringLiterals {
 			stringLiterals = append(stringLiterals, s)
 		}
+		for _, d := range astFile.dynamicTypes {
+			dynamicTypes = append(dynamicTypes, d)
+		}
 	}
 
 	return &AstPackage{
@@ -2047,7 +2052,7 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 		files:             astFiles,
 		namedTypes:        p.namedTypes,
 		stringLiterals:    stringLiterals,
-		dynamicTypes:      p.dynamicTypes,
+		dynamicTypes:      dynamicTypes,
 		uninferredGlobals: packageUninferredGlobals,
 		uninferredLocals:  packageUninferredLocals,
 	}
