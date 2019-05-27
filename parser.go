@@ -1837,16 +1837,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
 	}
 
 	if pkg == "" {
-		relbody := p.currentScope.get(rel.name)
-		if relbody != nil {
-			if relbody.gtype != nil {
-				rel.gtype = relbody.gtype
-			} else if relbody.expr != nil {
-				rel.expr = relbody.expr
-			} else {
-				errorft(rel.token(), "Bad type relbody %v", relbody)
-			}
-		} else {
+		relbody := resolve(p.currentScope, rel)  //p.currentScope.get(rel.name)
+		if relbody == nil {
 			if add && rel.name != "_" {
 				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
 			}
@@ -2040,24 +2032,27 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	}
 }
 
+func resolve(sc *Scope, rel *Relation) *IdentBody {
+	relbody := sc.get(rel.name)
+	if relbody != nil {
+		if relbody.gtype != nil {
+			rel.gtype = relbody.gtype
+		} else if relbody.expr != nil {
+			rel.expr = relbody.expr
+		} else {
+			errorft(rel.token(), "Bad type relbody %v", relbody)
+		}
+	}
+	return relbody
+}
+
 func resolveInPackage(pkg *AstPackage, universe *Scope) {
 	packageScope := pkg.scope
 	packageScope.outer = universe
 	for _, file := range pkg.files {
 		for _, rel := range file.unresolved {
-			//assert(rel.gtype == nil && rel.expr == nil, nil, "already resolved")
-			//debugf("resolving %s ...", rel.name)
-			//p.tryResolve("", rel, false)
-			relbody := packageScope.get(rel.name)
-			if relbody != nil {
-				if relbody.gtype != nil {
-					rel.gtype = relbody.gtype
-				} else if relbody.expr != nil {
-					rel.expr = relbody.expr
-				} else {
-					errorft(rel.token(), "Bad type relbody %v", relbody)
-				}
-			} else {
+			relbody := resolve(packageScope, rel)
+			if relbody == nil {
 				errorft(rel.token(), "unresolved identifier %s", rel.name)
 			}
 		}
