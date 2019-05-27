@@ -45,10 +45,6 @@ func (p *parser) clearLocalState() {
 
 type methods map[identifier]*ExprFuncRef
 
-func (p *parser) initPackage(pkgname identifier) {
-	p.packageName = pkgname
-}
-
 func (p *parser) assert(cond bool, msg string) {
 	assert(cond, p.lastToken(), msg)
 }
@@ -2015,8 +2011,9 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 }
 
 func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPackage {
-	p := &parser{}
-	p.initPackage(pkgname)
+	p := &parser{
+		packageName:pkgname,
+	}
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile
