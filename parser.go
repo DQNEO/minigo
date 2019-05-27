@@ -2040,12 +2040,26 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 	}
 }
 
-func resolveInPackage(pkg *AstPackage, p *parser, universe *Scope) {
-	p.packageBlockScope.outer = universe
+func resolveInPackage(pkg *AstPackage, universe *Scope) {
+	packageScope := pkg.scope
+	packageScope.outer = universe
 	for _, file := range pkg.files {
 		for _, rel := range file.unresolved {
+			//assert(rel.gtype == nil && rel.expr == nil, nil, "already resolved")
 			//debugf("resolving %s ...", rel.name)
-			p.tryResolve("", rel, false)
+			//p.tryResolve("", rel, false)
+			relbody := packageScope.get(rel.name)
+			if relbody != nil {
+				if relbody.gtype != nil {
+					rel.gtype = relbody.gtype
+				} else if relbody.expr != nil {
+					rel.expr = relbody.expr
+				} else {
+					errorft(rel.token(), "Bad type relbody %v", relbody)
+				}
+			} else {
+				errorft(rel.token(), "unresolved identifier %s", rel.name)
+			}
 		}
 	}
 }
