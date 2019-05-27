@@ -1937,6 +1937,17 @@ func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly
 	return p.parseByteStream(bs, packageBlockScope, importOnly)
 }
 
+// initialize parser's status per file
+func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
+	p.clearLocalState()
+
+	p.tokenStream = NewTokenStream(bs)
+	p.packageBlockScope = packageBlockScope
+	p.currentScope = packageBlockScope
+	p.importedNames = map[identifier]bool{}
+	p.methods =  map[identifier]methods{}
+}
+
 // https://golang.org/ref/spec#Source_file_organization
 // Each source file consists of
 // a package clause defining the package to which it belongs,
@@ -1944,14 +1955,7 @@ func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
 func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *AstFile {
 
-	p.clearLocalState()
-
-	// initialize parser's status per file
-	p.tokenStream = NewTokenStream(bs)
-	p.packageBlockScope = packageBlockScope
-	p.currentScope = packageBlockScope
-	p.importedNames = map[identifier]bool{}
-	p.methods =  map[identifier]methods{}
+	p.initFile(bs, packageBlockScope)
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
