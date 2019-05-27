@@ -1951,13 +1951,8 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 	p.importedNames = map[identifier]bool{}
-	p.unresolvedRelations = nil
-	p.uninferredGlobals = nil
-	p.uninferredLocals = nil
-	p.stringLiterals = nil
-	p.dynamicTypes = nil
-	p.namedTypes = nil
 	p.methods =  map[identifier]methods{}
+
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
 
