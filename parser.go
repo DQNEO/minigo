@@ -22,11 +22,11 @@ type parser struct {
 	packageBlockScope *Scope
 	currentScope      *Scope
 	importedNames     map[identifier]bool
+	unresolvedRelations []*Relation
 
 	// per package
 	packageName                identifier
 	packageMethods             map[identifier]methods
-	packageUnresolvedRelations []*Relation
 	packageUninferredGlobals   []*ExprVariable
 	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
 	packageStringLiterals      []*ExprStringLiteral
@@ -1840,7 +1840,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
 		relbody := resolve(p.currentScope, rel)  //p.currentScope.get(rel.name)
 		if relbody == nil {
 			if add && rel.name != "_" {
-				p.packageUnresolvedRelations = append(p.packageUnresolvedRelations, rel)
+				p.unresolvedRelations = append(p.unresolvedRelations, rel)
 			}
 		}
 	} else {
@@ -1959,6 +1959,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 	p.importedNames = map[identifier]bool{}
+	p.unresolvedRelations = nil
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
@@ -1985,16 +1986,13 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 
 	var stillUnresolved []*Relation
 
-	for _, unrel := range p.packageUnresolvedRelations {
+	for _, unrel := range p.unresolvedRelations {
 		//debugf("trying resolve rel %s", unrel.name)
 		p.tryResolve("", unrel, false)
 		if unrel.expr == nil && unrel.gtype == nil {
 			stillUnresolved = append(stillUnresolved, unrel)
 		}
 	}
-
-
-	//p.packageUnresolvedRelations = stillUnresolved
 
 	return &AstFile{
 		tok:           packageClause.tok,
