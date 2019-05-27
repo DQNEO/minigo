@@ -47,7 +47,6 @@ type methods map[identifier]*ExprFuncRef
 
 func (p *parser) initPackage(pkgname identifier) {
 	p.packageName = pkgname
-	p.methods = map[identifier]methods{}
 }
 
 func (p *parser) assert(cond bool, msg string) {
