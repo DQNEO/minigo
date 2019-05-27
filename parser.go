@@ -2031,9 +2031,9 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 }
 
 // copy packageMethods from p.nameTypes to gtype.packageMethods of each type
-func (p *parser) resolveMethods() {
+func resolveMethods(p *parser, packageScope *Scope) {
 	for typeName, methods := range p.packageMethods {
-		gtype := p.packageBlockScope.getGtype(typeName)
+		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", p.packageBlockScope.idents)
 			errorf("typaneme %s is not found in the package scope %s", typeName, p.packageName)

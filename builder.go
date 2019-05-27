@@ -28,7 +28,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
-	p.resolveMethods()
+	resolveMethods(p, p.packageBlockScope)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return &AstPackage{
 		name:           "",
@@ -43,7 +43,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{}
 	p.initPackage("")
 	internalRuntime := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	p.resolveMethods()
+	resolveMethods(p, p.packageBlockScope)
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return &AstPackage{
 		name:           "",
@@ -64,7 +64,7 @@ func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 		return nil
 	}
 	resolveInPackage(mainPkg, universe)
-	p.resolveMethods()
+	resolveMethods(p, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	setTypeIds(mainPkg.namedTypes)
@@ -96,7 +96,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		var codes []string = []string{pkgCode}
 		pkg := ParseSources(p, pkgName, codes, true)
 		resolveInPackage(pkg, universe)
-		p.resolveMethods()
+		resolveMethods(p, pkg.scope)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 		setTypeIds(pkg.namedTypes)
