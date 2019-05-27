@@ -25,11 +25,11 @@ type parser struct {
 	unresolvedRelations []*Relation
 	uninferredGlobals   []*ExprVariable
 	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	stringLiterals []*ExprStringLiteral
 
 	// per package
 	packageName    identifier
 	methods        map[identifier]methods
-	stringLiterals []*ExprStringLiteral
 	namedTypes     []*DeclType
 	dynamicTypes   []*Gtype
 }
