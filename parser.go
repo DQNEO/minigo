@@ -2053,8 +2053,11 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 			namedTypes = append(namedTypes, n)
 		}
 
-		for typeName, methods := range astFile.methods {
-			for mname, ref := range methods {
+
+		for typeName, _methods := range astFile.methods {
+			var mname identifier
+			var ref *ExprFuncRef
+			for mname, ref = range _methods {
 				almthds, ok := allmethods[typeName]
 				if !ok {
 					almthds = map[identifier]*ExprFuncRef{}

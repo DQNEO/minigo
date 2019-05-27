@@ -72,11 +72,11 @@ func (clause *ForRangeClause) infer() {
 		assert(ok, nil, "ok")
 
 		var elementType *Gtype
-		if collectionType.kind == G_ARRAY {
+		if collectionType.getKind() == G_ARRAY {
 			elementType = collectionType.elementType
-		} else if collectionType.kind == G_SLICE {
+		} else if collectionType.getKind() == G_SLICE {
 			elementType = collectionType.elementType
-		} else if collectionType.kind == G_MAP {
+		} else if collectionType.getKind() == G_MAP {
 			elementType = collectionType.mapValue
 		} else {
 			errorft(clause.token(), "internal error")
