@@ -18,20 +18,20 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	tokenStream       *TokenStream
-	packageBlockScope *Scope
-	currentScope      *Scope
-	importedNames     map[identifier]bool
+	tokenStream         *TokenStream
+	packageBlockScope   *Scope
+	currentScope        *Scope
+	importedNames       map[identifier]bool
 	unresolvedRelations []*Relation
 
 	// per package
-	packageName                identifier
-	packageMethods             map[identifier]methods
-	packageUninferredGlobals   []*ExprVariable
-	packageUninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
-	packageStringLiterals      []*ExprStringLiteral
-	packageNamedTypes          []*DeclType
-	packageDynamicTypes        []*Gtype
+	packageName              identifier
+	packageMethods           map[identifier]methods
+	packageUninferredGlobals []*ExprVariable
+	packageUninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
+	packageStringLiterals    []*ExprStringLiteral
+	packageNamedTypes        []*DeclType
+	packageDynamicTypes      []*Gtype
 }
 
 func (p *parser) clearLocalState() {
@@ -1837,7 +1837,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation, add bool) {
 	}
 
 	if pkg == "" {
-		relbody := resolve(p.currentScope, rel)  //p.currentScope.get(rel.name)
+		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
 		if relbody == nil {
 			if add && rel.name != "_" {
 				p.unresolvedRelations = append(p.unresolvedRelations, rel)
@@ -2000,7 +2000,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 		packageClause: packageClause,
 		importDecls:   importDecls,
 		topLevelDecls: topLevelDecls,
-		unresolved: stillUnresolved,
+		unresolved:    stillUnresolved,
 	}
 }
 

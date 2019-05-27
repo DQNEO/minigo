@@ -30,11 +30,11 @@ func compileUniverse(universe *Scope) *AstPackage {
 	internalUniverse := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
 	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
-	return  &AstPackage{
-		name:"",
-		files:[]*AstFile{internalUniverse},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
+	return &AstPackage{
+		name:           "",
+		files:          []*AstFile{internalUniverse},
+		stringLiterals: p.packageStringLiterals,
+		dynamicTypes:   p.packageDynamicTypes,
 	}
 }
 
@@ -46,10 +46,10 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p.resolveMethods()
 	inferTypes(p.packageUninferredGlobals, p.packageUninferredLocals)
 	return &AstPackage{
-		name:"",
-		files:[]*AstFile{internalRuntime},
-		stringLiterals:p.packageStringLiterals,
-		dynamicTypes:p.packageDynamicTypes,
+		name:           "",
+		files:          []*AstFile{internalRuntime},
+		stringLiterals: p.packageStringLiterals,
+		dynamicTypes:   p.packageDynamicTypes,
 	}
 }
 
