@@ -2035,8 +2035,8 @@ func resolveMethods(p *parser, packageScope *Scope) {
 	for typeName, methods := range p.packageMethods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
-			debugf("%#v", p.packageBlockScope.idents)
-			errorf("typaneme %s is not found in the package scope %s", typeName, p.packageName)
+			debugf("%#v", packageScope.idents)
+			errorf("typaneme %s is not found in the package scope %s", typeName, packageScope.name)
 		}
 		gtype.methods = methods
 	}
