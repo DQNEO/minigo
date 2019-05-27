@@ -2014,7 +2014,8 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	}
 }
 
-func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool) *AstPackage {
+func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPackage {
+	p := &parser{}
 	p.initPackage(pkgname)
 	pkgScope := newScope(nil, string(pkgname))
 

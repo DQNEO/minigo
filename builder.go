@@ -57,8 +57,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 
 func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
-	p := &parser{}
-	mainPkg := ParseSources(p, identifier("main"), sourceFiles, false)
+	mainPkg := ParseSources(identifier("main"), sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -89,14 +88,13 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
-		p := &parser{}
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
 		var codes []string = []string{pkgCode}
-		pkg := ParseSources(p, pkgName, codes, true)
+		pkg := ParseSources(pkgName, codes, true)
 		resolveInPackage(pkg, universe)
 		resolveMethods(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
