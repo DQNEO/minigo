@@ -1838,10 +1838,8 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 	if pkg == "" {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
-		if relbody == nil {
-			if rel.name != "_" {
+		if relbody == nil && rel.name != "_" {
 				p.unresolvedRelations = append(p.unresolvedRelations, rel)
-			}
 		}
 	} else {
 		// foreign package
