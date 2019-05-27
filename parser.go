@@ -2080,8 +2080,8 @@ func ParseSources(p *parser, pkgname identifier, sources []string, onMemory bool
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
-func resolveMethods(methods map[identifier]methods, packageScope *Scope) {
-	for typeName, methods := range methods {
+func resolveMethods(pmethods map[identifier]methods, packageScope *Scope) {
+	for typeName, methods := range pmethods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
 			debugf("%#v", packageScope.idents)
