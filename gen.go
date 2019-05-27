@@ -1255,7 +1255,7 @@ func (f *StmtFor) emitRangeForList() {
 	emit("")
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().kind == G_ARRAY || f.rng.rangeexpr.getGtype().kind == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got " + f.rng.rangeexpr.getGtype().String())
+	assert(f.rng.rangeexpr.getGtype().kind == G_ARRAY || f.rng.rangeexpr.getGtype().kind == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
 
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()

@@ -18,7 +18,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	packageName    identifier
+	packageName         identifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
@@ -26,11 +26,10 @@ type parser struct {
 	unresolvedRelations []*Relation
 	uninferredGlobals   []*ExprVariable
 	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
-	stringLiterals []*ExprStringLiteral
-	namedTypes     []*DeclType
-	dynamicTypes   []*Gtype
-	methods        map[identifier]methods
-
+	stringLiterals      []*ExprStringLiteral
+	namedTypes          []*DeclType
+	dynamicTypes        []*Gtype
+	methods             map[identifier]methods
 }
 
 func (p *parser) clearLocalState() {
@@ -1833,7 +1832,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	if pkg == "" {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
 		if relbody == nil && rel.name != "_" {
-				p.unresolvedRelations = append(p.unresolvedRelations, rel)
+			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {
 		// foreign package
@@ -1945,7 +1944,7 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
 	p.importedNames = map[identifier]bool{}
-	p.methods =  map[identifier]methods{}
+	p.methods = map[identifier]methods{}
 }
 
 // https://golang.org/ref/spec#Source_file_organization
@@ -2016,14 +2015,14 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 	var uninferredGlobals []*ExprVariable
 	var uninferredLocals []Inferrer
 	var stringLiterals []*ExprStringLiteral
-	var dynamicTypes   []*Gtype
-	var namedTypes     []*DeclType
-	var allmethods     map[identifier]methods = map[identifier]methods{}
+	var dynamicTypes []*Gtype
+	var namedTypes []*DeclType
+	var allmethods map[identifier]methods = map[identifier]methods{}
 
 	for _, source := range sources {
 		var astFile *AstFile
 		p := &parser{
-			packageName:pkgname,
+			packageName: pkgname,
 		}
 		if onMemory {
 			var filename string = string(pkgname) + ".memory"
@@ -2047,7 +2046,6 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 		for _, n := range astFile.namedTypes {
 			namedTypes = append(namedTypes, n)
 		}
-
 
 		for typeName, _methods := range astFile.methods {
 			var mname identifier
