@@ -35,7 +35,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{f},
-		stringLiterals: p.stringLiterals,
+		stringLiterals: f.stringLiterals,
 		dynamicTypes:   p.dynamicTypes,
 	}
 }
@@ -50,7 +50,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{f},
-		stringLiterals: p.stringLiterals,
+		stringLiterals: f.stringLiterals,
 		dynamicTypes:   p.dynamicTypes,
 	}
 }
