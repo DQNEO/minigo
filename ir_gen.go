@@ -53,13 +53,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		dynamicTypes = append(dynamicTypes, dt)
 	}
 
-	var importedPackages []*AstPackage
-
-	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(pkgName)]
-		importedPackages = append(importedPackages, compiledPkg)
-	}
-
+	importedPackages := csl.getPackages()
 	for _, pkg := range importedPackages {
 		collectDecls(pkg)
 		packages = append(packages, pkg)

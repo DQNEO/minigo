@@ -113,6 +113,16 @@ type compiledStdlib struct {
 	uniqImportedPackageNames []string
 }
 
+func (csl *compiledStdlib) getPackages() []*AstPackage {
+	var importedPackages []*AstPackage
+
+	for _, pkgName := range csl.uniqImportedPackageNames {
+		compiledPkg := csl.compiledPackages[identifier(pkgName)]
+		importedPackages = append(importedPackages, compiledPkg)
+	}
+	return importedPackages
+}
+
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 	csl.compiledPackages[pkg.name] = pkg
 	if !in_array(string(pkg.name), csl.uniqImportedPackageNames) {
