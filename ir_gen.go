@@ -41,21 +41,24 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	importedPackages := csl.getPackages()
 	for _, pkg := range importedPackages {
 		packages = append(packages, pkg)
-		setStringLables(pkg, string(pkg.name))
 	}
 
+	internalUniverse.stringLabelPrefix = "universe"
 	packages = append(packages, internalUniverse)
-	setStringLables(internalUniverse, "")
 
+	internalRuntime.stringLabelPrefix = "iruntime"
 	packages = append(packages, internalRuntime)
-	setStringLables(internalRuntime, "iruntime")
 
 	packages = append(packages, mainPkg)
-	setStringLables(mainPkg, string(mainPkg.name))
 
 	var dynamicTypes []*Gtype
 	for _, pkg := range packages {
 		collectDecls(pkg)
+		if pkg.stringLabelPrefix != "" {
+			setStringLables(pkg, pkg.stringLabelPrefix)
+		} else {
+			setStringLables(pkg, string(pkg.name))
+		}
 		for _, dt := range pkg.dynamicTypes {
 			dynamicTypes = append(dynamicTypes, dt)
 		}

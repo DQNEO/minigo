@@ -12,6 +12,7 @@ type AstPackage struct {
 	vars              []*DeclVar
 	funcs             []*DeclFunc
 	methods           map[identifier]methods
+	stringLabelPrefix string
 }
 
 type AstFile struct {
