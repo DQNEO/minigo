@@ -3489,13 +3489,11 @@ func (root *IrRoot) emit() {
 		emit(".string \"%s\"", shortMethodName)
 	}
 
-	emitComment("GLOBAL VARS (len=%d)", len(root.vars))
-	emit("")
+	emit(".data 0")
 	for _, vardecl := range root.vars {
 		vardecl.emitGlobal()
 	}
 
-	emitComment("FUNCTIONS")
 	emit(".text")
 	for _, funcdecl := range root.funcs {
 		funcdecl.emit()
