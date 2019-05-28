@@ -13,14 +13,14 @@ type IrRoot struct {
 
 var groot *IrRoot
 
-var declvars []*DeclVar
+var vars []*DeclVar
 var funcs []*DeclFunc
 
 func collectDecls(pkg *AstPackage) {
 	for _, f := range pkg.files {
 		for _, decl := range f.topLevelDecls {
 			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
+				vars = append(vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
 				funcs = append(funcs, decl.funcdecl)
 			}
@@ -85,7 +85,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 
 	root := &IrRoot{}
 	root.packages = packages
-	root.vars = declvars
+	root.vars = vars
 	root.funcs = funcs
 	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
