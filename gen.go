@@ -3497,9 +3497,11 @@ func (root *IrRoot) emit() {
 		emit(".string \"%s\"", shortMethodName)
 	}
 
-	for _, vardecl := range root.vars {
-		emit(".data 0")
-		vardecl.emit()
+	for _, pkg := range root.packages {
+		for _, vardecl := range pkg.vars {
+			emit(".data 0")
+			vardecl.emit()
+		}
 	}
 
 	for _, funcdecl := range root.funcs {

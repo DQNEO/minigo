@@ -21,6 +21,7 @@ func collectDecls(pkg *AstPackage) {
 		for _, decl := range f.topLevelDecls {
 			if decl.vardecl != nil {
 				vars = append(vars, decl.vardecl)
+				pkg.vars = append(pkg.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
 				funcs = append(funcs, decl.funcdecl)
 			}
