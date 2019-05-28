@@ -63,18 +63,30 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		}
 	}
 
-	var files []*AstFile
-	files = append(files, internalUniverse.files[0])
-	files = append(files, internalRuntime.files[0])
-	for _, f := range mainPkg.files {
-		files = append(files, f)
+	for _, f := range internalUniverse.files {
+		for _, decl := range f.topLevelDecls {
+			if decl.vardecl != nil {
+				declvars = append(declvars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				funcs = append(funcs, decl.funcdecl)
+			}
+		}
 	}
 
+	for _, f := range internalRuntime.files {
+		for _, decl := range f.topLevelDecls {
+			if decl.vardecl != nil {
+				declvars = append(declvars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				funcs = append(funcs, decl.funcdecl)
+			}
+		}
+	}
 	for _, dt := range mainPkg.dynamicTypes {
 		dynamicTypes = append(dynamicTypes, dt)
 	}
 
-	for _, f := range files {
+	for _, f := range mainPkg.files {
 		for _, decl := range f.topLevelDecls {
 			if decl.vardecl != nil {
 				declvars = append(declvars, decl.vardecl)
