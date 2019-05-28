@@ -3427,8 +3427,6 @@ func (root *IrRoot) emit() {
 
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
-
-	emit("")
 	emitComment("special strings")
 
 	// emit builtin string
@@ -3442,17 +3440,6 @@ func (root *IrRoot) emit() {
 	emitLabel(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
 
-	// strings per package
-	for _, pkg := range root.packages {
-		emit("# package %s", pkg.name)
-		emit("# string literals")
-		for _, ast := range pkg.stringLiterals {
-			emitLabel(".%s:", ast.slabel)
-			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
-			// the assembler marks the end of each string with a 0 byte.
-			emit(".string \"%s\"", ast.val)
-		}
-	}
 
 	emit("")
 	emitComment("Dynamic Types")
@@ -3497,11 +3484,26 @@ func (root *IrRoot) emit() {
 		emit(".string \"%s\"", shortMethodName)
 	}
 
+	emitRuntimeArgs()
+	emitMainFunc(root.importOS)
+
+	// emit packages
 	for _, pkg := range root.packages {
+		emit("# package %s", pkg.name)
+		emit("# string literals")
+		emit(".data 0")
+		for _, ast := range pkg.stringLiterals {
+			emitLabel(".%s:", ast.slabel)
+			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
+			// the assembler marks the end of each string with a 0 byte.
+			emit(".string \"%s\"", ast.val)
+		}
+
 		for _, vardecl := range pkg.vars {
 			emit(".data 0")
 			vardecl.emit()
 		}
+
 		for _, funcdecl := range pkg.funcs {
 			emit(".text")
 			funcdecl.emit()
@@ -3509,6 +3511,4 @@ func (root *IrRoot) emit() {
 
 	}
 
-	emitRuntimeArgs()
-	emitMainFunc(root.importOS)
 }
