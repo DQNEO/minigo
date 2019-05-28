@@ -70,7 +70,6 @@ func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 	resolveMethods(mainPkg.methods, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(mainPkg.uninferredGlobals, mainPkg.uninferredLocals)
-	setTypeIds(mainPkg.namedTypes)
 	if debugAst {
 		mainPkg.dump()
 	}
@@ -101,7 +100,6 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		resolveMethods(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
-		setTypeIds(pkg.namedTypes)
 		libs.AddPackage(pkg)
 	}
 

@@ -1,11 +1,13 @@
 // Semantic Analyzer to produce IR struct
 package main
 
+import "fmt"
+
 var typeId int = 1 // start with 1 because we want to zero as error
 
 func setTypeIds(namedTypes []*DeclType) {
-	for _, concreteNamedType := range namedTypes {
-		concreteNamedType.gtype.receiverTypeId = typeId
+	for _, namedType := range namedTypes {
+		namedType.gtype.receiverTypeId = typeId
 		typeId++
 	}
 }
@@ -48,3 +50,22 @@ func resolveMethods(pmethods map[identifier]methods, packageScope *Scope) {
 		gtype.methods = methods
 	}
 }
+
+func collectDecls(pkg *AstPackage) {
+	for _, f := range pkg.files {
+		for _, decl := range f.topLevelDecls {
+			if decl.vardecl != nil {
+				pkg.vars = append(pkg.vars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				pkg.funcs = append(pkg.funcs, decl.funcdecl)
+			}
+		}
+	}
+}
+
+func setStringLables(pkg *AstPackage, prefix string) {
+	for id, sl := range pkg.stringLiterals {
+		sl.slabel = fmt.Sprintf("%s.S%d", prefix, id+1)
+	}
+}
+

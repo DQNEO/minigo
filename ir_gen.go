@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 var groot *IrRoot
 
 type IrRoot struct {
@@ -9,24 +7,6 @@ type IrRoot struct {
 	methodTable   map[int][]string
 	uniquedDTypes []string
 	importOS      bool
-}
-
-func collectDecls(pkg *AstPackage) {
-	for _, f := range pkg.files {
-		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				pkg.vars = append(pkg.vars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				pkg.funcs = append(pkg.funcs, decl.funcdecl)
-			}
-		}
-	}
-}
-
-func setStringLables(pkg *AstPackage, prefix string) {
-	for id, sl := range pkg.stringLiterals {
-		sl.slabel = fmt.Sprintf("%s.S%d", prefix, id+1)
-	}
 }
 
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
@@ -60,6 +40,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		for _, fn := range pkg.funcs {
 			funcs = append(funcs, fn)
 		}
+		setTypeIds(pkg.namedTypes)
 	}
 
 	root := &IrRoot{}
