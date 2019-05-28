@@ -3502,11 +3502,11 @@ func (root *IrRoot) emit() {
 			emit(".data 0")
 			vardecl.emit()
 		}
-	}
+		for _, funcdecl := range pkg.funcs {
+			emit(".text")
+			funcdecl.emit()
+		}
 
-	for _, funcdecl := range root.funcs {
-		emit(".text")
-		funcdecl.emit()
 	}
 
 	emitRuntimeArgs()

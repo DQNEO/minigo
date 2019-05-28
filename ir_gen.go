@@ -2,28 +2,22 @@ package main
 
 import "fmt"
 
+var groot *IrRoot
+
 type IrRoot struct {
-	vars           []*DeclVar
-	funcs          []*DeclFunc
 	packages       []*AstPackage
 	methodTable    map[int][]string
 	uniquedDTypes  []string
 	importOS       bool
 }
 
-var groot *IrRoot
-
-var vars []*DeclVar
-var funcs []*DeclFunc
-
 func collectDecls(pkg *AstPackage) {
 	for _, f := range pkg.files {
 		for _, decl := range f.topLevelDecls {
 			if decl.vardecl != nil {
-				vars = append(vars, decl.vardecl)
 				pkg.vars = append(pkg.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
-				funcs = append(funcs, decl.funcdecl)
+				pkg.funcs = append(pkg.funcs, decl.funcdecl)
 			}
 		}
 	}
@@ -52,6 +46,8 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	packages = append(packages, mainPkg)
 
 	var dynamicTypes []*Gtype
+	var funcs []*DeclFunc
+
 	for _, pkg := range packages {
 		collectDecls(pkg)
 		if pkg.stringLabelPrefix != "" {
@@ -62,12 +58,13 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		for _, dt := range pkg.dynamicTypes {
 			dynamicTypes = append(dynamicTypes, dt)
 		}
+		for _, fn := range pkg.funcs {
+			funcs = append(funcs, fn)
+		}
 	}
 
 	root := &IrRoot{}
 	root.packages = packages
-	root.vars = vars
-	root.funcs = funcs
 	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
 	root.methodTable = composeMethodTable(funcs)
