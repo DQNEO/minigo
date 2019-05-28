@@ -89,7 +89,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	root.funcs = funcs
 	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
-	root.composeMethodTable()
+	root.methodTable = composeMethodTable(funcs)
 	return root
 }
 
@@ -105,10 +105,13 @@ func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 	ir.uniquedDTypes = uniquedDTypes
 }
 
-func (ir *IrRoot) composeMethodTable() {
+func composeMethodTable(funcs []*DeclFunc)  map[int][]string  {
 	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
-	for _, funcdecl := range ir.funcs {
-		if funcdecl.receiver != nil {
+
+	for _, funcdecl := range funcs {
+		if funcdecl.receiver == nil {
+			continue
+		}
 			//debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
 			if gtype.kind == G_POINTER {
@@ -122,10 +125,8 @@ func (ir *IrRoot) composeMethodTable() {
 			methods := methodTable[typeId]
 			methods = append(methods, symbol)
 			methodTable[typeId] = methods
-		}
 	}
 	debugf("set methodTable")
-
-	ir.methodTable = methodTable
+	return methodTable
 }
 

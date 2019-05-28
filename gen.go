@@ -1832,7 +1832,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		lit := rhs.(*ExprMapLiteral)
 		lit.emitPush()
-	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion:
+	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
 		emit("push %%rax")
 		emit("push %%rbx")
