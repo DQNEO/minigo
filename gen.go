@@ -3421,10 +3421,7 @@ var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:
 var builtinStringKey2 string = "SfmtDumpSlice"
 var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
-// generate code
-func (root *IrRoot) emit() {
-	groot = root
-
+func (root *IrRoot) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
 	emitComment("special strings")
@@ -3439,8 +3436,9 @@ func (root *IrRoot) emit() {
 	eEmptyString.slabel = fmt.Sprintf("S%d", 0)
 	emitLabel(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
+}
 
-
+func (root *IrRoot) emitDynamicTypes() {
 	emit("")
 	emitComment("Dynamic Types")
 	for dynamicTypeId, gs := range root.uniquedDTypes {
@@ -3448,7 +3446,9 @@ func (root *IrRoot) emit() {
 		emitLabel(".%s:", label)
 		emit(".string \"%s\"", gs)
 	}
+}
 
+func (root *IrRoot) emitMethodTable() {
 	emitComment("Method table")
 
 	emitLabel("%s:", "receiverTypes")
@@ -3483,6 +3483,16 @@ func (root *IrRoot) emit() {
 		emitLabel(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
 	}
+
+}
+
+// generate code
+func (root *IrRoot) emit() {
+	groot = root
+
+	root.emitSpecialStrings()
+	root.emitDynamicTypes()
+	root.emitMethodTable()
 
 	emitRuntimeArgs()
 	emitMainFunc(root.importOS)

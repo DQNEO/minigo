@@ -71,7 +71,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	return root
 }
 
-func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
+func (root *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 	var uniquedDTypes []string = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
@@ -80,7 +80,7 @@ func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 		}
 	}
 
-	ir.uniquedDTypes = uniquedDTypes
+	root.uniquedDTypes = uniquedDTypes
 }
 
 func composeMethodTable(funcs []*DeclFunc)  map[int][]string  {
