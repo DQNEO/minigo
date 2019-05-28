@@ -3404,7 +3404,7 @@ func (decl *DeclVar) emitGlobal() {
 type IrRoot struct {
 	vars           []*DeclVar
 	funcs          []*DeclFunc
-	stringLiterals []*ExprStringLiteral
+	packages       []*AstPackage
 	methodTable    map[int][]string
 	uniquedDTypes  []string
 	importOS       bool
@@ -3424,15 +3424,15 @@ var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:
 var builtinStringKey2 string = "SfmtDumpSlice"
 var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
+// generate code
 func (root *IrRoot) emit() {
 	groot = root
-	// generate code
 
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
 
 	emit("")
-	emitComment("STRING LITERALS")
+	emitComment("special strings")
 
 	// emit builtin string
 	emitLabel(".%s:", builtinStringKey1)
@@ -3445,11 +3445,16 @@ func (root *IrRoot) emit() {
 	emitLabel(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
 
-	for _, ast := range root.stringLiterals {
-		emitLabel(".%s:", ast.slabel)
-		// https://sourceware.org/binutils/docs-2.30/as/String.html#String
-		// the assembler marks the end of each string with a 0 byte.
-		emit(".string \"%s\"", ast.val)
+	// strings per package
+	for _, pkg := range root.packages {
+		emit("# package %s", pkg.name)
+		emit("# string literals")
+		for _, ast := range pkg.stringLiterals {
+			emitLabel(".%s:", ast.slabel)
+			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
+			// the assembler marks the end of each string with a 0 byte.
+			emit(".string \"%s\"", ast.val)
+		}
 	}
 
 	emit("")
