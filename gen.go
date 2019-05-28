@@ -2112,7 +2112,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 	}
 }
 
-
 func (decl *DeclVar) emit() {
 	if decl.variable.isGlobal {
 		decl.emitGlobal()

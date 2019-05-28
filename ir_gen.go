@@ -5,10 +5,10 @@ import "fmt"
 var groot *IrRoot
 
 type IrRoot struct {
-	packages       []*AstPackage
-	methodTable    map[int][]string
-	uniquedDTypes  []string
-	importOS       bool
+	packages      []*AstPackage
+	methodTable   map[int][]string
+	uniquedDTypes []string
+	importOS      bool
 }
 
 func collectDecls(pkg *AstPackage) {
@@ -22,7 +22,6 @@ func collectDecls(pkg *AstPackage) {
 		}
 	}
 }
-
 
 func setStringLables(pkg *AstPackage, prefix string) {
 	for id, sl := range pkg.stringLiterals {
@@ -83,7 +82,7 @@ func (root *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 	root.uniquedDTypes = uniquedDTypes
 }
 
-func composeMethodTable(funcs []*DeclFunc)  map[int][]string  {
+func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
@@ -107,4 +106,3 @@ func composeMethodTable(funcs []*DeclFunc)  map[int][]string  {
 	debugf("set methodTable")
 	return methodTable
 }
-
