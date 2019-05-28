@@ -32,16 +32,20 @@ const ptrSize int = 8
 const sliceWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
-func emit(format string, v ...interface{}) {
-	s := fmt.Sprintf("\t"+format+"\n", v...)
+func emitOut(format string, v ...interface{}) {
+	s := fmt.Sprintf(format, v...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
 
-func emitLabel(format string, v ...interface{}) {
-	s := fmt.Sprintf(format+"\n", v...)
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
+func emit(format string, v ...interface{}) {
+	frmt := "\t"+format+"\n"
+	emitOut(frmt, v...)
+}
+
+func emitWithoutIndent(format string, v ...interface{}) {
+	frmt := format+"\n"
+	emitOut(frmt, v...)
 }
 
 // Mytype.method -> Mytype#method
@@ -79,7 +83,7 @@ func (f *DeclFunc) getSymbol() string {
 }
 
 func (f *DeclFunc) emitPrologue() {
-	emitLabel("%s:", f.getSymbol())
+	emitWithoutIndent("%s:", f.getSymbol())
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -2444,7 +2448,7 @@ func (e *ExprTypeAssertion) emit() {
 		labelEnd := makeLabel()
 		emit("je %s # jmp if nil", labelEnd)
 		emit("mov (%%rax), %%rax") // deref
-		emitLabel("%s:", labelEnd)
+		emitWithoutIndent("%s:", labelEnd)
 	}
 }
 
@@ -2887,20 +2891,20 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		slabel := makeLabel()
 		emit(".data 0")
-		emitLabel("%s:", slabel)
+		emitWithoutIndent("%s:", slabel)
 		emit(".string \"%s\"", "assertInterface failed")
 		emit(".text")
 		emit("lea %s, %%rdi", slabel)
 		emit("mov $0, %%rax")
 		emit("call %s", ".panic")
 
-		emitLabel("%s:", labelEnd)
+		emitWithoutIndent("%s:", labelEnd)
 		emit("")
 
 	case builtinAsComment:
 		arg := funcall.args[0]
 		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
-			emitLabel("# %s", stringLiteral.val)
+			emitWithoutIndent("# %s", stringLiteral.val)
 		}
 	default:
 		var staticCall *IrStaticCall = &IrStaticCall{
@@ -3081,7 +3085,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 }
 
 func emitRuntimeArgs() {
-	emitLabel(".runtime_args:")
+	emitWithoutIndent(".runtime_args:")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -3096,7 +3100,7 @@ func emitRuntimeArgs() {
 func emitMainFunc(importOS bool) {
 	fname := "main"
 	emit(".global	%s", fname)
-	emitLabel("%s:", fname)
+	emitWithoutIndent("%s:", fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -3123,7 +3127,7 @@ func emitMainFunc(importOS bool) {
 	emitFuncEpilogue("noop_handler", nil)
 
 	// makeSlice
-	emitLabel("%s:", ".makeSlice")
+	emitWithoutIndent("%s:", ".makeSlice")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emit("")
@@ -3205,7 +3209,7 @@ func (decl *DeclVar) emitData() {
 
 	emit("# emitData()")
 	emit(".data 0")
-	emitLabel("%s: # gtype=%s", decl.variable.varname, gtype.String())
+	emitWithoutIndent("%s: # gtype=%s", decl.variable.varname, gtype.String())
 	emit("# right.gtype = %s", right.getGtype().String())
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
@@ -3385,7 +3389,7 @@ func emitDataAddr(operand Expr, depth int) {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitLabel("# emitGlobal for %s", decl.variable.varname)
+	emitWithoutIndent("# emitGlobal for %s", decl.variable.varname)
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {
@@ -3419,14 +3423,14 @@ func (root *IrRoot) emitSpecialStrings() {
 	emit("# special strings")
 
 	// emit builtin string
-	emitLabel(".%s:", builtinStringKey1)
+	emitWithoutIndent(".%s:", builtinStringKey1)
 	emit(".string \"%s\"", builtinStringValue1)
-	emitLabel(".%s:", builtinStringKey2)
+	emitWithoutIndent(".%s:", builtinStringKey2)
 	emit(".string \"%s\"", builtinStringValue2)
 
 	// empty string
 	eEmptyString.slabel = "empty"
-	emitLabel(".%s:", eEmptyString.slabel)
+	emitWithoutIndent(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
 }
 
@@ -3435,7 +3439,7 @@ func (root *IrRoot) emitDynamicTypes() {
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range root.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitLabel(".%s:", label)
+		emitWithoutIndent(".%s:", label)
 		emit(".string \"%s\"", gs)
 	}
 }
@@ -3443,7 +3447,7 @@ func (root *IrRoot) emitDynamicTypes() {
 func (root *IrRoot) emitMethodTable() {
 	emit("# Method table")
 
-	emitLabel("%s:", "receiverTypes")
+	emitWithoutIndent("%s:", "receiverTypes")
 	emit(".quad 0 # receiverTypeId:0")
 	for i := 1; i <= len(root.methodTable); i++ {
 		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
@@ -3452,7 +3456,7 @@ func (root *IrRoot) emitMethodTable() {
 	var shortMethodNames []string
 
 	for i := 1; i <= len(root.methodTable); i++ {
-		emitLabel("receiverType%d:", i)
+		emitWithoutIndent("receiverType%d:", i)
 		mt := root.methodTable
 		methods, ok := mt[i]
 		if !ok {
@@ -3472,7 +3476,7 @@ func (root *IrRoot) emitMethodTable() {
 
 	emit("# METHOD NAMES")
 	for _, shortMethodName := range shortMethodNames {
-		emitLabel(".M%s:", shortMethodName)
+		emitWithoutIndent(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
 	}
 
@@ -3495,7 +3499,7 @@ func (root *IrRoot) emit() {
 		emit("# string literals")
 		emit(".data 0")
 		for _, ast := range pkg.stringLiterals {
-			emitLabel(".%s:", ast.slabel)
+			emitWithoutIndent(".%s:", ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
 			emit(".string \"%s\"", ast.val)
