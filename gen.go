@@ -2112,8 +2112,17 @@ func assignToArray(lhs Expr, rhs Expr) {
 	}
 }
 
-// for local var
+
 func (decl *DeclVar) emit() {
+	if decl.variable.isGlobal {
+		decl.emitGlobal()
+	} else {
+		decl.emitLocal()
+	}
+}
+
+// for local var
+func (decl *DeclVar) emitLocal() {
 	emit("")
 	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
@@ -3391,7 +3400,6 @@ func emitDataAddr(operand Expr, depth int) {
 
 func (decl *DeclVar) emitGlobal() {
 	emitLabel("# emitGlobal for %s", decl.variable.varname)
-	assert(decl.variable.isGlobal, nil, "should be global")
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {
@@ -3491,7 +3499,7 @@ func (root *IrRoot) emit() {
 
 	emit(".data 0")
 	for _, vardecl := range root.vars {
-		vardecl.emitGlobal()
+		vardecl.emit()
 	}
 
 	emit(".text")
