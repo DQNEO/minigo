@@ -1874,14 +1874,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("push %%rax # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
-	//debugf("dynamic type:%s", gtype)
-	dynamicTypeId := get_index(gtype.String(), groot.uniquedDTypes)
-	if dynamicTypeId == -1 {
-		//debugf("types:%#v", groot.uniquedDynamicTypes)
-		//debugf("gtype.origType.relation.pkg:%s", gtype.origType.relation.pkg)
-		errorft(dynamicValue.token(), "type %s not found in uniquedDTypes", gtype.String())
-	}
-	label := fmt.Sprintf("DynamicTypeId%d", dynamicTypeId)
+	label := groot.getTypeLabel(gtype)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("mov %%rax, %%rcx # dynamicType")
 	emit("pop %%rbx # receiverTypeId")
@@ -3410,6 +3403,9 @@ func (decl *DeclVar) emitGlobal() {
 
 func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
 	dynamicTypeId := get_index(gtype.String(), root.uniquedDTypes)
+	if dynamicTypeId == -1 {
+		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
+	}
 	label := fmt.Sprintf("DynamicTypeId%d", dynamicTypeId)
 	return label
 }
