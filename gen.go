@@ -3401,13 +3401,16 @@ func (decl *DeclVar) emitGlobal() {
 	}
 }
 
+func makeDynamicTypeLabel(id int) string {
+	return fmt.Sprintf("DynamicTypeId%d", id)
+}
+
 func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
 	dynamicTypeId := get_index(gtype.String(), root.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
 	}
-	label := fmt.Sprintf("DynamicTypeId%d", dynamicTypeId)
-	return label
+	return makeDynamicTypeLabel(dynamicTypeId)
 }
 
 // builtin string
@@ -3437,7 +3440,7 @@ func (root *IrRoot) emitDynamicTypes() {
 	emit("")
 	emitComment("Dynamic Types")
 	for dynamicTypeId, gs := range root.uniquedDTypes {
-		label := fmt.Sprintf("DynamicTypeId%d", dynamicTypeId)
+		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitLabel(".%s:", label)
 		emit(".string \"%s\"", gs)
 	}
