@@ -36,6 +36,9 @@ func setStringLables(pkg *AstPackage, prefix string) {
 }
 
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
+	internalUniverse.stringLabelPrefix = "universe"
+	internalRuntime.stringLabelPrefix = "iruntime"
+
 	var packages []*AstPackage
 
 	importedPackages := csl.getPackages()
@@ -43,12 +46,8 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		packages = append(packages, pkg)
 	}
 
-	internalUniverse.stringLabelPrefix = "universe"
 	packages = append(packages, internalUniverse)
-
-	internalRuntime.stringLabelPrefix = "iruntime"
 	packages = append(packages, internalRuntime)
-
 	packages = append(packages, mainPkg)
 
 	var dynamicTypes []*Gtype
