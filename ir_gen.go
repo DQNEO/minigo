@@ -38,27 +38,24 @@ func setStringLables(pkg *AstPackage, prefix string) {
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var packages []*AstPackage
 
-	packages = append(packages, internalUniverse)
-	packages = append(packages, internalRuntime)
-
-	setStringLables(internalUniverse, "")
-	setStringLables(internalRuntime, "iruntime")
-	setStringLables(mainPkg, string(mainPkg.name))
-
 	importedPackages := csl.getPackages()
 	for _, pkg := range importedPackages {
-		collectDecls(pkg)
 		packages = append(packages, pkg)
-
+		collectDecls(pkg)
 		setStringLables(pkg, string(pkg.name))
-
 	}
 
+	packages = append(packages, internalUniverse)
 	collectDecls(internalUniverse)
+	setStringLables(internalUniverse, "")
+
+	packages = append(packages, internalRuntime)
 	collectDecls(internalRuntime)
-	collectDecls(mainPkg)
+	setStringLables(internalRuntime, "iruntime")
 
 	packages = append(packages, mainPkg)
+	collectDecls(mainPkg)
+	setStringLables(mainPkg, string(mainPkg.name))
 
 	var dynamicTypes []*Gtype
 	for _, pkg := range packages {
