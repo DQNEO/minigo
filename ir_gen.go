@@ -28,6 +28,13 @@ func collectDecls(pkg *AstPackage) {
 	}
 }
 
+
+func setStringLables(pkg *AstPackage, prefix string) {
+	for id, sl := range pkg.stringLiterals {
+		sl.slabel = fmt.Sprintf("%s.S%d", prefix, id+1)
+	}
+}
+
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var packages []*AstPackage
 	var dynamicTypes []*Gtype
@@ -35,14 +42,12 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	packages = append(packages, internalUniverse)
 	packages = append(packages, internalRuntime)
 
-	for id, sl := range internalUniverse.stringLiterals {
-		sl.slabel = fmt.Sprintf(".S%d", id+1)
-	}
+	setStringLables(internalUniverse, "")
+	setStringLables(internalRuntime, "iruntime")
+	setStringLables(mainPkg, string(mainPkg.name))
+
 	for _, dt := range internalUniverse.dynamicTypes {
 		dynamicTypes = append(dynamicTypes, dt)
-	}
-	for id, sl := range internalRuntime.stringLiterals {
-		sl.slabel = fmt.Sprintf("iruntime.S%d", id+1)
 	}
 	for _, dt := range internalRuntime.dynamicTypes {
 		dynamicTypes = append(dynamicTypes, dt)
@@ -59,9 +64,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		collectDecls(pkg)
 		packages = append(packages, pkg)
 
-		for id, sl := range pkg.stringLiterals {
-			sl.slabel = fmt.Sprintf("%s.S%d", pkg.name, id+1)
-		}
+		setStringLables(pkg, string(pkg.name))
 
 		for _, dt := range pkg.dynamicTypes {
 			dynamicTypes = append(dynamicTypes, dt)
@@ -76,10 +79,6 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		dynamicTypes = append(dynamicTypes, dt)
 	}
 
-
-	for id, sl := range mainPkg.stringLiterals {
-		sl.slabel = fmt.Sprintf("%s.S%d", mainPkg.name, id+1)
-	}
 
 	packages = append(packages, mainPkg)
 
