@@ -3497,13 +3497,13 @@ func (root *IrRoot) emit() {
 		emit(".string \"%s\"", shortMethodName)
 	}
 
-	emit(".data 0")
 	for _, vardecl := range root.vars {
+		emit(".data 0")
 		vardecl.emit()
 	}
 
-	emit(".text")
 	for _, funcdecl := range root.funcs {
+		emit(".text")
 		funcdecl.emit()
 	}
 
