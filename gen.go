@@ -3401,17 +3401,6 @@ func (decl *DeclVar) emitGlobal() {
 	}
 }
 
-type IrRoot struct {
-	vars           []*DeclVar
-	funcs          []*DeclFunc
-	packages       []*AstPackage
-	methodTable    map[int][]string
-	uniquedDTypes  []string
-	importOS       bool
-}
-
-var groot *IrRoot
-
 func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
 	dynamicTypeId := get_index(gtype.String(), root.uniquedDTypes)
 	label := fmt.Sprintf("DT%d", dynamicTypeId)

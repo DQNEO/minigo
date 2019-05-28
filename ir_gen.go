@@ -2,6 +2,17 @@ package main
 
 import "fmt"
 
+type IrRoot struct {
+	vars           []*DeclVar
+	funcs          []*DeclFunc
+	packages       []*AstPackage
+	methodTable    map[int][]string
+	uniquedDTypes  []string
+	importOS       bool
+}
+
+var groot *IrRoot
+
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var packages []*AstPackage
 	var dynamicTypes []*Gtype
