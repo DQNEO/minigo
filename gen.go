@@ -3433,7 +3433,7 @@ func (root *IrRoot) emitSpecialStrings() {
 	emit(".string \"%s\"", builtinStringValue2)
 
 	// empty string
-	eEmptyString.slabel = fmt.Sprintf("S%d", 0)
+	eEmptyString.slabel = "empty"
 	emitLabel(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
 }
