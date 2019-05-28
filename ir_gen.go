@@ -9,9 +9,9 @@ type IrRoot struct {
 	importOS      bool
 }
 
-func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
-	internalUniverse.stringLabelPrefix = "universe"
-	internalRuntime.stringLabelPrefix = "iruntime"
+func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
+	universe.stringLabelPrefix = "universe"
+	iruntime.stringLabelPrefix = "iruntime"
 
 	var packages []*AstPackage
 
@@ -20,8 +20,8 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		packages = append(packages, pkg)
 	}
 
-	packages = append(packages, internalUniverse)
-	packages = append(packages, internalRuntime)
+	packages = append(packages, universe)
+	packages = append(packages, iruntime)
 	packages = append(packages, mainPkg)
 
 	var dynamicTypes []*Gtype
