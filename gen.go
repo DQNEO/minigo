@@ -38,12 +38,6 @@ func emit(format string, v ...interface{}) {
 	os.Stdout.Write(b)
 }
 
-func emitComment(format string, v ...interface{}) {
-	s := fmt.Sprintf("/* "+format+" */\n", v...)
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
-}
-
 func emitLabel(format string, v ...interface{}) {
 	s := fmt.Sprintf(format+"\n", v...)
 	var b []byte = []byte(s)
@@ -2512,7 +2506,7 @@ func (e *ExprVaArg) emit() {
 }
 
 func (e *ExprConversion) emit() {
-	emitComment("ExprConversion.emit()")
+	emit("# ExprConversion.emit()")
 	if e.gtype.isString() {
 		// s = string(bytes)
 		labelEnd := makeLabel()
@@ -3422,7 +3416,7 @@ var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 func (root *IrRoot) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
-	emitComment("special strings")
+	emit("# special strings")
 
 	// emit builtin string
 	emitLabel(".%s:", builtinStringKey1)
@@ -3438,7 +3432,7 @@ func (root *IrRoot) emitSpecialStrings() {
 
 func (root *IrRoot) emitDynamicTypes() {
 	emit("")
-	emitComment("Dynamic Types")
+	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range root.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitLabel(".%s:", label)
@@ -3447,7 +3441,7 @@ func (root *IrRoot) emitDynamicTypes() {
 }
 
 func (root *IrRoot) emitMethodTable() {
-	emitComment("Method table")
+	emit("# Method table")
 
 	emitLabel("%s:", "receiverTypes")
 	emit(".quad 0 # receiverTypeId:0")
@@ -3476,7 +3470,7 @@ func (root *IrRoot) emitMethodTable() {
 		}
 	}
 
-	emitComment("METHOD NAMES")
+	emit("# METHOD NAMES")
 	for _, shortMethodName := range shortMethodNames {
 		emitLabel(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
