@@ -37,7 +37,6 @@ func setStringLables(pkg *AstPackage, prefix string) {
 
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var packages []*AstPackage
-	var dynamicTypes []*Gtype
 
 	packages = append(packages, internalUniverse)
 	packages = append(packages, internalRuntime)
@@ -46,13 +45,6 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 	setStringLables(internalRuntime, "iruntime")
 	setStringLables(mainPkg, string(mainPkg.name))
 
-	for _, dt := range internalUniverse.dynamicTypes {
-		dynamicTypes = append(dynamicTypes, dt)
-	}
-	for _, dt := range internalRuntime.dynamicTypes {
-		dynamicTypes = append(dynamicTypes, dt)
-	}
-
 	importedPackages := csl.getPackages()
 	for _, pkg := range importedPackages {
 		collectDecls(pkg)
@@ -60,21 +52,20 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 
 		setStringLables(pkg, string(pkg.name))
 
-		for _, dt := range pkg.dynamicTypes {
-			dynamicTypes = append(dynamicTypes, dt)
-		}
 	}
 
 	collectDecls(internalUniverse)
 	collectDecls(internalRuntime)
 	collectDecls(mainPkg)
 
-	for _, dt := range mainPkg.dynamicTypes {
-		dynamicTypes = append(dynamicTypes, dt)
-	}
-
-
 	packages = append(packages, mainPkg)
+
+	var dynamicTypes []*Gtype
+	for _, pkg := range packages {
+		for _, dt := range pkg.dynamicTypes {
+			dynamicTypes = append(dynamicTypes, dt)
+		}
+	}
 
 	root := &IrRoot{}
 	root.packages = packages
