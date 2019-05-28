@@ -13,6 +13,21 @@ type IrRoot struct {
 
 var groot *IrRoot
 
+var declvars []*DeclVar
+var funcs []*DeclFunc
+
+func collectDecls(pkg *AstPackage) {
+	for _, f := range pkg.files {
+		for _, decl := range f.topLevelDecls {
+			if decl.vardecl != nil {
+				declvars = append(declvars, decl.vardecl)
+			} else if decl.funcdecl != nil {
+				funcs = append(funcs, decl.funcdecl)
+			}
+		}
+	}
+}
+
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var packages []*AstPackage
 	var dynamicTypes []*Gtype
@@ -40,19 +55,9 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 
-	var declvars []*DeclVar
-	var funcs []*DeclFunc
 	for _, pkg := range importedPackages {
+		collectDecls(pkg)
 		packages = append(packages, pkg)
-		for _, f := range pkg.files {
-			for _, decl := range f.topLevelDecls {
-				if decl.vardecl != nil {
-					declvars = append(declvars, decl.vardecl)
-				} else if decl.funcdecl != nil {
-					funcs = append(funcs, decl.funcdecl)
-				}
-			}
-		}
 
 		for id, sl := range pkg.stringLiterals {
 			sl.slabel = fmt.Sprintf("%s.S%d", pkg.name, id+1)
@@ -63,38 +68,15 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		}
 	}
 
-	for _, f := range internalUniverse.files {
-		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				funcs = append(funcs, decl.funcdecl)
-			}
-		}
-	}
+	collectDecls(internalUniverse)
+	collectDecls(internalRuntime)
+	collectDecls(mainPkg)
 
-	for _, f := range internalRuntime.files {
-		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				funcs = append(funcs, decl.funcdecl)
-			}
-		}
-	}
 	for _, dt := range mainPkg.dynamicTypes {
 		dynamicTypes = append(dynamicTypes, dt)
 	}
 
-	for _, f := range mainPkg.files {
-		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				funcs = append(funcs, decl.funcdecl)
-			}
-		}
-	}
+
 	for id, sl := range mainPkg.stringLiterals {
 		sl.slabel = fmt.Sprintf("%s.S%d", mainPkg.name, id+1)
 	}
