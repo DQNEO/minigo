@@ -3,8 +3,7 @@ package main
 import "fmt"
 
 type IrRoot struct {
-	vars           []*DeclVar
-	funcs          []*DeclFunc
+	decls          []*TopLevelDecl
 	packages       []*AstPackage
 	methodTable    map[int][]string
 	uniquedDTypes  []string
@@ -40,17 +39,12 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 
-	var declvars []*DeclVar
-	var funcs []*DeclFunc
+	var decls []*TopLevelDecl
 	for _, pkg := range importedPackages {
 		packages = append(packages, pkg)
 		for _, f := range pkg.files {
 			for _, decl := range f.topLevelDecls {
-				if decl.vardecl != nil {
-					declvars = append(declvars, decl.vardecl)
-				} else if decl.funcdecl != nil {
-					funcs = append(funcs, decl.funcdecl)
-				}
+				decls = append(decls, decl)
 			}
 		}
 
@@ -76,11 +70,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 
 	for _, f := range files {
 		for _, decl := range f.topLevelDecls {
-			if decl.vardecl != nil {
-				declvars = append(declvars, decl.vardecl)
-			} else if decl.funcdecl != nil {
-				funcs = append(funcs, decl.funcdecl)
-			}
+			decls = append(decls, decl)
 		}
 	}
 	for id, sl := range mainPkg.stringLiterals {
@@ -91,8 +81,7 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 
 	root := &IrRoot{}
 	root.packages = packages
-	root.vars = declvars
-	root.funcs = funcs
+	root.decls = decls
 	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
 	root.composeMethodTable()
@@ -113,7 +102,11 @@ func (ir *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
 
 func (ir *IrRoot) composeMethodTable() {
 	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
-	for _, funcdecl := range ir.funcs {
+	for _, decl := range ir.decls {
+		if decl.funcdecl == nil {
+			continue
+		}
+		funcdecl := decl.funcdecl
 		if funcdecl.receiver != nil {
 			//debugf("funcdecl:%v", funcdecl)
 			gtype := funcdecl.receiver.getGtype()
