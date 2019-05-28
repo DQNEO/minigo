@@ -90,19 +90,19 @@ func composeMethodTable(funcs []*DeclFunc)  map[int][]string  {
 		if funcdecl.receiver == nil {
 			continue
 		}
-			//debugf("funcdecl:%v", funcdecl)
-			gtype := funcdecl.receiver.getGtype()
-			if gtype.kind == G_POINTER {
-				gtype = gtype.origType
-			}
-			if gtype.relation == nil {
-				errorf("no relation for %#v", funcdecl.receiver.getGtype())
-			}
-			typeId := gtype.relation.gtype.receiverTypeId
-			symbol := funcdecl.getSymbol()
-			methods := methodTable[typeId]
-			methods = append(methods, symbol)
-			methodTable[typeId] = methods
+
+		gtype := funcdecl.receiver.getGtype()
+		if gtype.kind == G_POINTER {
+			gtype = gtype.origType
+		}
+		if gtype.relation == nil {
+			errorf("no relation for %#v", funcdecl.receiver.getGtype())
+		}
+		typeId := gtype.relation.gtype.receiverTypeId
+		symbol := funcdecl.getSymbol()
+		methods := methodTable[typeId]
+		methods = append(methods, symbol)
+		methodTable[typeId] = methods
 	}
 	debugf("set methodTable")
 	return methodTable
