@@ -1,16 +1,20 @@
 package main
 
+import "fmt"
+
 func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
 	var stringLiterals []*ExprStringLiteral
 	var dynamicTypes []*Gtype
 
-	for _, sl := range internalUniverse.stringLiterals {
+	for id, sl := range internalUniverse.stringLiterals {
+		sl.slabel = fmt.Sprintf(".S%d", id+1)
 		stringLiterals = append(stringLiterals, sl)
 	}
 	for _, dt := range internalUniverse.dynamicTypes {
 		dynamicTypes = append(dynamicTypes, dt)
 	}
-	for _, sl := range internalRuntime.stringLiterals {
+	for id, sl := range internalRuntime.stringLiterals {
+		sl.slabel = fmt.Sprintf("iruntime.S%d", id+1)
 		stringLiterals = append(stringLiterals, sl)
 	}
 	for _, dt := range internalRuntime.dynamicTypes {
@@ -37,7 +41,8 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 			}
 		}
 
-		for _, sl := range pkg.stringLiterals {
+		for id, sl := range pkg.stringLiterals {
+			sl.slabel = fmt.Sprintf("%s.S%d", pkg.name, id+1)
 			stringLiterals = append(stringLiterals, sl)
 		}
 
@@ -66,7 +71,8 @@ func makeIR(internalUniverse *AstPackage, internalRuntime *AstPackage, csl *comp
 			}
 		}
 	}
-	for _, sl := range mainPkg.stringLiterals {
+	for id, sl := range mainPkg.stringLiterals {
+		sl.slabel = fmt.Sprintf("%s.S%d", mainPkg.name, id+1)
 		stringLiterals = append(stringLiterals, sl)
 	}
 
