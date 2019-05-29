@@ -84,8 +84,7 @@ func (f *DeclFunc) getSymbol() string {
 
 func (f *DeclFunc) emitPrologue() {
 	emitWithoutIndent("%s:", f.getSymbol())
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	emit("FUNC_PROLOGUE")
 
 	var params []*ExprVariable
 
@@ -3482,9 +3481,20 @@ func (root *IrRoot) emitMethodTable() {
 
 }
 
+func emitDefineMacros() {
+	emitWithoutIndent("// MACRO")
+	emitWithoutIndent(".macro func_prologue")
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+	emitWithoutIndent(".endm")
+	emit("")
+}
+
 // generate code
 func (root *IrRoot) emit() {
 	groot = root
+
+	emitDefineMacros()
 
 	root.emitSpecialStrings()
 	root.emitDynamicTypes()
