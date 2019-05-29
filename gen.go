@@ -102,7 +102,7 @@ func (f *DeclFunc) emitPrologue() {
 	var offset int
 
 	if len(params) > 0 {
-		emit("# Allocating stack for params")
+		emit("# Allocate params")
 	}
 
 	var regIndex int
@@ -111,9 +111,9 @@ func (f *DeclFunc) emitPrologue() {
 		case G_SLICE, G_INTERFACE, G_MAP:
 			offset -= IntSize * 3
 			param.offset = offset
-			emit("push %%%s # c", RegsForCall[regIndex+2])
-			emit("push %%%s # b", RegsForCall[regIndex+1])
-			emit("push %%%s # a", RegsForCall[regIndex])
+			emit("push %%%s # third", RegsForCall[regIndex+2])
+			emit("push %%%s # second", RegsForCall[regIndex+1])
+			emit("push %%%s # fist", RegsForCall[regIndex])
 			regIndex += sliceWidth
 		default:
 			offset -= IntSize
