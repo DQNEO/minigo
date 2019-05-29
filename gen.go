@@ -290,7 +290,7 @@ func (a *ExprStructField) emit() {
 			emit("# LOAD_DEREF_TO_24")
 			emit("mov %d(%%rax), %%rcx", ptrSize+ptrSize)
 			emit("mov %d(%%rax), %%rbx", ptrSize)
-			emit("mov (%%rax), %%rax")
+			emit("mov %d(%%rax), %%rax", 0)
 		default:
 			emit("mov (%%rax), %%rax # LOAD_DEREF_TO_8")
 		}
