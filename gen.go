@@ -196,11 +196,11 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 }
 
 func (ast *ExprNumberLiteral) emit() {
-	emit("mov	$%d, %%rax", ast.val)
+	emit("mov $%d, %%rax # LOAD_8_NUMBER", ast.val)
 }
 
 func (ast *ExprStringLiteral) emit() {
-	emit("lea .%s(%%rip), %%rax", ast.slabel)
+	emit("lea .%s(%%rip), %%rax # LOAD_8_STRING_LITERAL", ast.slabel)
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
@@ -3061,6 +3061,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		} else {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
+				emit("# emit variadic arg")
 				if vargIndex == 0 {
 					emit("# make an empty slice to append")
 					emit("push $0")
