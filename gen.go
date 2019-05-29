@@ -126,7 +126,7 @@ func (f *DeclFunc) emitPrologue() {
 		default:
 			offset -= IntSize
 			param.offset = offset
-			emit("push %%%s # param \"%s\" %s", RegsForArguments[regIndex], param.varname, param.getGtype().String())
+			emit("push_arg_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
 			regIndex += 1
 		}
 	}
