@@ -3086,9 +3086,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("pop_to_arg_0 # ptr")
 				emit("mov $0, %%rax")
 				emit("call iruntime.append24")
-				emit("push %%rax # slice.ptr")
-				emit("push %%rbx # slice.len")
-				emit("push %%rcx # slice.cap")
+				emit("push_slice")
 			}
 		}
 		numRegs += 3
@@ -3526,6 +3524,13 @@ func emitDefineMacros() {
 		emitWithoutIndent(".endm")
 		emitNewline()
 	}
+
+	emitWithoutIndent(".macro push_slice")
+	emit("push %%rax # slice.ptr")
+	emit("push %%rbx # slice.len")
+	emit("push %%rcx # slice.cap")
+	emitWithoutIndent(".endm")
+	emitNewline()
 }
 
 // generate code
