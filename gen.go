@@ -317,21 +317,21 @@ func getLoadInst(size int) string {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# emit variable \"%s\" %s", ast.varname, ast.getGtype().String())
+	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
 		switch {
 		case ast.gtype.getKind() == G_INTERFACE:
-			emit("mov %s(%%rip), %%rax", ast.varname)
+			emit("mov %s+%d(%%rip), %%rax", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 		case ast.getGtype().kind == G_SLICE:
 			emit("#   emit slice variable")
-			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
+			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
 		case ast.getGtype().getKind() == G_MAP:
 			emit("#   emit map variable")
-			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
+			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
 		case ast.gtype.kind == G_ARRAY:
