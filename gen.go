@@ -1779,7 +1779,7 @@ func emitSaveInterface(lhs Expr, offset int) {
 		emitSaveInterface(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.saveInterface(offset)
+		variable.save3Elements(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
@@ -1803,7 +1803,7 @@ func emitSave3Elements(lhs Expr, offset int) {
 		emitSave3Elements(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.saveSlice(offset)
+		variable.save3Elements(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
@@ -1987,23 +1987,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	emitSave3Elements(lhs, 0)
 }
 
-func (variable *ExprVariable) saveSlice(offset int) {
-	emit("# *ExprVariable.saveSlice()")
+func (variable *ExprVariable) save3Elements(offset int) {
+	emit("# *ExprVariable.save3Elements()")
 	emit("pop %%rax # 3rd")
 	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen, false)
 	emit("pop %%rax # 2nd")
 	variable.emitOffsetSave(8, offset+ptrSize, false)
 	emit("pop %%rax # 1st")
-	variable.emitOffsetSave(8, offset, true)
-}
-
-func (variable *ExprVariable) saveInterface(offset int) {
-	emit("# *ExprVariable.saveInterface()")
-	emit("pop %%rax # dynamic type id")
-	variable.emitOffsetSave(8, offset+ptrSize+ptrSize, false)
-	emit("pop %%rax # reciverTypeId")
-	variable.emitOffsetSave(8, offset+ptrSize, false)
-	emit("pop %%rax # ptr")
 	variable.emitOffsetSave(8, offset, true)
 }
 
