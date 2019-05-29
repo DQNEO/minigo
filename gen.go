@@ -1,3 +1,9 @@
+// Code generator
+// Convention:
+//  We SHOULD use the word "emit" for the meaning of "output assembly code",
+//  NOT for "load something to %rax".
+//  Such usage would make much confusion.
+
 package main
 
 import (
@@ -62,7 +68,6 @@ func emitWithoutIndent(format string, v ...interface{}) {
 }
 
 // Mytype.method -> Mytype#method
-
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
