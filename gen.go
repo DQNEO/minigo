@@ -168,7 +168,7 @@ func (f *DeclFunc) emitPrologue() {
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
-	emit("")
+	emitNewline()
 }
 
 func align(n int, m int) int {
@@ -192,7 +192,7 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 
 	emit("leave")
 	emit("ret")
-	emit("")
+	emitNewline()
 }
 
 func (ast *ExprNumberLiteral) emit() {
@@ -1265,7 +1265,7 @@ func (stmt *StmtSwitch) emit() {
 }
 
 func (f *StmtFor) emitRangeForList() {
-	emit("")
+	emitNewline()
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	assert(f.rng.rangeexpr.getGtype().kind == G_ARRAY || f.rng.rangeexpr.getGtype().kind == G_SLICE, f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
@@ -1892,7 +1892,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("mov %%rax, %%rcx # dynamicType")
 	emit("pop %%rbx # receiverTypeId")
 	emit("pop %%rax # addr of dynamicValue")
-	emit("")
+	emitNewline()
 }
 
 func isNil(e Expr) bool {
@@ -2211,7 +2211,7 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	}
 	emit("pop %%rax # STACK 1: restore the value")
 	emit("mov %%rax, (%%rbx) # save the value")
-	emit("")
+	emitNewline()
 }
 
 func loadCollectIndex(collection Expr, index Expr, offset int) {
@@ -2872,7 +2872,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		emit("mov $0, %%rax")
 		emit("call %s", "printf")
-		emit("")
+		emitNewline()
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 
@@ -2890,7 +2890,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		emit("mov $0, %%rax")
 		emit("call %s", "printf")
-		emit("")
+		emitNewline()
 	case builtinAssertInterface:
 		emit("# builtinAssertInterface")
 		labelEnd := makeLabel()
@@ -2921,7 +2921,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("call %s", ".panic")
 
 		emitWithoutIndent("%s:", labelEnd)
-		emit("")
+		emitNewline()
 
 	case builtinAsComment:
 		arg := funcall.args[0]
@@ -3102,7 +3102,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 	emit("mov $0, %%rax")
 	emit("call %s", ircall.symbol)
-	emit("")
+	emitNewline()
 }
 
 func emitRuntimeArgs() {
@@ -3142,7 +3142,7 @@ func emitMainFunc(importOS bool) {
 		emit("call os.init")
 	}
 
-	emit("")
+	emitNewline()
 	emit("mov $0, %%rax")
 	emit("call main.main")
 	emitFuncEpilogue("noop_handler", nil)
@@ -3151,7 +3151,7 @@ func emitMainFunc(importOS bool) {
 	emitWithoutIndent("%s:", "iruntime.makeSlice")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
-	emit("")
+	emitNewline()
 	emit("push %%rdi") // -8
 	emit("push %%rsi") // -16
 	emit("push %%rdx") // -24
@@ -3168,7 +3168,7 @@ func emitMainFunc(importOS bool) {
 
 	emit("leave")
 	emit("ret")
-	emit("")
+	emitNewline()
 }
 
 func (f *DeclFunc) emit() {
@@ -3456,7 +3456,7 @@ func (root *IrRoot) emitSpecialStrings() {
 }
 
 func (root *IrRoot) emitDynamicTypes() {
-	emit("")
+	emitNewline()
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range root.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
@@ -3510,20 +3510,20 @@ func emitDefineMacros() {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emitWithoutIndent(".endm")
-	emit("")
+	emitNewline()
 
 	for i, regi := range RegsForArguments {
 		emitWithoutIndent(".macro pop_to_arg_%d", i)
 		emitWithoutIndent("pop %%%s", regi)
 		emitWithoutIndent(".endm")
-		emit("")
+		emitNewline()
 	}
 
 	for i, regi := range RegsForArguments {
 		emitWithoutIndent(".macro push_arg_%d", i)
 		emitWithoutIndent("push %%%s", regi)
 		emitWithoutIndent(".endm")
-		emit("")
+		emitNewline()
 	}
 }
 
