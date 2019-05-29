@@ -298,7 +298,7 @@ func getLoadInst(size int) string {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# emit variable \"%s\" of type %s", ast.varname, ast.getGtype().String())
+	emit("# emit variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.gtype.kind == G_ARRAY {
 		ast.emitAddress(0)
 		return
@@ -2110,9 +2110,8 @@ func (decl *DeclVar) emit() {
 	}
 }
 
-// for local var
 func (decl *DeclVar) emitLocal() {
-	emit("# DeclVar %s", decl.variable.varname)
+	emit("# DeclVar \"%s\"", decl.variable.varname)
 	gtype := decl.variable.gtype
 	varname := decl.varname
 	switch {
@@ -2138,8 +2137,10 @@ func (decl *DeclVar) emitLocal() {
 				rhs = &ExprNumberLiteral{}
 			}
 		}
+		emit("# emit RHS")
 		rhs.emit()
 		comment := "initialize " + string(decl.variable.varname)
+		emit("# Assign")
 		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset, comment)
 	}
 }
