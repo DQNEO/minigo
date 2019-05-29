@@ -1413,17 +1413,14 @@ func (stmt *StmtReturn) emit() {
 		rettype := stmt.rettypes[0]
 		if rettype.getKind() == G_INTERFACE && expr.getGtype().getKind() != G_INTERFACE {
 			if expr.getGtype() == nil {
-				emit("mov $0, %%rax")
-				emit("mov $0, %%rbx")
-				emit("mov $0, %%rcx")
+				emit("load_empty_interface")
 			} else {
 				emitConversionToInterface(expr)
 			}
 		} else {
 			expr.emit()
 			if expr.getGtype() == nil && stmt.rettypes[0].kind == G_SLICE {
-				emit("mov $0, %%rbx")
-				emit("mov $0, %%rcx")
+				emit("load_empty_slice")
 			}
 		}
 		stmt.emitDeferAndReturn()
@@ -1434,8 +1431,7 @@ func (stmt *StmtReturn) emit() {
 		expr.emit()
 		//		rettype := stmt.rettypes[i]
 		if expr.getGtype() == nil && rettype.kind == G_SLICE {
-			emit("mov $0, %%rbx")
-			emit("mov $0, %%rcx")
+			emit("load_empty_slice")
 		}
 		size := rettype.getSize()
 		if size < 8 {
