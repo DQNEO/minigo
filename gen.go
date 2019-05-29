@@ -318,11 +318,6 @@ func getLoadInst(size int) string {
 
 func (ast *ExprVariable) emit() {
 	emit("# emit variable \"%s\" %s", ast.varname, ast.getGtype().String())
-	if ast.gtype.kind == G_ARRAY {
-		ast.emitAddress(0)
-		return
-	}
-
 	if ast.isGlobal {
 		switch {
 		case ast.gtype.getKind() == G_INTERFACE:
@@ -339,6 +334,8 @@ func (ast *ExprVariable) emit() {
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
+		case ast.gtype.kind == G_ARRAY:
+			ast.emitAddress(0)
 		default:
 			inst := getLoadInst(ast.getGtype().getSize())
 			emit("%s %s(%%rip), %%rax", inst, ast.varname)
@@ -362,6 +359,8 @@ func (ast *ExprVariable) emit() {
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
+		case ast.gtype.kind == G_ARRAY:
+			ast.emitAddress(0)
 		default:
 			inst := getLoadInst(ast.getGtype().getSize())
 			emit("%s %d(%%rbp), %%rax", inst, ast.offset)
