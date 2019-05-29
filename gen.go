@@ -32,6 +32,11 @@ const ptrSize int = 8
 const sliceWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
+func emitNewline() {
+	var b []byte = []byte{'\n'}
+	os.Stdout.Write(b)
+}
+
 func emitOut(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	var b []byte = []byte(s)
@@ -3543,12 +3548,14 @@ func (root *IrRoot) emit() {
 		}
 
 		for _, vardecl := range pkg.vars {
-			emit(".data 0")
+			emitNewline()
+			emitWithoutIndent(".data 0")
 			vardecl.emit()
 		}
 
 		for _, funcdecl := range pkg.funcs {
-			emit(".text")
+			emitNewline()
+			emitWithoutIndent(".text")
 			funcdecl.emit()
 		}
 
