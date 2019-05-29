@@ -321,9 +321,9 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		switch {
 		case ast.gtype.getKind() == G_INTERFACE:
-			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
-			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s(%%rip), %%rax", ast.varname)
+			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
+			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 		case ast.getGtype().kind == G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %s(%%rip), %%rax # ptr", ast.varname)
@@ -346,9 +346,9 @@ func (ast *ExprVariable) emit() {
 		}
 		switch {
 		case ast.gtype.getKind() == G_INTERFACE:
-			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
-			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rax", ast.offset)
+			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
+			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
 		case ast.getGtype().kind == G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
