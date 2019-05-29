@@ -122,7 +122,7 @@ func (f *DeclFunc) emitPrologue() {
 	var offset int
 
 	if len(params) > 0 {
-		emit("# Allocate params")
+		emit("# set params")
 	}
 
 	var regIndex int
@@ -3581,18 +3581,21 @@ func (root *IrRoot) emit() {
 
 	emitDefineMacros()
 
+	emit(".data 0")
 	root.emitSpecialStrings()
 	root.emitDynamicTypes()
 	root.emitMethodTable()
 
+	emitWithoutIndent(".text")
 	emitRuntimeArgs()
 	emitMainFunc(root.importOS)
 
 	// emit packages
 	for _, pkg := range root.packages {
-		emit("# package %s", pkg.name)
-		emit("# string literals")
-		emit(".data 0")
+		emitWithoutIndent("#--------------------------------------------------------")
+		emitWithoutIndent("# package %s", pkg.name)
+		emitWithoutIndent("# string literals")
+		emitWithoutIndent(".data 0")
 		for _, ast := range pkg.stringLiterals {
 			emitWithoutIndent(".%s:", ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
@@ -3602,14 +3605,14 @@ func (root *IrRoot) emit() {
 
 		for _, vardecl := range pkg.vars {
 			emitNewline()
-			emitWithoutIndent(".data 0")
 			vardecl.emit()
 		}
+		emitNewline()
 
+		emitWithoutIndent(".text")
 		for _, funcdecl := range pkg.funcs {
-			emitNewline()
-			emitWithoutIndent(".text")
 			funcdecl.emit()
+			emitNewline()
 		}
 
 	}
