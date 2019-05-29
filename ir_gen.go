@@ -10,9 +10,6 @@ type IrRoot struct {
 }
 
 func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
-	universe.stringLabelPrefix = "universe"
-	iruntime.stringLabelPrefix = "iruntime"
-
 	var packages []*AstPackage
 
 	importedPackages := csl.getPackages()
@@ -29,8 +26,8 @@ func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mai
 
 	for _, pkg := range packages {
 		collectDecls(pkg)
-		if pkg.stringLabelPrefix != "" {
-			setStringLables(pkg, pkg.stringLabelPrefix)
+		if pkg == universe {
+			setStringLables(pkg, "universe")
 		} else {
 			setStringLables(pkg, string(pkg.name))
 		}
