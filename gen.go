@@ -38,8 +38,9 @@ func emitOut(format string, v ...interface{}) {
 	os.Stdout.Write(b)
 }
 
+var gasIndent string = "  "
 func emit(format string, v ...interface{}) {
-	frmt := "  "+format+"\n"
+	frmt := gasIndent+format+"\n"
 	emitOut(frmt, v...)
 }
 
@@ -795,7 +796,6 @@ func isUnderScore(e Expr) bool {
 //  one, two, three = '一', '二', '三'
 //
 func (ast *StmtAssignment) emit() {
-	emit("")
 	emit("# StmtAssignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
@@ -2112,7 +2112,6 @@ func (decl *DeclVar) emit() {
 
 // for local var
 func (decl *DeclVar) emitLocal() {
-	emit("")
 	emit("# DeclVar %s", decl.variable.varname)
 	gtype := decl.variable.gtype
 	varname := decl.varname
@@ -2159,7 +2158,10 @@ func (decl *DeclConst) emit() {
 
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
+		emit("# Statement")
+		gasIndent = "    "
 		stmt.emit()
+		gasIndent = "  "
 	}
 }
 
@@ -2932,7 +2934,6 @@ func bool2string(bol bool) string {
 
 func (ircall *IrStaticCall) emit(args []Expr) {
 	// nothing to do
-	emit("")
 	emit("# emitCall %s", ircall.symbol)
 
 	var numRegs int
