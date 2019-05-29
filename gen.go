@@ -319,22 +319,22 @@ func getLoadInst(size int) string {
 func (ast *ExprVariable) emit() {
 	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
-		switch {
-		case ast.gtype.getKind() == G_INTERFACE:
+		switch ast.gtype.getKind() {
+		case G_INTERFACE:
 			emit("mov %s+%d(%%rip), %%rax", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
-		case ast.getGtype().kind == G_SLICE:
+		case G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
-		case ast.getGtype().getKind() == G_MAP:
+		case G_MAP:
 			emit("#   emit map variable")
 			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
-		case ast.gtype.kind == G_ARRAY:
+		case G_ARRAY:
 			ast.emitAddress(0)
 		default:
 			inst := getLoadInst(ast.getGtype().getSize())
@@ -344,22 +344,22 @@ func (ast *ExprVariable) emit() {
 		if ast.offset == 0 {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
 		}
-		switch {
-		case ast.gtype.getKind() == G_INTERFACE:
+		switch ast.gtype.getKind() {
+		case G_INTERFACE:
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
-		case ast.getGtype().kind == G_SLICE:
+		case G_SLICE:
 			emit("#   emit slice variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
-		case ast.getGtype().getKind() == G_MAP:
+		case G_MAP:
 			emit("#   emit map variable")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
-		case ast.gtype.kind == G_ARRAY:
+		case G_ARRAY:
 			ast.emitAddress(0)
 		default:
 			inst := getLoadInst(ast.getGtype().getSize())
