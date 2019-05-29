@@ -39,7 +39,7 @@ func emitOut(format string, v ...interface{}) {
 }
 
 func emit(format string, v ...interface{}) {
-	frmt := "\t"+format+"\n"
+	frmt := "  "+format+"\n"
 	emitOut(frmt, v...)
 }
 
