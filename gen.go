@@ -273,16 +273,13 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
-		emit("push %%rax")
 		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
-			emit("pop %%rdx")
-			emit("mov (%%rdx), %%rax")
-			emit("mov %d(%%rdx), %%rbx", ptrSize)
-			emit("mov %d(%%rdx), %%rcx", ptrSize+ptrSize)
+			emit("mov %d(%%rax), %%rcx", ptrSize+ptrSize)
+			emit("mov %d(%%rax), %%rbx", ptrSize)
+			emit("mov (%%rax), %%rax")
 		default:
-			emit("pop %%rbx")
-			emit("mov (%%rbx), %%rax")
+			emit("mov (%%rax), %%rax")
 		}
 
 	case G_NAMED: // struct
