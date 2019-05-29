@@ -44,7 +44,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: "",
+		packageName: "iruntime",
 	}
 	f := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	resolveMethods(f.methods, p.packageBlockScope)

@@ -695,7 +695,7 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("add $1, %%rbx # + 1 (null byte)")
 	emit("mov %%rbx, %%rdi")
 	emit("mov $0, %%rax")
-	emit("call .malloc")
+	emit("call iruntime.malloc")
 
 	emit("mov %%rax, %%rdi # new string")
 	emit("pop %%rsi # left string")
@@ -1805,13 +1805,13 @@ func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
-	emit("call .malloc")
+	emit("call iruntime.malloc")
 }
 
 func emitCallMalloc(size int) {
 	emit("mov $%d, %%rdi", size)
 	emit("mov $0, %%rax")
-	emit("call .malloc")
+	emit("call iruntime.malloc")
 }
 
 func assignToMap(lhs Expr, rhs Expr) {
@@ -2357,7 +2357,7 @@ func (e *ExprSlice) emit() {
 		emit("pop %%%s", RegsForCall[1])
 		emit("pop %%%s", RegsForCall[0])
 		emit("mov $0, %%rax")
-		emit("call .strcopy")
+		emit("call iruntime.strcopy")
 	} else {
 		e.emitToStack()
 		emit("pop %%rcx")
@@ -2808,10 +2808,10 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
-			staticCall.symbol = getFuncSymbol("", "append1")
+			staticCall.symbol = getFuncSymbol("iruntime", "append1")
 			staticCall.emit(funcall.args)
 		case 8:
-			staticCall.symbol = getFuncSymbol("", "append8")
+			staticCall.symbol = getFuncSymbol("iruntime", "append8")
 			staticCall.emit(funcall.args)
 		case 24:
 			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
@@ -2821,7 +2821,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 				}
 				funcall.args[1] = eConvertion
 			}
-			staticCall.symbol = getFuncSymbol("", "append24")
+			staticCall.symbol = getFuncSymbol("iruntime", "append24")
 			staticCall.emit(funcall.args)
 		default:
 			TBI(slice.token(), "")
@@ -2831,7 +2831,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		var staticCall *IrStaticCall = &IrStaticCall{
 			callee: decl,
 		}
-		staticCall.symbol = getFuncSymbol("", "makeSlice")
+		staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
 		staticCall.emit(funcall.args)
 	case builtinDumpSlice:
 		arg := funcall.args[0]
@@ -3063,7 +3063,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("pop %%rsi # len")
 				emit("pop %%rdi # ptr")
 				emit("mov $0, %%rax")
-				emit("call .append24")
+				emit("call iruntime.append24")
 				emit("push %%rax # slice.ptr")
 				emit("push %%rbx # slice.len")
 				emit("push %%rcx # slice.cap")
@@ -3112,7 +3112,7 @@ func emitMainFunc(importOS bool) {
 	// init runtime
 	emit("# init runtime")
 	emit("mov $0, %%rax")
-	emit("call .init")
+	emit("call iruntime.init")
 
 	// init imported packages
 	if importOS {
@@ -3127,7 +3127,7 @@ func emitMainFunc(importOS bool) {
 	emitFuncEpilogue("noop_handler", nil)
 
 	// makeSlice
-	emitWithoutIndent("%s:", ".makeSlice")
+	emitWithoutIndent("%s:", "iruntime.makeSlice")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emit("")
@@ -3141,7 +3141,7 @@ func emitMainFunc(importOS bool) {
 	emit("add $16, %%rax") // pure buffer
 	emit("mov %%rax, %%rdi")
 	emit("mov $0, %%rax")
-	emit("call .malloc")
+	emit("call iruntime.malloc")
 	emit("mov -8(%%rbp), %%rbx # newlen")
 	emit("mov -16(%%rbp), %%rcx # newcap")
 

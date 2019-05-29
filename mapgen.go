@@ -242,7 +242,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		// malloc(8)
 		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
 		emit("mov $0, %%rax")
-		emit("call .malloc")
+		emit("call iruntime.malloc")
 		// %%rax : malloced address
 		// stack : [map tail address, index value]
 		emit("pop %%rcx")            // index value
@@ -261,7 +261,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	}
 	emit("mov $%d, %%rdi", size) // malloc size
 	emit("mov $0, %%rax")
-	emit("call .malloc")
+	emit("call iruntime.malloc")
 
 	emit("pop %%rcx")           // map tail address
 	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
