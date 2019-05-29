@@ -1864,7 +1864,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
 		emit("# receiverType is nil. emit nil for interface")
-		emit("load_empty_ifc")
+		emit("load_empty_interface")
 		return
 	}
 
@@ -1888,7 +1888,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("push_primitive # dynamicType")
 
-	emit("pop_ifc")
+	emit("pop_interface")
 	emitNewline()
 }
 
@@ -1901,13 +1901,12 @@ func isNil(e Expr) bool {
 	return false
 }
 
+
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
 	if rhs == nil || isNil(rhs) {
-		emit("# initialize interface with a zero value")
-		emit("push $0")
-		emit("push $0")
-		emit("push $0")
+		emit("load_empty_interface")
+		emit("push_interface")
 		emitSaveInterface(lhs, 0)
 		return
 	}
@@ -1915,15 +1914,13 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
-		emit("push_ifc")
+		emit("push_interface")
 		emitSaveInterface(lhs, 0)
 		return
 	}
 
 	emitConversionToInterface(rhs)
-	emit("push %%rax")
-	emit("push %%rbx")
-	emit("push %%rcx")
+	emit("push_interface")
 	emitSaveInterface(lhs, 0)
 }
 
@@ -1932,10 +1929,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	assertInterface(lhs)
 	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
-		emit("# initialize slice with a zero value")
-		emit("push $0")
-		emit("push $0")
-		emit("push $0")
+		emit("load_empty_slice")
+		emit("push_slice")
 		emitSave3Elements(lhs, 0)
 		return
 	}
@@ -1946,25 +1941,19 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *Relation:
 		rel := rhs.(*Relation)
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			emit("# initialize slice with a zero value")
-			emit("push $0")
-			emit("push $0")
-			emit("push $0")
+			emit("load_empty_slice")
+			emit("push_slice")
 			emitSave3Elements(lhs, 0)
 			return
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 		rvariable.emit()
-		emit("push %%rax # ptr")
-		emit("push %%rbx # len")
-		emit("push %%rcx # cap")
+		emit("push_slice")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
-		emit("push %%rax")
-		emit("push %%rbx")
-		emit("push %%rcx")
+		emit("push_slice")
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
 		e.emitToStack()
@@ -1992,9 +1981,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	default:
 		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
 		rhs.emit() // it should put values to rax,rbx,rcx
-		emit("push %%rax")
-		emit("push %%rbx")
-		emit("push %%rcx")
+		emit("push_slice")
 	}
 
 	emitSave3Elements(lhs, 0)
@@ -3024,7 +3011,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		}
 		var width int
 		if doConvertToInterface || primType == G_INTERFACE {
-			emit("push_ifc")
+			emit("push_interface")
 			width = interfaceWidth
 		} else if primType == G_SLICE {
 			emit("push_slice")
@@ -3074,7 +3061,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				} else {
 					emitConversionToInterface(varg)
 				}
-				emit("push_ifc")
+				emit("push_interface")
 				emit("# calling append24")
 				emit("pop_to_arg_5 # ifc_c")
 				emit("pop_to_arg_4 # ifc_b")
@@ -3542,7 +3529,7 @@ func emitDefineMacros() {
 	emitWithoutIndent(".endm")
 	emitNewline()
 
-	emitWithoutIndent(".macro push_ifc")
+	emitWithoutIndent(".macro push_interface")
 	emit("push %%rax # ifc.1st")
 	emit("push %%rbx # ifc.2nd")
 	emit("push %%rcx # ifc.3rd")
@@ -3563,7 +3550,7 @@ func emitDefineMacros() {
 	emitWithoutIndent(".endm")
 	emitNewline()
 
-	emitWithoutIndent(".macro pop_ifc")
+	emitWithoutIndent(".macro pop_interface")
 	emit("pop %%rcx # ifc.3rd")
 	emit("pop %%rbx # ifc.2nd")
 	emit("pop %%rax # ifc.1st")
@@ -3584,7 +3571,7 @@ func emitDefineMacros() {
 	emitWithoutIndent(".endm")
 	emitNewline()
 
-	emitWithoutIndent(".macro load_empty_ifc")
+	emitWithoutIndent(".macro load_empty_interface")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("mov $0, %%rcx")
