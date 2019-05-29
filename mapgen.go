@@ -57,7 +57,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop %%%s   # argument no %d", RegsForCall[j], j+1)
+		emit("pop_to_arg_%d", j)
 	}
 
 	emit("pop %%rax")

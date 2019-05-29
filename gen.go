@@ -2366,9 +2366,9 @@ func (e *ExprSlice) emit() {
 		eNewStrlen.emit()
 		emit("push %%rax # strlen")
 
-		emit("pop %%%s", RegsForCall[2])
-		emit("pop %%%s", RegsForCall[1])
-		emit("pop %%%s", RegsForCall[0])
+		emit("pop_to_arg_2")
+		emit("pop_to_arg_1")
+		emit("pop_to_arg_0")
 		emit("mov $0, %%rax")
 		emit("call iruntime.strcopy")
 	} else {
@@ -2858,7 +2858,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
-			emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
+			emit("pop_to_arg_%d", i)
 		}
 
 		emit("mov $0, %%rax")
@@ -2876,7 +2876,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
-			emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
+			emit("pop_to_arg_%d", i)
 		}
 
 		emit("mov $0, %%rax")
@@ -3073,7 +3073,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("pop %%rcx # ifc_a")
 				emit("pop %%rdx # cap")
 				emit("pop %%rsi # len")
-				emit("pop %%rdi # ptr")
+				emit("pop_to_arg_0 # ptr")
 				emit("mov $0, %%rax")
 				emit("call iruntime.append24")
 				emit("push %%rax # slice.ptr")
@@ -3088,7 +3088,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if i >= len(RegsForCall) {
 			errorft(args[0].token(), "too many arguments")
 		}
-		emit("pop %%%s   # RegsForCall[%d]", RegsForCall[i], i)
+		emit("pop_to_arg_%d", i)
 	}
 
 	emit("mov $0, %%rax")
@@ -3495,12 +3495,20 @@ func (root *IrRoot) emitMethodTable() {
 }
 
 func emitDefineMacros() {
-	emitWithoutIndent("// MACRO")
+	emitWithoutIndent("// MACROS")
+
 	emitWithoutIndent(".macro func_prologue")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emitWithoutIndent(".endm")
 	emit("")
+
+	for i, regi := range RegsForCall {
+		emitWithoutIndent(".macro pop_to_arg_%d", i)
+		emitWithoutIndent("pop %%%s", regi)
+		emitWithoutIndent(".endm")
+		emit("")
+	}
 }
 
 // generate code
