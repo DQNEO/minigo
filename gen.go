@@ -36,6 +36,8 @@ var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "
 const IntSize int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
 const sliceWidth int = 3
+const interfaceWidth int = 3
+const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
@@ -196,11 +198,11 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 }
 
 func (ast *ExprNumberLiteral) emit() {
-	emit("mov $%d, %%rax # LOAD_8_NUMBER", ast.val)
+	emit("mov $%d, %%rax # LOAD_NUMBER", ast.val)
 }
 
 func (ast *ExprStringLiteral) emit() {
-	emit("lea .%s(%%rip), %%rax # LOAD_8_STRING_LITERAL", ast.slabel)
+	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
@@ -1833,9 +1835,8 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
 		emit("# initialize map with a zero value")
-		emit("push $0")
-		emit("push $0")
-		emit("push $0")
+		emit("load_empty_map")
+		emit("push_map")
 		emitSave3Elements(lhs, 0)
 		return
 	}
@@ -1847,9 +1848,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		lit.emitPush()
 	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
-		emit("push %%rax")
-		emit("push %%rbx")
-		emit("push %%rcx")
+		emit("push_map")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -1865,33 +1864,31 @@ func emitConversionToInterface(dynamicValue Expr) {
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
 		emit("# receiverType is nil. emit nil for interface")
-		emit("mov $0, %%rax")
-		emit("mov $0, %%rbx")
-		emit("mov $0, %%rcx")
+		emit("load_empty_ifc")
 		return
 	}
 
 	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
-	emit("push %%rax")
+	emit("push_primitive")
 	emitCallMalloc(8)
 	emit("pop %%rcx")                         // dynamicValue
 	emit("mov %%rcx, (%%rax)")                // store value to heap
-	emit("push %%rax # addr of dynamicValue") // address
+	emit("push_primitive # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
 	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
 	emit("mov $%d, %%rax # receiverTypeId", receiverType.receiverTypeId)
-	emit("push %%rax # receiverTypeId")
+	emit("push_primitive # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
 	label := groot.getTypeLabel(gtype)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("mov %%rax, %%rcx # dynamicType")
-	emit("pop %%rbx # receiverTypeId")
-	emit("pop %%rax # addr of dynamicValue")
+	emit("push_primitive # dynamicType")
+
+	emit("pop_ifc")
 	emitNewline()
 }
 
@@ -3027,15 +3024,21 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if arg.getGtype() != nil {
 			primType = arg.getGtype().getKind()
 		}
-		if doConvertToInterface || primType == G_SLICE || primType == G_INTERFACE || primType == G_MAP {
-			emit("push %%rax  # argument 1/3")
-			emit("push %%rbx  # argument 2/3")
-			emit("push %%rcx  # argument 3/3")
-			numRegs += sliceWidth
+		var width int
+		if doConvertToInterface || primType == G_INTERFACE {
+			emit("push_ifc")
+			width = interfaceWidth
+		} else if primType == G_SLICE {
+			emit("push_slice")
+			width = sliceWidth
+		} else if primType == G_MAP {
+			emit("push_map")
+			width = mapWidth
 		} else {
-			emit("push %%rax  # argument primitive")
-			numRegs += 1
+			emit("push_primitive")
+			width = 1
 		}
+		numRegs += width
 	}
 
 	// check if callee has a variadic
@@ -3064,9 +3067,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("# emit variadic arg")
 				if vargIndex == 0 {
 					emit("# make an empty slice to append")
-					emit("push $0")
-					emit("push $0")
-					emit("push $0")
+					emit("load_empty_slice")
+					emit("push_slice")
 				}
 				// conversion : var ifc = x
 				if varg.getGtype().getKind() == G_INTERFACE {
@@ -3074,15 +3076,13 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				} else {
 					emitConversionToInterface(varg)
 				}
-				emit("push %%rax")
-				emit("push %%rbx")
-				emit("push %%rcx")
+				emit("push_ifc")
 				emit("# calling append24")
-				emit("pop %%r9  # ifc_c")
-				emit("pop %%r8  # ifc_b")
-				emit("pop %%rcx # ifc_a")
-				emit("pop %%rdx # cap")
-				emit("pop %%rsi # len")
+				emit("pop_to_arg_5 # ifc_c")
+				emit("pop_to_arg_4 # ifc_b")
+				emit("pop_to_arg_3 # ifc_a")
+				emit("pop_to_arg_2 # cap")
+				emit("pop_to_arg_1 # len")
 				emit("pop_to_arg_0 # ptr")
 				emit("mov $0, %%rax")
 				emit("call iruntime.append24")
@@ -3525,12 +3525,79 @@ func emitDefineMacros() {
 		emitNewline()
 	}
 
+	emitWithoutIndent(".macro push_primitive")
+	emit("push %%rax # primitive")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
 	emitWithoutIndent(".macro push_slice")
 	emit("push %%rax # slice.ptr")
 	emit("push %%rbx # slice.len")
 	emit("push %%rcx # slice.cap")
 	emitWithoutIndent(".endm")
 	emitNewline()
+
+	emitWithoutIndent(".macro push_map")
+	emit("push %%rax # map.ptr")
+	emit("push %%rbx # map.len")
+	emit("push %%rcx # map.cap")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro push_ifc")
+	emit("push %%rax # ifc.1st")
+	emit("push %%rbx # ifc.2nd")
+	emit("push %%rcx # ifc.3rd")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro pop_slice")
+	emit("pop %%rcx # slice.cap")
+	emit("pop %%rbx # slice.len")
+	emit("pop %%rax # slice.ptr")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro pop_map")
+	emit("pop %%rcx # map.cap")
+	emit("pop %%rbx # map.len")
+	emit("pop %%rax # map.ptr")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro pop_ifc")
+	emit("pop %%rcx # ifc.3rd")
+	emit("pop %%rbx # ifc.2nd")
+	emit("pop %%rax # ifc.1st")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro load_empty_slice")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro load_empty_map")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro load_empty_ifc")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro load_string_literal slabel")
+	emit("lea \\slabel(%%rip), %%rax")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
 }
 
 // generate code
