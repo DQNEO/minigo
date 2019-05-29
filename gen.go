@@ -25,7 +25,7 @@ var retRegi [14]string = [14]string{
 	"rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 }
 
-var RegsForCall [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
+var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
 const IntSize int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
@@ -126,7 +126,7 @@ func (f *DeclFunc) emitPrologue() {
 		default:
 			offset -= IntSize
 			param.offset = offset
-			emit("push %%%s # param \"%s\" %s", RegsForCall[regIndex], param.varname, param.getGtype().String())
+			emit("push %%%s # param \"%s\" %s", RegsForArguments[regIndex], param.varname, param.getGtype().String())
 			regIndex += 1
 		}
 	}
@@ -3085,7 +3085,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	for i := numRegs - 1; i >= 0; i-- {
-		if i >= len(RegsForCall) {
+		if i >= len(RegsForArguments) {
 			errorft(args[0].token(), "too many arguments")
 		}
 		emit("pop_to_arg_%d", i)
@@ -3503,14 +3503,14 @@ func emitDefineMacros() {
 	emitWithoutIndent(".endm")
 	emit("")
 
-	for i, regi := range RegsForCall {
+	for i, regi := range RegsForArguments {
 		emitWithoutIndent(".macro pop_to_arg_%d", i)
 		emitWithoutIndent("pop %%%s", regi)
 		emitWithoutIndent(".endm")
 		emit("")
 	}
 
-	for i, regi := range RegsForCall {
+	for i, regi := range RegsForArguments {
 		emitWithoutIndent(".macro push_to_arg_%d", i)
 		emitWithoutIndent("push %%%s", regi)
 		emitWithoutIndent(".endm")
