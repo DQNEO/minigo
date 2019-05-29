@@ -265,7 +265,7 @@ func (structfield *ExprStructField) calcOffset() {
 }
 
 func (a *ExprStructField) emit() {
-	emit("# ExprStructField.emit()")
+	emit("# emit ExprStructField")
 	a.calcOffset()
 	switch a.strct.getGtype().kind {
 	case G_POINTER: // pointer to struct
@@ -273,14 +273,16 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
-		emit("mov %%rax, %%rdx")
+		emit("push %%rax")
 		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
+			emit("pop %%rdx")
 			emit("mov (%%rdx), %%rax")
 			emit("mov %d(%%rdx), %%rbx", ptrSize)
 			emit("mov %d(%%rdx), %%rcx", ptrSize+ptrSize)
 		default:
-			emit("mov (%%rdx), %%rax")
+			emit("pop %%rbx")
+			emit("mov (%%rbx), %%rax")
 		}
 
 	case G_NAMED: // struct
