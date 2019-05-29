@@ -265,7 +265,7 @@ func (structfield *ExprStructField) calcOffset() {
 }
 
 func (a *ExprStructField) emit() {
-	emit("# emit ExprStructField")
+	emit("# LOAD ExprStructField")
 	a.calcOffset()
 	switch a.strct.getGtype().kind {
 	case G_POINTER: // pointer to struct
@@ -275,11 +275,12 @@ func (a *ExprStructField) emit() {
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
 		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
+			emit("# LOAD_DEREF_TO_24")
 			emit("mov %d(%%rax), %%rcx", ptrSize+ptrSize)
 			emit("mov %d(%%rax), %%rbx", ptrSize)
 			emit("mov (%%rax), %%rax")
 		default:
-			emit("mov (%%rax), %%rax")
+			emit("mov (%%rax), %%rax # LOAD_DEREF_TO_8")
 		}
 
 	case G_NAMED: // struct
@@ -1461,7 +1462,7 @@ func getReg(regSize int) string {
 
 func emitStoreItToLocal(regSize int, loff int, comment string) {
 	reg := getReg(regSize)
-	emit("mov %%%s, %d(%%rbp) # STORE_IT_TO_LOCAL %d %d", reg, loff, regSize, loff)
+	emit("mov %%%s, %d(%%rbp) # STORE_%d_TO_LOCAL %d", reg, loff, regSize, loff)
 }
 
 func emitGsave(regSize int, varname identifier, offset int) {
@@ -2142,7 +2143,7 @@ func (decl *DeclVar) emitLocal() {
 				rhs = &ExprNumberLiteral{}
 			}
 		}
-		emit("# emit RHS")
+		emit("# LOAD RHS")
 		gasIndentLevel++
 		rhs.emit()
 		gasIndentLevel--
