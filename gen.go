@@ -113,12 +113,12 @@ func (f *DeclFunc) emitPrologue() {
 			param.offset = offset
 			emit("push %%%s # third", RegsForCall[regIndex+2])
 			emit("push %%%s # second", RegsForCall[regIndex+1])
-			emit("push %%%s # fist", RegsForCall[regIndex])
+			emit("push %%%s # fist \"%s\" %s", RegsForCall[regIndex], param.varname, param.getGtype().String())
 			regIndex += sliceWidth
 		default:
 			offset -= IntSize
 			param.offset = offset
-			emit("push %%%s", RegsForCall[regIndex])
+			emit("push %%%s # param \"%s\" %s", RegsForCall[regIndex], param.varname, param.getGtype().String())
 			regIndex += 1
 		}
 	}
