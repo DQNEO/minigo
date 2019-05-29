@@ -1915,9 +1915,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
-		emit("push %%rax")
-		emit("push %%rbx")
-		emit("push %%rcx")
+		emit("push_ifc")
 		emitSaveInterface(lhs, 0)
 		return
 	}
