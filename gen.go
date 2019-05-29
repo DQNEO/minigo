@@ -1147,23 +1147,23 @@ func (stmt *StmtIf) emit() {
 	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je %stmt  # jump if 0", labelElse)
+		emit("je %s  # jump if 0", labelElse)
 		emit("# then block")
 		stmt.then.emit()
-		emit("jmp %stmt # jump to endif", labelEndif)
+		emit("jmp %s # jump to endif", labelEndif)
 		emit("# else block")
-		emit("%stmt:", labelElse)
+		emit("%s:", labelElse)
 		stmt.els.emit()
 		emit("# endif")
-		emit("%stmt:", labelEndif)
+		emit("%s:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je %stmt  # jump if 0", labelEndif)
+		emit("je %s  # jump if 0", labelEndif)
 		emit("# then block")
 		stmt.then.emit()
 		emit("# endif")
-		emit("%stmt:", labelEndif)
+		emit("%s:", labelEndif)
 	}
 }
 
