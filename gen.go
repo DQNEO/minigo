@@ -38,9 +38,16 @@ func emitOut(format string, v ...interface{}) {
 	os.Stdout.Write(b)
 }
 
-var gasIndent string = "  "
+var gasIndentLevel int = 1
+
 func emit(format string, v ...interface{}) {
-	frmt := gasIndent+format+"\n"
+	var format2 string = format
+
+	for i := 0; i < gasIndentLevel; i++ {
+		format2 = "  " + format2
+	}
+
+	frmt := format2+"\n"
 	emitOut(frmt, v...)
 }
 
@@ -2138,10 +2145,14 @@ func (decl *DeclVar) emitLocal() {
 			}
 		}
 		emit("# emit RHS")
+		gasIndentLevel++
 		rhs.emit()
+		gasIndentLevel--
 		comment := "initialize " + string(decl.variable.varname)
-		emit("# Assign")
+		emit("# Assign to LHS")
+		gasIndentLevel++
 		emitLsave(decl.variable.getGtype().getSize(), decl.variable.offset, comment)
+		gasIndentLevel--
 	}
 }
 
@@ -2160,9 +2171,9 @@ func (decl *DeclConst) emit() {
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		emit("# Statement")
-		gasIndent = "    "
+		gasIndentLevel++
 		stmt.emit()
-		gasIndent = "  "
+		gasIndentLevel--
 	}
 }
 
