@@ -2339,8 +2339,8 @@ func (e *ExprSlice) emit() {
 		emit("POP_TO_ARG_2")
 		emit("POP_TO_ARG_1")
 		emit("POP_TO_ARG_0")
-		emit("mov $0, %%rax")
-		emit("call iruntime.strcopy")
+
+		emit("FUNCALL iruntime.strcopy")
 	} else {
 		e.emitToStack()
 		emit("POP_SLICE")

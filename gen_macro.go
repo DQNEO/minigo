@@ -137,6 +137,13 @@ func emitMacroDefinitions() {
 	macroStart("ADD_NUMBER", "n")
 	emit("add $\\n , %%rax")
 	macroEnd()
+
+	macroStart("FUNCALL", "fname")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emit("call \\fname")
+	macroEnd()
 }
 
 func macroStart(name string, args string) {
