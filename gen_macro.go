@@ -110,4 +110,9 @@ func emitMacroDefinitions() {
 	emit("mov %%rax, \\offset(%%rbp)")
 	emitWithoutIndent(".endm")
 	emitNewline()
+
+	emitWithoutIndent(".macro LOAD_8_FROM_LOCAL offset")
+	emit("mov \\offset(%%rbp), %%rax")
+	emitWithoutIndent(".endm")
+	emitNewline()
 }

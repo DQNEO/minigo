@@ -365,7 +365,11 @@ func (ast *ExprVariable) emit() {
 			ast.emitAddress(0)
 		default:
 			inst := getLoadInst(ast.getGtype().getSize())
-			emit("%s %d(%%rbp), %%rax", inst, ast.offset)
+			if inst == "mov" {
+				emit("LOAD_8_FROM_LOCAL %d", ast.offset)
+			} else {
+				emit("%s %d(%%rbp), %%rax", inst, ast.offset)
+			}
 		}
 	}
 }
