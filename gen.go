@@ -3128,9 +3128,9 @@ func emitMakeSliceFunc() {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emitNewline()
-	emit("push %%rdx") // -8
-	emit("push %%rsi") // -16
-	emit("push %%rdi") // -24
+	emit("PUSH_ARG_2") // -8
+	emit("PUSH_ARG_1") // -16
+	emit("PUSH_ARG_0") // -24
 
 	emit("mov -16(%%rbp), %%rax # newcap")
 	emit("mov -8(%%rbp), %%rcx # unit")
