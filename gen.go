@@ -1741,8 +1741,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
 			emit("ADD_NUMBER %d+%d", fieldType.offset,offset)
-			reg := getReg(size)
-			emit("mov (%%rax), %%%s", reg)
+			//reg := getReg(size)
+			emit("LOAD_8_BY_DEREF")
 		} else {
 			emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 		}
@@ -1758,9 +1758,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		rettype := rettypes[0]
 		assert(rettype.getKind() == G_POINTER, lhs.token(), "only pointer is supported")
 		mcall.emit()
-		emit("# START DEBUG")
-		emit("add $%d, %%rax", offset)
-		emit("mov (%%rax), %%rax")
+		emit("ADD_NUMBER %d", offset)
+		emit("LOAD_8_BY_DEREF")
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
