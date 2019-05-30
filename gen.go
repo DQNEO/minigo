@@ -2270,7 +2270,7 @@ func (e *ExprIndex) emit() {
 }
 
 func (e *ExprNilLiteral) emit() {
-	emit("mov $0, %%rax # nil literal")
+	emit("LOAD_NUMBER 0 # nil literal")
 }
 
 func (ast *StmtShortVarDecl) emit() {
@@ -2283,7 +2283,7 @@ func (ast *StmtShortVarDecl) emit() {
 }
 
 func (f *ExprFuncRef) emit() {
-	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
+	emit("LOAD_NUMBER 1 # funcref") // emit 1 for now.  @FIXME
 }
 
 func (e *ExprSlice) emitSubString() {
