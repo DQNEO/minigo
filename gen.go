@@ -2426,8 +2426,7 @@ func (e *ExprTypeAssertion) emit() {
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
 		// @TODO consider big data like slice, struct, etd
 		emit("pop %%rax # load ptr")
-		emit("mov %%rax, %%rcx")
-		emit("test %%rcx, %%rcx")
+		emit("TEST_IT")
 		labelEnd := makeLabel()
 		emit("je %s # jmp if nil", labelEnd)
 		emit("LOAD_8_BY_DEREF")
