@@ -347,20 +347,11 @@ func (ast *ExprVariable) emit() {
 		}
 		switch ast.gtype.getKind() {
 		case G_INTERFACE:
-			emit("# load local interface")
-			emit("mov %d(%%rbp), %%rax", ast.offset)
-			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
-			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
+			emit("LOAD_INTERFACE_FROM_LOCAL %d", ast.offset)
 		case G_SLICE:
-			emit("# load local slice")
-			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
-			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
-			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
+			emit("LOAD_SLICE_FROM_LOCAL %d", ast.offset)
 		case G_MAP:
-			emit("# load local map")
-			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
-			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
-			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
+			emit("LOAD_MAP_FROM_LOCAL %d", ast.offset)
 		case G_ARRAY:
 			ast.emitAddress(0)
 		default:

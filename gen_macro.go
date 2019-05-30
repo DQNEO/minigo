@@ -115,4 +115,25 @@ func emitMacroDefinitions() {
 	emit("mov \\offset(%%rbp), %%rax")
 	emitWithoutIndent(".endm")
 	emitNewline()
+
+	emitWithoutIndent(".macro LOAD_SLICE_FROM_LOCAL offset")
+	emit("mov \\offset+%2d(%%rbp), %%rax # ptr", 0)
+	emit("mov \\offset+%2d(%%rbp), %%rbx # len", ptrSize)
+	emit("mov \\offset+%2d(%%rbp), %%rcx # cap", ptrSize+IntSize)
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro LOAD_MAP_FROM_LOCAL offset")
+	emit("mov \\offset+%2d(%%rbp), %%rax # ptr", 0)
+	emit("mov \\offset+%2d(%%rbp), %%rbx # len", ptrSize)
+	emit("mov \\offset+%2d(%%rbp), %%rcx # cap", ptrSize+IntSize)
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro LOAD_INTERFACE_FROM_LOCAL offset")
+	emit("mov \\offset+%2d(%%rbp), %%rax", 0)
+	emit("mov \\offset+%2d(%%rbp), %%rbx", ptrSize)
+	emit("mov \\offset+%2d(%%rbp), %%rcx", ptrSize+ptrSize)
+	emitWithoutIndent(".endm")
+	emitNewline()
 }
