@@ -3136,9 +3136,12 @@ func emitMakeSliceFunc() {
 	emit("mov -8(%%rbp), %%rcx # unit")
 	emit("imul %%rcx, %%rax")
 	emit("add $16, %%rax") // pure buffer
-	emit("mov %%rax, %%rdi")
+
+	emit("PUSH_PRIMITIVE")
+	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
+
 	emit("mov -24(%%rbp), %%rbx # newlen")
 	emit("mov -16(%%rbp), %%rcx # newcap")
 
