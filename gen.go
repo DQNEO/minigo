@@ -222,7 +222,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			if variable.isGlobal {
 				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset+offset)
 			} else {
-				emit("mov %d(%%rbp), %%rax", variable.offset+field.offset+offset)
+				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
 		}
 	case *ExprStructField: // strct.field.field
@@ -335,8 +335,11 @@ func (ast *ExprVariable) emit() {
 		case G_ARRAY:
 			ast.emitAddress(0)
 		default:
-			inst := getLoadInst(ast.getGtype().getSize())
-			emit("%s %s(%%rip), %%rax", inst, ast.varname)
+			if ast.getGtype().getSize() == 1 {
+				emit("LOAD_1_FROM_GLOBAL %s", ast.varname)
+			} else {
+				emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
+			}
 		}
 	} else {
 		if ast.offset == 0 {
