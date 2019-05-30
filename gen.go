@@ -2810,38 +2810,33 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		arg := funcall.args[0]
 
 		emit("lea .%s, %%rax", builtinStringKey2)
-		emit("push %%rax")
-		arg.emit()
+		emit("PUSH_PRIMITIVE")
 
-		emit("push %%rax  # array")
-		emit("push %%rbx  # len")
-		emit("push %%rcx  # cap")
+		arg.emit()
+		emit("PUSH_SLICE")
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
 			emit("POP_TO_ARG_%d", i)
 		}
 
-		emit("mov $0, %%rax")
-		emit("call %s", "printf")
+		emit("FUNCALL %s", "printf")
 		emitNewline()
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 
 		emit("lea .%s, %%rax", builtinStringKey1)
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE")
+
 		arg.emit()
-		emit("push %%rax  # interface ptr")
-		emit("push %%rbx  # interface receverTypeId")
-		emit("push %%rcx  # interface dynamicTypeId")
+		emit("PUSH_INTERFACE")
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
 			emit("POP_TO_ARG_%d", i)
 		}
 
-		emit("mov $0, %%rax")
-		emit("call %s", "printf")
+		emit("FUNCALL %s", "printf")
 		emitNewline()
 	case builtinAssertInterface:
 		emit("# builtinAssertInterface")
