@@ -2695,7 +2695,7 @@ func (e *ExprCap) emit() {
 	gtype := arg.getGtype()
 	switch {
 	case gtype.kind == G_ARRAY:
-		emit("mov $%d, %%rax", gtype.length)
+		emit("LOAD_NUMBER %d", gtype.length)
 	case gtype.kind == G_SLICE:
 		switch arg.(type) {
 		case *Relation:
@@ -2710,7 +2710,7 @@ func (e *ExprCap) emit() {
 			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
 			length := len(_arg.values)
-			emit("mov $%d, %%rax", length)
+			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			if sliceExpr.collection.getGtype().kind == G_ARRAY {
