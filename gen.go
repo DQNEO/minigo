@@ -1830,8 +1830,8 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
 		emit("# initialize map with a zero value")
-		emit("load_empty_map")
-		emit("push_map")
+		emit("LOAD_EMPTY_MAP")
+		emit("PUSH_MAP")
 		emitSave3Elements(lhs, 0)
 		return
 	}
@@ -1844,7 +1844,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("PUSH_MAP")
 	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
-		emit("push_map")
+		emit("PUSH_MAP")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -1860,7 +1860,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
 		emit("# receiverType is nil. emit nil for interface")
-		emit("load_empty_interface")
+		emit("LOAD_EMPTY_INTERFACE")
 		return
 	}
 
