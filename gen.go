@@ -2237,8 +2237,11 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		} else {
 			// dereference the content of an emelment
 			inst := getLoadInst(size)
-			emit("# LOAD_8or1_BY_DEREF")
-			emit("%s (%%rax), %%rax", inst)
+			if size == 1 {
+				emit("%s (%%rax), %%rax", inst)
+			} else {
+				emit("LOAD_8_BY_DEREF")
+			}
 		}
 	} else if collection.getGtype().getKind() == G_MAP {
 		loadMapIndexExpr(collection, index)
