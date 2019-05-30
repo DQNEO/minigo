@@ -198,7 +198,7 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 }
 
 func (ast *ExprNumberLiteral) emit() {
-	emit("mov $%d, %%rax # LOAD_NUMBER", ast.val)
+	emit("LOAD_NUMBER %d", ast.val)
 }
 
 func (ast *ExprStringLiteral) emit() {
@@ -1812,15 +1812,17 @@ func emitSave3Elements(lhs Expr, offset int) {
 
 func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
-	emit("mov %%rax, %%rdi")
+	emit("PUSH_PRIMITIVE")
+	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
 }
 
 func emitCallMalloc(size int) {
-	emit("mov $%d, %%rdi", size)
-	emit("mov $0, %%rax")
-	emit("call iruntime.malloc")
+	eNumber := &ExprNumberLiteral{
+		val: size,
+	}
+	emitCallMallocDinamicSize(eNumber)
 }
 
 func assignToMap(lhs Expr, rhs Expr) {
@@ -3565,6 +3567,10 @@ func emitDefineMacros() {
 	emitWithoutIndent(".endm")
 	emitNewline()
 
+	emitWithoutIndent(".macro load_number n")
+	emit("mov $\\n, %%rax")
+	emitWithoutIndent(".endm")
+	emitNewline()
 }
 
 // generate code
