@@ -1,6 +1,6 @@
 package main
 
-func emitDefineMacros() {
+func emitMacroDefinitions() {
 	emitWithoutIndent("// MACROS")
 
 	emitWithoutIndent(".macro func_prologue")

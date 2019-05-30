@@ -3486,7 +3486,7 @@ func (root *IrRoot) emitMethodTable() {
 func (root *IrRoot) emit() {
 	groot = root
 
-	emitDefineMacros()
+	emitMacroDefinitions()
 
 	emit(".data 0")
 	root.emitSpecialStrings()
