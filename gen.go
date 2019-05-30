@@ -2204,16 +2204,13 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
+		emit("mov %%rbx, %%rax")
 		if collection.getGtype().elementType.getKind() == G_INTERFACE {
-			emit("# emit the element of interface type")
-			emit("mov %%rbx, %%rdx")
-			emit("mov 0(%%rdx), %%rax")
-			emit("mov 8(%%rdx), %%rbx")
-			emit("mov 16(%%rdx), %%rcx")
+			emit("LOAD_24_BY_DEREF")
 		} else {
-			emit("# emit the element of primitive type")
-			emit("mov (%%rbx), %%rax")
+			emit("LOAD_8_BY_DEREF")
 		}
+		return
 	} else if collection.getGtype().kind == G_SLICE {
 		elmType := collection.getGtype().elementType
 		emit("# emit address of the low index")
