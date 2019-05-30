@@ -249,7 +249,7 @@ func (a *ExprStructField) emitAddress() {
 	strcttype := a.strct.getGtype().origType.relation.gtype
 	field := strcttype.getField(a.fieldname)
 	a.strct.emit()
-	emit("add $%d, %%rax", field.offset)
+	emit("ADD_NUMBER %d", field.offset)
 }
 
 func (structfield *ExprStructField) calcOffset() {
