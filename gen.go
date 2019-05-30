@@ -1862,23 +1862,23 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
-	emit("push_primitive")
+	emit("PUSH_PRIMITIVE")
 	emitCallMalloc(8)
 	emit("pop %%rcx")                         // dynamicValue
 	emit("mov %%rcx, (%%rax)")                // store value to heap
-	emit("push_primitive # addr of dynamicValue") // address
+	emit("PUSH_PRIMITIVE # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
 	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
 	emit("mov $%d, %%rax # receiverTypeId", receiverType.receiverTypeId)
-	emit("push_primitive # receiverTypeId")
+	emit("PUSH_PRIMITIVE # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
 	label := groot.getTypeLabel(gtype)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("push_primitive # dynamicType")
+	emit("PUSH_PRIMITIVE # dynamicType")
 
 	emit("pop_interface")
 	emitNewline()
@@ -2339,9 +2339,9 @@ func (e *ExprSlice) emit() {
 		eNewStrlen.emit()
 		emit("push %%rax # strlen")
 
-		emit("pop_to_arg_2")
-		emit("pop_to_arg_1")
-		emit("pop_to_arg_0")
+		emit("POP_TO_ARG_2")
+		emit("POP_TO_ARG_1")
+		emit("POP_TO_ARG_0")
 		emit("mov $0, %%rax")
 		emit("call iruntime.strcopy")
 	} else {
@@ -2831,7 +2831,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
-			emit("pop_to_arg_%d", i)
+			emit("POP_TO_ARG_%d", i)
 		}
 
 		emit("mov $0, %%rax")
@@ -2849,7 +2849,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		numRegs := 4
 		for i := numRegs - 1; i >= 0; i-- {
-			emit("pop_to_arg_%d", i)
+			emit("POP_TO_ARG_%d", i)
 		}
 
 		emit("mov $0, %%rax")
@@ -3002,7 +3002,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			emit("push_map")
 			width = mapWidth
 		} else {
-			emit("push_primitive")
+			emit("PUSH_PRIMITIVE")
 			width = 1
 		}
 		numRegs += width
@@ -3045,12 +3045,12 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				}
 				emit("push_interface")
 				emit("# calling append24")
-				emit("pop_to_arg_5 # ifc_c")
-				emit("pop_to_arg_4 # ifc_b")
-				emit("pop_to_arg_3 # ifc_a")
-				emit("pop_to_arg_2 # cap")
-				emit("pop_to_arg_1 # len")
-				emit("pop_to_arg_0 # ptr")
+				emit("POP_TO_ARG_5 # ifc_c")
+				emit("POP_TO_ARG_4 # ifc_b")
+				emit("POP_TO_ARG_3 # ifc_a")
+				emit("POP_TO_ARG_2 # cap")
+				emit("POP_TO_ARG_1 # len")
+				emit("POP_TO_ARG_0 # ptr")
 				emit("mov $0, %%rax")
 				emit("call iruntime.append24")
 				emit("push_slice")
@@ -3063,7 +3063,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		if i >= len(RegsForArguments) {
 			errorft(args[0].token(), "too many arguments")
 		}
-		emit("pop_to_arg_%d", i)
+		emit("POP_TO_ARG_%d", i)
 	}
 
 	emit("mov $0, %%rax")
