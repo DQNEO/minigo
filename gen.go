@@ -2253,16 +2253,13 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		// if x is out of range at run time, a run-time panic occurs
 		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
 		// a[x] may not be assigned to
-
 		emit("# load head address of the string")
 		collection.emit()  // emit address
 		emit("PUSH_PRIMITIVE")
 		index.emit()
 		emit("PUSH_PRIMITIVE")
-		emit("pop %%rcx")
-		emit("pop %%rax")         // load address of variable
-		emit("add %%rcx , %%rax") // (index * size) + address
-		emit("add $%d,  %%rax", offset)
+		emit("SUM_FROM_STACK")
+		emit("ADD_NUMBER %d", offset)
 		emit("LOAD_8_BY_DEREF")
 	} else {
 		TBI(collection.token(), "unable to handle %s", collection.getGtype())

@@ -127,6 +127,16 @@ func emitMacroDefinitions() {
 	emit("mov \\offset+%2d(%%rbp), %%rbx", ptrSize)
 	emit("mov \\offset+%2d(%%rbp), %%rcx", ptrSize+ptrSize)
 	macroEnd()
+
+	macroStart("SUM_FROM_STACK", "")
+	emit("pop %%rcx")
+	emit("pop %%rax")
+	emit("add %%rcx , %%rax")
+	macroEnd()
+
+	macroStart("ADD_NUMBER", "n")
+	emit("add $\\n , %%rax")
+	macroEnd()
 }
 
 func macroStart(name string, args string) {
