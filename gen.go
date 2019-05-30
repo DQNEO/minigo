@@ -2232,19 +2232,19 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		if offset > 0 {
 			emit("add $%d,  %%rbx", offset)
 		}
+		emit("mov %%rbx, %%rax")
 
 		primType := collection.getGtype().elementType.getKind()
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
-			emit("# emit the element of interface type")
-			emit("mov %%rbx, %%rdx")
-			emit("mov 0(%%rdx), %%rax")
-			emit("mov 8(%%rdx), %%rbx")
-			emit("mov 16(%%rdx), %%rcx")
+			emit("# LOAD_24_BY_DEREF")
+			emit("mov 16(%%rax), %%rcx")
+			emit("mov 8(%%rax), %%rbx")
+			emit("mov 0(%%rax), %%rax")
 		} else {
 			// dereference the content of an emelment
 			inst := getLoadInst(size)
-			emit("# emit the element of primitive type")
-			emit("%s (%%rbx), %%rax", inst)
+			emit("# LOAD_8or1_BY_DEREF")
+			emit("%s (%%rax), %%rax", inst)
 		}
 	} else if collection.getGtype().getKind() == G_MAP {
 		loadMapIndexExpr(collection, index)
