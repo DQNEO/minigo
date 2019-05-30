@@ -2324,17 +2324,17 @@ func (e *ExprSlice) emit() {
 
 		// src address + low
 		e.collection.emit()
-		emit("push %%rax # src address")
+		emit("PUSH_PRIMITIVE")
 		e.low.emit()
-		emit("pop %%rbx")
-		emit("add %%rax, %%rbx")
-		emit("push %%rbx")
+		emit("PUSH_PRIMITIVE")
+		emit("SUM_FROM_STACK")
+		emit("PUSH_PRIMITIVE")
 
 		emitCallMallocDinamicSize(eMemSize)
-		emit("push %%rax # dst address")
+		emit("PUSH_PRIMITIVE")
 
 		eNewStrlen.emit()
-		emit("push %%rax # strlen")
+		emit("PUSH_PRIMITIVE")
 
 		emit("POP_TO_ARG_2")
 		emit("POP_TO_ARG_1")
@@ -2343,9 +2343,7 @@ func (e *ExprSlice) emit() {
 		emit("call iruntime.strcopy")
 	} else {
 		e.emitToStack()
-		emit("pop %%rcx")
-		emit("pop %%rbx")
-		emit("pop %%rax")
+		emit("POP_SLICE")
 	}
 }
 
