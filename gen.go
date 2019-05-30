@@ -637,8 +637,7 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 
 	emit("PUSH_PRIMITIVE")
 	emit("POP_TO_ARG_0")
-	emit("mov $0, %%rax")
-	emit("call strcmp")
+	emit("FUNCALL strcmp")
 	emit("cmp $0, %%rax") // retval == 0
 	if equal {
 		emit("sete %%al")
