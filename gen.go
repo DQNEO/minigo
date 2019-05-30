@@ -2431,7 +2431,7 @@ func (e *ExprTypeAssertion) emit() {
 		emit("test %%rcx, %%rcx")
 		labelEnd := makeLabel()
 		emit("je %s # jmp if nil", labelEnd)
-		emit("mov (%%rax), %%rax") // deref
+		emit("LOAD_8_BY_DEREF")
 		emitWithoutIndent("%s:", labelEnd)
 	}
 }
