@@ -1473,8 +1473,7 @@ func getReg(regSize int) string {
 }
 
 func emitStoreItToLocal(regSize int, loff int, comment string) {
-	reg := getReg(regSize)
-	emit("mov %%%s, %d(%%rbp) # STORE_%d_TO_LOCAL %d", reg, loff, regSize, loff)
+	emit("STORE_%d_TO_LOCAL %d", regSize, loff)
 }
 
 func emitGsave(regSize int, varname identifier, offset int) {

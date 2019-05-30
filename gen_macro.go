@@ -92,15 +92,22 @@ func emitMacroDefinitions() {
 	emitNewline()
 
 	emitWithoutIndent(".macro load_string_literal slabel")
-	emit(`lea \slabel(%%rip), %%rax`)
+	emit("lea \\slabel(%%rip), %%rax")
 	emitWithoutIndent(".endm")
 	emitNewline()
 
 	emitWithoutIndent(".macro load_number n")
-	emit(`mov $\n, %%rax`)
+	emit("mov $\\n, %%rax")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro STORE_1_TO_LOCAL offset")
+	emit("mov %%al, \\offset(%%rbp)")
+	emitWithoutIndent(".endm")
+	emitNewline()
+
+	emitWithoutIndent(".macro STORE_8_TO_LOCAL offset")
+	emit("mov %%rax, \\offset(%%rbp)")
 	emitWithoutIndent(".endm")
 	emitNewline()
 }
-
-
-
