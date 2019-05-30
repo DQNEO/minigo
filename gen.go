@@ -318,20 +318,11 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		switch ast.gtype.getKind() {
 		case G_INTERFACE:
-			emit("# load global interface")
-			emit("mov %s+%d(%%rip), %%rax", ast.varname, 0)
-			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
-			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
+			emit("LOAD_INTERFACE_FROM_GLOBAL %s", ast.varname)
 		case G_SLICE:
-			emit("# load global slice")
-			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
-			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
-			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
+			emit("LOAD_SLICE_FROM_GLOBAL %s", ast.varname)
 		case G_MAP:
-			emit("# load global map")
-			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
-			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
-			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
+			emit("LOAD_MAP_FROM_GLOBAL %s", ast.varname)
 		case G_ARRAY:
 			ast.emitAddress(0)
 		default:

@@ -122,6 +122,25 @@ func emitMacroDefinitions() {
 	emit("mov (%%rax), %%rax")
 	macroEnd()
 
+
+	macroStart("LOAD_INTERFACE_FROM_GLOBAL",  "varname")
+	emit("mov \\varname+%2d(%%rip), %%rax", 0)
+	emit("mov \\varname+%2d(%%rip), %%rbx", ptrSize)
+	emit("mov \\varname+%2d(%%rip), %%rcx", ptrSize+ptrSize)
+	macroEnd()
+
+	macroStart("LOAD_SLICE_FROM_GLOBAL", "varname")
+	emit("mov \\varname+%2d(%%rip), %%rax # ptr", 0)
+	emit("mov \\varname+%2d(%%rip), %%rbx # len", ptrSize)
+	emit("mov \\varname+%2d(%%rip), %%rcx # cap", ptrSize+IntSize)
+	macroEnd()
+
+	macroStart("LOAD_MAP_FROM_GLOBAL", "varname")
+	emit("mov \\varname+%2d(%%rip), %%rax # ptr", 0)
+	emit("mov \\varname+%2d(%%rip), %%rbx # len", ptrSize)
+	emit("mov \\varname+%2d(%%rip), %%rcx # cap", ptrSize+IntSize)
+	macroEnd()
+
 	macroStart("LOAD_SLICE_FROM_LOCAL", "offset")
 	emit("mov \\offset+%2d(%%rbp), %%rax # ptr", 0)
 	emit("mov \\offset+%2d(%%rbp), %%rbx # len", ptrSize)
@@ -133,7 +152,6 @@ func emitMacroDefinitions() {
 	emit("mov \\offset+%2d(%%rbp), %%rbx # len", ptrSize)
 	emit("mov \\offset+%2d(%%rbp), %%rcx # cap", ptrSize+IntSize)
 	macroEnd()
-
 	macroStart("LOAD_INTERFACE_FROM_LOCAL",  "offset")
 	emit("mov \\offset+%2d(%%rbp), %%rax", 0)
 	emit("mov \\offset+%2d(%%rbp), %%rbx", ptrSize)
