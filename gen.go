@@ -2256,15 +2256,14 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 
 		emit("# load head address of the string")
 		collection.emit()  // emit address
-		emit("push %%rax") // store address of variable
+		emit("PUSH_PRIMITIVE")
 		index.emit()
-		emit("mov %%rax, %%rcx")  // load  index * 1
-		emit("pop %%rbx")         // load address of variable
-		emit("add %%rcx , %%rbx") // (index * size) + address
-		if offset > 0 {
-			emit("add $%d,  %%rbx", offset)
-		}
-		emit("mov (%%rbx), %%rax") // dereference the content of an emelment	} else {
+		emit("PUSH_PRIMITIVE")
+		emit("pop %%rcx")
+		emit("pop %%rax")         // load address of variable
+		emit("add %%rcx , %%rax") // (index * size) + address
+		emit("add $%d,  %%rax", offset)
+		emit("LOAD_8_BY_DEREF")
 	} else {
 		TBI(collection.token(), "unable to handle %s", collection.getGtype())
 	}
