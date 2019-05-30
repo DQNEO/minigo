@@ -2682,8 +2682,7 @@ func (e *ExprLen) emit() {
 		arg.emit()
 		emit("PUSH_PRIMITIVE")
 		emit("POP_TO_ARG_0")
-		emit("mov $0, %%rax")
-		emit("call strlen")
+		emit("FUNCALL strlen")
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	}
@@ -2813,6 +2812,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("lea .%s, %%rax", builtinStringKey2)
 		emit("push %%rax")
 		arg.emit()
+
 		emit("push %%rax  # array")
 		emit("push %%rbx  # len")
 		emit("push %%rcx  # cap")
