@@ -92,12 +92,12 @@ func emitMacroDefinitions() {
 	emitNewline()
 
 	emitWithoutIndent(".macro load_string_literal slabel")
-	emit("lea \\slabel(%%rip), %%rax")
+	emit(`lea \slabel(%%rip), %%rax`)
 	emitWithoutIndent(".endm")
 	emitNewline()
 
 	emitWithoutIndent(".macro load_number n")
-	emit("mov $\\n, %%rax")
+	emit(`mov $\n, %%rax`)
 	emitWithoutIndent(".endm")
 	emitNewline()
 }
