@@ -2652,7 +2652,7 @@ func (e *ExprLen) emit() {
 			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
 			length := len(_arg.values)
-			emit("mov $%d, %%rax", length)
+			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			uop := &ExprBinop{
