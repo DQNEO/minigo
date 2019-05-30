@@ -3,21 +3,21 @@ package main
 func emitMacroDefinitions() {
 	emitWithoutIndent("// MACROS")
 
-	emitWithoutIndent(".macro func_prologue")
+	emitWithoutIndent(".macro FUNC_PROLOGUE")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	emitWithoutIndent(".endm")
 	emitNewline()
 
 	for i, regi := range RegsForArguments {
-		emitWithoutIndent(".macro pop_to_arg_%d", i)
+		emitWithoutIndent(".macro POP_TO_ARG_%d", i)
 		emitWithoutIndent("pop %%%s", regi)
 		emitWithoutIndent(".endm")
 		emitNewline()
 	}
 
 	for i, regi := range RegsForArguments {
-		emitWithoutIndent(".macro push_arg_%d", i)
+		emitWithoutIndent(".macro PUSH_ARG_%d", i)
 		emitWithoutIndent("push %%%s", regi)
 		emitWithoutIndent(".endm")
 		emitNewline()
