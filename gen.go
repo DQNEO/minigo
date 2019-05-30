@@ -3032,10 +3032,8 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		emit("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
-			// pass an empty slice
-			emit("push $0")
-			emit("push $0")
-			emit("push $0")
+			emit("load_empty_slice")
+			emit("push_slice")
 		} else {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
