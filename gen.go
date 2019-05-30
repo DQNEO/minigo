@@ -284,7 +284,7 @@ func (a *ExprStructField) emit() {
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
-		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
+		emit("ADD_NUMBER %d", field.offset)
 		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
 			emit("LOAD_24_BY_DEREF")
