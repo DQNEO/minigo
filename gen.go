@@ -2697,7 +2697,8 @@ func (e *ExprLen) emit() {
 		}
 	case gtype.getKind() == G_STRING:
 		arg.emit()
-		emit("mov %%rax, %%rdi")
+		emit("PUSH_PRIMITIVE")
+		emit("POP_TO_ARG_0")
 		emit("mov $0, %%rax")
 		emit("call strlen")
 	default:
