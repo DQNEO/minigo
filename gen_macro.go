@@ -185,7 +185,6 @@ func emitMacroDefinitions() {
 	macroStart("FUNCALL", "fname")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
-	emit("mov $0, %%rcx")
 	emit("call \\fname")
 	macroEnd()
 
