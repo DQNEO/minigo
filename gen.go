@@ -321,16 +321,17 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		switch ast.gtype.getKind() {
 		case G_INTERFACE:
+			emit("# load global interface")
 			emit("mov %s+%d(%%rip), %%rax", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx", ast.varname, ptrSize+ptrSize)
 		case G_SLICE:
-			emit("#   emit slice variable")
+			emit("# load global slice")
 			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
 		case G_MAP:
-			emit("#   emit map variable")
+			emit("# load global map")
 			emit("mov %s+%d(%%rip), %%rax # ptr", ast.varname, 0)
 			emit("mov %s+%d(%%rip), %%rbx # len", ast.varname, ptrSize)
 			emit("mov %s+%d(%%rip), %%rcx # cap", ast.varname, ptrSize+IntSize)
@@ -346,16 +347,17 @@ func (ast *ExprVariable) emit() {
 		}
 		switch ast.gtype.getKind() {
 		case G_INTERFACE:
+			emit("# load local interface")
 			emit("mov %d(%%rbp), %%rax", ast.offset)
 			emit("mov %d(%%rbp), %%rbx", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx", ast.offset+ptrSize+ptrSize)
 		case G_SLICE:
-			emit("#   emit slice variable")
+			emit("# load local slice")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
 		case G_MAP:
-			emit("#   emit map variable")
+			emit("# load local map")
 			emit("mov %d(%%rbp), %%rax # ptr", ast.offset)
 			emit("mov %d(%%rbp), %%rbx # len", ast.offset+ptrSize)
 			emit("mov %d(%%rbp), %%rcx # cap", ast.offset+ptrSize+IntSize)
