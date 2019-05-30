@@ -1884,7 +1884,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("PUSH_PRIMITIVE # dynamicType")
 
-	emit("pop_interface")
+	emit("POP_INTERFACE")
 	emitNewline()
 }
 
@@ -1901,8 +1901,8 @@ func isNil(e Expr) bool {
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
 	if rhs == nil || isNil(rhs) {
-		emit("load_empty_interface")
-		emit("push_interface")
+		emit("LOAD_EMPTY_INTERFACE")
+		emit("PUSH_INTERFACE")
 		emitSaveInterface(lhs, 0)
 		return
 	}
@@ -1910,13 +1910,13 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
-		emit("push_interface")
+		emit("PUSH_INTERFACE")
 		emitSaveInterface(lhs, 0)
 		return
 	}
 
 	emitConversionToInterface(rhs)
-	emit("push_interface")
+	emit("PUSH_INTERFACE")
 	emitSaveInterface(lhs, 0)
 }
 
@@ -1925,8 +1925,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	assertInterface(lhs)
 	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
-		emit("load_empty_slice")
-		emit("push_slice")
+		emit("LOAD_EMPTY_SLICE")
+		emit("PUSH_SLICE")
 		emitSave3Elements(lhs, 0)
 		return
 	}
@@ -1937,23 +1937,23 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *Relation:
 		rel := rhs.(*Relation)
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			emit("load_empty_slice")
-			emit("push_slice")
+			emit("LOAD_EMPTY_SLICE")
+			emit("PUSH_SLICE")
 			emitSave3Elements(lhs, 0)
 			return
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 		rvariable.emit()
-		emit("push_slice")
+		emit("PUSH_SLICE")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
-		emit("push_slice")
+		emit("PUSH_SLICE")
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
 		e.emit()
-		emit("push_slice")
+		emit("PUSH_SLICE")
 	case *ExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
@@ -1978,7 +1978,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	default:
 		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
 		rhs.emit() // it should put values to rax,rbx,rcx
-		emit("push_slice")
+		emit("PUSH_SLICE")
 	}
 
 	emitSave3Elements(lhs, 0)
