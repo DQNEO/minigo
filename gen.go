@@ -643,7 +643,8 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 	emit("pop %%rax # right string")
 	emitConvertNilToEmptyString("%rax")
 
-	emit("mov %%rax, %%rdi")
+	emit("PUSH_PRIMITIVE")
+	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call strcmp")
 	emit("cmp $0, %%rax") // retval == 0
@@ -685,9 +686,12 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("# emitStringConcate")
 	left.emit()
 	emit("push %%rax # left string")
-	emit("mov %%rax, %%rdi")
+
+	emit("PUSH_PRIMITIVE")
+	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call strlen # get left len")
+
 	emit("push %%rax # left len")
 	right.emit()
 	emit("push %%rax # right string")
@@ -707,7 +711,9 @@ func emitStringConcate(left Expr, right Expr) {
 	// newSize = strlen(left) + strlen(right) + 1
 	emit("add %%rax, %%rbx # len + len")
 	emit("add $1, %%rbx # + 1 (null byte)")
-	emit("mov %%rbx, %%rdi")
+	emit("mov %%rbx, %%rax")
+	emit("PUSH_PRIMITIVE")
+	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
 
