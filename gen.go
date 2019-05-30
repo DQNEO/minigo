@@ -598,12 +598,11 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emit("%s:", labelElse)
 	binop.left.emit()
 	emit("%s:", labelEnd)
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 
 	binop.right.emit()
-	emit("pop %%rcx")
-	emit("# rax = right, rcx = left")
-	emitStringsEqual(equal, "%rcx", "%rax")
+	emit("PUSH_PRIMITIVE")
+	emitStringsEqualFromStack(equal)
 }
 
 func emitConvertNilToEmptyString(regi string) {
@@ -621,6 +620,12 @@ func emitConvertNilToEmptyString(regi string) {
 }
 
 // call strcmp
+func emitStringsEqualFromStack(equal bool) {
+	emit("pop %%rax")
+	emit("pop %%rcx")
+	emitStringsEqual(equal, "%rax", "%rcx")
+}
+
 func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 	emit("push %s", rightReg) // stash
 
