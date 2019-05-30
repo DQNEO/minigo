@@ -188,6 +188,10 @@ func emitMacroDefinitions() {
 	emit("mov $0, %%rcx")
 	emit("call \\fname")
 	macroEnd()
+
+	macroStart("TEST_IT", "")
+	emit("test %%rax, %%rax")
+	macroEnd()
 }
 
 func macroStart(name string, args string) {

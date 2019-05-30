@@ -590,7 +590,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emit("cmp $0, %%rax")
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("mov $0, %%rax")
 	emit("je %s", labelElse)
 	emitEmptyString()
@@ -611,7 +611,7 @@ func emitConvertNilToEmptyString(regi string) {
 	emit("mov %s, %%rax", regi)
 	emit("push %%rax")
 	emit("# convert nil to an empty string")
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("pop %%rax")
 	labelEnd := makeLabel()
 	emit("jne %s # jump if not nil", labelEnd)
@@ -730,11 +730,11 @@ func (ast *ExprBinop) emit() {
 	case "&&":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("mov $0, %%rax")
 		emit("je %s", labelEnd)
 		ast.right.emit()
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("mov $0, %%rax")
 		emit("je %s", labelEnd)
 		emit("mov $1, %%rax")
@@ -743,11 +743,11 @@ func (ast *ExprBinop) emit() {
 	case "||":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("mov $1, %%rax")
 		emit("jne %s", labelEnd)
 		ast.right.emit()
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("mov $1, %%rax")
 		emit("jne %s", labelEnd)
 		emit("mov $0, %%rax")
@@ -1139,7 +1139,7 @@ func (stmt *StmtIf) emit() {
 		stmt.simplestmt.emit()
 	}
 	stmt.cond.emit()
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
@@ -1202,13 +1202,13 @@ func (stmt *StmtSwitch) emit() {
 				emit("pop %%rcx # the subject type")
 				emit("push %%rcx # the subject value")
 				emitStringsEqual(true, "%rax", "%rcx")
-				emit("test %%rax, %%rax")
+				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		} else if stmt.cond == nil {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit("test %%rax, %%rax")
+				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 				emit("push %%rcx # the subject value")
 			}
@@ -1225,7 +1225,7 @@ func (stmt *StmtSwitch) emit() {
 					emit("sete %%al")
 					emit("movzb %%al, %%eax")
 				}
-				emit("test %%rax, %%rax")
+				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 				emit("push %%rcx # the subject value")
 			}
@@ -1295,7 +1295,7 @@ func (f *StmtFor) emitRangeForList() {
 		},
 	}
 	condition.emit()
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
 	// v = s[i]
@@ -1335,7 +1335,7 @@ func (f *StmtFor) emitRangeForList() {
 		},
 	}
 	condition2.emit()
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
 	// i++
@@ -1360,7 +1360,7 @@ func (f *StmtFor) emitForClause() {
 	emit("%s: # begin loop ", labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("je %s  # jump if false", f.labelEndLoop)
 	}
 	f.block.emit()
@@ -2495,7 +2495,7 @@ func (e *ExprConversion) emit() {
 		labelEnd := makeLabel()
 		e.expr.emit()
 		emit("push %%rax")
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("pop %%rax")
 		emit("jne %s", labelEnd)
 		emitEmptyString()
@@ -2853,13 +2853,13 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("cmp %%rax, %%rdx")
 		emit("setne %%al") // rax != 0
 		emit("movzb %%al, %%eax")
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("je %s", labelEnd)
 
 		emit("cmp %%rcx, %%rdx")
 		emit("sete %%al") // rcx == 0
 		emit("movzb %%al, %%eax")
-		emit("test %%rax, %%rax")
+		emit("TEST_IT")
 		emit("je %s", labelEnd)
 
 		slabel := makeLabel()
