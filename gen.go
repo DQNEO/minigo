@@ -1952,7 +1952,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("push_slice")
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
-		e.emitToStack()
+		e.emit()
+		emit("push_slice")
 	case *ExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
@@ -2293,61 +2294,64 @@ func (f *ExprFuncRef) emit() {
 	emit("mov $1, %%rax") // emit 1 for now.  @FIXME
 }
 
+func (e *ExprSlice) emitSubString() {
+	// s[n:m]
+	// new strlen: m - n
+	var high Expr
+	if e.high == nil {
+		high = &ExprLen{
+			tok: e.token(),
+			arg: e.collection,
+		}
+	} else {
+		high = e.high
+	}
+	eNewStrlen := &ExprBinop{
+		tok:   e.token(),
+		op:    "-",
+		left:  high,
+		right: e.low,
+	}
+	// mem size = strlen + 1
+	eMemSize := &ExprBinop{
+		tok:  e.token(),
+		op:   "+",
+		left: eNewStrlen,
+		right: &ExprNumberLiteral{
+			val: 1,
+		},
+	}
+
+	// src address + low
+	e.collection.emit()
+	emit("PUSH_PRIMITIVE")
+	e.low.emit()
+	emit("PUSH_PRIMITIVE")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_PRIMITIVE")
+
+	emitCallMallocDinamicSize(eMemSize)
+	emit("PUSH_PRIMITIVE")
+
+	eNewStrlen.emit()
+	emit("PUSH_PRIMITIVE")
+
+	emit("POP_TO_ARG_2")
+	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0")
+
+	emit("FUNCALL iruntime.strcopy")
+}
+
 func (e *ExprSlice) emit() {
 	if e.collection.getGtype().isString() {
-		// s[n:m]
-		// new strlen: m - n
-		var high Expr
-		if e.high == nil {
-			high = &ExprLen{
-				tok: e.token(),
-				arg: e.collection,
-			}
-		} else {
-			high = e.high
-		}
-		eNewStrlen := &ExprBinop{
-			tok:   e.token(),
-			op:    "-",
-			left:  high,
-			right: e.low,
-		}
-		// mem size = strlen + 1
-		eMemSize := &ExprBinop{
-			tok:  e.token(),
-			op:   "+",
-			left: eNewStrlen,
-			right: &ExprNumberLiteral{
-				val: 1,
-			},
-		}
-
-		// src address + low
-		e.collection.emit()
-		emit("PUSH_PRIMITIVE")
-		e.low.emit()
-		emit("PUSH_PRIMITIVE")
-		emit("SUM_FROM_STACK")
-		emit("PUSH_PRIMITIVE")
-
-		emitCallMallocDinamicSize(eMemSize)
-		emit("PUSH_PRIMITIVE")
-
-		eNewStrlen.emit()
-		emit("PUSH_PRIMITIVE")
-
-		emit("POP_TO_ARG_2")
-		emit("POP_TO_ARG_1")
-		emit("POP_TO_ARG_0")
-
-		emit("FUNCALL iruntime.strcopy")
+		e.emitSubString()
 	} else {
-		e.emitToStack()
-		emit("POP_SLICE")
+		e.emitSlice()
 	}
 }
 
-func (e *ExprSlice) emitToStack() {
+func (e *ExprSlice) emitSlice() {
 	emit("# assign to a slice")
 	emit("#   emit address of the array")
 	e.collection.emit()
@@ -2398,6 +2402,7 @@ func (e *ExprSlice) emitToStack() {
 	calcCap.emit()
 
 	emit("push %%rax")
+	emit("POP_SLICE")
 }
 
 func (e ExprArrayLiteral) emit() {
