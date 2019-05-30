@@ -145,7 +145,11 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("push %%r11")
 		emit("push %%r10")
 		emit("push %%rcx")
-		emitStringsEqual(true, "%r12", "%rax")
+
+		emit("push %%rax")
+		emit("push %%r12")
+		emitStringsEqualFromStack(true)
+
 		emit("pop %%rcx")
 		emit("pop %%r10")
 		emit("pop %%r11")
