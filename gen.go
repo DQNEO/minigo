@@ -1960,13 +1960,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
 		stringVariable.emit()
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE # ptr")
 		strlen := &ExprLen{
 			arg: stringVariable,
 		}
 		strlen.emit()
-		emit("push %%rax # len")
-		emit("push %%rax # cap")
+		emit("PUSH_PRIMITIVE # len")
+		emit("PUSH_PRIMITIVE # cap")
 
 	default:
 		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
