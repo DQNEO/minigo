@@ -287,12 +287,9 @@ func (a *ExprStructField) emit() {
 		emit("add $%d, %%rax # +field.offet for %s", field.offset, a.fieldname)
 		switch field.getKind() {
 		case G_SLICE, G_INTERFACE, G_MAP:
-			emit("# LOAD_DEREF_TO_24")
-			emit("mov %d(%%rax), %%rcx", ptrSize+ptrSize)
-			emit("mov %d(%%rax), %%rbx", ptrSize)
-			emit("mov %d(%%rax), %%rax", 0)
+			emit("LOAD_24_BY_DEREF")
 		default:
-			emit("mov (%%rax), %%rax # LOAD_DEREF_TO_8")
+			emit("LOAD_8_BY_DEREF")
 		}
 
 	case G_NAMED: // struct

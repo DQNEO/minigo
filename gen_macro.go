@@ -100,6 +100,16 @@ func emitMacroDefinitions() {
 	emit("mov \\offset(%%rbp), %%rax")
 	macroEnd()
 
+	macroStart("LOAD_24_BY_DEREF", "")
+	emit("mov %d(%%rax), %%rcx", 16)
+	emit("mov %d(%%rax), %%rbx", 8)
+	emit("mov %d(%%rax), %%rax", 0)
+	macroEnd()
+
+	macroStart("LOAD_8_BY_DEREF","")
+	emit("mov (%%rax), %%rax")
+	macroEnd()
+
 	macroStart("LOAD_SLICE_FROM_LOCAL", "offset")
 	emit("mov \\offset+%2d(%%rbp), %%rax # ptr", 0)
 	emit("mov \\offset+%2d(%%rbp), %%rbx # len", ptrSize)
