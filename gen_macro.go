@@ -104,12 +104,12 @@ func emitMacroDefinitions() {
 	emit("mov \\offset(%%rbp), %%rax")
 	macroEnd()
 
-	macroStart("LOAD_1_FROM_GLOBAL", "varname")
-	emit("movsbq \\varname(%%rip), %%rax")
+	macroStart("LOAD_1_FROM_GLOBAL", "varname, offset=0")
+	emit("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
-	macroStart("LOAD_8_FROM_GLOBAL", "varname")
-	emit("mov \\varname(%%rip), %%rax")
+	macroStart("LOAD_8_FROM_GLOBAL", "varname, offset=0")
+	emit("mov \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_24_BY_DEREF", "")

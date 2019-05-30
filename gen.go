@@ -220,7 +220,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit("mov %s+%d(%%rip), %%rax # ", variable.varname, field.offset+offset)
+				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.varname, field.offset,offset)
 			} else {
 				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
