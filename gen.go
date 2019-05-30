@@ -2207,7 +2207,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		if collection.getGtype().elementType.getKind() == G_INTERFACE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
-			emit("mov (%%rdx), %%rax")
+			emit("mov 0(%%rdx), %%rax")
 			emit("mov 8(%%rdx), %%rbx")
 			emit("mov 16(%%rdx), %%rcx")
 		} else {
@@ -2237,7 +2237,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("# emit the element of interface type")
 			emit("mov %%rbx, %%rdx")
-			emit("mov (%%rdx), %%rax")
+			emit("mov 0(%%rdx), %%rax")
 			emit("mov 8(%%rdx), %%rbx")
 			emit("mov 16(%%rdx), %%rcx")
 		} else {
