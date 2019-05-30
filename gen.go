@@ -1869,7 +1869,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 		receiverType = receiverType.origType.relation.gtype
 	}
 	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
-	emit("mov $%d, %%rax # receiverTypeId", receiverType.receiverTypeId)
+	emit("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
 	emit("PUSH_PRIMITIVE # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
