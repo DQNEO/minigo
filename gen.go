@@ -2233,10 +2233,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 
 		primType := collection.getGtype().elementType.getKind()
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
-			emit("# LOAD_24_BY_DEREF")
-			emit("mov 16(%%rax), %%rcx")
-			emit("mov 8(%%rax), %%rbx")
-			emit("mov 0(%%rax), %%rax")
+			emit("LOAD_24_BY_DEREF")
 		} else {
 			// dereference the content of an emelment
 			inst := getLoadInst(size)
