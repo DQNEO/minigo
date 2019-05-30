@@ -134,6 +134,16 @@ func emitMacroDefinitions() {
 	emit("add %%rcx , %%rax")
 	macroEnd()
 
+	macroStart("IMUL_FROM_STACK", "")
+	emit("pop %%rcx")
+	emit("pop %%rax")
+	emit("imul %%rcx , %%rax")
+	macroEnd()
+
+	macroStart("IMUL_NUMBER", "n")
+	emit("imul $\\n , %%rax")
+	macroEnd()
+
 	macroStart("ADD_NUMBER", "n")
 	emit("add $\\n , %%rax")
 	macroEnd()

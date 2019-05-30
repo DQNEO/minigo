@@ -2352,21 +2352,22 @@ func (e *ExprSlice) emit() {
 }
 
 func (e *ExprSlice) emitSlice() {
-	emit("# assign to a slice")
-	emit("#   emit address of the array")
-	e.collection.emit()
-	emit("push %%rax") // head of the array
-	emit("#   emit low index")
-	e.low.emit()
-	emit("mov %%rax, %%rcx") // low index
 	elmType := e.collection.getGtype().elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax", size) // size of one element
-	emit("imul %%rcx, %%rax")    // index * size
-	emit("pop %%rcx")            // head of the array
-	emit("add %%rcx , %%rax")    // (index * size) + address
-	emit("push %%rax")
+
+	emit("# assign to a slice")
+	emit("#   emit address of the array")
+	e.collection.emit()
+	emit("PUSH_PRIMITIVE # head of the array")
+	e.low.emit()
+	emit("PUSH_PRIMITIVE # low index")
+	emit("LOAD_NUMBER %d", size)
+	emit("PUSH_PRIMITIVE")
+	emit("IMUL_FROM_STACK")
+	emit("PUSH_PRIMITIVE")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_PRIMITIVE")
 
 	emit("#   calc and set len")
 
@@ -2381,7 +2382,7 @@ func (e *ExprSlice) emitSlice() {
 		right: e.low,
 	}
 	calcLen.emit()
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 
 	emit("#   calc and set cap")
 	var max Expr
@@ -2401,7 +2402,7 @@ func (e *ExprSlice) emitSlice() {
 
 	calcCap.emit()
 
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 	emit("POP_SLICE")
 }
 
