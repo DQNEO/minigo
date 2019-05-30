@@ -3120,7 +3120,9 @@ func emitMainFunc(importOS bool) {
 	emit("mov $0, %%rax")
 	emit("call main.main")
 	emitFuncEpilogue("noop_handler", nil)
+}
 
+func emitMakeSliceFunc() {
 	// makeSlice
 	emitWithoutIndent("%s:", "iruntime.makeSlice")
 	emit("push %%rbp")
@@ -3593,6 +3595,7 @@ func (root *IrRoot) emit() {
 	emitWithoutIndent(".text")
 	emitRuntimeArgs()
 	emitMainFunc(root.importOS)
+	emitMakeSliceFunc()
 
 	// emit packages
 	for _, pkg := range root.packages {
