@@ -381,7 +381,7 @@ func (f *StmtFor) emitRangeForMap() {
 }
 
 // push addr, len, cap
-func (lit *ExprMapLiteral) emitPush() {
+func (lit *ExprMapLiteral) emit() {
 	length := len(lit.elements)
 
 	// allocaated address of the map head
@@ -447,4 +447,6 @@ func (lit *ExprMapLiteral) emitPush() {
 	emit("push %%rax")       // address (head of the heap)
 	emit("push $%d", length) // len
 	emit("push $%d", length) // cap
+
+	emit("POP_MAP")
 }

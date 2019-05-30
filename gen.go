@@ -1841,7 +1841,8 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("# map literal")
 
 		lit := rhs.(*ExprMapLiteral)
-		lit.emitPush()
+		lit.emit()
+		emit("PUSH_MAP")
 	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
 		emit("push_map")
@@ -2421,7 +2422,7 @@ func (e *ExprTypeAssertion) emit() {
 
 		e.expr.emit() // emit interface
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE")
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
@@ -2520,13 +2521,6 @@ func (e *ExprStructLiteral) emit() {
 func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
 	emit("mov %%rcx, %%rax # copy type id")
-}
-
-func (e *ExprMapLiteral) emit() {
-	e.emitPush()
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("pop %%rax")
 }
 
 func (ast *ExprMethodcall) getUniqueName() string {
