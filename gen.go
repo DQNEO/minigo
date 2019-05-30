@@ -2636,7 +2636,7 @@ func (e *ExprLen) emit() {
 
 	switch {
 	case gtype.kind == G_ARRAY:
-		emit("mov $%d, %%rax", gtype.length)
+		emit("LOAD_NUMBER %d", gtype.length)
 	case gtype.kind == G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
