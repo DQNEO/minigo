@@ -2997,13 +2997,13 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		}
 		var width int
 		if doConvertToInterface || primType == G_INTERFACE {
-			emit("push_interface")
+			emit("PUSH_INTERFACE")
 			width = interfaceWidth
 		} else if primType == G_SLICE {
-			emit("push_slice")
+			emit("PUSH_SLICE")
 			width = sliceWidth
 		} else if primType == G_MAP {
-			emit("push_map")
+			emit("PUSH_MAP")
 			width = mapWidth
 		} else {
 			emit("PUSH_PRIMITIVE")
@@ -3028,16 +3028,16 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		emit("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
-			emit("load_empty_slice")
-			emit("push_slice")
+			emit("LOAD_EMPTY_SLICE")
+			emit("PUSH_SLICE")
 		} else {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
 				emit("# emit variadic arg")
 				if vargIndex == 0 {
 					emit("# make an empty slice to append")
-					emit("load_empty_slice")
-					emit("push_slice")
+					emit("LOAD_EMPTY_SLICE")
+					emit("PUSH_SLICE")
 				}
 				// conversion : var ifc = x
 				if varg.getGtype().getKind() == G_INTERFACE {
@@ -3045,7 +3045,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				} else {
 					emitConversionToInterface(varg)
 				}
-				emit("push_interface")
+				emit("PUSH_INTERFACE")
 				emit("# calling append24")
 				emit("POP_TO_ARG_5 # ifc_c")
 				emit("POP_TO_ARG_4 # ifc_b")
@@ -3055,7 +3055,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("POP_TO_ARG_0 # ptr")
 				emit("mov $0, %%rax")
 				emit("call iruntime.append24")
-				emit("push_slice")
+				emit("PUSH_SLICE")
 			}
 		}
 		numRegs += 3
