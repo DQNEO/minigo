@@ -122,6 +122,10 @@ func emitMacroDefinitions() {
 	emit("mov (%%rax), %%rax")
 	macroEnd()
 
+	macroStart("LOAD_1_BY_DEREF","")
+	emit("movsbq (%%rax), %%rax")
+	macroEnd()
+
 
 	macroStart("LOAD_INTERFACE_FROM_GLOBAL",  "varname")
 	emit("mov \\varname+%2d(%%rip), %%rax", 0)
