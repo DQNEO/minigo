@@ -500,8 +500,7 @@ func (ast *ExprUop) emit() {
 
 			emitCallMalloc(e.getGtype().getSize()) // => rax
 			emit("PUSH_PRIMITIVE")                     // to:ptr addr
-			// @TODO handle global vars
-			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
+			e.invisiblevar.emitAddress(0)
 			emit("PUSH_PRIMITIVE") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype())
 			emit("pop %%rax") // from
