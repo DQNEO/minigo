@@ -2093,10 +2093,16 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
-		if collection.getGtype().elementType.getKind() == G_INTERFACE {
+		primType := collection.getGtype().elementType.getKind()
+		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("LOAD_24_BY_DEREF")
 		} else {
-			emit("LOAD_8_BY_DEREF")
+			// dereference the content of an emelment
+			if elmSize == 1 {
+				emit("LOAD_1_BY_DEREF")
+			} else {
+				emit("LOAD_8_BY_DEREF")
+			}
 		}
 		return
 	} else if collection.getGtype().kind == G_SLICE {
@@ -2118,7 +2124,6 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		emit("mov %%rbx, %%rax")
 
 		primType := collection.getGtype().elementType.getKind()
-
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("LOAD_24_BY_DEREF")
 		} else {
