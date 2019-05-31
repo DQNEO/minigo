@@ -595,12 +595,10 @@ func emitConvertNilToEmptyString(regi string) {
 
 // call strcmp
 func emitStringsEqualFromStack(equal bool) {
-	leftReg := "%rax"
-
 	emit("pop %%rax") // left
 
-	emitConvertNilToEmptyString(leftReg)
-	emit("mov %s, %%rsi", leftReg)
+	emitConvertNilToEmptyString("%rax")
+	emit("mov %%rax, %%rsi")
 
 	emit("pop %%rax # right string")
 	emitConvertNilToEmptyString("%rax")
