@@ -2041,9 +2041,15 @@ func (ast *StmtSatementList) emit() {
 }
 
 func emitCollectIndexSave(collection Expr, index Expr, offset int) {
-	assert(collection.getGtype().kind == G_ARRAY, collection.token(), "should be collection")
+	collectionType := collection.getGtype()
+	assert(collectionType.getKind() == G_ARRAY ||collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), "should be collection")
 
-	elmType := collection.getGtype().elementType
+	var elmType *Gtype
+	if collectionType.isString() {
+		elmType = gByte
+	} else {
+		elmType = collectionType.elementType
+	}
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 
