@@ -2042,7 +2042,7 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	emit("PUSH_PRIMITIVE # head")
 
 	index.emit()
-	emit("imul $%d, %%rax", elmSize)
+	emit("IMUL_NUMBER %d", elmSize)
 	emit("PUSH_PRIMITIVE # index * elmSize")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + head")
