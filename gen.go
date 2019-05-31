@@ -1020,19 +1020,18 @@ func (e *ExprIndex) emitSave() {
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 
-	emit("push %%rax # stash head address of collection")
+	emit("PUSH_PRIMITIVE # stash head address of collection")
+
 	e.index.emit()
-	//emit("mov %%rax, %%rcx") // index
-	//emit("mov $%d, %%rcx # elmSize of one element")
 	emit("imul $%d, %%rax # index * elmSize", elmSize)
-	emit("push %%rax # store index * elmSize")
+	emit("PUSH_PRIMITIVE # store index * elmSize")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + address")
 
-	emit("mov %%rax, %%rbx")
+	emit("mov %%rax, %%rcx")
 	emit("pop %%rax # load RHS value")
 	reg := getReg(elmSize)
-	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
+	emit("mov %%%s, (%%rcx) # finally save value to an element", reg)
 }
 
 func (e *ExprStructField) emitSave() {
