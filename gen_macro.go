@@ -233,6 +233,16 @@ func emitMacroDefinitions() {
 	emit("mov %%rcx, (%%rax)")
 	macroEnd()
 
+	macroStart("STORE_24_INDIRECT_FROM_STACK", "")
+	emit("pop %%rax")
+	emit("pop %%rcx # load RHS value(c)")
+	emit("mov %%rcx, 16(%%rax)")
+	emit("pop %%rcx # load RHS value(b)")
+	emit("mov %%rcx, 8(%%rax)")
+	emit("pop %%rcx # load RHS value(a)")
+	emit("mov %%rcx, 0(%%rax)")
+	macroEnd()
+
 	macroStart("ADD_NUMBER", "n")
 	emit("add $\\n , %%rax")
 	macroEnd()

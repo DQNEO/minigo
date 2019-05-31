@@ -977,10 +977,9 @@ func (e *ExprIndex) emitSave3Elements() {
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
-
-	emit("push %%rax # stash head address of collection")
+	emit("PUSH_PRIMITIVE # head address of collection")
 	e.index.emit()
-	emit("mov %%rax, %%rcx") // index
+	emit("PUSH_PRIMITIVE # index")
 	var elmType *Gtype
 	if collectionType.isString() {
 		elmType = gByte
@@ -989,20 +988,13 @@ func (e *ExprIndex) emitSave3Elements() {
 	}
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax # size of one element", size)
-	emit("imul %%rcx, %%rax # index * size")
-	emit("push %%rax # store index * size")
-	emit("pop %%rcx # load index * size")
-	emit("pop %%rax # load address of variable")
-	emit("add %%rcx , %%rax # (index * size) + address")
-
-	emit("mov %%rax, %%rbx")
-	emit("pop %%rax # load RHS value(c)")
-	emit("mov %%rax, 16(%%rbx)")
-	emit("pop %%rax # load RHS value(b)")
-	emit("mov %%rax, 8(%%rbx)")
-	emit("pop %%rax # load RHS value(a)")
-	emit("mov %%rax, (%%rbx)")
+	emit("LOAD_NUMBER %d # elementSize", size)
+	emit("PUSH_PRIMITIVE")
+	emit("IMUL_FROM_STACK # index * elementSize")
+	emit("PUSH_PRIMITIVE # index * elementSize")
+	emit("SUM_FROM_STACK # (index * size) + address")
+	emit("PUSH_PRIMITIVE")
+	emit("STORE_24_INDIRECT_FROM_STACK")
 }
 
 func (e *ExprIndex) emitSave() {
