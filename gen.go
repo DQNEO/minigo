@@ -468,7 +468,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	if variable.isGlobal {
 		emit("STORE_%d_TO_GLOBAL %s %d", size, variable.varname, offset)
 	} else {
-		emitStoreItToLocal(size, variable.offset+offset, "")
+		emit("STORE_%d_TO_LOCAL %d+%d", size, variable.offset, offset)
 	}
 }
 
@@ -1427,10 +1427,6 @@ func getReg(regSize int) string {
 	return reg
 }
 
-func emitStoreItToLocal(size int, loff int, comment string) {
-	emit("STORE_%d_TO_LOCAL %d", size, loff)
-}
-
 func emitAddress(e Expr) {
 	switch e.(type) {
 	case *Relation:
@@ -2023,7 +2019,8 @@ func (decl *DeclVar) emitLocal() {
 		comment := "initialize " + string(decl.variable.varname)
 		emit("# Assign to LHS")
 		gasIndentLevel++
-		emitStoreItToLocal(decl.variable.getGtype().getSize(), decl.variable.offset, comment)
+		emit("STORE_%d_TO_LOCAL %d # %s",
+			decl.variable.getGtype().getSize(), decl.variable.offset, comment)
 		gasIndentLevel--
 	}
 }
