@@ -2121,7 +2121,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		emit("PUSH_PRIMITIVE")          // store index * elmSize
 		emit("pop %%rcx")               // load  index * elmSize
 		emit("pop %%rbx")               // load  head
-		emit("add %%rax , %%rbx")       // (index * elmSize) + head
+		emit("add %%rcx , %%rbx")       // (index * elmSize) + head
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
