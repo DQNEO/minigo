@@ -987,7 +987,6 @@ func (e *ExprIndex) emitSave24() {
 }
 
 func (e *ExprIndex) emitSave() {
-	emit("PUSH_PRIMITIVE") // push RHS value
 
 	// load head address of the array
 	// load index
@@ -998,8 +997,9 @@ func (e *ExprIndex) emitSave() {
 	collectionType := e.collection.getGtype()
 	switch {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
-		e.collection.emit() // head address
+		// break
 	case collectionType.getKind() == G_MAP:
+		emit("PUSH_PRIMITIVE") // push RHS value
 		e.emitMapSet(false)
 		return
 	default:
@@ -1015,15 +1015,19 @@ func (e *ExprIndex) emitSave() {
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 
-	emit("PUSH_PRIMITIVE # stash head address of collection")
+	emit("PUSH_PRIMITIVE # rhs")
+
+	e.collection.emit()
+	emit("PUSH_PRIMITIVE # addr")
 
 	e.index.emit()
-	emit("imul $%d, %%rax # index * elmSize", elmSize)
-	emit("PUSH_PRIMITIVE # store index * elmSize")
+	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
+	emit("PUSH_PRIMITIVE")
 
-	emit("SUM_FROM_STACK # (index * elmSize) + address")
+	emit("SUM_FROM_STACK # (index * elmSize) + addr")
+	emit("PUSH_PRIMITIVE")
 
-	emit("mov %%rax, %%rcx")
+	emit("pop %%rcx")
 	emit("pop %%rax # load RHS value")
 	reg := getReg(elmSize)
 	emit("mov %%%s, (%%rcx) # finally save value to an element", reg)
@@ -2045,6 +2049,7 @@ func (ast *StmtSatementList) emit() {
 
 func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	assert(array.getGtype().kind == G_ARRAY, array.token(), "should be array")
+
 	elmType := array.getGtype().elementType
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
@@ -2058,7 +2063,7 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	emit("IMUL_NUMBER %d  # index * elmSize", elmSize)
 	emit("PUSH_PRIMITIVE")
 
-	emit("SUM_FROM_STACK # (index * elmSize) + address")
+	emit("SUM_FROM_STACK # (index * elmSize) + addr")
 	emit("ADD_NUMBER %d # offset", offset)
 	emit("PUSH_PRIMITIVE")
 
