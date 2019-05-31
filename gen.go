@@ -2075,8 +2075,8 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 	emit("# loadCollectIndex")
 	if collection.getGtype().kind == G_ARRAY {
 		elmType := collection.getGtype().elementType
-		size := elmType.getSize()
-		assert(size > 0, nil, "size > 0")
+		elmSize := elmType.getSize()
+		assert(elmSize > 0, nil, "elmSize > 0")
 
 		collection.emit()
 		emit("PUSH_PRIMITIVE # head")
@@ -2084,12 +2084,12 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		index.emit()
 		emit("mov %%rax, %%rcx")
 
-		emit("mov $%d, %%rax", size) // size of one element
-		emit("imul %%rcx, %%rax")    // index * size
-		emit("PUSH_PRIMITIVE")           // store index * size
-		emit("pop %%rcx")            // load  index * size
-		emit("pop %%rbx")            // load address of variable
-		emit("add %%rcx , %%rbx")    // (index * size) + address
+		emit("mov $%d, %%rax", elmSize) // elmSize of one element
+		emit("imul %%rcx, %%rax")       // index * elmSize
+		emit("PUSH_PRIMITIVE")          // store index * elmSize
+		emit("pop %%rcx")               // load  index * elmSize
+		emit("pop %%rbx")               // load address of variable
+		emit("add %%rcx , %%rbx")       // (index * elmSize) + address
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
@@ -2101,8 +2101,8 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		return
 	} else if collection.getGtype().kind == G_SLICE {
 		elmType := collection.getGtype().elementType
-		size := elmType.getSize()
-		assert(size > 0, nil, "size > 0")
+		elmSize := elmType.getSize()
+		assert(elmSize > 0, nil, "elmSize > 0")
 
 		collection.emit()
 		emit("PUSH_PRIMITIVE # head")
@@ -2110,10 +2110,10 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		index.emit()
 		emit("mov %%rax, %%rcx")
 
-		emit("mov $%d, %%rax", size) // size of one element
-		emit("imul %%rcx, %%rax")    // set e.index * size => %rax
-		emit("pop %%rbx")            // load head address
-		emit("add %%rax , %%rbx")    // (e.index * size) + head address
+		emit("mov $%d, %%rax", elmSize) // elmSize of one element
+		emit("imul %%rcx, %%rax")       // set e.index * elmSize => %rax
+		emit("pop %%rbx")               // load head address
+		emit("add %%rax , %%rbx")       // (e.index * elmSize) + head address
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
@@ -2123,7 +2123,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 			emit("LOAD_24_BY_DEREF")
 		} else {
 			// dereference the content of an emelment
-			if size == 1 {
+			if elmSize == 1 {
 				emit("LOAD_1_BY_DEREF")
 			} else {
 				emit("LOAD_8_BY_DEREF")
