@@ -301,17 +301,6 @@ func (a *ExprStructField) emit() {
 	}
 }
 
-func getLoadInst(size int) string {
-	var inst string
-	if size == 1 {
-		inst = "movsbq"
-	} else {
-		inst = "mov"
-	}
-
-	return inst
-}
-
 func (ast *ExprVariable) emit() {
 	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
