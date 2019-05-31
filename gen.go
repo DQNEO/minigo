@@ -1034,7 +1034,13 @@ func (e *ExprIndex) emitSave() {
 
 	emit("pop %%rcx")
 	emit("pop %%rax # load RHS value")
-	reg := getReg(elmSize)
+	var reg string
+	if elmSize == 1 {
+		reg = "al"
+	} else {
+		reg = "rax"
+	}
+
 	emit("mov %%%s, (%%rcx) # finally save value to an element", reg)
 }
 
@@ -1416,20 +1422,6 @@ func (stmt *StmtReturn) emit() {
 	}
 
 	stmt.emitDeferAndReturn()
-}
-
-func getReg(regSize int) string {
-	var reg string
-	switch regSize {
-	case 1:
-		reg = "al"
-	case 8:
-		reg = "rax"
-	default:
-		errorf("Unexpected reg size %d", regSize)
-
-	}
-	return reg
 }
 
 func emitAddress(e Expr) {
