@@ -187,6 +187,10 @@ func emitMacroDefinitions() {
 	emit("mov \\offset+%2d(%%rbp), %%rcx", ptrSize+ptrSize)
 	macroEnd()
 
+	macroStart("CAST_BYTE_TO_INT", "")
+	emit("movzbq %%al, %%rax")
+	macroEnd()
+
 	macroStart("SUM_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")

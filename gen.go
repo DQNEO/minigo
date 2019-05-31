@@ -388,7 +388,7 @@ func (ast *ExprConstVariable) emit() {
 
 func emit_intcast(gtype *Gtype) {
 	if gtype.getKind() == G_BYTE {
-		emit("movzbq %%al, %%rax")
+		emit("CAST_BYTE_TO_INT")
 	}
 }
 
