@@ -1465,8 +1465,7 @@ func emitLload(regSize int, loff int) {
 }
 
 func emitGload(regSize int, varname identifier, offset int) {
-	reg := getReg(regSize)
-	emit("mov %s+%d(%%rip), %%%s", varname, offset, reg)
+	emit("LOAD_%d_FROM_GLOBAL %s %d", regSize, varname, offset)
 }
 
 func emitAddress(e Expr) {
