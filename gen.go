@@ -2071,71 +2071,43 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	emitNewline()
 }
 
+func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
+	elmType := collection.getGtype().elementType
+	elmSize := elmType.getSize()
+	assert(elmSize > 0, nil, "elmSize > 0")
+
+	collection.emit()
+	emit("PUSH_PRIMITIVE # head")
+
+	index.emit()
+	emit("mov %%rax, %%rcx")
+
+	emit("mov $%d, %%rax", elmSize) // elmSize of one element
+	emit("imul %%rcx, %%rax")       // index * elmSize
+	emit("PUSH_PRIMITIVE")          // store index * elmSize
+	emit("pop %%rcx")               // load  index * elmSize
+	emit("pop %%rbx")               // load  head
+	emit("add %%rcx , %%rbx")       // (index * elmSize) + head
+	emit("add $%d,  %%rbx", offset)
+	emit("mov %%rbx, %%rax")
+
+	primType := collection.getGtype().elementType.getKind()
+	if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
+		emit("LOAD_24_BY_DEREF")
+	} else {
+		// dereference the content of an emelment
+		if elmSize == 1 {
+			emit("LOAD_1_BY_DEREF")
+		} else {
+			emit("LOAD_8_BY_DEREF")
+		}
+	}
+}
+
 func loadCollectIndex(collection Expr, index Expr, offset int) {
 	emit("# loadCollectIndex")
-	if collection.getGtype().kind == G_ARRAY {
-		elmType := collection.getGtype().elementType
-		elmSize := elmType.getSize()
-		assert(elmSize > 0, nil, "elmSize > 0")
-
-		collection.emit()
-		emit("PUSH_PRIMITIVE # head")
-
-		index.emit()
-		emit("mov %%rax, %%rcx")
-
-		emit("mov $%d, %%rax", elmSize) // elmSize of one element
-		emit("imul %%rcx, %%rax")       // index * elmSize
-		emit("PUSH_PRIMITIVE")          // store index * elmSize
-		emit("pop %%rcx")               // load  index * elmSize
-		emit("pop %%rbx")               // load  head
-		emit("add %%rcx , %%rbx")       // (index * elmSize) + head
-		emit("add $%d,  %%rbx", offset)
-		emit("mov %%rbx, %%rax")
-
-		primType := collection.getGtype().elementType.getKind()
-		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
-			emit("LOAD_24_BY_DEREF")
-		} else {
-			// dereference the content of an emelment
-			if elmSize == 1 {
-				emit("LOAD_1_BY_DEREF")
-			} else {
-				emit("LOAD_8_BY_DEREF")
-			}
-		}
-		return
-	} else if collection.getGtype().kind == G_SLICE {
-		elmType := collection.getGtype().elementType
-		elmSize := elmType.getSize()
-		assert(elmSize > 0, nil, "elmSize > 0")
-
-		collection.emit()
-		emit("PUSH_PRIMITIVE # head")
-
-		index.emit()
-		emit("mov %%rax, %%rcx")
-
-		emit("mov $%d, %%rax", elmSize) // elmSize of one element
-		emit("imul %%rcx, %%rax")       // index * elmSize
-		emit("PUSH_PRIMITIVE")          // store index * elmSize
-		emit("pop %%rcx")               // load  index * elmSize
-		emit("pop %%rbx")               // load  head
-		emit("add %%rcx , %%rbx")       // (index * elmSize) + head
-		emit("add $%d,  %%rbx", offset)
-		emit("mov %%rbx, %%rax")
-
-		primType := collection.getGtype().elementType.getKind()
-		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
-			emit("LOAD_24_BY_DEREF")
-		} else {
-			// dereference the content of an emelment
-			if elmSize == 1 {
-				emit("LOAD_1_BY_DEREF")
-			} else {
-				emit("LOAD_8_BY_DEREF")
-			}
-		}
+	if collection.getGtype().kind == G_ARRAY || collection.getGtype().kind == G_SLICE {
+		loadArrayOrSliceIndex(collection, index, offset)
 		return
 	} else if collection.getGtype().getKind() == G_MAP {
 		loadMapIndexExpr(collection, index)
