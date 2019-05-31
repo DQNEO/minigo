@@ -2080,16 +2080,11 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	emit("PUSH_PRIMITIVE # head")
 
 	index.emit()
-	emit("mov %%rax, %%rcx")
+	emit("imul $%d, %%rax", elmSize)
+	emit("PUSH_PRIMITIVE # index * elmSize")
 
-	emit("mov $%d, %%rax", elmSize) // elmSize of one element
-	emit("imul %%rcx, %%rax")       // index * elmSize
-	emit("PUSH_PRIMITIVE")          // store index * elmSize
-	emit("pop %%rcx")               // load  index * elmSize
-	emit("pop %%rbx")               // load  head
-	emit("add %%rcx , %%rbx")       // (index * elmSize) + head
-	emit("add $%d,  %%rbx", offset)
-	emit("mov %%rbx, %%rax")
+	emit("SUM_FROM_STACK # (index * elmSize) + head")
+	emit("ADD_NUMBER %d", offset)
 
 	primType := collection.getGtype().elementType.getKind()
 	if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
