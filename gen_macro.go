@@ -104,6 +104,15 @@ func emitMacroDefinitions() {
 	emit("mov \\offset(%%rbp), %%rax")
 	macroEnd()
 
+	macroStart("STORE_1_TO_GLOBAL", "varname, offset")
+	emit("mov %%al, \\varname+\\offset(%%rip)")
+	macroEnd()
+
+	macroStart("STORE_8_TO_GLOBAL", "varname, offset")
+	emit("mov %%rax, \\varname+\\offset(%%rip)")
+	macroEnd()
+
+
 	macroStart("LOAD_1_FROM_GLOBAL", "varname, offset=0")
 	emit("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
