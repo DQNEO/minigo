@@ -458,9 +458,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)
 		emit("PUSH_PRIMITIVE")
-
 		emit("STORE_8_INDIRECT_FROM_STACK")
-		emit("#")
 		return
 	}
 	if variable.isGlobal {
@@ -1618,6 +1616,7 @@ func emitOffsetSave(lhs Expr, size int, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
+		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
 		emitOffsetSave(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
