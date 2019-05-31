@@ -345,12 +345,12 @@ func (ast *ExprVariable) emit() {
 
 func (variable *ExprVariable) emitAddress(offset int) {
 	if variable.isGlobal {
-		emit("lea %s+%d(%%rip), %%rax", variable.varname, offset)
+		emit("LOAD_GLOBAL_ADDR %s, %d", variable.varname, offset)
 	} else {
 		if variable.offset == 0 {
 			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
-		emit("lea %d+%d(%%rbp), %%rax", variable.offset, offset)
+		emit("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
 	}
 }
 

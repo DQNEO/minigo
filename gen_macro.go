@@ -96,6 +96,14 @@ func emitMacroDefinitions() {
 	emit("mov %%rax, \\offset(%%rbp)")
 	macroEnd()
 
+	macroStart("LOAD_GLOBAL_ADDR", "varname, offset")
+	emit("lea \\varname+\\offset(%%rip), %%rax")
+	macroEnd()
+
+	macroStart("LOAD_LOCAL_ADDR", "offset")
+	emit("lea \\offset(%%rbp), %%rax")
+	macroEnd()
+
 	macroStart("LOAD_1_FROM_LOCAL_CAST", "offset")
 	emit("movsbq \\offset(%%rbp), %%rax")
 	macroEnd()
