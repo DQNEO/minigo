@@ -1461,8 +1461,7 @@ func emitGsave(regSize int, varname identifier, offset int) {
 }
 
 func emitLload(regSize int, loff int) {
-	reg := getReg(regSize)
-	emit("mov %d(%%rbp), %%%s", loff, reg)
+	emit("LOAD_%d_FROM_LOCAL %d", regSize, loff)
 }
 
 func emitGload(regSize int, varname identifier, offset int) {
