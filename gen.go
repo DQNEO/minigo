@@ -1022,9 +1022,9 @@ func (e *ExprIndex) emitSave() {
 
 	emit("push %%rax # stash head address of collection")
 	e.index.emit()
-	emit("mov %%rax, %%rcx") // index
-	emit("mov $%d, %%rax # elmSize of one element", elmSize)
-	emit("imul %%rcx, %%rax # index * elmSize")
+	//emit("mov %%rax, %%rcx") // index
+	//emit("mov $%d, %%rcx # elmSize of one element")
+	emit("imul $%d, %%rax # index * elmSize", elmSize)
 	emit("push %%rax # store index * elmSize")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + address")
