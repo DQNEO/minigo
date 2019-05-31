@@ -498,7 +498,7 @@ func (ast *ExprUop) emit() {
 			emit("PUSH_PRIMITIVE")                     // to:ptr addr
 			e.invisiblevar.emitAddress(0)
 			emit("PUSH_PRIMITIVE") // from:address of invisible var
-			emitCopyStructFromStack(e.getGtype())
+			emitCopyStructFromStack(e.getGtype().getSize())
 			// emit address
 		case *ExprStructField:
 			e := ast.operand.(*ExprStructField)
@@ -1391,20 +1391,20 @@ func emitAddress(e Expr) {
 }
 
 // expect rhs address is in the stack top, lhs is in the second top
-func emitCopyStructFromStack(gtype *Gtype) {
+func emitCopyStructFromStack(size int) {
 	emit("pop %%rbx") // to
 	emit("pop %%rax") // from
 
 	var i int
-	for ; i < gtype.getSize(); i += 8 {
+	for ; i < size; i += 8 {
 		emit("movq %d(%%rbx), %%rcx", i)
 		emit("movq %%rcx, %d(%%rax)", i)
 	}
-	for ; i < gtype.getSize(); i += 4 {
+	for ; i < size; i += 4 {
 		emit("movl %d(%%rbx), %%rcx", i)
 		emit("movl %%rcx, %d(%%rax)", i)
 	}
-	for ; i < gtype.getSize(); i++ {
+	for ; i < size; i++ {
 		emit("movb %d(%%rbx), %%rcx", i)
 		emit("movb %%rcx, %d(%%rax)", i)
 	}
@@ -1481,7 +1481,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		emit("PUSH_PRIMITIVE")
 		emitAddress(rhs)
 		emit("PUSH_PRIMITIVE")
-		emitCopyStructFromStack(lhs.getGtype())
+		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
 		if re.op == "*" {
@@ -1490,7 +1490,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("PUSH_PRIMITIVE")
 			re.operand.emit()
 			emit("PUSH_PRIMITIVE")
-			emitCopyStructFromStack(lhs.getGtype())
+			emitCopyStructFromStack(lhs.getGtype().getSize())
 		} else {
 			TBI(rhs.token(), "")
 		}
