@@ -885,7 +885,7 @@ func (ast *StmtAssignment) emit() {
 					assert(left.getGtype() != nil, left.token(), "should not be nil")
 					if left.getGtype().kind == G_SLICE {
 						// @TODO: Does this work ?
-						emitSave3Elements(left, 0)
+						emitSave24(left, 0)
 					} else if left.getGtype().getKind() == G_INTERFACE {
 						// @TODO: Does this work ?
 						emitSaveInterface(left, 0)
@@ -960,7 +960,7 @@ func emitSave(left Expr) {
 }
 
 // save data from stack
-func (e *ExprIndex) emitSave3Elements() {
+func (e *ExprIndex) emitSave24() {
 	// load head address of the array
 	// load index
 	// multi index * size
@@ -1525,11 +1525,11 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		case fieldtype.kind == G_SLICE:
 			emit("LOAD_EMPTY_SLICE")
 			emit("PUSH_SLICE")
-			emitSave3Elements(lhs, fieldtype.offset)
+			emitSave24(lhs, fieldtype.offset)
 		case fieldtype.kind == G_MAP:
 			emit("LOAD_EMPTY_MAP")
 			emit("PUSH_MAP")
-			emitSave3Elements(lhs, fieldtype.offset)
+			emitSave24(lhs, fieldtype.offset)
 		case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
@@ -1715,40 +1715,40 @@ func emitSaveInterface(lhs Expr, offset int) {
 		emitSaveInterface(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.save3Elements(offset)
+		variable.emitSave24(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
 		emitSaveInterface(structfield.strct, fieldType.offset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitSave3Elements()
+		indexExpr.emitSave24()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
 // take slice values from stack
-func emitSave3Elements(lhs Expr, offset int) {
+func emitSave24(lhs Expr, offset int) {
 	assertInterface(lhs)
-	//emit("# emitSave3Elements(%T, offset %d)", lhs, offset)
-	emit("# emitSave3Elements(?, offset %d)", offset)
+	//emit("# emitSave24(%T, offset %d)", lhs, offset)
+	emit("# emitSave24(?, offset %d)", offset)
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
-		emitSave3Elements(rel.expr, offset)
+		emitSave24(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.save3Elements(offset)
+		variable.emitSave24(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
 		fieldOffset := fieldType.offset
 		emit("# fieldOffset=%d (%s)", fieldOffset, fieldType.fieldname)
-		emitSave3Elements(structfield.strct, fieldOffset+offset)
+		emitSave24(structfield.strct, fieldOffset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitSave3Elements()
+		indexExpr.emitSave24()
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
@@ -1775,7 +1775,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 		emit("# initialize map with a zero value")
 		emit("LOAD_EMPTY_MAP")
 		emit("PUSH_MAP")
-		emitSave3Elements(lhs, 0)
+		emitSave24(lhs, 0)
 		return
 	}
 	switch rhs.(type) {
@@ -1791,7 +1791,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
-	emitSave3Elements(lhs, 0)
+	emitSave24(lhs, 0)
 }
 
 func (e *ExprConversionToInterface) emit() {
@@ -1870,7 +1870,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	if rhs == nil {
 		emit("LOAD_EMPTY_SLICE")
 		emit("PUSH_SLICE")
-		emitSave3Elements(lhs, 0)
+		emitSave24(lhs, 0)
 		return
 	}
 
@@ -1882,7 +1882,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {
 			emit("LOAD_EMPTY_SLICE")
 			emit("PUSH_SLICE")
-			emitSave3Elements(lhs, 0)
+			emitSave24(lhs, 0)
 			return
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
@@ -1924,11 +1924,11 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("PUSH_SLICE")
 	}
 
-	emitSave3Elements(lhs, 0)
+	emitSave24(lhs, 0)
 }
 
-func (variable *ExprVariable) save3Elements(offset int) {
-	emit("# *ExprVariable.save3Elements()")
+func (variable *ExprVariable) emitSave24(offset int) {
+	emit("# *ExprVariable.emitSave24()")
 	emit("pop %%rax # 3rd")
 	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen, false)
 	emit("pop %%rax # 2nd")

@@ -363,7 +363,7 @@ func (f *StmtFor) emitRangeForMap() {
 			emit("push %%rax")
 			emit("push %%rbx")
 			emit("push %%rcx")
-			emitSave3Elements(f.rng.valuevar, 0)
+			emitSave24(f.rng.valuevar, 0)
 		default:
 			emit("mov (%%rdx), %%rax")
 			f.rng.valuevar.emitSave()
