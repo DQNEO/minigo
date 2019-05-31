@@ -1444,7 +1444,6 @@ func emitAddress(e Expr) {
 
 // expect rhs address is in the stack top, lhs is in the second top
 func emitCopyStructFromStack(gtype *Gtype) {
-	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
 	emit("pop %%rbx") // to
 	emit("pop %%rax") // from
 
@@ -1461,9 +1460,7 @@ func emitCopyStructFromStack(gtype *Gtype) {
 		emit("movb %d(%%rbx), %%rcx", i)
 		emit("movb %%rcx, %d(%%rax)", i)
 	}
-
 }
-
 
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
