@@ -1102,7 +1102,7 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		emit("# the subject expression")
 		stmt.cond.emit()
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_PRIMITIVE # the subject value")
 		emit("#")
 	} else {
 		// switch {
@@ -1146,8 +1146,8 @@ func (stmt *StmtSwitch) emit() {
 		} else {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit("pop %%rcx # the subject value")
 				if e.getGtype().isString() {
+					emit("pop %%rcx # the subject value")
 					emit("push %%rcx")
 
 					emit("push %%rcx")
@@ -1155,9 +1155,8 @@ func (stmt *StmtSwitch) emit() {
 					emitStringsEqualFromStack(true)
 					emit("pop %%rcx")
 				} else {
-					emit("cmp %%rax, %%rcx") // right, left
-					emit("sete %%al")
-					emit("movzb %%al, %%eax")
+					emit("PUSH_PRIMITIVE")
+					emit("CMP_FROM_STACK sete")
 				}
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
