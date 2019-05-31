@@ -315,7 +315,7 @@ func (ast *ExprVariable) emit() {
 			ast.emitAddress(0)
 		default:
 			if ast.getGtype().getSize() == 1 {
-				emit("LOAD_1_FROM_GLOBAL %s", ast.varname)
+				emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
 			} else {
 				emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
 			}
