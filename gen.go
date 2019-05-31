@@ -1006,6 +1006,8 @@ func (e *ExprIndex) emitSave() {
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
 
+	var offset int = 0
+
 	var elmType *Gtype
 	if collectionType.isString() {
 		elmType = gByte
@@ -1025,6 +1027,7 @@ func (e *ExprIndex) emitSave() {
 	emit("PUSH_PRIMITIVE")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + addr")
+	emit("ADD_NUMBER %d # offset", offset)
 	emit("PUSH_PRIMITIVE")
 
 	emit("pop %%rcx")
