@@ -398,7 +398,7 @@ func emit_comp_primitive(inst string, binop *ExprBinop) {
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 	binop.right.emit()
 	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
@@ -438,7 +438,7 @@ func emitIncrDecl(inst string, operand Expr) {
 func (uop *ExprUop) emitSave() {
 	emit("# *ExprUop.emitSave()")
 	assert(uop.op == "*", uop.tok, "uop op should be *")
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 	uop.operand.emit()
 	emit("mov %%rax, %%rcx")
 	emit("pop %%rax")
@@ -461,7 +461,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE")
 		variable.emit()
 		emit("mov %%rax, %%rcx")
 		emit("add $%d, %%rcx # offset", offset)
@@ -504,10 +504,10 @@ func (ast *ExprUop) emit() {
 			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize()) // => rax
-			emit("push %%rax")                     // to:ptr addr
+			emit("PUSH_PRIMITIVE")                     // to:ptr addr
 			// @TODO handle global vars
 			emit("lea %d(%%rbp), %%rax", e.invisiblevar.offset)
-			emit("push %%rax") // from:address of invisible var
+			emit("PUSH_PRIMITIVE") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype())
 			emit("pop %%rax") // from
 			emit("pop %%rax") // to
@@ -596,7 +596,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 func emitConvertNilToEmptyString(regi string) {
 	emit("# emitConvertNilToEmptyString")
 	emit("mov %s, %%rax", regi)
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 	emit("# convert nil to an empty string")
 	emit("TEST_IT")
 	emit("pop %%rax")
@@ -747,7 +747,7 @@ func (ast *ExprBinop) emit() {
 		return
 	}
 	ast.left.emit()
-	emit("push %%rax")
+	emit("PUSH_PRIMITIVE")
 	ast.right.emit()
 	emit("mov %%rax, %%rcx")
 	emit("pop %%rax")
@@ -1021,7 +1021,7 @@ func (e *ExprIndex) emitSave3Elements() {
 }
 
 func (e *ExprIndex) emitSave() {
-	emit("push %%rax") // push RHS value
+	emit("PUSH_PRIMITIVE") // push RHS value
 
 	// load head address of the array
 	// load index
@@ -1166,7 +1166,7 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		emit("# the subject expression")
 		stmt.cond.emit()
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE")
 		emit("#")
 	} else {
 		// switch {
@@ -1480,7 +1480,7 @@ func emitCopyStructFromStack(gtype *Gtype) {
 	emitCopyStructInt(gtype)
 
 	// recover stack
-	emit("push %%rax") // to
+	emit("PUSH_PRIMITIVE") // to
 	emit("push %%rcx") // from
 }
 
@@ -1587,14 +1587,14 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	switch rhs.(type) {
 	case *Relation:
 		emitAddress(rhs)
-		emit("push %%rax")
+		emit("PUSH_PRIMITIVE")
 		emitCopyStruct(lhs)
 	case *ExprUop:
 		re := rhs.(*ExprUop)
 		if re.op == "*" {
 			// copy struct
 			re.operand.emit()
-			emit("push %%rax")
+			emit("PUSH_PRIMITIVE")
 			emitCopyStruct(lhs)
 		} else {
 			TBI(rhs.token(), "")
@@ -2021,7 +2021,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 						// conversion of dynamic type => interface type
 						dynamicValue := arrayLiteral.values[i]
 						emitConversionToInterface(dynamicValue)
-						emit("push %%rax")
+						emit("PUSH_PRIMITIVE")
 						emit("push %%rbx")
 						emit("push %%rcx")
 						emitSaveInterface(lhs, offsetByIndex)
@@ -2159,7 +2159,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		elmType := collection.getGtype().elementType
 		emit("# collection.emit()")
 		collection.emit()  // emit address
-		emit("push %%rax") // store address of variable
+		emit("PUSH_PRIMITIVE") // store address of variable
 
 		index.emit()
 		emit("mov %%rax, %%rcx") // index
@@ -2168,7 +2168,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		assert(size > 0, nil, "size > 0")
 		emit("mov $%d, %%rax", size) // size of one element
 		emit("imul %%rcx, %%rax")    // index * size
-		emit("push %%rax")           // store index * size
+		emit("PUSH_PRIMITIVE")           // store index * size
 		emit("pop %%rcx")            // load  index * size
 		emit("pop %%rbx")            // load address of variable
 		emit("add %%rcx , %%rbx")    // (index * size) + address
@@ -2186,7 +2186,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		elmType := collection.getGtype().elementType
 		emit("# emit address of the low index")
 		collection.emit()  // eval pointer value
-		emit("push %%rax") // store head address
+		emit("PUSH_PRIMITIVE") // store head address
 
 		index.emit() // index
 		emit("mov %%rax, %%rcx")
