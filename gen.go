@@ -1036,13 +1036,13 @@ func (e *ExprIndex) emitSave() {
 func (e *ExprStructField) emitSave() {
 	fieldType := e.getGtype()
 	if e.strct.getGtype().kind == G_POINTER {
-		emit("push %%rax # store rhs")
-		// structptr.field = x
-		e.strct.emit() // emit address
-		emit("add $%d, %%rax", fieldType.offset)
-		emit("mov %%rax, %%rbx")
-		emit("pop %%rax # load rhs")
-		emit("mov %%rax, (%%rbx)")
+		emit("PUSH_PRIMITIVE # rhs")
+
+		e.strct.emit()
+		emit("ADD_NUMBER %d", fieldType.offset)
+		emit("PUSH_PRIMITIVE")
+
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	} else {
 		emitOffsetSave(e.strct, 8, fieldType.offset)
 	}
