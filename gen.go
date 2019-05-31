@@ -183,6 +183,7 @@ func align(n int, m int) int {
 }
 
 func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
+	emitNewline()
 	emit("# func epilogue")
 	// every function has a defer handler
 	emit("%s: # defer handler", labelDeferHandler)
@@ -192,9 +193,7 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 		emit("jmp %s", stmtDefer.label)
 	}
 
-	emit("leave")
-	emit("ret")
-	emitNewline()
+	emit("LEAVE_AND_RET")
 }
 
 func (ast *ExprNumberLiteral) emit() {

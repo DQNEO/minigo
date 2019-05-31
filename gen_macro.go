@@ -191,6 +191,11 @@ func emitMacroDefinitions() {
 	macroStart("TEST_IT", "")
 	emit("test %%rax, %%rax")
 	macroEnd()
+
+	macroStart("LEAVE_AND_RET", "")
+	emit("leave")
+	emit("ret")
+	macroEnd()
 }
 
 func macroStart(name string, args string) {
