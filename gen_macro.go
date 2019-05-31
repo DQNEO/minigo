@@ -191,6 +191,20 @@ func emitMacroDefinitions() {
 	emit("movzbq %%al, %%rax")
 	macroEnd()
 
+	macroStart("CMP_EQ_ZERO","")
+	emit("cmp $0, %%rax")
+	emit("sete %%al")
+	emit("movzb %%al, %%eax")
+	macroEnd()
+
+	macroStart("CMP_FROM_STACK", "inst")
+	emit("pop %%rax # right")
+	emit("pop %%rcx # left")
+	emit("cmp %%rax, %%rcx") // right, left
+	emit("\\inst %%al")
+	emit("movzb %%al, %%eax")
+	macroEnd()
+
 	macroStart("SUM_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")

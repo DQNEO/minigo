@@ -398,15 +398,13 @@ func emit_comp_primitive(inst string, binop *ExprBinop) {
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_PRIMITIVE # left") // left
 	binop.right.emit()
 	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
 	}
-	emit("pop %%rcx")
-	emit("cmp %%rax, %%rcx") // right, left
-	emit("%s %%al", inst)
-	emit("movzb %%al, %%eax")
+	emit("PUSH_PRIMITIVE # right") // right
+	emit("CMP_FROM_STACK %s", inst)
 }
 
 var labelSeq = 0
@@ -531,10 +529,7 @@ func (ast *ExprUop) emit() {
 		emit("mov %%rcx, %%rax")
 	} else if ast.op == "!" {
 		ast.operand.emit()
-		emit("mov $0, %%rcx")
-		emit("cmp %%rax, %%rcx")
-		emit("sete %%al")
-		emit("movzb %%al, %%eax")
+		emit("CMP_EQ_ZERO")
 	} else if ast.op == "-" {
 		// delegate to biop
 		// -(x) -> (-1) * (x)
@@ -576,9 +571,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 	binop.left.emit()
 
 	// convert nil to the empty string
-	emit("cmp $0, %%rax")
-	emit("sete %%al")
-	emit("movzb %%al, %%eax")
+	emit("CMP_EQ_ZERO")
 	emit("TEST_IT")
 	emit("mov $0, %%rax")
 	emit("je %s", labelElse)
