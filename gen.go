@@ -1833,11 +1833,11 @@ func assignToSlice(lhs Expr, rhs Expr) {
 func (variable *ExprVariable) emitSave24(offset int) {
 	emit("# *ExprVariable.emitSave24()")
 	emit("pop %%rax # 3rd")
-	variable.emitOffsetSave(8, offset+ptrSize+sliceOffsetForLen, false)
+	variable.emitOffsetSave(8, offset+16, false)
 	emit("pop %%rax # 2nd")
-	variable.emitOffsetSave(8, offset+ptrSize, false)
+	variable.emitOffsetSave(8, offset+8, false)
 	emit("pop %%rax # 1st")
-	variable.emitOffsetSave(8, offset, true)
+	variable.emitOffsetSave(8, offset+0, true)
 }
 
 // copy each element
