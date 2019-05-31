@@ -1475,14 +1475,14 @@ func emitCopyStructInt(gtype *Gtype) {
 }
 
 // expect rhs address is in the stack top
-func emitCopyStruct(left Expr) {
-	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
+func emitCopyStruct(lhs Expr) {
+	//assert(lhs.getGtype().getSize() == right.getGtype().getSize(), lhs.token(),"size does not match")
 	emit("pop %%rax")
 	emit("push %%rcx")
 	emit("push %%r11")
 	emit("mov %%rax, %%rcx")
-	emitAddress(left)
-	emitCopyStructInt(left.getGtype())
+	emitAddress(lhs)
+	emitCopyStructInt(lhs.getGtype())
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
