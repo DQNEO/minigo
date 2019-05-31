@@ -1032,16 +1032,11 @@ func (e *ExprIndex) emitSave() {
 	emit("ADD_NUMBER %d # offset", offset)
 	emit("PUSH_PRIMITIVE")
 
-	emit("pop %%rcx")
-	emit("pop %%rax # load RHS value")
-	var reg string
 	if elmSize == 1 {
-		reg = "al"
+		emit("STORE_1_INDIRECT_FROM_STACK")
 	} else {
-		reg = "rax"
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
-
-	emit("mov %%%s, (%%rcx) # finally save value to an element", reg)
 }
 
 func (e *ExprStructField) emitSave() {
