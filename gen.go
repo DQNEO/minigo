@@ -1448,28 +1448,20 @@ func emitCopyStructFromStack(gtype *Gtype) {
 	emit("pop %%rbx") // to
 	emit("pop %%rax") // from
 
-	emit("push %%r11")
-
-
-	emitCopyStructInt(gtype)
-}
-
-func emitCopyStructInt(gtype *Gtype) {
 	var i int
 	for ; i < gtype.getSize(); i += 8 {
-		emit("movq %d(%%rbx), %%r11", i)
-		emit("movq %%r11, %d(%%rax)", i)
+		emit("movq %d(%%rbx), %%rcx", i)
+		emit("movq %%rcx, %d(%%rax)", i)
 	}
 	for ; i < gtype.getSize(); i += 4 {
-		emit("movl %d(%%rbx), %%r11", i)
-		emit("movl %%r11, %d(%%rax)", i)
+		emit("movl %d(%%rbx), %%rcx", i)
+		emit("movl %%rcx, %d(%%rax)", i)
 	}
 	for ; i < gtype.getSize(); i++ {
-		emit("movb %d(%%rbx), %%r11", i)
-		emit("movb %%r11, %d(%%rax)", i)
+		emit("movb %d(%%rbx), %%rcx", i)
+		emit("movb %%rcx, %d(%%rax)", i)
 	}
 
-	emit("pop %%r11")
 }
 
 
