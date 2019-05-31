@@ -471,7 +471,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 		return
 	}
 	if variable.isGlobal {
-		emitGsave(size, variable.varname, offset)
+		emit("STORE_%d_TO_GLOBAL %s %d", size, variable.varname, offset)
 	} else {
 		emitStoreItToLocal(size, variable.offset+offset, "")
 	}
@@ -480,9 +480,9 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.isGlobal {
-		emitGload(size, variable.varname, offset)
+		emit("LOAD_%d_FROM_GLOBAL %s %d", size, variable.varname, offset)
 	} else {
-		emitLload(size, variable.offset+offset)
+		emit("LOAD_%d_FROM_LOCAL %d+%d", size,  variable.offset, offset)
 	}
 }
 
@@ -1452,20 +1452,8 @@ func getReg(regSize int) string {
 	return reg
 }
 
-func emitStoreItToLocal(regSize int, loff int, comment string) {
-	emit("STORE_%d_TO_LOCAL %d", regSize, loff)
-}
-
-func emitGsave(regSize int, varname identifier, offset int) {
-	emit("STORE_%d_TO_GLOBAL %s %d", regSize, varname, offset)
-}
-
-func emitLload(regSize int, loff int) {
-	emit("LOAD_%d_FROM_LOCAL %d", regSize, loff)
-}
-
-func emitGload(regSize int, varname identifier, offset int) {
-	emit("LOAD_%d_FROM_GLOBAL %s %d", regSize, varname, offset)
+func emitStoreItToLocal(size int, loff int, comment string) {
+	emit("STORE_%d_TO_LOCAL %d", size, loff)
 }
 
 func emitAddress(e Expr) {
