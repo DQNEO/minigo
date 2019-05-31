@@ -462,10 +462,12 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
 		emit("PUSH_PRIMITIVE")
 		variable.emit()
-		emit("mov %%rax, %%rcx")
-		emit("add $%d, %%rcx # offset", offset)
+		emit("ADD_NUMBER %d", offset)
+		emit("PUSH_PRIMITIVE")
+
 		emit("pop %%rax")
-		emit("mov %%rax, (%%rcx)")
+		emit("pop %%rcx")
+		emit("mov %%rcx, (%%rax)")
 		emit("#")
 		return
 	}
