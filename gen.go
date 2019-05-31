@@ -1007,6 +1007,8 @@ func (e *ExprIndex) emitSave() {
 	}
 
 	var offset int = 0
+	collection := e.collection
+	index := e.index
 
 	var elmType *Gtype
 	if collectionType.isString() {
@@ -1019,10 +1021,10 @@ func (e *ExprIndex) emitSave() {
 
 	emit("PUSH_PRIMITIVE # rhs")
 
-	e.collection.emit()
+	collection.emit()
 	emit("PUSH_PRIMITIVE # addr")
 
-	e.index.emit()
+	index.emit()
 	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
 	emit("PUSH_PRIMITIVE")
 
@@ -2050,20 +2052,20 @@ func (ast *StmtSatementList) emit() {
 	}
 }
 
-func emitCollectIndexSave(array Expr, index Expr, offset int) {
-	assert(array.getGtype().kind == G_ARRAY, array.token(), "should be array")
+func emitCollectIndexSave(collection Expr, index Expr, offset int) {
+	assert(collection.getGtype().kind == G_ARRAY, collection.token(), "should be collection")
 
-	elmType := array.getGtype().elementType
+	elmType := collection.getGtype().elementType
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 
 	emit("PUSH_PRIMITIVE # rhs")
 
-	array.emit()
+	collection.emit()
 	emit("PUSH_PRIMITIVE # addr")
 
 	index.emit()
-	emit("IMUL_NUMBER %d  # index * elmSize", elmSize)
+	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
 	emit("PUSH_PRIMITIVE")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + addr")
