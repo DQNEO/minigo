@@ -433,9 +433,9 @@ func (lit *ExprMapLiteral) emit() {
 				emit("push %%rax") // ptr
 				emitCallMalloc(8 * 3)
 				emit("pop %%rdx") // ptr
-				emit("mov %%rdx, (%%rax)")
-				emit("mov %%rbx, %d(%%rax)", 8*1)
-				emit("mov %%rcx, %d(%%rax)", 8*2)
+				emit("mov %%rdx, %d(%%rax)", 0)
+				emit("mov %%rbx, %d(%%rax)", 8)
+				emit("mov %%rcx, %d(%%rax)", 16)
 
 			default:
 				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
