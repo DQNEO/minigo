@@ -996,7 +996,7 @@ func (e *ExprIndex) emitSave() {
 
 	// load head address of the array
 	// load index
-	// multi index * size
+	// multi index * elmSize
 	// calc address = head address + offset
 	// copy value to the address
 
@@ -1020,18 +1020,18 @@ func (e *ExprIndex) emitSave() {
 	} else {
 		elmType = collectionType.elementType
 	}
-	size := elmType.getSize()
-	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax # size of one element", size)
-	emit("imul %%rcx, %%rax # index * size")
-	emit("push %%rax # store index * size")
-	emit("pop %%rcx # load index * size")
+	elmSize := elmType.getSize()
+	assert(elmSize > 0, nil, "elmSize > 0")
+	emit("mov $%d, %%rax # elmSize of one element", elmSize)
+	emit("imul %%rcx, %%rax # index * elmSize")
+	emit("push %%rax # store index * elmSize")
+	emit("pop %%rcx # load index * elmSize")
 	emit("pop %%rax # load address of variable")
-	emit("add %%rcx , %%rax # (index * size) + address")
+	emit("add %%rcx , %%rax # (index * elmSize) + address")
 
 	emit("mov %%rax, %%rbx")
 	emit("pop %%rax # load RHS value")
-	reg := getReg(size)
+	reg := getReg(elmSize)
 	emit("mov %%%s, (%%rbx) # finally save value to an element", reg)
 }
 
