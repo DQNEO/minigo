@@ -2802,15 +2802,14 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
 
 		// (ptr != nil && rcx == nil) => Error
-		emit("cmp %%rax, $0")
-		emit("setne %%al") // rax != 0
-		emit("movzb %%al, %%eax")
+
+		emit("CMP_NE_ZERO")
 		emit("TEST_IT")
 		emit("je %s", labelEnd)
 
-		emit("cmp %%rcx, $0")
-		emit("sete %%al") // rcx == 0
-		emit("movzb %%al, %%eax")
+		emit("mov %%rcx, %%rax")
+
+		emit("CMP_EQ_ZERO")
 		emit("TEST_IT")
 		emit("je %s", labelEnd)
 
