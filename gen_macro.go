@@ -227,6 +227,12 @@ func emitMacroDefinitions() {
 	emit("imul $\\n , %%rax")
 	macroEnd()
 
+	macroStart("STORE_INDIRECT_FROM_STACK", "")
+	emit("pop %%rax")
+	emit("pop %%rcx")
+	emit("mov %%rcx, (%%rax)")
+	macroEnd()
+
 	macroStart("ADD_NUMBER", "n")
 	emit("add $\\n , %%rax")
 	macroEnd()
