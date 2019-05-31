@@ -2065,13 +2065,13 @@ func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	emit("imul %%rcx, %%rax # index * size")
 	emit("push %%rax        # STACK 3 : store index * size")
 	emit("pop %%rcx         # STACK 3: load  index * size")
-	emit("pop %%rbx         # STACK 2 : load address of variable")
-	emit("add %%rcx , %%rbx # (index * size) + address")
+	emit("pop %%rax         # STACK 2 : load address of variable")
+	emit("add %%rcx , %%rax # (index * size) + address")
 	if offset > 0 {
-		emit("add $%d,  %%rbx # offset", offset)
+		emit("add $%d,  %%rax # offset", offset)
 	}
-	emit("pop %%rax # STACK 1: restore the value")
-	emit("mov %%rax, (%%rbx) # save the value")
+	emit("pop %%rcx # STACK 1: restore the value")
+	emit("mov %%rcx, (%%rax) # save the value")
 	emitNewline()
 }
 
