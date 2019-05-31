@@ -2050,28 +2050,25 @@ func (ast *StmtSatementList) emit() {
 func emitCollectIndexSave(array Expr, index Expr, offset int) {
 	assert(array.getGtype().kind == G_ARRAY, array.token(), "should be array")
 	elmType := array.getGtype().elementType
-	emit("push %%rax # STACK 1 : the value") // stash value
+	elmSize := elmType.getSize()
+	assert(elmSize > 0, nil, "elmSize > 0")
 
-	emit("# array.emit()")
-	array.emit()                 // emit address
-	emit("push %%rax # STACK 2") // store address of variable
+	emit("PUSH_PRIMITIVE # rhs")
+
+	array.emit()
+	emit("PUSH_PRIMITIVE # addr")
 
 	index.emit()
-	emit("mov %%rax, %%rcx") // index
+	emit("IMUL_NUMBER %d  # index * elmSize", elmSize)
+	emit("PUSH_PRIMITIVE")
 
-	size := elmType.getSize()
-	assert(size > 0, nil, "size > 0")
-	emit("mov $%d, %%rax    # size of one element", size)
-	emit("imul %%rcx, %%rax # index * size")
-	emit("push %%rax        # STACK 3 : store index * size")
-	emit("pop %%rcx         # STACK 3: load  index * size")
-	emit("pop %%rax         # STACK 2 : load address of variable")
-	emit("add %%rcx , %%rax # (index * size) + address")
-	if offset > 0 {
-		emit("add $%d,  %%rax # offset", offset)
-	}
-	emit("pop %%rcx # STACK 1: restore the value")
-	emit("mov %%rcx, (%%rax) # save the value")
+	emit("SUM_FROM_STACK # (index * elmSize) + address")
+	emit("ADD_NUMBER %d # offset", offset)
+	emit("PUSH_PRIMITIVE")
+
+	emit("STORE_8_INDIRECT_FROM_STACK")
+
+
 	emitNewline()
 }
 
