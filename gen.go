@@ -595,13 +595,9 @@ func emitConvertNilToEmptyString(regi string) {
 
 // call strcmp
 func emitStringsEqualFromStack(equal bool) {
-	emit("pop %%rax")
-	emit("pop %%rcx")
-	emitStringsEqual(equal, "%rax", "%rcx")
-}
+	leftReg := "%rax"
 
-func emitStringsEqual(equal bool, leftReg string, rightReg string) {
-	emit("push %s", rightReg) // stash
+	emit("pop %%rax") // left
 
 	emitConvertNilToEmptyString(leftReg)
 	emit("mov %s, %%rsi", leftReg)
@@ -1168,7 +1164,10 @@ func (stmt *StmtSwitch) emit() {
 
 				emit("pop %%rcx # the subject type")
 				emit("push %%rcx # the subject value")
-				emitStringsEqual(true, "%rax", "%rcx")
+
+				emit("push %%rcx")
+				emit("push %%rax")
+				emitStringsEqualFromStack(true)
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
@@ -1185,7 +1184,10 @@ func (stmt *StmtSwitch) emit() {
 				emit("pop %%rcx # the subject value")
 				if e.getGtype().isString() {
 					emit("push %%rcx")
-					emitStringsEqual(true, "%rax", "%rcx")
+
+					emit("push %%rcx")
+					emit("push %%rax")
+					emitStringsEqualFromStack(true)
 					emit("pop %%rcx")
 				} else {
 					emit("cmp %%rax, %%rcx") // right, left
@@ -2315,7 +2317,10 @@ func (e *ExprTypeAssertion) emit() {
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
-		emitStringsEqual(true, "%rax", "%rcx")
+
+		emit("push %%rcx") // @TODO ????
+		emit("push %%rax")
+		emitStringsEqualFromStack(true)
 
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
 		// @TODO consider big data like slice, struct, etd
