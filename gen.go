@@ -888,7 +888,7 @@ func (ast *StmtAssignment) emit() {
 						emitSave24(left, 0)
 					} else if left.getGtype().getKind() == G_INTERFACE {
 						// @TODO: Does this work ?
-						emitSaveInterface(left, 0)
+						emitSave24(left, 0)
 					} else {
 						emit("pop %%rax")
 						emitSave(left)
@@ -1539,7 +1539,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		case fieldtype.getKind() == G_INTERFACE:
 			emit("LOAD_EMPTY_INTERFACE")
 			emit("PUSH_INTERFACE")
-			emitSaveInterface(lhs, fieldtype.offset)
+			emitSave24(lhs, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
@@ -1707,27 +1707,6 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
-// takes RHS from stack
-func emitSaveInterface(lhs Expr, offset int) {
-	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		emitSaveInterface(rel.expr, offset)
-	case *ExprVariable:
-		variable := lhs.(*ExprVariable)
-		variable.emitSave24(offset)
-	case *ExprStructField:
-		structfield := lhs.(*ExprStructField)
-		fieldType := structfield.getGtype()
-		emitSaveInterface(structfield.strct, fieldType.offset+offset)
-	case *ExprIndex:
-		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitSave24()
-	default:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
-	}
-}
-
 // take slice values from stack
 func emitSave24(lhs Expr, offset int) {
 	assertInterface(lhs)
@@ -1846,7 +1825,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	if rhs == nil || isNil(rhs) {
 		emit("LOAD_EMPTY_INTERFACE")
 		emit("PUSH_INTERFACE")
-		emitSaveInterface(lhs, 0)
+		emitSave24(lhs, 0)
 		return
 	}
 
@@ -1854,13 +1833,13 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
 		emit("PUSH_INTERFACE")
-		emitSaveInterface(lhs, 0)
+		emitSave24(lhs, 0)
 		return
 	}
 
 	emitConversionToInterface(rhs)
 	emit("PUSH_INTERFACE")
-	emitSaveInterface(lhs, 0)
+	emitSave24(lhs, 0)
 }
 
 func assignToSlice(lhs Expr, rhs Expr) {
@@ -1974,7 +1953,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 				if elementType.getKind() == G_INTERFACE {
 					emit("LOAD_EMPTY_INTERFACE")
 					emit("PUSH_INTERFACE")
-					emitSaveInterface(lhs, offsetByIndex)
+					emitSave24(lhs, offsetByIndex)
 					continue
 				} else {
 					emit("mov $0, %%rax")
@@ -1986,7 +1965,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 						// zero value
 						emit("LOAD_EMPTY_INTERFACE")
 						emit("PUSH_INTERFACE")
-						emitSaveInterface(lhs, offsetByIndex)
+						emitSave24(lhs, offsetByIndex)
 						continue
 					} else if arrayLiteral.values[i].getGtype().getKind() != G_INTERFACE {
 						// conversion of dynamic type => interface type
@@ -1994,11 +1973,11 @@ func assignToArray(lhs Expr, rhs Expr) {
 						emitConversionToInterface(dynamicValue)
 						emit("LOAD_EMPTY_INTERFACE")
 						emit("PUSH_INTERFACE")
-						emitSaveInterface(lhs, offsetByIndex)
+						emitSave24(lhs, offsetByIndex)
 						continue
 					} else {
 						arrayLiteral.values[i].emit()
-						emitSaveInterface(lhs, offsetByIndex)
+						emitSave24(lhs, offsetByIndex)
 						continue
 					}
 				}
