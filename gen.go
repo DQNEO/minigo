@@ -129,14 +129,14 @@ func (f *DeclFunc) emitPrologue() {
 		case G_SLICE, G_INTERFACE, G_MAP:
 			offset -= IntSize * 3
 			param.offset = offset
-			emit("push_arg_%d # third", regIndex+2)
-			emit("push_arg_%d # second", regIndex+1)
-			emit("push_arg_%d # fist \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			emit("PUSH_ARG_%d # third", regIndex+2)
+			emit("PUSH_ARG_%d # second", regIndex+1)
+			emit("PUSH_ARG_%d # fist \"%s\" %s", regIndex, param.varname, param.getGtype().String())
 			regIndex += sliceWidth
 		default:
 			offset -= IntSize
 			param.offset = offset
-			emit("push_arg_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
 			regIndex += 1
 		}
 	}
@@ -3520,7 +3520,7 @@ func emitDefineMacros() {
 	}
 
 	for i, regi := range RegsForArguments {
-		emitWithoutIndent(".macro push_arg_%d", i)
+		emitWithoutIndent(".macro PUSH_ARG_%d", i)
 		emitWithoutIndent("push %%%s", regi)
 		emitWithoutIndent(".endm")
 		emitNewline()
