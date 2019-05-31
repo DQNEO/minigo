@@ -1547,16 +1547,12 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 
 		case fieldtype.kind == G_SLICE:
-			emit("# initialize slice with a zero value")
-			emit("push $0")
-			emit("push $0")
-			emit("push $0")
+			emit("LOAD_EMPTY_SLICE")
+			emit("PUSH_SLICE")
 			emitSave3Elements(lhs, fieldtype.offset)
 		case fieldtype.kind == G_MAP:
-			emit("# initialize slice with a zero value")
-			emit("push $0")
-			emit("push $0")
-			emit("push $0")
+			emit("LOAD_EMPTY_MAP")
+			emit("PUSH_MAP")
 			emitSave3Elements(lhs, fieldtype.offset)
 		case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
 			left := &ExprStructField{
@@ -1565,9 +1561,8 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 			assignToStruct(left, nil)
 		case fieldtype.getKind() == G_INTERFACE:
-			emit("push $0")
-			emit("push $0")
-			emit("push $0")
+			emit("LOAD_EMPTY_INTERFACE")
+			emit("PUSH_INTERFACE")
 			emitSaveInterface(lhs, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
@@ -1736,6 +1731,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
+// takes RHS from stack
 func emitSaveInterface(lhs Expr, offset int) {
 	switch lhs.(type) {
 	case *Relation:
@@ -2000,9 +1996,8 @@ func assignToArray(lhs Expr, rhs Expr) {
 			case nil:
 				// assign zero values
 				if elementType.getKind() == G_INTERFACE {
-					emit("push $0")
-					emit("push $0")
-					emit("push $0")
+					emit("LOAD_EMPTY_INTERFACE")
+					emit("PUSH_INTERFACE")
 					emitSaveInterface(lhs, offsetByIndex)
 					continue
 				} else {
@@ -2013,18 +2008,16 @@ func assignToArray(lhs Expr, rhs Expr) {
 				if elementType.getKind() == G_INTERFACE {
 					if i >= len(arrayLiteral.values) {
 						// zero value
-						emit("push $0")
-						emit("push $0")
-						emit("push $0")
+						emit("LOAD_EMPTY_INTERFACE")
+						emit("PUSH_INTERFACE")
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
 					} else if arrayLiteral.values[i].getGtype().getKind() != G_INTERFACE {
 						// conversion of dynamic type => interface type
 						dynamicValue := arrayLiteral.values[i]
 						emitConversionToInterface(dynamicValue)
-						emit("PUSH_PRIMITIVE")
-						emit("push %%rbx")
-						emit("push %%rcx")
+						emit("LOAD_EMPTY_INTERFACE")
+						emit("PUSH_INTERFACE")
 						emitSaveInterface(lhs, offsetByIndex)
 						continue
 					} else {
