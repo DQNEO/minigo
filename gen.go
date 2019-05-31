@@ -350,7 +350,7 @@ func (variable *ExprVariable) emitAddress(offset int) {
 		if variable.offset == 0 {
 			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
-		emit("lea %d(%%rbp), %%rax", variable.offset+offset)
+		emit("lea %d+%d(%%rbp), %%rax", variable.offset, offset)
 	}
 }
 
