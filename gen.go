@@ -520,8 +520,7 @@ func (ast *ExprUop) emit() {
 		//vr, ok := rel.expr.(*ExprVariable)
 		//assert(ok, nil, "operand is a rel")
 		ast.operand.emit()
-		emit("mov (%%rax), %%rcx")
-		emit("mov %%rcx, %%rax")
+		emit("LOAD_8_BY_DEREF")
 	} else if ast.op == "!" {
 		ast.operand.emit()
 		emit("CMP_EQ_ZERO")
