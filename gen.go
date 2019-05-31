@@ -987,17 +987,10 @@ func (e *ExprIndex) emitSave24() {
 }
 
 func (e *ExprIndex) emitSave() {
-
-	// load head address of the array
-	// load index
-	// multi index * elmSize
-	// calc address = head address + offset
-	// copy value to the address
-
 	collectionType := e.collection.getGtype()
 	switch {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
-		// break
+		emitCollectIndexSave(e.collection, e.index, 0)
 	case collectionType.getKind() == G_MAP:
 		emit("PUSH_PRIMITIVE") // push RHS value
 		e.emitMapSet(false)
@@ -1005,39 +998,6 @@ func (e *ExprIndex) emitSave() {
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
-
-	var offset int = 0
-	collection := e.collection
-	index := e.index
-
-	var elmType *Gtype
-	if collectionType.isString() {
-		elmType = gByte
-	} else {
-		elmType = collectionType.elementType
-	}
-	elmSize := elmType.getSize()
-	assert(elmSize > 0, nil, "elmSize > 0")
-
-	emit("PUSH_PRIMITIVE # rhs")
-
-	collection.emit()
-	emit("PUSH_PRIMITIVE # addr")
-
-	index.emit()
-	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
-	emit("PUSH_PRIMITIVE")
-
-	emit("SUM_FROM_STACK # (index * elmSize) + addr")
-	emit("ADD_NUMBER %d # offset", offset)
-	emit("PUSH_PRIMITIVE")
-
-	if elmSize == 1 {
-		emit("STORE_1_INDIRECT_FROM_STACK")
-	} else {
-		emit("STORE_8_INDIRECT_FROM_STACK")
-	}
-	emitNewline()
 }
 
 func (e *ExprStructField) emitSave() {
