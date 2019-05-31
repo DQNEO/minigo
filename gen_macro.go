@@ -199,6 +199,10 @@ func emitMacroDefinitions() {
 	emit("add $\\n , %%rax")
 	macroEnd()
 
+	macroStart("SUB_NUMBER", "n")
+	emit("sub $\\n , %%rax")
+	macroEnd()
+
 	macroStart("FUNCALL", "fname")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")

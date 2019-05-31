@@ -418,17 +418,17 @@ func makeLabel() string {
 }
 
 func (ast *StmtInc) emit() {
-	emitIncrDecl("add", ast.operand)
+	emitIncrDecl("ADD_NUMBER 1", ast.operand)
 }
 func (ast *StmtDec) emit() {
-	emitIncrDecl("sub", ast.operand)
+	emitIncrDecl("SUB_NUMBER 1", ast.operand)
 }
 
 // https://golang.org/ref/spec#IncDecStmt
 // As with an assignment, the operand must be addressable or a map index expression.
 func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
-	emit("%s $1, %%rax", inst)
+	emit(inst)
 
 	left := operand
 	emitSave(left)
