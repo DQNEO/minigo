@@ -1037,6 +1037,7 @@ func (e *ExprIndex) emitSave() {
 	} else {
 		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
+	emitNewline()
 }
 
 func (e *ExprStructField) emitSave() {
@@ -2059,9 +2060,11 @@ func emitCollectIndexSave(collection Expr, index Expr, offset int) {
 	emit("ADD_NUMBER %d # offset", offset)
 	emit("PUSH_PRIMITIVE")
 
-	emit("STORE_8_INDIRECT_FROM_STACK")
-
-
+	if elmSize == 1 {
+		emit("STORE_1_INDIRECT_FROM_STACK")
+	} else {
+		emit("STORE_8_INDIRECT_FROM_STACK")
+	}
 	emitNewline()
 }
 
