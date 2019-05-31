@@ -757,7 +757,6 @@ func (ast *ExprBinop) emit() {
 		emit("mov %%rdx, %%rax")
 	} else if ast.op == "/" {
 		emit("mov $0, %%rdx # init %%rdx")
-		emit("mov $0, %%rdx")
 		emit("div %%rcx")
 	} else {
 		errorft(ast.token(), "Unknown binop: %s", ast.op)
@@ -2803,16 +2802,15 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		labelEnd := makeLabel()
 		arg := funcall.args[0]
 		arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
-		emit("mov $0, %%rdx")
 
 		// (ptr != nil && rcx == nil) => Error
-		emit("cmp %%rax, %%rdx")
+		emit("cmp %%rax, $0")
 		emit("setne %%al") // rax != 0
 		emit("movzb %%al, %%eax")
 		emit("TEST_IT")
 		emit("je %s", labelEnd)
 
-		emit("cmp %%rcx, %%rdx")
+		emit("cmp %%rcx, $0")
 		emit("sete %%al") // rcx == 0
 		emit("movzb %%al, %%eax")
 		emit("TEST_IT")
