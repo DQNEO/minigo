@@ -444,9 +444,7 @@ func (uop *ExprUop) emitSave() {
 
 // e.g. x = 1
 func (rel *Relation) emitSave() {
-	if rel.expr == nil {
-		errorft(rel.token(), "left.rel.expr is nil")
-	}
+	assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
 	variable := rel.expr.(*ExprVariable)
 	variable.emitOffsetSave(variable.getGtype().getSize(), 0, false)
 }
