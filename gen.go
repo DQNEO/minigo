@@ -2935,7 +2935,7 @@ func emitMakeSliceFunc() {
 	emit("mov -16(%%rbp), %%rax # newcap")
 	emit("mov -8(%%rbp), %%rcx # unit")
 	emit("imul %%rcx, %%rax")
-	emit("add $16, %%rax") // pure buffer
+	emit("ADD_NUMBER 16 # pure buffer")
 
 	emit("PUSH_PRIMITIVE")
 	emit("POP_TO_ARG_0")
@@ -2945,8 +2945,7 @@ func emitMakeSliceFunc() {
 	emit("mov -24(%%rbp), %%rbx # newlen")
 	emit("mov -16(%%rbp), %%rcx # newcap")
 
-	emit("leave")
-	emit("ret")
+	emit("LEAVE_AND_RET")
 	emitNewline()
 }
 
