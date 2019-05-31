@@ -2963,9 +2963,9 @@ func emitMainFunc(importOS bool) {
 func emitMakeSliceFunc() {
 	// makeSlice
 	emitWithoutIndent("%s:", "iruntime.makeSlice")
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	emit("FUNC_PROLOGUE")
 	emitNewline()
+
 	emit("PUSH_ARG_2") // -8
 	emit("PUSH_ARG_1") // -16
 	emit("PUSH_ARG_0") // -24
