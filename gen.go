@@ -579,9 +579,9 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emitStringsEqualFromStack(equal)
 }
 
-func emitConvertNilToEmptyString(regi string) {
+func emitConvertNilToEmptyString() {
 	emit("# emitConvertNilToEmptyString")
-	emit("mov %s, %%rax", regi)
+
 	emit("PUSH_PRIMITIVE")
 	emit("# convert nil to an empty string")
 	emit("TEST_IT")
@@ -597,14 +597,15 @@ func emitConvertNilToEmptyString(regi string) {
 func emitStringsEqualFromStack(equal bool) {
 	emit("pop %%rax") // left
 
-	emitConvertNilToEmptyString("%rax")
-	emit("mov %%rax, %%rsi")
-
+	emitConvertNilToEmptyString()
+	emit("mov %%rax, %%rcx")
 	emit("pop %%rax # right string")
-	emitConvertNilToEmptyString("%rax")
+	emit("push %%rcx")
+	emitConvertNilToEmptyString()
 
 	emit("PUSH_PRIMITIVE")
 	emit("POP_TO_ARG_0")
+	emit("POP_TO_ARG_1")
 	emit("FUNCALL strcmp")
 	if equal {
 		emit("CMP_EQ_ZERO") // retval == 0
