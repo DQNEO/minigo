@@ -1026,9 +1026,8 @@ func (e *ExprIndex) emitSave() {
 	emit("mov $%d, %%rax # elmSize of one element", elmSize)
 	emit("imul %%rcx, %%rax # index * elmSize")
 	emit("push %%rax # store index * elmSize")
-	emit("pop %%rcx # load index * elmSize")
-	emit("pop %%rax # load address of variable")
-	emit("add %%rcx , %%rax # (index * elmSize) + address")
+
+	emit("SUM_FROM_STACK # (index * elmSize) + address")
 
 	emit("mov %%rax, %%rbx")
 	emit("pop %%rax # load RHS value")
