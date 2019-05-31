@@ -1011,9 +1011,6 @@ func (e *ExprIndex) emitSave() {
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
 
-	emit("push %%rax # stash head address of collection")
-	e.index.emit()
-	emit("mov %%rax, %%rcx") // index
 	var elmType *Gtype
 	if collectionType.isString() {
 		elmType = gByte
@@ -1022,6 +1019,10 @@ func (e *ExprIndex) emitSave() {
 	}
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
+
+	emit("push %%rax # stash head address of collection")
+	e.index.emit()
+	emit("mov %%rax, %%rcx") // index
 	emit("mov $%d, %%rax # elmSize of one element", elmSize)
 	emit("imul %%rcx, %%rax # index * elmSize")
 	emit("push %%rax # store index * elmSize")
