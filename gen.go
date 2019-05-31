@@ -1442,11 +1442,11 @@ func emitAddress(e Expr) {
 	}
 }
 
-// expect lhs address is in the stack top, rhs is in the second top
+// expect rhs address is in the stack top, lhs is in the second top
 func emitCopyStructFromStack(gtype *Gtype) {
 	//assert(left.getGtype().getSize() == right.getGtype().getSize(), left.token(),"size does not match")
-	emit("pop %%rax") // from
-	emit("pop %%rbx") // to
+	emit("pop %%rax") // to
+	emit("pop %%rbx") // from
 	emit("push %%r15")
 	emit("push %%r11")
 	emit("mov %%rax, %%r15") // from
@@ -1474,16 +1474,6 @@ func emitCopyStructInt(gtype *Gtype) {
 	emit("pop %%r15")
 }
 
-// expect rhs address is in the stack top
-func emitCopyStruct(lhs Expr) {
-	//assert(lhs.getGtype().getSize() == right.getGtype().getSize(), lhs.token(),"size does not match")
-	emit("pop %%rax")
-	emit("push %%r15")
-	emit("push %%r11")
-	emit("mov %%rax, %%r15")
-	emitAddress(lhs)
-	emitCopyStructInt(lhs.getGtype())
-}
 
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
@@ -1552,16 +1542,20 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 	switch rhs.(type) {
 	case *Relation:
+		emitAddress(lhs)
+		emit("PUSH_PRIMITIVE")
 		emitAddress(rhs)
 		emit("PUSH_PRIMITIVE")
-		emitCopyStruct(lhs)
+		emitCopyStructFromStack(lhs.getGtype())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
 		if re.op == "*" {
 			// copy struct
+			emitAddress(lhs)
+			emit("PUSH_PRIMITIVE")
 			re.operand.emit()
 			emit("PUSH_PRIMITIVE")
-			emitCopyStruct(lhs)
+			emitCopyStructFromStack(lhs.getGtype())
 		} else {
 			TBI(rhs.token(), "")
 		}
