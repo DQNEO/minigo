@@ -620,13 +620,11 @@ func emitStringsEqual(equal bool, leftReg string, rightReg string) {
 	emit("PUSH_PRIMITIVE")
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL strcmp")
-	emit("cmp $0, %%rax") // retval == 0
 	if equal {
-		emit("sete %%al")
+		emit("CMP_EQ_ZERO") // retval == 0
 	} else {
-		emit("setne %%al")
+		emit("CMP_NE_ZERO") // retval != 0
 	}
-	emit("movzb %%al, %%eax")
 }
 
 func (binop *ExprBinop) emitComp() {
