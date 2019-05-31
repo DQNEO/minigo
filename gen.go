@@ -503,8 +503,6 @@ func (ast *ExprUop) emit() {
 			e.invisiblevar.emitAddress(0)
 			emit("PUSH_PRIMITIVE") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype())
-			emit("pop %%rax") // from
-			emit("pop %%rax") // to
 			// emit address
 		case *ExprStructField:
 			e := ast.operand.(*ExprStructField)
@@ -1455,10 +1453,6 @@ func emitCopyStructFromStack(gtype *Gtype) {
 	emit("mov %%rbx, %%rax") // to
 
 	emitCopyStructInt(gtype)
-
-	// recover stack
-	emit("PUSH_PRIMITIVE") // to
-	emit("push %%rcx") // from
 }
 
 func emitCopyStructInt(gtype *Gtype) {
