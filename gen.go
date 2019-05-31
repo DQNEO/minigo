@@ -2088,8 +2088,8 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		emit("imul %%rcx, %%rax")       // index * elmSize
 		emit("PUSH_PRIMITIVE")          // store index * elmSize
 		emit("pop %%rcx")               // load  index * elmSize
-		emit("pop %%rbx")               // load address of variable
-		emit("add %%rcx , %%rbx")       // (index * elmSize) + address
+		emit("pop %%rbx")               // load  head
+		emit("add %%rcx , %%rbx")       // (index * elmSize) + head
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
@@ -2117,9 +2117,11 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		emit("mov %%rax, %%rcx")
 
 		emit("mov $%d, %%rax", elmSize) // elmSize of one element
-		emit("imul %%rcx, %%rax")       // set e.index * elmSize => %rax
-		emit("pop %%rbx")               // load head address
-		emit("add %%rax , %%rbx")       // (e.index * elmSize) + head address
+		emit("imul %%rcx, %%rax")       // index * elmSize
+		emit("PUSH_PRIMITIVE")          // store index * elmSize
+		emit("pop %%rcx")               // load  index * elmSize
+		emit("pop %%rbx")               // load  head
+		emit("add %%rax , %%rbx")       // (index * elmSize) + head
 		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
