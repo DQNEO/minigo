@@ -498,7 +498,7 @@ func (ast *ExprUop) emit() {
 			ivv := e.invisiblevar
 			assignToStruct(ivv, e)
 
-			emitCallMalloc(e.getGtype().getSize()) // => rax
+			emitCallMalloc(e.getGtype().getSize())
 			emit("PUSH_PRIMITIVE")                     // to:ptr addr
 			e.invisiblevar.emitAddress(0)
 			emit("PUSH_PRIMITIVE") // from:address of invisible var
@@ -565,7 +565,7 @@ func (binop *ExprBinop) emitCompareStrings() {
 	// convert nil to the empty string
 	emit("CMP_EQ_ZERO")
 	emit("TEST_IT")
-	emit("mov $0, %%rax")
+	emit("LOAD_NUMBER 0")
 	emit("je %s", labelElse)
 	emitEmptyString()
 	emit("jmp %s", labelEnd)
