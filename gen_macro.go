@@ -227,7 +227,7 @@ func emitMacroDefinitions() {
 	emit("imul $\\n , %%rax")
 	macroEnd()
 
-	macroStart("STORE_INDIRECT_FROM_STACK", "")
+	macroStart("STORE_8_INDIRECT_FROM_STACK", "")
 	emit("pop %%rax")
 	emit("pop %%rcx")
 	emit("mov %%rcx, (%%rax)")

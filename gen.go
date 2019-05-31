@@ -439,7 +439,7 @@ func (uop *ExprUop) emitSave() {
 	emit("PUSH_PRIMITIVE")
 	uop.operand.emit()
 	emit("PUSH_PRIMITIVE")
-	emit("STORE_INDIRECT_FROM_STACK")
+	emit("STORE_8_INDIRECT_FROM_STACK")
 }
 
 // e.g. x = 1
@@ -461,7 +461,7 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 		emit("ADD_NUMBER %d", offset)
 		emit("PUSH_PRIMITIVE")
 
-		emit("STORE_INDIRECT_FROM_STACK")
+		emit("STORE_8_INDIRECT_FROM_STACK")
 		emit("#")
 		return
 	}
@@ -1763,7 +1763,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("PUSH_PRIMITIVE")
 	emitCallMalloc(8)
 	emit("PUSH_PRIMITIVE")
-	emit("STORE_INDIRECT_FROM_STACK")
+	emit("STORE_8_INDIRECT_FROM_STACK")
 	emit("PUSH_PRIMITIVE # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
