@@ -120,7 +120,7 @@ func (f *DeclFunc) emitPrologue() {
 	var offset int
 
 	if len(params) > 0 {
-		emit("# Allocate params")
+		emit("# set params")
 	}
 
 	var regIndex int
