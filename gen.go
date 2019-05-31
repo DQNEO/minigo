@@ -335,7 +335,7 @@ func (ast *ExprVariable) emit() {
 			ast.emitAddress(0)
 		default:
 			if ast.getGtype().getSize() == 1 {
-				emit("LOAD_1_FROM_LOCAL %d", ast.offset)
+				emit("LOAD_1_FROM_LOCAL_CAST %d", ast.offset)
 			} else {
 				emit("LOAD_8_FROM_LOCAL %d", ast.offset)
 			}
