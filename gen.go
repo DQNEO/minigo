@@ -2075,25 +2075,24 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 	emit("# loadCollectIndex")
 	if collection.getGtype().kind == G_ARRAY {
 		elmType := collection.getGtype().elementType
-		emit("# collection.emit()")
-		collection.emit()  // emit address
-		emit("PUSH_PRIMITIVE") // store address of variable
-
-		index.emit()
-		emit("mov %%rax, %%rcx") // index
-
 		size := elmType.getSize()
 		assert(size > 0, nil, "size > 0")
+
+		collection.emit()
+		emit("PUSH_PRIMITIVE # head")
+
+		index.emit()
+		emit("mov %%rax, %%rcx")
+
 		emit("mov $%d, %%rax", size) // size of one element
 		emit("imul %%rcx, %%rax")    // index * size
 		emit("PUSH_PRIMITIVE")           // store index * size
 		emit("pop %%rcx")            // load  index * size
 		emit("pop %%rbx")            // load address of variable
 		emit("add %%rcx , %%rbx")    // (index * size) + address
-		if offset > 0 {
-			emit("add $%d,  %%rbx", offset)
-		}
+		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
+
 		if collection.getGtype().elementType.getKind() == G_INTERFACE {
 			emit("LOAD_24_BY_DEREF")
 		} else {
@@ -2102,25 +2101,24 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		return
 	} else if collection.getGtype().kind == G_SLICE {
 		elmType := collection.getGtype().elementType
-		emit("# emit address of the low index")
-		collection.emit()  // eval pointer value
-		emit("PUSH_PRIMITIVE") // store head address
-
-		index.emit() // index
-		emit("mov %%rax, %%rcx")
-
 		size := elmType.getSize()
 		assert(size > 0, nil, "size > 0")
+
+		collection.emit()
+		emit("PUSH_PRIMITIVE # head")
+
+		index.emit()
+		emit("mov %%rax, %%rcx")
+
 		emit("mov $%d, %%rax", size) // size of one element
 		emit("imul %%rcx, %%rax")    // set e.index * size => %rax
 		emit("pop %%rbx")            // load head address
 		emit("add %%rax , %%rbx")    // (e.index * size) + head address
-		if offset > 0 {
-			emit("add $%d,  %%rbx", offset)
-		}
+		emit("add $%d,  %%rbx", offset)
 		emit("mov %%rbx, %%rax")
 
 		primType := collection.getGtype().elementType.getKind()
+
 		if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 			emit("LOAD_24_BY_DEREF")
 		} else {
@@ -2131,6 +2129,7 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 				emit("LOAD_8_BY_DEREF")
 			}
 		}
+		return
 	} else if collection.getGtype().getKind() == G_MAP {
 		loadMapIndexExpr(collection, index)
 	} else if collection.getGtype().getKind() == G_STRING {
