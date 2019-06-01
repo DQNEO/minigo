@@ -41,9 +41,9 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	// dereference: convert an interface value to a concrete value
 	receiver.emit()
 
-	emit("mov (%%rax), %%rax")
+	emit("LOAD_8_BY_DEREF")
 
-	emit("push %%rax  # receiver")
+	emit("PUSH_PRIMITIVE # receiver")
 
 	otherArgs := args[1:]
 	for i, arg := range otherArgs {
@@ -53,12 +53,12 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 		} else {
 			arg.emit()
 		}
-		emit("push %%rax  # argument no %d", i+2)
+		emit("PUSH_PRIMITIVE # argument no %d", i+2)
 	}
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop_to_arg_%d", j)
+		emit("POP_TO_ARG_%d", j)
 	}
 
 	emit("pop %%rax")
@@ -115,10 +115,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("movzb %%al, %%eax")
 	emit("test %%rax, %%rax")
 	if is24Width {
-		emit("mov $0, %%rax # NOT FOUND")
-		emit("mov $0, %%rbx # NOT FOUND")
-		emit("mov $0, %%rcx # NOT FOUND")
-
+		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else if mapValueType.isString() {
 		emitEmptyString()
 	} else {
