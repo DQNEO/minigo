@@ -1120,9 +1120,10 @@ func (stmt *StmtSwitch) emit() {
 		if stmt.isTypeSwitch {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				emit("pop %%r10  # the subject value")
-				emit("push %%r10 # the subject value")
-				emit("push %%r10 # the subject value")
+				emit("# Duplicate the subject value in stack")
+				emit("POP_8")
+				emit("PUSH_8")
+				emit("PUSH_8")
 				if gtype.isNil() {
 					emit("mov $0, %%rax # nil")
 				} else {
@@ -1142,22 +1143,19 @@ func (stmt *StmtSwitch) emit() {
 			}
 		} else {
 			for _, e := range caseClause.exprs {
+				emit("# Duplicate the subject value in stack")
+				emit("POP_8")
+				emit("PUSH_8")
+				emit("PUSH_8")
 				e.emit()
+				emit("PUSH_8")
 				if e.getGtype().isString() {
-					emit("pop %%rcx # the subject value")
-					emit("push %%rcx")
-
-					emit("push %%rcx")
-					emit("PUSH_8")
 					emitStringsEqualFromStack(true)
-					emit("pop %%rcx")
 				} else {
-					emit("PUSH_8")
 					emit("CMP_FROM_STACK sete")
 				}
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
-				emit("push %%rcx # the subject value")
 			}
 		}
 	}
@@ -1171,7 +1169,7 @@ func (stmt *StmtSwitch) emit() {
 		emit("jmp %s", defaultLabel)
 	}
 
-	emit("pop %%rax # destroy the subject value")
+	emit("POP_8 # destroy the subject value")
 	emit("#")
 	for i, caseClause := range stmt.cases {
 		emit("# case stmts")

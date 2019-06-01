@@ -50,6 +50,10 @@ func emitMacroDefinitions() {
 	emit("push %%rcx # ifc.3rd")
 	macroEnd()
 
+	macroStart("POP_8", "")
+	emit("pop %%rax # primitive")
+	macroEnd()
+
 	macroStart("POP_SLICE", "")
 	emit("pop %%rcx # slice.cap")
 	emit("pop %%rbx # slice.len")
