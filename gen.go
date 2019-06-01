@@ -1040,21 +1040,22 @@ func (e *ExprSliceLiteral) emit() {
 			value.emit()
 		}
 
+		emit("pop %%r10 # ptr")
+
 		switch e.gtype.elementType.getKind() {
 		case G_BYTE, G_INT, G_POINTER, G_STRING:
-			emit("pop %%rbx # ptr")
-			emit("mov %%rax, %d(%%rbx)", IntSize*i)
-			emit("push %%rbx # ptr")
+			emit("mov %%rax, %d(%%r10)", IntSize*i)
 		case G_INTERFACE, G_SLICE, G_MAP:
-			emit("pop %%rdx # ptr")
-			emit("mov %%rax, %d(%%rdx)", IntSize*3*i)
-			emit("mov %%rbx, %d(%%rdx)", IntSize*3*i+ptrSize)
-			emit("mov %%rcx, %d(%%rdx)", IntSize*3*i+ptrSize+ptrSize)
-			emit("push %%rdx # ptr")
+			emit("mov %%rax, %d(%%r10)", IntSize*3*i)
+			emit("mov %%rbx, %d(%%r10)", IntSize*3*i+ptrSize)
+			emit("mov %%rcx, %d(%%r10)", IntSize*3*i+ptrSize+ptrSize)
 		default:
 			TBI(e.token(), "")
 		}
+
+		emit("push %%r10 # ptr")
 	}
+
 	emit("pop %%rax # ptr")
 	emit("mov $%d, %%rbx # len", length)
 	emit("mov $%d, %%rcx # cap", length)
