@@ -398,11 +398,12 @@ func (lit *ExprMapLiteral) emit() {
 			element.key.emit()
 		} else {
 			element.key.emit()
-			emit("push %%rax") // value of key
+			emit("PUSH_PRIMITIVE") // value of key
 			// call malloc for key
 			emitCallMalloc(8)
-			emit("pop %%rcx")          // value of key
-			emit("mov %%rcx, (%%rax)") // save key to heap
+			emit("PUSH_PRIMITIVE")
+
+			emit("STORE_8_INDIRECT_FROM_STACK") // save key to heap
 		}
 
 		emit("pop %%rbx")                     // map head
