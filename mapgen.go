@@ -13,11 +13,13 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	}
 	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
 	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
-	emit("imul $8, %%rax")
-	emit("push %%rax")
+	emit("IMUL_NUMBER 8")
+	emit("PUSH_PRIMITIVE")
+
 	emit("lea receiverTypes(%%rip), %%rax")
-	emit("pop %%rcx")
-	emit("add %%rcx, %%rax")
+	emit("PUSH_PRIMITIVE")
+	emit("SUM_FROM_STACK")
+
 	emit("# find method %s", call.methodName)
 	emit("mov (%%rax), %%r10") // address of receiverType
 
