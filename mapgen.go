@@ -317,17 +317,19 @@ func (f *StmtFor) emitRangeForMap() {
 
 	// set key and value
 	mapCounter.emit()
-	emit("imul $16, %%rax")
-	emit("push %%rax")
+	emit("IMUL_NUMBER 16")
+	emit("PUSH_PRIMITIVE # x")
 	f.rng.rangeexpr.emit() // emit address of map data head
+	emit("PUSH_PRIMITIVE # y")
+
 	mapType := f.rng.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 
-	emit("pop %%rcx")
-	emit("add %%rax, %%rcx")
-	emit("mov (%%rcx), %%rax")
+	emit("SUM_FROM_STACK # x + y")
+	emit("LOAD_8_BY_DEREF")
+
 	if !mapKeyType.isString() {
-		emit("mov (%%rax), %%rax")
+		emit("LOAD_8_BY_DEREF")
 	}
 	f.rng.indexvar.emitSave()
 
