@@ -227,13 +227,13 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 
 	// map len++
 	elen.emit()
-	emit("add $1, %%rax")
+	emit("ADD_NUMBER 1")
 	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
-	emit("push %%rax") // index value
+	emit("PUSH_PRIMITIVE") // index value
 
 	mapType := e.collection.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
@@ -266,20 +266,11 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 
 	emit("pop %%rcx")           // map tail address
 	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
-
+	emit("PUSH_PRIMITIVE")
 	if isWidth24 {
-		emit("pop %%rdx") // rhs value 3/3
-		emit("pop %%rcx") // rhs value 2/3
-		emit("pop %%rbx") // rhs value 1/3
-		// save value
-		emit("mov %%rbx, (%%rax)")
-		emit("mov %%rcx, 8(%%rax)")
-		emit("mov %%rdx, 16(%%rax)")
+		emit("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit("pop %%rcx") // rhs value
-		// save value
-		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
-
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
 }
 
