@@ -167,9 +167,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("sete %%al")
 		emit("movzb %%al, %%eax")
 	}
-	emit("pop %%rcx") // index address
 
 	emit("TEST_IT")
+	emit("pop %%rcx") // index address
 	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
