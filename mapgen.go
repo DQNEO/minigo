@@ -21,12 +21,12 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("SUM_FROM_STACK")
 
 	emit("# find method %s", call.methodName)
-	emit("mov (%%rax), %%r10") // address of receiverType
+	emit("mov (%%rax), %%rax") // address of receiverType
+	emit("PUSH_8 # map head")
 
-	emit("mov $128, %%r11")  // copy len
-
+	emit("push $128 # len")
 	emit("lea .M%s, %%rax", call.methodName) // index value
-	emit("mov %%rax, %%r12")                 // index value
+	emit("PUSH_8 # map index value")                 // index value
 	emitMapGet(mapType, false)
 
 	emit("PUSH_8")
@@ -65,23 +65,20 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("call *%%rax")
 }
 
+// emit map index expr
 func loadMapIndexExpr(_map Expr, index Expr) {
 	// e.g. x[key]
-	emit("# emit map index expr")
-	emit("# r10: map header address")
-	emit("# r11: map len")
-	emit("# r12: specified index value")
-	emit("# r13: loop counter")
+
 
 	// rax: found value (zero if not found)
 	// rcx: ok (found: address of the index,  not found:0)
 	emit("# emit mapData head address")
 	_map.emit()
-	emit("mov %%rax, %%r10 # copy head address")
+	emit("PUSH_8 # map head")
 	emitOffsetLoad(_map, IntSize, IntSize)
-	emit("mov %%rax, %%r11 # copy len ")
+	emit("PUSH_8 # len")
 	index.emit()
-	emit("mov %%rax, %%r12 # index value")
+	emit("PUSH_8 # index value")
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -93,7 +90,15 @@ func mapOkRegister(is24Width bool) string {
 	}
 }
 
+// r10: map header address")
+// r11: map len")
+// r12: specified index value")
+// r13: loop counter")
 func emitMapGet(mapType *Gtype, deref bool) {
+
+	emit("pop %%r12 # index value")
+	emit("pop %%r11 # map len")
+	emit("pop %%r10 # map head")
 	if mapType.kind == G_NAMED {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
