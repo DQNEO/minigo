@@ -26,6 +26,12 @@ func emitMacroDefinitions() {
 	emit("push %%rax # primitive")
 	macroEnd()
 
+	macroStart("PUSH_24", "")
+	emit("push %%rax # 1st")
+	emit("push %%rbx # 2nd")
+	emit("push %%rcx # 3rd")
+	macroEnd()
+
 	macroStart("PUSH_SLICE", "")
 	emit("push %%rax # slice.ptr")
 	emit("push %%rbx # slice.len")

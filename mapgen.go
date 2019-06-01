@@ -335,29 +335,26 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
 		f.rng.rangeexpr.emit()
-		emit("mov %%rax, %%rcx # ptr")
+		emit("PUSH_PRIMITIVE")
 
 		emit("## mapCounter.emit()")
 		mapCounter.emit()
-
-		//assert(f.rng.valuevar.getGtype().getSize() <= 8, f.rng.token(), "invalid size")
 		emit("## eval value")
-		emit("imul $16, %%rax  # counter * 16")
-		emit("add $8, %%rax    # counter * 16 + 8")
-		emit("add %%rax, %%rcx # mapHead + (counter * 16 + 8)")
-		emit("mov (%%rcx), %%rdx")
+		emit("IMUL_NUMBER 16  # counter * 16")
+		emit("ADD_NUMBER 8 # counter * 16 + 8")
+		emit("PUSH_PRIMITIVE")
+
+		emit("SUM_FROM_STACK")
+
+		emit("LOAD_8_BY_DEREF")
 
 		switch f.rng.valuevar.getGtype().getKind() {
 		case G_SLICE, G_MAP:
-			emit("mov (%%rdx), %%rax")
-			emit("mov 8(%%rdx), %%rbx")
-			emit("mov 16(%%rdx), %%rcx")
-			emit("push %%rax")
-			emit("push %%rbx")
-			emit("push %%rcx")
+			emit("LOAD_24_BY_DEREF")
+			emit("PUSH_24")
 			emitSave24(f.rng.valuevar, 0)
 		default:
-			emit("mov (%%rdx), %%rax")
+			emit("LOAD_8_BY_DEREF")
 			f.rng.valuevar.emitSave()
 		}
 
