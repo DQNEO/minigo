@@ -173,9 +173,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	if deref {
 		if mapValueType.is24Width() {
 			emit("mov %%rax, %%r13 # stash")
-			emit("mov (%%r13), %%rax # deref 1st")
-			emit("mov 8(%%r13), %%rbx # deref 2nd")
-			emit("mov 16(%%r13), %%rcx # deref 3rd")
+			emit("LOAD_24_BY_DEREF")
 		} else {
 			emit("LOAD_8_BY_DEREF")
 		}
