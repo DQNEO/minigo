@@ -130,14 +130,15 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
 	emit("IMUL_NUMBER 16")    // i * 16
-	//emit("PUSH_PRIMITIVE")
-
-	emit("mov %%r10, %%rcx")   // head
-	emit("add %%rcx, %%rax")   // head + i * 16
-
 	emit("PUSH_PRIMITIVE")
+
+	emit("mov %%r10, %%rax")   // head
+	emit("PUSH_PRIMITIVE")
+
+	emit("SUM_FROM_STACK")   // head + i * 16
+
+	emit("PUSH_PRIMITIVE") // index address
 	emit("mov (%%rax), %%rax") // emit index address
-	emit("pop %%rcx")
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
@@ -147,13 +148,11 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("push %%r13")
 		emit("push %%r11")
 		emit("push %%r10")
-		emit("push %%rcx")
 
 		emit("push %%rax")
 		emit("push %%r12")
 		emitStringsEqualFromStack(true)
 
-		emit("pop %%rcx")
 		emit("pop %%r10")
 		emit("pop %%r11")
 		emit("pop %%r13")
@@ -163,6 +162,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("sete %%al")
 		emit("movzb %%al, %%eax")
 	}
+	emit("pop %%rcx") // index address
 
 	emit("TEST_IT")
 	emit("je %s  # Not match. go to next iteration", labelIncr)
