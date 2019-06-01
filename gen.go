@@ -1139,7 +1139,6 @@ func (stmt *StmtSwitch) emit() {
 				e.emit()
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
-				emit("push %%rcx # the subject value")
 			}
 		} else {
 			for _, e := range caseClause.exprs {
