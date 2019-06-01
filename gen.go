@@ -2690,7 +2690,9 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emitWithoutIndent("%s:", slabel)
 		emit(".string \"%s\"", "assertInterface failed")
 		emit(".text")
-		emit("lea %s, %%rdi", slabel)
+		emit("lea %s, %%rax", slabel)
+		emit("PUSH_PRIMITIVE")
+		emit("POP_TO_ARG_0")
 		emit("mov $0, %%rax")
 		emit("call %s", ".panic")
 
