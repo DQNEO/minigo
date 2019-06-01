@@ -113,7 +113,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("cmp %%r11, %%r13") // right, left
 	emit("setl %%al # eval(r13(i) < r11(len))")
 	emit("movzb %%al, %%eax")
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	if is24Width {
 		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else if mapValueType.isString() {
@@ -159,7 +159,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("movzb %%al, %%eax")
 	}
 
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
@@ -200,7 +200,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	emit("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # jump to append if not found", labelAppend)
 
 	// update
@@ -318,7 +318,7 @@ func (f *StmtFor) emitRangeForMap() {
 		},
 	}
 	condition.emit()
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
 
 	// set key and value
