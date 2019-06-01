@@ -21,6 +21,77 @@ var retRegi [14]string = [14]string{
 
 var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
+func (f *DeclFunc) emitPrologue() {
+	emitWithoutIndent("%s:", f.getSymbol())
+	emit("FUNC_PROLOGUE")
+
+	var params []*ExprVariable
+
+	// prepend receiver to params
+	if f.receiver != nil {
+		params = []*ExprVariable{f.receiver}
+		for _, param := range f.params {
+			params = append(params, param)
+		}
+	} else {
+		params = f.params
+	}
+
+	// offset for params and local variables
+	var offset int
+
+	if len(params) > 0 {
+		emit("# set params")
+	}
+
+	var regIndex int
+	for _, param := range params {
+		switch param.getGtype().getKind() {
+		case G_SLICE, G_INTERFACE, G_MAP:
+			offset -= IntSize * 3
+			param.offset = offset
+			emit("PUSH_ARG_%d # third", regIndex+2)
+			emit("PUSH_ARG_%d # second", regIndex+1)
+			emit("PUSH_ARG_%d # fist \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			regIndex += sliceWidth
+		default:
+			offset -= IntSize
+			param.offset = offset
+			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			regIndex += 1
+		}
+	}
+
+	if len(f.localvars) > 0 {
+		emit("# Allocating stack for localvars len=%d", len(f.localvars))
+	}
+
+	var localarea int
+	for _, lvar := range f.localvars {
+		if lvar.gtype == nil {
+			debugf("%s has nil gtype ", lvar)
+		}
+		size := lvar.gtype.getSize()
+		assert(size != 0, lvar.token(), "size should  not be zero:"+lvar.gtype.String())
+		loff := align(size, 8)
+		localarea -= loff
+		offset -= loff
+		lvar.offset = offset
+		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
+	}
+
+	for i := len(f.localvars) - 1; i >= 0; i-- {
+		lvar := f.localvars[i]
+		emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
+	}
+
+	if localarea != 0 {
+		emit("sub $%d, %%rsp # total stack size", -localarea)
+	}
+
+	emitNewline()
+}
+
 func (ircall *IrStaticCall) emit(args []Expr) {
 	// nothing to do
 	emit("# emitCall %s", ircall.symbol)
@@ -170,4 +241,61 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	emit("FUNCALL %s", ircall.symbol)
 	emitNewline()
 }
+
+func (stmt *StmtReturn) emit() {
+	if len(stmt.exprs) == 0 {
+		// return void
+		emit("mov $0, %%rax")
+		stmt.emitDeferAndReturn()
+		return
+	}
+
+	if len(stmt.exprs) > 7 {
+		TBI(stmt.token(), "too many number of arguments")
+	}
+
+	var retRegiIndex int
+	if len(stmt.exprs) == 1 {
+		expr := stmt.exprs[0]
+		rettype := stmt.rettypes[0]
+		if rettype.getKind() == G_INTERFACE && expr.getGtype().getKind() != G_INTERFACE {
+			if expr.getGtype() == nil {
+				emit("LOAD_EMPTY_INTERFACE")
+			} else {
+				emitConversionToInterface(expr)
+			}
+		} else {
+			expr.emit()
+			if expr.getGtype() == nil && stmt.rettypes[0].kind == G_SLICE {
+				emit("LOAD_EMPTY_SLICE")
+			}
+		}
+		stmt.emitDeferAndReturn()
+		return
+	}
+	for i, rettype := range stmt.rettypes {
+		expr := stmt.exprs[i]
+		expr.emit()
+		//		rettype := stmt.rettypes[i]
+		if expr.getGtype() == nil && rettype.kind == G_SLICE {
+			emit("LOAD_EMPTY_SLICE")
+		}
+		size := rettype.getSize()
+		if size < 8 {
+			size = 8
+		}
+		var num64bit int = size / 8 // @TODO odd size
+		for j := 0; j < num64bit; j++ {
+			emit("push %%%s", retRegi[num64bit-1-j])
+			retRegiIndex++
+		}
+	}
+	for i := 0; i < retRegiIndex; i++ {
+		emit("pop %%%s", retRegi[retRegiIndex-1-i])
+	}
+
+	stmt.emitDeferAndReturn()
+}
+
+
 

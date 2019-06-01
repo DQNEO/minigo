@@ -133,3 +133,43 @@ func (root *IrRoot) emit() {
 
 }
 
+func emitRuntimeArgs() {
+	emitWithoutIndent(".runtime_args:")
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+
+	emit("# set argv, argc, argc")
+	emit("mov runtimeArgv(%%rip), %%rax # ptr")
+	emit("mov runtimeArgc(%%rip), %%rbx # len")
+	emit("mov runtimeArgc(%%rip), %%rcx # cap")
+
+	emitFuncEpilogue(".runtime_args_noop_handler", nil)
+}
+
+func emitMainFunc(importOS bool) {
+	fname := "main"
+	emit(".global	%s", fname)
+	emitWithoutIndent("%s:", fname)
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
+
+	emit("mov %%rsi, runtimeArgv(%%rip)")
+	emit("mov %%rdi, runtimeArgc(%%rip)")
+	emit("mov $0, %%rsi")
+	emit("mov $0, %%rdi")
+
+	// init runtime
+	emit("# init runtime")
+	emit("FUNCALL iruntime.init")
+
+	// init imported packages
+	if importOS {
+		emit("# init os")
+		emit("FUNCALL os.init")
+	}
+
+	emitNewline()
+	emit("FUNCALL main.main")
+	emitFuncEpilogue("noop_handler", nil)
+}
+
