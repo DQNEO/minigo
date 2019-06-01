@@ -213,17 +213,17 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// append
 	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
-	emit("push %%rax # stash head address of mapData")
+	emit("PUSH_PRIMITIVE")
 
 	// emit len of the map
 	elen := &ExprLen{
 		arg: e.collection,
 	}
 	elen.emit()
-	emit("imul $%d, %%rax", 2*8) // distance from head to tail
-	emit("pop %%rcx")            // head
-	emit("add %%rax, %%rcx")     // now rcx is the tail address
-	emit("push %%rcx")
+	emit("IMUL_NUMBER %d", 2*8) // distance from head to tail
+	emit("PUSH_PRIMITIVE")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_PRIMITIVE")
 
 	// map len++
 	elen.emit()
