@@ -435,10 +435,7 @@ func (lit *ExprMapLiteral) emit() {
 		emit("push %%rbx")
 	}
 
-	emit("pop %%rax")
-	emit("push %%rax")       // address (head of the heap)
-	emit("push $%d", length) // len
-	emit("push $%d", length) // cap
-
-	emit("POP_MAP")
+	emit("pop %%rax") // address (head of the heap)
+	emit("mov $%d, %%rbx", length) // len
+	emit("mov $%d, %%rcx", length) // cap
 }
