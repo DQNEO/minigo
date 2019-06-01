@@ -129,10 +129,15 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
-	emit("imul $16, %%rax")    // i * 16
+	emit("IMUL_NUMBER 16")    // i * 16
+	//emit("PUSH_PRIMITIVE")
+
 	emit("mov %%r10, %%rcx")   // head
-	emit("add %%rax, %%rcx")   // head + i * 16
-	emit("mov (%%rcx), %%rax") // emit index address
+	emit("add %%rcx, %%rax")   // head + i * 16
+
+	emit("PUSH_PRIMITIVE")
+	emit("mov (%%rax), %%rax") // emit index address
+	emit("pop %%rcx")
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
