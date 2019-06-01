@@ -644,7 +644,7 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
-	emit("call strlen # get left len")
+	emit("FUNCALL strlen # get left len")
 
 	emit("push %%rax # left len")
 	right.emit()
@@ -652,7 +652,7 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
-	emit("call strlen # get right len")
+	emit("FUNCALL strlen # get right len")
 	emit("push %%rax # right len")
 
 	emit("pop %%rax # right len")
@@ -670,19 +670,19 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
-	emit("call iruntime.malloc")
+	emit("FUNCALL iruntime.malloc")
 
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
 	emit("mov $0, %%rax")
-	emit("call strcat")
+	emit("FUNCALL strcat")
 
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
 	emit("mov $0, %%rax")
-	emit("call strcat")
+	emit("FUNCALL strcat")
 }
 
 func (ast *ExprBinop) emit() {
@@ -1662,7 +1662,7 @@ func emitCallMallocDinamicSize(eSize Expr) {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
-	emit("call iruntime.malloc")
+	emit("FUNCALL iruntime.malloc")
 }
 
 func emitCallMalloc(size int) {
@@ -2694,7 +2694,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit("PUSH_8")
 		emit("POP_TO_ARG_0")
 		emit("mov $0, %%rax")
-		emit("call %s", ".panic")
+		emit("FUNCALL %s", ".panic")
 
 		emitWithoutIndent("%s:", labelEnd)
 		emitNewline()
@@ -2862,7 +2862,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 				emit("POP_TO_ARG_1 # len")
 				emit("POP_TO_ARG_0 # ptr")
 				emit("mov $0, %%rax")
-				emit("call iruntime.append24")
+				emit("FUNCALL iruntime.append24")
 				emit("PUSH_SLICE")
 			}
 		}
@@ -2877,7 +2877,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	}
 
 	emit("mov $0, %%rax")
-	emit("call %s", ircall.symbol)
+	emit("FUNCALL %s", ircall.symbol)
 	emitNewline()
 }
 
@@ -2909,18 +2909,18 @@ func emitMainFunc(importOS bool) {
 	// init runtime
 	emit("# init runtime")
 	emit("mov $0, %%rax")
-	emit("call iruntime.init")
+	emit("FUNCALL iruntime.init")
 
 	// init imported packages
 	if importOS {
 		emit("# init os")
 		emit("mov $0, %%rax")
-		emit("call os.init")
+		emit("FUNCALL os.init")
 	}
 
 	emitNewline()
 	emit("mov $0, %%rax")
-	emit("call main.main")
+	emit("FUNCALL main.main")
 	emitFuncEpilogue("noop_handler", nil)
 }
 
@@ -2942,7 +2942,7 @@ func emitMakeSliceFunc() {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
-	emit("call iruntime.malloc")
+	emit("FUNCALL iruntime.malloc")
 
 	emit("mov -24(%%rbp), %%rbx # newlen")
 	emit("mov -16(%%rbp), %%rcx # newcap")
