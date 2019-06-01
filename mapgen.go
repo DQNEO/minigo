@@ -13,22 +13,23 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	}
 	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
 	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
-	emit("imul $8, %%rax")
-	emit("push %%rax")
+	emit("IMUL_NUMBER 8")
+	emit("PUSH_8")
+
 	emit("lea receiverTypes(%%rip), %%rax")
-	emit("pop %%rcx")
-	emit("add %%rcx, %%rax")
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
+
 	emit("# find method %s", call.methodName)
-	emit("mov (%%rax), %%r10") // address of receiverType
+	emit("mov (%%rax), %%rax") // address of receiverType
+	emit("PUSH_8 # map head")
 
-	emit("mov $128, %%rax")  // copy len
-	emit("mov %%rax, %%r11") // copy len
-
+	emit("push $128 # len")
 	emit("lea .M%s, %%rax", call.methodName) // index value
-	emit("mov %%rax, %%r12")                 // index value
+	emit("PUSH_8 # map index value")                 // index value
 	emitMapGet(mapType, false)
 
-	emit("push %%rax")
+	emit("PUSH_8")
 
 	emit("# setting arguments (len=%d)", len(args))
 
@@ -40,9 +41,9 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	// dereference: convert an interface value to a concrete value
 	receiver.emit()
 
-	emit("mov (%%rax), %%rax")
+	emit("LOAD_8_BY_DEREF")
 
-	emit("push %%rax  # receiver")
+	emit("PUSH_8 # receiver")
 
 	otherArgs := args[1:]
 	for i, arg := range otherArgs {
@@ -52,35 +53,32 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 		} else {
 			arg.emit()
 		}
-		emit("push %%rax  # argument no %d", i+2)
+		emit("PUSH_8 # argument no %d", i+2)
 	}
 
 	for i, _ := range args {
 		j := len(args) - 1 - i
-		emit("pop_to_arg_%d", j)
+		emit("POP_TO_ARG_%d", j)
 	}
 
 	emit("pop %%rax")
 	emit("call *%%rax")
 }
 
+// emit map index expr
 func loadMapIndexExpr(_map Expr, index Expr) {
 	// e.g. x[key]
-	emit("# emit map index expr")
-	emit("# r10: map header address")
-	emit("# r11: map len")
-	emit("# r12: specified index value")
-	emit("# r13: loop counter")
+
 
 	// rax: found value (zero if not found)
 	// rcx: ok (found: address of the index,  not found:0)
 	emit("# emit mapData head address")
 	_map.emit()
-	emit("mov %%rax, %%r10 # copy head address")
+	emit("PUSH_8 # map head")
 	emitOffsetLoad(_map, IntSize, IntSize)
-	emit("mov %%rax, %%r11 # copy len ")
+	emit("PUSH_8 # len")
 	index.emit()
-	emit("mov %%rax, %%r12 # index value")
+	emit("PUSH_8 # index value")
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -92,7 +90,15 @@ func mapOkRegister(is24Width bool) string {
 	}
 }
 
+// r10: map header address")
+// r11: map len")
+// r12: specified index value")
+// r13: loop counter")
 func emitMapGet(mapType *Gtype, deref bool) {
+
+	emit("pop %%r12 # index value")
+	emit("pop %%r11 # map len")
+	emit("pop %%r10 # map head")
 	if mapType.kind == G_NAMED {
 		// @TODO handle infinite chain of relations
 		mapType = mapType.relation.gtype
@@ -109,15 +115,12 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	labelIncr := makeLabel()
 
-	emit("cmp %%r11, %%r13") // right, left
-	emit("setl %%al # eval(r13(i) < r11(len))")
-	emit("movzb %%al, %%eax")
-	emit("test %%rax, %%rax")
+	emit("push %%r13")
+	emit("push %%r11")
+	emit("CMP_FROM_STACK setl")
+	emit("TEST_IT")
 	if is24Width {
-		emit("mov $0, %%rax # NOT FOUND")
-		emit("mov $0, %%rbx # NOT FOUND")
-		emit("mov $0, %%rcx # NOT FOUND")
-
+		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else if mapValueType.isString() {
 		emitEmptyString()
 	} else {
@@ -127,26 +130,34 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	okRegister := mapOkRegister(is24Width)
 	emit("mov $0, %%%s # ok = false", okRegister)
 
-	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
+	emit("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
 
 	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
-	emit("imul $16, %%rax")    // i * 16
-	emit("mov %%r10, %%rcx")   // head
-	emit("add %%rax, %%rcx")   // head + i * 16
-	emit("mov (%%rcx), %%rax") // emit index address
+	emit("IMUL_NUMBER 16")    // i * 16
+	emit("PUSH_8")
+
+	emit("mov %%r10, %%rax")   // head
+	emit("PUSH_8")
+
+	emit("SUM_FROM_STACK")   // head + i * 16
+
+	emit("PUSH_8") // index address
+	emit("LOAD_8_BY_DEREF") // emit index address
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
-		emit("mov (%%rax), %%rax") // dereference
+		emit("LOAD_8_BY_DEREF") // dereference
 	}
 	if mapKeyType.isString() {
 		emit("push %%r13")
 		emit("push %%r11")
 		emit("push %%r10")
-		emit("push %%rcx")
-		emitStringsEqual(true, "%r12", "%rax")
-		emit("pop %%rcx")
+
+		emit("PUSH_8")
+		emit("push %%r12")
+		emitStringsEqualFromStack(true)
+
 		emit("pop %%r10")
 		emit("pop %%r11")
 		emit("pop %%r13")
@@ -157,25 +168,24 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("movzb %%al, %%eax")
 	}
 
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
+	emit("pop %%rax") // index address
 	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
-	emit("mov 8(%%rcx), %%rax # set the found value address")
-	emit("mov %%rcx, %%r12 # stash key address")
+	emit("push %%rax # stash key address")
+	emit("ADD_NUMBER 8 # value address")
+	emit("mov (%%rax), %%rax # set the found value address")
 	if deref {
 		if mapValueType.is24Width() {
-			emit("mov %%rax, %%r13 # stash")
-			emit("mov (%%r13), %%rax # deref 1st")
-			emit("mov 8(%%r13), %%rbx # deref 2nd")
-			emit("mov 16(%%r13), %%rcx # deref 3rd")
+			emit("LOAD_24_BY_DEREF")
 		} else {
-			emit("mov (%%rax), %%rax # dereference")
+			emit("LOAD_8_BY_DEREF")
 		}
 	}
 
 	emit("mov $1, %%%s # ok = true", okRegister)
-
+	emit("pop %%r12 # key address. will be in map set")
 	emit("jmp %s # exit loop", labelEnd)
 
 	emit("%s: # incr", labelIncr)
@@ -198,7 +208,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	emit("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # jump to append if not found", labelAppend)
 
 	// update
@@ -208,27 +218,27 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// append
 	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
-	emit("push %%rax # stash head address of mapData")
+	emit("PUSH_8")
 
 	// emit len of the map
 	elen := &ExprLen{
 		arg: e.collection,
 	}
 	elen.emit()
-	emit("imul $%d, %%rax", 2*8) // distance from head to tail
-	emit("pop %%rcx")            // head
-	emit("add %%rax, %%rcx")     // now rcx is the tail address
-	emit("push %%rcx")
+	emit("IMUL_NUMBER %d", 2*8) // distance from head to tail
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_8")
 
 	// map len++
 	elen.emit()
-	emit("add $1, %%rax")
+	emit("ADD_NUMBER 1")
 	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
 
 	// Save key and value
 	emit("%s: # end loop", labelSave)
 	e.index.emit()
-	emit("push %%rax") // index value
+	emit("PUSH_8") // index value
 
 	mapType := e.collection.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
@@ -237,12 +247,10 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		emit("pop %%rcx")          // index value
 		emit("pop %%rax")          // map tail address
 		emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
-		emit("push %%rax")         // push map tail
+		emit("PUSH_8")         // push map tail
 	} else {
 		// malloc(8)
-		emit("mov $%d, %%rdi", 8) // malloc 8 bytes
-		emit("mov $0, %%rax")
-		emit("call iruntime.malloc")
+		emitCallMalloc(8)
 		// %%rax : malloced address
 		// stack : [map tail address, index value]
 		emit("pop %%rcx")            // index value
@@ -259,26 +267,15 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	if isWidth24 {
 		size = 24
 	}
-	emit("mov $%d, %%rdi", size) // malloc size
-	emit("mov $0, %%rax")
-	emit("call iruntime.malloc")
+	emitCallMalloc(size)
 
 	emit("pop %%rcx")           // map tail address
 	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
-
+	emit("PUSH_8")
 	if isWidth24 {
-		emit("pop %%rdx") // rhs value 3/3
-		emit("pop %%rcx") // rhs value 2/3
-		emit("pop %%rbx") // rhs value 1/3
-		// save value
-		emit("mov %%rbx, (%%rax)")
-		emit("mov %%rcx, 8(%%rax)")
-		emit("mov %%rdx, 16(%%rax)")
+		emit("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit("pop %%rcx") // rhs value
-		// save value
-		emit("mov %%rcx, (%%rax)") // save value address to the malloced area
-
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
 }
 
@@ -320,22 +317,24 @@ func (f *StmtFor) emitRangeForMap() {
 		},
 	}
 	condition.emit()
-	emit("test %%rax, %%rax")
+	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
 
 	// set key and value
 	mapCounter.emit()
-	emit("imul $16, %%rax")
-	emit("push %%rax")
+	emit("IMUL_NUMBER 16")
+	emit("PUSH_8 # x")
 	f.rng.rangeexpr.emit() // emit address of map data head
+	emit("PUSH_8 # y")
+
 	mapType := f.rng.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 
-	emit("pop %%rcx")
-	emit("add %%rax, %%rcx")
-	emit("mov (%%rcx), %%rax")
+	emit("SUM_FROM_STACK # x + y")
+	emit("LOAD_8_BY_DEREF")
+
 	if !mapKeyType.isString() {
-		emit("mov (%%rax), %%rax")
+		emit("LOAD_8_BY_DEREF")
 	}
 	f.rng.indexvar.emitSave()
 
@@ -343,29 +342,26 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
 		f.rng.rangeexpr.emit()
-		emit("mov %%rax, %%rcx # ptr")
+		emit("PUSH_8")
 
 		emit("## mapCounter.emit()")
 		mapCounter.emit()
-
-		//assert(f.rng.valuevar.getGtype().getSize() <= 8, f.rng.token(), "invalid size")
 		emit("## eval value")
-		emit("imul $16, %%rax  # counter * 16")
-		emit("add $8, %%rax    # counter * 16 + 8")
-		emit("add %%rax, %%rcx # mapHead + (counter * 16 + 8)")
-		emit("mov (%%rcx), %%rdx")
+		emit("IMUL_NUMBER 16  # counter * 16")
+		emit("ADD_NUMBER 8 # counter * 16 + 8")
+		emit("PUSH_8")
+
+		emit("SUM_FROM_STACK")
+
+		emit("LOAD_8_BY_DEREF")
 
 		switch f.rng.valuevar.getGtype().getKind() {
 		case G_SLICE, G_MAP:
-			emit("mov (%%rdx), %%rax")
-			emit("mov 8(%%rdx), %%rbx")
-			emit("mov 16(%%rdx), %%rcx")
-			emit("push %%rax")
-			emit("push %%rbx")
-			emit("push %%rcx")
-			emitSave3Elements(f.rng.valuevar, 0)
+			emit("LOAD_24_BY_DEREF")
+			emit("PUSH_24")
+			emitSave24(f.rng.valuevar, 0)
 		default:
-			emit("mov (%%rdx), %%rax")
+			emit("LOAD_8_BY_DEREF")
 			f.rng.valuevar.emitSave()
 		}
 
@@ -385,10 +381,11 @@ func (f *StmtFor) emitRangeForMap() {
 }
 
 // push addr, len, cap
-func (lit *ExprMapLiteral) emitPush() {
+func (lit *ExprMapLiteral) emit() {
 	length := len(lit.elements)
 
 	// allocaated address of the map head
+	// @FIXME 1024 is a tentative number
 	var size int
 	if length == 0 {
 		size = ptrSize * 1024
@@ -396,7 +393,7 @@ func (lit *ExprMapLiteral) emitPush() {
 		size = length * ptrSize * 1024
 	}
 	emitCallMalloc(size)
-	emit("push %%rax") // map head
+	emit("PUSH_8") // map head
 
 	mapType := lit.getGtype()
 	mapKeyType := mapType.mapKey
@@ -407,11 +404,12 @@ func (lit *ExprMapLiteral) emitPush() {
 			element.key.emit()
 		} else {
 			element.key.emit()
-			emit("push %%rax") // value of key
+			emit("PUSH_8") // value of key
 			// call malloc for key
 			emitCallMalloc(8)
-			emit("pop %%rcx")          // value of key
-			emit("mov %%rcx, (%%rax)") // save key to heap
+			emit("PUSH_8")
+
+			emit("STORE_8_INDIRECT_FROM_STACK") // save key to heap
 		}
 
 		emit("pop %%rbx")                     // map head
@@ -420,23 +418,19 @@ func (lit *ExprMapLiteral) emitPush() {
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
-			emit("push %%rax") // value of value
-			// call malloc
+			emit("PUSH_8") // value of value
 			emitCallMalloc(8)
-			emit("pop %%rcx")          // value of value
-			emit("mov %%rcx, (%%rax)") // save value to heap
+			emit("PUSH_8")
+			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
 		} else {
 			switch element.value.getGtype().getKind() {
 			case G_MAP, G_SLICE, G_INTERFACE:
 				// rax,rbx,rcx
 				element.value.emit()
-				emit("push %%rax") // ptr
+				emit("PUSH_24") // ptr
 				emitCallMalloc(8 * 3)
-				emit("pop %%rdx") // ptr
-				emit("mov %%rdx, (%%rax)")
-				emit("mov %%rbx, %d(%%rax)", 8*1)
-				emit("mov %%rcx, %d(%%rax)", 8*2)
-
+				emit("PUSH_8")
+				emit("STORE_24_INDIRECT_FROM_STACK")
 			default:
 				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
 			}
@@ -447,8 +441,7 @@ func (lit *ExprMapLiteral) emitPush() {
 		emit("push %%rbx")
 	}
 
-	emit("pop %%rax")
-	emit("push %%rax")       // address (head of the heap)
-	emit("push $%d", length) // len
-	emit("push $%d", length) // cap
+	emit("pop %%rax") // address (head of the heap)
+	emit("mov $%d, %%rbx", length) // len
+	emit("mov $%d, %%rcx", length) // cap
 }
