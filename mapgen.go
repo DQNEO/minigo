@@ -169,15 +169,15 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	}
 
 	emit("TEST_IT")
-	emit("pop %%rcx") // index address
+	emit("pop %%rax") // index address
 	emit("je %s  # Not match. go to next iteration", labelIncr)
 
 	emit("# Value found!")
-	emit("mov 8(%%rcx), %%rax # set the found value address")
-	emit("mov %%rcx, %%r12 # stash key address")
+	emit("push %%rax # stash key address")
+	emit("ADD_NUMBER 8 # value address")
+	emit("mov (%%rax), %%rax # set the found value address")
 	if deref {
 		if mapValueType.is24Width() {
-			emit("mov %%rax, %%r13 # stash")
 			emit("LOAD_24_BY_DEREF")
 		} else {
 			emit("LOAD_8_BY_DEREF")
@@ -185,7 +185,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	}
 
 	emit("mov $1, %%%s # ok = true", okRegister)
-
+	emit("pop %%r12 # key address. will be in map set")
 	emit("jmp %s # exit loop", labelEnd)
 
 	emit("%s: # incr", labelIncr)
