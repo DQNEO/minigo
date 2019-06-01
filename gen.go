@@ -1122,6 +1122,7 @@ func (stmt *StmtSwitch) emit() {
 			for _, gtype := range caseClause.gtypes {
 				emit("pop %%r10  # the subject value")
 				emit("push %%r10 # the subject value")
+				emit("push %%r10 # the subject value")
 				if gtype.isNil() {
 					emit("mov $0, %%rax # nil")
 				} else {
@@ -1129,7 +1130,6 @@ func (stmt *StmtSwitch) emit() {
 					emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
 				}
 				emit("PUSH_8")
-				emit("push %%r10 # the subject value")
 				emitStringsEqualFromStack(true)
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
