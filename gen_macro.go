@@ -246,7 +246,7 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	macroStart("STORE_24_INDIRECT_FROM_STACK", "")
-	emit("pop %%rax")
+	emit("pop %%rax # target addr")
 	emit("pop %%rcx # load RHS value(c)")
 	emit("mov %%rcx, 16(%%rax)")
 	emit("pop %%rcx # load RHS value(b)")

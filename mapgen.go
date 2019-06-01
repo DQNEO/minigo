@@ -421,14 +421,10 @@ func (lit *ExprMapLiteral) emit() {
 			case G_MAP, G_SLICE, G_INTERFACE:
 				// rax,rbx,rcx
 				element.value.emit()
-				emit("push %%rax") // ptr
+				emit("PUSH_24") // ptr
 				emitCallMalloc(8 * 3)
-
-				emit("pop %%rdx") // ptr
-				emit("mov %%rdx, %d(%%rax)", 0)
-				emit("mov %%rbx, %d(%%rax)", 8)
-				emit("mov %%rcx, %d(%%rax)", 16)
-
+				emit("PUSH_PRIMITIVE")
+				emit("STORE_24_INDIRECT_FROM_STACK")
 			default:
 				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
 			}
