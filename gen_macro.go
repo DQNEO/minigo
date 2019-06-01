@@ -22,7 +22,7 @@ func emitMacroDefinitions() {
 		macroEnd()
 	}
 
-	macroStart("PUSH_PRIMITIVE", "")
+	macroStart("PUSH_8", "")
 	emit("push %%rax # primitive")
 	macroEnd()
 

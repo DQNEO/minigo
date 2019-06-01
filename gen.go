@@ -398,12 +398,12 @@ func emit_comp_primitive(inst string, binop *ExprBinop) {
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
-	emit("PUSH_PRIMITIVE # left") // left
+	emit("PUSH_8 # left") // left
 	binop.right.emit()
 	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
 	}
-	emit("PUSH_PRIMITIVE # right") // right
+	emit("PUSH_8 # right") // right
 	emit("CMP_FROM_STACK %s", inst)
 }
 
@@ -436,9 +436,9 @@ func emitIncrDecl(inst string, operand Expr) {
 func (uop *ExprUop) emitSave() {
 	emit("# *ExprUop.emitSave()")
 	assert(uop.op == "*", uop.tok, "uop op should be *")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	uop.operand.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("STORE_8_INDIRECT_FROM_STACK")
 }
 
@@ -454,10 +454,10 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emit("STORE_8_INDIRECT_FROM_STACK")
 		return
 	}
@@ -495,9 +495,9 @@ func (ast *ExprUop) emit() {
 			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize())
-			emit("PUSH_PRIMITIVE")                     // to:ptr addr
+			emit("PUSH_8")                     // to:ptr addr
 			e.invisiblevar.emitAddress(0)
-			emit("PUSH_PRIMITIVE") // from:address of invisible var
+			emit("PUSH_8") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype().getSize())
 			// emit address
 		case *ExprStructField:
@@ -568,17 +568,17 @@ func (binop *ExprBinop) emitCompareStrings() {
 	emit("%s:", labelElse)
 	binop.left.emit()
 	emit("%s:", labelEnd)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	binop.right.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emitStringsEqualFromStack(equal)
 }
 
 func emitConvertNilToEmptyString() {
 	emit("# emitConvertNilToEmptyString")
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("# convert nil to an empty string")
 	emit("TEST_IT")
 	emit("pop %%rax")
@@ -599,7 +599,7 @@ func emitStringsEqualFromStack(equal bool) {
 	emit("push %%rcx")
 	emitConvertNilToEmptyString()
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
 	emit("FUNCALL strcmp")
@@ -641,7 +641,7 @@ func emitStringConcate(left Expr, right Expr) {
 	left.emit()
 	emit("push %%rax # left string")
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call strlen # get left len")
@@ -649,7 +649,7 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("push %%rax # left len")
 	right.emit()
 	emit("push %%rax # right string")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call strlen # get right len")
@@ -667,18 +667,18 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("add %%rax, %%rbx # len + len")
 	emit("add $1, %%rbx # + 1 (null byte)")
 	emit("mov %%rbx, %%rax")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
 	emit("mov $0, %%rax")
 	emit("call strcat")
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
 	emit("mov $0, %%rax")
@@ -722,7 +722,7 @@ func (ast *ExprBinop) emit() {
 		return
 	}
 	ast.left.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	ast.right.emit()
 	emit("mov %%rax, %%rcx")
 	emit("pop %%rax")
@@ -966,9 +966,9 @@ func (e *ExprIndex) emitSave24() {
 	default:
 		TBI(e.token(), "unable to handle %s", collectionType)
 	}
-	emit("PUSH_PRIMITIVE # head address of collection")
+	emit("PUSH_8 # head address of collection")
 	e.index.emit()
-	emit("PUSH_PRIMITIVE # index")
+	emit("PUSH_8 # index")
 	var elmType *Gtype
 	if collectionType.isString() {
 		elmType = gByte
@@ -978,11 +978,11 @@ func (e *ExprIndex) emitSave24() {
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 	emit("LOAD_NUMBER %d # elementSize", size)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("IMUL_FROM_STACK # index * elementSize")
-	emit("PUSH_PRIMITIVE # index * elementSize")
+	emit("PUSH_8 # index * elementSize")
 	emit("SUM_FROM_STACK # (index * size) + address")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("STORE_24_INDIRECT_FROM_STACK")
 }
 
@@ -992,7 +992,7 @@ func (e *ExprIndex) emitSave() {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
 		emitCollectIndexSave(e.collection, e.index, 0)
 	case collectionType.getKind() == G_MAP:
-		emit("PUSH_PRIMITIVE") // push RHS value
+		emit("PUSH_8") // push RHS value
 		e.emitMapSet(false)
 		return
 	default:
@@ -1003,11 +1003,11 @@ func (e *ExprIndex) emitSave() {
 func (e *ExprStructField) emitSave() {
 	fieldType := e.getGtype()
 	if e.strct.getGtype().kind == G_POINTER {
-		emit("PUSH_PRIMITIVE # rhs")
+		emit("PUSH_8 # rhs")
 
 		e.strct.emit()
 		emit("ADD_NUMBER %d", fieldType.offset)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 
 		emit("STORE_8_INDIRECT_FROM_STACK")
 	} else {
@@ -1102,7 +1102,7 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		emit("# the subject expression")
 		stmt.cond.emit()
-		emit("PUSH_PRIMITIVE # the subject value")
+		emit("PUSH_8 # the subject value")
 		emit("#")
 	} else {
 		// switch {
@@ -1155,7 +1155,7 @@ func (stmt *StmtSwitch) emit() {
 					emitStringsEqualFromStack(true)
 					emit("pop %%rcx")
 				} else {
-					emit("PUSH_PRIMITIVE")
+					emit("PUSH_8")
 					emit("CMP_FROM_STACK sete")
 				}
 				emit("TEST_IT")
@@ -1478,18 +1478,18 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	switch rhs.(type) {
 	case *Relation:
 		emitAddress(lhs)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emitAddress(rhs)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
 		if re.op == "*" {
 			// copy struct
 			emitAddress(lhs)
-			emit("PUSH_PRIMITIVE")
+			emit("PUSH_8")
 			re.operand.emit()
-			emit("PUSH_PRIMITIVE")
+			emit("PUSH_8")
 			emitCopyStructFromStack(lhs.getGtype().getSize())
 		} else {
 			TBI(rhs.token(), "")
@@ -1659,7 +1659,7 @@ func emitSave24(lhs Expr, offset int) {
 
 func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
@@ -1712,23 +1712,23 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emitCallMalloc(8)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("STORE_8_INDIRECT_FROM_STACK")
-	emit("PUSH_PRIMITIVE # addr of dynamicValue") // address
+	emit("PUSH_8 # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
 	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
 	emit("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
-	emit("PUSH_PRIMITIVE # receiverTypeId")
+	emit("PUSH_8 # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
 	label := groot.getTypeLabel(gtype)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("PUSH_PRIMITIVE # dynamicType")
+	emit("PUSH_8 # dynamicType")
 
 	emit("POP_INTERFACE")
 	emitNewline()
@@ -1813,13 +1813,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
 		stringVariable.emit()
-		emit("PUSH_PRIMITIVE # ptr")
+		emit("PUSH_8 # ptr")
 		strlen := &ExprLen{
 			arg: stringVariable,
 		}
 		strlen.emit()
-		emit("PUSH_PRIMITIVE # len")
-		emit("PUSH_PRIMITIVE # cap")
+		emit("PUSH_8 # len")
+		emit("PUSH_8 # cap")
 
 	default:
 		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
@@ -2012,18 +2012,18 @@ func emitCollectIndexSave(collection Expr, index Expr, offset int) {
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 
-	emit("PUSH_PRIMITIVE # rhs")
+	emit("PUSH_8 # rhs")
 
 	collection.emit()
-	emit("PUSH_PRIMITIVE # addr")
+	emit("PUSH_8 # addr")
 
 	index.emit()
 	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + addr")
 	emit("ADD_NUMBER %d # offset", offset)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	if elmSize == 1 {
 		emit("STORE_1_INDIRECT_FROM_STACK")
@@ -2039,11 +2039,11 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	assert(elmSize > 0, nil, "elmSize > 0")
 
 	collection.emit()
-	emit("PUSH_PRIMITIVE # head")
+	emit("PUSH_8 # head")
 
 	index.emit()
 	emit("IMUL_NUMBER %d", elmSize)
-	emit("PUSH_PRIMITIVE # index * elmSize")
+	emit("PUSH_8 # index * elmSize")
 
 	emit("SUM_FROM_STACK # (index * elmSize) + head")
 	emit("ADD_NUMBER %d", offset)
@@ -2078,9 +2078,9 @@ func loadCollectIndex(collection Expr, index Expr, offset int) {
 		// a[x] may not be assigned to
 		emit("# load head address of the string")
 		collection.emit()  // emit address
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		index.emit()
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emit("SUM_FROM_STACK")
 		emit("ADD_NUMBER %d", offset)
 		emit("LOAD_8_BY_DEREF")
@@ -2146,17 +2146,17 @@ func (e *ExprSlice) emitSubString() {
 
 	// src address + low
 	e.collection.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	e.low.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("SUM_FROM_STACK")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	emitCallMallocDinamicSize(eMemSize)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	eNewStrlen.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	emit("POP_TO_ARG_2")
 	emit("POP_TO_ARG_1")
@@ -2181,15 +2181,15 @@ func (e *ExprSlice) emitSlice() {
 	emit("# assign to a slice")
 	emit("#   emit address of the array")
 	e.collection.emit()
-	emit("PUSH_PRIMITIVE # head of the array")
+	emit("PUSH_8 # head of the array")
 	e.low.emit()
-	emit("PUSH_PRIMITIVE # low index")
+	emit("PUSH_8 # low index")
 	emit("LOAD_NUMBER %d", size)
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("IMUL_FROM_STACK")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("SUM_FROM_STACK")
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	emit("#   calc and set len")
 
@@ -2204,7 +2204,7 @@ func (e *ExprSlice) emitSlice() {
 		right: e.low,
 	}
 	calcLen.emit()
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 
 	emit("#   calc and set cap")
 	var max Expr
@@ -2224,7 +2224,7 @@ func (e *ExprSlice) emitSlice() {
 
 	calcCap.emit()
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_SLICE")
 }
 
@@ -2243,7 +2243,7 @@ func (e *ExprTypeAssertion) emit() {
 
 		e.expr.emit() // emit interface
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		// @TODO DRY with type switch statement
 		typeLabel := groot.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
@@ -2509,7 +2509,7 @@ func (e *ExprLen) emit() {
 		}
 	case gtype.getKind() == G_STRING:
 		arg.emit()
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emit("POP_TO_ARG_0")
 		emit("FUNCALL strlen")
 	default:
@@ -2639,7 +2639,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		arg := funcall.args[0]
 
 		emit("lea .%s, %%rax", builtinStringKey2)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 
 		arg.emit()
 		emit("PUSH_SLICE")
@@ -2655,7 +2655,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		arg := funcall.args[0]
 
 		emit("lea .%s, %%rax", builtinStringKey1)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 
 		arg.emit()
 		emit("PUSH_INTERFACE")
@@ -2691,7 +2691,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		emit(".string \"%s\"", "assertInterface failed")
 		emit(".text")
 		emit("lea %s, %%rax", slabel)
-		emit("PUSH_PRIMITIVE")
+		emit("PUSH_8")
 		emit("POP_TO_ARG_0")
 		emit("mov $0, %%rax")
 		emit("call %s", ".panic")
@@ -2814,7 +2814,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			emit("PUSH_MAP")
 			width = mapWidth
 		} else {
-			emit("PUSH_PRIMITIVE")
+			emit("PUSH_8")
 			width = 1
 		}
 		numRegs += width
@@ -2939,7 +2939,7 @@ func emitMakeSliceFunc() {
 	emit("imul %%rcx, %%rax")
 	emit("ADD_NUMBER 16 # pure buffer")
 
-	emit("PUSH_PRIMITIVE")
+	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("mov $0, %%rax")
 	emit("call iruntime.malloc")
