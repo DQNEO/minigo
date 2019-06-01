@@ -413,10 +413,9 @@ func (lit *ExprMapLiteral) emit() {
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
 			emit("push %%rax") // value of value
-			// call malloc
 			emitCallMalloc(8)
-			emit("pop %%rcx")          // value of value
-			emit("mov %%rcx, (%%rax)") // save value to heap
+			emit("PUSH_PRIMITIVE")
+			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
 		} else {
 			switch element.value.getGtype().getKind() {
 			case G_MAP, G_SLICE, G_INTERFACE:
@@ -424,6 +423,7 @@ func (lit *ExprMapLiteral) emit() {
 				element.value.emit()
 				emit("push %%rax") // ptr
 				emitCallMalloc(8 * 3)
+
 				emit("pop %%rdx") // ptr
 				emit("mov %%rdx, %d(%%rax)", 0)
 				emit("mov %%rbx, %d(%%rax)", 8)
