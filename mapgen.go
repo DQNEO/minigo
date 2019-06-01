@@ -138,11 +138,11 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("SUM_FROM_STACK")   // head + i * 16
 
 	emit("PUSH_PRIMITIVE") // index address
-	emit("mov (%%rax), %%rax") // emit index address
+	emit("LOAD_8_BY_DEREF") // emit index address
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 	if !mapKeyType.isString() {
-		emit("mov (%%rax), %%rax") // dereference
+		emit("LOAD_8_BY_DEREF") // dereference
 	}
 	if mapKeyType.isString() {
 		emit("push %%r13")
@@ -177,7 +177,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 			emit("mov 8(%%r13), %%rbx # deref 2nd")
 			emit("mov 16(%%r13), %%rcx # deref 3rd")
 		} else {
-			emit("mov (%%rax), %%rax # dereference")
+			emit("LOAD_8_BY_DEREF")
 		}
 	}
 
