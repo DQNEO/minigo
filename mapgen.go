@@ -115,9 +115,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	labelIncr := makeLabel()
 
-	emit("cmp %%r11, %%r13") // right, left
-	emit("setl %%al # eval(r13(i) < r11(len))")
-	emit("movzb %%al, %%eax")
+	emit("push %%r13")
+	emit("push %%r11")
+	emit("CMP_FROM_STACK setl")
 	emit("TEST_IT")
 	if is24Width {
 		emit("LOAD_EMPTY_SLICE # NOT FOUND")
