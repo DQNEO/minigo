@@ -1117,13 +1117,20 @@ func (stmt *StmtSwitch) emit() {
 		emit("# case %d", i)
 		myCaseLabel := makeLabel()
 		labels = append(labels, myCaseLabel)
-		if stmt.isTypeSwitch {
+		if stmt.cond == nil {
+			for _, e := range caseClause.exprs {
+				e.emit()
+				emit("TEST_IT")
+				emit("jne %s # jump if matches", myCaseLabel)
+			}
+		} else if stmt.isTypeSwitch {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
 				emit("# Duplicate the subject value in stack")
 				emit("POP_8")
 				emit("PUSH_8")
 				emit("PUSH_8")
+
 				if gtype.isNil() {
 					emit("mov $0, %%rax # nil")
 				} else {
@@ -1132,12 +1139,7 @@ func (stmt *StmtSwitch) emit() {
 				}
 				emit("PUSH_8")
 				emitStringsEqualFromStack(true)
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
-			}
-		} else if stmt.cond == nil {
-			for _, e := range caseClause.exprs {
-				e.emit()
+
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
@@ -1147,6 +1149,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("POP_8")
 				emit("PUSH_8")
 				emit("PUSH_8")
+
 				e.emit()
 				emit("PUSH_8")
 				if e.getGtype().isString() {
@@ -1154,6 +1157,7 @@ func (stmt *StmtSwitch) emit() {
 				} else {
 					emit("CMP_FROM_STACK sete")
 				}
+
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
