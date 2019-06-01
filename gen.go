@@ -639,19 +639,19 @@ func (binop *ExprBinop) emitComp() {
 func emitStringConcate(left Expr, right Expr) {
 	emit("# emitStringConcate")
 	left.emit()
-	emit("push %%rax # left string")
+	emit("PUSH_8 # left string")
 
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL strlen # get left len")
 
-	emit("push %%rax # left len")
+	emit("PUSH_8 # left len")
 	right.emit()
-	emit("push %%rax # right string")
+	emit("PUSH_8 # right string")
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL strlen # get right len")
-	emit("push %%rax # right len")
+	emit("PUSH_8 # right len")
 
 	emit("pop %%rax # right len")
 	emit("pop %%rcx # right string")
@@ -1028,7 +1028,7 @@ func (e *ExprSliceLiteral) emit() {
 	length := len(e.values)
 	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
 	emitCallMalloc(e.gtype.getSize() * length)
-	emit("push %%rax # ptr")
+	emit("PUSH_8 # ptr")
 	for i, value := range e.values {
 		if e.gtype.elementType.getKind() == G_INTERFACE && value.getGtype().getKind() != G_INTERFACE {
 			emitConversionToInterface(value)
@@ -1126,7 +1126,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("push %%rcx # the subject value")
 
 				emit("push %%rcx")
-				emit("push %%rax")
+				emit("PUSH_8")
 				emitStringsEqualFromStack(true)
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
@@ -1146,7 +1146,7 @@ func (stmt *StmtSwitch) emit() {
 					emit("push %%rcx")
 
 					emit("push %%rcx")
-					emit("push %%rax")
+					emit("PUSH_8")
 					emitStringsEqualFromStack(true)
 					emit("pop %%rcx")
 				} else {
@@ -2243,7 +2243,7 @@ func (e *ExprTypeAssertion) emit() {
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
 
 		emit("push %%rcx") // @TODO ????
-		emit("push %%rax")
+		emit("PUSH_8")
 		emitStringsEqualFromStack(true)
 
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases

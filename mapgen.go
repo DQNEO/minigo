@@ -149,7 +149,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("push %%r11")
 		emit("push %%r10")
 
-		emit("push %%rax")
+		emit("PUSH_8")
 		emit("push %%r12")
 		emitStringsEqualFromStack(true)
 
@@ -242,7 +242,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		emit("pop %%rcx")          // index value
 		emit("pop %%rax")          // map tail address
 		emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
-		emit("push %%rax")         // push map tail
+		emit("PUSH_8")         // push map tail
 	} else {
 		// malloc(8)
 		emitCallMalloc(8)
@@ -388,7 +388,7 @@ func (lit *ExprMapLiteral) emit() {
 		size = length * ptrSize * 1024
 	}
 	emitCallMalloc(size)
-	emit("push %%rax") // map head
+	emit("PUSH_8") // map head
 
 	mapType := lit.getGtype()
 	mapKeyType := mapType.mapKey
@@ -413,7 +413,7 @@ func (lit *ExprMapLiteral) emit() {
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
-			emit("push %%rax") // value of value
+			emit("PUSH_8") // value of value
 			emitCallMalloc(8)
 			emit("PUSH_8")
 			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
