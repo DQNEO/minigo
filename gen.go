@@ -719,19 +719,23 @@ func (ast *ExprBinop) emit() {
 	ast.left.emit()
 	emit("PUSH_8")
 	ast.right.emit()
-	emit("mov %%rax, %%rcx")
-	emit("pop %%rax")
+	emit("PUSH_8")
+
 	if ast.op == "+" {
-		emit("add	%%rcx, %%rax")
+		emit("SUM_FROM_STACK")
 	} else if ast.op == "-" {
-		emit("sub	%%rcx, %%rax")
+		emit("SUB_FROM_STACK")
 	} else if ast.op == "*" {
-		emit("imul	%%rcx, %%rax")
+		emit("IMUL_FROM_STACK")
 	} else if ast.op == "%" {
+		emit("pop %%rcx")
+		emit("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 		emit("mov %%rdx, %%rax")
 	} else if ast.op == "/" {
+		emit("pop %%rcx")
+		emit("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 	} else {

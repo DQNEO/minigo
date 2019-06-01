@@ -223,6 +223,12 @@ func emitMacroDefinitions() {
 	emit("add %%rcx , %%rax")
 	macroEnd()
 
+	macroStart("SUB_FROM_STACK", "")
+	emit("pop %%rcx")
+	emit("pop %%rax")
+	emit("sub %%rcx , %%rax")
+	macroEnd()
+
 	macroStart("IMUL_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")
