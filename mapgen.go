@@ -130,7 +130,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	okRegister := mapOkRegister(is24Width)
 	emit("mov $0, %%%s # ok = false", okRegister)
 
-	emit("je %s  # NOT FOUND. exit loop if test makes zero", labelEnd)
+	emit("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
 
 	emit("# check if key matches")
 	emit("mov %%r13, %%rax")   // i
