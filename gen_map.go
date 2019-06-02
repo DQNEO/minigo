@@ -45,24 +45,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("PUSH_8 # funcref")
 
-	otherArgs := args[1:]
-	for i, arg := range otherArgs {
-		if _, ok := arg.(*ExprVaArg); ok {
-			// skip VaArg for now
-			emit("mov $0, %%rax")
-		} else {
-			arg.emit()
-		}
-		emit("PUSH_8 # argument no %d", i+2)
-	}
-
-	for i, _ := range args {
-		j := len(args) - 1 - i
-		emit("POP_TO_ARG_%d", j)
-	}
-
-	emit("POP_8 # funcref")
-	emit("call *%%rax")
+	emitMethodCall(args)
 }
 
 // emit map index expr
