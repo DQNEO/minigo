@@ -79,6 +79,17 @@ func (a *ExprStructField) emit() {
 	}
 }
 
+
+func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
+	rel, ok := e.strct.(*Relation)
+	assert(ok, e.tok, "should be *Relation")
+	vr, ok := rel.expr.(*ExprVariable)
+	assert(ok, e.tok, "should be *ExprVariable")
+	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
+	field := vr.gtype.relation.gtype.getField(e.fieldname)
+	vr.emitOffsetLoad(size, field.offset+offset)
+}
+
 func (ast *ExprVariable) emit() {
 	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
