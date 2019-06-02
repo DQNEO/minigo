@@ -14,10 +14,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 	switch strct.(type) {
 	case *Relation:
 		rel := strct.(*Relation)
-		assertNotNil(rel.expr != nil, nil)
-		variable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "rel is a variable")
-		loadStructField(variable, field, offset)
+		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
 		if field.kind == G_ARRAY {
