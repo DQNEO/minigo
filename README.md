@@ -5,15 +5,14 @@
 A Go compiler from scratch.
 
 # Description
-`minigo` is a small Go compiler made from scratch.
-It can compile itself.
+
+`minigo` is a small Go compiler made from scratch. It can compile itself.
 
 * No dependency on yacc/lex
 * No dependency on external libraries
 * Standard libraries are also made from scratch.
 
-It depends only on gcc as an assenmbler and linker, and on libc as a runtime.
-
+It depends only on gcc as an assembler and linker, and on libc as a runtime.
 
 `minigo` supports x86-64 Linux only.
  
@@ -33,16 +32,15 @@ There are several steps in the compilation proccess.
 
 # How to run
 
-You need Linux.
-So I would recommend you to use Docker.
+You need Linux, so I would recommend that you use Docker.
 
-```
+```sh
 $ docker run --rm -it -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 ```
 
 After entering the container, you can build and run it.
 
-```
+```sh
 # make
 # ./minigo t/hello/hello.go > a.s
 # gcc -g -no-pie a.s
@@ -50,9 +48,9 @@ After entering the container, you can build and run it.
 hello world
 ```
 
-# How to do "self compile"
+# How to "self compile"
 
-```
+```sh
 # make
 # ./minigo --version
 minigo 0.1.0
@@ -73,17 +71,18 @@ Copyright (C) 2019 @DQNEO
 
 You will see that the contents of 2nd generation compiler and 3rd generation compiler are identical.
 
-```
+```sh
 # diff /tmp/minigo2.s /tmp/minigo3.s
 ```
 
 # Test
 
-```
+```sh
 # make test
 ```
 
 # AUTHOR
+
 [@DQNEO](https://twitter.com/DQNEO)
 
 # LICENSE
