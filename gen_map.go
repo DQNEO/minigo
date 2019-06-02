@@ -43,7 +43,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("LOAD_8_BY_DEREF")
 
-	emit("PUSH_8 # receiver")
+	emit("PUSH_8 # funcref")
 
 	otherArgs := args[1:]
 	for i, arg := range otherArgs {
@@ -61,7 +61,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 		emit("POP_TO_ARG_%d", j)
 	}
 
-	emit("pop %%rax")
+	emit("POP_8 # funcref")
 	emit("call *%%rax")
 }
 
