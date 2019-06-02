@@ -41,30 +41,30 @@ $ docker run --rm -it -w /mnt -v `pwd`:/mnt dqneo/ubuntu-build-essential:go bash
 After entering the container, you can build and run it.
 
 ```sh
-# make
-# ./minigo t/hello/hello.go > a.s
-# gcc -g -no-pie a.s
-# ./a.out
+$ make
+$ ./minigo t/hello/hello.go > a.s
+$ gcc -g -no-pie a.s
+$ ./a.out
 hello world
 ```
 
 # How to "self compile"
 
 ```sh
-# make
-# ./minigo --version
+$ make
+$ ./minigo --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 
-# ./minigo *.go > /tmp/minigo2.s
-# gcc -no-pie -o minigo2 /tmp/minigo2.s
-# ./minigo2 --version
+$ ./minigo *.go > /tmp/minigo2.s
+$ gcc -no-pie -o minigo2 /tmp/minigo2.s
+$ ./minigo2 --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 
-# ./minigo2 *.go > /tmp/minigo3.s
-# gcc -no-pie -o minigo3 /tmp/minigo3.s
-# ./minigo3 --version
+$ ./minigo2 *.go > /tmp/minigo3.s
+$ gcc -no-pie -o minigo3 /tmp/minigo3.s
+$ ./minigo3 --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 ```
@@ -72,13 +72,13 @@ Copyright (C) 2019 @DQNEO
 You will see that the contents of 2nd generation compiler and 3rd generation compiler are identical.
 
 ```sh
-# diff /tmp/minigo2.s /tmp/minigo3.s
+$ diff /tmp/minigo2.s /tmp/minigo3.s
 ```
 
 # Test
 
 ```sh
-# make test
+$ make test
 ```
 
 # AUTHOR
