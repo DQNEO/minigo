@@ -319,7 +319,7 @@ func (f *StmtFor) emitRangeForMap() {
 	if !mapKeyType.isString() {
 		emit("LOAD_8_BY_DEREF")
 	}
-	f.rng.indexvar.emitSavePrimitive()
+	emitSavePrimitive(f.rng.indexvar)
 
 	if f.rng.valuevar != nil {
 		emit("# Setting valuevar")
@@ -345,7 +345,7 @@ func (f *StmtFor) emitRangeForMap() {
 			emitSave24(f.rng.valuevar, 0)
 		default:
 			emit("LOAD_8_BY_DEREF")
-			f.rng.valuevar.emitSavePrimitive()
+			emitSavePrimitive(f.rng.valuevar)
 		}
 
 	}

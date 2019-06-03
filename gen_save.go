@@ -2,6 +2,37 @@ package main
 
 import "fmt"
 
+func emitAssignPrimitive(left Expr, right Expr) {
+	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
+	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
+	right.emit()            //   expr => %rax
+	emitSavePrimitive(left) //   %rax => memory
+}
+
+// Each left-hand side operand must be addressable,
+// a map index expression,
+// or (for = assignments only) the blank identifier.
+func emitSavePrimitive(left Expr) {
+	switch left.(type) {
+	case *Relation:
+		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
+		rel := left.(*Relation)
+		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
+		variable := rel.expr.(*ExprVariable)
+		variable.emitOffsetSavePrimitive(variable.getGtype().getSize(), 0, false)
+	case *ExprIndex:
+		left.(*ExprIndex).emitSavePrimitive()
+	case *ExprStructField:
+		left.(*ExprStructField).emitSavePrimitive()
+	case *ExprUop:
+		left.(*ExprUop).emitSavePrimitive()
+	default:
+		left.dump()
+		errorft(left.token(), "Unknown case %T", left)
+	}
+}
+
+
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
 	emit("# *ExprUop.emitSavePrimitive()")
@@ -10,13 +41,6 @@ func (uop *ExprUop) emitSavePrimitive() {
 	uop.operand.emit()
 	emit("PUSH_8 # where")
 	emit("STORE_8_INDIRECT_FROM_STACK")
-}
-
-// e.g. x = 1
-func (rel *Relation) emitSavePrimitive() {
-	assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-	variable := rel.expr.(*ExprVariable)
-	variable.emitOffsetSavePrimitive(variable.getGtype().getSize(), 0, false)
 }
 
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
@@ -38,33 +62,6 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 	}
 }
 
-
-func emitAssignPrimitive(left Expr, right Expr) {
-	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
-	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
-	right.emit()            //   expr => %rax
-	emitSavePrimitive(left) //   %rax => memory
-}
-
-// Each left-hand side operand must be addressable,
-// a map index expression,
-// or (for = assignments only) the blank identifier.
-func emitSavePrimitive(left Expr) {
-	switch left.(type) {
-	case *Relation:
-		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
-		left.(*Relation).emitSavePrimitive()
-	case *ExprIndex:
-		left.(*ExprIndex).emitSavePrimitive()
-	case *ExprStructField:
-		left.(*ExprStructField).emitSavePrimitive()
-	case *ExprUop:
-		left.(*ExprUop).emitSavePrimitive()
-	default:
-		left.dump()
-		errorft(left.token(), "Unknown case %T", left)
-	}
-}
 
 // save data from stack
 func (e *ExprIndex) emitSave24() {
