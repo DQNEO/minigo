@@ -58,7 +58,7 @@ func (a *ExprStructField) emitAddress() {
 func (a *ExprStructField) emit() {
 	emit("# LOAD ExprStructField")
 	a.calcOffset()
-	switch a.strct.getGtype().kind {
+	switch a.strct.getGtype().getKind() {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
@@ -71,7 +71,7 @@ func (a *ExprStructField) emit() {
 			emit("LOAD_8_BY_DEREF")
 		}
 
-	case G_NAMED: // struct
+	case G_STRUCT:
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
