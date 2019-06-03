@@ -419,7 +419,7 @@ func (ast *StmtSatementList) emit() {
 
 func (e *ExprIndex) emit() {
 	emit("# emit *ExprIndex")
-	loadCollectIndex(e.collection, e.index, 0)
+	e.emitOffsetLoad(0)
 }
 
 func (e *ExprNilLiteral) emit() {

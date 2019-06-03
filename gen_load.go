@@ -34,7 +34,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		loadStructField(a.strct, field2, offset+field.offset)
 	case *ExprIndex: // array[1].field
 		indexExpr := strct.(*ExprIndex)
-		loadCollectIndex(indexExpr.collection, indexExpr.index, offset+field.offset)
+		indexExpr.emitOffsetLoad(offset+field.offset)
 	default:
 		// funcall().field
 		// methodcall().field
@@ -315,7 +315,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	case *ExprIndex:
 		//  e.g. arrayLiteral.values[i].getGtype().getKind()
 		indexExpr := lhs.(*ExprIndex)
-		loadCollectIndex(indexExpr.collection, indexExpr.index, offset)
+		indexExpr.emitOffsetLoad(offset)
 	case *ExprMethodcall:
 		// @TODO this logic is temporarly. Need to be verified.
 		mcall := lhs.(*ExprMethodcall)
@@ -359,8 +359,10 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	}
 }
 
-func loadCollectIndex(collection Expr, index Expr, offset int) {
-	emit("# loadCollectIndex")
+func (e *ExprIndex) emitOffsetLoad(offset int) {
+	emit("# ExprIndex.emitOffsetLoad")
+	collection := e.collection
+	index := e.index
 	if collection.getGtype().kind == G_ARRAY || collection.getGtype().kind == G_SLICE {
 		loadArrayOrSliceIndex(collection, index, offset)
 		return
