@@ -40,7 +40,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	if origType == nil {
 		errorft(methodCall.token(), "origType should not be nil")
 	}
-	if origType.kind == G_INTERFACE {
+	if origType.getKind() == G_INTERFACE {
 		return origType.imethods[methodCall.fname].rettypes
 	} else {
 		funcref, ok := origType.methods[methodCall.fname]
@@ -70,7 +70,7 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 
 func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
-	if origType.kind == G_INTERFACE {
+	if origType.getKind() == G_INTERFACE {
 		methodCall.emitInterfaceMethodCall()
 		return
 	}
