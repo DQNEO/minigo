@@ -6,9 +6,9 @@ import "fmt"
 func (uop *ExprUop) emitSave() {
 	emit("# *ExprUop.emitSave()")
 	assert(uop.op == "*", uop.tok, "uop op should be *")
-	emit("PUSH_8")
+	emit("PUSH_8 # what")
 	uop.operand.emit()
-	emit("PUSH_8")
+	emit("PUSH_8 # where")
 	emit("STORE_8_INDIRECT_FROM_STACK")
 }
 
@@ -24,10 +24,10 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
-		emit("PUSH_8")
+		emit("PUSH_8 # what")
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)
-		emit("PUSH_8")
+		emit("PUSH_8 # where")
 		emit("STORE_8_INDIRECT_FROM_STACK")
 		return
 	}
