@@ -279,7 +279,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
 				switch {
-				case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+				case elementType.getKind() == G_STRUCT:
 					left := &ExprStructField{
 						strct:     lhs,
 						fieldname: fieldtype.fieldname,
