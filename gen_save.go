@@ -63,8 +63,8 @@ func (uop *ExprUop) emitSavePrimitive() {
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
 	emit("# ExprVariable.emitOffsetSavePrimitive(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
-	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
-		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
+	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
+		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), "")
 		emit("PUSH_8 # what")
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)

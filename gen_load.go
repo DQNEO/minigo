@@ -19,7 +19,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
-		if field.kind == G_ARRAY {
+		if field.getKind() == G_ARRAY {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
