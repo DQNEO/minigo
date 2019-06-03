@@ -18,7 +18,9 @@ func emitSavePrimitive(left Expr) {
 		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
 		rel := left.(*Relation)
 		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		variable := rel.expr.(*ExprVariable)
+		emitSavePrimitive(rel.expr)
+	case *ExprVariable:
+		variable := left.(*ExprVariable)
 		variable.emitOffsetSavePrimitive(variable.getGtype().getSize(), 0, false)
 	case *ExprIndex:
 		left.(*ExprIndex).emitSavePrimitive()
@@ -43,6 +45,7 @@ func (uop *ExprUop) emitSavePrimitive() {
 	emit("STORE_8_INDIRECT_FROM_STACK")
 }
 
+// x = 1
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
 	emit("# ExprVariable.emitOffsetSavePrimitive(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
