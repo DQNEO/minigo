@@ -1,5 +1,7 @@
 package main
 
+const MAX_METHODS_PER_TYPE int = 128
+
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
@@ -24,7 +26,9 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("mov (%%rax), %%rax") // address of receiverType
 	emit("PUSH_8 # map head")
 
-	emit("push $128 # len")
+	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
+	emit("PUSH_8 # len")
+
 	emit("lea .M%s, %%rax", call.methodName) // index value
 	emit("PUSH_8 # map index value")                 // index value
 	emitMapGet(mapType, false)
