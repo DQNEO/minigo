@@ -125,7 +125,7 @@ func emitMakeSliceFunc() {
 	emit("mov -16(%%rbp), %%rax # newcap")
 	emit("mov -8(%%rbp), %%rcx # unit")
 	emit("imul %%rcx, %%rax")
-	emit("ADD_NUMBER 16 # pure buffer")
+	emit("ADD_NUMBER 1 # 1 byte buffer")
 
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
