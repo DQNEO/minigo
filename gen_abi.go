@@ -288,7 +288,7 @@ func (stmt *StmtReturn) emit() {
 			}
 		} else {
 			expr.emit()
-			if expr.getGtype() == nil && stmt.rettypes[0].kind == G_SLICE {
+			if expr.getGtype() == nil && stmt.rettypes[0].getKind() == G_SLICE {
 				emit("LOAD_EMPTY_SLICE")
 			}
 		}
@@ -299,7 +299,7 @@ func (stmt *StmtReturn) emit() {
 		expr := stmt.exprs[i]
 		expr.emit()
 		//		rettype := stmt.rettypes[i]
-		if expr.getGtype() == nil && rettype.kind == G_SLICE {
+		if expr.getGtype() == nil && rettype.getKind() == G_SLICE {
 			emit("LOAD_EMPTY_SLICE")
 		}
 		size := rettype.getSize()

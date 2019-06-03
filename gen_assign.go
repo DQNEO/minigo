@@ -122,13 +122,14 @@ func (ast *StmtAssignment) emit() {
 						continue
 					}
 					assert(left.getGtype() != nil, left.token(), "should not be nil")
-					if left.getGtype().kind == G_SLICE {
+					switch left.getGtype().getKind() {
+					case G_SLICE:
 						// @TODO: Does this work ?
 						emitSave24(left, 0)
-					} else if left.getGtype().getKind() == G_INTERFACE {
+					case G_INTERFACE:
 						// @TODO: Does this work ?
 						emitSave24(left, 0)
-					} else {
+					default:
 						emit("pop %%rax")
 						emitSavePrimitive(left)
 					}
@@ -184,18 +185,18 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	assert(rhs == nil || (rhs.getGtype().kind == G_NAMED && rhs.getGtype().relation.gtype.kind == G_STRUCT),
+	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
-		switch {
-		case fieldtype.kind == G_ARRAY:
+		switch fieldtype.getKind() {
+		case G_ARRAY:
 			arrayType := fieldtype
 			elementType := arrayType.elementType
 			elmSize := arrayType.elementType.getSize()
 			switch {
-			case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+			case elementType.getKind() == G_STRUCT:
 				left := &ExprStructField{
 					strct:     lhs,
 					fieldname: fieldtype.fieldname,
@@ -209,21 +210,21 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				}
 			}
 
-		case fieldtype.kind == G_SLICE:
+		case G_SLICE:
 			emit("LOAD_EMPTY_SLICE")
 			emit("PUSH_SLICE")
 			emitSave24(lhs, fieldtype.offset)
-		case fieldtype.kind == G_MAP:
+		case G_MAP:
 			emit("LOAD_EMPTY_MAP")
 			emit("PUSH_MAP")
 			emitSave24(lhs, fieldtype.offset)
-		case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
+		case G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
 				fieldname: fieldtype.fieldname,
 			}
 			assignToStruct(left, nil)
-		case fieldtype.getKind() == G_INTERFACE:
+		case G_INTERFACE:
 			emit("LOAD_EMPTY_INTERFACE")
 			emit("PUSH_INTERFACE")
 			emitSave24(lhs, fieldtype.offset)
@@ -271,15 +272,15 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("# .%s", field.key)
 			fieldtype := strcttyp.getField(field.key)
 
-			switch {
-			case fieldtype.kind == G_ARRAY:
+			switch fieldtype.getKind() {
+			case G_ARRAY:
 				initvalues, ok := field.value.(*ExprArrayLiteral)
 				assert(ok, nil, "ok")
 				arrayType := strcttyp.getField(field.key)
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
 				switch {
-				case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+				case elementType.getKind() == G_STRUCT:
 					left := &ExprStructField{
 						strct:     lhs,
 						fieldname: fieldtype.fieldname,
@@ -291,28 +292,28 @@ func assignToStruct(lhs Expr, rhs Expr) {
 						emitOffsetSavePrimitive(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
-			case fieldtype.kind == G_SLICE:
+			case G_SLICE:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
-			case fieldtype.getKind() == G_MAP:
+			case G_MAP:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToMap(left, field.value)
-			case fieldtype.getKind() == G_INTERFACE:
+			case G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToInterface(left, field.value)
-			case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
+			case G_STRUCT:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
@@ -423,8 +424,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		//
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*ExprConversion)
-		assert(conversion.gtype.kind == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().kind == G_STRING || conversion.expr.getGtype().relation.gtype.kind == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
+		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
+		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
 		stringVarname, ok := conversion.expr.(*Relation)
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
@@ -456,9 +457,9 @@ func assignToArray(lhs Expr, rhs Expr) {
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
-	assert(rhs == nil || rhs.getGtype().kind == G_ARRAY, nil, "rhs should be array")
-	switch {
-	case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+	assert(rhs == nil || rhs.getGtype().getKind() == G_ARRAY, nil, "rhs should be array")
+	switch elementType.getKind() {
+	case G_STRUCT:
 		//TBI
 		for i := 0; i < arrayType.length; i++ {
 			left := &ExprIndex{

@@ -19,7 +19,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
-		if field.kind == G_ARRAY {
+		if field.getKind() == G_ARRAY {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
@@ -30,7 +30,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		}
 	case *ExprStructField: // strct.field.field
 		a := strct.(*ExprStructField)
-		strcttype := a.strct.getGtype().relation.gtype
+		strcttype := a.strct.getGtype().Underlying()
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset+field.offset)
@@ -58,7 +58,7 @@ func (a *ExprStructField) emitAddress() {
 func (a *ExprStructField) emit() {
 	emit("# LOAD ExprStructField")
 	a.calcOffset()
-	switch a.strct.getGtype().kind {
+	switch a.strct.getGtype().getKind() {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
@@ -71,7 +71,7 @@ func (a *ExprStructField) emit() {
 			emit("LOAD_8_BY_DEREF")
 		}
 
-	case G_NAMED: // struct
+	case G_STRUCT:
 		strcttype := a.strct.getGtype().relation.gtype
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
@@ -303,7 +303,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		structfield := lhs.(*ExprStructField)
 		structfield.calcOffset()
 		fieldType := structfield.getGtype()
-		if structfield.strct.getGtype().kind == G_POINTER {
+		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
 			emit("ADD_NUMBER %d+%d", fieldType.offset,offset)
@@ -363,12 +363,13 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	emit("# ExprIndex.emitOffsetLoad")
 	collection := e.collection
 	index := e.index
-	if collection.getGtype().kind == G_ARRAY || collection.getGtype().kind == G_SLICE {
+	switch collection.getGtype().getKind() {
+	case G_ARRAY, G_SLICE:
 		loadArrayOrSliceIndex(collection, index, offset)
 		return
-	} else if collection.getGtype().getKind() == G_MAP {
+	case G_MAP:
 		loadMapIndexExpr(collection, index)
-	} else if collection.getGtype().getKind() == G_STRING {
+	case G_STRING:
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:
 		//
@@ -377,14 +378,14 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
 		// a[x] may not be assigned to
 		emit("# load head address of the string")
-		collection.emit()  // emit address
+		collection.emit() // emit address
 		emit("PUSH_8")
 		index.emit()
 		emit("PUSH_8")
 		emit("SUM_FROM_STACK")
 		emit("ADD_NUMBER %d", offset)
 		emit("LOAD_8_BY_DEREF")
-	} else {
+	default:
 		TBI(collection.token(), "unable to handle %s", collection.getGtype())
 	}
 }

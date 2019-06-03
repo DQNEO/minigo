@@ -82,10 +82,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("pop %%r12 # index value")
 	emit("pop %%r11 # map len")
 	emit("pop %%r10 # map head")
-	if mapType.kind == G_NAMED {
-		// @TODO handle infinite chain of relations
-		mapType = mapType.relation.gtype
-	}
+	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
 	is24Width := mapValueType.is24Width()

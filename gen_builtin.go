@@ -8,10 +8,10 @@ func (e *ExprLen) emit() {
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
-	switch {
-	case gtype.kind == G_ARRAY:
+	switch gtype.getKind() {
+	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case gtype.kind == G_SLICE:
+	case G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
 		case *Relation:
@@ -38,7 +38,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_MAP:
+	case G_MAP:
 		emit("# emit len(map)")
 		switch arg.(type) {
 		case *Relation:
@@ -52,7 +52,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_STRING:
+	case G_STRING:
 		arg.emit()
 		emit("PUSH_8")
 		emit("POP_TO_ARG_0")
@@ -66,10 +66,10 @@ func (e *ExprCap) emit() {
 	emit("# emit cap()")
 	arg := e.arg
 	gtype := arg.getGtype()
-	switch {
-	case gtype.kind == G_ARRAY:
+	switch gtype.getKind() {
+	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case gtype.kind == G_SLICE:
+	case G_SLICE:
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
@@ -86,7 +86,7 @@ func (e *ExprCap) emit() {
 			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
-			if sliceExpr.collection.getGtype().kind == G_ARRAY {
+			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
 					op:  "-",
@@ -103,9 +103,9 @@ func (e *ExprCap) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_MAP:
+	case G_MAP:
 		TBI(arg.token(), "unable to handle %T", arg)
-	case gtype.getKind() == G_STRING:
+	case G_STRING:
 		TBI(arg.token(), "unable to handle %T", arg)
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
