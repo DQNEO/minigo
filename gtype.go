@@ -77,6 +77,12 @@ func (gtype *Gtype) getKind() GTYPE_KIND {
 	return gtype.Underlying().kind
 }
 
+// is array or slice
+func (gtype *Gtype) isArrayLike() bool {
+	kind := gtype.getKind()
+	return kind == G_ARRAY || kind == G_SLICE
+}
+
 func (gtype *Gtype) is24Width() bool {
 	switch gtype.getKind() {
 	case G_INTERFACE, G_MAP, G_SLICE:
