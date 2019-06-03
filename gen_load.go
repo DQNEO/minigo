@@ -30,7 +30,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		}
 	case *ExprStructField: // strct.field.field
 		a := strct.(*ExprStructField)
-		strcttype := a.strct.getGtype().relation.gtype
+		strcttype := a.strct.getGtype().Underlying()
 		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset+field.offset)
