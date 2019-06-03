@@ -1,5 +1,7 @@
 package main
 
+const MAX_METHODS_PER_TYPE int = 128
+
 func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
@@ -24,9 +26,15 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 	emit("mov (%%rax), %%rax") // address of receiverType
 	emit("PUSH_8 # map head")
 
-	emit("push $128 # len")
+	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
+	emit("PUSH_8 # len")
+
 	emit("lea .M%s, %%rax", call.methodName) // index value
 	emit("PUSH_8 # map index value")                 // index value
+
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("pop %%rax")
 	emitMapGet(mapType, false)
 
 	emit("PUSH_8")
@@ -62,6 +70,10 @@ func loadMapIndexExpr(_map Expr, index Expr) {
 	emit("PUSH_8 # len")
 	index.emit()
 	emit("PUSH_8 # index value")
+
+	emit("pop %%rcx # index value")
+	emit("pop %%rbx # len")
+	emit("pop %%rax # heap")
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -79,21 +91,24 @@ func mapOkRegister(is24Width bool) string {
 // r13: loop counter")
 func emitMapGet(mapType *Gtype, deref bool) {
 
-	emit("pop %%r12 # index value")
-	emit("pop %%r11 # map len")
-	emit("pop %%r10 # map head")
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
 	is24Width := mapValueType.is24Width()
+
 	emit("# emitMapGet")
-	emit("mov $0, %%r13 # init loop counter") // i = 0
+
+	emit("mov %%rax, %%r10")
+	emit("mov %%rbx, %%r11")
+	emit("mov %%rcx, %%r12")
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
-	emit("%s: # begin loop ", labelBegin)
-
 	labelIncr := makeLabel()
+
+	emit("mov $0, %%r13 # init loop counter") // i = 0
+
+	emit("%s: # begin loop ", labelBegin)
 
 	emit("push %%r13")
 	emit("push %%r11")
@@ -173,6 +188,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("jmp %s", labelBegin)
 
 	emit("%s: # end loop", labelEnd)
+
 }
 
 // m[k] = v
