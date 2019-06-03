@@ -506,17 +506,6 @@ func (e *ExprTypeSwitchGuard) emit() {
 	emit("mov %%rcx, %%rax # copy type id")
 }
 
-func getRettypes(call Expr) []*Gtype {
-	switch call.(type) {
-	case *ExprFuncallOrConversion:
-		return call.(*ExprFuncallOrConversion).getRettypes()
-	case *ExprMethodcall:
-		return call.(*ExprMethodcall).getRettypes()
-	}
-	errorf("no reach here")
-	return nil
-}
-
 func bool2string(bol bool) string {
 	if bol {
 		return "true"

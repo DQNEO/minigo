@@ -529,4 +529,13 @@ func assignToArray(lhs Expr, rhs Expr) {
 	}
 }
 
-
+func getRettypes(call Expr) []*Gtype {
+	switch call.(type) {
+	case *ExprFuncallOrConversion:
+		return call.(*ExprFuncallOrConversion).getRettypes()
+	case *ExprMethodcall:
+		return call.(*ExprMethodcall).getRettypes()
+	}
+	errorf("no reach here")
+	return nil
+}
