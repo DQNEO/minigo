@@ -271,8 +271,8 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("# .%s", field.key)
 			fieldtype := strcttyp.getField(field.key)
 
-			switch {
-			case fieldtype.kind == G_ARRAY:
+			switch fieldtype.getKind() {
+			case G_ARRAY:
 				initvalues, ok := field.value.(*ExprArrayLiteral)
 				assert(ok, nil, "ok")
 				arrayType := strcttyp.getField(field.key)
@@ -291,28 +291,28 @@ func assignToStruct(lhs Expr, rhs Expr) {
 						emitOffsetSavePrimitive(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
-			case fieldtype.kind == G_SLICE:
+			case G_SLICE:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
-			case fieldtype.getKind() == G_MAP:
+			case G_MAP:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToMap(left, field.value)
-			case fieldtype.getKind() == G_INTERFACE:
+			case G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),
 					strct:     lhs,
 					fieldname: field.key,
 				}
 				assignToInterface(left, field.value)
-			case fieldtype.kind == G_NAMED && fieldtype.relation.gtype.kind == G_STRUCT:
+			case G_STRUCT:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,
