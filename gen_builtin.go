@@ -8,10 +8,10 @@ func (e *ExprLen) emit() {
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
-	switch {
-	case gtype.kind == G_ARRAY:
+	switch gtype.getKind() {
+	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case gtype.kind == G_SLICE:
+	case G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
 		case *Relation:
@@ -38,7 +38,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_MAP:
+	case G_MAP:
 		emit("# emit len(map)")
 		switch arg.(type) {
 		case *Relation:
@@ -52,7 +52,7 @@ func (e *ExprLen) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_STRING:
+	case G_STRING:
 		arg.emit()
 		emit("PUSH_8")
 		emit("POP_TO_ARG_0")
