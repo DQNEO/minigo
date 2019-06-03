@@ -364,16 +364,16 @@ func (decl *DeclVar) emitLocal() {
 	emit("# DeclVar \"%s\"", decl.variable.varname)
 	gtype := decl.variable.gtype
 	varname := decl.varname
-	switch {
-	case gtype.kind == G_ARRAY:
+	switch gtype.getKind() {
+	case G_ARRAY:
 		assignToArray(varname, decl.initval)
-	case gtype.kind == G_SLICE:
+	case G_SLICE:
 		assignToSlice(varname, decl.initval)
-	case gtype.kind == G_NAMED && gtype.relation.gtype.kind == G_STRUCT:
+	case G_STRUCT:
 		assignToStruct(varname, decl.initval)
-	case gtype.getKind() == G_MAP:
+	case G_MAP:
 		assignToMap(varname, decl.initval)
-	case gtype.getKind() == G_INTERFACE:
+	case G_INTERFACE:
 		assignToInterface(varname, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
