@@ -171,6 +171,13 @@ func (ast *StmtAssignment) emit() {
 
 }
 
+func emitAssignPrimitive(left Expr, right Expr) {
+	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
+	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
+	right.emit()            //   expr => %rax
+	emitSavePrimitive(left) //   %rax => memory
+}
+
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
 
