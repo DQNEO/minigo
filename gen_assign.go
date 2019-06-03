@@ -122,13 +122,14 @@ func (ast *StmtAssignment) emit() {
 						continue
 					}
 					assert(left.getGtype() != nil, left.token(), "should not be nil")
-					if left.getGtype().kind == G_SLICE {
+					switch left.getGtype().getKind() {
+					case G_SLICE:
 						// @TODO: Does this work ?
 						emitSave24(left, 0)
-					} else if left.getGtype().getKind() == G_INTERFACE {
+					case G_INTERFACE:
 						// @TODO: Does this work ?
 						emitSave24(left, 0)
-					} else {
+					default:
 						emit("pop %%rax")
 						emitSavePrimitive(left)
 					}
