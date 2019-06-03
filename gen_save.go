@@ -21,7 +21,7 @@ func emitSavePrimitive(left Expr) {
 	case *ExprVariable:
 		emitOffsetSavePrimitive(left, left.getGtype().getSize(), 0)
 	case *ExprIndex:
-		left.(*ExprIndex).emitSavePrimitive()
+		emitOffsetSavePrimitive(left, left.getGtype().getSize(),0)
 	case *ExprStructField:
 		left.(*ExprStructField).emitSavePrimitive()
 	case *ExprUop:
@@ -43,7 +43,7 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 		variable.emitOffsetSavePrimitive(size, offset, false)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
-		indexExpr.emitArrayOrSliceSavePrimitive(offset)
+		indexExpr.emitOffsetSavePrimitive(offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
@@ -125,11 +125,11 @@ func (e *ExprIndex) emitSave24() {
 	emit("STORE_24_INDIRECT_FROM_STACK")
 }
 
-func (e *ExprIndex) emitSavePrimitive() {
+func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 	collectionType := e.collection.getGtype()
 	switch {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
-		e.emitArrayOrSliceSavePrimitive(0)
+		e.emitArrayOrSliceSavePrimitive(offset)
 	case collectionType.getKind() == G_MAP:
 		emit("PUSH_8") // push RHS value
 		e.emitMapSet(false)
