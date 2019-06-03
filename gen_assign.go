@@ -424,8 +424,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		//
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*ExprConversion)
-		assert(conversion.gtype.kind == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().kind == G_STRING || conversion.expr.getGtype().relation.gtype.kind == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
+		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
+		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
 		stringVarname, ok := conversion.expr.(*Relation)
 		assert(ok, rhs.token(), "ok")
 		stringVariable := stringVarname.expr.(*ExprVariable)
@@ -457,9 +457,9 @@ func assignToArray(lhs Expr, rhs Expr) {
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
-	assert(rhs == nil || rhs.getGtype().kind == G_ARRAY, nil, "rhs should be array")
-	switch {
-	case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+	assert(rhs == nil || rhs.getGtype().getKind() == G_ARRAY, nil, "rhs should be array")
+	switch elementType.getKind() {
+	case G_STRUCT:
 		//TBI
 		for i := 0; i < arrayType.length; i++ {
 			left := &ExprIndex{
