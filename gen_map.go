@@ -79,21 +79,24 @@ func mapOkRegister(is24Width bool) string {
 // r13: loop counter")
 func emitMapGet(mapType *Gtype, deref bool) {
 
-	emit("pop %%r12 # index value")
-	emit("pop %%r11 # map len")
-	emit("pop %%r10 # map head")
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
 	is24Width := mapValueType.is24Width()
+
+	emit("pop %%r12 # index value")
+	emit("pop %%r11 # map len")
+	emit("pop %%r10 # map head")
+
 	emit("# emitMapGet")
 	emit("mov $0, %%r13 # init loop counter") // i = 0
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
+	labelIncr := makeLabel()
+
 	emit("%s: # begin loop ", labelBegin)
 
-	labelIncr := makeLabel()
 
 	emit("push %%r13")
 	emit("push %%r11")
