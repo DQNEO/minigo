@@ -15,7 +15,6 @@ func emitAssignPrimitive(left Expr, right Expr) {
 func emitSavePrimitive(left Expr) {
 	switch left.(type) {
 	case *Relation:
-		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
 		rel := left.(*Relation)
 		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
 		emitSavePrimitive(rel.expr)
@@ -31,6 +30,27 @@ func emitSavePrimitive(left Expr) {
 	default:
 		left.dump()
 		errorft(left.token(), "Unknown case %T", left)
+	}
+}
+
+func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
+	switch lhs.(type) {
+	case *Relation:
+		rel := lhs.(*Relation)
+		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
+		emitOffsetSavePrimitive(rel.expr, size, offset)
+	case *ExprVariable:
+		variable := lhs.(*ExprVariable)
+		variable.emitOffsetSavePrimitive(size, offset, false)
+	case *ExprIndex:
+		indexExpr := lhs.(*ExprIndex)
+		emitCollectIndexSave(indexExpr.collection, indexExpr.index, offset)
+	case *ExprStructField:
+		structfield := lhs.(*ExprStructField)
+		fieldType := structfield.getGtype()
+		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
+	default:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
@@ -130,28 +150,6 @@ func (e *ExprStructField) emitSavePrimitive() {
 		emit("STORE_8_INDIRECT_FROM_STACK")
 	} else {
 		emitOffsetSavePrimitive(e.strct, 8, fieldType.offset)
-	}
-}
-
-func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
-	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		emitOffsetSavePrimitive(rel.expr, size, offset)
-	case *ExprVariable:
-		variable := lhs.(*ExprVariable)
-		variable.emitOffsetSavePrimitive(size, offset, false)
-	case *ExprStructField:
-		structfield := lhs.(*ExprStructField)
-		fieldType := structfield.getGtype()
-		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
-	case *ExprIndex:
-		indexExpr := lhs.(*ExprIndex)
-		emitCollectIndexSave(indexExpr.collection, indexExpr.index, offset)
-
-	default:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
