@@ -1,0 +1,1995 @@
+// MACROS
+.macro FUNC_PROLOGUE 
+  push %rbp
+  mov %rsp, %rbp
+.endm
+
+.macro POP_TO_ARG_0 
+  pop %rdi
+.endm
+
+.macro POP_TO_ARG_1 
+  pop %rsi
+.endm
+
+.macro POP_TO_ARG_2 
+  pop %rdx
+.endm
+
+.macro POP_TO_ARG_3 
+  pop %rcx
+.endm
+
+.macro POP_TO_ARG_4 
+  pop %r8
+.endm
+
+.macro POP_TO_ARG_5 
+  pop %r9
+.endm
+
+.macro POP_TO_ARG_6 
+  pop %r10
+.endm
+
+.macro POP_TO_ARG_7 
+  pop %r11
+.endm
+
+.macro POP_TO_ARG_8 
+  pop %r12
+.endm
+
+.macro POP_TO_ARG_9 
+  pop %r13
+.endm
+
+.macro POP_TO_ARG_10 
+  pop %r14
+.endm
+
+.macro POP_TO_ARG_11 
+  pop %r15
+.endm
+
+.macro PUSH_ARG_0 
+  push %rdi
+.endm
+
+.macro PUSH_ARG_1 
+  push %rsi
+.endm
+
+.macro PUSH_ARG_2 
+  push %rdx
+.endm
+
+.macro PUSH_ARG_3 
+  push %rcx
+.endm
+
+.macro PUSH_ARG_4 
+  push %r8
+.endm
+
+.macro PUSH_ARG_5 
+  push %r9
+.endm
+
+.macro PUSH_ARG_6 
+  push %r10
+.endm
+
+.macro PUSH_ARG_7 
+  push %r11
+.endm
+
+.macro PUSH_ARG_8 
+  push %r12
+.endm
+
+.macro PUSH_ARG_9 
+  push %r13
+.endm
+
+.macro PUSH_ARG_10 
+  push %r14
+.endm
+
+.macro PUSH_ARG_11 
+  push %r15
+.endm
+
+.macro PUSH_8 
+  push %rax # primitive
+.endm
+
+.macro PUSH_24 
+  push %rax # 1st
+  push %rbx # 2nd
+  push %rcx # 3rd
+.endm
+
+.macro PUSH_SLICE 
+  push %rax # slice.ptr
+  push %rbx # slice.len
+  push %rcx # slice.cap
+.endm
+
+.macro PUSH_MAP 
+  push %rax # map.ptr
+  push %rbx # map.len
+  push %rcx # map.cap
+.endm
+
+.macro PUSH_INTERFACE 
+  push %rax # ifc.1st
+  push %rbx # ifc.2nd
+  push %rcx # ifc.3rd
+.endm
+
+.macro POP_8 
+  pop %rax # primitive
+.endm
+
+.macro POP_SLICE 
+  pop %rcx # slice.cap
+  pop %rbx # slice.len
+  pop %rax # slice.ptr
+.endm
+
+.macro POP_MAP 
+  pop %rcx # map.cap
+  pop %rbx # map.len
+  pop %rax # map.ptr
+.endm
+
+.macro POP_INTERFACE 
+  pop %rcx # ifc.3rd
+  pop %rbx # ifc.2nd
+  pop %rax # ifc.1st
+.endm
+
+.macro LOAD_EMPTY_SLICE 
+  mov $0, %rax
+  mov $0, %rbx
+  mov $0, %rcx
+.endm
+
+.macro LOAD_EMPTY_MAP 
+  mov $0, %rax
+  mov $0, %rbx
+  mov $0, %rcx
+.endm
+
+.macro LOAD_EMPTY_INTERFACE 
+  mov $0, %rax
+  mov $0, %rbx
+  mov $0, %rcx
+.endm
+
+.macro LOAD_STRING_LITERAL slabel
+  lea \slabel(%rip), %rax
+.endm
+
+.macro LOAD_NUMBER n
+  mov $\n, %rax
+.endm
+
+.macro STORE_1_TO_LOCAL offset
+  mov %al, \offset(%rbp)
+.endm
+
+.macro STORE_8_TO_LOCAL offset
+  mov %rax, \offset(%rbp)
+.endm
+
+.macro LOAD_GLOBAL_ADDR varname, offset
+  lea \varname+\offset(%rip), %rax
+.endm
+
+.macro LOAD_LOCAL_ADDR offset
+  lea \offset(%rbp), %rax
+.endm
+
+.macro LOAD_1_FROM_LOCAL_CAST offset
+  movsbq \offset(%rbp), %rax
+.endm
+
+.macro LOAD_1_FROM_LOCAL offset
+  mov \offset(%rbp), %al
+.endm
+
+.macro LOAD_8_FROM_LOCAL offset
+  mov \offset(%rbp), %rax
+.endm
+
+.macro STORE_1_TO_GLOBAL varname, offset
+  mov %al, \varname+\offset(%rip)
+.endm
+
+.macro STORE_8_TO_GLOBAL varname, offset
+  mov %rax, \varname+\offset(%rip)
+.endm
+
+.macro LOAD_1_FROM_GLOBAL_CAST varname, offset=0
+  movsbq \varname+\offset(%rip), %rax
+.endm
+
+.macro LOAD_1_FROM_GLOBAL varname, offset=0
+  mov \varname+\offset(%rip), %al
+.endm
+
+.macro LOAD_8_FROM_GLOBAL varname, offset=0
+  mov \varname+\offset(%rip), %rax
+.endm
+
+.macro LOAD_24_BY_DEREF 
+  mov 16(%rax), %rcx
+  mov 8(%rax), %rbx
+  mov 0(%rax), %rax
+.endm
+
+.macro LOAD_8_BY_DEREF 
+  mov (%rax), %rax
+.endm
+
+.macro LOAD_1_BY_DEREF 
+  movsbq (%rax), %rax
+.endm
+
+.macro LOAD_INTERFACE_FROM_GLOBAL varname
+  mov \varname+ 0(%rip), %rax
+  mov \varname+ 8(%rip), %rbx
+  mov \varname+16(%rip), %rcx
+.endm
+
+.macro LOAD_SLICE_FROM_GLOBAL varname
+  mov \varname+ 0(%rip), %rax # ptr
+  mov \varname+ 8(%rip), %rbx # len
+  mov \varname+16(%rip), %rcx # cap
+.endm
+
+.macro LOAD_MAP_FROM_GLOBAL varname
+  mov \varname+ 0(%rip), %rax # ptr
+  mov \varname+ 8(%rip), %rbx # len
+  mov \varname+16(%rip), %rcx # cap
+.endm
+
+.macro LOAD_SLICE_FROM_LOCAL offset
+  mov \offset+ 0(%rbp), %rax # ptr
+  mov \offset+ 8(%rbp), %rbx # len
+  mov \offset+16(%rbp), %rcx # cap
+.endm
+
+.macro LOAD_MAP_FROM_LOCAL offset
+  mov \offset+ 0(%rbp), %rax # ptr
+  mov \offset+ 8(%rbp), %rbx # len
+  mov \offset+16(%rbp), %rcx # cap
+.endm
+
+.macro LOAD_INTERFACE_FROM_LOCAL offset
+  mov \offset+ 0(%rbp), %rax
+  mov \offset+ 8(%rbp), %rbx
+  mov \offset+16(%rbp), %rcx
+.endm
+
+.macro CAST_BYTE_TO_INT 
+  movzbq %al, %rax
+.endm
+
+.macro CMP_EQ_ZERO 
+  cmp $0, %rax
+  sete %al
+  movzb %al, %eax
+.endm
+
+.macro CMP_NE_ZERO 
+  cmp $0, %rax
+  setne %al
+  movzb %al, %eax
+.endm
+
+.macro CMP_FROM_STACK inst
+  pop %rax # right
+  pop %rcx # left
+  cmp %rax, %rcx
+  \inst %al
+  movzb %al, %eax
+.endm
+
+.macro SUM_FROM_STACK 
+  pop %rcx
+  pop %rax
+  add %rcx , %rax
+.endm
+
+.macro SUB_FROM_STACK 
+  pop %rcx
+  pop %rax
+  sub %rcx , %rax
+.endm
+
+.macro IMUL_FROM_STACK 
+  pop %rcx
+  pop %rax
+  imul %rcx , %rax
+.endm
+
+.macro IMUL_NUMBER n
+  imul $\n , %rax
+.endm
+
+.macro STORE_1_INDIRECT_FROM_STACK 
+  pop %rax # where
+  pop %rcx # what
+  mov %cl, (%rax)
+.endm
+
+.macro STORE_8_INDIRECT_FROM_STACK 
+  pop %rax # where
+  pop %rcx # what
+  mov %rcx, (%rax)
+.endm
+
+.macro STORE_24_INDIRECT_FROM_STACK 
+  pop %rax # target addr
+  pop %rcx # load RHS value(c)
+  mov %rcx, 16(%rax)
+  pop %rcx # load RHS value(b)
+  mov %rcx, 8(%rax)
+  pop %rcx # load RHS value(a)
+  mov %rcx, 0(%rax)
+.endm
+
+.macro ADD_NUMBER n
+  add $\n , %rax
+.endm
+
+.macro SUB_NUMBER n
+  sub $\n , %rax
+.endm
+
+.macro FUNCALL fname
+  mov $0, %rax
+  mov $0, %rbx
+  call \fname
+.endm
+
+.macro TEST_IT 
+  test %rax, %rax
+.endm
+
+.macro LEAVE_AND_RET 
+  leave
+  ret
+.endm
+
+  .data 0
+  .data 0
+  # special strings
+.SfmtDumpInterface:
+  .string "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\n"
+.SfmtDumpSlice:
+  .string "# slice = {underlying:%p,len:%d,cap:%d}\n"
+.empty:
+  .string ""
+
+  # Dynamic Types
+.DynamicTypeId0:
+  .string "bool"
+.DynamicTypeId1:
+  .string "byte"
+.DynamicTypeId2:
+  .string "int"
+.DynamicTypeId3:
+  .string "string"
+.DynamicTypeId4:
+  .string "func"
+.DynamicTypeId5:
+  .string "G_NAMED(os.File)"
+.DynamicTypeId6:
+  .string "*G_NAMED(os.File)"
+.DynamicTypeId7:
+  .string "G_NAMED(os.int)"
+.DynamicTypeId8:
+  .string "struct{G_NAMED(os.int),}"
+.DynamicTypeId9:
+  .string "G_NAMED(os.byte)"
+.DynamicTypeId10:
+  .string "[]G_NAMED(os.byte)"
+.DynamicTypeId11:
+  .string "G_NAMED(os.error)"
+.DynamicTypeId12:
+  .string "G_NAMED(.string)"
+.DynamicTypeId13:
+  .string "G_NAMED(iruntime.int)"
+.DynamicTypeId14:
+  .string "*G_NAMED(iruntime.int)"
+.DynamicTypeId15:
+  .string "G_NAMED(iruntime.string)"
+.DynamicTypeId16:
+  .string "[]G_NAMED(iruntime.string)"
+.DynamicTypeId17:
+  .string "G_NAMED(iruntime.byte)"
+.DynamicTypeId18:
+  .string "[640485760]G_NAMED(iruntime.byte)"
+.DynamicTypeId19:
+  .string "[]G_NAMED(iruntime.byte)"
+.DynamicTypeId20:
+  .string "[]G_NAMED(iruntime.int)"
+.DynamicTypeId21:
+  .string "[]interface{}"
+.DynamicTypeId22:
+  .string "G_NAMED(main.int)"
+  # Method table
+receiverTypes:
+  .quad 0 # receiverTypeId:0
+  .quad receiverType1 # receiverTypeId:1
+receiverType1:
+  .quad .MWrite # key
+  .quad os.File$Write # method
+  # METHOD NAMES
+.MWrite:
+  .string "Write"
+.text
+.runtime_args:
+  push %rbp
+  mov %rsp, %rbp
+  # set argv, argc, argc
+  mov runtimeArgv(%rip), %rax # ptr
+  mov runtimeArgc(%rip), %rbx # len
+  mov runtimeArgc(%rip), %rcx # cap
+
+  # func epilogue
+  .runtime_args_noop_handler: # defer handler
+  LEAVE_AND_RET
+  .global	main
+main:
+  push %rbp
+  mov %rsp, %rbp
+  mov %rsi, runtimeArgv(%rip)
+  mov %rdi, runtimeArgc(%rip)
+  mov $0, %rsi
+  mov $0, %rdi
+  # init runtime
+  FUNCALL iruntime.init
+  # init os
+  FUNCALL os.init
+
+  FUNCALL main.main
+
+  # func epilogue
+  noop_handler: # defer handler
+  LEAVE_AND_RET
+iruntime.makeSlice:
+  FUNC_PROLOGUE
+
+  PUSH_ARG_2
+  PUSH_ARG_1
+  PUSH_ARG_0
+  mov -16(%rbp), %rax # newcap
+  mov -8(%rbp), %rcx # unit
+  imul %rcx, %rax
+  ADD_NUMBER 16 # pure buffer
+  PUSH_8
+  POP_TO_ARG_0
+  FUNCALL iruntime.malloc
+  mov -24(%rbp), %rbx # newlen
+  mov -16(%rbp), %rcx # newcap
+  LEAVE_AND_RET
+
+#--------------------------------------------------------
+# package os
+# string literals
+.data 0
+
+# emitGlobal for Stdout
+  # emitData()
+  .data 0
+Stdout: # gtype=*G_NAMED(os.File)
+  # right.gtype = *G_NAMED(os.File)
+  # doEmitData: containerName=, depth=0
+  .data 1
+  .L16:
+  # doEmitData: containerName=, depth=1
+  # padding=0
+  # field:offesr=0, fieldname=id
+  # doEmitData: containerName=.File.id, depth=1
+  .quad 1 # G_NAMED(os.int) .File.id
+  .data 0
+  .quad .L16
+
+# emitGlobal for Stderr
+  # emitData()
+  .data 0
+Stderr: # gtype=*G_NAMED(os.File)
+  # right.gtype = *G_NAMED(os.File)
+  # doEmitData: containerName=, depth=0
+  .data 1
+  .L17:
+  # doEmitData: containerName=, depth=1
+  # padding=0
+  # field:offesr=0, fieldname=id
+  # doEmitData: containerName=.File.id, depth=1
+  .quad 2 # G_NAMED(os.int) .File.id
+  .data 0
+  .quad .L17
+
+.text
+os.File$Write:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "f" *G_NAMED(os.File)
+  PUSH_ARG_3 # third
+  PUSH_ARG_2 # second
+  PUSH_ARG_1 # fist "b" []G_NAMED(os.byte)
+  # Allocating stack for localvars len=2
+  # offset -48 variable "n" G_NAMED(os.int)
+  # offset -40 variable "fid" G_NAMED(os.int)
+  sub $16, %rsp # total stack size
+
+  # Statement
+    # DeclVar "fid"
+    # LOAD RHS
+      # LOAD ExprStructField
+      # load variable "f" *G_NAMED(os.File)
+      LOAD_8_FROM_LOCAL -8
+      ADD_NUMBER 0
+      LOAD_8_BY_DEREF
+    # Assign to LHS
+      STORE_8_TO_LOCAL -40 # initialize fid
+  # Statement
+    # DeclVar "n"
+    # LOAD RHS
+      LOAD_NUMBER 0
+    # Assign to LHS
+      STORE_8_TO_LOCAL -48 # initialize n
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "n" = 
+    # emitCall write
+    # get fromGtype
+    # from G_NAMED(os.int)
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    # load variable "fid" G_NAMED(os.int)
+    LOAD_8_FROM_LOCAL -40
+    PUSH_8
+    # get fromGtype
+    # from string
+    # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+    # ExprConversion.emit()
+    # load variable "b" []G_NAMED(os.byte)
+    LOAD_SLICE_FROM_LOCAL -32
+    TEST_IT
+    jne .L18
+    LOAD_STRING_LITERAL .empty
+    .L18:
+    PUSH_8
+    # get fromGtype
+    # from int
+    # arg 2, doConvertToInterface=false, collectVariadicArgs=false
+    # emit len()
+    # len(slice)
+    # Relation
+    # emitOffsetLoad(offset 8)
+    # emitOffsetLoad(offset 8)
+    LOAD_8_FROM_LOCAL -32+8
+    PUSH_8
+    POP_TO_ARG_2
+    POP_TO_ARG_1
+    POP_TO_ARG_0
+    FUNCALL write
+
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -48+0
+  # Statement
+    # load variable "n" G_NAMED(os.int)
+    LOAD_8_FROM_LOCAL -48
+    push %rax
+    LOAD_NUMBER 0 # nil literal
+    push %rcx
+    push %rbx
+    push %rax
+    pop %rdx
+    pop %rcx
+    pop %rbx
+    pop %rax
+    # defer and return
+    jmp .L11_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L11_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+os.Exit:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "i" G_NAMED(os.int)
+
+  mov $0, %rax
+
+  # func epilogue
+  .L12_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+os.init:
+  FUNC_PROLOGUE
+
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "Args" = 
+    # assignToSlice
+    # emitCall .runtime_args
+    FUNCALL .runtime_args
+
+    PUSH_SLICE
+    # emitSave24(?, offset 0)
+    # emitSave24(?, offset 0)
+    # *ExprVariable.emitSave24()
+    pop %rax # 3rd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+    STORE_8_TO_GLOBAL Args 16
+    pop %rax # 2nd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+    STORE_8_TO_GLOBAL Args 8
+    pop %rax # 1st
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_GLOBAL Args 0
+  mov $0, %rax
+
+  # func epilogue
+  .L13_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+#--------------------------------------------------------
+# package 
+# string literals
+.data 0
+.universe.S1:
+  .string "panic:%s\n"
+.universe.S2:
+  .string "%s\n"
+
+.text
+.make:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "x" interface{}
+
+  mov $0, %rax
+
+  # func epilogue
+  .L0_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+.panic:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "s" G_NAMED(.string)
+
+  # Statement
+    # emitCall printf
+    # get fromGtype
+    # from string
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    LOAD_STRING_LITERAL .universe.S1
+    PUSH_8
+    # get fromGtype
+    # from G_NAMED(.string)
+    # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+    # load variable "s" G_NAMED(.string)
+    LOAD_8_FROM_LOCAL -8
+    PUSH_8
+    POP_TO_ARG_1
+    POP_TO_ARG_0
+    FUNCALL printf
+
+  # Statement
+    # emitCall exit
+    # get fromGtype
+    # from int
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    LOAD_NUMBER 1
+    PUSH_8
+    POP_TO_ARG_0
+    FUNCALL exit
+
+  mov $0, %rax
+
+  # func epilogue
+  .L1_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+.println:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "s" interface{}
+
+  # Statement
+    # emitCall printf
+    # get fromGtype
+    # from string
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    LOAD_STRING_LITERAL .universe.S2
+    PUSH_8
+    # get fromGtype
+    # from interface{}
+    # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+    # load variable "s" interface{}
+    LOAD_INTERFACE_FROM_LOCAL -24
+    PUSH_INTERFACE
+    POP_TO_ARG_3
+    POP_TO_ARG_2
+    POP_TO_ARG_1
+    POP_TO_ARG_0
+    FUNCALL printf
+
+  mov $0, %rax
+
+  # func epilogue
+  .L2_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+.print:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "x" interface{}
+
+  # Statement
+    # emitCall printf
+    # get fromGtype
+    # from interface{}
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    # load variable "x" interface{}
+    LOAD_INTERFACE_FROM_LOCAL -24
+    PUSH_INTERFACE
+    POP_TO_ARG_2
+    POP_TO_ARG_1
+    POP_TO_ARG_0
+    FUNCALL printf
+
+  mov $0, %rax
+
+  # func epilogue
+  .L3_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+.recover:
+  FUNC_PROLOGUE
+
+  # Statement
+    LOAD_EMPTY_INTERFACE
+    # defer and return
+    jmp .L4_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L4_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+#--------------------------------------------------------
+# package 
+# string literals
+.data 0
+..S1:
+  .string "malloc exceeds heap capacity"
+
+# emitGlobal for runtimeArgc
+  .data
+  .lcomm runtimeArgc, 8
+
+# emitGlobal for runtimeArgv
+  .data
+  .lcomm runtimeArgv, 8
+
+# emitGlobal for Args
+  .data
+  .lcomm Args, 24
+
+# emitGlobal for heap
+  .data
+  .lcomm heap, 640485760
+
+# emitGlobal for heapTail
+  .data
+  .lcomm heapTail, 8
+
+.text
+iruntime.init:
+  FUNC_PROLOGUE
+
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "heapTail" = 
+    # load variable "heap" [640485760]G_NAMED(iruntime.byte)
+    LOAD_GLOBAL_ADDR heap, 0
+    PUSH_8
+    LOAD_NUMBER 0
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_GLOBAL heapTail 0
+  mov $0, %rax
+
+  # func epilogue
+  .L5_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+iruntime.malloc:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "size" G_NAMED(iruntime.int)
+  # Allocating stack for localvars len=1
+  # offset -16 variable "r" *G_NAMED(iruntime.int)
+  sub $8, %rsp # total stack size
+
+  # Statement
+    # if
+    # emitComp
+    # emit_comp_primitive
+    # load variable "heapTail" *G_NAMED(iruntime.int)
+    LOAD_8_FROM_GLOBAL heapTail
+    PUSH_8
+    # load variable "size" G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -8
+    PUSH_8
+    SUM_FROM_STACK
+    PUSH_8 # left
+    # emit len()
+    LOAD_NUMBER 640485760
+    PUSH_8
+    # load variable "heap" [640485760]G_NAMED(iruntime.byte)
+    LOAD_GLOBAL_ADDR heap, 0
+    PUSH_8
+    SUM_FROM_STACK
+    PUSH_8 # right
+    CMP_FROM_STACK setg
+    TEST_IT
+    je .L19  # jump if 0
+    # then block
+    # Statement
+      # emitCall .panic
+      # get fromGtype
+      # from string
+      # has a corresponding param
+      # fromGtype:string
+      # toGtype:G_NAMED(.string)
+      # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+      LOAD_STRING_LITERAL ..S1
+      PUSH_8
+      POP_TO_ARG_0
+      FUNCALL .panic
+
+    # Statement
+      LOAD_NUMBER 0
+      # defer and return
+      jmp .L6_defer_handler
+    # endif
+    .L19:
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "r" = 
+    # load variable "heapTail" *G_NAMED(iruntime.int)
+    LOAD_8_FROM_GLOBAL heapTail
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -16+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "heapTail" = 
+    # load variable "heapTail" *G_NAMED(iruntime.int)
+    LOAD_8_FROM_GLOBAL heapTail
+    PUSH_8
+    # load variable "size" G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -8
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_GLOBAL heapTail 0
+  # Statement
+    # load variable "r" *G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -16
+    # defer and return
+    jmp .L6_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L6_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+iruntime.append1:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "x" []G_NAMED(iruntime.byte)
+  PUSH_ARG_3 # param "elm" G_NAMED(iruntime.byte)
+  # Allocating stack for localvars len=5
+  # offset -88 variable "i" int
+  # offset -80 variable "newcap" G_NAMED(iruntime.int)
+  # offset -72 variable "zlen" int
+  # offset -64 variable "xlen" int
+  # offset -56 variable "z" []G_NAMED(iruntime.byte)
+  sub $56, %rsp # total stack size
+
+  # Statement
+    # DeclVar "z"
+    # assignToSlice
+    LOAD_EMPTY_SLICE
+    PUSH_SLICE
+    # emitSave24(?, offset 0)
+    # emitSave24(?, offset 0)
+    # *ExprVariable.emitSave24()
+    pop %rax # 3rd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+    STORE_8_TO_LOCAL -56+16
+    pop %rax # 2nd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+    STORE_8_TO_LOCAL -56+8
+    pop %rax # 1st
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -56+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "xlen" = 
+    # emit len()
+    # len(slice)
+    # Relation
+    # emitOffsetLoad(offset 8)
+    # emitOffsetLoad(offset 8)
+    LOAD_8_FROM_LOCAL -24+8
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -64+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "zlen" = 
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -64
+    PUSH_8
+    LOAD_NUMBER 1
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -72+0
+  # Statement
+    # if
+    # emitComp
+    # emit_comp_primitive
+    # emit cap()
+    # Relation
+    # emitOffsetLoad(offset 16)
+    # emitOffsetLoad(offset 16)
+    LOAD_8_FROM_LOCAL -24+16
+    PUSH_8 # left
+    # load variable "zlen" int
+    LOAD_8_FROM_LOCAL -72
+    PUSH_8 # right
+    CMP_FROM_STACK setge
+    TEST_IT
+    je .L20  # jump if 0
+    # then block
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # assign to a slice
+      #   emit address of the array
+      # load variable "x" []G_NAMED(iruntime.byte)
+      LOAD_SLICE_FROM_LOCAL -24
+      PUSH_8 # head of the array
+      LOAD_NUMBER 0
+      PUSH_8 # low index
+      LOAD_NUMBER 1
+      PUSH_8
+      IMUL_FROM_STACK
+      PUSH_8
+      SUM_FROM_STACK
+      PUSH_8
+      #   calc and set len
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -72
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      #   calc and set cap
+      # emit cap()
+      # Relation
+      # emitOffsetLoad(offset 16)
+      # emitOffsetLoad(offset 16)
+      LOAD_8_FROM_LOCAL -24+16
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      POP_SLICE
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -56+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -56+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -56+0
+    jmp .L21 # jump to endif
+    # else block
+    .L20:
+    # Statement
+      # DeclVar "newcap"
+      # LOAD RHS
+        LOAD_NUMBER 0
+      # Assign to LHS
+        STORE_8_TO_LOCAL -80 # initialize newcap
+    # Statement
+      # if
+      # emitComp
+      # emit_comp_primitive
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -64
+      PUSH_8 # left
+      LOAD_NUMBER 0
+      PUSH_8 # right
+      CMP_FROM_STACK sete
+      TEST_IT
+      je .L22  # jump if 0
+      # then block
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        LOAD_NUMBER 8
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -80+0
+      jmp .L23 # jump to endif
+      # else block
+      .L22:
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        # load variable "xlen" int
+        LOAD_8_FROM_LOCAL -64
+        PUSH_8
+        LOAD_NUMBER 2
+        PUSH_8
+        IMUL_FROM_STACK
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -80+0
+      # endif
+      .L23:
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # emitCall iruntime.makeSlice
+      # get fromGtype
+      # from int
+      # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -72
+      PUSH_8
+      # get fromGtype
+      # from G_NAMED(iruntime.int)
+      # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "newcap" G_NAMED(iruntime.int)
+      LOAD_8_FROM_LOCAL -80
+      PUSH_8
+      # get fromGtype
+      # from int
+      # arg 2, doConvertToInterface=false, collectVariadicArgs=false
+      LOAD_NUMBER 1
+      PUSH_8
+      POP_TO_ARG_2
+      POP_TO_ARG_1
+      POP_TO_ARG_0
+      FUNCALL iruntime.makeSlice
+
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -56+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -56+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -56+0
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "i" = 
+      LOAD_NUMBER 0
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -88+0
+      .L24: # begin loop 
+      # emitComp
+      # emit_comp_primitive
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -88
+      PUSH_8 # left
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -64
+      PUSH_8 # right
+      CMP_FROM_STACK setl
+      TEST_IT
+      je .L26  # jump if false
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # emit *ExprIndex
+        # loadCollectIndex
+        # load variable "x" []G_NAMED(iruntime.byte)
+        LOAD_SLICE_FROM_LOCAL -24
+        PUSH_8 # head
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -88
+        IMUL_NUMBER 1
+        PUSH_8 # index * elmSize
+        SUM_FROM_STACK # (index * elmSize) + head
+        ADD_NUMBER 0
+        LOAD_1_BY_DEREF
+        PUSH_8 # rhs
+        # load variable "z" []G_NAMED(iruntime.byte)
+        LOAD_SLICE_FROM_LOCAL -56
+        PUSH_8 # addr
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -88
+        IMUL_NUMBER 1 # index * elmSize
+        PUSH_8
+        SUM_FROM_STACK # (index * elmSize) + addr
+        ADD_NUMBER 0 # offset
+        PUSH_8
+        STORE_1_INDIRECT_FROM_STACK
+
+      .L25: # end block
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -88
+      ADD_NUMBER 1
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -88+0
+      jmp .L24
+      .L26: # end loop
+    # endif
+    .L21:
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # load variable "elm" G_NAMED(iruntime.byte)
+    LOAD_1_FROM_LOCAL_CAST -32
+    PUSH_8 # rhs
+    # load variable "z" []G_NAMED(iruntime.byte)
+    LOAD_SLICE_FROM_LOCAL -56
+    PUSH_8 # addr
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -64
+    IMUL_NUMBER 1 # index * elmSize
+    PUSH_8
+    SUM_FROM_STACK # (index * elmSize) + addr
+    ADD_NUMBER 0 # offset
+    PUSH_8
+    STORE_1_INDIRECT_FROM_STACK
+
+  # Statement
+    # load variable "z" []G_NAMED(iruntime.byte)
+    LOAD_SLICE_FROM_LOCAL -56
+    # defer and return
+    jmp .L7_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L7_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+iruntime.append8:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "x" []G_NAMED(iruntime.int)
+  PUSH_ARG_3 # param "elm" G_NAMED(iruntime.int)
+  # Allocating stack for localvars len=5
+  # offset -88 variable "i" int
+  # offset -80 variable "newcap" G_NAMED(iruntime.int)
+  # offset -72 variable "zlen" int
+  # offset -64 variable "xlen" int
+  # offset -56 variable "z" []G_NAMED(iruntime.int)
+  sub $56, %rsp # total stack size
+
+  # Statement
+    # DeclVar "z"
+    # assignToSlice
+    LOAD_EMPTY_SLICE
+    PUSH_SLICE
+    # emitSave24(?, offset 0)
+    # emitSave24(?, offset 0)
+    # *ExprVariable.emitSave24()
+    pop %rax # 3rd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+    STORE_8_TO_LOCAL -56+16
+    pop %rax # 2nd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+    STORE_8_TO_LOCAL -56+8
+    pop %rax # 1st
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -56+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "xlen" = 
+    # emit len()
+    # len(slice)
+    # Relation
+    # emitOffsetLoad(offset 8)
+    # emitOffsetLoad(offset 8)
+    LOAD_8_FROM_LOCAL -24+8
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -64+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "zlen" = 
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -64
+    PUSH_8
+    LOAD_NUMBER 1
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -72+0
+  # Statement
+    # if
+    # emitComp
+    # emit_comp_primitive
+    # emit cap()
+    # Relation
+    # emitOffsetLoad(offset 16)
+    # emitOffsetLoad(offset 16)
+    LOAD_8_FROM_LOCAL -24+16
+    PUSH_8 # left
+    # load variable "zlen" int
+    LOAD_8_FROM_LOCAL -72
+    PUSH_8 # right
+    CMP_FROM_STACK setge
+    TEST_IT
+    je .L27  # jump if 0
+    # then block
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # assign to a slice
+      #   emit address of the array
+      # load variable "x" []G_NAMED(iruntime.int)
+      LOAD_SLICE_FROM_LOCAL -24
+      PUSH_8 # head of the array
+      LOAD_NUMBER 0
+      PUSH_8 # low index
+      LOAD_NUMBER 8
+      PUSH_8
+      IMUL_FROM_STACK
+      PUSH_8
+      SUM_FROM_STACK
+      PUSH_8
+      #   calc and set len
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -72
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      #   calc and set cap
+      # emit cap()
+      # Relation
+      # emitOffsetLoad(offset 16)
+      # emitOffsetLoad(offset 16)
+      LOAD_8_FROM_LOCAL -24+16
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      POP_SLICE
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -56+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -56+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -56+0
+    jmp .L28 # jump to endif
+    # else block
+    .L27:
+    # Statement
+      # DeclVar "newcap"
+      # LOAD RHS
+        LOAD_NUMBER 0
+      # Assign to LHS
+        STORE_8_TO_LOCAL -80 # initialize newcap
+    # Statement
+      # if
+      # emitComp
+      # emit_comp_primitive
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -64
+      PUSH_8 # left
+      LOAD_NUMBER 0
+      PUSH_8 # right
+      CMP_FROM_STACK sete
+      TEST_IT
+      je .L29  # jump if 0
+      # then block
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        LOAD_NUMBER 8
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -80+0
+      jmp .L30 # jump to endif
+      # else block
+      .L29:
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        # load variable "xlen" int
+        LOAD_8_FROM_LOCAL -64
+        PUSH_8
+        LOAD_NUMBER 2
+        PUSH_8
+        IMUL_FROM_STACK
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -80+0
+      # endif
+      .L30:
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # emitCall iruntime.makeSlice
+      # get fromGtype
+      # from int
+      # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -72
+      PUSH_8
+      # get fromGtype
+      # from G_NAMED(iruntime.int)
+      # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "newcap" G_NAMED(iruntime.int)
+      LOAD_8_FROM_LOCAL -80
+      PUSH_8
+      # get fromGtype
+      # from int
+      # arg 2, doConvertToInterface=false, collectVariadicArgs=false
+      LOAD_NUMBER 8
+      PUSH_8
+      POP_TO_ARG_2
+      POP_TO_ARG_1
+      POP_TO_ARG_0
+      FUNCALL iruntime.makeSlice
+
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -56+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -56+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -56+0
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "i" = 
+      LOAD_NUMBER 0
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -88+0
+      .L31: # begin loop 
+      # emitComp
+      # emit_comp_primitive
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -88
+      PUSH_8 # left
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -64
+      PUSH_8 # right
+      CMP_FROM_STACK setl
+      TEST_IT
+      je .L33  # jump if false
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # emit *ExprIndex
+        # loadCollectIndex
+        # load variable "x" []G_NAMED(iruntime.int)
+        LOAD_SLICE_FROM_LOCAL -24
+        PUSH_8 # head
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -88
+        IMUL_NUMBER 8
+        PUSH_8 # index * elmSize
+        SUM_FROM_STACK # (index * elmSize) + head
+        ADD_NUMBER 0
+        LOAD_8_BY_DEREF
+        PUSH_8 # rhs
+        # load variable "z" []G_NAMED(iruntime.int)
+        LOAD_SLICE_FROM_LOCAL -56
+        PUSH_8 # addr
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -88
+        IMUL_NUMBER 8 # index * elmSize
+        PUSH_8
+        SUM_FROM_STACK # (index * elmSize) + addr
+        ADD_NUMBER 0 # offset
+        PUSH_8
+        STORE_8_INDIRECT_FROM_STACK
+
+      .L32: # end block
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -88
+      ADD_NUMBER 1
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -88+0
+      jmp .L31
+      .L33: # end loop
+    # endif
+    .L28:
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # load variable "elm" G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -32
+    PUSH_8 # rhs
+    # load variable "z" []G_NAMED(iruntime.int)
+    LOAD_SLICE_FROM_LOCAL -56
+    PUSH_8 # addr
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -64
+    IMUL_NUMBER 8 # index * elmSize
+    PUSH_8
+    SUM_FROM_STACK # (index * elmSize) + addr
+    ADD_NUMBER 0 # offset
+    PUSH_8
+    STORE_8_INDIRECT_FROM_STACK
+
+  # Statement
+    # load variable "z" []G_NAMED(iruntime.int)
+    LOAD_SLICE_FROM_LOCAL -56
+    # defer and return
+    jmp .L8_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L8_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+iruntime.append24:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_2 # third
+  PUSH_ARG_1 # second
+  PUSH_ARG_0 # fist "x" []interface{}
+  PUSH_ARG_5 # third
+  PUSH_ARG_4 # second
+  PUSH_ARG_3 # fist "elm" interface{}
+  # Allocating stack for localvars len=5
+  # offset -104 variable "i" int
+  # offset -96 variable "newcap" G_NAMED(iruntime.int)
+  # offset -88 variable "zlen" int
+  # offset -80 variable "xlen" int
+  # offset -72 variable "z" []interface{}
+  sub $56, %rsp # total stack size
+
+  # Statement
+    # DeclVar "z"
+    # assignToSlice
+    LOAD_EMPTY_SLICE
+    PUSH_SLICE
+    # emitSave24(?, offset 0)
+    # emitSave24(?, offset 0)
+    # *ExprVariable.emitSave24()
+    pop %rax # 3rd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+    STORE_8_TO_LOCAL -72+16
+    pop %rax # 2nd
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+    STORE_8_TO_LOCAL -72+8
+    pop %rax # 1st
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -72+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "xlen" = 
+    # emit len()
+    # len(slice)
+    # Relation
+    # emitOffsetLoad(offset 8)
+    # emitOffsetLoad(offset 8)
+    LOAD_8_FROM_LOCAL -24+8
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -80+0
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "zlen" = 
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -80
+    PUSH_8
+    LOAD_NUMBER 1
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -88+0
+  # Statement
+    # if
+    # emitComp
+    # emit_comp_primitive
+    # emit cap()
+    # Relation
+    # emitOffsetLoad(offset 16)
+    # emitOffsetLoad(offset 16)
+    LOAD_8_FROM_LOCAL -24+16
+    PUSH_8 # left
+    # load variable "zlen" int
+    LOAD_8_FROM_LOCAL -88
+    PUSH_8 # right
+    CMP_FROM_STACK setge
+    TEST_IT
+    je .L34  # jump if 0
+    # then block
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # assign to a slice
+      #   emit address of the array
+      # load variable "x" []interface{}
+      LOAD_SLICE_FROM_LOCAL -24
+      PUSH_8 # head of the array
+      LOAD_NUMBER 0
+      PUSH_8 # low index
+      LOAD_NUMBER 24
+      PUSH_8
+      IMUL_FROM_STACK
+      PUSH_8
+      SUM_FROM_STACK
+      PUSH_8
+      #   calc and set len
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -88
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      #   calc and set cap
+      # emit cap()
+      # Relation
+      # emitOffsetLoad(offset 16)
+      # emitOffsetLoad(offset 16)
+      LOAD_8_FROM_LOCAL -24+16
+      PUSH_8
+      LOAD_NUMBER 0
+      PUSH_8
+      SUB_FROM_STACK
+      PUSH_8
+      POP_SLICE
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -72+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -72+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -72+0
+    jmp .L35 # jump to endif
+    # else block
+    .L34:
+    # Statement
+      # DeclVar "newcap"
+      # LOAD RHS
+        LOAD_NUMBER 0
+      # Assign to LHS
+        STORE_8_TO_LOCAL -96 # initialize newcap
+    # Statement
+      # if
+      # emitComp
+      # emit_comp_primitive
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -80
+      PUSH_8 # left
+      LOAD_NUMBER 0
+      PUSH_8 # right
+      CMP_FROM_STACK sete
+      TEST_IT
+      je .L36  # jump if 0
+      # then block
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        LOAD_NUMBER 8
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -96+0
+      jmp .L37 # jump to endif
+      # else block
+      .L36:
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # "newcap" = 
+        # load variable "xlen" int
+        LOAD_8_FROM_LOCAL -80
+        PUSH_8
+        LOAD_NUMBER 2
+        PUSH_8
+        IMUL_FROM_STACK
+        # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+        STORE_8_TO_LOCAL -96+0
+      # endif
+      .L37:
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "z" = 
+      # assignToSlice
+      # emitCall iruntime.makeSlice
+      # get fromGtype
+      # from int
+      # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "zlen" int
+      LOAD_8_FROM_LOCAL -88
+      PUSH_8
+      # get fromGtype
+      # from G_NAMED(iruntime.int)
+      # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+      # load variable "newcap" G_NAMED(iruntime.int)
+      LOAD_8_FROM_LOCAL -96
+      PUSH_8
+      # get fromGtype
+      # from int
+      # arg 2, doConvertToInterface=false, collectVariadicArgs=false
+      LOAD_NUMBER 24
+      PUSH_8
+      POP_TO_ARG_2
+      POP_TO_ARG_1
+      POP_TO_ARG_0
+      FUNCALL iruntime.makeSlice
+
+      PUSH_SLICE
+      # emitSave24(?, offset 0)
+      # emitSave24(?, offset 0)
+      # *ExprVariable.emitSave24()
+      pop %rax # 3rd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 16)
+      STORE_8_TO_LOCAL -72+16
+      pop %rax # 2nd
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 8)
+      STORE_8_TO_LOCAL -72+8
+      pop %rax # 1st
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -72+0
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # "i" = 
+      LOAD_NUMBER 0
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -104+0
+      .L38: # begin loop 
+      # emitComp
+      # emit_comp_primitive
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -104
+      PUSH_8 # left
+      # load variable "xlen" int
+      LOAD_8_FROM_LOCAL -80
+      PUSH_8 # right
+      CMP_FROM_STACK setl
+      TEST_IT
+      je .L40  # jump if false
+      # Statement
+        # StmtAssignment
+        # multi(1) = expr
+        # assignToInterface
+        # emit *ExprIndex
+        # loadCollectIndex
+        # load variable "x" []interface{}
+        LOAD_SLICE_FROM_LOCAL -24
+        PUSH_8 # head
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -104
+        IMUL_NUMBER 24
+        PUSH_8 # index * elmSize
+        SUM_FROM_STACK # (index * elmSize) + head
+        ADD_NUMBER 0
+        LOAD_24_BY_DEREF
+        PUSH_INTERFACE
+        # emitSave24(?, offset 0)
+        # load variable "z" []interface{}
+        LOAD_SLICE_FROM_LOCAL -72
+        PUSH_8 # head address of collection
+        # load variable "i" int
+        LOAD_8_FROM_LOCAL -104
+        PUSH_8 # index
+        LOAD_NUMBER 24 # elementSize
+        PUSH_8
+        IMUL_FROM_STACK # index * elementSize
+        PUSH_8 # index * elementSize
+        SUM_FROM_STACK # (index * size) + address
+        PUSH_8
+        STORE_24_INDIRECT_FROM_STACK
+      .L39: # end block
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -104
+      ADD_NUMBER 1
+      # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+      STORE_8_TO_LOCAL -104+0
+      jmp .L38
+      .L40: # end loop
+    # endif
+    .L35:
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # assignToInterface
+    # load variable "elm" interface{}
+    LOAD_INTERFACE_FROM_LOCAL -48
+    PUSH_INTERFACE
+    # emitSave24(?, offset 0)
+    # load variable "z" []interface{}
+    LOAD_SLICE_FROM_LOCAL -72
+    PUSH_8 # head address of collection
+    # load variable "xlen" int
+    LOAD_8_FROM_LOCAL -80
+    PUSH_8 # index
+    LOAD_NUMBER 24 # elementSize
+    PUSH_8
+    IMUL_FROM_STACK # index * elementSize
+    PUSH_8 # index * elementSize
+    SUM_FROM_STACK # (index * size) + address
+    PUSH_8
+    STORE_24_INDIRECT_FROM_STACK
+  # Statement
+    # load variable "z" []interface{}
+    LOAD_SLICE_FROM_LOCAL -72
+    # defer and return
+    jmp .L9_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L9_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+iruntime.strcopy:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "src" G_NAMED(iruntime.string)
+  PUSH_ARG_1 # param "dest" G_NAMED(iruntime.string)
+  PUSH_ARG_2 # param "slen" G_NAMED(iruntime.int)
+  # Allocating stack for localvars len=1
+  # offset -32 variable "i" int
+  sub $8, %rsp # total stack size
+
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "i" = 
+    LOAD_NUMBER 0
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -32+0
+    .L41: # begin loop 
+    # emitComp
+    # emit_comp_primitive
+    # load variable "i" int
+    LOAD_8_FROM_LOCAL -32
+    PUSH_8 # left
+    # load variable "slen" G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -24
+    PUSH_8 # right
+    CMP_FROM_STACK setl
+    TEST_IT
+    je .L43  # jump if false
+    # Statement
+      # StmtAssignment
+      # multi(1) = expr
+      # emit *ExprIndex
+      # loadCollectIndex
+      # load head address of the string
+      # load variable "src" G_NAMED(iruntime.string)
+      LOAD_8_FROM_LOCAL -8
+      PUSH_8
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -32
+      PUSH_8
+      SUM_FROM_STACK
+      ADD_NUMBER 0
+      LOAD_8_BY_DEREF
+      PUSH_8 # rhs
+      # load variable "dest" G_NAMED(iruntime.string)
+      LOAD_8_FROM_LOCAL -16
+      PUSH_8 # addr
+      # load variable "i" int
+      LOAD_8_FROM_LOCAL -32
+      IMUL_NUMBER 1 # index * elmSize
+      PUSH_8
+      SUM_FROM_STACK # (index * elmSize) + addr
+      ADD_NUMBER 0 # offset
+      PUSH_8
+      STORE_1_INDIRECT_FROM_STACK
+
+    .L42: # end block
+    # load variable "i" int
+    LOAD_8_FROM_LOCAL -32
+    ADD_NUMBER 1
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -32+0
+    jmp .L41
+    .L43: # end loop
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    LOAD_NUMBER 0
+    PUSH_8 # rhs
+    # load variable "dest" G_NAMED(iruntime.string)
+    LOAD_8_FROM_LOCAL -16
+    PUSH_8 # addr
+    # load variable "slen" G_NAMED(iruntime.int)
+    LOAD_8_FROM_LOCAL -24
+    IMUL_NUMBER 1 # index * elmSize
+    PUSH_8
+    SUM_FROM_STACK # (index * elmSize) + addr
+    ADD_NUMBER 0 # offset
+    PUSH_8
+    STORE_1_INDIRECT_FROM_STACK
+
+  # Statement
+    # load variable "dest" G_NAMED(iruntime.string)
+    LOAD_8_FROM_LOCAL -16
+    # defer and return
+    jmp .L10_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L10_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+#--------------------------------------------------------
+# package main
+# string literals
+.data 0
+
+.text
+main.sum:
+  FUNC_PROLOGUE
+  # set params
+  PUSH_ARG_0 # param "a" G_NAMED(main.int)
+  PUSH_ARG_1 # param "b" G_NAMED(main.int)
+  # Allocating stack for localvars len=1
+  # offset -24 variable "r" G_NAMED(main.int)
+  sub $8, %rsp # total stack size
+
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "r" = 
+    # load variable "a" G_NAMED(main.int)
+    LOAD_8_FROM_LOCAL -8
+    PUSH_8
+    # load variable "b" G_NAMED(main.int)
+    LOAD_8_FROM_LOCAL -16
+    PUSH_8
+    SUM_FROM_STACK
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -24+0
+  # Statement
+    # load variable "r" G_NAMED(main.int)
+    LOAD_8_FROM_LOCAL -24
+    # defer and return
+    jmp .L14_defer_handler
+  mov $0, %rax
+
+  # func epilogue
+  .L14_defer_handler: # defer handler
+  LEAVE_AND_RET
+
+main.main:
+  FUNC_PROLOGUE
+  # Allocating stack for localvars len=1
+  # offset -8 variable "s" G_NAMED(main.int)
+  sub $8, %rsp # total stack size
+
+  # Statement
+    # StmtAssignment
+    # multi(1) = expr
+    # "s" = 
+    # emitCall main.sum
+    # get fromGtype
+    # from int
+    # has a corresponding param
+    # fromGtype:int
+    # toGtype:G_NAMED(main.int)
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    LOAD_NUMBER 2
+    PUSH_8
+    # get fromGtype
+    # from int
+    # has a corresponding param
+    # fromGtype:int
+    # toGtype:G_NAMED(main.int)
+    # arg 1, doConvertToInterface=false, collectVariadicArgs=false
+    LOAD_NUMBER 3
+    PUSH_8
+    POP_TO_ARG_1
+    POP_TO_ARG_0
+    FUNCALL main.sum
+
+    # ExprVariable.emitOffsetSavePrimitive(size 8, offset 0)
+    STORE_8_TO_LOCAL -8+0
+  # Statement
+    # emitCall .println
+    # get fromGtype
+    # from G_NAMED(main.int)
+    # has a corresponding param
+    # fromGtype:G_NAMED(main.int)
+    # toGtype:interface{}
+    # arg 0, doConvertToInterface=false, collectVariadicArgs=false
+    # load variable "s" G_NAMED(main.int)
+    LOAD_8_FROM_LOCAL -8
+    PUSH_8
+    POP_TO_ARG_0
+    FUNCALL .println
+
+  mov $0, %rax
+
+  # func epilogue
+  .L15_defer_handler: # defer handler
+  LEAVE_AND_RET
+
