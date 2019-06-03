@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 // e.g. *x = 1, or *x++
-func (uop *ExprUop) emitSave() {
-	emit("# *ExprUop.emitSave()")
+func (uop *ExprUop) emitSavePrimitive() {
+	emit("# *ExprUop.emitSavePrimitive()")
 	assert(uop.op == "*", uop.tok, "uop op should be *")
 	emit("PUSH_8 # what")
 	uop.operand.emit()
@@ -13,14 +13,14 @@ func (uop *ExprUop) emitSave() {
 }
 
 // e.g. x = 1
-func (rel *Relation) emitSave() {
+func (rel *Relation) emitSavePrimitive() {
 	assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
 	variable := rel.expr.(*ExprVariable)
-	variable.emitOffsetSave(variable.getGtype().getSize(), 0, false)
+	variable.emitOffsetSavePrimitive(variable.getGtype().getSize(), 0, false)
 }
 
-func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirection bool) {
-	emit("# ExprVariable.emitOffsetSave(size %d, offset %d)", size, offset)
+func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
+	emit("# ExprVariable.emitOffsetSavePrimitive(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().kind == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().kind == G_POINTER, variable.token(), "")
@@ -42,24 +42,24 @@ func (variable *ExprVariable) emitOffsetSave(size int, offset int, forceIndirect
 func emitAssignPrimitive(left Expr, right Expr) {
 	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
 	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
-	right.emit()   //   expr => %rax
-	emitSave(left) //   %rax => memory
+	right.emit()            //   expr => %rax
+	emitSavePrimitive(left) //   %rax => memory
 }
 
 // Each left-hand side operand must be addressable,
 // a map index expression,
 // or (for = assignments only) the blank identifier.
-func emitSave(left Expr) {
+func emitSavePrimitive(left Expr) {
 	switch left.(type) {
 	case *Relation:
 		emit("# %s %s = ", left.(*Relation).name, left.getGtype().String())
-		left.(*Relation).emitSave()
+		left.(*Relation).emitSavePrimitive()
 	case *ExprIndex:
-		left.(*ExprIndex).emitSave()
+		left.(*ExprIndex).emitSavePrimitive()
 	case *ExprStructField:
-		left.(*ExprStructField).emitSave()
+		left.(*ExprStructField).emitSavePrimitive()
 	case *ExprUop:
-		left.(*ExprUop).emitSave()
+		left.(*ExprUop).emitSavePrimitive()
 	default:
 		left.dump()
 		errorft(left.token(), "Unknown case %T", left)
@@ -104,7 +104,7 @@ func (e *ExprIndex) emitSave24() {
 	emit("STORE_24_INDIRECT_FROM_STACK")
 }
 
-func (e *ExprIndex) emitSave() {
+func (e *ExprIndex) emitSavePrimitive() {
 	collectionType := e.collection.getGtype()
 	switch {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
@@ -118,7 +118,7 @@ func (e *ExprIndex) emitSave() {
 	}
 }
 
-func (e *ExprStructField) emitSave() {
+func (e *ExprStructField) emitSavePrimitive() {
 	fieldType := e.getGtype()
 	if e.strct.getGtype().kind == G_POINTER {
 		emit("PUSH_8 # rhs")
@@ -129,23 +129,23 @@ func (e *ExprStructField) emitSave() {
 
 		emit("STORE_8_INDIRECT_FROM_STACK")
 	} else {
-		emitOffsetSave(e.strct, 8, fieldType.offset)
+		emitOffsetSavePrimitive(e.strct, 8, fieldType.offset)
 	}
 }
 
-func emitOffsetSave(lhs Expr, size int, offset int) {
+func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 	switch lhs.(type) {
 	case *Relation:
 		rel := lhs.(*Relation)
 		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		emitOffsetSave(rel.expr, size, offset)
+		emitOffsetSavePrimitive(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
-		variable.emitOffsetSave(size, offset, false)
+		variable.emitOffsetSavePrimitive(size, offset, false)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
-		emitOffsetSave(structfield.strct, size, fieldType.offset+offset)
+		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
 		emitCollectIndexSave(indexExpr.collection, indexExpr.index, offset)
@@ -184,11 +184,11 @@ func emitSave24(lhs Expr, offset int) {
 func (variable *ExprVariable) emitSave24(offset int) {
 	emit("# *ExprVariable.emitSave24()")
 	emit("pop %%rax # 3rd")
-	variable.emitOffsetSave(8, offset+16, false)
+	variable.emitOffsetSavePrimitive(8, offset+16, false)
 	emit("pop %%rax # 2nd")
-	variable.emitOffsetSave(8, offset+8, false)
+	variable.emitOffsetSavePrimitive(8, offset+8, false)
 	emit("pop %%rax # 1st")
-	variable.emitOffsetSave(8, offset+0, true)
+	variable.emitOffsetSavePrimitive(8, offset+0, true)
 }
 
 func emitCollectIndexSave(collection Expr, index Expr, offset int) {

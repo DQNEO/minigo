@@ -130,7 +130,7 @@ func (ast *StmtAssignment) emit() {
 						emitSave24(left, 0)
 					} else {
 						emit("pop %%rax")
-						emitSave(left)
+						emitSavePrimitive(left)
 					}
 				}
 				return
@@ -164,7 +164,7 @@ func (ast *StmtAssignment) emit() {
 			okVariable := ast.lefts[1]
 			okRegister := mapOkRegister(right.getGtype().is24Width())
 			emit("mov %%%s, %%rax # emit okValue", okRegister)
-			emitSave(okVariable)
+			emitSavePrimitive(okVariable)
 		}
 		return
 	}
@@ -198,7 +198,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				assert(0 <= elmSize && elmSize <= 8, lhs.token(), "invalid size")
 				for i := 0; i < arrayType.length; i++ {
 					emit("mov $0, %%rax")
-					emitOffsetSave(lhs, elmSize, fieldtype.offset+i*elmSize)
+					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
 				}
 			}
 
@@ -224,7 +224,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, lhs.token(), fieldtype.String())
-			emitOffsetSave(lhs, regSize, fieldtype.offset)
+			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)
 		}
 	}
 	emit("# initialize struct with zero values: end")
@@ -281,7 +281,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				default:
 					for i, val := range initvalues.values {
 						val.emit()
-						emitOffsetSave(variable, elmSize, arrayType.offset+i*elmSize)
+						emitOffsetSavePrimitive(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
 			case fieldtype.kind == G_SLICE:
@@ -317,7 +317,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 				regSize := fieldtype.getSize()
 				assert(0 < regSize && regSize <= 8, variable.token(), fieldtype.String())
-				emitOffsetSave(variable, regSize, fieldtype.offset)
+				emitOffsetSavePrimitive(variable, regSize, fieldtype.offset)
 			}
 		}
 	default:
@@ -524,7 +524,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 				TBI(rhs.token(), "no supporetd %T", rhs)
 			}
 
-			emitOffsetSave(lhs, elmSize, offsetByIndex)
+			emitOffsetSavePrimitive(lhs, elmSize, offsetByIndex)
 		}
 	}
 }

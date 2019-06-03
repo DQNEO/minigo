@@ -216,7 +216,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// map len++
 	elen.emit()
 	emit("ADD_NUMBER 1")
-	emitOffsetSave(e.collection, IntSize, ptrSize) // update map len
+	emitOffsetSavePrimitive(e.collection, IntSize, ptrSize) // update map len
 
 	// Save key and value
 	emit("%s: # end loop", labelSave)
@@ -319,7 +319,7 @@ func (f *StmtFor) emitRangeForMap() {
 	if !mapKeyType.isString() {
 		emit("LOAD_8_BY_DEREF")
 	}
-	f.rng.indexvar.emitSave()
+	f.rng.indexvar.emitSavePrimitive()
 
 	if f.rng.valuevar != nil {
 		emit("# Setting valuevar")
@@ -345,7 +345,7 @@ func (f *StmtFor) emitRangeForMap() {
 			emitSave24(f.rng.valuevar, 0)
 		default:
 			emit("LOAD_8_BY_DEREF")
-			f.rng.valuevar.emitSave()
+			f.rng.valuevar.emitSavePrimitive()
 		}
 
 	}

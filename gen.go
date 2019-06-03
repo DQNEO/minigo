@@ -170,7 +170,7 @@ func emitIncrDecl(inst string, operand Expr) {
 	emit(inst)
 
 	left := operand
-	emitSave(left)
+	emitSavePrimitive(left)
 }
 
 func (binop *ExprBinop) emitComp() {
