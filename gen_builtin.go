@@ -86,7 +86,7 @@ func (e *ExprCap) emit() {
 			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
-			if sliceExpr.collection.getGtype().kind == G_ARRAY {
+			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
 					op:  "-",
