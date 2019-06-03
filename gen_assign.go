@@ -184,7 +184,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
 	}
-	assert(rhs == nil || (rhs.getGtype().kind == G_NAMED && rhs.getGtype().relation.gtype.kind == G_STRUCT),
+	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
@@ -195,7 +195,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			elementType := arrayType.elementType
 			elmSize := arrayType.elementType.getSize()
 			switch {
-			case elementType.kind == G_NAMED && elementType.relation.gtype.kind == G_STRUCT:
+			case elementType.getKind() == G_STRUCT:
 				left := &ExprStructField{
 					strct:     lhs,
 					fieldname: fieldtype.fieldname,

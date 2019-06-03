@@ -134,7 +134,7 @@ func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 
 func (e *ExprStructField) emitSavePrimitive() {
 	fieldType := e.getGtype()
-	if e.strct.getGtype().kind == G_POINTER {
+	if e.strct.getGtype().getKind() == G_POINTER {
 		emit("PUSH_8 # rhs")
 
 		e.strct.emit()
