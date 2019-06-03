@@ -244,14 +244,14 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	macroStart("STORE_1_INDIRECT_FROM_STACK", "")
-	emit("pop %%rax")
-	emit("pop %%rcx")
+	emit("pop %%rax # where")
+	emit("pop %%rcx # what")
 	emit("mov %%cl, (%%rax)")
 	macroEnd()
 
 	macroStart("STORE_8_INDIRECT_FROM_STACK", "")
-	emit("pop %%rax")
-	emit("pop %%rcx")
+	emit("pop %%rax # where")
+	emit("pop %%rcx # what")
 	emit("mov %%rcx, (%%rax)")
 	macroEnd()
 
