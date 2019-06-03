@@ -66,10 +66,10 @@ func (e *ExprCap) emit() {
 	emit("# emit cap()")
 	arg := e.arg
 	gtype := arg.getGtype()
-	switch {
-	case gtype.kind == G_ARRAY:
+	switch gtype.getKind() {
+	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case gtype.kind == G_SLICE:
+	case G_SLICE:
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
@@ -103,9 +103,9 @@ func (e *ExprCap) emit() {
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
-	case gtype.getKind() == G_MAP:
+	case G_MAP:
 		TBI(arg.token(), "unable to handle %T", arg)
-	case gtype.getKind() == G_STRING:
+	case G_STRING:
 		TBI(arg.token(), "unable to handle %T", arg)
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
