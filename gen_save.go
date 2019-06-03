@@ -19,8 +19,7 @@ func emitSavePrimitive(left Expr) {
 		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
 		emitSavePrimitive(rel.expr)
 	case *ExprVariable:
-		variable := left.(*ExprVariable)
-		variable.emitOffsetSavePrimitive(variable.getGtype().getSize(), 0, false)
+		emitOffsetSavePrimitive(left, left.getGtype().getSize(), 0)
 	case *ExprIndex:
 		left.(*ExprIndex).emitSavePrimitive()
 	case *ExprStructField:
