@@ -31,6 +31,10 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("lea .M%s, %%rax", call.methodName) // index value
 	emit("PUSH_8 # map index value")                 // index value
+
+	emit("pop %%rcx")
+	emit("pop %%rbx")
+	emit("pop %%rax")
 	emitMapGet(mapType, false)
 
 	emit("PUSH_8")
@@ -66,6 +70,10 @@ func loadMapIndexExpr(_map Expr, index Expr) {
 	emit("PUSH_8 # len")
 	index.emit()
 	emit("PUSH_8 # index value")
+
+	emit("pop %%rcx # index value")
+	emit("pop %%rbx # len")
+	emit("pop %%rax # heap")
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -90,9 +98,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("# emitMapGet")
 
-	emit("pop %%r12 # index value")
-	emit("pop %%r11 # map len")
-	emit("pop %%r10 # map head")
+	emit("mov %%rax, %%r10")
+	emit("mov %%rbx, %%r11")
+	emit("mov %%rcx, %%r12")
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
@@ -180,6 +188,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("jmp %s", labelBegin)
 
 	emit("%s: # end loop", labelEnd)
+
 }
 
 // m[k] = v
