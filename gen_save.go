@@ -48,6 +48,8 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
 		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
+	case *ExprUop:
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
