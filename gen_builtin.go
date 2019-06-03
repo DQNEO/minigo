@@ -122,9 +122,11 @@ func emitMakeSliceFunc() {
 	emit("PUSH_ARG_1") // -16
 	emit("PUSH_ARG_0") // -24
 
-	emit("mov -16(%%rbp), %%rax # newcap")
-	emit("mov -8(%%rbp), %%rcx # unit")
-	emit("imul %%rcx, %%rax")
+	emit("LOAD_8_FROM_LOCAL -16 # newcap")
+	emit("PUSH_8")
+	emit("LOAD_8_FROM_LOCAL -8 # unit")
+	emit("PUSH_8")
+	emit("IMUL_FROM_STACK")
 	emit("ADD_NUMBER 1 # 1 byte buffer")
 
 	emit("PUSH_8")
