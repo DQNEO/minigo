@@ -535,14 +535,12 @@ func (p *parser) parsePrim() Expr {
 		values := p.parseArrayLiteral()
 		switch gtype.kind {
 		case G_ARRAY:
-			if gtype.kind == G_ARRAY {
-				if gtype.length == 0 {
-					gtype.length = len(values)
-				} else {
-					if gtype.length < len(values) {
-						errorft(tok, "array length does not match (%d != %d)",
-							len(values), gtype.length)
-					}
+			if gtype.length == 0 {
+				gtype.length = len(values)
+			} else {
+				if gtype.length < len(values) {
+					errorft(tok, "array length does not match (%d != %d)",
+						len(values), gtype.length)
 				}
 			}
 
