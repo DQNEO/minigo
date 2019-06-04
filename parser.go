@@ -1924,14 +1924,14 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
-func (p *parser) parseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
-	return p.parseByteStream(bs, packageBlockScope, importOnly)
+	return p.Parse(bs, packageBlockScope, importOnly)
 }
 
-func (p *parser) parseFile(filename string, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseFile(filename string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromFile(filename)
-	return p.parseByteStream(bs, packageBlockScope, importOnly)
+	return p.Parse(bs, packageBlockScope, importOnly)
 }
 
 // initialize parser's status per file
@@ -1950,7 +1950,7 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 // a package clause defining the package to which it belongs,
 // followed by a possibly empty set of import declarations that declare packages whose contents it wishes to use,
 // followed by a possibly empty set of declarations of functions, types, variables, and constants.
-func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool) *AstFile {
 
 	p.initFile(bs, packageBlockScope)
 
@@ -2005,7 +2005,7 @@ func (p *parser) parseByteStream(bs *ByteStream, packageBlockScope *Scope, impor
 	}
 }
 
-func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPackage {
+func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage {
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile
@@ -2024,9 +2024,9 @@ func ParseSources(pkgname identifier, sources []string, onMemory bool) *AstPacka
 		}
 		if onMemory {
 			var filename string = string(pkgname) + ".memory"
-			astFile = p.parseString(filename, source, pkgScope, false)
+			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
-			astFile = p.parseFile(source, pkgScope, false)
+			astFile = p.ParseFile(source, pkgScope, false)
 		}
 		astFiles = append(astFiles, astFile)
 		for _, g := range astFile.uninferredGlobals {

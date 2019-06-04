@@ -9,7 +9,7 @@ func parseImports(sourceFiles []string) []string {
 	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
-		astFile := p.parseFile(sourceFile, nil, true)
+		astFile := p.ParseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
@@ -28,7 +28,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: "",
 	}
-	f := p.parseString("internal_universe.go", internalUniverseCode, universe, false)
+	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
 
 	//debugf("len p.methods = %d", len(p.methods))
 	resolveMethods(f.methods, p.packageBlockScope)
@@ -46,7 +46,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: "iruntime",
 	}
-	f := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	resolveMethods(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -58,9 +58,10 @@ func compileRuntime(universe *Scope) *AstPackage {
 	}
 }
 
-func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
+// compileFiles parses files into *AstPackage
+func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
-	mainPkg := ParseSources(identifier("main"), sourceFiles, false)
+	mainPkg := ParseFiles(identifier("main"), sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -97,7 +98,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
 		var codes []string = []string{pkgCode}
-		pkg := ParseSources(pkgName, codes, true)
+		pkg := ParseFiles(pkgName, codes, true)
 		resolveInPackage(pkg, universe)
 		resolveMethods(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
