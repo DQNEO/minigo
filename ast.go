@@ -19,7 +19,7 @@ type AstFile struct {
 	name              string
 	packageClause     *PackageClause
 	importDecls       []*ImportDecl
-	topLevelDecls     []*TopLevelDecl
+	DeclList          []*TopLevelDecl
 	unresolved        []*Relation
 	uninferredGlobals []*ExprVariable
 	uninferredLocals  []Inferrer // VarDecl, StmtShortVarDecl or RangeClause

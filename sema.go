@@ -53,7 +53,7 @@ func resolveMethods(pmethods map[identifier]methods, packageScope *Scope) {
 
 func collectDecls(pkg *AstPackage) {
 	for _, f := range pkg.files {
-		for _, decl := range f.topLevelDecls {
+		for _, decl := range f.DeclList {
 			if decl.vardecl != nil {
 				pkg.vars = append(pkg.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {

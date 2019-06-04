@@ -1994,7 +1994,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		name:              bs.filename,
 		packageClause:     packageClause,
 		importDecls:       importDecls,
-		topLevelDecls:     topLevelDecls,
+		DeclList:          topLevelDecls,
 		unresolved:        stillUnresolved,
 		uninferredGlobals: p.uninferredGlobals,
 		uninferredLocals:  p.uninferredLocals,

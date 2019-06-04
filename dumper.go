@@ -108,7 +108,7 @@ func (a *AstFile) dump() {
 			debugf("import \"%s\"", spec.path)
 		}
 	}
-	for _, decl := range a.topLevelDecls {
+	for _, decl := range a.DeclList {
 		if decl.funcdecl != nil {
 			decl.funcdecl.dump()
 		} else if decl.typedecl != nil {
