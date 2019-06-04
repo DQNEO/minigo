@@ -61,7 +61,6 @@ func (uop *ExprUop) emitSavePrimitive() {
 
 // x = 1
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
-	emit("# ExprVariable.emitOffsetSavePrimitive(size %d, offset %d)", size, offset)
 	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
 	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), "")
@@ -69,13 +68,13 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)
 		emit("PUSH_8 # where")
-		emit("STORE_8_INDIRECT_FROM_STACK")
+		emit("STORE_8_INDIRECT_FROM_STACK # %s", variable.varname)
 		return
 	}
 	if variable.isGlobal {
-		emit("STORE_%d_TO_GLOBAL %s %d", size, variable.varname, offset)
+		emit("STORE_%d_TO_GLOBAL %s %d # %s ", size, variable.varname, offset, variable.varname)
 	} else {
-		emit("STORE_%d_TO_LOCAL %d+%d", size, variable.offset, offset)
+		emit("STORE_%d_TO_LOCAL %d+%d # %s", size, variable.offset, offset, variable.varname)
 	}
 }
 
