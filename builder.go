@@ -49,6 +49,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	f := p.parseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	resolveMethods(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
+	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{f},
@@ -70,6 +71,7 @@ func compileMainPackage(universe *Scope, sourceFiles []string) *AstPackage {
 	resolveMethods(mainPkg.methods, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(mainPkg.uninferredGlobals, mainPkg.uninferredLocals)
+	calcStructSize(mainPkg.dynamicTypes)
 	if debugAst {
 		mainPkg.dump()
 	}
@@ -100,6 +102,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		resolveMethods(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
+		calcStructSize(pkg.dynamicTypes)
 		libs.AddPackage(pkg)
 	}
 

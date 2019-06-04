@@ -113,7 +113,6 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		emit(".quad %d # %s %s", val, gtype.String(), containerName)
 	} else if primType == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
-		gtype.relation.gtype.calcStructOffset()
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# padding=%d", field.padding)
 			switch field.padding {

@@ -69,3 +69,12 @@ func setStringLables(pkg *AstPackage, prefix string) {
 	}
 }
 
+func calcStructSize(gtypes []*Gtype) {
+	for _, gtype := range gtypes {
+		if gtype.getKind() == G_STRUCT {
+			gtype.calcStructOffset()
+		} else if gtype.getKind() == G_POINTER && gtype.origType.getKind() == G_STRUCT {
+			gtype.origType.calcStructOffset()
+		}
+	}
+}
