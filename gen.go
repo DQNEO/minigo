@@ -113,9 +113,7 @@ func (structfield *ExprStructField) calcOffset() {
 	switch structType.getKind() {
 	case G_POINTER:
 		origType := structType.origType.relation.gtype
-		if origType.size == undefinedSize {
-			origType.calcStructOffset()
-		}
+		origType.calcStructOffset()
 	case G_STRUCT:
 		structType.calcStructOffset()
 	default:
