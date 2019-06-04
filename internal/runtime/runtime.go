@@ -1,4 +1,4 @@
-package runtime
+package iruntime
 
 var runtimeArgc int
 var runtimeArgv *int
