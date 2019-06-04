@@ -57,7 +57,6 @@ func (a *ExprStructField) emitAddress() {
 
 func (a *ExprStructField) emit() {
 	emit("# LOAD ExprStructField")
-	a.calcOffset()
 	switch a.strct.getGtype().getKind() {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
@@ -301,7 +300,6 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		variable.emitOffsetLoad(size, offset)
 	case *ExprStructField:
 		structfield := lhs.(*ExprStructField)
-		structfield.calcOffset()
 		fieldType := structfield.getGtype()
 		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct

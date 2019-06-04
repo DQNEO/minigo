@@ -64,6 +64,10 @@ func (gtype *Gtype) isNil() bool {
 
 func (gtype *Gtype) Underlying() *Gtype {
 	if gtype.kind == G_NAMED {
+		if gtype.relation.gtype == nil {
+			// nil type
+			return gtype
+		}
 		return gtype.relation.gtype.Underlying()
 
 	}
@@ -112,7 +116,6 @@ func (gtype *Gtype) getSize() int {
 			assertNotNil(gtype.elementType != nil, nil)
 			return gtype.length * gtype.elementType.getSize()
 		} else if gtype.kind == G_STRUCT {
-			// @TODO consider the case of real zero e.g. struct{}
 			if gtype.size == undefinedSize {
 				gtype.calcStructOffset()
 			}
@@ -199,7 +202,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type, but got "+strct.String())
+	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got "+strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int

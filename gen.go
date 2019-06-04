@@ -103,30 +103,6 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 	emit("LEAVE_AND_RET")
 }
 
-func (structfield *ExprStructField) calcOffset() {
-	fieldType := structfield.getGtype()
-	if fieldType.offset != undefinedSize {
-		return
-	}
-
-	structType := structfield.strct.getGtype()
-	switch structType.getKind() {
-	case G_POINTER:
-		origType := structType.origType.relation.gtype
-		if origType.size == undefinedSize {
-			origType.calcStructOffset()
-		}
-	case G_STRUCT:
-		structType.calcStructOffset()
-	default:
-		errorf("invalid case")
-	}
-
-	if fieldType.offset == undefinedSize {
-		errorf("filed type %s [named %s] offset should not be minus.", fieldType.String(), structfield.fieldname)
-	}
-}
-
 func emit_intcast(gtype *Gtype) {
 	if gtype.getKind() == G_BYTE {
 		emit("CAST_BYTE_TO_INT")
