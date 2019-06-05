@@ -68,7 +68,8 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
-	mainPkg := ParseFiles(identifier("main"), sourceFiles, false)
+	var pkgName identifier = "main"
+	mainPkg := ParseFiles(pkgName, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -83,7 +84,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	if resolveOnly {
 		return nil
 	}
-	allScopes[mainPkg.name] = mainPkg.scope
+	allScopes[pkgName] = mainPkg.scope
 	return mainPkg
 }
 
