@@ -26,7 +26,7 @@ func resolve(sc *Scope, rel *Relation) *IdentBody {
 	return relbody
 }
 
-func resolveInPackage(pkg *AstPackage, universe *Scope) {
+func resolveIdents(pkg *AstPackage, universe *Scope) {
 	packageScope := pkg.scope
 	packageScope.outer = universe
 	for _, file := range pkg.files {

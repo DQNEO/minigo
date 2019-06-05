@@ -67,7 +67,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 		}
 		return nil
 	}
-	resolveInPackage(mainPkg, universe)
+	resolveIdents(mainPkg, universe)
 	resolveMethods(mainPkg.methods, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(mainPkg.uninferredGlobals, mainPkg.uninferredLocals)
@@ -98,7 +98,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
-		resolveInPackage(pkg, universe)
+		resolveIdents(pkg, universe)
 		resolveMethods(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
