@@ -259,25 +259,16 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 		gtype = gtype.origType
 	}
 
-	// refetch gtype from the package block scope
-	// I forgot the reason to do this :(
-	_, ok := allScopes[gtype.relation.pkg]
-	if !ok {
-		errorft(e.token(), "ExprMethodcall.getGtype(): socope \"%s\" does not exist in allScopes ", gtype.relation.pkg)
-	}
-	pgtype := allScopes[gtype.relation.pkg].getGtype(gtype.relation.name)
-	if pgtype == nil {
-		errorft(e.token(), "%s is not found in the scope", gtype)
-	}
-	if pgtype.kind == G_INTERFACE {
-		methodsig, ok := pgtype.imethods[e.fname]
+	underlyingType := gtype.relation.gtype // I forgot the reason to do this :(
+	if underlyingType.kind == G_INTERFACE {
+		methodsig, ok := underlyingType.imethods[e.fname]
 		if !ok {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(methodsig != nil, e.tok)
 		return methodsig.rettypes[0]
 	} else {
-		method, ok := pgtype.methods[e.fname]
+		method, ok := underlyingType.methods[e.fname]
 		if !ok {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
