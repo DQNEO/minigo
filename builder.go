@@ -57,6 +57,14 @@ func compileRuntime(universe *Scope) *AstPackage {
 	}
 }
 
+func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
+	resolveIdents(pkg, universe)
+	attachMethodsToTypes(pkg.methods, pkg.scope)
+	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
+	calcStructSize(pkg.dynamicTypes)
+	return pkg
+}
+
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
@@ -67,11 +75,8 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 		}
 		return nil
 	}
-	resolveIdents(mainPkg, universe)
-	attachMethodsToTypes(mainPkg.methods, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
-	inferTypes(mainPkg.uninferredGlobals, mainPkg.uninferredLocals)
-	calcStructSize(mainPkg.dynamicTypes)
+	mainPkg = makePkg(mainPkg, universe)
 	if debugAst {
 		mainPkg.dump()
 	}
@@ -98,11 +103,8 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
-		resolveIdents(pkg, universe)
-		attachMethodsToTypes(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
-		inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
-		calcStructSize(pkg.dynamicTypes)
+		pkg = makePkg(pkg,universe)
 		libs.AddPackage(pkg)
 	}
 
