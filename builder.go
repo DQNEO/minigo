@@ -75,7 +75,6 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 		}
 		return nil
 	}
-	allScopes[mainPkg.name] = mainPkg.scope
 	mainPkg = makePkg(mainPkg, universe)
 	if debugAst {
 		mainPkg.dump()
@@ -84,6 +83,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	if resolveOnly {
 		return nil
 	}
+	allScopes[mainPkg.name] = mainPkg.scope
 	return mainPkg
 }
 
@@ -103,9 +103,9 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
-		allScopes[pkgName] = pkg.scope
 		pkg = makePkg(pkg,universe)
 		libs.AddPackage(pkg)
+		allScopes[pkgName] = pkg.scope
 	}
 
 	return libs
