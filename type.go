@@ -2,13 +2,13 @@ package main
 
 import "fmt"
 
-type GTYPE_KIND int
+type EType int
 
 const undefinedSize = -1
 
 const (
-	G_UNKOWNE   GTYPE_KIND = iota
-	G_DEPENDENT            // depends on other expression
+	G_UNKOWNE   EType = iota
+	G_DEPENDENT             // depends on other expression
 	G_NAMED
 	// below are primitives which are declared in the universe block
 	G_INT
@@ -33,7 +33,7 @@ type signature struct {
 }
 
 type Gtype struct {
-	kind           GTYPE_KIND
+	kind           EType                       // Elementary type
 	receiverTypeId int                         // for receiverTypeId. 0:unkonwn
 	dependendson   Expr                        // for G_DEPENDENT
 	relation       *Relation                   // for G_NAMED
@@ -74,7 +74,7 @@ func (gtype *Gtype) Underlying() *Gtype {
 	return gtype
 }
 
-func (gtype *Gtype) getKind() GTYPE_KIND {
+func (gtype *Gtype) getKind() EType {
 	if gtype == nil {
 		return G_UNKOWNE
 	}

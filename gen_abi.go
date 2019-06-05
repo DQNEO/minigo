@@ -162,7 +162,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			arg.emit()
 		}
 
-		var primType GTYPE_KIND = 0
+		var primType EType = 0
 		if arg.getGtype() != nil {
 			primType = arg.getGtype().getKind()
 		}
