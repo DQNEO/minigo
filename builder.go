@@ -29,10 +29,9 @@ func compileUniverse(universe *Scope) *AstPackage {
 		packageName: "",
 	}
 	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
-
-	//debugf("len p.methods = %d", len(p.methods))
 	resolveMethods(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
+	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
 		name:           "",
 		files:          []*AstFile{f},
