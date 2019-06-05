@@ -35,6 +35,9 @@ func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mai
 			funcs = append(funcs, fn)
 		}
 		setTypeIds(pkg.namedTypes)
+		for _, f := range pkg.files {
+			WalkFile(f)
+		}
 	}
 
 	symbolTable.uniquedDTypes = uniqueDynamicTypes(dynamicTypes)

@@ -61,6 +61,7 @@ func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) 
 func collectDecls(pkg *AstPackage) {
 	for _, f := range pkg.files {
 		for _, decl := range f.DeclList {
+
 			if decl.vardecl != nil {
 				pkg.vars = append(pkg.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
@@ -82,6 +83,24 @@ func calcStructSize(gtypes []*Gtype) {
 			gtype.calcStructOffset()
 		} else if gtype.getKind() == G_POINTER && gtype.origType.getKind() == G_STRUCT {
 			gtype.origType.calcStructOffset()
+		}
+	}
+}
+
+func WalkFile(file *AstFile) {
+	for _, decl := range file.DeclList {
+		Walk(decl)
+	}
+}
+
+func Walk(n Node) {
+	switch n.(type) {
+	case *TopLevelDecl:
+		decl := n.(*TopLevelDecl)
+		if decl.funcdecl != nil {
+			Walk(decl.funcdecl)
+		} else if decl.vardecl != nil {
+			Walk(decl.vardecl)
 		}
 	}
 }
