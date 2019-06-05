@@ -40,7 +40,7 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 }
 
 // copy methods from p.nameTypes to gtype.methods of each type
-func resolveMethods(pmethods map[identifier]methods, packageScope *Scope) {
+func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) {
 	for typeName, methods := range pmethods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {

@@ -29,7 +29,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 		packageName: "",
 	}
 	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
-	resolveMethods(f.methods, p.packageBlockScope)
+	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
@@ -46,7 +46,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 		packageName: "iruntime",
 	}
 	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
-	resolveMethods(f.methods, p.packageBlockScope)
+	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
@@ -68,7 +68,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 		return nil
 	}
 	resolveIdents(mainPkg, universe)
-	resolveMethods(mainPkg.methods, mainPkg.scope)
+	attachMethodsToTypes(mainPkg.methods, mainPkg.scope)
 	allScopes[mainPkg.name] = mainPkg.scope
 	inferTypes(mainPkg.uninferredGlobals, mainPkg.uninferredLocals)
 	calcStructSize(mainPkg.dynamicTypes)
@@ -99,7 +99,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		var codes []string = []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
 		resolveIdents(pkg, universe)
-		resolveMethods(pkg.methods, pkg.scope)
+		attachMethodsToTypes(pkg.methods, pkg.scope)
 		allScopes[pkgName] = pkg.scope
 		inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
 		calcStructSize(pkg.dynamicTypes)
