@@ -124,10 +124,10 @@ func (ast *StmtAssignment) emit() {
 					assert(left.getGtype() != nil, left.token(), "should not be nil")
 					switch left.getGtype().getKind() {
 					case G_SLICE:
-						// @TODO: Does this work ?
+						emit("POP_24")
 						emitSave24(left, 0)
 					case G_INTERFACE:
-						// @TODO: Does this work ?
+						emit("POP_24")
 						emitSave24(left, 0)
 					default:
 						emit("pop %%rax")
@@ -212,11 +212,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 		case G_SLICE:
 			emit("LOAD_EMPTY_SLICE")
-			emit("PUSH_SLICE")
 			emitSave24(lhs, fieldtype.offset)
 		case G_MAP:
 			emit("LOAD_EMPTY_MAP")
-			emit("PUSH_MAP")
 			emitSave24(lhs, fieldtype.offset)
 		case G_STRUCT:
 			left := &ExprStructField{
@@ -226,7 +224,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			assignToStruct(left, nil)
 		case G_INTERFACE:
 			emit("LOAD_EMPTY_INTERFACE")
-			emit("PUSH_INTERFACE")
 			emitSave24(lhs, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
@@ -340,7 +337,6 @@ func assignToMap(lhs Expr, rhs Expr) {
 	if rhs == nil {
 		emit("# initialize map with a zero value")
 		emit("LOAD_EMPTY_MAP")
-		emit("PUSH_MAP")
 		emitSave24(lhs, 0)
 		return
 	}
@@ -350,10 +346,8 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		lit := rhs.(*ExprMapLiteral)
 		lit.emit()
-		emit("PUSH_MAP")
 	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
-		emit("PUSH_MAP")
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
@@ -365,7 +359,6 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
 	if rhs == nil || isNil(rhs) {
 		emit("LOAD_EMPTY_INTERFACE")
-		emit("PUSH_INTERFACE")
 		emitSave24(lhs, 0)
 		return
 	}
@@ -373,13 +366,11 @@ func assignToInterface(lhs Expr, rhs Expr) {
 	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
-		emit("PUSH_INTERFACE")
 		emitSave24(lhs, 0)
 		return
 	}
 
 	emitConversionToInterface(rhs)
-	emit("PUSH_INTERFACE")
 	emitSave24(lhs, 0)
 }
 
@@ -389,7 +380,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
 		emit("LOAD_EMPTY_SLICE")
-		emit("PUSH_SLICE")
 		emitSave24(lhs, 0)
 		return
 	}
@@ -401,22 +391,18 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		rel := rhs.(*Relation)
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {
 			emit("LOAD_EMPTY_SLICE")
-			emit("PUSH_SLICE")
 			emitSave24(lhs, 0)
 			return
 		}
 		rvariable, ok := rel.expr.(*ExprVariable)
 		assert(ok, nil, "ok")
 		rvariable.emit()
-		emit("PUSH_SLICE")
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
-		emit("PUSH_SLICE")
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
 		e.emit()
-		emit("PUSH_SLICE")
 	case *ExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
@@ -437,11 +423,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		strlen.emit()
 		emit("PUSH_8 # len")
 		emit("PUSH_8 # cap")
-
+		emit("POP_SLICE")
 	default:
 		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
 		rhs.emit() // it should put values to rax,rbx,rcx
-		emit("PUSH_SLICE")
 	}
 
 	emitSave24(lhs, 0)
@@ -483,7 +468,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 				// assign zero values
 				if elementType.getKind() == G_INTERFACE {
 					emit("LOAD_EMPTY_INTERFACE")
-					emit("PUSH_INTERFACE")
 					emitSave24(lhs, offsetByIndex)
 					continue
 				} else {
@@ -495,7 +479,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 					if i >= len(arrayLiteral.values) {
 						// zero value
 						emit("LOAD_EMPTY_INTERFACE")
-						emit("PUSH_INTERFACE")
 						emitSave24(lhs, offsetByIndex)
 						continue
 					} else if arrayLiteral.values[i].getGtype().getKind() != G_INTERFACE {
@@ -503,7 +486,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 						dynamicValue := arrayLiteral.values[i]
 						emitConversionToInterface(dynamicValue)
 						emit("LOAD_EMPTY_INTERFACE")
-						emit("PUSH_INTERFACE")
 						emitSave24(lhs, offsetByIndex)
 						continue
 					} else {

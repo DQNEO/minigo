@@ -86,7 +86,7 @@ func (e *ExprIndex) emitSave24() {
 	// multi index * size
 	// calc address = head address + offset
 	// copy value to the address
-
+	emit("PUSH_24")
 	collectionType := e.collection.getGtype()
 	switch {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
@@ -173,6 +173,7 @@ func emitSave24(lhs Expr, offset int) {
 }
 
 func (variable *ExprVariable) emitSave24(offset int) {
+	emit("PUSH_24")
 	emit("# *ExprVariable.emitSave24()")
 	emit("pop %%rax # 3rd")
 	variable.emitOffsetSavePrimitive(8, offset+16, false)

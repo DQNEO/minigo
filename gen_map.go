@@ -354,7 +354,6 @@ func (f *StmtFor) emitRangeForMap() {
 		switch f.rng.valuevar.getGtype().getKind() {
 		case G_SLICE, G_MAP:
 			emit("LOAD_24_BY_DEREF")
-			emit("PUSH_24")
 			emitSave24(f.rng.valuevar, 0)
 		default:
 			emit("LOAD_8_BY_DEREF")
