@@ -163,7 +163,7 @@ func (ast *StmtAssignment) emit() {
 		}
 		if leftsMayBeTwo && len(ast.lefts) == 2 {
 			okVariable := ast.lefts[1]
-			okRegister := mapOkRegister(right.getGtype().is24Width())
+			okRegister := mapOkRegister(right.getGtype().is24WidthType())
 			emit("mov %%%s, %%rax # emit okValue", okRegister)
 			emitSavePrimitive(okVariable)
 		}

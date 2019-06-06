@@ -46,7 +46,7 @@ func (f *DeclFunc) emitPrologue() {
 
 	var regIndex int
 	for _, param := range params {
-		switch param.getGtype().is24Width() {
+		switch param.getGtype().is24WidthType() {
 		case true:
 			offset -= IntSize * 3
 			param.offset = offset
@@ -163,7 +163,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 		}
 
 		var width int
-		if doConvertToInterface || arg.getGtype().is24Width() {
+		if doConvertToInterface || arg.getGtype().is24WidthType() {
 			emit("PUSH_24")
 			width = 3
 		} else {

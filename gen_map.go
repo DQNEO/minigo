@@ -94,7 +94,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
-	is24Width := mapValueType.is24Width()
+	is24Width := mapValueType.is24WidthType()
 
 	emit("# emitMapGet")
 
@@ -172,7 +172,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("ADD_NUMBER 8 # value address")
 	emit("mov (%%rax), %%rax # set the found value address")
 	if deref {
-		if mapValueType.is24Width() {
+		if mapValueType.is24WidthType() {
 			emit("LOAD_24_BY_DEREF")
 		} else {
 			emit("LOAD_8_BY_DEREF")

@@ -87,7 +87,7 @@ func (gtype *Gtype) isArrayLike() bool {
 	return kind == G_ARRAY || kind == G_SLICE
 }
 
-func (gtype *Gtype) is24Width() bool {
+func (gtype *Gtype) is24WidthType() bool {
 	switch gtype.getKind() {
 	case G_INTERFACE, G_MAP, G_SLICE:
 		return true
