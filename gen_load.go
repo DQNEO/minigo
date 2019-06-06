@@ -329,7 +329,7 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	emit("SUM_FROM_STACK # (index * elmSize) + head")
 	emit("ADD_NUMBER %d", offset)
 
-	primType := collection.getGtype().elementType.getKind()
+	primType := elmType.getKind()
 	if primType == G_INTERFACE || primType == G_MAP || primType == G_SLICE {
 		emit("LOAD_24_BY_DEREF")
 	} else {
