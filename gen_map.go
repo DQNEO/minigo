@@ -417,18 +417,16 @@ func (lit *ExprMapLiteral) emit() {
 			emitCallMalloc(8)
 			emit("PUSH_8")
 			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
+		} else if element.value.getGtype().is24WidthType() {
+			// rax,rbx,rcx
+			element.value.emit()
+			emit("PUSH_24") // ptr
+			emitCallMalloc(8 * 3)
+			emit("PUSH_8")
+			emit("STORE_24_INDIRECT_FROM_STACK")
 		} else {
-			switch element.value.getGtype().getKind() {
-			case G_MAP, G_SLICE, G_INTERFACE:
-				// rax,rbx,rcx
-				element.value.emit()
-				emit("PUSH_24") // ptr
-				emitCallMalloc(8 * 3)
-				emit("PUSH_8")
-				emit("STORE_24_INDIRECT_FROM_STACK")
-			default:
-				TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
-			}
+			TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
+
 		}
 
 		emit("pop %%rbx") // map head
