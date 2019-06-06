@@ -96,10 +96,10 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
-		} else if ast.getGtype().getSize() == 1 {
-			emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
 		} else if ast.getGtype().is24WidthType() {
 			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
+		} else if ast.getGtype().getSize() == 1 {
+			emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
 		} else {
 			emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
 		}
