@@ -173,23 +173,10 @@ func emitMacroDefinitions() {
 	emit("movsbq (%%rax), %%rax")
 	macroEnd()
 
-
-	macroStart("LOAD_INTERFACE_FROM_GLOBAL",  "varname")
-	emit("mov \\varname+%2d(%%rip), %%rax", 0)
-	emit("mov \\varname+%2d(%%rip), %%rbx", ptrSize)
-	emit("mov \\varname+%2d(%%rip), %%rcx", ptrSize+ptrSize)
-	macroEnd()
-
-	macroStart("LOAD_SLICE_FROM_GLOBAL", "varname")
-	emit("mov \\varname+%2d(%%rip), %%rax # ptr", 0)
-	emit("mov \\varname+%2d(%%rip), %%rbx # len", ptrSize)
-	emit("mov \\varname+%2d(%%rip), %%rcx # cap", ptrSize+IntSize)
-	macroEnd()
-
-	macroStart("LOAD_MAP_FROM_GLOBAL", "varname")
-	emit("mov \\varname+%2d(%%rip), %%rax # ptr", 0)
-	emit("mov \\varname+%2d(%%rip), %%rbx # len", ptrSize)
-	emit("mov \\varname+%2d(%%rip), %%rcx # cap", ptrSize+IntSize)
+	macroStart("LOAD_24_FROM_GLOBAL", "varname")
+	emit("mov \\varname+%2d(%%rip), %%rax # 1st", 0)
+	emit("mov \\varname+%2d(%%rip), %%rbx # 2nd", 8)
+	emit("mov \\varname+%2d(%%rip), %%rcx # 3ru", 16)
 	macroEnd()
 
 	macroStart("LOAD_SLICE_FROM_LOCAL", "offset")

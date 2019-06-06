@@ -96,11 +96,11 @@ func (ast *ExprVariable) emit() {
 	if ast.isGlobal {
 		switch ast.gtype.getKind() {
 		case G_INTERFACE:
-			emit("LOAD_INTERFACE_FROM_GLOBAL %s", ast.varname)
+			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
 		case G_SLICE:
-			emit("LOAD_SLICE_FROM_GLOBAL %s", ast.varname)
+			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
 		case G_MAP:
-			emit("LOAD_MAP_FROM_GLOBAL %s", ast.varname)
+			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
 		case G_ARRAY:
 			ast.emitAddress(0)
 		default:
