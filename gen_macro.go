@@ -78,6 +78,12 @@ func emitMacroDefinitions() {
 	emit("pop %%rax # ifc.1st")
 	macroEnd()
 
+	macroStart("LOAD_EMPTY_24", "")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	macroEnd()
+
 	macroStart("LOAD_EMPTY_SLICE", "")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")

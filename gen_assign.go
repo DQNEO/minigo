@@ -190,6 +190,11 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	// initializes with zero values
 	emit("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
+		if fieldtype.is24WidthType() {
+			emit("LOAD_EMPTY_24")
+			emitSave24(lhs, fieldtype.offset)
+			continue
+		}
 		switch fieldtype.getKind() {
 		case G_ARRAY:
 			arrayType := fieldtype
@@ -209,22 +214,12 @@ func assignToStruct(lhs Expr, rhs Expr) {
 					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
 				}
 			}
-
-		case G_SLICE:
-			emit("LOAD_EMPTY_SLICE")
-			emitSave24(lhs, fieldtype.offset)
-		case G_MAP:
-			emit("LOAD_EMPTY_MAP")
-			emitSave24(lhs, fieldtype.offset)
 		case G_STRUCT:
 			left := &ExprStructField{
 				strct:     lhs,
 				fieldname: fieldtype.fieldname,
 			}
 			assignToStruct(left, nil)
-		case G_INTERFACE:
-			emit("LOAD_EMPTY_INTERFACE")
-			emitSave24(lhs, fieldtype.offset)
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
