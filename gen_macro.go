@@ -176,7 +176,7 @@ func emitMacroDefinitions() {
 	macroStart("LOAD_24_FROM_GLOBAL", "varname")
 	emit("mov \\varname+%2d(%%rip), %%rax # 1st", 0)
 	emit("mov \\varname+%2d(%%rip), %%rbx # 2nd", 8)
-	emit("mov \\varname+%2d(%%rip), %%rcx # 3ru", 16)
+	emit("mov \\varname+%2d(%%rip), %%rcx # 3rd", 16)
 	macroEnd()
 
 	macroStart("LOAD_SLICE_FROM_LOCAL", "offset")
