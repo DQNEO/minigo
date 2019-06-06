@@ -46,14 +46,14 @@ func (f *DeclFunc) emitPrologue() {
 
 	var regIndex int
 	for _, param := range params {
-		switch param.getGtype().getKind() {
-		case G_SLICE, G_INTERFACE, G_MAP:
+		switch param.getGtype().is24Width() {
+		case true:
 			offset -= IntSize * 3
 			param.offset = offset
-			emit("PUSH_ARG_%d # third", regIndex+2)
-			emit("PUSH_ARG_%d # second", regIndex+1)
-			emit("PUSH_ARG_%d # fist \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += sliceWidth
+			emit("PUSH_ARG_%d # 3rd", regIndex+2)
+			emit("PUSH_ARG_%d # 2nd", regIndex+1)
+			emit("PUSH_ARG_%d # 1st \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			regIndex += 3
 		default:
 			offset -= IntSize
 			param.offset = offset
@@ -162,20 +162,10 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 			arg.emit()
 		}
 
-		var primType EType = 0
-		if arg.getGtype() != nil {
-			primType = arg.getGtype().getKind()
-		}
 		var width int
-		if doConvertToInterface || primType == G_INTERFACE {
-			emit("PUSH_INTERFACE")
-			width = interfaceWidth
-		} else if primType == G_SLICE {
-			emit("PUSH_SLICE")
-			width = sliceWidth
-		} else if primType == G_MAP {
-			emit("PUSH_MAP")
-			width = mapWidth
+		if doConvertToInterface || arg.getGtype().is24Width() {
+			emit("PUSH_24")
+			width = 3
 		} else {
 			emit("PUSH_8")
 			width = 1
