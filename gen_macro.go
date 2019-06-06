@@ -37,13 +37,6 @@ func emitMacroDefinitions() {
 	emit("push %%rbx # slice.len")
 	emit("push %%rcx # slice.cap")
 	macroEnd()
-
-	macroStart("PUSH_MAP", "")
-	emit("push %%rax # map.ptr")
-	emit("push %%rbx # map.len")
-	emit("push %%rcx # map.cap")
-	macroEnd()
-
 	macroStart("PUSH_INTERFACE", "")
 	emit("push %%rax # ifc.1st")
 	emit("push %%rbx # ifc.2nd")
