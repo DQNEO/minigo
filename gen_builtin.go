@@ -40,18 +40,22 @@ func (e *ExprLen) emit() {
 		}
 	case G_MAP:
 		emit("# emit len(map)")
-		switch arg.(type) {
-		case *Relation:
-			emit("# Relation")
-			emitOffsetLoad(arg, 8, ptrSize)
-		case *ExprStructField:
-			emit("# ExprStructField")
-			emitOffsetLoad(arg, 8, ptrSize)
-		case *ExprMapLiteral:
-			TBI(arg.token(), "unable to handle %T", arg)
-		default:
-			TBI(arg.token(), "unable to handle %T", arg)
-		}
+		arg.emit()
+
+		// if not nil
+		// then 0
+		// else len
+		labelNil := makeLabel()
+		labelEnd := makeLabel()
+		emit("test %%rax, %%rax # map && map (check if map is nil)")
+		emit("je %s # jump if map is nil", labelNil)
+		// not nil case
+		emit("mov 8(%%rax), %%rax # load map len")
+		emit("jmp %s", labelEnd)
+		// nil case
+		emit("%s:", labelNil)
+		emit("LOAD_NUMBER 0")
+		emit("%s:", labelEnd)
 	case G_STRING:
 		arg.emit()
 		emit("PUSH_8")

@@ -65,8 +65,20 @@ func loadMapIndexExpr(e *ExprIndex) {
 	// rcx: ok (found: address of the index,  not found:0)
 	emit("# emit mapData head address")
 	_map.emit()
+
+	// if not nil
+	// then emit 24width data
+	// else emit 24width 0
+	labelNil := makeLabel()
+	labelEnd := makeLabel()
+	emit("test %%rax, %%rax # map && map (check if map is nil)")
+	emit("je %s # jump if map is nil", labelNil)
+	// not nil case
+	emit("# not null")
+	emit("mov (%%rax), %%rax")
 	emit("PUSH_8 # map head")
-	emitOffsetLoad(_map, IntSize, IntSize)
+	_map.emit()
+	emit("mov 8(%%rax), %%rax")
 	emit("PUSH_8 # len")
 	e.index.emit()
 	emit("PUSH_8 # index value")
@@ -74,6 +86,16 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("pop %%rcx # index value")
 	emit("pop %%rbx # len")
 	emit("pop %%rax # heap")
+
+	emit("jmp %s", labelEnd)
+	// nil case
+	emit("%s:", labelNil)
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emit("%s:", labelEnd)
+
+
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -214,6 +236,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// append
 	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
+	emit("mov (%%rax), %%rax")
 	emit("PUSH_8")
 
 	// emit len of the map
@@ -229,7 +252,10 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// map len++
 	elen.emit()
 	emit("ADD_NUMBER 1")
-	emitOffsetSavePrimitive(e.collection, IntSize, ptrSize) // update map len
+	emit("PUSH_8")
+	e.collection.emit()
+	emit("pop %%rbx # new len")
+	emit("mov %%rbx, 8(%%rax) # update map len")
 
 	// Save key and value
 	emit("%s: # end loop", labelSave)
@@ -321,6 +347,7 @@ func (f *StmtFor) emitRangeForMap() {
 	emit("IMUL_NUMBER 16")
 	emit("PUSH_8 # x")
 	f.rng.rangeexpr.emit() // emit address of map data head
+	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # y")
 
 	mapType := f.rng.rangeexpr.getGtype().Underlying()
@@ -338,6 +365,7 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
 		f.rng.rangeexpr.emit()
+		emit("mov (%%rax), %%rax")
 		emit("PUSH_8")
 
 		emit("## mapCounter.emit()")
@@ -433,7 +461,9 @@ func (lit *ExprMapLiteral) emit() {
 		emit("push %%rbx")
 	}
 
-	emit("pop %%rax") // address (head of the heap)
-	emit("mov $%d, %%rbx", length) // len
-	emit("mov $%d, %%rcx", length) // cap
+	emitCallMalloc(16)
+	emit("pop %%rbx") // address (head of the heap)
+	emit("mov %%rbx, (%%rax)")
+	emit("mov $%d, %%rcx", length) // len
+	emit("mov %%rcx, 8(%%rax)")
 }
