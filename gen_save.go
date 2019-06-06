@@ -88,15 +88,13 @@ func (e *ExprIndex) emitSave24() {
 	// copy value to the address
 	emit("PUSH_24")
 	collectionType := e.collection.getGtype()
-	switch {
-	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
-		e.collection.emit() // head address
-	case collectionType.getKind() == G_MAP:
+	if collectionType.getKind() == G_MAP {
 		e.emitMapSet(true)
 		return
-	default:
-		TBI(e.token(), "unable to handle %s", collectionType)
 	}
+
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, e.token(), "unexpected kind")
+	e.collection.emit()
 	emit("PUSH_8 # head address of collection")
 	e.index.emit()
 	emit("PUSH_8 # index")
