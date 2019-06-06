@@ -63,8 +63,8 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
 		emit("ADD_NUMBER %d", field.offset)
-		switch field.getKind() {
-		case G_SLICE, G_INTERFACE, G_MAP:
+		switch field.is24WidthType() {
+		case true:
 			emit("LOAD_24_BY_DEREF")
 		default:
 			emit("LOAD_8_BY_DEREF")
