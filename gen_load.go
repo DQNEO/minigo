@@ -94,22 +94,16 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 func (ast *ExprVariable) emit() {
 	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
-		switch ast.gtype.getKind() {
-		case G_INTERFACE:
-			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
-		case G_SLICE:
-			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
-		case G_MAP:
-			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
-		case G_ARRAY:
+		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
-		default:
-			if ast.getGtype().getSize() == 1 {
-				emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
-			} else {
-				emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
-			}
+		} else if ast.getGtype().getSize() == 1 {
+			emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
+		} else if ast.getGtype().is24WidthType() {
+			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
+		} else {
+			emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
 		}
+
 	} else {
 		if ast.offset == 0 {
 			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
