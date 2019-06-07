@@ -2051,7 +2051,6 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 					allmethods[typeName] = almthds
 				}
 				almthds[mname] = ref
-				allmethods[typeName] = almthds
 			}
 		}
 	}
