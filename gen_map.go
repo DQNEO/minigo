@@ -71,11 +71,11 @@ func loadMapIndexExpr(e *ExprIndex) {
 	// else emit 24width 0
 	labelNil := makeLabel()
 	labelEnd := makeLabel()
-	emit("test %%rax, %%rax # map && map (check if map is nil)")
+	emit("TEST_IT # map && map (check if map is nil)")
 	emit("je %s # jump if map is nil", labelNil)
 	// not nil case
 	emit("# not null")
-	emit("mov (%%rax), %%rax")
+	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # map head")
 	_map.emit()
 	emit("mov 8(%%rax), %%rax")
@@ -192,7 +192,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("# Value found!")
 	emit("push %%rax # stash key address")
 	emit("ADD_NUMBER 8 # value address")
-	emit("mov (%%rax), %%rax # set the found value address")
+	emit("LOAD_8_BY_DEREF # set the found value address")
 	if deref {
 		if mapValueType.is24WidthType() {
 			emit("LOAD_24_BY_DEREF")
@@ -236,7 +236,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// append
 	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
-	emit("mov (%%rax), %%rax")
+	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8")
 
 	// emit len of the map
@@ -365,7 +365,7 @@ func (f *StmtFor) emitRangeForMap() {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
 		f.rng.rangeexpr.emit()
-		emit("mov (%%rax), %%rax")
+		emit("LOAD_8_BY_DEREF# map head")
 		emit("PUSH_8")
 
 		emit("## mapCounter.emit()")

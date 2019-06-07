@@ -47,7 +47,7 @@ func (e *ExprLen) emit() {
 		// else len
 		labelNil := makeLabel()
 		labelEnd := makeLabel()
-		emit("test %%rax, %%rax # map && map (check if map is nil)")
+		emit("TEST_IT # map && map (check if map is nil)")
 		emit("je %s # jump if map is nil", labelNil)
 		// not nil case
 		emit("mov 8(%%rax), %%rax # load map len")
