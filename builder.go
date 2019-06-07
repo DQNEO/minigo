@@ -84,7 +84,6 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	if resolveOnly {
 		return nil
 	}
-	allScopes[pkgName] = mainPkg.scope
 	return mainPkg
 }
 
