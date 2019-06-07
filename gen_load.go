@@ -348,7 +348,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 		loadArrayOrSliceIndex(collection, index, offset)
 		return
 	case G_MAP:
-		loadMapIndexExpr(collection, index)
+		loadMapIndexExpr(e)
 	case G_STRING:
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:

@@ -329,6 +329,7 @@ func (e *ExprIndex) getGtype() *Gtype {
 	}
 }
 
+// type of fist,second := m[a]
 func (e *ExprIndex) getSecondGtype() *Gtype {
 	assertNotNil(e.collection.getGtype() != nil, nil)
 	if e.collection.getGtype().kind == G_MAP {

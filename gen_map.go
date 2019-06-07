@@ -57,10 +57,10 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 }
 
 // emit map index expr
-func loadMapIndexExpr(_map Expr, index Expr) {
+func loadMapIndexExpr(e *ExprIndex) {
 	// e.g. x[key]
 
-
+	_map := e.collection
 	// rax: found value (zero if not found)
 	// rcx: ok (found: address of the index,  not found:0)
 	emit("# emit mapData head address")
@@ -68,7 +68,7 @@ func loadMapIndexExpr(_map Expr, index Expr) {
 	emit("PUSH_8 # map head")
 	emitOffsetLoad(_map, IntSize, IntSize)
 	emit("PUSH_8 # len")
-	index.emit()
+	e.index.emit()
 	emit("PUSH_8 # index value")
 
 	emit("pop %%rcx # index value")
