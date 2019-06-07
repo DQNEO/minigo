@@ -331,8 +331,8 @@ func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
 		emit("# initialize map with a zero value")
-		emit("LOAD_EMPTY_MAP")
-		emitSave24(lhs, 0)
+		emit("LOAD_NUMBER 0")
+		emitSavePrimitive(lhs)
 		return
 	}
 	switch rhs.(type) {
@@ -346,7 +346,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
 	}
-	emitSave24(lhs, 0)
+	emitSavePrimitive(lhs)
 }
 
 
