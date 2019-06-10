@@ -43,7 +43,7 @@ func (root *IrRoot) emitSpecialStrings() {
 func (root *IrRoot) emitDynamicTypes() {
 	emitNewline()
 	emit("# Dynamic Types")
-	for dynamicTypeId, gs := range root.uniquedDTypes {
+	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitWithoutIndent(".%s:", label)
 		emit(".string \"%s\"", gs)
@@ -91,7 +91,6 @@ func (root *IrRoot) emitMethodTable() {
 // generate code
 func (root *IrRoot) emit() {
 
-	symbolTable.uniquedDTypes = root.uniquedDTypes
 	emitMacroDefinitions()
 
 	emit(".data 0")

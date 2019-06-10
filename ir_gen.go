@@ -3,7 +3,6 @@ package main
 type IrRoot struct {
 	packages      []*AstPackage
 	methodTable   map[int][]string
-	uniquedDTypes []string
 	importOS      bool
 }
 
@@ -38,24 +37,24 @@ func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mai
 		setTypeIds(pkg.namedTypes)
 	}
 
+	symbolTable.uniquedDTypes = uniqueDynamicTypes(dynamicTypes)
+
 	root := &IrRoot{}
 	root.packages = packages
-	root.setDynamicTypes(dynamicTypes)
 	root.importOS = in_array("os", csl.uniqImportedPackageNames)
 	root.methodTable = composeMethodTable(funcs)
 	return root
 }
 
-func (root *IrRoot) setDynamicTypes(dynamicTypes []*Gtype) {
-	var uniquedDTypes []string = builtinTypesAsString
+func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
+	var r []string = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
-		if !in_array(gs, uniquedDTypes) {
-			uniquedDTypes = append(uniquedDTypes, gs)
+		if !in_array(gs, r) {
+			r = append(r, gs)
 		}
 	}
-
-	root.uniquedDTypes = uniquedDTypes
+	return r
 }
 
 func composeMethodTable(funcs []*DeclFunc) map[int][]string {
