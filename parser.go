@@ -1830,7 +1830,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		}
 	} else {
 		// foreign package
-		relbody := allScopes[pkg].get(rel.name)
+		relbody := symbolTable.allScopes[pkg].get(rel.name)
 		if relbody == nil {
 			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}

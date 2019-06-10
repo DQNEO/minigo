@@ -1,7 +1,5 @@
 package main
 
-var allScopes map[identifier]*Scope
-
 type Scope struct {
 	idents map[identifier]*IdentBody
 	name   string

@@ -87,7 +87,11 @@ func main() {
 
 	imported := parseImports(sourceFiles)
 
+	symbolTable = &SymbolTable{}
+
+	var allScopes map[identifier]*Scope
 	allScopes = map[identifier]*Scope{}
+	symbolTable.allScopes = allScopes
 	libs := compileStdLibs(universe, imported)
 
 	m := compileFiles(universe, sourceFiles)

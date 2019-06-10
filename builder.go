@@ -105,7 +105,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg,universe)
 		libs.AddPackage(pkg)
-		allScopes[pkgName] = pkg.scope
+		symbolTable.allScopes[pkgName] = pkg.scope
 	}
 
 	return libs

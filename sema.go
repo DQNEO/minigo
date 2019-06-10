@@ -3,6 +3,12 @@ package main
 
 import "fmt"
 
+var symbolTable *SymbolTable
+
+type SymbolTable struct {
+	allScopes map[identifier]*Scope
+}
+
 var typeId int = 1 // start with 1 because we want to zero as error
 
 func setTypeIds(namedTypes []*DeclType) {
