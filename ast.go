@@ -76,9 +76,11 @@ type ExprVariable struct {
 	tok        *Token
 	varname    identifier
 	gtype      *Gtype
-	offset     int // for local variable
 	isGlobal   bool
 	isVariadic bool
+
+	offset     int // sema: for local variable
+	regIndex   int // sema: for func param
 }
 
 type ExprConstVariable struct {
@@ -243,6 +245,9 @@ type DeclFunc struct {
 	stmtDefer *StmtDefer
 	// every function has a defer handler
 	labelDeferHandler string
+
+	passParams []*ExprVariable // sema: passing params in ASM level
+	localarea int              // sema: total stack size of localvars
 }
 
 type TopLevelDecl struct {

@@ -22,43 +22,22 @@ var retRegi [14]string = [14]string{
 var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
 func (f *DeclFunc) emitPrologue() {
+	f.prepare()
 	emitWithoutIndent("%s:", f.getSymbol())
 	emit("FUNC_PROLOGUE")
 
-	var params []*ExprVariable
-
-	// prepend receiver to params
-	if f.receiver != nil {
-		params = []*ExprVariable{f.receiver}
-		for _, param := range f.params {
-			params = append(params, param)
-		}
-	} else {
-		params = f.params
-	}
-
-	// offset for params and local variables
-	var offset int
-
-	if len(params) > 0 {
+	if len(f.passParams) > 0 {
 		emit("# set params")
 	}
 
-	var regIndex int
-	for _, param := range params {
+	for _, param := range f.passParams {
 		switch param.getGtype().is24WidthType() {
 		case true:
-			offset -= IntSize * 3
-			param.offset = offset
-			emit("PUSH_ARG_%d # 3rd", regIndex+2)
-			emit("PUSH_ARG_%d # 2nd", regIndex+1)
-			emit("PUSH_ARG_%d # 1st \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += 3
+			emit("PUSH_ARG_%d # 3rd", param.regIndex+2)
+			emit("PUSH_ARG_%d # 2nd", param.regIndex+1)
+			emit("PUSH_ARG_%d # 1st \"%s\" %s", param.regIndex, param.varname, param.getGtype().String())
 		default:
-			offset -= IntSize
-			param.offset = offset
-			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += 1
+			emit("PUSH_ARG_%d # param \"%s\" %s", param.regIndex, param.varname, param.getGtype().String())
 		}
 	}
 
@@ -66,27 +45,13 @@ func (f *DeclFunc) emitPrologue() {
 		emit("# Allocating stack for localvars len=%d", len(f.localvars))
 	}
 
-	var localarea int
-	for _, lvar := range f.localvars {
-		if lvar.gtype == nil {
-			debugf("%s has nil gtype ", lvar)
-		}
-		size := lvar.gtype.getSize()
-		assert(size != 0, lvar.token(), "size should  not be zero:"+lvar.gtype.String())
-		loff := align(size, 8)
-		localarea -= loff
-		offset -= loff
-		lvar.offset = offset
-		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
-	}
-
 	for i := len(f.localvars) - 1; i >= 0; i-- {
 		lvar := f.localvars[i]
 		emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 	}
 
-	if localarea != 0 {
-		emit("sub $%d, %%rsp # total stack size", -localarea)
+	if f.localarea != 0 {
+		emit("sub $%d, %%rsp # total stack size", -f.localarea)
 	}
 
 	emitNewline()

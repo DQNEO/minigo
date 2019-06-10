@@ -23,8 +23,59 @@ func (n *TopLevelDecl) walk() *TopLevelDecl {
 	return n
 }
 
-func (n *DeclFunc) walk() *DeclFunc {
-	return n
+func (f *DeclFunc) prepare() {
+	var params []*ExprVariable
+
+	// prepend receiver to params
+	if f.receiver != nil {
+		params = []*ExprVariable{f.receiver}
+		for _, param := range f.params {
+			params = append(params, param)
+		}
+	} else {
+		params = f.params
+	}
+
+	f.passParams = params
+
+	// offset for params and local variables
+	var offset int
+
+	var regIndex int
+	for _, param := range f.passParams {
+		switch param.getGtype().is24WidthType() {
+		case true:
+			offset -= IntSize * 3
+			param.offset = offset
+			param.regIndex = regIndex
+			regIndex += 3
+		default:
+			offset -= IntSize
+			param.offset = offset
+			param.regIndex = regIndex
+			regIndex += 1
+		}
+	}
+
+	var localarea int
+	for _, lvar := range f.localvars {
+		if lvar.gtype == nil {
+			debugf("%s has nil gtype ", lvar)
+		}
+		size := lvar.gtype.getSize()
+		assert(size != 0, lvar.token(), "size should  not be zero:"+lvar.gtype.String())
+		loff := align(size, 8)
+		localarea -= loff
+		offset -= loff
+		lvar.offset = offset
+		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
+	}
+	f.localarea = localarea
+}
+
+func (f *DeclFunc) walk() *DeclFunc {
+	f.prepare()
+	return f
 }
 
 func (n *DeclVar) walk() *DeclVar {
