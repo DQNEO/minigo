@@ -1,7 +1,5 @@
 package main
 
-var groot *IrRoot
-
 type IrRoot struct {
 	packages      []*AstPackage
 	methodTable   map[int][]string

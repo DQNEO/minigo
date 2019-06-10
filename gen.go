@@ -311,7 +311,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	emit("PUSH_8 # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
-	label := groot.getTypeLabel(gtype)
+	label := symbolTable.getTypeLabel(gtype)
 	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("PUSH_8 # dynamicType")
 
@@ -432,7 +432,7 @@ func (e *ExprTypeAssertion) emit() {
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
 		emit("PUSH_8")
 		// @TODO DRY with type switch statement
-		typeLabel := groot.getTypeLabel(e.gtype)
+		typeLabel := symbolTable.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
 
 		emit("push %%rcx") // @TODO ????

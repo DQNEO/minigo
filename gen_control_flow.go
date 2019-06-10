@@ -73,7 +73,7 @@ func (stmt *StmtSwitch) emit() {
 				if gtype.isNil() {
 					emit("mov $0, %%rax # nil")
 				} else {
-					typeLabel := groot.getTypeLabel(gtype)
+					typeLabel := symbolTable.getTypeLabel(gtype)
 					emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
 				}
 				emit("PUSH_8")

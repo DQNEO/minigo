@@ -9,8 +9,8 @@ func makeDynamicTypeLabel(id int) string {
 	return fmt.Sprintf("DynamicTypeId%d", id)
 }
 
-func (root *IrRoot) getTypeLabel(gtype *Gtype) string {
-	dynamicTypeId := get_index(gtype.String(), root.uniquedDTypes)
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
+	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
 	}
@@ -90,8 +90,8 @@ func (root *IrRoot) emitMethodTable() {
 
 // generate code
 func (root *IrRoot) emit() {
-	groot = root
 
+	symbolTable.uniquedDTypes = root.uniquedDTypes
 	emitMacroDefinitions()
 
 	emit(".data 0")
