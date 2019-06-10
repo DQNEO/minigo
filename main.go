@@ -99,6 +99,6 @@ func main() {
 		return
 	}
 
-	ir := makeIR(u, r, libs, m)
+	ir := build(u, r, libs, m)
 	ir.emit()
 }

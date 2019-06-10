@@ -1,12 +1,12 @@
 package main
 
-type IrRoot struct {
+type Program struct {
 	packages      []*AstPackage
 	methodTable   map[int][]string
 	importOS      bool
 }
 
-func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *IrRoot {
+func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *Program {
 	var packages []*AstPackage
 
 	importedPackages := csl.getPackages()
@@ -39,11 +39,11 @@ func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mai
 
 	symbolTable.uniquedDTypes = uniqueDynamicTypes(dynamicTypes)
 
-	root := &IrRoot{}
-	root.packages = packages
-	root.importOS = in_array("os", csl.uniqImportedPackageNames)
-	root.methodTable = composeMethodTable(funcs)
-	return root
+	program := &Program{}
+	program.packages = packages
+	program.importOS = in_array("os", csl.uniqImportedPackageNames)
+	program.methodTable = composeMethodTable(funcs)
+	return program
 }
 
 func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {

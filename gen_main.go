@@ -23,7 +23,7 @@ var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:
 var builtinStringKey2 string = "SfmtDumpSlice"
 var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
-func (root *IrRoot) emitSpecialStrings() {
+func (root *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
 	emit("# special strings")
@@ -40,7 +40,7 @@ func (root *IrRoot) emitSpecialStrings() {
 	emit(".string \"%s\"", eEmptyString.val)
 }
 
-func (root *IrRoot) emitDynamicTypes() {
+func (root *Program) emitDynamicTypes() {
 	emitNewline()
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
@@ -50,7 +50,7 @@ func (root *IrRoot) emitDynamicTypes() {
 	}
 }
 
-func (root *IrRoot) emitMethodTable() {
+func (root *Program) emitMethodTable() {
 	emit("# Method table")
 
 	emitWithoutIndent("%s:", "receiverTypes")
@@ -89,7 +89,7 @@ func (root *IrRoot) emitMethodTable() {
 }
 
 // generate code
-func (root *IrRoot) emit() {
+func (root *Program) emit() {
 
 	emitMacroDefinitions()
 
