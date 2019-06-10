@@ -85,3 +85,39 @@ func calcStructSize(gtypes []*Gtype) {
 		}
 	}
 }
+
+func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
+	var r []string = builtinTypesAsString
+	for _, gtype := range dynamicTypes {
+		gs := gtype.String()
+		if !in_array(gs, r) {
+			r = append(r, gs)
+		}
+	}
+	return r
+}
+
+func composeMethodTable(funcs []*DeclFunc) map[int][]string {
+	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
+
+	for _, funcdecl := range funcs {
+		if funcdecl.receiver == nil {
+			continue
+		}
+
+		gtype := funcdecl.receiver.getGtype()
+		if gtype.kind == G_POINTER {
+			gtype = gtype.origType
+		}
+		if gtype.relation == nil {
+			errorf("no relation for %#v", funcdecl.receiver.getGtype())
+		}
+		typeId := gtype.relation.gtype.receiverTypeId
+		symbol := funcdecl.getSymbol()
+		methods := methodTable[typeId]
+		methods = append(methods, symbol)
+		methodTable[typeId] = methods
+	}
+	debugf("set methodTable")
+	return methodTable
+}
