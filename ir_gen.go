@@ -36,7 +36,7 @@ func makeIR(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mai
 		}
 		setTypeIds(pkg.namedTypes)
 		for _, f := range pkg.files {
-			WalkFile(f)
+			f = f.walk()
 		}
 	}
 

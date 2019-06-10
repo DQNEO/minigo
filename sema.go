@@ -87,20 +87,30 @@ func calcStructSize(gtypes []*Gtype) {
 	}
 }
 
-func WalkFile(file *AstFile) {
-	for _, decl := range file.DeclList {
-		Walk(decl)
+func (n *AstFile) walk() *AstFile {
+	for _, decl := range n.DeclList {
+		decl = decl.walk()
 	}
+	return n
 }
 
-func Walk(n Node) {
-	switch n.(type) {
-	case *TopLevelDecl:
-		decl := n.(*TopLevelDecl)
-		if decl.funcdecl != nil {
-			Walk(decl.funcdecl)
-		} else if decl.vardecl != nil {
-			Walk(decl.vardecl)
-		}
+func (n *TopLevelDecl) walk() *TopLevelDecl {
+	if n.funcdecl != nil {
+		n.funcdecl = n.funcdecl.walk()
+	} else if n.vardecl != nil {
+		n.vardecl = n.vardecl.walk()
+	} else {
+		// assert not reach here
+		return nil
 	}
+
+	return n
+}
+
+func (n *DeclFunc) walk() *DeclFunc {
+	return n
+}
+
+func (n *DeclVar) walk() *DeclVar {
+	return n
 }
