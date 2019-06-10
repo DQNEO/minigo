@@ -3,6 +3,34 @@ package main
 
 import "fmt"
 
+func (n *AstFile) walk() *AstFile {
+	for _, decl := range n.DeclList {
+		decl = decl.walk()
+	}
+	return n
+}
+
+func (n *TopLevelDecl) walk() *TopLevelDecl {
+	if n.funcdecl != nil {
+		n.funcdecl = n.funcdecl.walk()
+	} else if n.vardecl != nil {
+		n.vardecl = n.vardecl.walk()
+	} else {
+		// assert not reach here
+		return nil
+	}
+
+	return n
+}
+
+func (n *DeclFunc) walk() *DeclFunc {
+	return n
+}
+
+func (n *DeclVar) walk() *DeclVar {
+	return n
+}
+
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
@@ -85,32 +113,4 @@ func calcStructSize(gtypes []*Gtype) {
 			gtype.origType.calcStructOffset()
 		}
 	}
-}
-
-func (n *AstFile) walk() *AstFile {
-	for _, decl := range n.DeclList {
-		decl = decl.walk()
-	}
-	return n
-}
-
-func (n *TopLevelDecl) walk() *TopLevelDecl {
-	if n.funcdecl != nil {
-		n.funcdecl = n.funcdecl.walk()
-	} else if n.vardecl != nil {
-		n.vardecl = n.vardecl.walk()
-	} else {
-		// assert not reach here
-		return nil
-	}
-
-	return n
-}
-
-func (n *DeclFunc) walk() *DeclFunc {
-	return n
-}
-
-func (n *DeclVar) walk() *DeclVar {
-	return n
 }
