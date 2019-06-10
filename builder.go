@@ -132,3 +132,52 @@ func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 	}
 }
+
+type Program struct {
+	packages      []*AstPackage
+	methodTable   map[int][]string
+	importOS      bool
+}
+
+func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *Program {
+	var packages []*AstPackage
+
+	importedPackages := csl.getPackages()
+	for _, pkg := range importedPackages {
+		packages = append(packages, pkg)
+	}
+
+	packages = append(packages, universe)
+	packages = append(packages, iruntime)
+	packages = append(packages, mainPkg)
+
+	var dynamicTypes []*Gtype
+	var funcs []*DeclFunc
+
+	for _, pkg := range packages {
+		collectDecls(pkg)
+		if pkg == universe {
+			setStringLables(pkg, "universe")
+		} else {
+			setStringLables(pkg, string(pkg.name))
+		}
+		for _, dt := range pkg.dynamicTypes {
+			dynamicTypes = append(dynamicTypes, dt)
+		}
+		for _, fn := range pkg.funcs {
+			funcs = append(funcs, fn)
+		}
+		setTypeIds(pkg.namedTypes)
+		for _, f := range pkg.files {
+			f = f.walk()
+		}
+	}
+
+	symbolTable.uniquedDTypes = uniqueDynamicTypes(dynamicTypes)
+
+	program := &Program{}
+	program.packages = packages
+	program.importOS = in_array("os", csl.uniqImportedPackageNames)
+	program.methodTable = composeMethodTable(funcs)
+	return program
+}
