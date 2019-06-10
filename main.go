@@ -99,6 +99,6 @@ func main() {
 		return
 	}
 
-	ir := build(u, r, libs, m)
-	ir.emit()
+	program := build(u, r, libs, m)
+	program.emit()
 }

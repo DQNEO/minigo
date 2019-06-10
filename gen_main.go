@@ -23,7 +23,7 @@ var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:
 var builtinStringKey2 string = "SfmtDumpSlice"
 var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
-func (root *Program) emitSpecialStrings() {
+func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
 	emit(".data 0")
 	emit("# special strings")
@@ -40,7 +40,7 @@ func (root *Program) emitSpecialStrings() {
 	emit(".string \"%s\"", eEmptyString.val)
 }
 
-func (root *Program) emitDynamicTypes() {
+func (program *Program) emitDynamicTypes() {
 	emitNewline()
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
@@ -50,20 +50,20 @@ func (root *Program) emitDynamicTypes() {
 	}
 }
 
-func (root *Program) emitMethodTable() {
+func (program *Program) emitMethodTable() {
 	emit("# Method table")
 
 	emitWithoutIndent("%s:", "receiverTypes")
 	emit(".quad 0 # receiverTypeId:0")
-	for i := 1; i <= len(root.methodTable); i++ {
+	for i := 1; i <= len(program.methodTable); i++ {
 		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 	}
 
 	var shortMethodNames []string
 
-	for i := 1; i <= len(root.methodTable); i++ {
+	for i := 1; i <= len(program.methodTable); i++ {
 		emitWithoutIndent("receiverType%d:", i)
-		mt := root.methodTable
+		mt := program.methodTable
 		methods, ok := mt[i]
 		if !ok {
 			debugf("methods not found in methodTable %d", i)
@@ -89,22 +89,22 @@ func (root *Program) emitMethodTable() {
 }
 
 // generate code
-func (root *Program) emit() {
+func (program *Program) emit() {
 
 	emitMacroDefinitions()
 
 	emit(".data 0")
-	root.emitSpecialStrings()
-	root.emitDynamicTypes()
-	root.emitMethodTable()
+	program.emitSpecialStrings()
+	program.emitDynamicTypes()
+	program.emitMethodTable()
 
 	emitWithoutIndent(".text")
 	emitRuntimeArgs()
-	emitMainFunc(root.importOS)
+	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
 
 	// emit packages
-	for _, pkg := range root.packages {
+	for _, pkg := range program.packages {
 		emitWithoutIndent("#--------------------------------------------------------")
 		emitWithoutIndent("# package %s", pkg.name)
 		emitWithoutIndent("# string literals")
