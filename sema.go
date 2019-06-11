@@ -146,16 +146,34 @@ func walkStmt(stmt Stmt) Stmt {
 		}
 		return s
 	case *StmtAssignment:
+		s, _ := stmt.(*StmtAssignment)
+		/*
+		for i:=0; i<len(s.lefts); i++ {
+			left := s.lefts[i]
+			left = walkExpr(left)
+			s.lefts[i] = left
+		}
+		for i:=0; i<len(s.rights); i++ {
+			right := s.rights[i]
+			right = walkExpr(right)
+			s.rights[i] = right
+		}
+		*/
+		return s
 	case *StmtShortVarDecl:
 		s, _ := stmt.(*StmtShortVarDecl)
+		for i:=0; i<len(s.rights); i++ {
+			right := s.rights[i]
+			right = walkExpr(right)
+			s.rights[i] = right
+		}
 		a := &StmtAssignment{
 			tok:    s.tok,
 			lefts:  s.lefts,
 			rights: s.rights,
 		}
-		return a
+		return walkStmt(a)
 	case *StmtContinue:
-
 	case *StmtBreak:
 	case *StmtSwitch:
 		s, _ := stmt.(*StmtSwitch)
@@ -178,18 +196,51 @@ func walkExpr(expr Expr) Expr {
 	}
 	switch expr.(type) {
 	case *Relation:
+		e,_ := expr.(*Relation)
+		return e.expr
 	case *ExprNilLiteral:
 	case *ExprNumberLiteral:
 	case *ExprStringLiteral:
 	case *ExprVariable:
 	case *ExprConstVariable:
 	case *ExprFuncallOrConversion:
+		funcall,_ := expr.(*ExprFuncallOrConversion)
+		for i:=0;i<len(funcall.args);i++ {
+			arg := funcall.args[i]
+			arg = walkExpr(arg)
+			funcall.args[i] = arg
+		}
+		if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+			// Conversion
+			return &ExprConversion{
+				tok:   funcall.token(),
+				gtype: funcall.rel.gtype,
+				expr:  funcall.args[0],
+			}
+		}
+		decl := funcall.getFuncDef()
+		switch decl {
+		case builtinLen:
+			arg := funcall.args[0]
+			return &ExprLen{
+				tok: arg.token(),
+				arg: arg,
+			}
+		}
+		return funcall
 	case *ExprMethodcall:
 	case *ExprBinop:
 	case *ExprUop:
+		e,_ := expr.(*ExprUop)
+		//e.operand = walkExpr(e.operand)
+		return e
 	case *ExprFuncRef:
 	case *ExprSlice:
 	case *ExprIndex:
+		e,_ := expr.(*ExprIndex)
+		e.index = walkExpr(e.index)
+		e.collection = walkExpr(e.collection)
+		return e
 	case *ExprArrayLiteral:
 	case *ExprSliceLiteral:
 	case *ExprTypeAssertion:
@@ -200,6 +251,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprTypeSwitchGuard:
 	case *ExprMapLiteral:
 	case *ExprLen:
+
 	case *ExprCap:
 	case *ExprConversionToInterface:
 	}

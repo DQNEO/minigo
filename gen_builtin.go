@@ -17,6 +17,9 @@ func (e *ExprLen) emit() {
 		case *Relation:
 			emit("# Relation")
 			emitOffsetLoad(arg, 8, ptrSize)
+		case *ExprVariable:
+			emit("# ExprVariable")
+			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprStructField:
 			emit("# ExprStructField")
 			emitOffsetLoad(arg, 8, ptrSize)
@@ -77,6 +80,9 @@ func (e *ExprCap) emit() {
 		switch arg.(type) {
 		case *Relation:
 			emit("# Relation")
+			emitOffsetLoad(arg, 8, ptrSize*2)
+		case *ExprVariable:
+			emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprStructField:
 			emit("# ExprStructField")

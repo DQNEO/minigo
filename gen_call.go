@@ -107,6 +107,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 
 func (funcall *ExprFuncallOrConversion) emit() {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+		debugf("remains:%s %s", funcall.fname, funcall.token().String())
 		// Conversion
 		conversion := &ExprConversion{
 			tok:   funcall.token(),
