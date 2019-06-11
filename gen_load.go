@@ -172,6 +172,9 @@ func (ast *ExprUop) emit() {
 				errorft(ast.token(), "rel is not an variable")
 			}
 			vr.emitAddress(0)
+		case *ExprVariable:
+			vr := ast.operand.(*ExprVariable)
+			vr.emitAddress(0)
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
 			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
