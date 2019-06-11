@@ -75,8 +75,19 @@ func (f *DeclFunc) prepare() {
 
 func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
+	case *StmtFor:
+	case *StmtIf:
+	case *StmtReturn:
+	case *StmtInc:
+	case *StmtDec:
+	case *StmtSatementList:
+	case *StmtAssignment:
+	case *StmtShortVarDecl:
+	case *StmtContinue:
+	case *StmtBreak:
+	case *StmtExpr:
 	case *StmtDefer:
-
+	case *StmtSwitch:
 	}
 	return stmt
 }
