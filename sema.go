@@ -165,8 +165,45 @@ func walkStmt(stmt Stmt) Stmt {
 		s.dflt = walkStmt(s.dflt)
 	case *StmtDefer:
 	case *StmtExpr:
+		s, _ := stmt.(*StmtExpr)
+		s.expr = walkExpr(s.expr)
+		return s
 	}
 	return stmt
+}
+
+func walkExpr(expr Expr) Expr {
+	if expr == nil {
+		return nil
+	}
+	switch expr.(type) {
+	case *Relation:
+	case *ExprNilLiteral:
+	case *ExprNumberLiteral:
+	case *ExprStringLiteral:
+	case *ExprVariable:
+	case *ExprConstVariable:
+	case *ExprFuncallOrConversion:
+	case *ExprMethodcall:
+	case *ExprBinop:
+	case *ExprUop:
+	case *ExprFuncRef:
+	case *ExprSlice:
+	case *ExprIndex:
+	case *ExprArrayLiteral:
+	case *ExprSliceLiteral:
+	case *ExprTypeAssertion:
+	case *ExprVaArg:
+	case *ExprConversion:
+	case *ExprStructLiteral:
+	case *ExprStructField:
+	case *ExprTypeSwitchGuard:
+	case *ExprMapLiteral:
+	case *ExprLen:
+	case *ExprCap:
+	case *ExprConversionToInterface:
+	}
+	return expr
 }
 
 func (f *DeclFunc) walk() *DeclFunc {
