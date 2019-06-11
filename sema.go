@@ -80,6 +80,7 @@ func walkStmt(stmt Stmt) Stmt {
 		f.block = f.block.walk()
 		if f.rng != nil {
 			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
+
 				f.kind = FOR_KIND_RANGE_MAP
 			} else {
 				f.kind = FOR_KIND_RANGE_LIST

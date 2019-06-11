@@ -304,9 +304,6 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 func (f *StmtFor) emitRangeForMap() {
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	labelBegin := makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
 
 	mapCounter := &Relation{
 		name: "",
@@ -323,11 +320,6 @@ func (f *StmtFor) emitRangeForMap() {
 			},
 		},
 	}
-	emit("# init index")
-	initstmt.emit()
-
-	emit("%s: # begin loop ", labelBegin)
-
 	// counter < len(list)
 	condition := &ExprBinop{
 		op:   "<",
@@ -338,6 +330,21 @@ func (f *StmtFor) emitRangeForMap() {
 			arg: f.rng.rangeexpr, // len(expr)
 		},
 	}
+
+	// counter++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+
+	labelBegin := makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
+
+	emit("# init index")
+	initstmt.emit()
+
+	emit("%s: # begin loop ", labelBegin)
+
 	condition.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
@@ -392,10 +399,6 @@ func (f *StmtFor) emitRangeForMap() {
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	// counter++
-	indexIncr := &StmtInc{
-		operand: mapCounter,
-	}
 	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)
