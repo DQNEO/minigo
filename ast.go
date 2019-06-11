@@ -401,6 +401,32 @@ type ExprTypeSwitchGuard struct {
 }
 
 func (node *Relation) token() *Token                  { return node.tok }
+
+func (node *AstFile) token() *Token                   { return node.tok }
+func (node *PackageClause) token() *Token             { return node.tok }
+func (node *ImportSpec) token() *Token                { return node.tok }
+func (node *ImportDecl) token() *Token                { return node.tok }
+
+func (node *TopLevelDecl) token() *Token              { return node.tok }
+func (node *DeclVar) token() *Token                   { return node.tok }
+func (node *DeclConst) token() *Token                 { return node.tok }
+func (node *DeclFunc) token() *Token                  { return node.tok }
+func (node *DeclType) token() *Token                  { return node.tok }
+
+func (node *StmtFor) token() *Token                   { return node.tok }
+func (node *StmtIf) token() *Token                    { return node.tok }
+func (node *StmtReturn) token() *Token                { return node.tok }
+func (node *StmtInc) token() *Token                   { return node.tok }
+func (node *StmtDec) token() *Token                   { return node.tok }
+func (node *StmtSatementList) token() *Token          { return node.tok }
+func (node *StmtAssignment) token() *Token            { return node.tok }
+func (node *StmtShortVarDecl) token() *Token          { return node.tok }
+func (node *StmtContinue) token() *Token              { return node.tok }
+func (node *StmtBreak) token() *Token                 { return node.tok }
+func (node *StmtExpr) token() *Token                  { return node.tok }
+func (node *StmtDefer) token() *Token                 { return node.tok }
+func (node *StmtSwitch) token() *Token                { return node.tok }
+
 func (node *ExprNilLiteral) token() *Token            { return node.tok }
 func (node *ExprNumberLiteral) token() *Token         { return node.tok }
 func (node *ExprStringLiteral) token() *Token         { return node.tok }
@@ -410,39 +436,17 @@ func (node *ExprFuncallOrConversion) token() *Token   { return node.tok }
 func (node *ExprMethodcall) token() *Token            { return node.tok }
 func (node *ExprBinop) token() *Token                 { return node.tok }
 func (node *ExprUop) token() *Token                   { return node.tok }
-func (node *DeclVar) token() *Token                   { return node.tok }
-func (node *DeclConst) token() *Token                 { return node.tok }
-func (node *StmtAssignment) token() *Token            { return node.tok }
-func (node *StmtShortVarDecl) token() *Token          { return node.tok }
 func (node *ForRangeClause) token() *Token            { return node.tok }
 func (node *ForForClause) token() *Token              { return node.tok }
-func (node *StmtFor) token() *Token                   { return node.tok }
-func (node *StmtIf) token() *Token                    { return node.tok }
-func (node *StmtReturn) token() *Token                { return node.tok }
-func (node *StmtInc) token() *Token                   { return node.tok }
-func (node *StmtDec) token() *Token                   { return node.tok }
-func (node *PackageClause) token() *Token             { return node.tok }
-func (node *ImportSpec) token() *Token                { return node.tok }
-func (node *ImportDecl) token() *Token                { return node.tok }
-func (node *StmtSatementList) token() *Token          { return node.tok }
 func (node *ExprFuncRef) token() *Token               { return node.tok }
-func (node *DeclFunc) token() *Token                  { return node.tok }
-func (node *TopLevelDecl) token() *Token              { return node.tok }
-func (node *AstFile) token() *Token                   { return node.tok }
-func (node *DeclType) token() *Token                  { return node.tok }
 func (node *ExprSlice) token() *Token                 { return node.tok }
 func (node *ExprIndex) token() *Token                 { return node.tok }
 func (node *ExprArrayLiteral) token() *Token          { return node.tok }
 func (node *ExprSliceLiteral) token() *Token          { return node.tok }
 func (node *ExprTypeAssertion) token() *Token         { return node.tok }
-func (node *StmtContinue) token() *Token              { return node.tok }
-func (node *StmtBreak) token() *Token                 { return node.tok }
-func (node *StmtExpr) token() *Token                  { return node.tok }
-func (node *StmtDefer) token() *Token                 { return node.tok }
 func (node *ExprVaArg) token() *Token                 { return node.tok }
 func (node *ExprConversion) token() *Token            { return node.tok }
 func (node *ExprCaseClause) token() *Token            { return node.tok }
-func (node *StmtSwitch) token() *Token                { return node.tok }
 func (node *KeyedElement) token() *Token              { return node.tok }
 func (node *ExprStructLiteral) token() *Token         { return node.tok }
 func (node *ExprStructField) token() *Token           { return node.tok }
