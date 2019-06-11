@@ -19,20 +19,7 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 			rettypes := getRettypes(right)
 			assert(len(rettypes) == 1, ast.token(), "return values should be one")
 		}
-		gtype := left.getGtype()
-		switch {
-		case gtype.getKind() == G_ARRAY:
-			assignToArray(left, right)
-		case gtype.getKind() == G_SLICE:
-			assignToSlice(left, right)
-		case gtype.getKind() == G_STRUCT:
-			assignToStruct(left, right)
-		case gtype.getKind() == G_INTERFACE:
-			assignToInterface(left, right)
-		default:
-			// suppose primitive
-			emitAssignPrimitive(left, right)
-		}
+		emitAssignOne(left, right)
 	}
 }
 
@@ -55,125 +42,129 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 //
 //  one, two, three = '一', '二', '三'
 //
+
+func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
+	numLeft := len(ast.lefts)
+	emit("# multi(%d) = expr", numLeft)
+	// a,b,c = expr
+	numRight := 0
+	right := ast.rights[0]
+
+	var leftsMayBeTwo bool // a(,b) := expr // map index or type assertion
+	switch right.(type) {
+	case *ExprFuncallOrConversion, *ExprMethodcall:
+		rettypes := getRettypes(right)
+		numRight += len(rettypes)
+	case *ExprTypeAssertion:
+		leftsMayBeTwo = true
+		numRight++
+	case *ExprIndex:
+		indexExpr := right.(*ExprIndex)
+		if indexExpr.collection.getGtype().getKind() == G_MAP {
+			// map get
+			emit("# v, ok = map[k]")
+			leftsMayBeTwo = true
+		}
+		numRight++
+	default:
+		numRight++
+	}
+
+	if leftsMayBeTwo {
+		if numLeft > 2 {
+			errorft(ast.token(), "number of exprs does not match. numLeft=%d", numLeft)
+		}
+	} else {
+		if numLeft != numRight {
+			errorft(ast.token(), "number of exprs does not match: %d <=> %d", numLeft, numRight)
+		}
+	}
+
+	left := ast.lefts[0]
+	switch right.(type) {
+	case *ExprFuncallOrConversion, *ExprMethodcall:
+		rettypes := getRettypes(right)
+		if len(rettypes) > 1 {
+			// a,b,c = f()
+			emit("# a,b,c = f()")
+			right.emit()
+			var retRegiLen int
+			for _, rettype := range rettypes {
+				retSize := rettype.getSize()
+				if retSize < 8 {
+					retSize = 8
+				}
+				retRegiLen += retSize / 8
+			}
+			emit("# retRegiLen=%d\n", retRegiLen)
+			for i := retRegiLen - 1; i >= 0; i-- {
+				emit("push %%%s # %d", retRegi[i], i)
+			}
+			for _, left := range ast.lefts {
+				if isUnderScore(left) {
+					continue
+				}
+				assert(left.getGtype() != nil, left.token(), "should not be nil")
+				switch left.getGtype().getKind() {
+				case G_SLICE:
+					emit("POP_24")
+					emitSave24(left, 0)
+				case G_INTERFACE:
+					emit("POP_24")
+					emitSave24(left, 0)
+				default:
+					emit("pop %%rax")
+					emitSavePrimitive(left)
+				}
+			}
+			return
+		}
+	}
+
+	if _, ok := left.(*Relation); ok {
+		emit("# \"%s\" = ", left.(*Relation).name)
+	}
+	emitAssignOne(left, right)
+	//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
+	if leftsMayBeTwo && len(ast.lefts) == 2 {
+		okVariable := ast.lefts[1]
+		okRegister := mapOkRegister(right.getGtype().is24WidthType())
+		emit("mov %%%s, %%rax # emit okValue", okRegister)
+		emitSavePrimitive(okVariable)
+	}
+}
+
+func emitAssignOne(left Expr, right Expr) {
+	gtype := left.getGtype()
+	switch {
+	case gtype == nil:
+		// suppose left is "_"
+		right.emit()
+	case gtype.getKind() == G_ARRAY:
+		assignToArray(left, right)
+	case gtype.getKind() == G_SLICE:
+		assignToSlice(left, right)
+	case gtype.getKind() == G_STRUCT:
+		assignToStruct(left, right)
+	case gtype.getKind() == G_INTERFACE:
+		assignToInterface(left, right)
+	case gtype.getKind() == G_MAP:
+		assignToMap(left, right)
+	default:
+		// suppose primitive
+		emitAssignPrimitive(left, right)
+	}
+}
 func (ast *StmtAssignment) emit() {
 	emit("# StmtAssignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
-	isOnetoOneAssignment := (len(ast.rights) > 1)
-	if isOnetoOneAssignment {
+	if (len(ast.rights) > 1) {
 		emitAssignMultiToMulti(ast)
-		return
 	} else {
-		numLeft := len(ast.lefts)
-		emit("# multi(%d) = expr", numLeft)
-		// a,b,c = expr
-		numRight := 0
-		right := ast.rights[0]
-
-		var leftsMayBeTwo bool // a(,b) := expr // map index or type assertion
-		switch right.(type) {
-		case *ExprFuncallOrConversion, *ExprMethodcall:
-			rettypes := getRettypes(right)
-			numRight += len(rettypes)
-		case *ExprTypeAssertion:
-			leftsMayBeTwo = true
-			numRight++
-		case *ExprIndex:
-			indexExpr := right.(*ExprIndex)
-			if indexExpr.collection.getGtype().getKind() == G_MAP {
-				// map get
-				emit("# v, ok = map[k]")
-				leftsMayBeTwo = true
-			}
-			numRight++
-		default:
-			numRight++
-		}
-
-		if leftsMayBeTwo {
-			if numLeft > 2 {
-				errorft(ast.token(), "number of exprs does not match. numLeft=%d", numLeft)
-			}
-		} else {
-			if numLeft != numRight {
-				errorft(ast.token(), "number of exprs does not match: %d <=> %d", numLeft, numRight)
-			}
-		}
-
-		left := ast.lefts[0]
-		switch right.(type) {
-		case *ExprFuncallOrConversion, *ExprMethodcall:
-			rettypes := getRettypes(right)
-			if len(rettypes) > 1 {
-				// a,b,c = f()
-				emit("# a,b,c = f()")
-				right.emit()
-				var retRegiLen int
-				for _, rettype := range rettypes {
-					retSize := rettype.getSize()
-					if retSize < 8 {
-						retSize = 8
-					}
-					retRegiLen += retSize / 8
-				}
-				emit("# retRegiLen=%d\n", retRegiLen)
-				for i := retRegiLen - 1; i >= 0; i-- {
-					emit("push %%%s # %d", retRegi[i], i)
-				}
-				for _, left := range ast.lefts {
-					if isUnderScore(left) {
-						continue
-					}
-					assert(left.getGtype() != nil, left.token(), "should not be nil")
-					switch left.getGtype().getKind() {
-					case G_SLICE:
-						emit("POP_24")
-						emitSave24(left, 0)
-					case G_INTERFACE:
-						emit("POP_24")
-						emitSave24(left, 0)
-					default:
-						emit("pop %%rax")
-						emitSavePrimitive(left)
-					}
-				}
-				return
-			}
-		}
-
-		gtype := left.getGtype()
-		if _, ok := left.(*Relation); ok {
-			emit("# \"%s\" = ", left.(*Relation).name)
-		}
-		//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
-		switch {
-		case gtype == nil:
-			// suppose left is "_"
-			right.emit()
-		case gtype.getKind() == G_ARRAY:
-			assignToArray(left, right)
-		case gtype.getKind() == G_SLICE:
-			assignToSlice(left, right)
-		case gtype.getKind() == G_STRUCT:
-			assignToStruct(left, right)
-		case gtype.getKind() == G_INTERFACE:
-			assignToInterface(left, right)
-		case gtype.getKind() == G_MAP:
-			assignToMap(left, right)
-		default:
-			// suppose primitive
-			emitAssignPrimitive(left, right)
-		}
-		if leftsMayBeTwo && len(ast.lefts) == 2 {
-			okVariable := ast.lefts[1]
-			okRegister := mapOkRegister(right.getGtype().is24WidthType())
-			emit("mov %%%s, %%rax # emit okValue", okRegister)
-			emitSavePrimitive(okVariable)
-		}
-		return
+		emitAssignOneRightToMultiLeft(ast)
 	}
-
 }
 
 func emitAssignPrimitive(left Expr, right Expr) {
