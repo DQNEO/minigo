@@ -135,6 +135,11 @@ func walkStmt(stmt Stmt) Stmt {
 		if len(s.exprs) > 7 {
 			TBI(s.token(), "too many number of arguments")
 		}
+		for i := 0;i<len(s.exprs);i++ {
+			e := s.exprs[i]
+			e = walkExpr(e)
+			s.exprs[i] = e
+		}
 		return s
 	case *StmtInc:
 	case *StmtDec:
@@ -229,6 +234,13 @@ func walkExpr(expr Expr) Expr {
 		}
 		return funcall
 	case *ExprMethodcall:
+		methodCall,_ := expr.(*ExprMethodcall)
+		for i:=0 ;i<len(methodCall.args); i++ {
+			arg := methodCall.args[i]
+			arg = walkExpr(arg)
+			methodCall.args[i] = arg
+		}
+		return methodCall
 	case *ExprBinop:
 		e,_ := expr.(*ExprBinop)
 		e.left = walkExpr(e.left)
