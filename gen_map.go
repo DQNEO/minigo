@@ -305,7 +305,7 @@ func (f *StmtFor) emitRangeForMap() {
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 
-	mapCounter := f.rng.invisibleMapCounter
+	mapCounter := f.rng.mapCounter
 
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()

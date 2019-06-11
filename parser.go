@@ -1133,11 +1133,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 		tok:   tokRange,
 		outer: p.currentForStmt,
 		rng: &ForRangeClause{
-			tok:                 tokRange,
-			invisibleMapCounter: p.newVariable("", gInt),
-			indexvar:            indexvar,
-			valuevar:            valuevar,
-			rangeexpr:           rangeExpr,
+			tok:        tokRange,
+			mapCounter: p.newVariable("", gInt),
+			indexvar:   indexvar,
+			valuevar:   valuevar,
+			rangeexpr:  rangeExpr,
 		},
 	}
 	p.currentForStmt = r

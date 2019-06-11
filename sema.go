@@ -81,7 +81,7 @@ func walkStmt(stmt Stmt) Stmt {
 		if f.rng != nil {
 			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 				f.kind = FOR_KIND_RANGE_MAP
-				mapCounter := f.rng.invisibleMapCounter
+				mapCounter := f.rng.mapCounter
 
 				// counter = 0
 				f.rng.init = &StmtAssignment{

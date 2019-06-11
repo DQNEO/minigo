@@ -164,10 +164,10 @@ type ForRangeClause struct {
 	rangeexpr           Expr
 
 	// for map
-	invisibleMapCounter *ExprVariable
-	init *StmtAssignment
-	cond *ExprBinop
-	post *StmtInc
+	mapCounter *ExprVariable
+	init       *StmtAssignment
+	cond       *ExprBinop
+	post       *StmtInc
 
 }
 
