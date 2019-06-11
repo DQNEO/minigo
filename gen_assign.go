@@ -232,7 +232,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	strcttyp := rhs.getGtype().Underlying()
 
 	switch rhs.(type) {
-	case *Relation:
+	case *ExprVariable:
 		emitAddress(lhs)
 		emit("PUSH_8")
 		emitAddress(rhs)
@@ -402,8 +402,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
 		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
 		stringVarname, ok := conversion.expr.(*Relation)
-		assert(ok, rhs.token(), "ok")
-		stringVariable := stringVarname.expr.(*ExprVariable)
+		var stringVariable *ExprVariable
+		if ok {
+			stringVariable = stringVarname.expr.(*ExprVariable)
+		} else {
+			stringVariable = conversion.expr.(*ExprVariable)
+		}
+		//assert(ok, rhs.token(), "ok")
 		stringVariable.emit()
 		emit("PUSH_8 # ptr")
 		strlen := &ExprLen{
@@ -495,6 +500,9 @@ func assignToArray(lhs Expr, rhs Expr) {
 				rel := rhs.(*Relation)
 				arrayVariable, ok := rel.expr.(*ExprVariable)
 				assert(ok, nil, "ok")
+				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
+			case *ExprVariable:
+				arrayVariable := rhs.(*ExprVariable)
 				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
 			case *ExprStructField:
 				strctField := rhs.(*ExprStructField)
