@@ -75,6 +75,7 @@ func (f *DeclFunc) prepare() {
 
 func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
+	case *StmtDefer:
 
 	}
 	return stmt
