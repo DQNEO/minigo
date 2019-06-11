@@ -230,9 +230,13 @@ func walkExpr(expr Expr) Expr {
 		return funcall
 	case *ExprMethodcall:
 	case *ExprBinop:
+		e,_ := expr.(*ExprBinop)
+		e.left = walkExpr(e.left)
+		e.right = walkExpr(e.right)
+		return e
 	case *ExprUop:
 		e,_ := expr.(*ExprUop)
-		//e.operand = walkExpr(e.operand)
+		e.operand = walkExpr(e.operand)
 		return e
 	case *ExprFuncRef:
 	case *ExprSlice:
