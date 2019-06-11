@@ -75,9 +75,6 @@ func (ast *StmtAssignment) emit() {
 		switch right.(type) {
 		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
-			if isOnetoOneAssignment && len(rettypes) > 1 {
-				errorft(ast.token(), "multivalue is not allowed")
-			}
 			numRight += len(rettypes)
 		case *ExprTypeAssertion:
 			leftsMayBeTwo = true
