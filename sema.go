@@ -155,15 +155,16 @@ func walkStmt(stmt Stmt) Stmt {
 		}
 		return a
 	case *StmtContinue:
+
 	case *StmtBreak:
-	case *StmtExpr:
-	case *StmtDefer:
 	case *StmtSwitch:
 		s, _ := stmt.(*StmtSwitch)
 		for _, xcase := range s.cases {
 			xcase.compound = walkStmt(xcase.compound)
 		}
 		s.dflt = walkStmt(s.dflt)
+	case *StmtDefer:
+	case *StmtExpr:
 	}
 	return stmt
 }
