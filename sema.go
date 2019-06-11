@@ -75,6 +75,9 @@ func (f *DeclFunc) prepare() {
 
 // transform nodes
 func walkStmt(stmt Stmt) Stmt {
+	if stmt == nil {
+		return nil
+	}
 	switch stmt.(type) {
 	case *StmtFor:
 		f, _ := stmt.(*StmtFor)
@@ -115,11 +118,15 @@ func walkStmt(stmt Stmt) Stmt {
 				f.kind = FOR_KIND_RANGE_LIST
 			}
 		} else {
+			//f.cls.init = walkStmt(f.cls.init) // This does not work
+			f.cls.cond = walkStmt(f.cls.cond)
+			f.cls.post = walkStmt(f.cls.post)
 			f.kind = FOR_KIND_PLAIN
 		}
 		return f
 	case *StmtIf:
 		s, _ := stmt.(*StmtIf)
+		s.simplestmt = walkStmt(s.simplestmt)
 		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
 		return s
@@ -135,6 +142,13 @@ func walkStmt(stmt Stmt) Stmt {
 		return s
 	case *StmtAssignment:
 	case *StmtShortVarDecl:
+		s, _ := stmt.(*StmtShortVarDecl)
+		a := &StmtAssignment{
+			tok:    s.tok,
+			lefts:  s.lefts,
+			rights: s.rights,
+		}
+		return a
 	case *StmtContinue:
 	case *StmtBreak:
 	case *StmtExpr:

@@ -402,11 +402,12 @@ func (e *ExprNilLiteral) emit() {
 	emit("LOAD_NUMBER 0 # nil literal")
 }
 
-func (ast *StmtShortVarDecl) emit() {
+func (s *StmtShortVarDecl) emit() {
+	// this emitter cannot be removed due to lack of for.cls.init conversion
 	a := &StmtAssignment{
-		tok:    ast.tok,
-		lefts:  ast.lefts,
-		rights: ast.rights,
+		tok:    s.tok,
+		lefts:  s.lefts,
+		rights: s.rights,
 	}
 	a.emit()
 }
