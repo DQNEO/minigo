@@ -19,20 +19,7 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 			rettypes := getRettypes(right)
 			assert(len(rettypes) == 1, ast.token(), "return values should be one")
 		}
-		gtype := left.getGtype()
-		switch {
-		case gtype.getKind() == G_ARRAY:
-			assignToArray(left, right)
-		case gtype.getKind() == G_SLICE:
-			assignToSlice(left, right)
-		case gtype.getKind() == G_STRUCT:
-			assignToStruct(left, right)
-		case gtype.getKind() == G_INTERFACE:
-			assignToInterface(left, right)
-		default:
-			// suppose primitive
-			emitAssignPrimitive(left, right)
-		}
+		emitAssignOne(left, right)
 	}
 }
 
@@ -134,11 +121,21 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		}
 	}
 
-	gtype := left.getGtype()
 	if _, ok := left.(*Relation); ok {
 		emit("# \"%s\" = ", left.(*Relation).name)
 	}
+	emitAssignOne(left, right)
 	//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
+	if leftsMayBeTwo && len(ast.lefts) == 2 {
+		okVariable := ast.lefts[1]
+		okRegister := mapOkRegister(right.getGtype().is24WidthType())
+		emit("mov %%%s, %%rax # emit okValue", okRegister)
+		emitSavePrimitive(okVariable)
+	}
+}
+
+func emitAssignOne(left Expr, right Expr) {
+	gtype := left.getGtype()
 	switch {
 	case gtype == nil:
 		// suppose left is "_"
@@ -157,14 +154,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		// suppose primitive
 		emitAssignPrimitive(left, right)
 	}
-	if leftsMayBeTwo && len(ast.lefts) == 2 {
-		okVariable := ast.lefts[1]
-		okRegister := mapOkRegister(right.getGtype().is24WidthType())
-		emit("mov %%%s, %%rax # emit okValue", okRegister)
-		emitSavePrimitive(okVariable)
-	}
 }
-
 func (ast *StmtAssignment) emit() {
 	emit("# StmtAssignment")
 	// the right hand operand is a single multi-valued expression
