@@ -43,18 +43,18 @@ func (f *DeclFunc) prepare() {
 
 	var regIndex int
 	for _, param := range f.passParams {
+		var regConsume int
 		switch param.getGtype().is24WidthType() {
 		case true:
-			offset -= IntSize * 3
-			param.offset = offset
-			param.regIndex = regIndex
-			regIndex += 3
+			regConsume = 3
 		default:
-			offset -= IntSize
-			param.offset = offset
-			param.regIndex = regIndex
-			regIndex += 1
+			regConsume = 1
 		}
+
+		offset -= IntSize * regConsume
+		param.offset = offset
+		param.regIndex = regIndex
+		regIndex += regConsume
 	}
 
 	var localarea int
