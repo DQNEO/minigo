@@ -73,11 +73,12 @@ func (f *DeclFunc) prepare() {
 	f.localarea = localarea
 }
 
+// transform nodes
 func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
 	case *StmtFor:
 		f, _ := stmt.(*StmtFor)
-		f.block = f.block.walk()
+		f.block = walkStmt(f.block)
 		if f.rng != nil {
 			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 				f.kind = FOR_KIND_RANGE_MAP
@@ -119,7 +120,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return f
 	case *StmtIf:
 		s, _ := stmt.(*StmtIf)
-		s.then = s.then.walk()
+		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
 		return s
 	case *StmtReturn:
@@ -127,8 +128,9 @@ func walkStmt(stmt Stmt) Stmt {
 	case *StmtDec:
 	case *StmtSatementList:
 		s, _ := stmt.(*StmtSatementList)
-		for _,st := range s.stmts {
-			st = walkStmt(st)
+		for i:=0;i<len(s.stmts);i++ {
+			stmt := s.stmts[i]
+			s.stmts[i] = walkStmt(stmt)
 		}
 		return s
 	case *StmtAssignment:
@@ -147,17 +149,9 @@ func walkStmt(stmt Stmt) Stmt {
 	return stmt
 }
 
-func (s *StmtSatementList) walk() *StmtSatementList {
-	for i:=0;i<len(s.stmts);i++ {
-		stmt := s.stmts[i]
-		s.stmts[i] = walkStmt(stmt)
-	}
-	return s
-}
-
 func (f *DeclFunc) walk() *DeclFunc {
 	f.prepare()
-	f.body = f.body.walk()
+	f.body = walkStmt(f.body)
 	return f
 }
 

@@ -189,7 +189,7 @@ type StmtFor struct {
 	// either of rng or cls is set
 	rng           *ForRangeClause
 	cls           *ForForClause
-	block         *StmtSatementList
+	block         Stmt
 	labelEndBlock string
 	labelEndLoop  string
 	outer         *StmtFor // to manage lables in nested for-statements
@@ -199,7 +199,7 @@ type StmtIf struct {
 	tok        *Token
 	simplestmt Stmt
 	cond       Expr
-	then       *StmtSatementList
+	then       Stmt
 	els        Stmt
 }
 
@@ -253,7 +253,7 @@ type DeclFunc struct {
 	rettypes  []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
-	body      *StmtSatementList
+	body      Stmt
 	stmtDefer *StmtDefer
 	// every function has a defer handler
 	labelDeferHandler string

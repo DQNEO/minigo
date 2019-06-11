@@ -21,7 +21,8 @@ func (a *PackageClause) dump() {
 func (a *DeclFunc) dump() {
 	debugf("funcdef %s", a.fname)
 	debugNest++
-	for _, stmt := range a.body.stmts {
+	body := a.body.(*StmtSatementList)
+	for _, stmt := range body.stmts {
 		stmt.dump()
 	}
 	debugNest--
