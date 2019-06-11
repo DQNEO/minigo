@@ -15,10 +15,9 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emit("# emitData()")
-	emit(".data 0")
 	emitWithoutIndent("%s: # gtype=%s", decl.variable.varname, gtype.String())
-	emit("# right.gtype = %s", right.getGtype().String())
+	emitWithoutIndent("# right.gtype = %s", right.getGtype().String())
+	emitWithoutIndent(".data 0")
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
