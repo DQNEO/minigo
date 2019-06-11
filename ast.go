@@ -172,8 +172,14 @@ type ForForClause struct {
 	post Stmt
 }
 
+const (
+	FOR_KIND_RANGE_MAP int = 1
+	FOR_KIND_RANGE_LIST int = 2
+	FOR_KIND_PLAIN int = 3
+)
 type StmtFor struct {
 	tok *Token
+	kind int
 	// either of rng or cls is set
 	rng           *ForRangeClause
 	cls           *ForForClause
@@ -352,7 +358,7 @@ type ExprCaseClause struct {
 	tok      *Token
 	exprs    []Expr
 	gtypes   []*Gtype
-	compound *StmtSatementList
+	compound Stmt
 }
 
 // https://golang.org/ref/spec#Switch_statements
@@ -361,7 +367,7 @@ type StmtSwitch struct {
 	isTypeSwitch bool
 	cond         Expr
 	cases        []*ExprCaseClause
-	dflt         *StmtSatementList
+	dflt         Stmt
 }
 
 type KeyedElement struct {

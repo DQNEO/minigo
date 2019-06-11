@@ -244,15 +244,16 @@ func (f *StmtFor) emitForClause() {
 }
 
 func (f *StmtFor) emit() {
-	if f.rng != nil {
-		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
-			f.emitRangeForMap()
-		} else {
-			f.emitRangeForList()
-		}
-		return
+	switch f.kind {
+	case FOR_KIND_RANGE_MAP:
+		f.emitRangeForMap()
+	case FOR_KIND_RANGE_LIST:
+		f.emitRangeForList()
+	case FOR_KIND_PLAIN:
+		f.emitForClause()
+	default:
+		errorft(f.token(), "unexpected case")
 	}
-	f.emitForClause()
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {

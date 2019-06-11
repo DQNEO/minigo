@@ -76,11 +76,32 @@ func (f *DeclFunc) prepare() {
 func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
 	case *StmtFor:
+		f, _ := stmt.(*StmtFor)
+		f.block = f.block.walk()
+		if f.rng != nil {
+			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
+				f.kind = FOR_KIND_RANGE_MAP
+			} else {
+				f.kind = FOR_KIND_RANGE_LIST
+			}
+		} else {
+			f.kind = FOR_KIND_PLAIN
+		}
+		return f
 	case *StmtIf:
+		s, _ := stmt.(*StmtIf)
+		s.then = s.then.walk()
+		s.els = walkStmt(s.els)
+		return s
 	case *StmtReturn:
 	case *StmtInc:
 	case *StmtDec:
 	case *StmtSatementList:
+		s, _ := stmt.(*StmtSatementList)
+		for _,st := range s.stmts {
+			st = walkStmt(st)
+		}
+		return s
 	case *StmtAssignment:
 	case *StmtShortVarDecl:
 	case *StmtContinue:
@@ -88,6 +109,11 @@ func walkStmt(stmt Stmt) Stmt {
 	case *StmtExpr:
 	case *StmtDefer:
 	case *StmtSwitch:
+		s, _ := stmt.(*StmtSwitch)
+		for _, xcase := range s.cases {
+			xcase.compound = walkStmt(xcase.compound)
+		}
+		s.dflt = walkStmt(s.dflt)
 	}
 	return stmt
 }
