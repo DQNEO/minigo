@@ -131,6 +131,11 @@ func walkStmt(stmt Stmt) Stmt {
 		s.els = walkStmt(s.els)
 		return s
 	case *StmtReturn:
+		s, _ := stmt.(*StmtReturn)
+		if len(s.exprs) > 7 {
+			TBI(s.token(), "too many number of arguments")
+		}
+		return s
 	case *StmtInc:
 	case *StmtDec:
 	case *StmtSatementList:

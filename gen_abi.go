@@ -226,10 +226,6 @@ func (stmt *StmtReturn) emit() {
 		return
 	}
 
-	if len(stmt.exprs) > 7 {
-		TBI(stmt.token(), "too many number of arguments")
-	}
-
 	var retRegiIndex int
 	if len(stmt.exprs) == 1 {
 		expr := stmt.exprs[0]
