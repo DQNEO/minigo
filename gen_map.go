@@ -307,34 +307,6 @@ func (f *StmtFor) emitRangeForMap() {
 
 	mapCounter := f.rng.invisibleMapCounter
 
-	// counter = 0
-	f.rng.init = &StmtAssignment{
-		lefts: []Expr{
-			mapCounter,
-		},
-		rights: []Expr{
-			&ExprNumberLiteral{
-				val: 0,
-			},
-		},
-	}
-
-	// counter < len(list)
-	f.rng.cond = &ExprBinop{
-		op:   "<",
-		left: mapCounter, // i
-		// @TODO
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
-
-	// counter++
-	f.rng.post = &StmtInc{
-		operand: mapCounter,
-	}
-
 	labelBegin := makeLabel()
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()

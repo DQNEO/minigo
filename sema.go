@@ -80,8 +80,36 @@ func walkStmt(stmt Stmt) Stmt {
 		f.block = f.block.walk()
 		if f.rng != nil {
 			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
-
 				f.kind = FOR_KIND_RANGE_MAP
+				mapCounter := f.rng.invisibleMapCounter
+
+				// counter = 0
+				f.rng.init = &StmtAssignment{
+					lefts: []Expr{
+						mapCounter,
+					},
+					rights: []Expr{
+						&ExprNumberLiteral{
+							val: 0,
+						},
+					},
+				}
+
+				// counter < len(list)
+				f.rng.cond = &ExprBinop{
+					op:   "<",
+					left: mapCounter, // i
+					// @TODO
+					// The range expression x is evaluated once before beginning the loop
+					right: &ExprLen{
+						arg: f.rng.rangeexpr, // len(expr)
+					},
+				}
+
+				// counter++
+				f.rng.post = &StmtInc{
+					operand: mapCounter,
+				}
 			} else {
 				f.kind = FOR_KIND_RANGE_LIST
 			}
