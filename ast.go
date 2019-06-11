@@ -159,10 +159,16 @@ type StmtShortVarDecl struct {
 
 type ForRangeClause struct {
 	tok                 *Token
-	invisibleMapCounter *ExprVariable
 	indexvar            *Relation
 	valuevar            *Relation
 	rangeexpr           Expr
+
+	// for map
+	invisibleMapCounter *ExprVariable
+	init *StmtAssignment
+	cond *ExprBinop
+	post *StmtInc
+
 }
 
 type ForForClause struct {

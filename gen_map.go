@@ -305,12 +305,10 @@ func (f *StmtFor) emitRangeForMap() {
 	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 
-	mapCounter := &Relation{
-		name: "",
-		expr: f.rng.invisibleMapCounter,
-	}
+	mapCounter := f.rng.invisibleMapCounter
+
 	// counter = 0
-	initstmt := &StmtAssignment{
+	f.rng.init = &StmtAssignment{
 		lefts: []Expr{
 			mapCounter,
 		},
@@ -320,8 +318,9 @@ func (f *StmtFor) emitRangeForMap() {
 			},
 		},
 	}
+
 	// counter < len(list)
-	condition := &ExprBinop{
+	f.rng.cond = &ExprBinop{
 		op:   "<",
 		left: mapCounter, // i
 		// @TODO
@@ -332,7 +331,7 @@ func (f *StmtFor) emitRangeForMap() {
 	}
 
 	// counter++
-	indexIncr := &StmtInc{
+	f.rng.post = &StmtInc{
 		operand: mapCounter,
 	}
 
@@ -341,11 +340,11 @@ func (f *StmtFor) emitRangeForMap() {
 	f.labelEndLoop = makeLabel()
 
 	emit("# init index")
-	initstmt.emit()
+	f.rng.init.emit()
 
 	emit("%s: # begin loop ", labelBegin)
 
-	condition.emit()
+	f.rng.cond.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
 
@@ -399,7 +398,7 @@ func (f *StmtFor) emitRangeForMap() {
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	indexIncr.emit()
+	f.rng.post.emit()
 
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
