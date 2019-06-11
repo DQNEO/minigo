@@ -79,6 +79,10 @@ func walkStmt(stmt Stmt) Stmt {
 		return nil
 	}
 	switch stmt.(type) {
+	case *DeclVar:
+		decl, _ := stmt.(*DeclVar)
+		decl.initval = walkExpr(decl.initval)
+		return decl
 	case *StmtFor:
 		f, _ := stmt.(*StmtFor)
 		f.block = walkStmt(f.block)
