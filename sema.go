@@ -73,8 +73,24 @@ func (f *DeclFunc) prepare() {
 	f.localarea = localarea
 }
 
+func walkStmt(stmt Stmt) Stmt {
+	switch stmt.(type) {
+
+	}
+	return stmt
+}
+
+func (s *StmtSatementList) walk() *StmtSatementList {
+	for i:=0;i<len(s.stmts);i++ {
+		stmt := s.stmts[i]
+		s.stmts[i] = walkStmt(stmt)
+	}
+	return s
+}
+
 func (f *DeclFunc) walk() *DeclFunc {
 	f.prepare()
+	f.body = f.body.walk()
 	return f
 }
 
