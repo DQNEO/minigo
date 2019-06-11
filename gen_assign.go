@@ -2,6 +2,40 @@ package main
 
 import "fmt"
 
+// Assignment: a,b,c = expr1,expr2,expr3
+func emitAssignMultiToMulti(ast *StmtAssignment) {
+	emit("# multi(%d) = multi(%d)", len(ast.lefts), len(ast.rights))
+	// The number of operands on the left hand side must match the number of values.
+	if len(ast.lefts) != len(ast.rights) {
+		errorft(ast.token(), "number of exprs does not match")
+	}
+
+	length := len(ast.lefts)
+	for i:=0; i<length;i++ {
+		right := ast.rights[i]
+		left := ast.lefts[i]
+		switch right.(type) {
+		case *ExprFuncallOrConversion, *ExprMethodcall:
+			rettypes := getRettypes(right)
+			assert(len(rettypes) == 1, ast.token(), "return values should be one")
+		}
+		gtype := left.getGtype()
+		switch {
+		case gtype.getKind() == G_ARRAY:
+			assignToArray(left, right)
+		case gtype.getKind() == G_SLICE:
+			assignToSlice(left, right)
+		case gtype.getKind() == G_STRUCT:
+			assignToStruct(left, right)
+		case gtype.getKind() == G_INTERFACE:
+			assignToInterface(left, right)
+		default:
+			// suppose primitive
+			emitAssignPrimitive(left, right)
+		}
+	}
+}
+
 // https://golang.org/ref/spec#Assignments
 // A tuple assignment assigns the individual elements of a multi-valued operation to a list of variables.
 // There are two forms.
@@ -28,34 +62,7 @@ func (ast *StmtAssignment) emit() {
 	// The number of operands on the left hand side must match the number of values.
 	isOnetoOneAssignment := (len(ast.rights) > 1)
 	if isOnetoOneAssignment {
-		emit("# multi(%d) = multi(%d)", len(ast.lefts), len(ast.rights))
-		// a,b,c = expr1,expr2,expr3
-		if len(ast.lefts) != len(ast.rights) {
-			errorft(ast.token(), "number of exprs does not match")
-		}
-
-		for rightIndex, right := range ast.rights {
-			left := ast.lefts[rightIndex]
-			switch right.(type) {
-			case *ExprFuncallOrConversion, *ExprMethodcall:
-				rettypes := getRettypes(right)
-				assert(len(rettypes) == 1, ast.token(), "return values should be one")
-			}
-			gtype := left.getGtype()
-			switch {
-			case gtype.getKind() == G_ARRAY:
-				assignToArray(left, right)
-			case gtype.getKind() == G_SLICE:
-				assignToSlice(left, right)
-			case gtype.getKind() == G_STRUCT:
-				assignToStruct(left, right)
-			case gtype.getKind() == G_INTERFACE:
-				assignToInterface(left, right)
-			default:
-				// suppose primitive
-				emitAssignPrimitive(left, right)
-			}
-		}
+		emitAssignMultiToMulti(ast)
 		return
 	} else {
 		numLeft := len(ast.lefts)
