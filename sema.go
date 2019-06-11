@@ -10,6 +10,19 @@ type SymbolTable struct {
 	uniquedDTypes []string
 }
 
+
+func makeDynamicTypeLabel(id int) string {
+	return fmt.Sprintf("DynamicTypeId%d", id)
+}
+
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
+	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
+	if dynamicTypeId == -1 {
+		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
+	}
+	return makeDynamicTypeLabel(dynamicTypeId)
+}
+
 var typeId int = 1 // start with 1 because we want to zero as error
 
 func setTypeIds(namedTypes []*DeclType) {

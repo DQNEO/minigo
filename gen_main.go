@@ -1,21 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
-
-func makeDynamicTypeLabel(id int) string {
-	return fmt.Sprintf("DynamicTypeId%d", id)
-}
-
-func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
-	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
-	if dynamicTypeId == -1 {
-		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
-	}
-	return makeDynamicTypeLabel(dynamicTypeId)
-}
 
 // builtin string
 var builtinStringKey1 string = "SfmtDumpInterface"
