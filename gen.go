@@ -480,6 +480,7 @@ func (e *ExprTypeAssertion) emit() {
 }
 
 func (ast *StmtExpr) emit() {
+	setPos(ast.token())
 	ast.expr.emit()
 }
 
