@@ -234,6 +234,7 @@ func walkExpr(expr Expr) Expr {
 		decl := funcall.getFuncDef()
 		switch decl {
 		case builtinLen:
+			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 			arg := funcall.args[0]
 			return &ExprLen{
 				tok: arg.token(),
