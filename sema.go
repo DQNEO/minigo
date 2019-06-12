@@ -271,6 +271,11 @@ func walkExpr(expr Expr) Expr {
 		e.expr = walkExpr(e.expr)
 		return e
 	case *ExprStructLiteral:
+		e,_ := expr.(*ExprStructLiteral)
+		for _, field := range e.fields {
+			field.value = walkExpr(field.value)
+		}
+		return e
 	case *ExprStructField:
 	case *ExprTypeSwitchGuard:
 	case *ExprMapLiteral:
