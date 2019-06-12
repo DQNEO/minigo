@@ -19,8 +19,28 @@ const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
+	writePos()
 	var b []byte = []byte{'\n'}
 	os.Stdout.Write(b)
+}
+
+var pos *Token // current source position
+
+func setPos(ptok *Token) {
+	pos = ptok
+}
+
+func writePos() {
+	if !emitPosition {
+		return
+	}
+	var spos string
+	if pos == nil {
+		spos = ""
+	} else {
+		spos = pos.String()
+	}
+	writef("/* %s */ ", spos)
 }
 
 func write(s string) {
@@ -37,9 +57,10 @@ func writef(format string, v ...interface{}) {
 var gasIndentLevel int = 1
 
 func emit(format string, v ...interface{}) {
+	writePos()
+
 	var format2 string = format
 
-	write("/* tok */ ")
 	for i := 0; i < gasIndentLevel; i++ {
 		write("  ")
 	}
@@ -49,7 +70,7 @@ func emit(format string, v ...interface{}) {
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
-	write("/* tok */ ")
+	writePos()
 	writef(format + "\n", v...)
 }
 
@@ -393,7 +414,7 @@ func (decl *DeclConst) emit() {
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		//emit("# Statement: %s", stmt.token())
-		emit("# Statement")
+		setPos(ast.token())
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
