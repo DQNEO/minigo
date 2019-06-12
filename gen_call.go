@@ -107,15 +107,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 
 func (funcall *ExprFuncallOrConversion) emit() {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		debugf("remains:%s %s", funcall.fname, funcall.token().String())
-		// Conversion
-		conversion := &ExprConversion{
-			tok:   funcall.token(),
-			gtype: funcall.rel.gtype,
-			expr:  funcall.args[0],
-		}
-		conversion.emit()
-		return
+		errorft(funcall.token(), "remains:%s", funcall.fname, )
 	}
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")

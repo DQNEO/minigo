@@ -162,13 +162,16 @@ func walkStmt(stmt Stmt) Stmt {
 			right2 := walkExpr(right)
 			s.rights[i] = right2
 		}
-		/*
+
 		for i:=0; i<len(s.lefts); i++ {
 			left := s.lefts[i]
-			left = walkExpr(left)
-			s.lefts[i] = left
+			left2 := walkExpr(left)
+			if left2 == nil {
+				// this is "_" identifier. Recover original value
+				left2 = left
+			}
+			s.lefts[i] = left2
 		}
-		*/
 		return s
 	case *StmtShortVarDecl:
 		s, _ := stmt.(*StmtShortVarDecl)
