@@ -11,11 +11,15 @@ var debugMode = false // execute debugf() or not
 var debugToken = false
 
 var debugAst = false
+var debugSemaResult = false
 var debugParser = false
 var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
+var semaOnly = false
+
 var emitPosition = false
+
 func printVersion() {
 	println("minigo 0.1.0")
 	println("Copyright (C) 2019 @DQNEO")
@@ -35,6 +39,9 @@ func parseOpts(args []string) []string {
 		if opt == "-a" {
 			debugAst = true
 		}
+		if opt == "--sema" {
+			debugSemaResult = true
+		}
 		if opt == "-p" {
 			debugParser = true
 		}
@@ -52,6 +59,9 @@ func parseOpts(args []string) []string {
 		}
 		if opt == "--resolve-only" {
 			resolveOnly = true
+		}
+		if opt == "--sema-only" {
+			semaOnly = true
 		}
 		if strings.HasSuffix(opt, ".go") {
 			r = append(r, opt)
@@ -103,5 +113,9 @@ func main() {
 	}
 
 	program := build(u, r, libs, m)
+	if semaOnly {
+		return
+	}
+
 	program.emit()
 }

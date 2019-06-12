@@ -171,6 +171,10 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 		for _, f := range pkg.files {
 			f = f.walk()
 		}
+
+		if debugSemaResult {
+			pkg.dump()
+		}
 	}
 
 	symbolTable.uniquedDTypes = uniqueDynamicTypes(dynamicTypes)
