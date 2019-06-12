@@ -23,7 +23,12 @@ func emitNewline() {
 	os.Stdout.Write(b)
 }
 
-func emitOut(format string, v ...interface{}) {
+func write(s string) {
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
+}
+
+func writef(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
@@ -35,16 +40,15 @@ func emit(format string, v ...interface{}) {
 	var format2 string = format
 
 	for i := 0; i < gasIndentLevel; i++ {
-		format2 = "  " + format2
+		write("  ")
 	}
 
-	frmt := format2+"\n"
-	emitOut(frmt, v...)
+	frmt := format2 + "\n"
+	writef(frmt, v...)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
-	frmt := format+"\n"
-	emitOut(frmt, v...)
+	writef(format + "\n", v...)
 }
 
 // Mytype.method -> Mytype#method
