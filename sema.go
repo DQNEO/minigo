@@ -236,6 +236,12 @@ func walkExpr(expr Expr) Expr {
 				tok: arg.token(),
 				arg: arg,
 			}
+		case builtinCap:
+			arg := funcall.args[0]
+			return &ExprCap{
+				tok: arg.token(),
+				arg: arg,
+			}
 		}
 		return funcall
 	case *ExprMethodcall:

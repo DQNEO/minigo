@@ -108,13 +108,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 	// check if it's a builtin function
 	switch decl {
-	case builtinCap:
-		arg := funcall.args[0]
-		e := &ExprCap{
-			tok: arg.token(),
-			arg: arg,
-		}
-		e.emit()
 	case builtinAppend:
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
