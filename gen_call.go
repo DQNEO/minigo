@@ -3,11 +3,6 @@ package main
 import "fmt"
 
 func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
-	if funcall.rel.gtype != nil {
-		// Conversion
-		return []*Gtype{funcall.rel.gtype}
-	}
-
 	return funcall.getFuncDef().rettypes
 }
 
