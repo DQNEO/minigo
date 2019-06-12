@@ -14,9 +14,6 @@ func (ast *ExprStringLiteral) emit() {
 func loadStructField(strct Expr, field *Gtype, offset int) {
 	emit("# loadStructField")
 	switch strct.(type) {
-	case *Relation:
-		rel := strct.(*Relation)
-		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
 		if field.getKind() == G_ARRAY {
@@ -170,13 +167,6 @@ func (ast *ExprUop) emit() {
 	emit("# emitting ExprUop")
 	if ast.op == "&" {
 		switch ast.operand.(type) {
-		case *Relation:
-			rel := ast.operand.(*Relation)
-			vr, ok := rel.expr.(*ExprVariable)
-			if !ok {
-				errorft(ast.token(), "rel is not an variable")
-			}
-			vr.emitAddress(0)
 		case *ExprVariable:
 			vr := ast.operand.(*ExprVariable)
 			vr.emitAddress(0)

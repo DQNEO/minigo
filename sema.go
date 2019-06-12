@@ -148,7 +148,13 @@ func walkStmt(stmt Stmt) Stmt {
 		}
 		return s
 	case *StmtInc:
+		s, _ := stmt.(*StmtInc)
+		s.operand = walkExpr(s.operand)
+		return s
 	case *StmtDec:
+		s, _ := stmt.(*StmtDec)
+		s.operand = walkExpr(s.operand)
+		return s
 	case *StmtSatementList:
 		s, _ := stmt.(*StmtSatementList)
 		for i:=0;i<len(s.stmts);i++ {
