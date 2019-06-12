@@ -227,18 +227,7 @@ func (f *StmtFor) emitForClause() {
 
 	if f.cls.init != nil {
 		init := f.cls.init
-		switch init.(type) {
-		case *StmtAssignment:
-			s := init.(*StmtAssignment)
-			init = walkStmt(s)
-		case *StmtShortVarDecl:
-			s := init.(*StmtShortVarDecl)
-			init = walkStmt(s)
-		default:
-			errorft(f.token(), "should not reach here")
-		}
-		//f.cls.init = walkStmt(f.cls.init)
-
+		init = walkStmt(init)
 		f.cls.init.emit()
 	}
 	emit("%s: # begin loop ", labelBegin)
