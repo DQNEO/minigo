@@ -256,6 +256,11 @@ func walkExpr(expr Expr) Expr {
 		return e
 	case *ExprFuncRef:
 	case *ExprSlice:
+		e,_ := expr.(*ExprSlice)
+		e.low = walkExpr(e.low)
+		e.high = walkExpr(e.high)
+		e.max = walkExpr(e.max)
+		return e
 	case *ExprIndex:
 		e,_ := expr.(*ExprIndex)
 		e.index = walkExpr(e.index)
