@@ -175,11 +175,6 @@ func walkStmt(stmt Stmt) Stmt {
 		return s
 	case *StmtShortVarDecl:
 		s, _ := stmt.(*StmtShortVarDecl)
-		for i:=0; i<len(s.rights); i++ {
-			right := s.rights[i]
-			right = walkExpr(right)
-			s.rights[i] = right
-		}
 		a := &StmtAssignment{
 			tok:    s.tok,
 			lefts:  s.lefts,
