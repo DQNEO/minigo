@@ -386,7 +386,7 @@ func (decl *DeclConst) emit() {
 
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
-		emit("# Statement")
+		emit("# Statement: %s", stmt.token())
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
