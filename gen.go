@@ -39,6 +39,7 @@ var gasIndentLevel int = 1
 func emit(format string, v ...interface{}) {
 	var format2 string = format
 
+	write("/* tok */ ")
 	for i := 0; i < gasIndentLevel; i++ {
 		write("  ")
 	}
@@ -48,6 +49,7 @@ func emit(format string, v ...interface{}) {
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
+	write("/* tok */ ")
 	writef(format + "\n", v...)
 }
 
