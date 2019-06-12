@@ -318,11 +318,13 @@ func (f *StmtFor) dump() {
 }
 
 func (e *ExprLen) dump() {
-	TBI(e.token(), "")
+	debugf("len")
+	e.arg.emit()
 }
 
 func (e *ExprCap) dump() {
-	TBI(e.token(), "")
+	debugf("cap")
+	e.arg.emit()
 }
 
 func (e *ExprSliceLiteral) dump() {
