@@ -36,11 +36,11 @@ func writePos() {
 	}
 	var spos string
 	if pos == nil {
-		spos = ""
+		spos = "()"
 	} else {
 		spos = pos.String()
 	}
-	writef("/* %s */ ", spos)
+	writef("/*%s*/", spos)
 }
 
 func write(s string) {
