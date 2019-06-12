@@ -119,6 +119,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	is24Width := mapValueType.is24WidthType()
 
 	emit("# emitMapGet")
+	gasIndentLevel++
 
 	emit("mov %%rax, %%r10")
 	emit("mov %%rbx, %%r11")
@@ -211,6 +212,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("%s: # end loop", labelEnd)
 
+	gasIndentLevel--
 }
 
 // m[k] = v
