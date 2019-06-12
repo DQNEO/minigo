@@ -79,14 +79,7 @@ func (a *ExprStructField) emit() {
 
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
-	var vr *ExprVariable
-	rel, ok := e.strct.(*Relation)
-	if ok {
-		vr, ok = rel.expr.(*ExprVariable)
-	} else {
-		vr, ok = e.strct.(*ExprVariable)
-	}
-
+	vr, ok := e.strct.(*ExprVariable)
 	assert(ok, e.tok, "should be *ExprVariable")
 	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
