@@ -129,11 +129,6 @@ func (tok *Token) isSemicolon() bool {
 
 */
 
-var semicolonToken = Token{
-	typ:  "punct", // @FIXME: should be T_PUNCT
-	sval: ";",
-}
-
 func (tok *Token) dump() {
 	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.sval)
 	var b []byte = []byte(s)
