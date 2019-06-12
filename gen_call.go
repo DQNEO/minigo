@@ -101,10 +101,6 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 }
 
 func (funcall *ExprFuncallOrConversion) emit() {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		errorft(funcall.token(), "remains:%s", funcall.fname, )
-	}
-
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
 	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")
 	decl := funcall.getFuncDef()
