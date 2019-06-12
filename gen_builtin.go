@@ -15,10 +15,10 @@ func (e *ExprLen) emit() {
 		emit("# len(slice)")
 		switch arg.(type) {
 		case *Relation:
-			emit("# Relation")
+			//emit("# Relation")
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprVariable:
-			emit("# ExprVariable")
+			//emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprStructField:
 			emit("# ExprStructField")

@@ -87,6 +87,7 @@ func walkStmt(stmt Stmt) Stmt {
 		f, _ := stmt.(*StmtFor)
 		f.block = walkStmt(f.block)
 		if f.rng != nil {
+			f.rng.rangeexpr = walkExpr(f.rng.rangeexpr)
 			if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 				f.kind = FOR_KIND_RANGE_MAP
 				mapCounter := f.rng.mapCounter
@@ -246,6 +247,7 @@ func walkExpr(expr Expr) Expr {
 		return funcall
 	case *ExprMethodcall:
 		methodCall,_ := expr.(*ExprMethodcall)
+		methodCall.receiver = walkExpr(methodCall.receiver)
 		for i:=0 ;i<len(methodCall.args); i++ {
 			arg := methodCall.args[i]
 			arg = walkExpr(arg)
@@ -264,6 +266,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprFuncRef:
 	case *ExprSlice:
 		e,_ := expr.(*ExprSlice)
+		e.collection = walkExpr(e.collection)
 		e.low = walkExpr(e.low)
 		e.high = walkExpr(e.high)
 		e.max = walkExpr(e.max)
@@ -288,6 +291,9 @@ func walkExpr(expr Expr) Expr {
 		}
 		return e
 	case *ExprStructField:
+		e,_ := expr.(*ExprStructField)
+		e.strct = walkExpr(e.strct)
+		return e
 	case *ExprTypeSwitchGuard:
 	case *ExprMapLiteral:
 	case *ExprLen:
