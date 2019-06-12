@@ -376,6 +376,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	//	assert(rhs.getGtype().getKind() == G_SLICE, rhs.token(), "rsh should be slice type")
 
 	switch rhs.(type) {
+	case *ExprNilLiteral:
+		emit("LOAD_EMPTY_SLICE")
+		emitSave24(lhs, 0)
+		return
 	case *Relation:
 		rel := rhs.(*Relation)
 		if _, ok := rel.expr.(*ExprNilLiteral); ok {

@@ -157,16 +157,16 @@ func walkStmt(stmt Stmt) Stmt {
 		return s
 	case *StmtAssignment:
 		s, _ := stmt.(*StmtAssignment)
+		for i:=0; i<len(s.rights); i++ {
+			right := s.rights[i]
+			right2 := walkExpr(right)
+			s.rights[i] = right2
+		}
 		/*
 		for i:=0; i<len(s.lefts); i++ {
 			left := s.lefts[i]
 			left = walkExpr(left)
 			s.lefts[i] = left
-		}
-		for i:=0; i<len(s.rights); i++ {
-			right := s.rights[i]
-			right = walkExpr(right)
-			s.rights[i] = right
 		}
 		*/
 		return s
