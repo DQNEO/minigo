@@ -19,11 +19,36 @@ const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
+	writePos()
 	var b []byte = []byte{'\n'}
 	os.Stdout.Write(b)
 }
 
-func emitOut(format string, v ...interface{}) {
+var pos *Token // current source position
+
+func setPos(ptok *Token) {
+	pos = ptok
+}
+
+func writePos() {
+	if !emitPosition {
+		return
+	}
+	var spos string
+	if pos == nil {
+		spos = ""
+	} else {
+		spos = pos.String()
+	}
+	writef("/* %s */ ", spos)
+}
+
+func write(s string) {
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
+}
+
+func writef(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
@@ -32,19 +57,21 @@ func emitOut(format string, v ...interface{}) {
 var gasIndentLevel int = 1
 
 func emit(format string, v ...interface{}) {
+	writePos()
+
 	var format2 string = format
 
 	for i := 0; i < gasIndentLevel; i++ {
-		format2 = "  " + format2
+		write("  ")
 	}
 
-	frmt := format2+"\n"
-	emitOut(frmt, v...)
+	frmt := format2 + "\n"
+	writef(frmt, v...)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
-	frmt := format+"\n"
-	emitOut(frmt, v...)
+	writePos()
+	writef(format + "\n", v...)
 }
 
 // Mytype.method -> Mytype#method
@@ -386,7 +413,8 @@ func (decl *DeclConst) emit() {
 
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
-		emit("# Statement: %s", stmt.token())
+		//emit("# Statement: %s", stmt.token())
+		setPos(ast.token())
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
