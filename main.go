@@ -15,7 +15,7 @@ var debugParser = false
 var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
-
+var emitPosition = false
 func printVersion() {
 	println("minigo 0.1.0")
 	println("Copyright (C) 2019 @DQNEO")
@@ -37,6 +37,9 @@ func parseOpts(args []string) []string {
 		}
 		if opt == "-p" {
 			debugParser = true
+		}
+		if opt == "--position" {
+			emitPosition = true
 		}
 		if opt == "-d" {
 			debugMode = true

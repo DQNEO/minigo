@@ -1516,12 +1516,12 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 	}
 }
 
-func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
+func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
 	tok := p.readToken()
-	fname := tok.getIdent()
+	fnameToken := tok
 	p.expect("(")
 
 	var params []*ExprVariable
@@ -1572,7 +1572,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 
 	next := p.peekToken()
 	if next.isPunct("{") || next.isSemicolon() {
-		return fname, params, nil
+		return fnameToken, params, nil
 	}
 
 	var rettypes []*Gtype
@@ -1596,7 +1596,7 @@ func (p *parser) parseFuncSignature() (identifier, []*ExprVariable, []*Gtype) {
 		rettypes = []*Gtype{p.parseType()}
 	}
 
-	return fname, params, rettypes
+	return fnameToken, params, rettypes
 }
 
 func (p *parser) parseFuncDef() *DeclFunc {
@@ -1627,12 +1627,12 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.expect(")")
 	}
 
-	fname, params, rettypes := p.parseFuncSignature()
-
+	fnameToken, params, rettypes := p.parseFuncSignature()
+	fname := fnameToken.getIdent()
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
-		tok:      ptok,
+		tok:      fnameToken,
 		pkg:      p.packageName,
 		receiver: receiver,
 		fname:    fname,
@@ -1789,7 +1789,8 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			break
 		}
 
-		fname, params, rettypes := p.parseFuncSignature()
+		fnameToken, params, rettypes := p.parseFuncSignature()
+		fname := fnameToken.getIdent()
 		p.expect(";")
 
 		var paramTypes []*Gtype
