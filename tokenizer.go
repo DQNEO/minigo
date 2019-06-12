@@ -246,7 +246,8 @@ func (tn *Tokenizer) tokenize() []*Token {
 			if len(r) > 0 {
 				last := r[len(r)-1]
 				if tn.autoSemicolonInsert(last) {
-					r = append(r, &semicolonToken)
+					semicolon := tn.makeToken(T_PUNCT, ";")
+					r = append(r, semicolon)
 				}
 			}
 			continue
