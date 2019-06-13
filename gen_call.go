@@ -93,11 +93,13 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
-	var staticCall *IrStaticCall = &IrStaticCall{
+	var staticCall Expr = &IrStaticCall{
+		tok: methodCall.token(),
 		symbol:       getFuncSymbol(pkgname, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:args,
+		origExpr:methodCall,
 	}
 	staticCall.emit()
 }
@@ -190,10 +192,12 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			emitWithoutIndent("# %s", stringLiteral.val)
 		}
 	default:
-		var staticCall *IrStaticCall = &IrStaticCall{
+		var staticCall Expr = &IrStaticCall{
+			tok: funcall.token(),
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
 			args:funcall.args,
+			origExpr:funcall,
 		}
 		staticCall.emit()
 	}
@@ -207,7 +211,7 @@ type IrStaticCall struct {
 	callee       *DeclFunc
 	isMethodCall bool
 	args []Expr
-	gtype *Gtype
+	origExpr     Expr
 }
 
 func (ircall *IrStaticCall) token() *Token {
@@ -215,7 +219,7 @@ func (ircall *IrStaticCall) token() *Token {
 }
 
 func (ircall *IrStaticCall) getGtype() *Gtype {
-	return ircall.gtype
+	return ircall.origExpr.getGtype()
 }
 
 

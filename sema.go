@@ -312,11 +312,12 @@ func walkExpr(expr Expr) Expr {
 		case builtinMakeSlice:
 			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
 			var staticCall *IrStaticCall = &IrStaticCall{
+				tok: funcall.token(),
+				origExpr:funcall,
 				callee: decl,
 			}
 			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
 			staticCall.args = funcall.args
-			staticCall.gtype = funcall.getGtype()
 			return staticCall
 		case builtinAppend:
 			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
@@ -324,6 +325,8 @@ func walkExpr(expr Expr) Expr {
 			valueToAppend := funcall.args[1]
 			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
 			var staticCall *IrStaticCall = &IrStaticCall{
+				tok: funcall.token(),
+				origExpr:funcall,
 				callee: decl,
 			}
 			switch slice.getGtype().elementType.getSize() {
