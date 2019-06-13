@@ -377,16 +377,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		emit("LOAD_EMPTY_SLICE")
 		emitSave24(lhs, 0)
 		return
-	case *Relation:
-		rel := rhs.(*Relation)
-		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			emit("LOAD_EMPTY_SLICE")
-			emitSave24(lhs, 0)
-			return
-		}
-		rvariable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
-		rvariable.emit()
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
