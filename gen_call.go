@@ -62,7 +62,7 @@ func (call *IrInterfaceMethodCall) token() *Token {
 	return call.tok
 }
 
-func (methodCall *ExprMethodcall) toInterfaceMethodCall() Stmt {
+func (methodCall *ExprMethodcall) toInterfaceMethodCall() Expr {
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
@@ -79,12 +79,8 @@ func (methodCall *ExprMethodcall) toInterfaceMethodCall() Stmt {
 }
 
 func (methodCall *ExprMethodcall) emit() {
+
 	origType := methodCall.getOrigType()
-	if origType.getKind() == G_INTERFACE {
-		stmt := methodCall.toInterfaceMethodCall()
-		stmt.emit()
-		return
-	}
 
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
