@@ -57,7 +57,7 @@ func (f *DeclFunc) emitPrologue() {
 	emitNewline()
 }
 
-func (ircall *IrStaticCall) emit(args []Expr) {
+func (ircall *IrStaticCall) emit() {
 	// nothing to do
 	emit("# emitCall %s", ircall.symbol)
 
@@ -67,7 +67,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-	for argIndex, arg = range args {
+	for argIndex, arg = range ircall.args {
 		var fromGtype string = ""
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
@@ -188,7 +188,7 @@ func (ircall *IrStaticCall) emit(args []Expr) {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(args[0].token(), "too many arguments")
+			errorft(ircall.args[0].token(), "too many arguments")
 		}
 		emit("POP_TO_ARG_%d", i)
 	}
