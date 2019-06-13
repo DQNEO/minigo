@@ -47,26 +47,36 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 }
 
 type IrInterfaceMethodCall struct {
+	tok *Token
 	receiver   Expr
 	methodName identifier
+	args []Expr
 }
 
-func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
+func (call *IrInterfaceMethodCall) token() *Token {
+	return call.tok
+}
+
+func (methodCall *ExprMethodcall) toInterfaceMethodCall() Stmt {
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
 	call := &IrInterfaceMethodCall{
+		tok: methodCall.token(),
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
+		args:args,
 	}
-	call.emit(args)
+	var s Stmt = call
+	return s
 }
 
 func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
 	if origType.getKind() == G_INTERFACE {
-		methodCall.emitInterfaceMethodCall()
+		stmt := methodCall.toInterfaceMethodCall()
+		stmt.emit()
 		return
 	}
 

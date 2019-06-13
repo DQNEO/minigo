@@ -141,6 +141,15 @@ func (ast *IrStaticCall) dump() {
 	debugNest--
 }
 
+func (ast *IrInterfaceMethodCall) dump() {
+	debugf("IrStaIrInterfaceMethodCallticCall " + string(ast.methodName))
+	debugNest++
+	for _, arg := range ast.args {
+		arg.dump()
+	}
+	debugNest--
+}
+
 
 func (ast *ExprMethodcall) dump() {
 	debugf(string(ast.fname))

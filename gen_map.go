@@ -2,7 +2,8 @@ package main
 
 const MAX_METHODS_PER_TYPE int = 128
 
-func (call *IrInterfaceMethodCall) emit(args []Expr) {
+func (call *IrInterfaceMethodCall) emit() {
+	args := call.args
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
