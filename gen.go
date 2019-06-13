@@ -309,8 +309,8 @@ func emitCallMalloc(size int) {
 	emitCallMallocDinamicSize(eNumber)
 }
 
-func (e *ExprConversionToInterface) emit() {
-	emit("# ExprConversionToInterface")
+func (e *IrExprConversionToInterface) emit() {
+	emit("# IrExprConversionToInterface")
 	emitConversionToInterface(e.expr)
 }
 
@@ -488,8 +488,8 @@ func (e *ExprVaArg) emit() {
 	e.expr.emit()
 }
 
-func (e *ExprConversion) emit() {
-	emit("# ExprConversion.emit()")
+func (e *IrExprConversion) emit() {
+	emit("# IrExprConversion.emit()")
 	if e.gtype.isString() {
 		// s = string(bytes)
 		labelEnd := makeLabel()

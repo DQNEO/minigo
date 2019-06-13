@@ -331,13 +331,13 @@ type ExprVaArg struct {
 	expr Expr // slice
 }
 
-type ExprConversion struct {
+type IrExprConversion struct {
 	tok   *Token
 	gtype *Gtype // to
 	expr  Expr   // from
 }
 
-type ExprConversionToInterface struct {
+type IrExprConversionToInterface struct {
 	tok  *Token
 	expr Expr // dynamic type
 }
@@ -433,20 +433,20 @@ func (node *ExprBinop) token() *Token                 { return node.tok }
 func (node *ExprUop) token() *Token                   { return node.tok }
 func (node *ForRangeClause) token() *Token            { return node.tok }
 func (node *ForForClause) token() *Token              { return node.tok }
-func (node *ExprFuncRef) token() *Token               { return node.tok }
-func (node *ExprSlice) token() *Token                 { return node.tok }
-func (node *ExprIndex) token() *Token                 { return node.tok }
-func (node *ExprArrayLiteral) token() *Token          { return node.tok }
-func (node *ExprSliceLiteral) token() *Token          { return node.tok }
-func (node *ExprTypeAssertion) token() *Token         { return node.tok }
-func (node *ExprVaArg) token() *Token                 { return node.tok }
-func (node *ExprConversion) token() *Token            { return node.tok }
-func (node *ExprCaseClause) token() *Token            { return node.tok }
-func (node *KeyedElement) token() *Token              { return node.tok }
-func (node *ExprStructLiteral) token() *Token         { return node.tok }
-func (node *ExprStructField) token() *Token           { return node.tok }
-func (node *ExprTypeSwitchGuard) token() *Token       { return node.tok }
-func (node *ExprMapLiteral) token() *Token            { return node.tok }
-func (node *ExprLen) token() *Token                   { return node.tok }
-func (node *ExprCap) token() *Token                   { return node.tok }
-func (node *ExprConversionToInterface) token() *Token { return node.tok }
+func (node *ExprFuncRef) token() *Token         { return node.tok }
+func (node *ExprSlice) token() *Token           { return node.tok }
+func (node *ExprIndex) token() *Token           { return node.tok }
+func (node *ExprArrayLiteral) token() *Token    { return node.tok }
+func (node *ExprSliceLiteral) token() *Token    { return node.tok }
+func (node *ExprTypeAssertion) token() *Token   { return node.tok }
+func (node *ExprVaArg) token() *Token           { return node.tok }
+func (node *IrExprConversion) token() *Token    { return node.tok }
+func (node *ExprCaseClause) token() *Token              { return node.tok }
+func (node *KeyedElement) token() *Token                { return node.tok }
+func (node *ExprStructLiteral) token() *Token           { return node.tok }
+func (node *ExprStructField) token() *Token             { return node.tok }
+func (node *ExprTypeSwitchGuard) token() *Token         { return node.tok }
+func (node *ExprMapLiteral) token() *Token              { return node.tok }
+func (node *ExprLen) token() *Token                     { return node.tok }
+func (node *ExprCap) token() *Token                     { return node.tok }
+func (node *IrExprConversionToInterface) token() *Token { return node.tok }

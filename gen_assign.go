@@ -393,13 +393,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *ExprSlice:
 		e := rhs.(*ExprSlice)
 		e.emit()
-	case *ExprConversion:
+	case *IrExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
 		// yields a slice whose successive elements are the bytes of the string.
 		//
 		// see also https://blog.golang.org/strings
-		conversion := rhs.(*ExprConversion)
+		conversion := rhs.(*IrExprConversion)
 		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
 		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
 		stringVarname, ok := conversion.expr.(*Relation)

@@ -111,7 +111,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 func (funcall *ExprFuncallOrConversion) emit() {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 		// Conversion
-		conversion := &ExprConversion{
+		conversion := &IrExprConversion{
 			tok:   funcall.token(),
 			gtype: funcall.rel.gtype,
 			expr:  funcall.args[0],
@@ -154,7 +154,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			symbol = getFuncSymbol("iruntime", "append8")
 		case 24:
 			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
-				eConvertion := &ExprConversionToInterface{
+				eConvertion := &IrExprConversionToInterface{
 					tok:  valueToAppend.token(),
 					expr: valueToAppend,
 				}

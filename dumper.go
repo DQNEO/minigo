@@ -264,7 +264,7 @@ func (e *ExprVaArg) dump() {
 	e.expr.dump()
 }
 
-func (e *ExprConversion) dump() {
+func (e *IrExprConversion) dump() {
 	debugf("conversion")
 	debugNest++
 	debugf("toType:%s", e.gtype.String())
@@ -393,6 +393,6 @@ func (e *ExprMapLiteral) dump() {
 	debugNest--
 }
 
-func (e *ExprConversionToInterface) dump() {
-	panic("implement me: ExprConversionToInterface")
+func (e *IrExprConversionToInterface) dump() {
+	panic("implement me: IrExprConversionToInterface")
 }

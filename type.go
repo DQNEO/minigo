@@ -411,7 +411,7 @@ func (e *ExprNilLiteral) getGtype() *Gtype {
 	return nil
 }
 
-func (e *ExprConversion) getGtype() *Gtype {
+func (e *IrExprConversion) getGtype() *Gtype {
 	return e.gtype
 }
 
@@ -432,6 +432,6 @@ func (e *ExprMapLiteral) getGtype() *Gtype {
 	return e.gtype
 }
 
-func (e *ExprConversionToInterface) getGtype() *Gtype {
+func (e *IrExprConversionToInterface) getGtype() *Gtype {
 	return gInterface
 }
