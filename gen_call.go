@@ -109,33 +109,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 	// check if it's a builtin function
 	switch decl {
-	case builtinAppend:
-		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
-		slice := funcall.args[0]
-		valueToAppend := funcall.args[1]
-		emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
-		var staticCall *IrStaticCall = &IrStaticCall{
-			callee: decl,
-		}
-		switch slice.getGtype().elementType.getSize() {
-		case 1:
-			staticCall.symbol = getFuncSymbol("iruntime", "append1")
-		case 8:
-			staticCall.symbol = getFuncSymbol("iruntime", "append8")
-		case 24:
-			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
-				eConvertion := &ExprConversionToInterface{
-					tok:  valueToAppend.token(),
-					expr: valueToAppend,
-				}
-				funcall.args[1] = eConvertion
-			}
-			staticCall.symbol = getFuncSymbol("iruntime", "append24")
-		default:
-			TBI(slice.token(), "")
-		}
-		staticCall.args = funcall.args
-		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 
