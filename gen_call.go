@@ -86,11 +86,13 @@ func (methodCall *ExprMethodcall) emit() {
 	}
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
-	var staticCall *IrStaticCall = &IrStaticCall{
+	var staticCall Expr = &IrStaticCall{
+		tok: methodCall.token(),
 		symbol:       getFuncSymbol(pkgname, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:args,
+		origExpr:methodCall,
 	}
 	staticCall.emit()
 }
@@ -144,18 +146,12 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		slice := funcall.args[0]
 		valueToAppend := funcall.args[1]
 		emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
-		var staticCall *IrStaticCall = &IrStaticCall{
-			callee: decl,
-		}
+		var symbol string
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
-			staticCall.symbol = getFuncSymbol("iruntime", "append1")
-			staticCall.args = funcall.args
-			staticCall.emit()
+			symbol = getFuncSymbol("iruntime", "append1")
 		case 8:
-			staticCall.symbol = getFuncSymbol("iruntime", "append8")
-			staticCall.args = funcall.args
-			staticCall.emit()
+			symbol = getFuncSymbol("iruntime", "append8")
 		case 24:
 			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 				eConvertion := &ExprConversionToInterface{
@@ -164,19 +160,27 @@ func (funcall *ExprFuncallOrConversion) emit() {
 				}
 				funcall.args[1] = eConvertion
 			}
-			staticCall.symbol = getFuncSymbol("iruntime", "append24")
-			staticCall.args = funcall.args
-			staticCall.emit()
+			symbol = getFuncSymbol("iruntime", "append24")
 		default:
 			TBI(slice.token(), "")
 		}
+		var staticCall Expr = &IrStaticCall{
+			tok: funcall.token(),
+			callee: decl,
+			args: funcall.args,
+			origExpr: funcall,
+			symbol: symbol,
+		}
+		staticCall.emit()
 	case builtinMakeSlice:
 		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		var staticCall *IrStaticCall = &IrStaticCall{
+		var staticCall Expr = &IrStaticCall{
+			tok: funcall.token(),
 			callee: decl,
+			args: funcall.args,
+			origExpr: funcall,
+			symbol: getFuncSymbol("iruntime", "makeSlice"),
 		}
-		staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
-		staticCall.args = funcall.args
 		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
@@ -247,10 +251,12 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			emitWithoutIndent("# %s", stringLiteral.val)
 		}
 	default:
-		var staticCall *IrStaticCall = &IrStaticCall{
+		var staticCall Expr = &IrStaticCall{
+			tok: funcall.token(),
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
 			args: funcall.args,
+			origExpr:funcall,
 		}
 		staticCall.emit()
 	}
@@ -264,6 +270,18 @@ type IrStaticCall struct {
 	callee       *DeclFunc
 	isMethodCall bool
 	args         []Expr
-	gtype *Gtype
+	origExpr     Expr
+}
+
+func (ircall *IrStaticCall) token() *Token {
+	return ircall.tok
+}
+
+func (ircall *IrStaticCall) dump() {
+	ircall.origExpr.dump()
+}
+
+func (ircall *IrStaticCall) getGtype() *Gtype {
+	return ircall.origExpr.getGtype()
 }
 
