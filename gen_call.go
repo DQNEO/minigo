@@ -90,8 +90,9 @@ func (methodCall *ExprMethodcall) emit() {
 		symbol:       getFuncSymbol(pkgname, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
+		args:args,
 	}
-	staticCall.emit(args)
+	staticCall.emit()
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
@@ -149,10 +150,12 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		switch slice.getGtype().elementType.getSize() {
 		case 1:
 			staticCall.symbol = getFuncSymbol("iruntime", "append1")
-			staticCall.emit(funcall.args)
+			staticCall.args = funcall.args
+			staticCall.emit()
 		case 8:
 			staticCall.symbol = getFuncSymbol("iruntime", "append8")
-			staticCall.emit(funcall.args)
+			staticCall.args = funcall.args
+			staticCall.emit()
 		case 24:
 			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 				eConvertion := &ExprConversionToInterface{
@@ -162,7 +165,8 @@ func (funcall *ExprFuncallOrConversion) emit() {
 				funcall.args[1] = eConvertion
 			}
 			staticCall.symbol = getFuncSymbol("iruntime", "append24")
-			staticCall.emit(funcall.args)
+			staticCall.args = funcall.args
+			staticCall.emit()
 		default:
 			TBI(slice.token(), "")
 		}
@@ -172,7 +176,8 @@ func (funcall *ExprFuncallOrConversion) emit() {
 			callee: decl,
 		}
 		staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
-		staticCall.emit(funcall.args)
+		staticCall.args = funcall.args
+		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 
@@ -245,16 +250,20 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		var staticCall *IrStaticCall = &IrStaticCall{
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
+			args: funcall.args,
 		}
-		staticCall.emit(funcall.args)
+		staticCall.emit()
 	}
 }
 
 type IrStaticCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
+	tok          *Token
 	symbol       string
 	callee       *DeclFunc
 	isMethodCall bool
+	args         []Expr
+	gtype *Gtype
 }
 
