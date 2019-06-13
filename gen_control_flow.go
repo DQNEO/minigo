@@ -246,13 +246,25 @@ func (f *StmtFor) emitForClause() {
 func (f *StmtFor) emit() {
 	if f.rng != nil {
 		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
-			f.emitRangeForMap()
+			f.kind = FOR_KIND_RANGE_MAP
 		} else {
-			f.emitRangeForList()
+			f.kind = FOR_KIND_RANGE_LIST
 		}
-		return
+	} else {
+		f.kind = FOR_KIND_CLIKE
 	}
-	f.emitForClause()
+
+	switch f.kind {
+	case FOR_KIND_RANGE_MAP:
+		f.emitRangeForMap()
+	case FOR_KIND_RANGE_LIST:
+		f.emitRangeForList()
+	case FOR_KIND_CLIKE:
+		f.emitForClause()
+	default:
+		errorft(f.token(), "NOT_REACHED")
+	}
+
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {

@@ -170,8 +170,14 @@ type ForForClause struct {
 	post Stmt
 }
 
+const (
+	FOR_KIND_RANGE_MAP int = 1
+	FOR_KIND_RANGE_LIST int = 2
+	FOR_KIND_CLIKE int = 3
+)
 type StmtFor struct {
 	tok *Token
+	kind int // 1:range map, 2:range list, 3:c-like
 	// either of rng or cls is set
 	rng           *ForRangeClause
 	cls           *ForForClause
