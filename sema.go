@@ -386,6 +386,9 @@ func walkExpr(expr Expr) Expr {
 	case *ExprSliceLiteral:
 	case *ExprTypeAssertion:
 	case *ExprVaArg:
+		e,_ := expr.(*ExprVaArg)
+		e.expr = walkExpr(e.expr)
+		return e
 	case *ExprConversion:
 		e,_ := expr.(*ExprConversion)
 		e.expr = walkExpr(e.expr)
