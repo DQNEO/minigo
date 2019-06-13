@@ -177,9 +177,6 @@ func emitAssignPrimitive(left Expr, right Expr) {
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
 
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
 	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
@@ -336,7 +333,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 
 		lit := rhs.(*ExprMapLiteral)
 		lit.emit()
-	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
+	case *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
 	default:
 		TBI(rhs.token(), "unable to handle %T", rhs)
@@ -433,10 +430,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	emit("# assignToArray")
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
-
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
