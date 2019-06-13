@@ -366,18 +366,18 @@ func (decl *DeclVar) emit() {
 func (decl *DeclVar) emitLocal() {
 	emit("# DeclVar \"%s\"", decl.variable.varname)
 	gtype := decl.variable.gtype
-	varname := decl.varname
+	variable := decl.variable
 	switch gtype.getKind() {
 	case G_ARRAY:
-		assignToArray(varname, decl.initval)
+		assignToArray(variable, decl.initval)
 	case G_SLICE:
-		assignToSlice(varname, decl.initval)
+		assignToSlice(variable, decl.initval)
 	case G_STRUCT:
-		assignToStruct(varname, decl.initval)
+		assignToStruct(variable, decl.initval)
 	case G_MAP:
-		assignToMap(varname, decl.initval)
+		assignToMap(variable, decl.initval)
 	case G_INTERFACE:
-		assignToInterface(varname, decl.initval)
+		assignToInterface(variable, decl.initval)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
 		// primitive types like int,bool,byte
