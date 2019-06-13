@@ -20,9 +20,8 @@ minigo: *.go internal_runtime.go internal_universe.go stdlib.go
 # 2nd gen assembly
 minigo.s: minigo
 	./minigo *.go > /tmp/minigo.s
-	./minigo --position *.go > /tmp/minigo.pos.s
+	./minigo --position *.go > /tmp/minigo.s
 	cp /tmp/minigo.s minigo.s
-	cp /tmp/minigo.pos.s minigo.pos.s
 
 # 2nd gen compiler
 minigo2: minigo.s
@@ -33,7 +32,8 @@ minigo2.s: minigo2 minigo *.go
 	cp /tmp/minigo2.s minigo2.s
 
 selfhost: minigo2.s
-	diff minigo2.s minigo.s && echo ok
+	sed -e 's|^/\*.*)\*/||' minigo.s > /tmp/minigo.stripped.s
+	diff minigo2.s /tmp/minigo.stripped.s && echo ok
 
 test: minigo minigo2
 	make vet

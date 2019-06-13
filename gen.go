@@ -36,11 +36,11 @@ func writePos() {
 	}
 	var spos string
 	if pos == nil {
-		spos = ""
+		spos = "()"
 	} else {
 		spos = pos.String()
 	}
-	writef("/* %s */ ", spos)
+	writef("/*%s*/", spos)
 }
 
 func write(s string) {
@@ -413,8 +413,8 @@ func (decl *DeclConst) emit() {
 
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
-		//emit("# Statement: %s", stmt.token())
 		setPos(ast.token())
+		emit("# Statement")
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
@@ -479,6 +479,7 @@ func (e *ExprTypeAssertion) emit() {
 }
 
 func (ast *StmtExpr) emit() {
+	setPos(ast.token())
 	ast.expr.emit()
 }
 
