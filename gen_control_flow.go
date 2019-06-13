@@ -141,79 +141,27 @@ func (f *StmtFor) emitRangeForList() {
 
 	// i = 0
 	emit("# init index")
-	initstmt := &StmtAssignment{
-		lefts: []Expr{
-			f.rng.indexvar,
-		},
-		rights: []Expr{
-			&ExprNumberLiteral{
-				val: 0,
-			},
-		},
-	}
-	initstmt.emit()
+	f.rng.init.emit()
 
 	emit("%s: # begin loop ", labelBegin)
 
-	// i < len(list)
-	condition := &ExprBinop{
-		op:   "<",
-		left: f.rng.indexvar, // i
-		// @TODO
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
-	condition.emit()
+	f.rng.cond.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
-	// v = s[i]
-	var assignVar *StmtAssignment
-	if f.rng.valuevar != nil {
-		assignVar = &StmtAssignment{
-			lefts: []Expr{
-				f.rng.valuevar,
-			},
-			rights: []Expr{
-				&ExprIndex{
-					collection: f.rng.rangeexpr,
-					index:      f.rng.indexvar,
-				},
-			},
-		}
-		assignVar.emit()
+	if f.rng.assignvar != nil {
+		f.rng.assignvar.emit()
 	}
 
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	// break if i == len(list) - 1
-	condition2 := &ExprBinop{
-		op:   "==",
-		left: f.rng.indexvar, // i
-		// @TODO2
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprBinop{
-			op: "-",
-			left: &ExprLen{
-				arg: f.rng.rangeexpr, // len(expr)
-			},
-			right: &ExprNumberLiteral{
-				val: 1,
-			},
-		},
-	}
-	condition2.emit()
+	f.rng.cond2.emit()
 	emit("TEST_IT")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
 	// i++
-	indexIncr := &StmtInc{
-		operand: f.rng.indexvar,
-	}
-	indexIncr.emit()
+	f.rng.post.emit()
 
 	emit("jmp %s", labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)

@@ -164,12 +164,17 @@ type ForRangeClause struct {
 	valuevar            *Relation
 	rangeexpr           Expr
 
-	// for map
-	mapCounter *ExprVariable
+	// for range
 	init       *StmtAssignment
 	cond       *ExprBinop
 	post       *StmtInc
 
+	// for map
+	mapCounter *ExprVariable
+
+	// for array like
+	cond2 *ExprBinop
+	assignvar *StmtAssignment
 }
 
 type ForForClause struct {

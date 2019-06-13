@@ -121,6 +121,66 @@ func walkStmt(stmt Stmt) Stmt {
 				}
 			} else {
 				f.kind = FOR_KIND_RANGE_LIST
+				f.rng.init = &StmtAssignment{
+					lefts: []Expr{
+						f.rng.indexvar,
+					},
+					rights: []Expr{
+						&ExprNumberLiteral{
+							val: 0,
+						},
+					},
+				}
+
+				// i < len(list)
+				f.rng.cond = &ExprBinop{
+					op:   "<",
+					left: f.rng.indexvar, // i
+					// @TODO
+					// The range expression x is evaluated once before beginning the loop
+					right: &ExprLen{
+						arg: f.rng.rangeexpr, // len(expr)
+					},
+				}
+
+				// break if i == len(list) - 1
+				f.rng.cond2 = &ExprBinop{
+					op:   "==",
+					left: f.rng.indexvar, // i
+					// @TODO2
+					// The range expression x is evaluated once before beginning the loop
+					right: &ExprBinop{
+						op: "-",
+						left: &ExprLen{
+							arg: f.rng.rangeexpr, // len(expr)
+						},
+						right: &ExprNumberLiteral{
+							val: 1,
+						},
+					},
+				}
+
+				// v = s[i]
+				if f.rng.valuevar != nil {
+					f.rng.assignvar = &StmtAssignment{
+						lefts: []Expr{
+							f.rng.valuevar,
+						},
+						rights: []Expr{
+							&ExprIndex{
+								collection: f.rng.rangeexpr,
+								index:      f.rng.indexvar,
+							},
+						},
+					}
+				}
+
+				f.rng.post = &StmtInc{
+					operand: f.rng.indexvar,
+				}
+
+
+
 			}
 		} else {
 			//f.cls.init = walkStmt(f.cls.init) // This does not work
