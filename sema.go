@@ -183,7 +183,7 @@ func walkStmt(stmt Stmt) Stmt {
 
 			}
 		} else {
-			//f.cls.init = walkStmt(f.cls.init) // This does not work
+			f.cls.init = walkStmt(f.cls.init) // This does not work
 			f.cls.cond = walkStmt(f.cls.cond)
 			f.cls.post = walkStmt(f.cls.post)
 			f.kind = FOR_KIND_PLAIN
