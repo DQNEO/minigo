@@ -176,7 +176,7 @@ func (f *StmtFor) emitForClause() {
 	if f.cls.init != nil {
 		init := f.cls.init
 		init = walkStmt(init)
-		f.cls.init.emit()
+		init.emit()
 	}
 	emit("%s: # begin loop ", labelBegin)
 	if f.cls.cond != nil {
