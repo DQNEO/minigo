@@ -500,11 +500,6 @@ func assignToArray(lhs Expr, rhs Expr) {
 					val := arrayLiteral.values[i]
 					val.emit()
 				}
-			case *Relation:
-				rel := rhs.(*Relation)
-				arrayVariable, ok := rel.expr.(*ExprVariable)
-				assert(ok, nil, "ok")
-				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
 			case *ExprVariable:
 				arrayVariable := rhs.(*ExprVariable)
 				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
