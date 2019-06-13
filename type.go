@@ -266,6 +266,9 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(methodsig != nil, e.tok)
+		if len(methodsig.rettypes) == 0 {
+			return nil
+		}
 		return methodsig.rettypes[0]
 	} else {
 		method, ok := underlyingType.methods[e.fname]
@@ -273,6 +276,9 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(method != nil, e.tok)
+		if len(method.funcdef.rettypes) == 0 {
+			return nil
+		}
 		return method.funcdef.rettypes[0]
 	}
 }

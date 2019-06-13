@@ -48,9 +48,14 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 
 type IrInterfaceMethodCall struct {
 	tok *Token
+	gtype *Gtype
 	receiver   Expr
 	methodName identifier
 	args []Expr
+}
+
+func (call *IrInterfaceMethodCall) getGtype() *Gtype {
+	return call.gtype
 }
 
 func (call *IrInterfaceMethodCall) token() *Token {
@@ -64,11 +69,12 @@ func (methodCall *ExprMethodcall) toInterfaceMethodCall() Stmt {
 	}
 	call := &IrInterfaceMethodCall{
 		tok: methodCall.token(),
+		gtype: methodCall.getGtype(),
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
 		args:args,
 	}
-	var s Stmt = call
+	var s Expr = call
 	return s
 }
 
