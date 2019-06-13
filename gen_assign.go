@@ -392,18 +392,10 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		conversion := rhs.(*ExprConversion)
 		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
 		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
-		stringVarname, ok := conversion.expr.(*Relation)
-		var stringVariable *ExprVariable
-		if ok {
-			stringVariable = stringVarname.expr.(*ExprVariable)
-		} else {
-			stringVariable = conversion.expr.(*ExprVariable)
-		}
-		//assert(ok, rhs.token(), "ok")
-		stringVariable.emit()
+		conversion.expr.emit()
 		emit("PUSH_8 # ptr")
 		strlen := &ExprLen{
-			arg: stringVariable,
+			arg: conversion.expr,
 		}
 		strlen.emit()
 		emit("PUSH_8 # len")
