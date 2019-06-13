@@ -375,8 +375,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	switch rhs.(type) {
 	case *ExprNilLiteral:
 		emit("LOAD_EMPTY_SLICE")
-		emitSave24(lhs, 0)
-		return
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
 		lit.emit()
