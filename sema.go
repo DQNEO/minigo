@@ -249,6 +249,15 @@ func walkExpr(expr Expr) Expr {
 				tok: arg.token(),
 				arg: arg,
 			}
+		case builtinMakeSlice:
+			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+			var staticCall *IrStaticCall = &IrStaticCall{
+				callee: decl,
+			}
+			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
+			staticCall.args = funcall.args
+			staticCall.gtype = funcall.getGtype()
+			return staticCall
 		}
 		return funcall
 	case *ExprMethodcall:

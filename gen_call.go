@@ -136,14 +136,6 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 		staticCall.args = funcall.args
 		staticCall.emit()
-	case builtinMakeSlice:
-		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		var staticCall *IrStaticCall = &IrStaticCall{
-			callee: decl,
-		}
-		staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
-		staticCall.args = funcall.args
-		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 
@@ -225,9 +217,20 @@ func (funcall *ExprFuncallOrConversion) emit() {
 type IrStaticCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
+	tok *Token
 	symbol       string
 	callee       *DeclFunc
 	isMethodCall bool
 	args []Expr
+	gtype *Gtype
 }
+
+func (ircall *IrStaticCall) token() *Token {
+	return ircall.tok
+}
+
+func (ircall *IrStaticCall) getGtype() *Gtype {
+	return ircall.gtype
+}
+
 

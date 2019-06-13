@@ -132,6 +132,16 @@ func (ast *ExprFuncallOrConversion) dump() {
 	debugNest--
 }
 
+func (ast *IrStaticCall) dump() {
+	debugf("IrStaticCall " + ast.symbol)
+	debugNest++
+	for _, arg := range ast.args {
+		arg.dump()
+	}
+	debugNest--
+}
+
+
 func (ast *ExprMethodcall) dump() {
 	debugf(string(ast.fname))
 	debugNest++
