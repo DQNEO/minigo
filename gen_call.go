@@ -67,15 +67,15 @@ func (methodCall *ExprMethodcall) toInterfaceMethodCall() Expr {
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
 	}
-	call := &IrInterfaceMethodCall{
+	var call Expr = &IrInterfaceMethodCall{
 		tok: methodCall.token(),
 		gtype: methodCall.getGtype(),
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
 		args:args,
 	}
-	var s Expr = call
-	return s
+
+	return call
 }
 
 func (methodCall *ExprMethodcall) emit() {
