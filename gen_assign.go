@@ -283,13 +283,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
-			case G_MAP:
-				left := &ExprStructField{
-					tok:       variable.token(),
-					strct:     lhs,
-					fieldname: field.key,
-				}
-				assignToMap(left, field.value)
 			case G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),
@@ -305,6 +298,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				}
 				assignToStruct(left, field.value)
 			default:
+				if field.value == nil {
+					field.value = &ExprNumberLiteral{}
+				}
 				field.value.emit()
 
 				regSize := fieldtype.getSize()
