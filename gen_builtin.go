@@ -73,11 +73,7 @@ func (e *ExprCap) emit() {
 		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
-		case *ExprVariable:
-			emitOffsetLoad(arg, 8, ptrSize*2)
-		case *ExprStructField:
-			emitOffsetLoad(arg, 8, ptrSize*2)
-		case *ExprIndex:
+		case *ExprVariable,*ExprStructField,*ExprIndex :
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
