@@ -384,14 +384,6 @@ func (decl *DeclVar) emitLocal() {
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
 		// primitive types like int,bool,byte
-		if rhs == nil {
-			if variable.getGtype().isString() {
-				rhs = &eEmptyString
-			} else {
-				// assign zero value
-				rhs = &ExprNumberLiteral{}
-			}
-		}
 		emitAssignPrimitive(variable, rhs)
 	}
 }

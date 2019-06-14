@@ -169,6 +169,15 @@ func (ast *StmtAssignment) emit() {
 }
 
 func emitAssignPrimitive(lhs Expr, rhs Expr) {
+	if rhs == nil {
+		if lhs.getGtype().isString() {
+			rhs = &eEmptyString
+		} else {
+			// assign zero value
+			rhs = &ExprNumberLiteral{}
+		}
+	}
+
 	assert(lhs.getGtype().getSize() <= 8, lhs.token(), fmt.Sprintf("invalid type for lhs: %s", lhs.getGtype()))
 	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(), fmt.Sprintf("invalid type for rhs: %s", rhs.getGtype()))
 	rhs.emit()             //   expr => %rax
