@@ -149,14 +149,11 @@ func (ast *ExprConstVariable) emit() {
 				val: ast.iotaIndex,
 			}
 			val.emit()
-		} else {
-			emit("# Not iota")
-			ast.val.emit()
+			return
 		}
-	} else {
-		emit("# const is not iota")
-		ast.val.emit()
 	}
+	emit("# const is not iota")
+	ast.val.emit()
 }
 
 func (ast *ExprUop) emit() {
