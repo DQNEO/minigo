@@ -66,7 +66,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 							vr, ok := operand.(*ExprVariable)
 							assert(ok, uop.token(), "only variable is allowed")
 							emit(".quad %s # %s %s", vr.varname, value.getGtype().String(), selector)
-						case *Relation:
+						case *ExprVariable:
 							assert(false, value.token(), "variable here is not allowed")
 						default:
 							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
