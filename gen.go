@@ -542,8 +542,6 @@ func evalIntExpr(e Expr) int {
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
 		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
-	case *Relation:
-		return evalIntExpr(e.(*Relation).expr)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
 		switch binop.op {

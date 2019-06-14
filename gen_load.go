@@ -12,11 +12,9 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
+	strct = unwrapRel(strct)
 	emit("# loadStructField")
 	switch strct.(type) {
-	case *Relation:
-		rel := strct.(*Relation)
-		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
 		if field.getKind() == G_ARRAY {
@@ -82,9 +80,9 @@ func (a *ExprStructField) emit() {
 
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
-	rel, ok := e.strct.(*Relation)
-	assert(ok, e.tok, "should be *Relation")
-	vr, ok := rel.expr.(*ExprVariable)
+	strct := e.strct
+	strct = unwrapRel(strct)
+	vr, ok := strct.(*ExprVariable)
 	assert(ok, e.tok, "should be *ExprVariable")
 	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
@@ -162,15 +160,13 @@ func (ast *ExprConstVariable) emit() {
 }
 
 func (ast *ExprUop) emit() {
+	operand := unwrapRel(ast.operand)
+	ast.operand = operand
 	emit("# emitting ExprUop")
 	if ast.op == "&" {
 		switch ast.operand.(type) {
-		case *Relation:
-			rel := ast.operand.(*Relation)
-			vr, ok := rel.expr.(*ExprVariable)
-			if !ok {
-				errorft(ast.token(), "rel is not an variable")
-			}
+		case *ExprVariable:
+			vr := ast.operand.(*ExprVariable)
 			vr.emitAddress(0)
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
@@ -191,12 +187,6 @@ func (ast *ExprUop) emit() {
 			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
 	} else if ast.op == "*" {
-		// dereferene of a pointer
-		//debugf("dereferene of a pointer")
-		//rel, ok := ast.operand.(*Relation)
-		//debugf("operand:%s", rel)
-		//vr, ok := rel.expr.(*ExprVariable)
-		//assert(ok, nil, "operand is a rel")
 		ast.operand.emit()
 		emit("LOAD_8_BY_DEREF")
 	} else if ast.op == "!" {
@@ -264,9 +254,8 @@ func (e *ExprSliceLiteral) emit() {
 }
 
 func emitAddress(e Expr) {
+	e = unwrapRel(e)
 	switch e.(type) {
-	case *Relation:
-		emitAddress(e.(*Relation).expr)
 	case *ExprVariable:
 		e.(*ExprVariable).emitAddress(0)
 	default:
@@ -275,11 +264,9 @@ func emitAddress(e Expr) {
 }
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
+	lhs = unwrapRel(lhs)
 	emit("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		emitOffsetLoad(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitOffsetLoad(size, offset)
