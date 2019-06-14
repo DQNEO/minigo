@@ -68,15 +68,15 @@ func (e *ExprLen) emit() {
 
 func (e *ExprCap) emit() {
 	emit("# emit cap()")
-	arg := e.arg
+	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	switch gtype.getKind() {
 	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
-		case *Relation:
-			emit("# Relation")
+		case *ExprVariable:
+			emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprStructField:
 			emit("# ExprStructField")
