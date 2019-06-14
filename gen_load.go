@@ -266,11 +266,9 @@ func emitAddress(e Expr) {
 }
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
+	lhs = unwrapRel(lhs)
 	emit("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		emitOffsetLoad(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitOffsetLoad(size, offset)
