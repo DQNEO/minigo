@@ -4,7 +4,7 @@ import "fmt"
 
 func (e *ExprLen) emit() {
 	emit("# emit len()")
-	arg := e.arg
+	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
@@ -14,8 +14,8 @@ func (e *ExprLen) emit() {
 	case G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
-		case *Relation:
-			emit("# Relation")
+		case *ExprVariable:
+			emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprStructField:
 			emit("# ExprStructField")
