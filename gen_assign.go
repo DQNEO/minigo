@@ -146,7 +146,11 @@ func emitAssignOne(lhs Expr, rhs Expr) {
 	case gtype.getKind() == G_INTERFACE:
 		assignToInterface(lhs, rhs)
 	case gtype.getKind() == G_MAP:
-		assignToMap(lhs, rhs)
+		if rhs == nil {
+			rhs = &ExprNumberLiteral{} // zero value for map
+		}
+		rhs.emit()
+		emitSavePrimitive(lhs)
 	default:
 		// suppose primitive
 		emitAssignPrimitive(lhs, rhs)
@@ -314,16 +318,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 	emit("# assignToStruct end")
 }
-
-func assignToMap(lhs Expr, rhs Expr) {
-	emit("# assignToMap")
-	if rhs == nil {
-		rhs = &ExprNumberLiteral{} // zero value for map
-	}
-	rhs.emit()
-	emitSavePrimitive(lhs)
-}
-
 
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
