@@ -6,11 +6,8 @@ import "fmt"
 // a map index expression,
 // or (for = assignments only) the blank identifier.
 func emitSavePrimitive(lhs Expr) {
+	lhs = unwrapRel(lhs)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		assert(rel.expr != nil, rel.token(), "lhs.rel.expr is nil")
-		emitSavePrimitive(rel.expr)
 	case *ExprVariable:
 		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprIndex:
