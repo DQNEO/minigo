@@ -308,10 +308,7 @@ func (f *StmtFor) emitRangeForMap() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
-	mapCounter := &Relation{
-		name: "",
-		expr: f.rng.invisibleMapCounter,
-	}
+	mapCounter := f.rng.invisibleMapCounter
 	// counter = 0
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
