@@ -371,21 +371,21 @@ func (decl *DeclVar) emitLocal() {
 	emit("# DeclVar \"%s\"", decl.variable.varname)
 	gtype := decl.variable.gtype
 	variable := decl.variable
+	rhs := decl.initval
 	switch gtype.getKind() {
 	case G_ARRAY:
-		assignToArray(variable, decl.initval)
+		assignToArray(variable, rhs)
 	case G_SLICE:
-		assignToSlice(variable, decl.initval)
+		assignToSlice(variable, rhs)
 	case G_STRUCT:
-		assignToStruct(variable, decl.initval)
+		assignToStruct(variable, rhs)
 	case G_MAP:
-		assignToMap(variable, decl.initval)
+		assignToMap(variable, rhs)
 	case G_INTERFACE:
-		assignToInterface(variable, decl.initval)
+		assignToInterface(variable, rhs)
 	default:
 		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
 		// primitive types like int,bool,byte
-		rhs := decl.initval
 		if rhs == nil {
 			if gtype.isString() {
 				rhs = &eEmptyString
