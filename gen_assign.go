@@ -121,9 +121,6 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		}
 	}
 
-	if _, ok := left.(*Relation); ok {
-		emit("# \"%s\" = ", left.(*Relation).name)
-	}
 	emitAssignOne(left, right)
 	//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
 	if leftsMayBeTwo && len(ast.lefts) == 2 {
