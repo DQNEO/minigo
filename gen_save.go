@@ -5,23 +5,23 @@ import "fmt"
 // Each left-hand side operand must be addressable,
 // a map index expression,
 // or (for = assignments only) the blank identifier.
-func emitSavePrimitive(left Expr) {
-	switch left.(type) {
+func emitSavePrimitive(lhs Expr) {
+	switch lhs.(type) {
 	case *Relation:
-		rel := left.(*Relation)
-		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
+		rel := lhs.(*Relation)
+		assert(rel.expr != nil, rel.token(), "lhs.rel.expr is nil")
 		emitSavePrimitive(rel.expr)
 	case *ExprVariable:
-		emitOffsetSavePrimitive(left, left.getGtype().getSize(), 0)
+		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprIndex:
-		emitOffsetSavePrimitive(left, left.getGtype().getSize(),0)
+		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(),0)
 	case *ExprStructField:
-		left.(*ExprStructField).emitSavePrimitive()
+		lhs.(*ExprStructField).emitSavePrimitive()
 	case *ExprUop:
-		left.(*ExprUop).emitSavePrimitive()
+		lhs.(*ExprUop).emitSavePrimitive()
 	default:
-		left.dump()
-		errorft(left.token(), "Unknown case %T", left)
+		lhs.dump()
+		errorft(lhs.token(), "Unknown case %T", lhs)
 	}
 }
 
