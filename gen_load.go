@@ -162,15 +162,13 @@ func (ast *ExprConstVariable) emit() {
 }
 
 func (ast *ExprUop) emit() {
+	operand := unwrapRel(ast.operand)
+	ast.operand = operand
 	emit("# emitting ExprUop")
 	if ast.op == "&" {
 		switch ast.operand.(type) {
-		case *Relation:
-			rel := ast.operand.(*Relation)
-			vr, ok := rel.expr.(*ExprVariable)
-			if !ok {
-				errorft(ast.token(), "rel is not an variable")
-			}
+		case *ExprVariable:
+			vr := ast.operand.(*ExprVariable)
 			vr.emitAddress(0)
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
