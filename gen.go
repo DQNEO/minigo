@@ -534,12 +534,8 @@ func evalIntExpr(e Expr) int {
 		}
 	case *ExprConstVariable:
 		cnst := e.(*ExprConstVariable)
-		rel, ok := cnst.val.(*Relation)
-		if ok {
-			val := rel.expr.(*ExprConstVariable)
-			if val == eIota {
-				return cnst.iotaIndex
-			}
+		if cnst.hasIotaValue() {
+			return cnst.iotaIndex
 		}
 		return evalIntExpr(cnst.val)
 	default:
@@ -548,3 +544,12 @@ func evalIntExpr(e Expr) int {
 	return 0
 }
 
+func (cnst *ExprConstVariable) hasIotaValue() bool {
+	rel, ok := cnst.val.(*Relation)
+	if !ok {
+		return false
+	}
+
+	val := rel.expr.(*ExprConstVariable)
+	return val == eIota
+}
