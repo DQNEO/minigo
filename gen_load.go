@@ -189,12 +189,6 @@ func (ast *ExprUop) emit() {
 			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
 	} else if ast.op == "*" {
-		// dereferene of a pointer
-		//debugf("dereferene of a pointer")
-		//rel, ok := ast.operand.(*Relation)
-		//debugf("operand:%s", rel)
-		//vr, ok := rel.expr.(*ExprVariable)
-		//assert(ok, nil, "operand is a rel")
 		ast.operand.emit()
 		emit("LOAD_8_BY_DEREF")
 	} else if ast.op == "!" {
