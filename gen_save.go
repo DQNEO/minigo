@@ -23,11 +23,8 @@ func emitSavePrimitive(lhs Expr) {
 }
 
 func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
+ 	lhs = unwrapRel(lhs)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		emitOffsetSavePrimitive(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitOffsetSavePrimitive(size, offset, false)
