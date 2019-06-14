@@ -379,12 +379,6 @@ func (decl *DeclVar) emitLocal() {
 		assignToSlice(variable, rhs)
 	case G_STRUCT:
 		assignToStruct(variable, rhs)
-	case G_MAP:
-		if rhs == nil {
-			rhs = &ExprNumberLiteral{} // zero value for map
-		}
-		rhs.emit()
-		emitSavePrimitive(variable)
 	case G_INTERFACE:
 		assignToInterface(variable, rhs)
 	default:
