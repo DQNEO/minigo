@@ -379,31 +379,10 @@ func (decl *DeclVar) emitLocal() {
 		assignToSlice(variable, rhs)
 	case G_STRUCT:
 		assignToStruct(variable, rhs)
-	case G_MAP:
-		assignToMap(variable, rhs)
 	case G_INTERFACE:
 		assignToInterface(variable, rhs)
 	default:
-		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
-		// primitive types like int,bool,byte
-		if rhs == nil {
-			if gtype.isString() {
-				rhs = &eEmptyString
-			} else {
-				// assign zero value
-				rhs = &ExprNumberLiteral{}
-			}
-		}
-		emit("# LOAD RHS")
-		gasIndentLevel++
-		rhs.emit()
-		gasIndentLevel--
-		comment := "initialize " + string(decl.variable.varname)
-		emit("# Assign to LHS")
-		gasIndentLevel++
-		emit("STORE_%d_TO_LOCAL %d # %s",
-			decl.variable.getGtype().getSize(), decl.variable.offset, comment)
-		gasIndentLevel--
+		emitAssignPrimitive(variable, rhs)
 	}
 }
 

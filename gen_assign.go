@@ -131,25 +131,23 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 	}
 }
 
-func emitAssignOne(left Expr, right Expr) {
-	gtype := left.getGtype()
+func emitAssignOne(lhs Expr, rhs Expr) {
+	gtype := lhs.getGtype()
 	switch {
 	case gtype == nil:
-		// suppose left is "_"
-		right.emit()
+		// suppose lhs is "_"
+		rhs.emit()
 	case gtype.getKind() == G_ARRAY:
-		assignToArray(left, right)
+		assignToArray(lhs, rhs)
 	case gtype.getKind() == G_SLICE:
-		assignToSlice(left, right)
+		assignToSlice(lhs, rhs)
 	case gtype.getKind() == G_STRUCT:
-		assignToStruct(left, right)
+		assignToStruct(lhs, rhs)
 	case gtype.getKind() == G_INTERFACE:
-		assignToInterface(left, right)
-	case gtype.getKind() == G_MAP:
-		assignToMap(left, right)
+		assignToInterface(lhs, rhs)
 	default:
 		// suppose primitive
-		emitAssignPrimitive(left, right)
+		emitAssignPrimitive(lhs, rhs)
 	}
 }
 func (ast *StmtAssignment) emit() {
@@ -164,11 +162,20 @@ func (ast *StmtAssignment) emit() {
 	}
 }
 
-func emitAssignPrimitive(left Expr, right Expr) {
-	assert(left.getGtype().getSize() <= 8, left.token(), fmt.Sprintf("invalid type for lhs: %s", left.getGtype()))
-	assert(right != nil || right.getGtype().getSize() <= 8, right.token(), fmt.Sprintf("invalid type for rhs: %s", right.getGtype()))
-	right.emit()            //   expr => %rax
-	emitSavePrimitive(left) //   %rax => memory
+func emitAssignPrimitive(lhs Expr, rhs Expr) {
+	if rhs == nil {
+		if lhs.getGtype().isString() {
+			rhs = &eEmptyString
+		} else {
+			// assign zero value
+			rhs = &ExprNumberLiteral{}
+		}
+	}
+
+	assert(lhs.getGtype().getSize() <= 8, lhs.token(), fmt.Sprintf("invalid type for lhs: %s", lhs.getGtype()))
+	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(), fmt.Sprintf("invalid type for rhs: %s", rhs.getGtype()))
+	rhs.emit()             //   expr => %rax
+	emitSavePrimitive(lhs) //   %rax => memory
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
@@ -283,13 +290,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 					fieldname: field.key,
 				}
 				assignToSlice(left, field.value)
-			case G_MAP:
-				left := &ExprStructField{
-					tok:       variable.token(),
-					strct:     lhs,
-					fieldname: field.key,
-				}
-				assignToMap(left, field.value)
 			case G_INTERFACE:
 				left := &ExprStructField{
 					tok:       lhs.token(),
@@ -305,6 +305,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				}
 				assignToStruct(left, field.value)
 			default:
+				if field.value == nil {
+					field.value = &ExprNumberLiteral{}
+				}
 				field.value.emit()
 
 				regSize := fieldtype.getSize()
@@ -318,16 +321,6 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 	emit("# assignToStruct end")
 }
-
-func assignToMap(lhs Expr, rhs Expr) {
-	emit("# assignToMap")
-	if rhs == nil {
-		rhs = &ExprNumberLiteral{} // zero value for map
-	}
-	rhs.emit()
-	emitSavePrimitive(lhs)
-}
-
 
 func assignToInterface(lhs Expr, rhs Expr) {
 	emit("# assignToInterface")
