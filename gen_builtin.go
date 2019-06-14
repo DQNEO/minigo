@@ -15,10 +15,8 @@ func (e *ExprLen) emit() {
 		emit("# len(slice)")
 		switch arg.(type) {
 		case *ExprVariable:
-			emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprStructField:
-			emit("# ExprStructField")
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize)
@@ -76,10 +74,8 @@ func (e *ExprCap) emit() {
 	case G_SLICE:
 		switch arg.(type) {
 		case *ExprVariable:
-			emit("# ExprVariable")
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprStructField:
-			emit("# ExprStructField")
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize*2)
