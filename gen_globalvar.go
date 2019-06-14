@@ -164,12 +164,9 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
-			operand := uop.operand
-			rel, ok := operand.(*Relation)
+			operand := unwrapRel(uop.operand)
+			vr, ok := operand.(*ExprVariable)
 			if ok {
-				assert(ok, value.token(), "operand should be *Relation")
-				vr, ok := rel.expr.(*ExprVariable)
-				assert(ok, value.token(), "operand should be a variable")
 				assert(vr.isGlobal, value.token(), "operand should be a global variable")
 				emit(".quad %s", vr.varname)
 			} else {
