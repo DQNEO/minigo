@@ -398,8 +398,7 @@ func (decl *DeclVar) emitLocal() {
 				rhs = &ExprNumberLiteral{}
 			}
 		}
-		rhs.emit()
-		emitSavePrimitive(variable)
+		emitAssignPrimitive(variable, rhs)
 	}
 }
 
