@@ -534,6 +534,9 @@ func evalIntExpr(e Expr) int {
 		}
 	case *ExprConstVariable:
 		cnst := e.(*ExprConstVariable)
+		if cnst.val == eIota {
+			return cnst.iotaIndex
+		}
 		constVal, ok := cnst.val.(*Relation)
 		if ok && constVal.name == "iota" {
 			val, ok := constVal.expr.(*ExprConstVariable)
