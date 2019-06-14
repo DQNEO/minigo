@@ -322,22 +322,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 func assignToMap(lhs Expr, rhs Expr) {
 	emit("# assignToMap")
 	if rhs == nil {
-		emit("# initialize map with a zero value")
-		emit("LOAD_NUMBER 0")
-		emitSavePrimitive(lhs)
-		return
+		rhs = &ExprNumberLiteral{} // zero value for map
 	}
-	switch rhs.(type) {
-	case *ExprMapLiteral:
-		emit("# map literal")
-
-		lit := rhs.(*ExprMapLiteral)
-		lit.emit()
-	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
-		rhs.emit()
-	default:
-		TBI(rhs.token(), "unable to handle %T", rhs)
-	}
+	rhs.emit()
 	emitSavePrimitive(lhs)
 }
 
