@@ -74,6 +74,13 @@ func emitWithoutIndent(format string, v ...interface{}) {
 	writef(format + "\n", v...)
 }
 
+func unwrapRel(e Expr) Expr {
+	if rel, ok := e.(*Relation); ok {
+		return rel.expr
+	}
+	return e
+}
+
 // Mytype.method -> Mytype#method
 func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
@@ -527,7 +534,10 @@ func (f *DeclFunc) emit() {
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
 
+
 func evalIntExpr(e Expr) int {
+	e = unwrapRel(e)
+
 	switch e.(type) {
 	case nil:
 		errorf("e is nil")
