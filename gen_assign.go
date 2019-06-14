@@ -344,6 +344,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	assertInterface(lhs)
+	rhs = unwrapRel(rhs)
 	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
 	if rhs == nil {
 		emit("LOAD_EMPTY_SLICE")
@@ -354,15 +355,12 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	//	assert(rhs.getGtype().getKind() == G_SLICE, rhs.token(), "rsh should be slice type")
 
 	switch rhs.(type) {
-	case *Relation:
-		rel := rhs.(*Relation)
-		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			emit("LOAD_EMPTY_SLICE")
-			emitSave24(lhs, 0)
-			return
-		}
-		rvariable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
+	case *ExprNilLiteral:
+		emit("LOAD_EMPTY_SLICE")
+		emitSave24(lhs, 0)
+		return
+	case *ExprVariable:
+		rvariable := rhs.(*ExprVariable)
 		rvariable.emit()
 	case *ExprSliceLiteral:
 		lit := rhs.(*ExprSliceLiteral)
