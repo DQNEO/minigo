@@ -329,10 +329,7 @@ func assignToMap(lhs Expr, rhs Expr) {
 	}
 	switch rhs.(type) {
 	case *ExprMapLiteral:
-		emit("# map literal")
-
-		lit := rhs.(*ExprMapLiteral)
-		lit.emit()
+		rhs.emit()
 	case *Relation, *ExprVariable, *ExprIndex, *ExprStructField, *ExprFuncallOrConversion, *ExprMethodcall:
 		rhs.emit()
 	default:
