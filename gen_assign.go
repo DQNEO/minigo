@@ -345,29 +345,12 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	assertInterface(lhs)
 	rhs = unwrapRel(rhs)
-	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
-	if rhs == nil {
-		emit("LOAD_EMPTY_SLICE")
-		emitSave24(lhs, 0)
-		return
-	}
-
-	//	assert(rhs.getGtype().getKind() == G_SLICE, rhs.token(), "rsh should be slice type")
 
 	switch rhs.(type) {
+	case nil:
+		emit("LOAD_EMPTY_SLICE")
 	case *ExprNilLiteral:
 		emit("LOAD_EMPTY_SLICE")
-		emitSave24(lhs, 0)
-		return
-	case *ExprVariable:
-		rvariable := rhs.(*ExprVariable)
-		rvariable.emit()
-	case *ExprSliceLiteral:
-		lit := rhs.(*ExprSliceLiteral)
-		lit.emit()
-	case *ExprSlice:
-		e := rhs.(*ExprSlice)
-		e.emit()
 	case *IrExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
