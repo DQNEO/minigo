@@ -131,25 +131,25 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 	}
 }
 
-func emitAssignOne(left Expr, right Expr) {
-	gtype := left.getGtype()
+func emitAssignOne(lhs Expr, rhs Expr) {
+	gtype := lhs.getGtype()
 	switch {
 	case gtype == nil:
-		// suppose left is "_"
-		right.emit()
+		// suppose lhs is "_"
+		rhs.emit()
 	case gtype.getKind() == G_ARRAY:
-		assignToArray(left, right)
+		assignToArray(lhs, rhs)
 	case gtype.getKind() == G_SLICE:
-		assignToSlice(left, right)
+		assignToSlice(lhs, rhs)
 	case gtype.getKind() == G_STRUCT:
-		assignToStruct(left, right)
+		assignToStruct(lhs, rhs)
 	case gtype.getKind() == G_INTERFACE:
-		assignToInterface(left, right)
+		assignToInterface(lhs, rhs)
 	case gtype.getKind() == G_MAP:
-		assignToMap(left, right)
+		assignToMap(lhs, rhs)
 	default:
 		// suppose primitive
-		emitAssignPrimitive(left, right)
+		emitAssignPrimitive(lhs, rhs)
 	}
 }
 func (ast *StmtAssignment) emit() {
