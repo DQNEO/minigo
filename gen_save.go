@@ -5,32 +5,26 @@ import "fmt"
 // Each left-hand side operand must be addressable,
 // a map index expression,
 // or (for = assignments only) the blank identifier.
-func emitSavePrimitive(left Expr) {
-	switch left.(type) {
-	case *Relation:
-		rel := left.(*Relation)
-		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		emitSavePrimitive(rel.expr)
+func emitSavePrimitive(lhs Expr) {
+	lhs = unwrapRel(lhs)
+	switch lhs.(type) {
 	case *ExprVariable:
-		emitOffsetSavePrimitive(left, left.getGtype().getSize(), 0)
+		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprIndex:
-		emitOffsetSavePrimitive(left, left.getGtype().getSize(),0)
+		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(),0)
 	case *ExprStructField:
-		left.(*ExprStructField).emitSavePrimitive()
+		lhs.(*ExprStructField).emitSavePrimitive()
 	case *ExprUop:
-		left.(*ExprUop).emitSavePrimitive()
+		lhs.(*ExprUop).emitSavePrimitive()
 	default:
-		left.dump()
-		errorft(left.token(), "Unknown case %T", left)
+		lhs.dump()
+		errorft(lhs.token(), "Unknown case %T", lhs)
 	}
 }
 
 func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
+ 	lhs = unwrapRel(lhs)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		assert(rel.expr != nil, rel.token(), "left.rel.expr is nil")
-		emitOffsetSavePrimitive(rel.expr, size, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitOffsetSavePrimitive(size, offset, false)
@@ -147,12 +141,10 @@ func (e *ExprStructField) emitSavePrimitive() {
 // take slice values from stack
 func emitSave24(lhs Expr, offset int) {
 	assertInterface(lhs)
+	lhs = unwrapRel(lhs)
 	//emit("# emitSave24(%T, offset %d)", lhs, offset)
 	emit("# emitSave24(?, offset %d)", offset)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		emitSave24(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitSave24(offset)

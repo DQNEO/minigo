@@ -180,10 +180,7 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
-
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
+	lhs = unwrapRel(lhs)
 	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
@@ -234,9 +231,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	variable := lhs
 
 	strcttyp := rhs.getGtype().Underlying()
-
+	rhs = unwrapRel(rhs)
 	switch rhs.(type) {
-	case *Relation:
+	case *ExprVariable:
 		emitAddress(lhs)
 		emit("PUSH_8")
 		emitAddress(rhs)
@@ -344,32 +341,13 @@ func assignToInterface(lhs Expr, rhs Expr) {
 func assignToSlice(lhs Expr, rhs Expr) {
 	emit("# assignToSlice")
 	assertInterface(lhs)
-	//assert(rhs == nil || rhs.getGtype().kind == G_SLICE, nil, "should be a slice literal or nil")
-	if rhs == nil {
-		emit("LOAD_EMPTY_SLICE")
-		emitSave24(lhs, 0)
-		return
-	}
-
-	//	assert(rhs.getGtype().getKind() == G_SLICE, rhs.token(), "rsh should be slice type")
+	rhs = unwrapRel(rhs)
 
 	switch rhs.(type) {
-	case *Relation:
-		rel := rhs.(*Relation)
-		if _, ok := rel.expr.(*ExprNilLiteral); ok {
-			emit("LOAD_EMPTY_SLICE")
-			emitSave24(lhs, 0)
-			return
-		}
-		rvariable, ok := rel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
-		rvariable.emit()
-	case *ExprSliceLiteral:
-		lit := rhs.(*ExprSliceLiteral)
-		lit.emit()
-	case *ExprSlice:
-		e := rhs.(*ExprSlice)
-		e.emit()
+	case nil:
+		emit("LOAD_EMPTY_SLICE")
+	case *ExprNilLiteral:
+		emit("LOAD_EMPTY_SLICE")
 	case *IrExprConversion:
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
@@ -403,10 +381,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 func assignToArray(lhs Expr, rhs Expr) {
 	rhs = unwrapRel(rhs)
 	emit("# assignToArray")
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
-
+	lhs = unwrapRel(lhs)
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
