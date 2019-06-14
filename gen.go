@@ -382,8 +382,6 @@ func (decl *DeclVar) emitLocal() {
 	case G_INTERFACE:
 		assignToInterface(variable, rhs)
 	default:
-		assert(decl.variable.getGtype().getSize() <= 8, decl.token(), "invalid type:"+gtype.String())
-		// primitive types like int,bool,byte
 		emitAssignPrimitive(variable, rhs)
 	}
 }
