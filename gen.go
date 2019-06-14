@@ -354,12 +354,9 @@ func emitConversionToInterface(dynamicValue Expr) {
 }
 
 func isNil(e Expr) bool {
-	rel, ok := e.(*Relation)
-	if ok {
-		_, isNil := rel.expr.(*ExprNilLiteral)
-		return isNil
-	}
-	return false
+	e = unwrapRel(e)
+	_, isNil := e.(*ExprNilLiteral)
+	return isNil
 }
 
 func (decl *DeclVar) emit() {
