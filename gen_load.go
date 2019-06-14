@@ -12,11 +12,9 @@ func (ast *ExprStringLiteral) emit() {
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
+	strct = unwrapRel(strct)
 	emit("# loadStructField")
 	switch strct.(type) {
-	case *Relation:
-		rel := strct.(*Relation)
-		loadStructField(rel.expr, field, offset)
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
 		if field.getKind() == G_ARRAY {
