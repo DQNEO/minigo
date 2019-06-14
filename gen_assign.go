@@ -424,6 +424,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
+	rhs = unwrapRel(rhs)
 	emit("# assignToArray")
 	if rel, ok := lhs.(*Relation); ok {
 		lhs = rel.expr
@@ -492,10 +493,8 @@ func assignToArray(lhs Expr, rhs Expr) {
 					val := arrayLiteral.values[i]
 					val.emit()
 				}
-			case *Relation:
-				rel := rhs.(*Relation)
-				arrayVariable, ok := rel.expr.(*ExprVariable)
-				assert(ok, nil, "ok")
+			case *ExprVariable:
+				arrayVariable := rhs.(*ExprVariable)
 				arrayVariable.emitOffsetLoad(elmSize, offsetByIndex)
 			case *ExprStructField:
 				strctField := rhs.(*ExprStructField)
