@@ -180,10 +180,7 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 
 func assignToStruct(lhs Expr, rhs Expr) {
 	emit("# assignToStruct start")
-
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
+	lhs = unwrapRel(lhs)
 	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
@@ -234,9 +231,9 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	variable := lhs
 
 	strcttyp := rhs.getGtype().Underlying()
-
+	rhs = unwrapRel(rhs)
 	switch rhs.(type) {
-	case *Relation:
+	case *ExprVariable:
 		emitAddress(lhs)
 		emit("PUSH_8")
 		emitAddress(rhs)
@@ -384,10 +381,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 func assignToArray(lhs Expr, rhs Expr) {
 	rhs = unwrapRel(rhs)
 	emit("# assignToArray")
-	if rel, ok := lhs.(*Relation); ok {
-		lhs = rel.expr
-	}
-
+	lhs = unwrapRel(lhs)
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
