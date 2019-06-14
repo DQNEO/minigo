@@ -32,6 +32,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 }
 
 func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
+	value = unwrapRel(value)
 	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
 	primType := gtype.getKind()
 	if primType == G_ARRAY {
@@ -160,9 +161,6 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
-		case *Relation:
-			rel := value.(*Relation)
-			doEmitData(ptok, gtype, rel.expr, "rel", depth)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
