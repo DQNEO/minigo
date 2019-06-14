@@ -4,7 +4,7 @@ import "fmt"
 
 func (e *ExprLen) emit() {
 	emit("# emit len()")
-	arg := e.arg
+	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
 
@@ -14,13 +14,7 @@ func (e *ExprLen) emit() {
 	case G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
-		case *Relation:
-			emit("# Relation")
-			emitOffsetLoad(arg, 8, ptrSize)
-		case *ExprStructField:
-			emit("# ExprStructField")
-			emitOffsetLoad(arg, 8, ptrSize)
-		case *ExprIndex:
+		case *ExprVariable,*ExprStructField,*ExprIndex :
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
@@ -68,20 +62,14 @@ func (e *ExprLen) emit() {
 
 func (e *ExprCap) emit() {
 	emit("# emit cap()")
-	arg := e.arg
+	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	switch gtype.getKind() {
 	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
-		case *Relation:
-			emit("# Relation")
-			emitOffsetLoad(arg, 8, ptrSize*2)
-		case *ExprStructField:
-			emit("# ExprStructField")
-			emitOffsetLoad(arg, 8, ptrSize*2)
-		case *ExprIndex:
+		case *ExprVariable,*ExprStructField,*ExprIndex :
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")

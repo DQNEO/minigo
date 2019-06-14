@@ -138,21 +138,12 @@ func (ast *ExprConstVariable) emit() {
 	emit("# *ExprConstVariable.emit() name=%s iotaindex=%d", ast.name, ast.iotaIndex)
 	assert(ast.iotaIndex < 10000, ast.token(), "iotaindex is too large")
 	assert(ast.val != nil, ast.token(), "const.val for should not be nil:"+string(ast.name))
-	rel, ok := ast.val.(*Relation)
-	if ok {
-		emit("# rel=%s", rel.name)
-		cnst, ok := rel.expr.(*ExprConstVariable)
-		if ok && cnst == eIota {
-			emit("# const is iota")
-			// replace the iota expr by a index number
-			val := &ExprNumberLiteral{
-				val: ast.iotaIndex,
-			}
-			val.emit()
-		} else {
-			emit("# Not iota")
-			ast.val.emit()
+	if ast.hasIotaValue() {
+		emit("# const is iota")
+		val := &ExprNumberLiteral{
+			val: ast.iotaIndex,
 		}
+		val.emit()
 	} else {
 		emit("# const is not iota")
 		ast.val.emit()

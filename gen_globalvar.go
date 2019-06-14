@@ -32,6 +32,7 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 }
 
 func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
+	value = unwrapRel(value)
 	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
 	primType := gtype.getKind()
 	if primType == G_ARRAY {
@@ -61,10 +62,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						switch value.(type) {
 						case *ExprUop:
 							uop := value.(*ExprUop)
-							rel, ok := uop.operand.(*Relation)
+							operand := unwrapRel(uop.operand)
+							vr, ok := operand.(*ExprVariable)
 							assert(ok, uop.token(), "only variable is allowed")
-							emit(".quad %s # %s %s", rel.name, value.getGtype().String(), selector)
-						case *Relation:
+							emit(".quad %s # %s %s", vr.varname, value.getGtype().String(), selector)
+						case *ExprVariable:
 							assert(false, value.token(), "variable here is not allowed")
 						default:
 							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
@@ -160,18 +162,12 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
-		case *Relation:
-			rel := value.(*Relation)
-			doEmitData(ptok, gtype, rel.expr, "rel", depth)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(uop.op == "&", ptok, "only uop & is allowed")
-			operand := uop.operand
-			rel, ok := operand.(*Relation)
+			operand := unwrapRel(uop.operand)
+			vr, ok := operand.(*ExprVariable)
 			if ok {
-				assert(ok, value.token(), "operand should be *Relation")
-				vr, ok := rel.expr.(*ExprVariable)
-				assert(ok, value.token(), "operand should be a variable")
 				assert(vr.isGlobal, value.token(), "operand should be a global variable")
 				emit(".quad %s", vr.varname)
 			} else {
