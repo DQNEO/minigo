@@ -355,11 +355,11 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		//
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
+		targetExpr := unwrapRel(conversion.expr)
 		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
-		assert(conversion.expr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
-		stringVarname, ok := conversion.expr.(*Relation)
+		assert(targetExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
+		stringVariable,ok := targetExpr.(*ExprVariable)
 		assert(ok, rhs.token(), "ok")
-		stringVariable := stringVarname.expr.(*ExprVariable)
 		stringVariable.emit()
 		emit("PUSH_8 # ptr")
 		strlen := &ExprLen{
