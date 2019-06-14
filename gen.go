@@ -398,16 +398,8 @@ func (decl *DeclVar) emitLocal() {
 				rhs = &ExprNumberLiteral{}
 			}
 		}
-		emit("# LOAD RHS")
-		gasIndentLevel++
 		rhs.emit()
-		gasIndentLevel--
-		comment := "initialize " + string(decl.variable.varname)
-		emit("# Assign to LHS")
-		gasIndentLevel++
-		emit("STORE_%d_TO_LOCAL %d # %s",
-			decl.variable.getGtype().getSize(), decl.variable.offset, comment)
-		gasIndentLevel--
+		emitSavePrimitive(variable)
 	}
 }
 
