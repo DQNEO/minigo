@@ -256,9 +256,8 @@ func (e *ExprSliceLiteral) emit() {
 }
 
 func emitAddress(e Expr) {
+	e = unwrapRel(e)
 	switch e.(type) {
-	case *Relation:
-		emitAddress(e.(*Relation).expr)
 	case *ExprVariable:
 		e.(*ExprVariable).emitAddress(0)
 	default:
