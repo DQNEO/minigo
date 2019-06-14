@@ -141,12 +141,10 @@ func (e *ExprStructField) emitSavePrimitive() {
 // take slice values from stack
 func emitSave24(lhs Expr, offset int) {
 	assertInterface(lhs)
+	lhs = unwrapRel(lhs)
 	//emit("# emitSave24(%T, offset %d)", lhs, offset)
 	emit("# emitSave24(?, offset %d)", offset)
 	switch lhs.(type) {
-	case *Relation:
-		rel := lhs.(*Relation)
-		emitSave24(rel.expr, offset)
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
 		variable.emitSave24(offset)
