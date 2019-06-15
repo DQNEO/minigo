@@ -139,8 +139,6 @@ func (f *StmtFor) emitRangeForList() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
-	// i = 0
-	emit("# init index")
 	initstmt := &StmtAssignment{
 		lefts: []Expr{
 			f.rng.indexvar,
@@ -151,10 +149,6 @@ func (f *StmtFor) emitRangeForList() {
 			},
 		},
 	}
-	initstmt.emit()
-
-	emit("%s: # begin loop ", labelBegin)
-
 	// i < len(list)
 	condition := &ExprBinop{
 		op:   "<",
@@ -165,9 +159,6 @@ func (f *StmtFor) emitRangeForList() {
 			arg: f.rng.rangeexpr, // len(expr)
 		},
 	}
-	condition.emit()
-	emit("TEST_IT")
-	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
 	// v = s[i]
 	var assignVar *StmtAssignment
@@ -183,11 +174,7 @@ func (f *StmtFor) emitRangeForList() {
 				},
 			},
 		}
-		assignVar.emit()
 	}
-
-	f.block.emit()
-	emit("%s: # end block", f.labelEndBlock)
 
 	// break if i == len(list) - 1
 	condition2 := &ExprBinop{
@@ -205,14 +192,33 @@ func (f *StmtFor) emitRangeForList() {
 			},
 		},
 	}
-	condition2.emit()
-	emit("TEST_IT")
-	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
 	// i++
 	indexIncr := &StmtInc{
 		operand: f.rng.indexvar,
 	}
+
+	// i = 0
+	emit("# init index")
+	initstmt.emit()
+
+	emit("%s: # begin loop ", labelBegin)
+
+	condition.emit()
+	emit("TEST_IT")
+	emit("je %s  # if false, go to loop end", f.labelEndLoop)
+
+	if assignVar != nil {
+		assignVar.emit()
+	}
+
+	f.block.emit()
+	emit("%s: # end block", f.labelEndBlock)
+
+	condition2.emit()
+	emit("TEST_IT")
+	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
+
 	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)

@@ -234,9 +234,8 @@ func (ircall *IrStaticCall) emit() {
 }
 
 // @TODO: This is too simple. It should use the same logic as in IrStaticCall for passing args.
-func emitMethodCall(args []Expr) {
-	otherArgs := args[1:]
-	for i, arg := range otherArgs {
+func (call *IrInterfaceMethodCall) emitMethodCall() {
+	for i, arg := range call.args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
@@ -246,8 +245,10 @@ func emitMethodCall(args []Expr) {
 		emit("PUSH_8 # argument no %d", i+2)
 	}
 
-	for i, _ := range args {
-		j := len(args) - 1 - i
+	emit("POP_TO_ARG_%d", len(call.args))
+
+	for i := range call.args {
+		j := len(call.args) - 1 - i
 		emit("POP_TO_ARG_%d", j)
 	}
 

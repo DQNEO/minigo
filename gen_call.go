@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+type Emitter interface {
+	emit()
+}
+
 func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 	if funcall.rel.gtype != nil {
 		// Conversion
@@ -54,36 +58,30 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 type IrInterfaceMethodCall struct {
 	receiver   Expr
 	methodName identifier
+	args []Expr
 }
 
-func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
-	args := []Expr{methodCall.receiver}
-	for _, arg := range methodCall.args {
-		args = append(args, arg)
-	}
+func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
+		args: methodCall.args ,
 	}
-	call.emit(args)
+	return call
 }
 
-func (methodCall *ExprMethodcall) emit() {
+func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
-	if origType.getKind() == G_INTERFACE {
-		methodCall.emitInterfaceMethodCall()
-		return
-	}
-
-	args := []Expr{methodCall.receiver}
-	for _, arg := range methodCall.args {
-		args = append(args, arg)
-	}
-
 	funcref, ok := origType.methods[methodCall.fname]
 	if !ok {
 		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
+
+	args := []Expr{methodCall.receiver}
+	for _, arg := range methodCall.args {
+		args = append(args, arg)
+	}
+
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
@@ -94,7 +92,19 @@ func (methodCall *ExprMethodcall) emit() {
 		args:args,
 		origExpr:methodCall,
 	}
-	staticCall.emit()
+	return staticCall
+}
+
+func (methodCall *ExprMethodcall) emit() {
+	origType := methodCall.getOrigType()
+	var e Emitter
+	if origType.getKind() == G_INTERFACE {
+		e = methodCall.interfaceMethodCall()
+	} else {
+		e = methodCall.dynamicTypeMethodCall()
+	}
+
+	e.emit()
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
@@ -108,16 +118,14 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
-func (funcall *ExprFuncallOrConversion) emit() {
+func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 		// Conversion
-		conversion := &IrExprConversion{
+		return &IrExprConversion{
 			tok:   funcall.token(),
 			gtype: funcall.rel.gtype,
 			expr:  funcall.args[0],
 		}
-		conversion.emit()
-		return
 	}
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
@@ -129,18 +137,16 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	case builtinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
-		exprLen := &ExprLen{
+		return &ExprLen{
 			tok: arg.token(),
 			arg: arg,
 		}
-		exprLen.emit()
 	case builtinCap:
 		arg := funcall.args[0]
-		e := &ExprCap{
+		return &ExprCap{
 			tok: arg.token(),
 			arg: arg,
 		}
-		e.emit()
 	case builtinAppend:
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
@@ -164,102 +170,57 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		default:
 			TBI(slice.token(), "")
 		}
-		var staticCall Expr = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
 			origExpr: funcall,
 			symbol: symbol,
 		}
-		staticCall.emit()
 	case builtinMakeSlice:
 		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		var staticCall Expr = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
 			origExpr: funcall,
 			symbol: getFuncSymbol("iruntime", "makeSlice"),
 		}
-		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
-
-		emit("lea .%s, %%rax", builtinStringKey2)
-		emit("PUSH_8")
-
-		arg.emit()
-		emit("PUSH_SLICE")
-
-		numRegs := 4
-		for i := numRegs - 1; i >= 0; i-- {
-			emit("POP_TO_ARG_%d", i)
+		return &builtinDumpSliceEmitter{
+			arg: arg,
 		}
-
-		emit("FUNCALL %s", "printf")
-		emitNewline()
 	case builtinDumpInterface:
 		arg := funcall.args[0]
-
-		emit("lea .%s, %%rax", builtinStringKey1)
-		emit("PUSH_8")
-
-		arg.emit()
-		emit("PUSH_INTERFACE")
-
-		numRegs := 4
-		for i := numRegs - 1; i >= 0; i-- {
-			emit("POP_TO_ARG_%d", i)
+		return &builtinDumpInterfaceEmitter{
+			arg:arg,
 		}
-
-		emit("FUNCALL %s", "printf")
-		emitNewline()
 	case builtinAssertInterface:
-		emit("# builtinAssertInterface")
-		labelEnd := makeLabel()
 		arg := funcall.args[0]
-		arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
-
-		// (ptr != nil && rcx == nil) => Error
-
-		emit("CMP_NE_ZERO")
-		emit("TEST_IT")
-		emit("je %s", labelEnd)
-
-		emit("mov %%rcx, %%rax")
-
-		emit("CMP_EQ_ZERO")
-		emit("TEST_IT")
-		emit("je %s", labelEnd)
-
-		slabel := makeLabel()
-		emit(".data 0")
-		emitWithoutIndent("%s:", slabel)
-		emit(".string \"%s\"", "assertInterface failed")
-		emit(".text")
-		emit("lea %s, %%rax", slabel)
-		emit("PUSH_8")
-		emit("POP_TO_ARG_0")
-		emit("FUNCALL %s", ".panic")
-
-		emitWithoutIndent("%s:", labelEnd)
-		emitNewline()
-
+		return &builtinAssertInterfaceEmitter{
+			arg: arg,
+		}
 	case builtinAsComment:
 		arg := funcall.args[0]
-		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
-			emitWithoutIndent("# %s", stringLiteral.val)
+		return &builtinAsCommentEmitter{
+			arg:arg,
 		}
 	default:
-		var staticCall Expr = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
 			args: funcall.args,
 			origExpr:funcall,
 		}
-		staticCall.emit()
 	}
+
+}
+
+func (funcall *ExprFuncallOrConversion) emit() {
+	e := funcall2emitter(funcall)
+	e.emit()
 }
 
 type IrStaticCall struct {
@@ -285,3 +246,87 @@ func (ircall *IrStaticCall) getGtype() *Gtype {
 	return ircall.origExpr.getGtype()
 }
 
+type builtinDumpSliceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinDumpSliceEmitter) emit() {
+	emit("lea .%s, %%rax", builtinStringKey2)
+	emit("PUSH_8")
+
+	em.arg.emit()
+	emit("PUSH_SLICE")
+
+	numRegs := 4
+	for i := numRegs - 1; i >= 0; i-- {
+		emit("POP_TO_ARG_%d", i)
+	}
+
+	emit("FUNCALL %s", "printf")
+	emitNewline()
+}
+
+type builtinDumpInterfaceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinDumpInterfaceEmitter) emit() {
+	emit("lea .%s, %%rax", builtinStringKey1)
+	emit("PUSH_8")
+
+	em.arg.emit()
+	emit("PUSH_INTERFACE")
+
+	numRegs := 4
+	for i := numRegs - 1; i >= 0; i-- {
+		emit("POP_TO_ARG_%d", i)
+	}
+
+	emit("FUNCALL %s", "printf")
+	emitNewline()
+}
+
+type builtinAssertInterfaceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinAssertInterfaceEmitter) emit() {
+	emit("# builtinAssertInterface")
+	labelEnd := makeLabel()
+	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
+
+	// (ptr != nil && rcx == nil) => Error
+
+	emit("CMP_NE_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
+
+	emit("mov %%rcx, %%rax")
+
+	emit("CMP_EQ_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
+
+	slabel := makeLabel()
+	emit(".data 0")
+	emitWithoutIndent("%s:", slabel)
+	emit(".string \"%s\"", "assertInterface failed")
+	emit(".text")
+	emit("lea %s, %%rax", slabel)
+	emit("PUSH_8")
+	emit("POP_TO_ARG_0")
+	emit("FUNCALL %s", ".panic")
+
+	emitWithoutIndent("%s:", labelEnd)
+	emitNewline()
+}
+
+type builtinAsCommentEmitter struct {
+	arg Expr
+}
+
+func (em *builtinAsCommentEmitter) emit() {
+	if stringLiteral, ok := em.arg.(*ExprStringLiteral); ok {
+		emitWithoutIndent("# %s", stringLiteral.val)
+	}
+}

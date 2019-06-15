@@ -2,7 +2,8 @@ package main
 
 const MAX_METHODS_PER_TYPE int = 128
 
-func (call *IrInterfaceMethodCall) emit(args []Expr) {
+func (call *IrInterfaceMethodCall) emit() {
+	receiver := call.receiver
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
@@ -13,8 +14,8 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 			kind: G_STRING,
 		},
 	}
-	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
-	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
+	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
+	emitOffsetLoad(receiver, ptrSize, ptrSize)
 	emit("IMUL_NUMBER 8")
 	emit("PUSH_8")
 
@@ -39,9 +40,6 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("PUSH_8")
 
-	emit("# setting arguments (len=%d)", len(args))
-
-	receiver := args[0]
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
@@ -53,7 +51,7 @@ func (call *IrInterfaceMethodCall) emit(args []Expr) {
 
 	emit("PUSH_8 # funcref")
 
-	emitMethodCall(args)
+	call.emitMethodCall()
 }
 
 // emit map index expr
@@ -308,6 +306,9 @@ func (f *StmtFor) emitRangeForMap() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
+	mapType := f.rng.rangeexpr.getGtype().Underlying()
+	mapKeyType := mapType.mapKey
+
 	mapCounter := f.rng.invisibleMapCounter
 	// counter = 0
 	initstmt := &StmtAssignment{
@@ -320,11 +321,6 @@ func (f *StmtFor) emitRangeForMap() {
 			},
 		},
 	}
-	emit("# init index")
-	initstmt.emit()
-
-	emit("%s: # begin loop ", labelBegin)
-
 	// counter < len(list)
 	condition := &ExprBinop{
 		op:   "<",
@@ -335,6 +331,17 @@ func (f *StmtFor) emitRangeForMap() {
 			arg: f.rng.rangeexpr, // len(expr)
 		},
 	}
+
+	// counter++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+
+	emit("# init index")
+	initstmt.emit()
+
+	emit("%s: # begin loop ", labelBegin)
+
 	condition.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
@@ -346,9 +353,6 @@ func (f *StmtFor) emitRangeForMap() {
 	f.rng.rangeexpr.emit() // emit address of map data head
 	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # y")
-
-	mapType := f.rng.rangeexpr.getGtype().Underlying()
-	mapKeyType := mapType.mapKey
 
 	emit("SUM_FROM_STACK # x + y")
 	emit("LOAD_8_BY_DEREF")
@@ -389,10 +393,6 @@ func (f *StmtFor) emitRangeForMap() {
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	// counter++
-	indexIncr := &StmtInc{
-		operand: mapCounter,
-	}
 	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)
