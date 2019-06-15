@@ -54,6 +54,7 @@ func (f *DeclFunc) emitPrologue() {
 			offset -= IntSize * width
 			param.offset = offset
 			emit("# arg  \"%s\" %s", param.varname, param.getGtype().String())
+
 			emit("PUSH_ARG_%d # 3rd", regIndex-1)
 			emit("PUSH_ARG_%d # 2nd", regIndex-2)
 			emit("PUSH_ARG_%d # 1st", regIndex-3)
@@ -62,12 +63,9 @@ func (f *DeclFunc) emitPrologue() {
 			regIndex += width
 			offset -= IntSize * width
 			param.offset = offset
+
 			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex - width, param.varname, param.getGtype().String())
 		}
-	}
-
-	if len(f.localvars) > 0 {
-		emit("# Allocating stack for localvars len=%d", len(f.localvars))
 	}
 
 	var localarea int
@@ -82,6 +80,10 @@ func (f *DeclFunc) emitPrologue() {
 		offset -= loff
 		lvar.offset = offset
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
+	}
+
+	if len(f.localvars) > 0 {
+		emit("# Allocating stack for localvars len=%d", len(f.localvars))
 	}
 
 	for i := len(f.localvars) - 1; i >= 0; i-- {
