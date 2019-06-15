@@ -51,9 +51,10 @@ func (f *DeclFunc) emitPrologue() {
 		case true:
 			offset -= IntSize * 3
 			param.offset = offset
+			emit("# arg  \"%s\" %s", param.varname, param.getGtype().String())
 			emit("PUSH_ARG_%d # 3rd", regIndex+2)
 			emit("PUSH_ARG_%d # 2nd", regIndex+1)
-			emit("PUSH_ARG_%d # 1st \"%s\" %s", regIndex, param.varname, param.getGtype().String())
+			emit("PUSH_ARG_%d # 1st", regIndex+0)
 			regIndex += 3
 		default:
 			offset -= IntSize
