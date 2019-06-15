@@ -62,14 +62,10 @@ type IrInterfaceMethodCall struct {
 }
 
 func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
-	args := []Expr{methodCall.receiver}
-	for _, arg := range methodCall.args {
-		args = append(args, arg)
-	}
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
-		args: args,
+		args: methodCall.args ,
 	}
 	call.emit()
 }

@@ -51,7 +51,7 @@ func (call *IrInterfaceMethodCall) emit() {
 
 	emit("PUSH_8 # funcref")
 
-	emitMethodCall(call.args)
+	call.emitMethodCall()
 }
 
 // emit map index expr
