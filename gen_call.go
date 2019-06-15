@@ -72,13 +72,8 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 	call.emit(args)
 }
 
-func (methodCall *ExprMethodcall) emit() {
+func (methodCall *ExprMethodcall) emitDynamicTypeMethodCall() {
 	origType := methodCall.getOrigType()
-	if origType.getKind() == G_INTERFACE {
-		methodCall.emitInterfaceMethodCall()
-		return
-	}
-
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
@@ -99,6 +94,15 @@ func (methodCall *ExprMethodcall) emit() {
 		origExpr:methodCall,
 	}
 	staticCall.emit()
+}
+
+func (methodCall *ExprMethodcall) emit() {
+	origType := methodCall.getOrigType()
+	if origType.getKind() == G_INTERFACE {
+		methodCall.emitInterfaceMethodCall()
+		return
+	}
+	methodCall.emitDynamicTypeMethodCall()
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
