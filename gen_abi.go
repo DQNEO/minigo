@@ -21,7 +21,7 @@ var retRegi [14]string = [14]string{
 
 var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
-func (f *DeclFunc) emitPrologue() {
+func (f *DeclFunc) prologue() Emitter {
 
 	var params []*ExprVariable
 
@@ -35,36 +35,30 @@ func (f *DeclFunc) emitPrologue() {
 		params = f.params
 	}
 
+	var regIndex int
 	// offset for params and local variables
 	var offset int
-
-	setPos(f.token())
-	emitWithoutIndent("%s:", f.getSymbol())
-	emit("FUNC_PROLOGUE")
-	if len(params) > 0 {
-		emit("# set params")
-	}
-
-	var regIndex int
+	var argRegisters []int
 	for _, param := range params {
+		var width int
 		switch param.getGtype().is24WidthType() {
 		case true:
-			offset -= IntSize * 3
+			width = 3
+			regIndex += width
+			offset -= IntSize * width
 			param.offset = offset
-			emit("PUSH_ARG_%d # 3rd", regIndex+2)
-			emit("PUSH_ARG_%d # 2nd", regIndex+1)
-			emit("PUSH_ARG_%d # 1st \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += 3
-		default:
-			offset -= IntSize
-			param.offset = offset
-			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += 1
-		}
-	}
 
-	if len(f.localvars) > 0 {
-		emit("# Allocating stack for localvars len=%d", len(f.localvars))
+			argRegisters = append(argRegisters, regIndex-1)
+			argRegisters = append(argRegisters, regIndex-2)
+			argRegisters = append(argRegisters, regIndex-3)
+		default:
+			width = 1
+			regIndex += width
+			offset -= IntSize * width
+			param.offset = offset
+
+			argRegisters = append(argRegisters, regIndex - width)
+		}
 	}
 
 	var localarea int
@@ -81,12 +75,43 @@ func (f *DeclFunc) emitPrologue() {
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 
-	for i := len(f.localvars) - 1; i >= 0; i-- {
-		lvar := f.localvars[i]
-		emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
+	return &funcPrologueEmitter{
+		token: f.token(),
+		symbol: f.getSymbol(),
+		argRegisters:argRegisters,
+		localvars:f.localvars,
+		localarea:localarea,
+	}
+}
+
+type funcPrologueEmitter struct {
+	token *Token
+	symbol string
+	argRegisters []int
+	localvars []*ExprVariable
+	localarea int
+}
+
+func (fe *funcPrologueEmitter) emit() {
+	setPos(fe.token)
+	emitWithoutIndent("%s:", fe.symbol)
+	emit("FUNC_PROLOGUE")
+
+	if len(fe.argRegisters) > 0 {
+		emit("# set params")
 	}
 
-	if localarea != 0 {
+	for _, regi := range fe.argRegisters {
+		emit("PUSH_ARG_%d", regi)
+	}
+
+	if len(fe.localvars) > 0 {
+		emit("# Allocating stack for localvars len=%d", len(fe.localvars))
+		for i := len(fe.localvars) - 1; i >= 0; i-- {
+			lvar := fe.localvars[i]
+			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
+		}
+		localarea := fe.localarea
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
