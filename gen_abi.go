@@ -22,9 +22,6 @@ var retRegi [14]string = [14]string{
 var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
 func (f *DeclFunc) emitPrologue() {
-	setPos(f.token())
-	emitWithoutIndent("%s:", f.getSymbol())
-	emit("FUNC_PROLOGUE")
 
 	var params []*ExprVariable
 
@@ -41,6 +38,9 @@ func (f *DeclFunc) emitPrologue() {
 	// offset for params and local variables
 	var offset int
 
+	setPos(f.token())
+	emitWithoutIndent("%s:", f.getSymbol())
+	emit("FUNC_PROLOGUE")
 	if len(params) > 0 {
 		emit("# set params")
 	}
