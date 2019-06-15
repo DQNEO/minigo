@@ -2,6 +2,10 @@ package main
 
 import "fmt"
 
+type Emitter interface {
+	emit()
+}
+
 func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 	if funcall.rel.gtype != nil {
 		// Conversion
@@ -125,7 +129,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
-	var e Expr
+	var e Emitter
 	switch decl {
 	case builtinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
@@ -181,76 +185,29 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 	case builtinDumpSlice:
 		arg := funcall.args[0]
-
-		emit("lea .%s, %%rax", builtinStringKey2)
-		emit("PUSH_8")
-
-		arg.emit()
-		emit("PUSH_SLICE")
-
-		numRegs := 4
-		for i := numRegs - 1; i >= 0; i-- {
-			emit("POP_TO_ARG_%d", i)
+		em := &builtinDumpSliceEmitter{
+			arg: arg,
 		}
-
-		emit("FUNCALL %s", "printf")
-		emitNewline()
-		return
+		e = em
 	case builtinDumpInterface:
 		arg := funcall.args[0]
-
-		emit("lea .%s, %%rax", builtinStringKey1)
-		emit("PUSH_8")
-
-		arg.emit()
-		emit("PUSH_INTERFACE")
-
-		numRegs := 4
-		for i := numRegs - 1; i >= 0; i-- {
-			emit("POP_TO_ARG_%d", i)
+		em := &builtinDumpInterfaceEmitter{
+			arg:arg,
 		}
-
-		emit("FUNCALL %s", "printf")
-		emitNewline()
-		return
+		e = em
 	case builtinAssertInterface:
-		emit("# builtinAssertInterface")
-		labelEnd := makeLabel()
 		arg := funcall.args[0]
-		arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
-
-		// (ptr != nil && rcx == nil) => Error
-
-		emit("CMP_NE_ZERO")
-		emit("TEST_IT")
-		emit("je %s", labelEnd)
-
-		emit("mov %%rcx, %%rax")
-
-		emit("CMP_EQ_ZERO")
-		emit("TEST_IT")
-		emit("je %s", labelEnd)
-
-		slabel := makeLabel()
-		emit(".data 0")
-		emitWithoutIndent("%s:", slabel)
-		emit(".string \"%s\"", "assertInterface failed")
-		emit(".text")
-		emit("lea %s, %%rax", slabel)
-		emit("PUSH_8")
-		emit("POP_TO_ARG_0")
-		emit("FUNCALL %s", ".panic")
-
-		emitWithoutIndent("%s:", labelEnd)
-		emitNewline()
-		return
-
+		em := &builtinAssertInterfaceEmitter{
+			arg: arg,
+		}
+		e = em
 	case builtinAsComment:
 		arg := funcall.args[0]
-		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
-			emitWithoutIndent("# %s", stringLiteral.val)
+		em := &builtinAsCommentEmitter{
+			arg:arg,
 		}
-		return
+		em.emit()
+		e = em
 	default:
 		e = &IrStaticCall{
 			tok: funcall.token(),
@@ -287,3 +244,87 @@ func (ircall *IrStaticCall) getGtype() *Gtype {
 	return ircall.origExpr.getGtype()
 }
 
+type builtinDumpSliceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinDumpSliceEmitter) emit() {
+	emit("lea .%s, %%rax", builtinStringKey2)
+	emit("PUSH_8")
+
+	em.arg.emit()
+	emit("PUSH_SLICE")
+
+	numRegs := 4
+	for i := numRegs - 1; i >= 0; i-- {
+		emit("POP_TO_ARG_%d", i)
+	}
+
+	emit("FUNCALL %s", "printf")
+	emitNewline()
+}
+
+type builtinDumpInterfaceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinDumpInterfaceEmitter) emit() {
+	emit("lea .%s, %%rax", builtinStringKey1)
+	emit("PUSH_8")
+
+	em.arg.emit()
+	emit("PUSH_INTERFACE")
+
+	numRegs := 4
+	for i := numRegs - 1; i >= 0; i-- {
+		emit("POP_TO_ARG_%d", i)
+	}
+
+	emit("FUNCALL %s", "printf")
+	emitNewline()
+}
+
+type builtinAssertInterfaceEmitter struct {
+	arg Expr
+}
+
+func (em *builtinAssertInterfaceEmitter) emit() {
+	emit("# builtinAssertInterface")
+	labelEnd := makeLabel()
+	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
+
+	// (ptr != nil && rcx == nil) => Error
+
+	emit("CMP_NE_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
+
+	emit("mov %%rcx, %%rax")
+
+	emit("CMP_EQ_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
+
+	slabel := makeLabel()
+	emit(".data 0")
+	emitWithoutIndent("%s:", slabel)
+	emit(".string \"%s\"", "assertInterface failed")
+	emit(".text")
+	emit("lea %s, %%rax", slabel)
+	emit("PUSH_8")
+	emit("POP_TO_ARG_0")
+	emit("FUNCALL %s", ".panic")
+
+	emitWithoutIndent("%s:", labelEnd)
+	emitNewline()
+}
+
+type builtinAsCommentEmitter struct {
+	arg Expr
+}
+
+func (em *builtinAsCommentEmitter) emit() {
+	if stringLiteral, ok := em.arg.(*ExprStringLiteral); ok {
+		emitWithoutIndent("# %s", stringLiteral.val)
+	}
+}
