@@ -58,6 +58,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 type IrInterfaceMethodCall struct {
 	receiver   Expr
 	methodName identifier
+	args []Expr
 }
 
 func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
@@ -68,8 +69,9 @@ func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
+		args: args,
 	}
-	call.emit(args)
+	call.emit()
 }
 
 func (methodCall *ExprMethodcall) emitDynamicTypeMethodCall() {
