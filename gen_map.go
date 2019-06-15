@@ -3,7 +3,7 @@ package main
 const MAX_METHODS_PER_TYPE int = 128
 
 func (call *IrInterfaceMethodCall) emit() {
-	args := call.args
+	receiver := call.receiver
 	emit("# emit interface method call \"%s\"", call.methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
@@ -14,8 +14,8 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_STRING,
 		},
 	}
-	emit("# emit receiverTypeId of %s", call.receiver.getGtype().String())
-	emitOffsetLoad(call.receiver, ptrSize, ptrSize)
+	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
+	emitOffsetLoad(receiver, ptrSize, ptrSize)
 	emit("IMUL_NUMBER 8")
 	emit("PUSH_8")
 
@@ -40,9 +40,6 @@ func (call *IrInterfaceMethodCall) emit() {
 
 	emit("PUSH_8")
 
-	emit("# setting arguments (len=%d)", len(args))
-
-	receiver := args[0]
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
@@ -54,7 +51,7 @@ func (call *IrInterfaceMethodCall) emit() {
 
 	emit("PUSH_8 # funcref")
 
-	emitMethodCall(args)
+	emitMethodCall(call.args)
 }
 
 // emit map index expr
