@@ -61,16 +61,16 @@ type IrInterfaceMethodCall struct {
 	args []Expr
 }
 
-func (methodCall *ExprMethodcall) emitInterfaceMethodCall() {
+func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
 		args: methodCall.args ,
 	}
-	call.emit()
+	return call
 }
 
-func (methodCall *ExprMethodcall) emitDynamicTypeMethodCall() {
+func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
@@ -91,16 +91,19 @@ func (methodCall *ExprMethodcall) emitDynamicTypeMethodCall() {
 		args:args,
 		origExpr:methodCall,
 	}
-	staticCall.emit()
+	return staticCall
 }
 
 func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
+	var e Emitter
 	if origType.getKind() == G_INTERFACE {
-		methodCall.emitInterfaceMethodCall()
+		e = methodCall.interfaceMethodCall()
 	} else {
-		methodCall.emitDynamicTypeMethodCall()
+		e = methodCall.dynamicTypeMethodCall()
 	}
+
+	e.emit()
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
