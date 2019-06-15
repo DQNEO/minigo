@@ -204,7 +204,6 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 		em := &builtinAsCommentEmitter{
 			arg:arg,
 		}
-		em.emit()
 		e = em
 	default:
 		e = &IrStaticCall{
