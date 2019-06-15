@@ -100,9 +100,9 @@ func (methodCall *ExprMethodcall) emit() {
 	origType := methodCall.getOrigType()
 	if origType.getKind() == G_INTERFACE {
 		methodCall.emitInterfaceMethodCall()
-		return
+	} else {
+		methodCall.emitDynamicTypeMethodCall()
 	}
-	methodCall.emitDynamicTypeMethodCall()
 }
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
