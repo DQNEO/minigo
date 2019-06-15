@@ -35,16 +35,10 @@ func (f *DeclFunc) emitPrologue() {
 		params = f.params
 	}
 
-	setPos(f.token())
-	emitWithoutIndent("%s:", f.getSymbol())
-	emit("FUNC_PROLOGUE")
-	if len(params) > 0 {
-		emit("# set params")
-	}
-
 	var regIndex int
 	// offset for params and local variables
 	var offset int
+	var pushArgRegisters []int
 	for _, param := range params {
 		var width int
 		switch param.getGtype().is24WidthType() {
@@ -53,18 +47,17 @@ func (f *DeclFunc) emitPrologue() {
 			regIndex += width
 			offset -= IntSize * width
 			param.offset = offset
-			emit("# arg  \"%s\" %s", param.varname, param.getGtype().String())
 
-			emit("PUSH_ARG_%d # 3rd", regIndex-1)
-			emit("PUSH_ARG_%d # 2nd", regIndex-2)
-			emit("PUSH_ARG_%d # 1st", regIndex-3)
+			pushArgRegisters = append(pushArgRegisters, regIndex-1)
+			pushArgRegisters = append(pushArgRegisters, regIndex-2)
+			pushArgRegisters = append(pushArgRegisters, regIndex-3)
 		default:
 			width = 1
 			regIndex += width
 			offset -= IntSize * width
 			param.offset = offset
 
-			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex - width, param.varname, param.getGtype().String())
+			pushArgRegisters = append(pushArgRegisters, regIndex - width)
 		}
 	}
 
@@ -82,14 +75,24 @@ func (f *DeclFunc) emitPrologue() {
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 
+	setPos(f.token())
+	emitWithoutIndent("%s:", f.getSymbol())
+	emit("FUNC_PROLOGUE")
+
+	if len(pushArgRegisters) > 0 {
+		emit("# set params")
+	}
+
+	for _, regi := range pushArgRegisters {
+		emit("PUSH_ARG_%d", regi)
+	}
+
 	if len(f.localvars) > 0 {
 		emit("# Allocating stack for localvars len=%d", len(f.localvars))
-
 		for i := len(f.localvars) - 1; i >= 0; i-- {
 			lvar := f.localvars[i]
 			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 		}
-
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
