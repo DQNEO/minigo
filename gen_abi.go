@@ -38,7 +38,7 @@ func (f *DeclFunc) emitPrologue() {
 	var regIndex int
 	// offset for params and local variables
 	var offset int
-	var pushArgRegisters []int
+	var argRegisters []int
 	for _, param := range params {
 		var width int
 		switch param.getGtype().is24WidthType() {
@@ -48,16 +48,16 @@ func (f *DeclFunc) emitPrologue() {
 			offset -= IntSize * width
 			param.offset = offset
 
-			pushArgRegisters = append(pushArgRegisters, regIndex-1)
-			pushArgRegisters = append(pushArgRegisters, regIndex-2)
-			pushArgRegisters = append(pushArgRegisters, regIndex-3)
+			argRegisters = append(argRegisters, regIndex-1)
+			argRegisters = append(argRegisters, regIndex-2)
+			argRegisters = append(argRegisters, regIndex-3)
 		default:
 			width = 1
 			regIndex += width
 			offset -= IntSize * width
 			param.offset = offset
 
-			pushArgRegisters = append(pushArgRegisters, regIndex - width)
+			argRegisters = append(argRegisters, regIndex - width)
 		}
 	}
 
@@ -75,24 +75,44 @@ func (f *DeclFunc) emitPrologue() {
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 
-	setPos(f.token())
-	emitWithoutIndent("%s:", f.getSymbol())
+	fe := &funcPrologueEmitter{
+		token: f.token(),
+		symbol: f.getSymbol(),
+		argRegisters:argRegisters,
+		localvars:f.localvars,
+		localarea:localarea,
+	}
+	fe.emit()
+}
+
+type funcPrologueEmitter struct {
+	token *Token
+	symbol string
+	argRegisters []int
+	localvars []*ExprVariable
+	localarea int
+}
+
+func (fe *funcPrologueEmitter) emit() {
+	setPos(fe.token)
+	emitWithoutIndent("%s:", fe.symbol)
 	emit("FUNC_PROLOGUE")
 
-	if len(pushArgRegisters) > 0 {
+	if len(fe.argRegisters) > 0 {
 		emit("# set params")
 	}
 
-	for _, regi := range pushArgRegisters {
+	for _, regi := range fe.argRegisters {
 		emit("PUSH_ARG_%d", regi)
 	}
 
-	if len(f.localvars) > 0 {
-		emit("# Allocating stack for localvars len=%d", len(f.localvars))
-		for i := len(f.localvars) - 1; i >= 0; i-- {
-			lvar := f.localvars[i]
+	if len(fe.localvars) > 0 {
+		emit("# Allocating stack for localvars len=%d", len(fe.localvars))
+		for i := len(fe.localvars) - 1; i >= 0; i-- {
+			lvar := fe.localvars[i]
 			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 		}
+		localarea := fe.localarea
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
