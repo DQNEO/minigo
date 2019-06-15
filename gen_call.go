@@ -112,16 +112,14 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
-func (funcall *ExprFuncallOrConversion) emit() {
+func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 		// Conversion
-		conversion := &IrExprConversion{
+		return &IrExprConversion{
 			tok:   funcall.token(),
 			gtype: funcall.rel.gtype,
 			expr:  funcall.args[0],
 		}
-		conversion.emit()
-		return
 	}
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
@@ -218,6 +216,11 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		}
 	}
 
+	return e
+}
+
+func (funcall *ExprFuncallOrConversion) emit() {
+	e := funcall2emitter(funcall)
 	e.emit()
 }
 
