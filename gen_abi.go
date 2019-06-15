@@ -84,14 +84,12 @@ func (f *DeclFunc) emitPrologue() {
 
 	if len(f.localvars) > 0 {
 		emit("# Allocating stack for localvars len=%d", len(f.localvars))
-	}
 
-	for i := len(f.localvars) - 1; i >= 0; i-- {
-		lvar := f.localvars[i]
-		emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
-	}
+		for i := len(f.localvars) - 1; i >= 0; i-- {
+			lvar := f.localvars[i]
+			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
+		}
 
-	if localarea != 0 {
 		emit("sub $%d, %%rsp # total stack size", -localarea)
 	}
 
