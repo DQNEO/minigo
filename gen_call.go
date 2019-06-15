@@ -127,18 +127,17 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
-	var e Emitter
 	switch decl {
 	case builtinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
-		e = &ExprLen{
+		return &ExprLen{
 			tok: arg.token(),
 			arg: arg,
 		}
 	case builtinCap:
 		arg := funcall.args[0]
-		e = &ExprCap{
+		return &ExprCap{
 			tok: arg.token(),
 			arg: arg,
 		}
@@ -165,7 +164,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 		default:
 			TBI(slice.token(), "")
 		}
-		e = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
@@ -174,7 +173,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 		}
 	case builtinMakeSlice:
 		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		e = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
@@ -183,30 +182,26 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 		}
 	case builtinDumpSlice:
 		arg := funcall.args[0]
-		em := &builtinDumpSliceEmitter{
+		return &builtinDumpSliceEmitter{
 			arg: arg,
 		}
-		e = em
 	case builtinDumpInterface:
 		arg := funcall.args[0]
-		em := &builtinDumpInterfaceEmitter{
+		return &builtinDumpInterfaceEmitter{
 			arg:arg,
 		}
-		e = em
 	case builtinAssertInterface:
 		arg := funcall.args[0]
-		em := &builtinAssertInterfaceEmitter{
+		return &builtinAssertInterfaceEmitter{
 			arg: arg,
 		}
-		e = em
 	case builtinAsComment:
 		arg := funcall.args[0]
-		em := &builtinAsCommentEmitter{
+		return &builtinAsCommentEmitter{
 			arg:arg,
 		}
-		e = em
 	default:
-		e = &IrStaticCall{
+		return &IrStaticCall{
 			tok: funcall.token(),
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
@@ -215,7 +210,6 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 		}
 	}
 
-	return e
 }
 
 func (funcall *ExprFuncallOrConversion) emit() {
