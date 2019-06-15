@@ -125,22 +125,21 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
+	var e Expr
 	switch decl {
 	case builtinLen:
 		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 		arg := funcall.args[0]
-		exprLen := &ExprLen{
+		e = &ExprLen{
 			tok: arg.token(),
 			arg: arg,
 		}
-		exprLen.emit()
 	case builtinCap:
 		arg := funcall.args[0]
-		e := &ExprCap{
+		e = &ExprCap{
 			tok: arg.token(),
 			arg: arg,
 		}
-		e.emit()
 	case builtinAppend:
 		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 		slice := funcall.args[0]
@@ -164,24 +163,22 @@ func (funcall *ExprFuncallOrConversion) emit() {
 		default:
 			TBI(slice.token(), "")
 		}
-		var staticCall Expr = &IrStaticCall{
+		e = &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
 			origExpr: funcall,
 			symbol: symbol,
 		}
-		staticCall.emit()
 	case builtinMakeSlice:
 		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		var staticCall Expr = &IrStaticCall{
+		e = &IrStaticCall{
 			tok: funcall.token(),
 			callee: decl,
 			args: funcall.args,
 			origExpr: funcall,
 			symbol: getFuncSymbol("iruntime", "makeSlice"),
 		}
-		staticCall.emit()
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 
@@ -198,6 +195,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		emit("FUNCALL %s", "printf")
 		emitNewline()
+		return
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 
@@ -214,6 +212,7 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		emit("FUNCALL %s", "printf")
 		emitNewline()
+		return
 	case builtinAssertInterface:
 		emit("# builtinAssertInterface")
 		labelEnd := makeLabel()
@@ -244,22 +243,25 @@ func (funcall *ExprFuncallOrConversion) emit() {
 
 		emitWithoutIndent("%s:", labelEnd)
 		emitNewline()
+		return
 
 	case builtinAsComment:
 		arg := funcall.args[0]
 		if stringLiteral, ok := arg.(*ExprStringLiteral); ok {
 			emitWithoutIndent("# %s", stringLiteral.val)
 		}
+		return
 	default:
-		var staticCall Expr = &IrStaticCall{
+		e = &IrStaticCall{
 			tok: funcall.token(),
 			symbol: getFuncSymbol(decl.pkg, funcall.fname),
 			callee: decl,
 			args: funcall.args,
 			origExpr:funcall,
 		}
-		staticCall.emit()
 	}
+
+	e.emit()
 }
 
 type IrStaticCall struct {
