@@ -21,7 +21,7 @@ var retRegi [14]string = [14]string{
 
 var RegsForArguments [12]string = [12]string{"rdi", "rsi", "rdx", "rcx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}
 
-func (f *DeclFunc) emitPrologue() {
+func (f *DeclFunc) prologue() Emitter {
 
 	var params []*ExprVariable
 
@@ -75,14 +75,13 @@ func (f *DeclFunc) emitPrologue() {
 		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
 	}
 
-	fe := &funcPrologueEmitter{
+	return &funcPrologueEmitter{
 		token: f.token(),
 		symbol: f.getSymbol(),
 		argRegisters:argRegisters,
 		localvars:f.localvars,
 		localarea:localarea,
 	}
-	fe.emit()
 }
 
 type funcPrologueEmitter struct {

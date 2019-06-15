@@ -504,7 +504,8 @@ func bool2string(bol bool) string {
 }
 
 func (f *DeclFunc) emit() {
-	f.emitPrologue()
+	prologue := f.prologue()
+	prologue.emit()
 	f.body.emit()
 	emit("mov $0, %%rax")
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
