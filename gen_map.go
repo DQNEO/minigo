@@ -308,6 +308,9 @@ func (f *StmtFor) emitRangeForMap() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
+	mapType := f.rng.rangeexpr.getGtype().Underlying()
+	mapKeyType := mapType.mapKey
+
 	mapCounter := f.rng.invisibleMapCounter
 	// counter = 0
 	initstmt := &StmtAssignment{
@@ -320,11 +323,6 @@ func (f *StmtFor) emitRangeForMap() {
 			},
 		},
 	}
-	emit("# init index")
-	initstmt.emit()
-
-	emit("%s: # begin loop ", labelBegin)
-
 	// counter < len(list)
 	condition := &ExprBinop{
 		op:   "<",
@@ -335,6 +333,17 @@ func (f *StmtFor) emitRangeForMap() {
 			arg: f.rng.rangeexpr, // len(expr)
 		},
 	}
+
+	// counter++
+	indexIncr := &StmtInc{
+		operand: mapCounter,
+	}
+
+	emit("# init index")
+	initstmt.emit()
+
+	emit("%s: # begin loop ", labelBegin)
+
 	condition.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, exit loop", f.labelEndLoop)
@@ -346,9 +355,6 @@ func (f *StmtFor) emitRangeForMap() {
 	f.rng.rangeexpr.emit() // emit address of map data head
 	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # y")
-
-	mapType := f.rng.rangeexpr.getGtype().Underlying()
-	mapKeyType := mapType.mapKey
 
 	emit("SUM_FROM_STACK # x + y")
 	emit("LOAD_8_BY_DEREF")
@@ -389,10 +395,6 @@ func (f *StmtFor) emitRangeForMap() {
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	// counter++
-	indexIncr := &StmtInc{
-		operand: mapCounter,
-	}
 	indexIncr.emit()
 
 	emit("jmp %s", labelBegin)
