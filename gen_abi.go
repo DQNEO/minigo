@@ -35,9 +35,6 @@ func (f *DeclFunc) emitPrologue() {
 		params = f.params
 	}
 
-	// offset for params and local variables
-	var offset int
-
 	setPos(f.token())
 	emitWithoutIndent("%s:", f.getSymbol())
 	emit("FUNC_PROLOGUE")
@@ -46,21 +43,26 @@ func (f *DeclFunc) emitPrologue() {
 	}
 
 	var regIndex int
+	// offset for params and local variables
+	var offset int
 	for _, param := range params {
+		var width int
 		switch param.getGtype().is24WidthType() {
 		case true:
-			offset -= IntSize * 3
+			width = 3
+			regIndex += width
+			offset -= IntSize * width
 			param.offset = offset
 			emit("# arg  \"%s\" %s", param.varname, param.getGtype().String())
-			emit("PUSH_ARG_%d # 3rd", regIndex+2)
-			emit("PUSH_ARG_%d # 2nd", regIndex+1)
-			emit("PUSH_ARG_%d # 1st", regIndex+0)
-			regIndex += 3
+			emit("PUSH_ARG_%d # 3rd", regIndex-1)
+			emit("PUSH_ARG_%d # 2nd", regIndex-2)
+			emit("PUSH_ARG_%d # 1st", regIndex-3)
 		default:
-			offset -= IntSize
+			width = 1
+			regIndex += width
+			offset -= IntSize * width
 			param.offset = offset
-			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex, param.varname, param.getGtype().String())
-			regIndex += 1
+			emit("PUSH_ARG_%d # param \"%s\" %s", regIndex - width, param.varname, param.getGtype().String())
 		}
 	}
 
