@@ -143,12 +143,13 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 	var packages []*AstPackage
 
 	packages = append(packages, universe)
-	packages = append(packages, iruntime)
 
 	importedPackages := csl.getPackages()
 	for _, pkg := range importedPackages {
 		packages = append(packages, pkg)
 	}
+
+	packages = append(packages, iruntime)
 
 	packages = append(packages, mainPkg)
 
