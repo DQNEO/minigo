@@ -148,6 +148,10 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 }
 
 func walkStmt(stmt Stmt) Stmt {
+	switch stmt.(type) {
+	case nil:
+		return nil
+	}
 	return stmt
 }
 
