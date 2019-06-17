@@ -134,3 +134,20 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 	debugf("set methodTable")
 	return methodTable
 }
+
+func walkFunc(fnc *DeclFunc) *DeclFunc {
+	fnc.body = walkStmtList(fnc.body)
+	return fnc
+}
+
+func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
+	for _, stmt := range stmtList.stmts {
+		stmt = walkStmt(stmt)
+	}
+	return stmtList
+}
+
+func walkStmt(stmt Stmt) Stmt {
+	return stmt
+}
+
