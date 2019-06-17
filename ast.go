@@ -168,12 +168,18 @@ type ForForClause struct {
 	init Stmt
 	cond Stmt
 	post Stmt
+}
+
+type PlainForEmitter struct {
+	tok *Token
+	cls *ForForClause
 
 	block         *StmtSatementList
 	labelBegin    string
 	labelEndBlock string
 	labelEndLoop  string
 }
+
 
 const (
 	FOR_KIND_RANGE_MAP int = 1

@@ -225,25 +225,25 @@ func (f *StmtFor) emitRangeForList() {
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
-func  (cls *ForForClause) emit() {
-	assertNotNil(cls != nil, nil)
+func  (f *PlainForEmitter) emit() {
+	assertNotNil(f != nil, nil)
 
-	if cls.init != nil {
-		cls.init.emit()
+	if f.cls.init != nil {
+		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", cls.labelBegin)
-	if cls.cond != nil {
-		cls.cond.emit()
+	emit("%s: # begin loop ", f.labelBegin)
+	if f.cls.cond != nil {
+		f.cls.cond.emit()
 		emit("TEST_IT")
-		emit("je %s  # jump if false", cls.labelEndLoop)
+		emit("je %s  # jump if false", f.labelEndLoop)
 	}
-	cls.block.emit()
-	emit("%s: # end block", cls.labelEndBlock)
-	if cls.post != nil {
-		cls.post.emit()
+	f.block.emit()
+	emit("%s: # end block", f.labelEndBlock)
+	if f.cls.post != nil {
+		f.cls.post.emit()
 	}
-	emit("jmp %s", cls.labelBegin)
-	emit("%s: # end loop", cls.labelEndLoop)
+	emit("jmp %s", f.labelBegin)
+	emit("%s: # end loop", f.labelEndLoop)
 }
 
 func (f *StmtFor) emit() {
@@ -280,11 +280,14 @@ func (f *StmtFor) emit() {
 	case FOR_KIND_RANGE_LIST:
 		f.emitRangeForList()
 	case FOR_KIND_CLIKE:
-		f.cls.labelBegin = f.labelBegin
-		f.cls.labelEndBlock =  f.labelEndBlock
-		f.cls.labelEndLoop = f.labelEndLoop
-		f.cls.block = f.block
-		var em Emitter = f.cls
+		var em Emitter = &PlainForEmitter{
+			tok :f.token(),
+			labelBegin : f.labelBegin,
+			labelEndBlock :  f.labelEndBlock,
+			labelEndLoop : f.labelEndLoop,
+			cls: f.cls,
+			block : f.block,
+		}
 		em.emit()
 	default:
 		errorft(f.token(), "NOT_REACHED")
