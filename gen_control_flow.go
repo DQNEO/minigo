@@ -262,7 +262,18 @@ func (f *StmtFor) emit() {
 
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
-		f.emitRangeForMap()
+		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+		em := &RangeMapEmtter{
+			block:         f.block,
+			labelBegin:    makeLabel(),
+			labelEndBlock: makeLabel(),
+			labelEndLoop:  makeLabel(),
+			rangeexpr: f.rng.rangeexpr,
+			indexvar: f.rng.indexvar,
+			valuevar: f.rng.valuevar,
+			mapCounter:    f.rng.invisibleMapCounter,
+		}
+		em.emit()
 	case FOR_KIND_RANGE_LIST:
 		f.emitRangeForList()
 	case FOR_KIND_CLIKE:

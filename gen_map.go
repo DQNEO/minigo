@@ -299,21 +299,28 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	}
 }
 
-func (f *StmtFor) emitRangeForMap() {
-	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
-	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	labelBegin := makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
+type RangeMapEmtter struct {
+	labelBegin string
+	labelEndBlock string
+	labelEndLoop string
+	rangeexpr Expr
+	indexvar *Relation
+	valuevar *Relation
+	mapCounter *ExprVariable
+	initstmt Stmt
+	condition Expr
+	indexIncr Stmt
+	block Stmt
+}
 
-	mapType := f.rng.rangeexpr.getGtype().Underlying()
+func (em *RangeMapEmtter) emit() {
+	mapType := em.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 
-	mapCounter := f.rng.invisibleMapCounter
 	// counter = 0
-	initstmt := &StmtAssignment{
+	em.initstmt = &StmtAssignment{
 		lefts: []Expr{
-			mapCounter,
+			em.mapCounter,
 		},
 		rights: []Expr{
 			&ExprNumberLiteral{
@@ -322,35 +329,35 @@ func (f *StmtFor) emitRangeForMap() {
 		},
 	}
 	// counter < len(list)
-	condition := &ExprBinop{
+	em.condition = &ExprBinop{
 		op:   "<",
-		left: mapCounter, // i
+		left: em.mapCounter, // i
 		// @TODO
 		// The range expression x is evaluated once before beginning the loop
 		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
+			arg: em.rangeexpr, // len(expr)
 		},
 	}
 
 	// counter++
-	indexIncr := &StmtInc{
-		operand: mapCounter,
+	em.indexIncr = &StmtInc{
+		operand: em.mapCounter,
 	}
 
 	emit("# init index")
-	initstmt.emit()
+	em.initstmt.emit()
 
-	emit("%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", em.labelBegin)
 
-	condition.emit()
+	em.condition.emit()
 	emit("TEST_IT")
-	emit("je %s  # if false, exit loop", f.labelEndLoop)
+	emit("je %s  # if false, exit loop", em.labelEndLoop)
 
 	// set key and value
-	mapCounter.emit()
+	em.mapCounter.emit()
 	emit("IMUL_NUMBER 16")
 	emit("PUSH_8 # x")
-	f.rng.rangeexpr.emit() // emit address of map data head
+	em.rangeexpr.emit() // emit address of map data head
 	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # y")
 
@@ -360,17 +367,17 @@ func (f *StmtFor) emitRangeForMap() {
 	if !mapKeyType.isString() {
 		emit("LOAD_8_BY_DEREF")
 	}
-	emitSavePrimitive(f.rng.indexvar)
+	emitSavePrimitive(em.indexvar)
 
-	if f.rng.valuevar != nil {
+	if em.valuevar != nil {
 		emit("# Setting valuevar")
 		emit("## rangeexpr.emit()")
-		f.rng.rangeexpr.emit()
+		em.rangeexpr.emit()
 		emit("LOAD_8_BY_DEREF# map head")
 		emit("PUSH_8")
 
 		emit("## mapCounter.emit()")
-		mapCounter.emit()
+		em.mapCounter.emit()
 		emit("## eval value")
 		emit("IMUL_NUMBER 16  # counter * 16")
 		emit("ADD_NUMBER 8 # counter * 16 + 8")
@@ -380,23 +387,23 @@ func (f *StmtFor) emitRangeForMap() {
 
 		emit("LOAD_8_BY_DEREF")
 
-		if f.rng.valuevar.getGtype().is24WidthType() {
+		if em.valuevar.getGtype().is24WidthType() {
 			emit("LOAD_24_BY_DEREF")
-			emitSave24(f.rng.valuevar, 0)
+			emitSave24(em.valuevar, 0)
 		} else {
 			emit("LOAD_8_BY_DEREF")
-			emitSavePrimitive(f.rng.valuevar)
+			emitSavePrimitive(em.valuevar)
 		}
 
 	}
 
-	f.block.emit()
-	emit("%s: # end block", f.labelEndBlock)
+	em.block.emit()
+	emit("%s: # end block", em.labelEndBlock)
 
-	indexIncr.emit()
+	em.indexIncr.emit()
 
-	emit("jmp %s", labelBegin)
-	emit("%s: # end loop", f.labelEndLoop)
+	emit("jmp %s", em.labelBegin)
+	emit("%s: # end loop", em.labelEndLoop)
 }
 
 // push addr, len, cap
