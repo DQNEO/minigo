@@ -175,6 +175,13 @@ const (
 	FOR_KIND_RANGE_LIST int = 2
 	FOR_KIND_CLIKE int = 3
 )
+
+type LoopLabels struct {
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
+}
+
 type StmtFor struct {
 	tok *Token
 	kind int // 1:range map, 2:range list, 3:c-like
@@ -182,9 +189,7 @@ type StmtFor struct {
 	rng           *ForRangeClause
 	cls           *ForForClause
 	block         *StmtSatementList
-	labelBegin    string
-	labelEndBlock string
-	labelEndLoop  string
+	labels        *LoopLabels
 	outer         *StmtFor // to manage lables in nested for-statements
 }
 

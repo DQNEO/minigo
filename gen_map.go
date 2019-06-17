@@ -301,9 +301,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 
 type RangeMapEmitter struct {
 	tok *Token
-	labelBegin string
-	labelEndBlock string
-	labelEndLoop string
+	labels *LoopLabels
 	rangeexpr Expr
 	indexvar *Relation
 	valuevar *Relation
@@ -352,11 +350,11 @@ func (em *RangeMapEmitter) emit() {
 	emit("# init index")
 	em.initstmt.emit()
 
-	emit("%s: # begin loop ", em.labelBegin)
+	emit("%s: # begin loop ", em.labels.labelBegin)
 
 	em.condition.emit()
 	emit("TEST_IT")
-	emit("je %s  # if false, exit loop", em.labelEndLoop)
+	emit("je %s  # if false, exit loop", em.labels.labelEndLoop)
 
 	// set key and value
 	em.mapCounter.emit()
@@ -403,12 +401,12 @@ func (em *RangeMapEmitter) emit() {
 	}
 
 	em.block.emit()
-	emit("%s: # end block", em.labelEndBlock)
+	emit("%s: # end block", em.labels.labelEndBlock)
 
 	em.indexIncr.emit()
 
-	emit("jmp %s", em.labelBegin)
-	emit("%s: # end loop", em.labelEndLoop)
+	emit("jmp %s", em.labels.labelBegin)
+	emit("%s: # end loop", em.labels.labelEndLoop)
 }
 
 // push addr, len, cap

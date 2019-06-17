@@ -136,9 +136,7 @@ type ForRangeListEmitter struct {
 	cond2 Expr
 	incr Stmt
 	block *StmtSatementList
-	labelBegin    string
-	labelEndBlock string
-	labelEndLoop  string
+	labels *LoopLabels
 }
 
 func (f *ForRangeListEmitter) emit() {
@@ -146,36 +144,34 @@ func (f *ForRangeListEmitter) emit() {
 	emit("# init index")
 	f.init.emit()
 
-	emit("%s: # begin loop ", f.labelBegin)
+	emit("%s: # begin loop ", f.labels.labelBegin)
 
 	f.cond.emit()
 	emit("TEST_IT")
-	emit("je %s  # if false, go to loop end", f.labelEndLoop)
+	emit("je %s  # if false, go to loop end", f.labels.labelEndLoop)
 
 	if f.assignVar != nil {
 		f.assignVar.emit()
 	}
 
 	f.block.emit()
-	emit("%s: # end block", f.labelEndBlock)
+	emit("%s: # end block", f.labels.labelEndBlock)
 
 	f.cond2.emit()
 	emit("TEST_IT")
-	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
+	emit("jne %s  # if this iteration is final, go to loop end", f.labels.labelEndLoop)
 
 	f.incr.emit()
 
-	emit("jmp %s", f.labelBegin)
-	emit("%s: # end loop", f.labelEndLoop)
+	emit("jmp %s", f.labels.labelBegin)
+	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
 type PlainForEmitter struct {
 	tok *Token
 	cls *ForForClause
 	block         *StmtSatementList
-	labelBegin    string
-	labelEndBlock string
-	labelEndLoop  string
+	labels *LoopLabels
 }
 
 func  (f *PlainForEmitter) emit() {
@@ -184,19 +180,19 @@ func  (f *PlainForEmitter) emit() {
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", f.labelBegin)
+	emit("%s: # begin loop ", f.labels.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
 		emit("TEST_IT")
-		emit("je %s  # jump if false", f.labelEndLoop)
+		emit("je %s  # jump if false", f.labels.labelEndLoop)
 	}
 	f.block.emit()
-	emit("%s: # end block", f.labelEndBlock)
+	emit("%s: # end block", f.labels.labelEndBlock)
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit("jmp %s", f.labelBegin)
-	emit("%s: # end loop", f.labelEndLoop)
+	emit("jmp %s", f.labels.labelBegin)
+	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
 func (f *StmtFor) emit() {
@@ -210,25 +206,26 @@ func (f *StmtFor) emit() {
 		f.kind = FOR_KIND_CLIKE
 	}
 
-	f.labelBegin = makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
+	labels := &LoopLabels{
+		labelBegin:makeLabel(),
+		labelEndBlock:makeLabel(),
+		labelEndLoop:makeLabel(),
+	}
 
+	f.labels = labels
 	var em Emitter
 
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 		em = &RangeMapEmitter{
-			tok: f.token(),
-			block:         f.block,
-			labelBegin:    f.labelBegin,
-			labelEndBlock: f.labelEndBlock,
-			labelEndLoop:  f.labelEndLoop,
-			rangeexpr: f.rng.rangeexpr,
-			indexvar: f.rng.indexvar,
-			valuevar: f.rng.valuevar,
-			mapCounter:    f.rng.invisibleMapCounter,
+			tok:        f.token(),
+			block:      f.block,
+			labels:     labels,
+			rangeexpr:  f.rng.rangeexpr,
+			indexvar:   f.rng.indexvar,
+			valuevar:   f.rng.valuevar,
+			mapCounter: f.rng.invisibleMapCounter,
 		}
 	case FOR_KIND_RANGE_LIST:
 		emit("# for range %s", f.rng.rangeexpr.getGtype().String())
@@ -301,16 +298,12 @@ func (f *StmtFor) emit() {
 			cond2:         cond2,
 			incr:          incr,
 			block:         f.block,
-			labelBegin:    f.labelBegin,
-			labelEndLoop:  f.labelEndLoop,
-			labelEndBlock: f.labelEndBlock,
+			labels:     labels,
 		}
 	case FOR_KIND_CLIKE:
 		em = &PlainForEmitter{
 			tok :f.token(),
-			labelBegin : f.labelBegin,
-			labelEndBlock :  f.labelEndBlock,
-			labelEndLoop : f.labelEndLoop,
+			labels:     labels,
 			cls: f.cls,
 			block : f.block,
 		}
@@ -368,13 +361,13 @@ func (ast *StmtDefer) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	assert(ast.stmtFor.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # continue", ast.stmtFor.labelEndBlock)
+	assert(ast.stmtFor.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # continue", ast.stmtFor.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(ast.stmtFor.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # break", ast.stmtFor.labelEndLoop)
+	assert(ast.stmtFor.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # break", ast.stmtFor.labels.labelEndLoop)
 }
 
 
