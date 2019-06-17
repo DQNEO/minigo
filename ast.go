@@ -197,7 +197,7 @@ type StmtIf struct {
 	tok        *Token
 	simplestmt Stmt
 	cond       Expr
-	then       *StmtSatementList
+	then       Stmt
 	els        Stmt
 }
 

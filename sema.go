@@ -172,7 +172,7 @@ func walkStmt(stmt Stmt) Stmt {
 	case *StmtIf:
 		s := stmt.(*StmtIf)
 		s.simplestmt = walkStmt(s.simplestmt)
-		s.then = walkStmtList(s.then)
+		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
 		return s
 	case *StmtReturn:
