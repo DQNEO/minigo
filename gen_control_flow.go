@@ -172,7 +172,6 @@ func (f *ForRangeListEmitter) emit() {
 type PlainForEmitter struct {
 	tok *Token
 	cls *ForForClause
-
 	block         *StmtSatementList
 	labelBegin    string
 	labelEndBlock string
