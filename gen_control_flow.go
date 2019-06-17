@@ -169,6 +169,16 @@ func (f *ForRangeListEmitter) emit() {
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
+type PlainForEmitter struct {
+	tok *Token
+	cls *ForForClause
+
+	block         *StmtSatementList
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
+}
+
 func  (f *PlainForEmitter) emit() {
 	assertNotNil(f != nil, nil)
 
