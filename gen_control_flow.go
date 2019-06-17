@@ -129,93 +129,45 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
+type ForRangeListEmitter struct {
+	init *StmtAssignment
+	cond Expr
+	assignVar *StmtAssignment
+	cond2 Expr
+	incr Stmt
+	block *StmtSatementList
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
+}
+
 func (f *StmtFor) emitRangeForList() {
-	emitNewline()
-	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
-	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
 
-	init := &StmtAssignment{
-		lefts: []Expr{
-			f.rng.indexvar,
-		},
-		rights: []Expr{
-			&ExprNumberLiteral{
-				val: 0,
-			},
-		},
-	}
-	// i < len(list)
-	cond := &ExprBinop{
-		op:   "<",
-		left: f.rng.indexvar, // i
-		// @TODO
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
+}
 
-	// v = s[i]
-	var assignVar *StmtAssignment
-	if f.rng.valuevar != nil {
-		assignVar = &StmtAssignment{
-			lefts: []Expr{
-				f.rng.valuevar,
-			},
-			rights: []Expr{
-				&ExprIndex{
-					collection: f.rng.rangeexpr,
-					index:      f.rng.indexvar,
-				},
-			},
-		}
-	}
-
-	// break if i == len(list) - 1
-	cond2 := &ExprBinop{
-		op:   "==",
-		left: f.rng.indexvar, // i
-		// @TODO2
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprBinop{
-			op: "-",
-			left: &ExprLen{
-				arg: f.rng.rangeexpr, // len(expr)
-			},
-			right: &ExprNumberLiteral{
-				val: 1,
-			},
-		},
-	}
-
-	// i++
-	incr := &StmtInc{
-		operand: f.rng.indexvar,
-	}
-
+func (f *ForRangeListEmitter) emit() {
 	// i = 0
 	emit("# init index")
-	init.emit()
+	f.init.emit()
 
 	emit("%s: # begin loop ", f.labelBegin)
 
-	cond.emit()
+	f.cond.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
-	if assignVar != nil {
-		assignVar.emit()
+	if f.assignVar != nil {
+		f.assignVar.emit()
 	}
 
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	cond2.emit()
+	f.cond2.emit()
 	emit("TEST_IT")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
-	incr.emit()
+	f.incr.emit()
 
 	emit("jmp %s", f.labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
@@ -257,10 +209,11 @@ func (f *StmtFor) emit() {
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
+	var em Emitter
+
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		var em Emitter
 		em = &RangeMapEmitter{
 			tok: f.token(),
 			block:         f.block,
@@ -272,11 +225,83 @@ func (f *StmtFor) emit() {
 			valuevar: f.rng.valuevar,
 			mapCounter:    f.rng.invisibleMapCounter,
 		}
-		em.emit()
 	case FOR_KIND_RANGE_LIST:
-		f.emitRangeForList()
+		emit("# for range %s", f.rng.rangeexpr.getGtype().String())
+		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
+
+		var init = &StmtAssignment{
+			lefts: []Expr{
+				f.rng.indexvar,
+			},
+			rights: []Expr{
+				&ExprNumberLiteral{
+					val: 0,
+				},
+			},
+		}
+		// i < len(list)
+		var cond = &ExprBinop{
+			op:   "<",
+			left: f.rng.indexvar, // i
+			// @TODO
+			// The range expression x is evaluated once before beginning the loop
+			right: &ExprLen{
+				arg: f.rng.rangeexpr, // len(expr)
+			},
+		}
+
+		// v = s[i]
+		var assignVar *StmtAssignment
+		if f.rng.valuevar != nil {
+			assignVar = &StmtAssignment{
+				lefts: []Expr{
+					f.rng.valuevar,
+				},
+				rights: []Expr{
+					&ExprIndex{
+						collection: f.rng.rangeexpr,
+						index:      f.rng.indexvar,
+					},
+				},
+			}
+		}
+
+		// break if i == len(list) - 1
+		var cond2 = &ExprBinop{
+			op:   "==",
+			left: f.rng.indexvar, // i
+			// @TODO2
+			// The range expression x is evaluated once before beginning the loop
+			right: &ExprBinop{
+				op: "-",
+				left: &ExprLen{
+					arg: f.rng.rangeexpr, // len(expr)
+				},
+				right: &ExprNumberLiteral{
+					val: 1,
+				},
+			},
+		}
+
+		// i++
+		var incr = &StmtInc{
+			operand: f.rng.indexvar,
+		}
+
+		em = &ForRangeListEmitter{
+			init:          init,
+			cond:          cond,
+			assignVar:     assignVar,
+			cond2:         cond2,
+			incr:          incr,
+			block:         f.block,
+			labelBegin:    f.labelBegin,
+			labelEndLoop:  f.labelEndLoop,
+			labelEndBlock: f.labelEndBlock,
+		}
 	case FOR_KIND_CLIKE:
-		var em Emitter = &PlainForEmitter{
+		em = &PlainForEmitter{
 			tok :f.token(),
 			labelBegin : f.labelBegin,
 			labelEndBlock :  f.labelEndBlock,
@@ -284,11 +309,11 @@ func (f *StmtFor) emit() {
 			cls: f.cls,
 			block : f.block,
 		}
-		em.emit()
 	default:
 		errorft(f.token(), "NOT_REACHED")
 	}
 
+	em.emit()
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
