@@ -141,6 +141,9 @@ func walkFunc(fnc *DeclFunc) *DeclFunc {
 }
 
 func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
+	if stmtList == nil {
+		return nil
+	}
 	for _, stmt := range stmtList.stmts {
 		stmt = walkStmt(stmt)
 	}
@@ -165,6 +168,9 @@ func walkStmt(stmt Stmt) Stmt {
 		s.block = walkStmtList(s.block)
 	case *StmtIf:
 		s := stmt.(*StmtIf)
+		s.simplestmt = walkStmt(s.simplestmt)
+		s.then = walkStmtList(s.then)
+		s.els = walkStmt(s.els)
 		return s
 	case *StmtReturn:
 		s := stmt.(*StmtReturn)
@@ -177,6 +183,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s
 	case *StmtSatementList:
 		s := stmt.(*StmtSatementList)
+		s = walkStmtList(s)
 		return s
 	case *StmtAssignment:
 		s := stmt.(*StmtAssignment)
@@ -198,6 +205,10 @@ func walkStmt(stmt Stmt) Stmt {
 		return s
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)
+		for _, cse := range s.cases {
+			cse.compound = walkStmtList(cse.compound)
+		}
+		s.dflt = walkStmtList(s.dflt)
 		return s
 	}
 
