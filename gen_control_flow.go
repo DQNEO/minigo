@@ -260,6 +260,10 @@ func (f *StmtFor) emit() {
 		f.kind = FOR_KIND_CLIKE
 	}
 
+	f.labelBegin = makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
+
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
@@ -267,9 +271,9 @@ func (f *StmtFor) emit() {
 		em = &RangeMapEmitter{
 			tok: f.token(),
 			block:         f.block,
-			labelBegin:    makeLabel(),
-			labelEndBlock: makeLabel(),
-			labelEndLoop:  makeLabel(),
+			labelBegin:    f.labelBegin,
+			labelEndBlock: f.labelEndBlock,
+			labelEndLoop:  f.labelEndLoop,
 			rangeexpr: f.rng.rangeexpr,
 			indexvar: f.rng.indexvar,
 			valuevar: f.rng.valuevar,
