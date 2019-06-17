@@ -462,3 +462,7 @@ func (node *ExprMapLiteral) token() *Token              { return node.tok }
 func (node *ExprLen) token() *Token                     { return node.tok }
 func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
+
+func (node *ForRangeListEmitter) token() *Token { return node.tok }
+func (node *RangeMapEmitter) token() *Token { return node.tok }
+func (node *PlainForEmitter) token() *Token { return node.tok }

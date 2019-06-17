@@ -151,6 +151,10 @@ func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
 	case nil:
 		return nil
+	case *StmtFor:
+		s := stmt.(*StmtFor)
+		s.block = walkStmtList(s.block)
+		return s
 	}
 	return stmt
 }

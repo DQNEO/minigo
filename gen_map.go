@@ -312,10 +312,6 @@ type RangeMapEmitter struct {
 	block Stmt
 }
 
-func (em *RangeMapEmitter) token() *Token {
-	return em.tok
-}
-
 func (em *RangeMapEmitter) emit() {
 	mapType := em.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey

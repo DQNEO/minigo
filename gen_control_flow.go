@@ -130,6 +130,7 @@ func (stmt *StmtSwitch) emit() {
 }
 
 type ForRangeListEmitter struct {
+	tok *Token
 	init *StmtAssignment
 	cond Expr
 	assignVar *StmtAssignment
@@ -213,7 +214,7 @@ func (f *StmtFor) emit() {
 	}
 
 	f.labels = labels
-	var em Emitter
+	var em Stmt
 
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:

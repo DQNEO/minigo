@@ -288,28 +288,46 @@ func (e *ExprTypeSwitchGuard) dump() {
 	e.expr.dump()
 }
 
+func (f *ForRangeListEmitter) dump() {
+	debugf("for range list")
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
+func (f *RangeMapEmitter) dump() {
+	debugf("for range map")
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
+func (f *PlainForEmitter) dump() {
+	debugf("for clause")
+	if f.cls.init != nil {
+		f.cls.init.dump()
+	}
+	if f.cls.cond != nil {
+		f.cls.cond.dump()
+	}
+	if f.cls.post != nil {
+		f.cls.post.dump()
+	}
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
 func (f *StmtFor) dump() {
-	if f.rng != nil {
-		debugf("for range")
-		debugNest++
-		f.rng.indexvar.dump()
-		if f.rng.valuevar != nil {
-			f.rng.valuevar.dump()
-		}
-		debugf("range")
-		f.rng.rangeexpr.dump()
-		debugNest--
-	} else if f.cls != nil {
-		debugf("for clause")
-		if f.cls.init != nil {
-			f.cls.init.dump()
-		}
-		if f.cls.cond != nil {
-			f.cls.cond.dump()
-		}
-		if f.cls.post != nil {
-			f.cls.post.dump()
-		}
+	debugf("for clause")
+	if f.cls.init != nil {
+		f.cls.init.dump()
+	}
+	if f.cls.cond != nil {
+		f.cls.cond.dump()
+	}
+	if f.cls.post != nil {
+		f.cls.post.dump()
 	}
 	debugNest++
 	f.block.dump()
