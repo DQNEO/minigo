@@ -1,17 +1,10 @@
-# Golang CircleCI 2.0 configuration file
-#
 version: 2
 jobs:
   build:
     docker:
       - image: dqneo/ubuntu-build-essential:go
 
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/DQNEO/minigo
     steps:
-      # specify any bash command here prefixed with `run: `
       - checkout
       - run: PATH="/usr/lib/go-1.10/bin:$PATH" make test
