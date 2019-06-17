@@ -227,14 +227,14 @@ func (f *StmtFor) emitRangeForList() {
 
 func (f *StmtFor) emitForClause() {
 	assertNotNil(f.cls != nil, nil)
-	labelBegin := makeLabel()
+	f.labelBegin = makeLabel()
 	f.labelEndBlock = makeLabel()
 	f.labelEndLoop = makeLabel()
 
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", f.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
 		emit("TEST_IT")
@@ -245,7 +245,7 @@ func (f *StmtFor) emitForClause() {
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit("jmp %s", labelBegin)
+	emit("jmp %s", f.labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
