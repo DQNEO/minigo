@@ -141,10 +141,6 @@ type ForRangeListEmitter struct {
 	labelEndLoop  string
 }
 
-func (f *StmtFor) emitRangeForList() {
-
-}
-
 func (f *ForRangeListEmitter) emit() {
 	// i = 0
 	emit("# init index")
