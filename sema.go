@@ -163,7 +163,44 @@ func walkStmt(stmt Stmt) Stmt {
 	case *PlainForEmitter:
 		s := stmt.(*PlainForEmitter)
 		s.block = walkStmtList(s.block)
+	case *StmtIf:
+		s := stmt.(*StmtIf)
+		return s
+	case *StmtReturn:
+		s := stmt.(*StmtReturn)
+		return s
+	case *StmtInc:
+		s := stmt.(*StmtInc)
+		return s
+	case *StmtDec:
+		s := stmt.(*StmtDec)
+		return s
+	case *StmtSatementList:
+		s := stmt.(*StmtSatementList)
+		return s
+	case *StmtAssignment:
+		s := stmt.(*StmtAssignment)
+		return s
+	case *StmtShortVarDecl:
+		s := stmt.(*StmtShortVarDecl)
+		return s
+	case *StmtContinue:
+		s := stmt.(*StmtContinue)
+		return s
+	case *StmtBreak:
+		s := stmt.(*StmtBreak)
+		return s
+	case *StmtExpr:
+		s := stmt.(*StmtExpr)
+		return s
+	case *StmtDefer:
+		s := stmt.(*StmtDefer)
+		return s
+	case *StmtSwitch:
+		s := stmt.(*StmtSwitch)
+		return s
 	}
+
 	return stmt
 }
 
