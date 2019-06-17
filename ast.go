@@ -168,6 +168,11 @@ type ForForClause struct {
 	init Stmt
 	cond Stmt
 	post Stmt
+
+	block         *StmtSatementList
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
 }
 
 const (
