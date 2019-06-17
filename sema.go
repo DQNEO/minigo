@@ -153,8 +153,16 @@ func walkStmt(stmt Stmt) Stmt {
 		return nil
 	case *StmtFor:
 		s := stmt.(*StmtFor)
+		return s.convert()
+	case *ForRangeListEmitter:
+		s := stmt.(*ForRangeListEmitter)
 		s.block = walkStmtList(s.block)
-		return s
+	case *RangeMapEmitter:
+		s := stmt.(*RangeMapEmitter)
+		s.block = walkStmtList(s.block)
+	case *PlainForEmitter:
+		s := stmt.(*PlainForEmitter)
+		s.block = walkStmtList(s.block)
 	}
 	return stmt
 }

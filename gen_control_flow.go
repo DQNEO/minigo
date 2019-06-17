@@ -129,17 +129,6 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-type ForRangeListEmitter struct {
-	tok *Token
-	init *StmtAssignment
-	cond Expr
-	assignVar *StmtAssignment
-	cond2 Expr
-	incr Stmt
-	block *StmtSatementList
-	labels *LoopLabels
-}
-
 func (f *ForRangeListEmitter) emit() {
 	// i = 0
 	emit("# init index")
@@ -168,13 +157,6 @@ func (f *ForRangeListEmitter) emit() {
 	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
-type PlainForEmitter struct {
-	tok *Token
-	cls *ForForClause
-	block         *StmtSatementList
-	labels *LoopLabels
-}
-
 func  (f *PlainForEmitter) emit() {
 	assertNotNil(f != nil, nil)
 
@@ -197,6 +179,11 @@ func  (f *PlainForEmitter) emit() {
 }
 
 func (f *StmtFor) emit() {
+	f2 := f.convert()
+	f2.emit()
+}
+
+func (f *StmtFor) convert() Stmt {
 	if f.rng != nil {
 		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 			f.kind = FOR_KIND_RANGE_MAP
@@ -312,7 +299,7 @@ func (f *StmtFor) emit() {
 		errorft(f.token(), "NOT_REACHED")
 	}
 
-	em.emit()
+	return em
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {

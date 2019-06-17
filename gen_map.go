@@ -299,18 +299,6 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	}
 }
 
-type RangeMapEmitter struct {
-	tok *Token
-	labels *LoopLabels
-	rangeexpr Expr
-	indexvar *Relation
-	valuevar *Relation
-	mapCounter *ExprVariable
-	initstmt Stmt
-	condition Expr
-	indexIncr Stmt
-	block Stmt
-}
 
 func (em *RangeMapEmitter) emit() {
 	mapType := em.rangeexpr.getGtype().Underlying()

@@ -463,6 +463,38 @@ func (node *ExprLen) token() *Token                     { return node.tok }
 func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
 
+// Internal node made by sema
+type ForRangeListEmitter struct {
+	tok *Token
+	init *StmtAssignment
+	cond Expr
+	assignVar *StmtAssignment
+	cond2 Expr
+	incr Stmt
+	block *StmtSatementList
+	labels *LoopLabels
+}
+
+type RangeMapEmitter struct {
+	tok *Token
+	labels *LoopLabels
+	rangeexpr Expr
+	indexvar *Relation
+	valuevar *Relation
+	mapCounter *ExprVariable
+	initstmt Stmt
+	condition Expr
+	indexIncr Stmt
+	block *StmtSatementList
+}
+
+type PlainForEmitter struct {
+	tok *Token
+	cls *ForForClause
+	block         *StmtSatementList
+	labels *LoopLabels
+}
+
 func (node *ForRangeListEmitter) token() *Token { return node.tok }
 func (node *RangeMapEmitter) token() *Token { return node.tok }
 func (node *PlainForEmitter) token() *Token { return node.tok }

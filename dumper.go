@@ -319,19 +319,6 @@ func (f *PlainForEmitter) dump() {
 }
 
 func (f *StmtFor) dump() {
-	debugf("for clause")
-	if f.cls.init != nil {
-		f.cls.init.dump()
-	}
-	if f.cls.cond != nil {
-		f.cls.cond.dump()
-	}
-	if f.cls.post != nil {
-		f.cls.post.dump()
-	}
-	debugNest++
-	f.block.dump()
-	debugNest--
 }
 
 func (e *ExprLen) dump() {
