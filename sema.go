@@ -159,71 +159,91 @@ func walkExpr(expr Expr) Expr {
 */
 
 func walkStmt(stmt Stmt) Stmt {
+	var s2 Stmt
 	switch stmt.(type) {
 	case nil:
-		return nil
+		return s2
 	case *StmtFor:
 		s := stmt.(*StmtFor)
-		s2 := s.convert()
-		return walkStmt(s2)
+		s2 = s.convert()
+		s2 = walkStmt(s2)
+		return s2
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)
 		s.block = walkStmtList(s.block)
+		s2 = s
+		return s2
 	case *RangeMapEmitter:
 		s := stmt.(*RangeMapEmitter)
 		//s.rangeexpr = walkExpr(s.rangeexpr)
 		//s.condition = walkExpr(s.condition)
 		s.block = walkStmtList(s.block)
+		s2 = s
+		return s2
 	case *PlainForEmitter:
 		s := stmt.(*PlainForEmitter)
-		//s.cls.init = walkStmt(s.cls.init)
+		s.cls.init = walkStmt(s.cls.init)
 		s.cls.cond = walkStmt(s.cls.cond)
 		s.cls.post = walkStmt(s.cls.post)
 		s.block = walkStmtList(s.block)
+		s2 = s
+		return s2
 	case *StmtIf:
 		s := stmt.(*StmtIf)
 		s.simplestmt = walkStmt(s.simplestmt)
 		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
-		return s
+		s2 = s
+		return s2
 	case *StmtReturn:
 		s := stmt.(*StmtReturn)
-		return s
+		s2 = s
+		return s2
 	case *StmtInc:
 		s := stmt.(*StmtInc)
-		return s
+		s2 = s
+		return s2
 	case *StmtDec:
 		s := stmt.(*StmtDec)
-		return s
+		s2 = s
+		return s2
 	case *StmtSatementList:
 		s := stmt.(*StmtSatementList)
 		s = walkStmtList(s)
-		return s
+		s2 = s
+		return s2
 	case *StmtAssignment:
 		s := stmt.(*StmtAssignment)
-		return s
+		s2 = s
+		return s2
 	case *StmtShortVarDecl:
 		s := stmt.(*StmtShortVarDecl)
-		return s
+		s2 = s
+		return s2
 	case *StmtContinue:
 		s := stmt.(*StmtContinue)
-		return s
+		s2 = s
+		return s2
 	case *StmtBreak:
 		s := stmt.(*StmtBreak)
-		return s
+		s2 = s
+		return s2
 	case *StmtExpr:
 		s := stmt.(*StmtExpr)
-		return s
+		s2 = s
+		return s2
 	case *StmtDefer:
 		s := stmt.(*StmtDefer)
-		return s
+		s2 = s
+		return s2
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)
 		for _, cse := range s.cases {
 			cse.compound = walkStmtList(cse.compound)
 		}
 		s.dflt = walkStmtList(s.dflt)
-		return s
+		s2 = s
+		return s2
 	}
 
 	return stmt

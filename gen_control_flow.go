@@ -158,8 +158,7 @@ func (f *ForRangeListEmitter) emit() {
 }
 
 func  (f *PlainForEmitter) emit() {
-	assertNotNil(f != nil, nil)
-
+	emit("# in emit PlainForEmitter")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}

@@ -398,8 +398,16 @@ func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		setPos(ast.token())
 		emit("# Statement")
+
 		gasIndentLevel++
-		stmt.emit()
+		switch stmt.(type) {
+		case *PlainForEmitter:
+			emit("# before emit PlainForEmitter")
+			p := stmt.(*PlainForEmitter)
+			p.emit()
+		default:
+			stmt.emit()
+		}
 		gasIndentLevel--
 	}
 }
