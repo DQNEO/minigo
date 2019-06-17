@@ -264,7 +264,7 @@ func (f *StmtFor) emit() {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 		var em Emitter
-		em = &RangeMapEmtter{
+		em = &RangeMapEmitter{
 			tok: f.token(),
 			block:         f.block,
 			labelBegin:    makeLabel(),
