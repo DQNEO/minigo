@@ -179,8 +179,7 @@ func  (f *PlainForEmitter) emit() {
 }
 
 func (f *StmtFor) emit() {
-	f2 := f.convert()
-	f2.emit()
+	panic("SHOULD NOT REACH HERE")
 }
 
 func (f *StmtFor) convert() Stmt {

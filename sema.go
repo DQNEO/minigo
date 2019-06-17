@@ -144,8 +144,9 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 	if stmtList == nil {
 		return nil
 	}
-	for _, stmt := range stmtList.stmts {
-		stmt = walkStmt(stmt)
+	for i, stmt := range stmtList.stmts {
+		stmt2 := walkStmt(stmt)
+		stmtList.stmts[i] = stmt2
 	}
 	return stmtList
 }
@@ -156,7 +157,8 @@ func walkStmt(stmt Stmt) Stmt {
 		return nil
 	case *StmtFor:
 		s := stmt.(*StmtFor)
-		return s.convert()
+		s2 := s.convert()
+		return walkStmt(s2)
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)
 		s.block = walkStmtList(s.block)
