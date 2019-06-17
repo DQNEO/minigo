@@ -152,6 +152,12 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 	return stmtList
 }
 
+/*
+func walkExpr(expr Expr) Expr {
+	return expr
+}
+*/
+
 func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
 	case nil:
@@ -165,9 +171,14 @@ func walkStmt(stmt Stmt) Stmt {
 		s.block = walkStmtList(s.block)
 	case *RangeMapEmitter:
 		s := stmt.(*RangeMapEmitter)
+		//s.rangeexpr = walkExpr(s.rangeexpr)
+		//s.condition = walkExpr(s.condition)
 		s.block = walkStmtList(s.block)
 	case *PlainForEmitter:
 		s := stmt.(*PlainForEmitter)
+		//s.cls.init = walkStmt(s.cls.init)
+		s.cls.cond = walkStmt(s.cls.cond)
+		s.cls.post = walkStmt(s.cls.post)
 		s.block = walkStmtList(s.block)
 	case *StmtIf:
 		s := stmt.(*StmtIf)
