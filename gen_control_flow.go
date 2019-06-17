@@ -135,11 +135,7 @@ func (f *StmtFor) emitRangeForList() {
 	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 	assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
 
-	labelBegin := makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
-
-	initstmt := &StmtAssignment{
+	init := &StmtAssignment{
 		lefts: []Expr{
 			f.rng.indexvar,
 		},
@@ -150,7 +146,7 @@ func (f *StmtFor) emitRangeForList() {
 		},
 	}
 	// i < len(list)
-	condition := &ExprBinop{
+	cond := &ExprBinop{
 		op:   "<",
 		left: f.rng.indexvar, // i
 		// @TODO
@@ -177,7 +173,7 @@ func (f *StmtFor) emitRangeForList() {
 	}
 
 	// break if i == len(list) - 1
-	condition2 := &ExprBinop{
+	cond2 := &ExprBinop{
 		op:   "==",
 		left: f.rng.indexvar, // i
 		// @TODO2
@@ -194,17 +190,17 @@ func (f *StmtFor) emitRangeForList() {
 	}
 
 	// i++
-	indexIncr := &StmtInc{
+	incr := &StmtInc{
 		operand: f.rng.indexvar,
 	}
 
 	// i = 0
 	emit("# init index")
-	initstmt.emit()
+	init.emit()
 
-	emit("%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", f.labelBegin)
 
-	condition.emit()
+	cond.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
@@ -215,13 +211,13 @@ func (f *StmtFor) emitRangeForList() {
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	condition2.emit()
+	cond2.emit()
 	emit("TEST_IT")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
-	indexIncr.emit()
+	incr.emit()
 
-	emit("jmp %s", labelBegin)
+	emit("jmp %s", f.labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
