@@ -300,6 +300,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 }
 
 type RangeMapEmtter struct {
+	tok *Token
 	labelBegin string
 	labelEndBlock string
 	labelEndLoop string
@@ -311,6 +312,10 @@ type RangeMapEmtter struct {
 	condition Expr
 	indexIncr Stmt
 	block Stmt
+}
+
+func (em *RangeMapEmtter) token() *Token {
+	return em.tok
 }
 
 func (em *RangeMapEmtter) emit() {
