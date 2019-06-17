@@ -178,7 +178,8 @@ func  (f *PlainForEmitter) emit() {
 }
 
 func (f *StmtFor) emit() {
-	panic("SHOULD NOT REACH HERE")
+	s := f.convert()
+	s.emit()
 }
 
 func (f *StmtFor) convert() Stmt {
@@ -192,13 +193,11 @@ func (f *StmtFor) convert() Stmt {
 		f.kind = FOR_KIND_CLIKE
 	}
 
-	labels := &LoopLabels{
-		labelBegin:makeLabel(),
-		labelEndBlock:makeLabel(),
-		labelEndLoop:makeLabel(),
-	}
+	f.labels.labelBegin = makeLabel()
+	f.labels.labelEndBlock = makeLabel()
+	f.labels.labelEndLoop = makeLabel()
 
-	f.labels = labels
+	labels := f.labels
 	var em Stmt
 
 	switch f.kind {

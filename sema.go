@@ -165,8 +165,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtFor:
 		s := stmt.(*StmtFor)
-		s2 = s.convert()
-		s2 = walkStmt(s2)
+		s2 = s
 		return s2
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)

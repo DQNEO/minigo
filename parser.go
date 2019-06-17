@@ -1030,6 +1030,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	var r = &StmtFor{
 		tok:   ptok,
 		outer: p.currentForStmt,
+		labels: &LoopLabels{},
 	}
 	p.currentForStmt = r
 	p.enterNewScope("for")
@@ -1139,6 +1140,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 			valuevar:            valuevar,
 			rangeexpr:           rangeExpr,
 		},
+		labels: &LoopLabels{},
 	}
 	p.currentForStmt = r
 	if infer {
