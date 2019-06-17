@@ -255,6 +255,7 @@ type DeclFunc struct {
 	stmtDefer *StmtDefer
 	// every function has a defer handler
 	labelDeferHandler string
+	prologue Emitter
 }
 
 type TopLevelDecl struct {

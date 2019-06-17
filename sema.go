@@ -135,9 +135,10 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 	return methodTable
 }
 
-func walkFunc(fnc *DeclFunc) *DeclFunc {
-	fnc.body = walkStmtList(fnc.body)
-	return fnc
+func walkFunc(f *DeclFunc) *DeclFunc {
+	f.prologue = f.prepare()
+	f.body = walkStmtList(f.body)
+	return f
 }
 
 func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
