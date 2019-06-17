@@ -129,112 +129,62 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-func (f *StmtFor) emitRangeForList() {
-	emitNewline()
-	emit("# for range %s", f.rng.rangeexpr.getGtype().String())
-	assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-	assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
+type ForRangeListEmitter struct {
+	init *StmtAssignment
+	cond Expr
+	assignVar *StmtAssignment
+	cond2 Expr
+	incr Stmt
+	block *StmtSatementList
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
+}
 
-	labelBegin := makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
-
-	initstmt := &StmtAssignment{
-		lefts: []Expr{
-			f.rng.indexvar,
-		},
-		rights: []Expr{
-			&ExprNumberLiteral{
-				val: 0,
-			},
-		},
-	}
-	// i < len(list)
-	condition := &ExprBinop{
-		op:   "<",
-		left: f.rng.indexvar, // i
-		// @TODO
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprLen{
-			arg: f.rng.rangeexpr, // len(expr)
-		},
-	}
-
-	// v = s[i]
-	var assignVar *StmtAssignment
-	if f.rng.valuevar != nil {
-		assignVar = &StmtAssignment{
-			lefts: []Expr{
-				f.rng.valuevar,
-			},
-			rights: []Expr{
-				&ExprIndex{
-					collection: f.rng.rangeexpr,
-					index:      f.rng.indexvar,
-				},
-			},
-		}
-	}
-
-	// break if i == len(list) - 1
-	condition2 := &ExprBinop{
-		op:   "==",
-		left: f.rng.indexvar, // i
-		// @TODO2
-		// The range expression x is evaluated once before beginning the loop
-		right: &ExprBinop{
-			op: "-",
-			left: &ExprLen{
-				arg: f.rng.rangeexpr, // len(expr)
-			},
-			right: &ExprNumberLiteral{
-				val: 1,
-			},
-		},
-	}
-
-	// i++
-	indexIncr := &StmtInc{
-		operand: f.rng.indexvar,
-	}
-
+func (f *ForRangeListEmitter) emit() {
 	// i = 0
 	emit("# init index")
-	initstmt.emit()
+	f.init.emit()
 
-	emit("%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", f.labelBegin)
 
-	condition.emit()
+	f.cond.emit()
 	emit("TEST_IT")
 	emit("je %s  # if false, go to loop end", f.labelEndLoop)
 
-	if assignVar != nil {
-		assignVar.emit()
+	if f.assignVar != nil {
+		f.assignVar.emit()
 	}
 
 	f.block.emit()
 	emit("%s: # end block", f.labelEndBlock)
 
-	condition2.emit()
+	f.cond2.emit()
 	emit("TEST_IT")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labelEndLoop)
 
-	indexIncr.emit()
+	f.incr.emit()
 
-	emit("jmp %s", labelBegin)
+	emit("jmp %s", f.labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
-func (f *StmtFor) emitForClause() {
-	assertNotNil(f.cls != nil, nil)
-	labelBegin := makeLabel()
-	f.labelEndBlock = makeLabel()
-	f.labelEndLoop = makeLabel()
+type PlainForEmitter struct {
+	tok *Token
+	cls *ForForClause
+	block         *StmtSatementList
+	labelBegin    string
+	labelEndBlock string
+	labelEndLoop  string
+}
+
+func  (f *PlainForEmitter) emit() {
+	assertNotNil(f != nil, nil)
 
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", labelBegin)
+	emit("%s: # begin loop ", f.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
 		emit("TEST_IT")
@@ -245,7 +195,7 @@ func (f *StmtFor) emitForClause() {
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit("jmp %s", labelBegin)
+	emit("jmp %s", f.labelBegin)
 	emit("%s: # end loop", f.labelEndLoop)
 }
 
@@ -260,17 +210,115 @@ func (f *StmtFor) emit() {
 		f.kind = FOR_KIND_CLIKE
 	}
 
+	f.labelBegin = makeLabel()
+	f.labelEndBlock = makeLabel()
+	f.labelEndLoop = makeLabel()
+
+	var em Emitter
+
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
-		f.emitRangeForMap()
+		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+		em = &RangeMapEmitter{
+			tok: f.token(),
+			block:         f.block,
+			labelBegin:    f.labelBegin,
+			labelEndBlock: f.labelEndBlock,
+			labelEndLoop:  f.labelEndLoop,
+			rangeexpr: f.rng.rangeexpr,
+			indexvar: f.rng.indexvar,
+			valuevar: f.rng.valuevar,
+			mapCounter:    f.rng.invisibleMapCounter,
+		}
 	case FOR_KIND_RANGE_LIST:
-		f.emitRangeForList()
+		emit("# for range %s", f.rng.rangeexpr.getGtype().String())
+		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
+
+		var init = &StmtAssignment{
+			lefts: []Expr{
+				f.rng.indexvar,
+			},
+			rights: []Expr{
+				&ExprNumberLiteral{
+					val: 0,
+				},
+			},
+		}
+		// i < len(list)
+		var cond = &ExprBinop{
+			op:   "<",
+			left: f.rng.indexvar, // i
+			// @TODO
+			// The range expression x is evaluated once before beginning the loop
+			right: &ExprLen{
+				arg: f.rng.rangeexpr, // len(expr)
+			},
+		}
+
+		// v = s[i]
+		var assignVar *StmtAssignment
+		if f.rng.valuevar != nil {
+			assignVar = &StmtAssignment{
+				lefts: []Expr{
+					f.rng.valuevar,
+				},
+				rights: []Expr{
+					&ExprIndex{
+						collection: f.rng.rangeexpr,
+						index:      f.rng.indexvar,
+					},
+				},
+			}
+		}
+
+		// break if i == len(list) - 1
+		var cond2 = &ExprBinop{
+			op:   "==",
+			left: f.rng.indexvar, // i
+			// @TODO2
+			// The range expression x is evaluated once before beginning the loop
+			right: &ExprBinop{
+				op: "-",
+				left: &ExprLen{
+					arg: f.rng.rangeexpr, // len(expr)
+				},
+				right: &ExprNumberLiteral{
+					val: 1,
+				},
+			},
+		}
+
+		// i++
+		var incr = &StmtInc{
+			operand: f.rng.indexvar,
+		}
+
+		em = &ForRangeListEmitter{
+			init:          init,
+			cond:          cond,
+			assignVar:     assignVar,
+			cond2:         cond2,
+			incr:          incr,
+			block:         f.block,
+			labelBegin:    f.labelBegin,
+			labelEndLoop:  f.labelEndLoop,
+			labelEndBlock: f.labelEndBlock,
+		}
 	case FOR_KIND_CLIKE:
-		f.emitForClause()
+		em = &PlainForEmitter{
+			tok :f.token(),
+			labelBegin : f.labelBegin,
+			labelEndBlock :  f.labelEndBlock,
+			labelEndLoop : f.labelEndLoop,
+			cls: f.cls,
+			block : f.block,
+		}
 	default:
 		errorft(f.token(), "NOT_REACHED")
 	}
 
+	em.emit()
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {

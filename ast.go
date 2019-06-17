@@ -182,6 +182,7 @@ type StmtFor struct {
 	rng           *ForRangeClause
 	cls           *ForForClause
 	block         *StmtSatementList
+	labelBegin    string
 	labelEndBlock string
 	labelEndLoop  string
 	outer         *StmtFor // to manage lables in nested for-statements
