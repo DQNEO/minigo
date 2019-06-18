@@ -194,12 +194,13 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *RangeMapEmitter:
 		s := stmt.(*RangeMapEmitter)
+		s.rangeexpr = walkExpr(s.rangeexpr)
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)
-
+		s.cond = walkExpr(s.cond)
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
@@ -215,12 +216,17 @@ func walkStmt(stmt Stmt) Stmt {
 	case *StmtIf:
 		s := stmt.(*StmtIf)
 		s.simplestmt = walkStmt(s.simplestmt)
+		s.cond = walkExpr(s.cond)
 		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
 		s2 = s
 		return s2
 	case *StmtReturn:
 		s := stmt.(*StmtReturn)
+		for i, expr := range s.exprs {
+			e := walkExpr(expr)
+			s.exprs[i] = e
+		}
 		s2 = s
 		return s2
 	case *StmtInc:
