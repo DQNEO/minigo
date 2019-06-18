@@ -172,7 +172,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 		setTypeIds(pkg.namedTypes)
 	}
 
-	// Walk
+	//  Do restructuring of local nodes
 	for _, pkg := range packages {
 		for _,fnc := range pkg.funcs {
 			fnc = walkFunc(fnc)
