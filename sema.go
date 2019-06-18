@@ -152,35 +152,166 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 	return stmtList
 }
 
-
 func walkExpr(expr Expr) Expr {
 	var r Expr
+	if expr == nil {
+		return nil
+	}
+
 	switch expr.(type) {
 	case nil:
 		return r
 	case *Relation:
 		e := expr.(*Relation)
 		return e.expr
+	case *ExprNilLiteral:
+	case *ExprNumberLiteral:
+	case *ExprStringLiteral:
+	case *ExprVariable:
+	case *ExprConstVariable:
 	case *ExprFuncallOrConversion:
-		funcall, _ := expr.(*ExprFuncallOrConversion)
-		for i := 0; i < len(funcall.args); i++ {
+		funcall := expr.(*ExprFuncallOrConversion)
+		for i:=0;i<len(funcall.args);i++ {
 			arg := funcall.args[i]
 			arg = walkExpr(arg)
 			funcall.args[i] = arg
 		}
-
 		if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 			// Conversion
-			return &IrExprConversion{
+			r = &IrExprConversion{
 				tok:   funcall.token(),
 				gtype: funcall.rel.gtype,
 				expr:  funcall.args[0],
 			}
+			return r
 		}
+		decl := funcall.getFuncDef()
+		switch decl {
+		case builtinLen:
+			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
+			arg := funcall.args[0]
+			return &ExprLen{
+				tok: arg.token(),
+				arg: arg,
+			}
+		case builtinCap:
+			arg := funcall.args[0]
+			return &ExprCap{
+				tok: arg.token(),
+				arg: arg,
+			}
+		case builtinMakeSlice:
+			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok: funcall.token(),
+				origExpr:funcall,
+				callee: decl,
+			}
+			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
+			staticCall.args = funcall.args
+			return staticCall
+		case builtinAppend:
+			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
+			slice := funcall.args[0]
+			valueToAppend := funcall.args[1]
+			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok: funcall.token(),
+				origExpr:funcall,
+				callee: decl,
+			}
+			switch slice.getGtype().elementType.getSize() {
+			case 1:
+				staticCall.symbol = getFuncSymbol("iruntime", "append1")
+			case 8:
+				staticCall.symbol = getFuncSymbol("iruntime", "append8")
+			case 24:
+				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
+					eConvertion := &IrExprConversionToInterface{
+						tok:  valueToAppend.token(),
+						expr: valueToAppend,
+					}
+					funcall.args[1] = eConvertion
+				}
+				staticCall.symbol = getFuncSymbol("iruntime", "append24")
+			default:
+				TBI(slice.token(), "")
+			}
+			staticCall.args = funcall.args
+			return staticCall
+		}
+		return funcall
+	case *ExprMethodcall:
+		return expr
+		/*
+		methodCall,_ := expr.(*ExprMethodcall)
+		methodCall.receiver = walkExpr(methodCall.receiver)
+		for i:=0 ;i<len(methodCall.args); i++ {
+			arg := methodCall.args[i]
+			arg = walkExpr(arg)
+			methodCall.args[i] = arg
+		}
+
+		if methodCall.getOrigType().getKind() == G_INTERFACE {
+			return methodCall.toInterfaceMethodCall()
+		}
+		return methodCall
+
+		 */
+	case *ExprBinop:
+		e,_ := expr.(*ExprBinop)
+		e.left = walkExpr(e.left)
+		e.right = walkExpr(e.right)
+		return e
+	case *ExprUop:
+		e,_ := expr.(*ExprUop)
+		e.operand = walkExpr(e.operand)
+		return e
+	case *ExprFuncRef:
+	case *ExprSlice:
+		e,_ := expr.(*ExprSlice)
+		e.collection = walkExpr(e.collection)
+		e.low = walkExpr(e.low)
+		e.high = walkExpr(e.high)
+		e.max = walkExpr(e.max)
+		return e
+	case *ExprIndex:
+		e,_ := expr.(*ExprIndex)
+		e.index = walkExpr(e.index)
+		e.collection = walkExpr(e.collection)
+		return e
+	case *ExprArrayLiteral:
+	case *ExprSliceLiteral:
+	case *ExprTypeAssertion:
+	case *ExprVaArg:
+		e,_ := expr.(*ExprVaArg)
+		e.expr = walkExpr(e.expr)
+		return e
+		/*
+	case *ExprConversion:
+		e,_ := expr.(*ExprConversion)
+		e.expr = walkExpr(e.expr)
+		return e
+		 */
+	case *ExprStructLiteral:
+		e,_ := expr.(*ExprStructLiteral)
+		for _, field := range e.fields {
+			field.value = walkExpr(field.value)
+		}
+		return e
+	case *ExprStructField:
+		e,_ := expr.(*ExprStructField)
+		e.strct = walkExpr(e.strct)
+		return e
+	case *ExprTypeSwitchGuard:
+	case *ExprMapLiteral:
+	case *ExprLen:
+
+	case *ExprCap:
+	//case *ExprConversionToInterface:
 	}
 	return expr
 }
-
 
 func walkStmt(stmt Stmt) Stmt {
 	var s2 Stmt
