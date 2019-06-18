@@ -398,7 +398,6 @@ func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		setPos(ast.token())
 		emit("# Statement")
-
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
