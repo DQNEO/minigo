@@ -178,8 +178,7 @@ func  (f *PlainForEmitter) emit() {
 }
 
 func (f *StmtFor) emit() {
-	s := f.convert()
-	s.emit()
+	errorft(f.token(), "NOT_REACHED")
 }
 
 func (f *StmtFor) detectKind() {
