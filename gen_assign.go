@@ -104,6 +104,10 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 				if isUnderScore(left) {
 					continue
 				}
+				if left == nil {
+					// what is this case ???
+					continue
+				}
 				assert(left.getGtype() != nil, left.token(), "should not be nil")
 				switch left.getGtype().getKind() {
 				case G_SLICE:
@@ -132,6 +136,10 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 }
 
 func emitAssignOne(lhs Expr, rhs Expr) {
+	if lhs == nil {
+		// what is this case ???
+		return
+	}
 	gtype := lhs.getGtype()
 	switch {
 	case gtype == nil:

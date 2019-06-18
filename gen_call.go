@@ -119,14 +119,6 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 }
 
 func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
-	if funcall.rel.expr == nil && funcall.rel.gtype != nil {
-		// Conversion
-		return &IrExprConversion{
-			tok:   funcall.token(),
-			gtype: funcall.rel.gtype,
-			expr:  funcall.args[0],
-		}
-	}
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
 	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")

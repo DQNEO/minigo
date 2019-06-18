@@ -467,7 +467,7 @@ func (node *IrExprConversionToInterface) token() *Token { return node.tok }
 // Internal node made by sema
 type ForRangeListEmitter struct {
 	tok *Token
-	init *StmtAssignment
+	init Stmt
 	cond Expr
 	assignVar *StmtAssignment
 	cond2 Expr

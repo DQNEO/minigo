@@ -259,10 +259,11 @@ func walkExpr(expr Expr) Expr {
 
 		 */
 	case *ExprBinop:
-		e,_ := expr.(*ExprBinop)
+		e := expr.(*ExprBinop)
 		e.left = walkExpr(e.left)
 		e.right = walkExpr(e.right)
-		return e
+		r = e
+		return r
 	case *ExprUop:
 		e,_ := expr.(*ExprUop)
 		e.operand = walkExpr(e.operand)
@@ -318,6 +319,9 @@ func walkStmt(stmt Stmt) Stmt {
 	switch stmt.(type) {
 	case nil:
 		return s2
+	case *DeclVar:
+		s := stmt.(*DeclVar)
+		s.initval = walkExpr(s.initval)
 	case *StmtFor:
 		s := stmt.(*StmtFor)
 		s2 = s.convert()
@@ -331,6 +335,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)
+		s.init = walkStmt(s.init)
 		s.cond = walkExpr(s.cond)
 		s.block  = walkStmtList(s.block)
 		s2 = s
@@ -381,12 +386,12 @@ func walkStmt(stmt Stmt) Stmt {
 			right = walkExpr(right)
 			s.rights[i] = right
 		}
-		/*
+
 		for i, left := range s.lefts {
 			left = walkExpr(left)
 			s.lefts[i] = left
 		}
-			 */
+
 		s2 = s
 		return s2
 	case *StmtShortVarDecl:
