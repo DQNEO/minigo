@@ -38,7 +38,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("pop %%rax")
 	emitMapGet(mapType, false)
 
-	emit("PUSH_8")
+	emit("PUSH_8 # funcref")
 
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
@@ -48,8 +48,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	receiver.emit()
 
 	emit("LOAD_8_BY_DEREF")
-
-	emit("PUSH_8 # funcref")
+	emit("PUSH_8 # receiver")
 
 	call.emitMethodCall()
 }
