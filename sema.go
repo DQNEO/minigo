@@ -180,6 +180,10 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *PlainForEmitter:
 		s := stmt.(*PlainForEmitter)
+		cls := s.cls
+		cls.init = walkStmt(cls.init)
+		cls.cond = walkStmt(cls.cond)
+		cls.post = walkStmt(cls.post)
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
