@@ -400,14 +400,7 @@ func (ast *StmtSatementList) emit() {
 		emit("# Statement")
 
 		gasIndentLevel++
-		switch stmt.(type) {
-		case *PlainForEmitter:
-			emit("# before emit PlainForEmitter")
-			p := stmt.(*PlainForEmitter)
-			p.emit()
-		default:
-			stmt.emit()
-		}
+		stmt.emit()
 		gasIndentLevel--
 	}
 }
