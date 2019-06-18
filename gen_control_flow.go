@@ -181,7 +181,8 @@ func (f *StmtFor) emit() {
 	errorft(f.token(), "NOT_REACHED")
 }
 
-func (f *StmtFor) detectKind() {
+func (f *StmtFor) convert() Stmt {
+	// Determine kind
 	if f.rng != nil {
 		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 			f.kind = FOR_KIND_RANGE_MAP
@@ -191,10 +192,7 @@ func (f *StmtFor) detectKind() {
 	} else {
 		f.kind = FOR_KIND_CLIKE
 	}
-}
 
-func (f *StmtFor) convert() Stmt {
-	f.detectKind()
 	f.labels.labelBegin = makeLabel()
 	f.labels.labelEndBlock = makeLabel()
 	f.labels.labelEndLoop = makeLabel()
