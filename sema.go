@@ -315,6 +315,7 @@ func walkStmt(stmt Stmt) Stmt {
 	case *DeclVar:
 		s := stmt.(*DeclVar)
 		s.initval = walkExpr(s.initval)
+		return s
 	case *StmtFor:
 		s := stmt.(*StmtFor)
 		s2 = s.convert()
@@ -324,15 +325,13 @@ func walkStmt(stmt Stmt) Stmt {
 		s := stmt.(*IrStmtRangeMap)
 		s.rangeexpr = walkExpr(s.rangeexpr)
 		s.block  = walkStmtList(s.block)
-		s2 = s
-		return s2
+		return s
 	case *IrStmtForRangeList:
 		s := stmt.(*IrStmtForRangeList)
 		s.init = walkStmt(s.init)
 		s.cond = walkExpr(s.cond)
 		s.block  = walkStmtList(s.block)
-		s2 = s
-		return s2
+		return s
 	case *IrStmtClikeFor:
 		s := stmt.(*IrStmtClikeFor)
 		cls := s.cls
@@ -340,39 +339,33 @@ func walkStmt(stmt Stmt) Stmt {
 		cls.cond = walkStmt(cls.cond)
 		cls.post = walkStmt(cls.post)
 		s.block  = walkStmtList(s.block)
-		s2 = s
-		return s2
+		return s
 	case *StmtIf:
 		s := stmt.(*StmtIf)
 		s.simplestmt = walkStmt(s.simplestmt)
 		s.cond = walkExpr(s.cond)
 		s.then = walkStmt(s.then)
 		s.els = walkStmt(s.els)
-		s2 = s
-		return s2
+		return s
 	case *StmtReturn:
 		s := stmt.(*StmtReturn)
 		for i, expr := range s.exprs {
 			e := walkExpr(expr)
 			s.exprs[i] = e
 		}
-		s2 = s
-		return s2
+		return s
 	case *StmtInc:
 		s := stmt.(*StmtInc)
 		s.operand = walkExpr(s.operand)
-		s2 = s
-		return s2
+		return s
 	case *StmtDec:
 		s := stmt.(*StmtDec)
 		s.operand = walkExpr(s.operand)
-		s2 = s
-		return s2
+		return s
 	case *StmtSatementList:
 		s := stmt.(*StmtSatementList)
 		s = walkStmtList(s)
-		s2 = s
-		return s2
+		return s
 	case *StmtAssignment:
 		s := stmt.(*StmtAssignment)
 		for i, right := range s.rights {
@@ -385,8 +378,7 @@ func walkStmt(stmt Stmt) Stmt {
 			s.lefts[i] = left
 		}
 
-		s2 = s
-		return s2
+		return s
 	case *StmtShortVarDecl:
 		s := stmt.(*StmtShortVarDecl)
 		var s2 Stmt = &StmtAssignment{
@@ -398,22 +390,18 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtContinue:
 		s := stmt.(*StmtContinue)
-		s2 = s
-		return s2
+		return s
 	case *StmtBreak:
 		s := stmt.(*StmtBreak)
-		s2 = s
-		return s2
+		return s
 	case *StmtExpr:
 		s := stmt.(*StmtExpr)
 		s.expr = walkExpr(s.expr)
-		s2 = s
-		return s2
+		return s
 	case *StmtDefer:
 		s := stmt.(*StmtDefer)
 		s.expr = walkExpr(s.expr)
-		s2 = s
-		return s2
+		return s
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)
 		s.cond = walkExpr(s.cond)
@@ -421,8 +409,7 @@ func walkStmt(stmt Stmt) Stmt {
 			cse.compound = walkStmtList(cse.compound)
 		}
 		s.dflt = walkStmtList(s.dflt)
-		s2 = s
-		return s2
+		return s
 	}
 
 	return stmt
