@@ -242,16 +242,16 @@ func walkExpr(expr Expr) Expr {
 		}
 		return funcall
 	case *ExprMethodcall:
-		return expr
-		/*
 		methodCall,_ := expr.(*ExprMethodcall)
-		methodCall.receiver = walkExpr(methodCall.receiver)
 		for i:=0 ;i<len(methodCall.args); i++ {
 			arg := methodCall.args[i]
 			arg = walkExpr(arg)
 			methodCall.args[i] = arg
 		}
-
+		methodCall.receiver = walkExpr(methodCall.receiver)
+		expr = methodCall
+		return expr
+		/*
 		if methodCall.getOrigType().getKind() == G_INTERFACE {
 			return methodCall.toInterfaceMethodCall()
 		}
