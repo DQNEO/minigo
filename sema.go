@@ -231,10 +231,12 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtInc:
 		s := stmt.(*StmtInc)
+		s.operand = walkExpr(s.operand)
 		s2 = s
 		return s2
 	case *StmtDec:
 		s := stmt.(*StmtDec)
+		s.operand = walkExpr(s.operand)
 		s2 = s
 		return s2
 	case *StmtSatementList:
