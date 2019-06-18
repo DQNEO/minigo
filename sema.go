@@ -251,8 +251,7 @@ func walkExpr(expr Expr) Expr {
 		e := expr.(*ExprBinop)
 		e.left = walkExpr(e.left)
 		e.right = walkExpr(e.right)
-		r = e
-		return r
+		return e
 	case *ExprUop:
 		e := expr.(*ExprUop)
 		e.operand = walkExpr(e.operand)
