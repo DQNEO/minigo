@@ -182,7 +182,7 @@ func (f *StmtFor) emit() {
 	s.emit()
 }
 
-func (f *StmtFor) convert() Stmt {
+func (f *StmtFor) detectKind() {
 	if f.rng != nil {
 		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 			f.kind = FOR_KIND_RANGE_MAP
@@ -192,12 +192,20 @@ func (f *StmtFor) convert() Stmt {
 	} else {
 		f.kind = FOR_KIND_CLIKE
 	}
+}
 
+func (f *StmtFor) prepare() {
+	f.detectKind()
 	f.labels.labelBegin = makeLabel()
 	f.labels.labelEndBlock = makeLabel()
 	f.labels.labelEndLoop = makeLabel()
+}
 
-	labels := f.labels
+func (f *StmtFor) convert() Stmt {
+	if f.kind == 0 {
+		errorft(f.token(), "kind is not set")
+	}
+
 	var em Stmt
 
 	switch f.kind {
@@ -206,7 +214,7 @@ func (f *StmtFor) convert() Stmt {
 		em = &RangeMapEmitter{
 			tok:        f.token(),
 			block:      f.block,
-			labels:     labels,
+			labels:     f.labels,
 			rangeexpr:  f.rng.rangeexpr,
 			indexvar:   f.rng.indexvar,
 			valuevar:   f.rng.valuevar,
@@ -283,12 +291,12 @@ func (f *StmtFor) convert() Stmt {
 			cond2:         cond2,
 			incr:          incr,
 			block:         f.block,
-			labels:     labels,
+			labels:     f.labels,
 		}
 	case FOR_KIND_CLIKE:
 		em = &PlainForEmitter{
 			tok :f.token(),
-			labels:     labels,
+			labels:     f.labels,
 			cls: f.cls,
 			block : f.block,
 		}
