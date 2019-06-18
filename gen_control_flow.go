@@ -194,18 +194,11 @@ func (f *StmtFor) detectKind() {
 	}
 }
 
-func (f *StmtFor) prepare() {
+func (f *StmtFor) convert() Stmt {
 	f.detectKind()
 	f.labels.labelBegin = makeLabel()
 	f.labels.labelEndBlock = makeLabel()
 	f.labels.labelEndLoop = makeLabel()
-}
-
-func (f *StmtFor) convert() Stmt {
-	f.prepare()
-	if f.kind == 0 {
-		errorft(f.token(), "kind is not set")
-	}
 
 	var em Stmt
 
