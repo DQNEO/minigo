@@ -19,7 +19,7 @@ minigo: *.go internal_runtime.go internal_universe.go stdlib.go
 
 # 2nd gen assembly
 minigo.s: minigo
-	./minigo --position *.go > /tmp/minigo.s
+	./minigo --position [a-z]*.go > /tmp/minigo.s
 	cp /tmp/minigo.s minigo.s
 
 # 2nd gen compiler
@@ -27,7 +27,7 @@ minigo2: minigo.s
 	gcc -g -no-pie -o minigo2 minigo.s
 
 minigo2.s: minigo2 minigo *.go
-	./minigo2 *.go > /tmp/minigo2.s
+	./minigo2 [a-z]*.go > /tmp/minigo2.s
 	cp /tmp/minigo2.s minigo2.s
 
 selfhost: minigo2.s
