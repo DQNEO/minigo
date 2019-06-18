@@ -300,7 +300,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 }
 
 
-func (em *RangeMapEmitter) emit() {
+func (em *IrStmtRangeMap) emit() {
 	mapType := em.rangeexpr.getGtype().Underlying()
 	mapKeyType := mapType.mapKey
 

@@ -129,7 +129,7 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-func (f *ForRangeListEmitter) emit() {
+func (f *IrStmtForRangeList) emit() {
 	// i = 0
 	emit("# init index")
 	f.init.emit()
@@ -157,8 +157,8 @@ func (f *ForRangeListEmitter) emit() {
 	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
-func  (f *PlainForEmitter) emit() {
-	emit("# in emit PlainForEmitter")
+func  (f *IrStmtClikeForFor) emit() {
+	emit("# in emit IrStmtClikeForFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
@@ -202,7 +202,7 @@ func (f *StmtFor) convert() Stmt {
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		em = &RangeMapEmitter{
+		em = &IrStmtRangeMap{
 			tok:        f.token(),
 			block:      f.block,
 			labels:     f.labels,
@@ -275,7 +275,7 @@ func (f *StmtFor) convert() Stmt {
 			operand: f.rng.indexvar,
 		}
 
-		em = &ForRangeListEmitter{
+		em = &IrStmtForRangeList{
 			init:          init,
 			cond:          cond,
 			assignVar:     assignVar,
@@ -285,7 +285,7 @@ func (f *StmtFor) convert() Stmt {
 			labels:     f.labels,
 		}
 	case FOR_KIND_CLIKE:
-		em = &PlainForEmitter{
+		em = &IrStmtClikeForFor{
 			tok :f.token(),
 			labels:     f.labels,
 			cls: f.cls,

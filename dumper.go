@@ -288,21 +288,21 @@ func (e *ExprTypeSwitchGuard) dump() {
 	e.expr.dump()
 }
 
-func (f *ForRangeListEmitter) dump() {
+func (f *IrStmtForRangeList) dump() {
 	debugf("for range list")
 	debugNest++
 	f.block.dump()
 	debugNest--
 }
 
-func (f *RangeMapEmitter) dump() {
+func (f *IrStmtRangeMap) dump() {
 	debugf("for range map")
 	debugNest++
 	f.block.dump()
 	debugNest--
 }
 
-func (f *PlainForEmitter) dump() {
+func (f *IrStmtClikeForFor) dump() {
 	debugf("for clause")
 	if f.cls.init != nil {
 		f.cls.init.dump()

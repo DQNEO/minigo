@@ -320,21 +320,21 @@ func walkStmt(stmt Stmt) Stmt {
 		s2 = s.convert()
 		s2 = walkStmt(s2)
 		return s2
-	case *RangeMapEmitter:
-		s := stmt.(*RangeMapEmitter)
+	case *IrStmtRangeMap:
+		s := stmt.(*IrStmtRangeMap)
 		s.rangeexpr = walkExpr(s.rangeexpr)
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
-	case *ForRangeListEmitter:
-		s := stmt.(*ForRangeListEmitter)
+	case *IrStmtForRangeList:
+		s := stmt.(*IrStmtForRangeList)
 		s.init = walkStmt(s.init)
 		s.cond = walkExpr(s.cond)
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
-	case *PlainForEmitter:
-		s := stmt.(*PlainForEmitter)
+	case *IrStmtClikeForFor:
+		s := stmt.(*IrStmtClikeForFor)
 		cls := s.cls
 		cls.init = walkStmt(cls.init)
 		cls.cond = walkStmt(cls.cond)

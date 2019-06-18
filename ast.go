@@ -465,7 +465,7 @@ func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
 
 // Internal node made by sema
-type ForRangeListEmitter struct {
+type IrStmtForRangeList struct {
 	tok *Token
 	init Stmt
 	cond Expr
@@ -476,7 +476,7 @@ type ForRangeListEmitter struct {
 	labels *LoopLabels
 }
 
-type RangeMapEmitter struct {
+type IrStmtRangeMap struct {
 	tok *Token
 	labels *LoopLabels
 	rangeexpr Expr
@@ -489,13 +489,13 @@ type RangeMapEmitter struct {
 	block *StmtSatementList
 }
 
-type PlainForEmitter struct {
+type IrStmtClikeForFor struct {
 	tok *Token
 	cls *ForForClause
 	block         *StmtSatementList
 	labels *LoopLabels
 }
 
-func (node *ForRangeListEmitter) token() *Token { return node.tok }
-func (node *RangeMapEmitter) token() *Token { return node.tok }
-func (node *PlainForEmitter) token() *Token { return node.tok }
+func (node *IrStmtForRangeList) token() *Token { return node.tok }
+func (node *IrStmtRangeMap) token() *Token     { return node.tok }
+func (node *IrStmtClikeForFor) token() *Token  { return node.tok }
