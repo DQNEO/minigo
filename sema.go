@@ -154,10 +154,6 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 
 func walkExpr(expr Expr) Expr {
 	var r Expr
-	if expr == nil {
-		return nil
-	}
-
 	switch expr.(type) {
 	case nil:
 		return r
@@ -242,7 +238,7 @@ func walkExpr(expr Expr) Expr {
 		}
 		return funcall
 	case *ExprMethodcall:
-		methodCall,_ := expr.(*ExprMethodcall)
+		methodCall := expr.(*ExprMethodcall)
 		for i:=0 ;i<len(methodCall.args); i++ {
 			arg := methodCall.args[i]
 			arg = walkExpr(arg)
@@ -258,19 +254,19 @@ func walkExpr(expr Expr) Expr {
 		r = e
 		return r
 	case *ExprUop:
-		e,_ := expr.(*ExprUop)
+		e := expr.(*ExprUop)
 		e.operand = walkExpr(e.operand)
 		return e
 	case *ExprFuncRef:
 	case *ExprSlice:
-		e,_ := expr.(*ExprSlice)
+		e := expr.(*ExprSlice)
 		e.collection = walkExpr(e.collection)
 		e.low = walkExpr(e.low)
 		e.high = walkExpr(e.high)
 		e.max = walkExpr(e.max)
 		return e
 	case *ExprIndex:
-		e,_ := expr.(*ExprIndex)
+		e := expr.(*ExprIndex)
 		e.index = walkExpr(e.index)
 		e.collection = walkExpr(e.collection)
 		return e
@@ -278,7 +274,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprSliceLiteral:
 	case *ExprTypeAssertion:
 	case *ExprVaArg:
-		e,_ := expr.(*ExprVaArg)
+		e := expr.(*ExprVaArg)
 		e.expr = walkExpr(e.expr)
 		return e
 		/*
@@ -288,13 +284,13 @@ func walkExpr(expr Expr) Expr {
 		return e
 		 */
 	case *ExprStructLiteral:
-		e,_ := expr.(*ExprStructLiteral)
+		e  := expr.(*ExprStructLiteral)
 		for _, field := range e.fields {
 			field.value = walkExpr(field.value)
 		}
 		return e
 	case *ExprStructField:
-		e,_ := expr.(*ExprStructField)
+		e := expr.(*ExprStructField)
 		e.strct = walkExpr(e.strct)
 		return e
 	case *ExprTypeSwitchGuard:
