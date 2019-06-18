@@ -202,6 +202,7 @@ func (f *StmtFor) prepare() {
 }
 
 func (f *StmtFor) convert() Stmt {
+	f.prepare()
 	if f.kind == 0 {
 		errorft(f.token(), "kind is not set")
 	}
