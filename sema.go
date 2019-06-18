@@ -167,26 +167,6 @@ func walkStmt(stmt Stmt) Stmt {
 		s := stmt.(*StmtFor)
 		s2 = s
 		return s2
-	case *ForRangeListEmitter:
-		s := stmt.(*ForRangeListEmitter)
-		s.block = walkStmtList(s.block)
-		s2 = s
-		return s2
-	case *RangeMapEmitter:
-		s := stmt.(*RangeMapEmitter)
-		//s.rangeexpr = walkExpr(s.rangeexpr)
-		//s.condition = walkExpr(s.condition)
-		s.block = walkStmtList(s.block)
-		s2 = s
-		return s2
-	case *PlainForEmitter:
-		s := stmt.(*PlainForEmitter)
-		s.cls.init = walkStmt(s.cls.init)
-		s.cls.cond = walkStmt(s.cls.cond)
-		s.cls.post = walkStmt(s.cls.post)
-		s.block = walkStmtList(s.block)
-		s2 = s
-		return s2
 	case *StmtIf:
 		s := stmt.(*StmtIf)
 		s.simplestmt = walkStmt(s.simplestmt)

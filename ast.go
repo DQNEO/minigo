@@ -319,12 +319,12 @@ type ExprTypeAssertion struct {
 
 type StmtContinue struct {
 	tok     *Token
-	stmtFor *StmtFor
+	labels *LoopLabels
 }
 
 type StmtBreak struct {
 	tok     *Token
-	stmtFor *StmtFor
+	labels *LoopLabels
 }
 
 type StmtExpr struct {

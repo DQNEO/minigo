@@ -346,13 +346,13 @@ func (ast *StmtDefer) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	assert(ast.stmtFor.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # continue", ast.stmtFor.labels.labelEndBlock)
+	assert(ast.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # continue", ast.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(ast.stmtFor.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # break", ast.stmtFor.labels.labelEndLoop)
+	assert(ast.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # break", ast.labels.labelEndLoop)
 }
 
 

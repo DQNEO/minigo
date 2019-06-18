@@ -1437,13 +1437,13 @@ func (p *parser) parseStmt() Stmt {
 		ptok := p.expectKeyword("continue")
 		return &StmtContinue{
 			tok:     ptok,
-			stmtFor: p.currentForStmt,
+			labels: p.currentForStmt.labels,
 		}
 	} else if tok.isKeyword("break") {
 		ptok := p.expectKeyword("break")
 		return &StmtBreak{
 			tok:     ptok,
-			stmtFor: p.currentForStmt,
+			labels: p.currentForStmt.labels,
 		}
 	} else if tok.isKeyword("defer") {
 		return p.parseDeferStmt()
