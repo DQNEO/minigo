@@ -126,58 +126,6 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 
 	// check if it's a builtin function
 	switch decl {
-	case builtinLen:
-		assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
-		arg := funcall.args[0]
-		return &ExprLen{
-			tok: arg.token(),
-			arg: arg,
-		}
-	case builtinCap:
-		arg := funcall.args[0]
-		return &ExprCap{
-			tok: arg.token(),
-			arg: arg,
-		}
-	case builtinAppend:
-		assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
-		slice := funcall.args[0]
-		valueToAppend := funcall.args[1]
-		emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
-		var symbol string
-		switch slice.getGtype().elementType.getSize() {
-		case 1:
-			symbol = getFuncSymbol("iruntime", "append1")
-		case 8:
-			symbol = getFuncSymbol("iruntime", "append8")
-		case 24:
-			if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
-				eConvertion := &IrExprConversionToInterface{
-					tok:  valueToAppend.token(),
-					expr: valueToAppend,
-				}
-				funcall.args[1] = eConvertion
-			}
-			symbol = getFuncSymbol("iruntime", "append24")
-		default:
-			TBI(slice.token(), "")
-		}
-		return &IrStaticCall{
-			tok: funcall.token(),
-			callee: decl,
-			args: funcall.args,
-			origExpr: funcall,
-			symbol: symbol,
-		}
-	case builtinMakeSlice:
-		assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
-		return &IrStaticCall{
-			tok: funcall.token(),
-			callee: decl,
-			args: funcall.args,
-			origExpr: funcall,
-			symbol: getFuncSymbol("iruntime", "makeSlice"),
-		}
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 		return &builtinDumpSliceEmitter{
