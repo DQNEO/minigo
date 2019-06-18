@@ -250,11 +250,22 @@ func walkStmt(stmt Stmt) Stmt {
 			right = walkExpr(right)
 			s.rights[i] = right
 		}
+		/*
+		for i, left := range s.lefts {
+			left = walkExpr(left)
+			s.lefts[i] = left
+		}
+			 */
 		s2 = s
 		return s2
 	case *StmtShortVarDecl:
 		s := stmt.(*StmtShortVarDecl)
-		s2 = s
+		var s2 Stmt = &StmtAssignment{
+			tok:    s.tok,
+			lefts:  s.lefts,
+			rights: s.rights,
+		}
+		s2 = walkStmt(s2)
 		return s2
 	case *StmtContinue:
 		s := stmt.(*StmtContinue)
@@ -271,6 +282,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtDefer:
 		s := stmt.(*StmtDefer)
+		s.expr = walkExpr(s.expr)
 		s2 = s
 		return s2
 	case *StmtSwitch:
