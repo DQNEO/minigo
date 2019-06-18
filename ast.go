@@ -158,8 +158,8 @@ type StmtShortVarDecl struct {
 type ForRangeClause struct {
 	tok                 *Token
 	invisibleMapCounter *ExprVariable
-	indexvar            *Relation
-	valuevar            *Relation
+	indexvar            Expr
+	valuevar            Expr
 	rangeexpr           Expr
 }
 
@@ -197,7 +197,7 @@ type StmtIf struct {
 	tok        *Token
 	simplestmt Stmt
 	cond       Expr
-	then       *StmtSatementList
+	then       Stmt
 	els        Stmt
 }
 
@@ -255,6 +255,7 @@ type DeclFunc struct {
 	stmtDefer *StmtDefer
 	// every function has a defer handler
 	labelDeferHandler string
+	prologue Emitter
 }
 
 type TopLevelDecl struct {
@@ -318,12 +319,12 @@ type ExprTypeAssertion struct {
 
 type StmtContinue struct {
 	tok     *Token
-	stmtFor *StmtFor
+	labels *LoopLabels
 }
 
 type StmtBreak struct {
 	tok     *Token
-	stmtFor *StmtFor
+	labels *LoopLabels
 }
 
 type StmtExpr struct {
@@ -462,3 +463,39 @@ func (node *ExprMapLiteral) token() *Token              { return node.tok }
 func (node *ExprLen) token() *Token                     { return node.tok }
 func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
+
+// Internal node made by sema
+type IrStmtForRangeList struct {
+	tok *Token
+	init Stmt
+	cond Expr
+	assignVar *StmtAssignment
+	cond2 Expr
+	incr Stmt
+	block *StmtSatementList
+	labels *LoopLabels
+}
+
+type IrStmtRangeMap struct {
+	tok *Token
+	labels *LoopLabels
+	rangeexpr Expr
+	indexvar Expr
+	valuevar Expr
+	mapCounter *ExprVariable
+	initstmt Stmt
+	condition Expr
+	indexIncr Stmt
+	block *StmtSatementList
+}
+
+type IrStmtClikeFor struct {
+	tok *Token
+	cls *ForForClause
+	block         *StmtSatementList
+	labels *LoopLabels
+}
+
+func (node *IrStmtForRangeList) token() *Token { return node.tok }
+func (node *IrStmtRangeMap) token() *Token     { return node.tok }
+func (node *IrStmtClikeFor) token() *Token     { return node.tok }

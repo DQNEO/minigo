@@ -129,17 +129,7 @@ func (stmt *StmtSwitch) emit() {
 	emit("%s: # end of switch", labelEnd)
 }
 
-type ForRangeListEmitter struct {
-	init *StmtAssignment
-	cond Expr
-	assignVar *StmtAssignment
-	cond2 Expr
-	incr Stmt
-	block *StmtSatementList
-	labels *LoopLabels
-}
-
-func (f *ForRangeListEmitter) emit() {
+func (f *IrStmtForRangeList) emit() {
 	// i = 0
 	emit("# init index")
 	f.init.emit()
@@ -167,16 +157,8 @@ func (f *ForRangeListEmitter) emit() {
 	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
-type PlainForEmitter struct {
-	tok *Token
-	cls *ForForClause
-	block         *StmtSatementList
-	labels *LoopLabels
-}
-
-func  (f *PlainForEmitter) emit() {
-	assertNotNil(f != nil, nil)
-
+func  (f *IrStmtClikeFor) emit() {
+	emit("# emit IrStmtClikeFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
@@ -196,6 +178,11 @@ func  (f *PlainForEmitter) emit() {
 }
 
 func (f *StmtFor) emit() {
+	errorft(f.token(), "NOT_REACHED")
+}
+
+func (f *StmtFor) convert() Stmt {
+	// Determine kind
 	if f.rng != nil {
 		if f.rng.rangeexpr.getGtype().getKind() == G_MAP {
 			f.kind = FOR_KIND_RANGE_MAP
@@ -206,22 +193,19 @@ func (f *StmtFor) emit() {
 		f.kind = FOR_KIND_CLIKE
 	}
 
-	labels := &LoopLabels{
-		labelBegin:makeLabel(),
-		labelEndBlock:makeLabel(),
-		labelEndLoop:makeLabel(),
-	}
+	f.labels.labelBegin = makeLabel()
+	f.labels.labelEndBlock = makeLabel()
+	f.labels.labelEndLoop = makeLabel()
 
-	f.labels = labels
-	var em Emitter
+	var em Stmt
 
 	switch f.kind {
 	case FOR_KIND_RANGE_MAP:
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		em = &RangeMapEmitter{
+		em = &IrStmtRangeMap{
 			tok:        f.token(),
 			block:      f.block,
-			labels:     labels,
+			labels:     f.labels,
 			rangeexpr:  f.rng.rangeexpr,
 			indexvar:   f.rng.indexvar,
 			valuevar:   f.rng.valuevar,
@@ -291,19 +275,19 @@ func (f *StmtFor) emit() {
 			operand: f.rng.indexvar,
 		}
 
-		em = &ForRangeListEmitter{
+		em = &IrStmtForRangeList{
 			init:          init,
 			cond:          cond,
 			assignVar:     assignVar,
 			cond2:         cond2,
 			incr:          incr,
 			block:         f.block,
-			labels:     labels,
+			labels:     f.labels,
 		}
 	case FOR_KIND_CLIKE:
-		em = &PlainForEmitter{
+		em = &IrStmtClikeFor{
 			tok :f.token(),
-			labels:     labels,
+			labels:     f.labels,
 			cls: f.cls,
 			block : f.block,
 		}
@@ -311,7 +295,7 @@ func (f *StmtFor) emit() {
 		errorft(f.token(), "NOT_REACHED")
 	}
 
-	em.emit()
+	return em
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
@@ -361,13 +345,13 @@ func (ast *StmtDefer) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	assert(ast.stmtFor.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # continue", ast.stmtFor.labels.labelEndBlock)
+	assert(ast.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # continue", ast.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(ast.stmtFor.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # break", ast.stmtFor.labels.labelEndLoop)
+	assert(ast.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
+	emit("jmp %s # break", ast.labels.labelEndLoop)
 }
 
 

@@ -288,6 +288,36 @@ func (e *ExprTypeSwitchGuard) dump() {
 	e.expr.dump()
 }
 
+func (f *IrStmtForRangeList) dump() {
+	debugf("for range list")
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
+func (f *IrStmtRangeMap) dump() {
+	debugf("for range map")
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
+func (f *IrStmtClikeFor) dump() {
+	debugf("for clause")
+	if f.cls.init != nil {
+		f.cls.init.dump()
+	}
+	if f.cls.cond != nil {
+		f.cls.cond.dump()
+	}
+	if f.cls.post != nil {
+		f.cls.post.dump()
+	}
+	debugNest++
+	f.block.dump()
+	debugNest--
+}
+
 func (f *StmtFor) dump() {
 	if f.rng != nil {
 		debugf("for range")
