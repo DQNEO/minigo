@@ -423,6 +423,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)
+		s.cond = walkExpr(s.cond)
 		for _, cse := range s.cases {
 			cse.compound = walkStmtList(cse.compound)
 		}
