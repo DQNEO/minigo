@@ -475,6 +475,6 @@ func getRettypes(call Expr) []*Gtype {
 	case *ExprMethodcall:
 		return call.(*ExprMethodcall).getRettypes()
 	}
-	errorf("no reach here")
+	assertNotReached(call.token())
 	return nil
 }

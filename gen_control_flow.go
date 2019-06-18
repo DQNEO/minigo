@@ -178,7 +178,7 @@ func  (f *IrStmtClikeFor) emit() {
 }
 
 func (f *StmtFor) emit() {
-	errorft(f.token(), "NOT_REACHED")
+	assertNotReached(f.token())
 }
 
 func (f *StmtFor) convert() Stmt {
@@ -292,7 +292,7 @@ func (f *StmtFor) convert() Stmt {
 			block : f.block,
 		}
 	default:
-		errorft(f.token(), "NOT_REACHED")
+		assertNotReached(f.token())
 	}
 
 	return em

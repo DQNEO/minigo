@@ -50,6 +50,10 @@ func assert(cond bool, tok *Token, msg string) {
 	}
 }
 
+func assertNotReached(tok *Token) {
+	panic(fmt.Sprintf("assertNotReached %s", tok.String()))
+}
+
 func assertNotNil(cond bool, tok *Token) {
 	assert(cond, tok, "should not be nil")
 }

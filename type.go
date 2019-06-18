@@ -249,7 +249,7 @@ func (e *ExprFuncallOrConversion) getGtype() *Gtype {
 	} else if e.rel.gtype != nil {
 		return e.rel.gtype
 	}
-	errorf("should not reach here")
+	assertNotReached(e.token())
 	return nil
 }
 
