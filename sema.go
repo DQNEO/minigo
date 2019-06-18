@@ -251,13 +251,6 @@ func walkExpr(expr Expr) Expr {
 		methodCall.receiver = walkExpr(methodCall.receiver)
 		expr = methodCall
 		return expr
-		/*
-		if methodCall.getOrigType().getKind() == G_INTERFACE {
-			return methodCall.toInterfaceMethodCall()
-		}
-		return methodCall
-
-		 */
 	case *ExprBinop:
 		e := expr.(*ExprBinop)
 		e.left = walkExpr(e.left)
