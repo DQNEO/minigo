@@ -489,7 +489,7 @@ type IrStmtRangeMap struct {
 	block *StmtSatementList
 }
 
-type IrStmtClikeForFor struct {
+type IrStmtClikeFor struct {
 	tok *Token
 	cls *ForForClause
 	block         *StmtSatementList
@@ -498,4 +498,4 @@ type IrStmtClikeForFor struct {
 
 func (node *IrStmtForRangeList) token() *Token { return node.tok }
 func (node *IrStmtRangeMap) token() *Token     { return node.tok }
-func (node *IrStmtClikeForFor) token() *Token  { return node.tok }
+func (node *IrStmtClikeFor) token() *Token     { return node.tok }

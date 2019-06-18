@@ -302,7 +302,7 @@ func (f *IrStmtRangeMap) dump() {
 	debugNest--
 }
 
-func (f *IrStmtClikeForFor) dump() {
+func (f *IrStmtClikeFor) dump() {
 	debugf("for clause")
 	if f.cls.init != nil {
 		f.cls.init.dump()

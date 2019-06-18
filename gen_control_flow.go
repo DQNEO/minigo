@@ -157,8 +157,8 @@ func (f *IrStmtForRangeList) emit() {
 	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
-func  (f *IrStmtClikeForFor) emit() {
-	emit("# in emit IrStmtClikeForFor")
+func  (f *IrStmtClikeFor) emit() {
+	emit("# emit IrStmtClikeFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
@@ -285,7 +285,7 @@ func (f *StmtFor) convert() Stmt {
 			labels:     f.labels,
 		}
 	case FOR_KIND_CLIKE:
-		em = &IrStmtClikeForFor{
+		em = &IrStmtClikeFor{
 			tok :f.token(),
 			labels:     f.labels,
 			cls: f.cls,

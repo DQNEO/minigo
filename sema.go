@@ -333,8 +333,8 @@ func walkStmt(stmt Stmt) Stmt {
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
-	case *IrStmtClikeForFor:
-		s := stmt.(*IrStmtClikeForFor)
+	case *IrStmtClikeFor:
+		s := stmt.(*IrStmtClikeFor)
 		cls := s.cls
 		cls.init = walkStmt(cls.init)
 		cls.cond = walkStmt(cls.cond)
