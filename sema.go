@@ -154,6 +154,30 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 
 
 func walkExpr(expr Expr) Expr {
+	var r Expr
+	switch expr.(type) {
+	case nil:
+		return r
+	case *Relation:
+		e := expr.(*Relation)
+		return e.expr
+	case *ExprFuncallOrConversion:
+		funcall, _ := expr.(*ExprFuncallOrConversion)
+		for i := 0; i < len(funcall.args); i++ {
+			arg := funcall.args[i]
+			arg = walkExpr(arg)
+			funcall.args[i] = arg
+		}
+
+		if funcall.rel.expr == nil && funcall.rel.gtype != nil {
+			// Conversion
+			return &IrExprConversion{
+				tok:   funcall.token(),
+				gtype: funcall.rel.gtype,
+				expr:  funcall.args[0],
+			}
+		}
+	}
 	return expr
 }
 
@@ -175,6 +199,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *ForRangeListEmitter:
 		s := stmt.(*ForRangeListEmitter)
+
 		s.block  = walkStmtList(s.block)
 		s2 = s
 		return s2
@@ -213,6 +238,10 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtAssignment:
 		s := stmt.(*StmtAssignment)
+		for i, right := range s.rights {
+			right = walkExpr(right)
+			s.rights[i] = right
+		}
 		s2 = s
 		return s2
 	case *StmtShortVarDecl:
@@ -229,6 +258,7 @@ func walkStmt(stmt Stmt) Stmt {
 		return s2
 	case *StmtExpr:
 		s := stmt.(*StmtExpr)
+		s.expr = walkExpr(s.expr)
 		s2 = s
 		return s2
 	case *StmtDefer:
