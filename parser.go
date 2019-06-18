@@ -1121,9 +1121,12 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	if !ok {
 		errorft(tokRange, " rng.lefts[0]. is not relation")
 	}
-	var valuevar *Relation
+	var eIndexvar Expr = indexvar
+
+	var eValuevar Expr
 	if len(exprs) == 2 {
-		valuevar = exprs[1].(*Relation)
+		valueRel := exprs[1].(*Relation)
+		eValuevar = valueRel
 	}
 
 	p.requireBlock = true
@@ -1136,8 +1139,8 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 		rng: &ForRangeClause{
 			tok:                 tokRange,
 			invisibleMapCounter: p.newVariable("", gInt),
-			indexvar:            indexvar,
-			valuevar:            valuevar,
+			indexvar:            eIndexvar,
+			valuevar:            eValuevar,
 			rangeexpr:           rangeExpr,
 		},
 		labels: &LoopLabels{},

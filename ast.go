@@ -158,8 +158,8 @@ type StmtShortVarDecl struct {
 type ForRangeClause struct {
 	tok                 *Token
 	invisibleMapCounter *ExprVariable
-	indexvar            *Relation
-	valuevar            *Relation
+	indexvar            Expr
+	valuevar            Expr
 	rangeexpr           Expr
 }
 
@@ -480,8 +480,8 @@ type RangeMapEmitter struct {
 	tok *Token
 	labels *LoopLabels
 	rangeexpr Expr
-	indexvar *Relation
-	valuevar *Relation
+	indexvar Expr
+	valuevar Expr
 	mapCounter *ExprVariable
 	initstmt Stmt
 	condition Expr
