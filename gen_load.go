@@ -21,7 +21,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.varname, field.offset,offset)
+				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.varname, field.offset, offset)
 			} else {
 				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
@@ -34,7 +34,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		loadStructField(a.strct, field2, offset+field.offset)
 	case *ExprIndex: // array[1].field
 		indexExpr := strct.(*ExprIndex)
-		indexExpr.emitOffsetLoad(offset+field.offset)
+		indexExpr.emitOffsetLoad(offset + field.offset)
 	default:
 		// funcall().field
 		// methodcall().field
@@ -77,7 +77,6 @@ func (a *ExprStructField) emit() {
 		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String())
 	}
 }
-
 
 func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	strct := e.strct
@@ -166,7 +165,7 @@ func (ast *ExprUop) emit() {
 			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize())
-			emit("PUSH_8")                     // to:ptr addr
+			emit("PUSH_8") // to:ptr addr
 			e.invisiblevar.emitAddress(0)
 			emit("PUSH_8") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype().getSize())
@@ -205,7 +204,7 @@ func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	if variable.isGlobal {
 		emit("LOAD_%d_FROM_GLOBAL %s %d", size, variable.varname, offset)
 	} else {
-		emit("LOAD_%d_FROM_LOCAL %d+%d", size,  variable.offset, offset)
+		emit("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
 	}
 }
 
@@ -228,9 +227,9 @@ func (e *ExprSliceLiteral) emit() {
 		emit("pop %%r10 # ptr")
 
 		if e.gtype.elementType.is24WidthType() {
-			emit("mov %%rax, %d+%d(%%r10)", IntSize*3*i,0)
-			emit("mov %%rbx, %d+%d(%%r10)", IntSize*3*i,8)
-			emit("mov %%rcx, %d+%d(%%r10)", IntSize*3*i,16)
+			emit("mov %%rax, %d+%d(%%r10)", IntSize*3*i, 0)
+			emit("mov %%rbx, %d+%d(%%r10)", IntSize*3*i, 8)
+			emit("mov %%rcx, %d+%d(%%r10)", IntSize*3*i, 16)
 		} else if e.gtype.elementType.getSize() <= 8 {
 			emit("mov %%rax, %d(%%r10)", IntSize*i)
 		} else {
@@ -267,7 +266,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
-			emit("ADD_NUMBER %d+%d", fieldType.offset,offset)
+			emit("ADD_NUMBER %d+%d", fieldType.offset, offset)
 			//reg := getReg(size)
 			emit("LOAD_8_BY_DEREF")
 		} else {
@@ -311,7 +310,7 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	if elmType.is24WidthType() {
 		emit("LOAD_24_BY_DEREF")
 	} else if elmSize == 1 {
-			emit("LOAD_1_BY_DEREF")
+		emit("LOAD_1_BY_DEREF")
 	} else {
 		emit("LOAD_8_BY_DEREF")
 	}
@@ -459,6 +458,3 @@ func (e *ExprSlice) emitSlice() {
 	emit("PUSH_8")
 	emit("POP_SLICE")
 }
-
-
-

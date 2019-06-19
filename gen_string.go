@@ -127,5 +127,3 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("POP_TO_ARG_1")
 	emit("FUNCALL strcat")
 }
-
-

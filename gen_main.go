@@ -159,4 +159,3 @@ func emitMainFunc(importOS bool) {
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 	emitFuncEpilogue("noop_handler", nil)
 }
-

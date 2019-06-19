@@ -31,7 +31,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("PUSH_8 # len")
 
 	emit("lea .M%s, %%rax", call.methodName) // index value
-	emit("PUSH_8 # map index value")                 // index value
+	emit("PUSH_8 # map index value")         // index value
 
 	emit("pop %%rcx")
 	emit("pop %%rbx")
@@ -91,7 +91,6 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("mov $0, %%rcx")
 	emit("%s:", labelEnd)
 
-
 	emitMapGet(_map.getGtype(), true)
 }
 
@@ -146,16 +145,16 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
 
 	emit("# check if key matches")
-	emit("mov %%r13, %%rax")   // i
-	emit("IMUL_NUMBER 16")    // i * 16
+	emit("mov %%r13, %%rax") // i
+	emit("IMUL_NUMBER 16")   // i * 16
 	emit("PUSH_8")
 
-	emit("mov %%r10, %%rax")   // head
+	emit("mov %%r10, %%rax") // head
 	emit("PUSH_8")
 
-	emit("SUM_FROM_STACK")   // head + i * 16
+	emit("SUM_FROM_STACK") // head + i * 16
 
-	emit("PUSH_8") // index address
+	emit("PUSH_8")          // index address
 	emit("LOAD_8_BY_DEREF") // emit index address
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
@@ -265,7 +264,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		emit("pop %%rcx")          // index value
 		emit("pop %%rax")          // map tail address
 		emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
-		emit("PUSH_8")         // push map tail
+		emit("PUSH_8")             // push map tail
 	} else {
 		// malloc(8)
 		emitCallMalloc(8)
@@ -296,7 +295,6 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
 }
-
 
 func (em *IrStmtRangeMap) emit() {
 	mapType := em.rangeexpr.getGtype().Underlying()

@@ -1028,8 +1028,8 @@ func (p *parser) parseForStmt() *StmtFor {
 	ptok := p.expectKeyword("for")
 
 	var r = &StmtFor{
-		tok:   ptok,
-		outer: p.currentForStmt,
+		tok:    ptok,
+		outer:  p.currentForStmt,
 		labels: &LoopLabels{},
 	}
 	p.currentForStmt = r
@@ -1439,13 +1439,13 @@ func (p *parser) parseStmt() Stmt {
 	} else if tok.isKeyword("continue") {
 		ptok := p.expectKeyword("continue")
 		return &StmtContinue{
-			tok:     ptok,
+			tok:    ptok,
 			labels: p.currentForStmt.labels,
 		}
 	} else if tok.isKeyword("break") {
 		ptok := p.expectKeyword("break")
 		return &StmtBreak{
-			tok:     ptok,
+			tok:    ptok,
 			labels: p.currentForStmt.labels,
 		}
 	} else if tok.isKeyword("defer") {

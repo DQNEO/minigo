@@ -6,10 +6,9 @@ import "fmt"
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
-	allScopes map[identifier]*Scope
+	allScopes     map[identifier]*Scope
 	uniquedDTypes []string
 }
-
 
 func makeDynamicTypeLabel(id int) string {
 	return fmt.Sprintf("DynamicTypeId%d", id)
@@ -167,7 +166,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprConstVariable:
 	case *ExprFuncallOrConversion:
 		funcall := expr.(*ExprFuncallOrConversion)
-		for i:=0;i<len(funcall.args);i++ {
+		for i := 0; i < len(funcall.args); i++ {
 			arg := funcall.args[i]
 			arg = walkExpr(arg)
 			funcall.args[i] = arg
@@ -199,9 +198,9 @@ func walkExpr(expr Expr) Expr {
 		case builtinMakeSlice:
 			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
 			var staticCall *IrStaticCall = &IrStaticCall{
-				tok: funcall.token(),
-				origExpr:funcall,
-				callee: decl,
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
 			}
 			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
 			staticCall.args = funcall.args
@@ -212,9 +211,9 @@ func walkExpr(expr Expr) Expr {
 			valueToAppend := funcall.args[1]
 			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
 			var staticCall *IrStaticCall = &IrStaticCall{
-				tok: funcall.token(),
-				origExpr:funcall,
-				callee: decl,
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
 			}
 			switch slice.getGtype().elementType.getSize() {
 			case 1:
@@ -239,7 +238,7 @@ func walkExpr(expr Expr) Expr {
 		return funcall
 	case *ExprMethodcall:
 		methodCall := expr.(*ExprMethodcall)
-		for i:=0 ;i<len(methodCall.args); i++ {
+		for i := 0; i < len(methodCall.args); i++ {
 			arg := methodCall.args[i]
 			arg = walkExpr(arg)
 			methodCall.args[i] = arg
@@ -277,7 +276,7 @@ func walkExpr(expr Expr) Expr {
 		e.expr = walkExpr(e.expr)
 		return e
 	case *ExprStructLiteral:
-		e  := expr.(*ExprStructLiteral)
+		e := expr.(*ExprStructLiteral)
 		for _, field := range e.fields {
 			field.value = walkExpr(field.value)
 		}
@@ -291,7 +290,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprLen:
 
 	case *ExprCap:
-	//case *ExprConversionToInterface:
+		//case *ExprConversionToInterface:
 	}
 	return expr
 }
@@ -313,13 +312,13 @@ func walkStmt(stmt Stmt) Stmt {
 	case *IrStmtRangeMap:
 		s := stmt.(*IrStmtRangeMap)
 		s.rangeexpr = walkExpr(s.rangeexpr)
-		s.block  = walkStmtList(s.block)
+		s.block = walkStmtList(s.block)
 		return s
 	case *IrStmtForRangeList:
 		s := stmt.(*IrStmtForRangeList)
 		s.init = walkStmt(s.init)
 		s.cond = walkExpr(s.cond)
-		s.block  = walkStmtList(s.block)
+		s.block = walkStmtList(s.block)
 		return s
 	case *IrStmtClikeFor:
 		s := stmt.(*IrStmtClikeFor)
@@ -327,7 +326,7 @@ func walkStmt(stmt Stmt) Stmt {
 		cls.init = walkStmt(cls.init)
 		cls.cond = walkStmt(cls.cond)
 		cls.post = walkStmt(cls.post)
-		s.block  = walkStmtList(s.block)
+		s.block = walkStmtList(s.block)
 		return s
 	case *StmtIf:
 		s := stmt.(*StmtIf)
@@ -403,4 +402,3 @@ func walkStmt(stmt Stmt) Stmt {
 
 	return stmt
 }
-

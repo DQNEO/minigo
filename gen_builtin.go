@@ -14,7 +14,7 @@ func (e *ExprLen) emit() {
 	case G_SLICE:
 		emit("# len(slice)")
 		switch arg.(type) {
-		case *ExprVariable,*ExprStructField,*ExprIndex :
+		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
@@ -69,7 +69,7 @@ func (e *ExprCap) emit() {
 		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
-		case *ExprVariable,*ExprStructField,*ExprIndex :
+		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
 			emit("# ExprSliceLiteral")
@@ -131,5 +131,3 @@ func emitMakeSliceFunc() {
 	emit("LEAVE_AND_RET")
 	emitNewline()
 }
-
-

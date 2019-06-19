@@ -57,7 +57,7 @@ func (f *DeclFunc) prepare() Emitter {
 			offset -= IntSize * width
 			param.offset = offset
 
-			argRegisters = append(argRegisters, regIndex - width)
+			argRegisters = append(argRegisters, regIndex-width)
 		}
 	}
 
@@ -76,20 +76,20 @@ func (f *DeclFunc) prepare() Emitter {
 	}
 
 	return &funcPrologueEmitter{
-		token: f.token(),
-		symbol: f.getSymbol(),
-		argRegisters:argRegisters,
-		localvars:f.localvars,
-		localarea:localarea,
+		token:        f.token(),
+		symbol:       f.getSymbol(),
+		argRegisters: argRegisters,
+		localvars:    f.localvars,
+		localarea:    localarea,
 	}
 }
 
 type funcPrologueEmitter struct {
-	token *Token
-	symbol string
+	token        *Token
+	symbol       string
 	argRegisters []int
-	localvars []*ExprVariable
-	localarea int
+	localvars    []*ExprVariable
+	localarea    int
 }
 
 func (fe *funcPrologueEmitter) emit() {
@@ -335,6 +335,3 @@ func (stmt *StmtReturn) emit() {
 
 	stmt.emitDeferAndReturn()
 }
-
-
-

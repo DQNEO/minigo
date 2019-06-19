@@ -103,7 +103,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		}
 		var codes []string = []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
-		pkg = makePkg(pkg,universe)
+		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)
 		symbolTable.allScopes[pkgName] = pkg.scope
 	}
@@ -134,9 +134,9 @@ func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 }
 
 type Program struct {
-	packages      []*AstPackage
-	methodTable   map[int][]string
-	importOS      bool
+	packages    []*AstPackage
+	methodTable map[int][]string
+	importOS    bool
 }
 
 func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *Program {
@@ -174,7 +174,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	//  Do restructuring of local nodes
 	for _, pkg := range packages {
-		for _,fnc := range pkg.funcs {
+		for _, fnc := range pkg.funcs {
 			fnc = walkFunc(fnc)
 		}
 	}
@@ -187,4 +187,3 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
-

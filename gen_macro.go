@@ -5,7 +5,7 @@ import "fmt"
 func emitMacroDefinitions() {
 	emitWithoutIndent("// MACROS")
 
-	macroStart("FUNC_PROLOGUE","")
+	macroStart("FUNC_PROLOGUE", "")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	macroEnd()
@@ -99,7 +99,7 @@ func emitMacroDefinitions() {
 	emit("lea \\slabel(%%rip), %%rax")
 	macroEnd()
 
-	macroStart("LOAD_NUMBER",  "n")
+	macroStart("LOAD_NUMBER", "n")
 	emit("mov $\\n, %%rax")
 	macroEnd()
 
@@ -139,7 +139,6 @@ func emitMacroDefinitions() {
 	emit("mov %%rax, \\varname+\\offset(%%rip)")
 	macroEnd()
 
-
 	macroStart("LOAD_1_FROM_GLOBAL_CAST", "varname, offset=0")
 	emit("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
@@ -158,11 +157,11 @@ func emitMacroDefinitions() {
 	emit("mov %d(%%rax), %%rax", 0)
 	macroEnd()
 
-	macroStart("LOAD_8_BY_DEREF","")
+	macroStart("LOAD_8_BY_DEREF", "")
 	emit("mov (%%rax), %%rax")
 	macroEnd()
 
-	macroStart("LOAD_1_BY_DEREF","")
+	macroStart("LOAD_1_BY_DEREF", "")
 	emit("movsbq (%%rax), %%rax")
 	macroEnd()
 
@@ -182,13 +181,13 @@ func emitMacroDefinitions() {
 	emit("movzbq %%al, %%rax")
 	macroEnd()
 
-	macroStart("CMP_EQ_ZERO","")
+	macroStart("CMP_EQ_ZERO", "")
 	emit("cmp $0, %%rax")
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	macroEnd()
 
-	macroStart("CMP_NE_ZERO","")
+	macroStart("CMP_NE_ZERO", "")
 	emit("cmp $0, %%rax")
 	emit("setne %%al")
 	emit("movzb %%al, %%eax")
@@ -278,4 +277,3 @@ func macroEnd() {
 	emitWithoutIndent(".endm")
 	emitNewline()
 }
-

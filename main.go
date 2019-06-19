@@ -16,6 +16,7 @@ var tokenizeOnly = false
 var parseOnly = false
 var resolveOnly = false
 var emitPosition = false
+
 func printVersion() {
 	println("minigo 0.1.0")
 	println("Copyright (C) 2019 @DQNEO")

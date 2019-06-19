@@ -157,7 +157,7 @@ func (f *IrStmtForRangeList) emit() {
 	emit("%s: # end loop", f.labels.labelEndLoop)
 }
 
-func  (f *IrStmtClikeFor) emit() {
+func (f *IrStmtClikeFor) emit() {
 	emit("# emit IrStmtClikeFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
@@ -276,20 +276,20 @@ func (f *StmtFor) convert() Stmt {
 		}
 
 		em = &IrStmtForRangeList{
-			init:          init,
-			cond:          cond,
-			assignVar:     assignVar,
-			cond2:         cond2,
-			incr:          incr,
-			block:         f.block,
-			labels:     f.labels,
+			init:      init,
+			cond:      cond,
+			assignVar: assignVar,
+			cond2:     cond2,
+			incr:      incr,
+			block:     f.block,
+			labels:    f.labels,
 		}
 	case FOR_KIND_CLIKE:
 		em = &IrStmtClikeFor{
-			tok :f.token(),
-			labels:     f.labels,
-			cls: f.cls,
-			block : f.block,
+			tok:    f.token(),
+			labels: f.labels,
+			cls:    f.cls,
+			block:  f.block,
 		}
 	default:
 		assertNotReached(f.token())
@@ -353,5 +353,3 @@ func (ast *StmtBreak) emit() {
 	assert(ast.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # break", ast.labels.labelEndLoop)
 }
-
-

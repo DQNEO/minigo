@@ -71,7 +71,7 @@ func emit(format string, v ...interface{}) {
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	writef(format + "\n", v...)
+	writef(format+"\n", v...)
 }
 
 func unwrapRel(e Expr) Expr {
@@ -509,7 +509,6 @@ func (f *DeclFunc) emit() {
 	emit("mov $0, %%rax")
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
-
 
 func evalIntExpr(e Expr) int {
 	e = unwrapRel(e)

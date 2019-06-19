@@ -200,5 +200,3 @@ func (decl *DeclVar) emitGlobal() {
 		decl.emitData()
 	}
 }
-
-

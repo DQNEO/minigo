@@ -11,7 +11,7 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 	}
 
 	length := len(ast.lefts)
-	for i:=0; i<length;i++ {
+	for i := 0; i < length; i++ {
 		right := ast.rights[i]
 		left := ast.lefts[i]
 		switch right.(type) {
@@ -163,7 +163,7 @@ func (ast *StmtAssignment) emit() {
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
-	if (len(ast.rights) > 1) {
+	if len(ast.rights) > 1 {
 		emitAssignMultiToMulti(ast)
 	} else {
 		emitAssignOneRightToMultiLeft(ast)
@@ -366,7 +366,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		targetExpr := unwrapRel(conversion.expr)
 		assert(conversion.gtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
 		assert(targetExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.expr.getGtype().String())
-		stringVariable,ok := targetExpr.(*ExprVariable)
+		stringVariable, ok := targetExpr.(*ExprVariable)
 		assert(ok, rhs.token(), "ok")
 		stringVariable.emit()
 		emit("PUSH_8 # ptr")

@@ -8,7 +8,7 @@ const undefinedSize = -1
 
 const (
 	G_UNKOWNE   EType = iota
-	G_DEPENDENT             // depends on other expression
+	G_DEPENDENT       // depends on other expression
 	G_NAMED
 	// below are primitives which are declared in the universe block
 	G_INT

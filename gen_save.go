@@ -11,7 +11,7 @@ func emitSavePrimitive(lhs Expr) {
 	case *ExprVariable:
 		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprIndex:
-		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(),0)
+		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprStructField:
 		lhs.(*ExprStructField).emitSavePrimitive()
 	case *ExprUop:
@@ -23,7 +23,7 @@ func emitSavePrimitive(lhs Expr) {
 }
 
 func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
- 	lhs = unwrapRel(lhs)
+	lhs = unwrapRel(lhs)
 	switch lhs.(type) {
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
@@ -41,7 +41,6 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
-
 
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
@@ -71,7 +70,6 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 		emit("STORE_%d_TO_LOCAL %d+%d # %s", size, variable.offset, offset, variable.varname)
 	}
 }
-
 
 // save data from stack
 func (e *ExprIndex) emitSave24() {
@@ -177,7 +175,7 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	collection := e.collection
 	index := e.index
 	collectionType := collection.getGtype()
-	assert(collectionType.getKind() == G_ARRAY ||collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), "should be collection")
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), "should be collection")
 
 	var elmType *Gtype
 	if collectionType.isString() {
@@ -208,4 +206,3 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	}
 	emitNewline()
 }
-

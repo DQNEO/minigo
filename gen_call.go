@@ -38,7 +38,6 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	return origType
 }
 
-
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
 	if origType == nil {
@@ -58,14 +57,14 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 type IrInterfaceMethodCall struct {
 	receiver   Expr
 	methodName identifier
-	args []Expr
+	args       []Expr
 }
 
 func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
-		args: methodCall.args ,
+		args:       methodCall.args,
 	}
 	return call
 }
@@ -85,12 +84,12 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	pkgname := funcref.funcdef.pkg
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
-		tok: methodCall.token(),
+		tok:          methodCall.token(),
 		symbol:       getFuncSymbol(pkgname, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
-		args:args,
-		origExpr:methodCall,
+		args:         args,
+		origExpr:     methodCall,
 	}
 	return staticCall
 }
@@ -134,7 +133,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	case builtinDumpInterface:
 		arg := funcall.args[0]
 		return &builtinDumpInterfaceEmitter{
-			arg:arg,
+			arg: arg,
 		}
 	case builtinAssertInterface:
 		arg := funcall.args[0]
@@ -144,15 +143,15 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	case builtinAsComment:
 		arg := funcall.args[0]
 		return &builtinAsCommentEmitter{
-			arg:arg,
+			arg: arg,
 		}
 	default:
 		return &IrStaticCall{
-			tok: funcall.token(),
-			symbol: getFuncSymbol(decl.pkg, funcall.fname),
-			callee: decl,
-			args: funcall.args,
-			origExpr:funcall,
+			tok:      funcall.token(),
+			symbol:   getFuncSymbol(decl.pkg, funcall.fname),
+			callee:   decl,
+			args:     funcall.args,
+			origExpr: funcall,
 		}
 	}
 
