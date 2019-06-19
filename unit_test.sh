@@ -1,21 +1,23 @@
 #!/bin/bash
 
+set -e
 progname=$1
 basename=$2
 suffix=$3
 
 out_dir=/tmp/out
-mkdir -p $out_dir
+out_dir_as=/tmp/tmpfs/out
+mkdir -p $out_dir $out_dir_as
 
 if [[ -z $suffix ]];then
-    as_file=$out_dir/${basename}.s
+    as_file=$out_dir_as/${basename}.s
 else
-    as_file=$out_dir/${basename}.${suffix}.s
+    as_file=$out_dir_as/${basename}.${suffix}.s
 fi
 src=t/$basename/*.go
 expected=t/expected/${basename}.txt
 bin_file=$out_dir/${basename}.bin
-obj_file=$out_dir/${basename}.o
+obj_file=$out_dir_as/${basename}.o
 
 actual=$out_dir/actual.txt
 # for os.Args
@@ -38,7 +40,7 @@ function as_run {
 function run_unit_test {
     echo -n "unit_test $basename ... "
     compile
-    as_run 2>/dev/null
+    as_run
     if [[ $? -ne 0 ]];then
         echo failed
         return 1
