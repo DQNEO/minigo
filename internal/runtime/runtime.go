@@ -34,7 +34,7 @@ func append1(x []byte, elm byte) []byte {
 	} else {
 		var newcap int
 		if xlen == 0 {
-			newcap = 8
+			newcap = 1
 		} else {
 			newcap = xlen * 2
 		}
@@ -58,7 +58,7 @@ func append8(x []int, elm int) []int {
 	} else {
 		var newcap int
 		if xlen == 0 {
-			newcap = 8
+			newcap = 1
 		} else {
 			newcap = xlen * 2
 		}
@@ -84,7 +84,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 	} else {
 		var newcap int
 		if xlen == 0 {
-			newcap = 8
+			newcap = 1
 		} else {
 			newcap = xlen * 2
 		}
