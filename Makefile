@@ -34,8 +34,9 @@ minigo2.s: minigo2 minigo *.go
 	cp /tmp/tmpfs/minigo2.s minigo2.s
 
 selfhost: minigo2.s
-	sed -e 's|^/\*.*)\*/||' minigo.s > /tmp/tmpfs/minigo.stripped.s
-	diff minigo2.s /tmp/tmpfs/minigo.stripped.s && echo ok
+	sed -e 's|^/\*.*)\*/||' minigo.s > /tmp/tmpfs/stripped.minigo.s
+	sed -e '/^# memory-usage/d' minigo2.s > /tmp/tmpfs/stripped.minigo2.s
+	diff /tmp/tmpfs/stripped.minigo2.s /tmp/tmpfs/stripped.minigo.s && echo ok
 
 test: minigo minigo2
 	make vet

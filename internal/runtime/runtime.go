@@ -24,6 +24,15 @@ func malloc(size int) *int {
 	return r
 }
 
+
+func reportMemoryUsage() {
+	printf("# memory-usage %d\n", getMemoryUsage())
+}
+
+func getMemoryUsage() int {
+	return heapTail - heap
+}
+
 func append1(x []byte, elm byte) []byte {
 	var z []byte
 	xlen := len(x)
