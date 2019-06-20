@@ -223,8 +223,8 @@ func walkExpr(expr Expr) Expr {
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
-						tok:  valueToAppend.token(),
-						expr: valueToAppend,
+						tok: valueToAppend.token(),
+						arg: valueToAppend,
 					}
 					funcall.args[1] = eConvertion
 				}

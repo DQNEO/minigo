@@ -321,7 +321,7 @@ func emitCallMalloc(size int) {
 
 func (e *IrExprConversionToInterface) emit() {
 	emit("# IrExprConversionToInterface")
-	emitConversionToInterface(e.expr)
+	emitConversionToInterface(e.arg)
 }
 
 func emitConversionToInterface(dynamicValue Expr) {

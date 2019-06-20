@@ -351,8 +351,8 @@ type IrExprConversion struct {
 }
 
 type IrExprConversionToInterface struct {
-	tok  *Token
-	expr Expr // dynamic type
+	tok *Token
+	arg Expr // dynamic type
 }
 
 // ExprCaseClause or TypeCaseClause
