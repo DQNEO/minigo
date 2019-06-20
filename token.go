@@ -29,7 +29,7 @@ const (
 
 type Token struct {
 	typ      TokenType
-	sval     string
+	sval     gostring
 	filename string
 	line     int
 	column   int
@@ -55,8 +55,12 @@ func (ts *TokenStream) isEnd() bool {
 }
 
 func (tok *Token) String() string {
+	var sval cstring = ""
+	if len(tok.sval) > 0 {
+		sval = cstring(tok.sval)
+	}
 	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
-		tok.sval, tok.filename, tok.line, tok.column)
+		sval, tok.filename, tok.line, tok.column)
 }
 
 func (tok *Token) isEOF() bool {
@@ -64,15 +68,18 @@ func (tok *Token) isEOF() bool {
 }
 
 func (tok *Token) isPunct(s string) bool {
-	return tok != nil && tok.typ == T_PUNCT && tok.sval == s
+	gs := gostring(s)
+	return tok != nil && tok.typ == T_PUNCT && eqGostring(tok.sval, gs)
 }
 
 func (tok *Token) isKeyword(s string) bool {
-	return tok != nil && tok.typ == T_KEYWORWD && tok.sval == s
+	gs := gostring(s)
+	return tok != nil && tok.typ == T_KEYWORWD && eqGostring(tok.sval,gs)
 }
 
 func (tok *Token) isIdent(s string) bool {
-	return tok != nil && tok.typ == T_IDENT && tok.sval == s
+	gs := gostring(s)
+	return tok != nil && tok.typ == T_IDENT && eqGostring(tok.sval,gs)
 }
 
 func (tok *Token) getIdent() identifier {
@@ -83,7 +90,7 @@ func (tok *Token) getIdent() identifier {
 }
 
 func (tok *Token) getIntval() int {
-	val, _ := strconv.Atoi(tok.sval)
+	val, _ := strconv.Atoi(string(tok.sval))
 	return val
 }
 

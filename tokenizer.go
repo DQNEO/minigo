@@ -2,23 +2,35 @@ package main
 
 import "fmt"
 
+
+type gostring []byte
+type cstring string
+
+func eqGostring(a gostring, b gostring) bool {
+	return string(a) == string(b)
+}
+
+func eqCstring(a cstring, b cstring) bool {
+	return a == b
+}
+
 type Tokenizer struct {
 	bs *ByteStream
 }
 
-func (tn *Tokenizer) read_number(c0 byte) string {
+func (tn *Tokenizer) read_number(c0 byte) []byte {
 	var chars = []byte{c0}
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			return string(chars)
+			return chars
 		}
 		if tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
 			tn.bs.unget()
-			return string(chars)
+			return chars
 		}
 	}
 }
@@ -41,24 +53,24 @@ func (tn *Tokenizer) isLetter(b byte) bool {
 }
 
 // https://golang.org/ref/spec#Identifiers
-func (tn *Tokenizer) readIdentifier(c0 byte) string {
+func (tn *Tokenizer) readIdentifier(c0 byte) gostring {
 	var chars = []byte{c0}
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			return string(chars)
+			return gostring(chars)
 		}
 		if tn.isLetter(c) || tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
 			tn.bs.unget()
-			return string(chars)
+			return gostring(chars)
 		}
 	}
 }
 
-func (tn *Tokenizer) read_string() string {
+func (tn *Tokenizer) read_string() gostring {
 	var chars []byte
 	for {
 		c, err := tn.bs.get()
@@ -80,12 +92,12 @@ func (tn *Tokenizer) read_string() string {
 			chars = append(chars, c)
 			continue
 		} else {
-			return string(chars)
+			return gostring(chars)
 		}
 	}
 }
 
-func (tn *Tokenizer) read_raw_string() string {
+func (tn *Tokenizer) read_raw_string() []byte {
 	var chars []byte
 	for {
 		c, err := tn.bs.get()
@@ -113,30 +125,30 @@ func (tn *Tokenizer) read_raw_string() string {
 			}
 			continue
 		} else {
-			return string(chars)
+			return chars
 		}
 	}
 }
 
-func (tn *Tokenizer) read_char() string {
+func (tn *Tokenizer) read_char() gostring {
 	c, err := tn.bs.get()
 	if err != nil {
 		panic("invalid char literal")
 	}
 	if c == '\\' {
-		var sval string
+		var sval gostring
 		c, err = tn.bs.get()
 		switch c {
 		case 'n':
-			sval = "\n"
+			sval = gostring("\n")
 		case 't':
-			sval = "\t"
+			sval = gostring("\t")
 		case 'r':
-			sval = "\r"
+			sval = gostring("\r")
 		case '\\':
-			sval = "\\"
+			sval = gostring("\\")
 		case '\'':
-			sval = "'"
+			sval = gostring("'")
 		default:
 			errorf("unexpected char 1:%c", c)
 		}
@@ -151,7 +163,7 @@ func (tn *Tokenizer) read_char() string {
 	if end != '\'' {
 		errorf("unexpected char:%c", end)
 	}
-	return string([]byte{c})
+	return []byte{c}
 }
 
 func (tn *Tokenizer) isSpace(c byte) bool {
@@ -173,7 +185,7 @@ func (tn *Tokenizer) skipSpace() {
 	}
 }
 
-func (tn *Tokenizer) makeToken(typ TokenType, sval string) *Token {
+func (tn *Tokenizer) makeToken(typ TokenType, sval gostring) *Token {
 	return &Token{
 		typ:      typ,
 		sval:     sval,
@@ -246,7 +258,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 			if len(r) > 0 {
 				last := r[len(r)-1]
 				if tn.autoSemicolonInsert(last) {
-					semicolon := tn.makeToken(T_PUNCT, ";")
+					semicolon := tn.makeToken(T_PUNCT, gostring(";"))
 					r = append(r, semicolon)
 				}
 			}
@@ -257,7 +269,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 		case '_', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
 			sval := tn.readIdentifier(c)
-			if in_array(sval, keywords) {
+			if in_array(string(sval), keywords) {
 				tok = tn.makeToken(T_KEYWORWD, sval)
 			} else {
 				tok = tn.makeToken(T_IDENT, sval)
@@ -283,155 +295,155 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tn.skipBlockComment()
 				continue
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "/=")
+				tok = tn.makeToken(T_PUNCT, gostring("/="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "/")
+				tok = tn.makeToken(T_PUNCT, gostring("/"))
 			}
 		case '(', ')', '[', ']', '{', '}', ',', ';':
-			tok = tn.makeToken(T_PUNCT, string([]byte{c}))
+			tok = tn.makeToken(T_PUNCT, []byte{c})
 		case '!':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "!=")
+				tok = tn.makeToken(T_PUNCT, gostring("!="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "!")
+				tok = tn.makeToken(T_PUNCT, gostring("!"))
 			}
 		case '%':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "%=")
+				tok = tn.makeToken(T_PUNCT, gostring("%="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "%")
+				tok = tn.makeToken(T_PUNCT, gostring("%"))
 			}
 		case '*':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "*=")
+				tok = tn.makeToken(T_PUNCT, gostring("*="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "*")
+				tok = tn.makeToken(T_PUNCT, gostring("*"))
 			}
 		case ':':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, ":=")
+				tok = tn.makeToken(T_PUNCT, gostring(":="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, ":")
+				tok = tn.makeToken(T_PUNCT, gostring(":"))
 			}
 		case '=':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "==")
+				tok = tn.makeToken(T_PUNCT, gostring("=="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "=")
+				tok = tn.makeToken(T_PUNCT, gostring("="))
 			}
 		case '^':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "^=")
+				tok = tn.makeToken(T_PUNCT, gostring("^="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "^")
+				tok = tn.makeToken(T_PUNCT, gostring("^"))
 			}
 		case '&':
 			c, _ := tn.bs.get()
 			if c == '&' {
-				tok = tn.makeToken(T_PUNCT, "&&")
+				tok = tn.makeToken(T_PUNCT, gostring("&&"))
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "&=")
+				tok = tn.makeToken(T_PUNCT, gostring("&="))
 			} else if c == '^' {
 				c, _ := tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, "&^=")
+					tok = tn.makeToken(T_PUNCT, gostring("&^="))
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, "&^")
+					tok = tn.makeToken(T_PUNCT, gostring("&^"))
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "&")
+				tok = tn.makeToken(T_PUNCT, gostring("&"))
 			}
 		case '+':
 			c, _ = tn.bs.get()
 			if c == '+' {
-				tok = tn.makeToken(T_PUNCT, "++")
+				tok = tn.makeToken(T_PUNCT, gostring("++"))
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "+=")
+				tok = tn.makeToken(T_PUNCT, gostring("+="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "+")
+				tok = tn.makeToken(T_PUNCT, gostring("+"))
 			}
 		case '-':
 			c, _ = tn.bs.get()
 			if c == '-' {
-				tok = tn.makeToken(T_PUNCT, "--")
+				tok = tn.makeToken(T_PUNCT, gostring("--"))
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "-=")
+				tok = tn.makeToken(T_PUNCT, gostring("-="))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "-")
+				tok = tn.makeToken(T_PUNCT, gostring("-"))
 			}
 		case '|':
 			c, _ = tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "|=")
+				tok = tn.makeToken(T_PUNCT, gostring("|="))
 			} else if c == '|' {
-				tok = tn.makeToken(T_PUNCT, "||")
+				tok = tn.makeToken(T_PUNCT, gostring("||"))
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "|")
+				tok = tn.makeToken(T_PUNCT, gostring("|"))
 			}
 		case '.':
 			c, _ = tn.bs.get()
 			if c == '.' {
 				c, _ = tn.bs.get()
 				if c == '.' {
-					tok = tn.makeToken(T_PUNCT, "...")
+					tok = tn.makeToken(T_PUNCT, gostring("..."))
 				} else {
 					panic("invalid token '..'")
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, ".")
+				tok = tn.makeToken(T_PUNCT, gostring("."))
 			}
 		case '>':
 			c, _ = tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, ">=")
+				tok = tn.makeToken(T_PUNCT, gostring(">="))
 			} else if c == '>' {
 				c, _ = tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, ">>=")
+					tok = tn.makeToken(T_PUNCT, gostring(">>="))
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, ">>")
+					tok = tn.makeToken(T_PUNCT, gostring(">>"))
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, ">")
+				tok = tn.makeToken(T_PUNCT, gostring(">"))
 			}
 		case '<':
 			c, _ = tn.bs.get()
 			if c == '-' {
-				tok = tn.makeToken(T_PUNCT, "<-")
+				tok = tn.makeToken(T_PUNCT, gostring("<-"))
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, "<=")
+				tok = tn.makeToken(T_PUNCT, gostring("<="))
 			} else if c == '<' {
 				c, _ = tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, "<<=")
+					tok = tn.makeToken(T_PUNCT, gostring("<<="))
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, "<<")
+					tok = tn.makeToken(T_PUNCT, gostring("<<"))
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, "<")
+				tok = tn.makeToken(T_PUNCT, gostring("<"))
 			}
 		default:
 			panic(fmt.Sprintf("unknown char:%d", c))

@@ -5,17 +5,6 @@ import (
 	"strings"
 )
 
-type gostring []byte
-type cstring string
-
-func eqGostring(a gostring, b gostring) bool {
-	return string(a) == string(b)
-}
-
-func eqCstring(a cstring, b cstring) bool {
-	return a == b
-}
-
 var GENERATION int = 1
 
 var debugMode = false // execute debugf() or not

@@ -270,6 +270,12 @@ func walkExpr(expr Expr) Expr {
 		return e
 	case *ExprArrayLiteral:
 	case *ExprSliceLiteral:
+		e := expr.(*ExprSliceLiteral)
+		for i, v := range e.values {
+			v2 := walkExpr(v)
+			e.values[i] = v2
+		}
+		return e
 	case *ExprTypeAssertion:
 	case *ExprVaArg:
 		e := expr.(*ExprVaArg)

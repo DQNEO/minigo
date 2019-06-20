@@ -209,7 +209,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	}
 	if rel.name == "__func__" {
 		sliteral := &ExprStringLiteral{
-			val: string(p.currentFunc.fname),
+			val: cstring(p.currentFunc.fname),
 		}
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)
@@ -479,7 +479,7 @@ func (p *parser) parsePrim() Expr {
 		p.skip()
 		ast := &ExprStringLiteral{
 			tok: tok,
-			val: tok.sval,
+			val: cstring(tok.sval),
 		}
 		p.addStringLiteral(ast)
 		return ast
@@ -652,7 +652,7 @@ func (p *parser) parseUnaryExpr() Expr {
 	case tok.isPunct("&"):
 		uop := &ExprUop{
 			tok:     tok,
-			op:      gostring(tok.sval),
+			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 		// when &T{}, allocate stack memory
@@ -667,19 +667,19 @@ func (p *parser) parseUnaryExpr() Expr {
 	case tok.isPunct("*"):
 		return &ExprUop{
 			tok:     tok,
-			op:      gostring(tok.sval),
+			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("!"):
 		return &ExprUop{
 			tok:     tok,
-			op:      gostring(tok.sval),
+			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
 		return &ExprUop{
 			tok:     tok,
-			op:      gostring(tok.sval),
+			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	default:
@@ -688,8 +688,8 @@ func (p *parser) parseUnaryExpr() Expr {
 	return p.parsePrim()
 }
 
-func priority(op string) int {
-	switch op {
+func priority(op gostring) int {
+	switch cstring(op) {
 	case "&&", "||":
 		return 5
 	case "==", "!=", "<", ">", ">=", "<=":
@@ -732,7 +732,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if in_array(tok.sval, binops) {
+		if in_array(string(tok.sval), binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
@@ -742,7 +742,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 				}
 				ast = &ExprBinop{
 					tok:   tok,
-					op:    gostring(tok.sval),
+					op:    tok.sval,
 					left:  ast,
 					right: right,
 				}
@@ -1257,13 +1257,13 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	}
 }
 
-func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
+func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAssignment {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.lastToken()
 
-	var op string
-	switch assignop {
+	var op cstring
+	switch cstring(assignop) {
 	case "+=":
 		op = "+"
 	case "-=":
@@ -1698,7 +1698,7 @@ func (p *parser) parseImport() *ImportDecl {
 			if tok.isTypeString() {
 				specs = append(specs, &ImportSpec{
 					tok:  tok,
-					path: tok.sval,
+					path: string(tok.sval),
 				})
 				p.expect(";")
 			} else if tok.isPunct(")") {
@@ -1713,7 +1713,7 @@ func (p *parser) parseImport() *ImportDecl {
 		}
 		specs = []*ImportSpec{&ImportSpec{
 			tok:  tok,
-			path: tok.sval,
+			path: string(tok.sval),
 		},
 		}
 	}
@@ -1883,7 +1883,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		errorft(nextToken, "invalid token")
 	}
 
-	switch nextToken.sval {
+	switch cstring(nextToken.sval) {
 	case "func":
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}

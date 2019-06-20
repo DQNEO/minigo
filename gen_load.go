@@ -295,7 +295,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 }
 
 func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
-	elmType := collection.getGtype().elementType
+	elmType := collection.getGtype().Underlying().elementType
+	assert(elmType != nil, collection.token(), "elmType should not be nil")
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, "elmSize > 0")
 

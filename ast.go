@@ -67,7 +67,7 @@ type ExprNumberLiteral struct {
 
 type ExprStringLiteral struct {
 	tok    *Token
-	val    string
+	val    cstring
 	slabel string
 }
 
