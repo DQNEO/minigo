@@ -480,13 +480,40 @@ func (e *ExprVaArg) emit() {
 func (e *IrExprConversion) emit() {
 	emit("# IrExprConversion.emit()")
 	if e.toGtype.isString() {
-		// s = string(bytes)
+		emit("# convert slice to string")
+		// string(bytes)
 		labelEnd := makeLabel()
-		e.arg.emit()
-		emit("TEST_IT")
-		emit("jne %s", labelEnd)
+		e.arg.emit() // load slice
+		emit("TEST_IT") // check if ptr is nil
+		emit("jne %s # exit if not nil", labelEnd)
+		emit("# if nil then")
 		emitEmptyString()
 		emit("%s:", labelEnd)
+	} else if e.arg.getGtype().isString() && e.toGtype.getKind() == G_SLICE {
+		//  []byte(string)
+		emit("# convert string to slice")
+		labelEnd := makeLabel()
+		labelThen := makeLabel()
+		e.arg.emit() // load string
+		emit("TEST_IT") // check if string is nil
+		emit("jne %s # go to then if not nil", labelThen)
+		emit("# if nil ")
+		emit("LOAD_EMPTY_SLICE")
+		emitEmptyString()
+		emit("jmp %s", labelEnd)
+		emit("%s:", labelThen)
+
+		e.arg.emit() // load string
+		emit("PUSH_8")
+		elen := &ExprLen{
+			arg:e.arg,
+		}
+		elen.emit()
+		emit("PUSH_8 # len")
+		emit("PUSH_8 # cap")
+		emit("POP_SLICE")
+		emit("%s:", labelEnd)
+
 	} else {
 		e.arg.emit()
 	}
