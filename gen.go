@@ -145,6 +145,7 @@ func emit_intcast(gtype *Gtype) {
 
 func emit_comp_primitive(inst string, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
+	assert(inst != "", binop.token(), "inst shoud not be empty")
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
