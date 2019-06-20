@@ -8,12 +8,12 @@ import (
 type gostring []byte
 type cstring string
 
-func eqCstring(a string, b string) bool {
-	return a == b
-}
-
 func eqGostring(a gostring, b gostring) bool {
 	return string(a) == string(b)
+}
+
+func eqCstring(a cstring, b cstring) bool {
+	return a == b
 }
 
 var GENERATION int = 1
