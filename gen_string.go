@@ -79,7 +79,7 @@ func emitStringsEqualFromStack(equal bool) {
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
-	emit("FUNCALL strcmp")
+	emit("FUNCALL iruntime.gostrcmp")
 	if equal {
 		emit("CMP_EQ_ZERO") // retval == 0
 	} else {

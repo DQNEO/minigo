@@ -115,4 +115,8 @@ func strcopy(src string, dest string, slen int) string {
 	return dest
 }
 
+func gostrcmp(a string, b string) int {
+	return strcmp(a, b)
+}
+
 const MiniGo int = 1

@@ -180,6 +180,13 @@ func predeclareLibcFuncs(universe *Scope) {
 		},
 	})
 
+	universe.setFunc("strcmp", &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg:      "libc",
+			rettypes: []*Gtype{gInt},
+		},
+	})
+
 	universe.setFunc("write", &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
