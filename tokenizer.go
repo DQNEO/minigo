@@ -6,7 +6,7 @@ import "fmt"
 type gostring []byte
 type cstring string
 
-func eqGostringByByte(a gostring, b gostring) bool {
+func eqGostring(a gostring, b gostring) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -17,20 +17,6 @@ func eqGostringByByte(a gostring, b gostring) bool {
 		}
 	}
 	return true
-}
-
-func eqGostring(a gostring, b gostring) bool {
-	//dumpSlice(a)
-	//dumpSlice(b)
-	var ret1 bool
-	ret1 =  string(a) == string(b)
-
-	var ret2 bool
-	ret2 = eqGostringByByte(a, b)
-	if ret1 != ret2 {
-		panic("String Comparison Unmatch")
-	}
-	return ret1
 }
 
 func eqCstring(a cstring, b cstring) bool {
