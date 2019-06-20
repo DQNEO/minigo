@@ -196,7 +196,7 @@ func (binop *ExprBinop) emitComp() {
 	switch op {
 	case "<":
 		instruction = "setl"
-	case ">z":
+	case ">":
 		instruction = "setg"
 	case "<=":
 		instruction = "setle"
@@ -206,6 +206,8 @@ func (binop *ExprBinop) emitComp() {
 		instruction = "setne"
 	case "==":
 		instruction = "sete"
+	default:
+		assertNotReached(binop.token())
 	}
 
 	emit_comp_primitive(instruction, binop)
