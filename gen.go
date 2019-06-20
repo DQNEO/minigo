@@ -479,13 +479,13 @@ func (e *IrExprConversion) emit() {
 	if e.toGtype.isString() {
 		// s = string(bytes)
 		labelEnd := makeLabel()
-		e.expr.emit()
+		e.arg.emit()
 		emit("TEST_IT")
 		emit("jne %s", labelEnd)
 		emitEmptyString()
 		emit("%s:", labelEnd)
 	} else {
-		e.expr.emit()
+		e.arg.emit()
 	}
 }
 

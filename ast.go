@@ -347,7 +347,7 @@ type ExprVaArg struct {
 type IrExprConversion struct {
 	tok     *Token
 	toGtype *Gtype // to
-	expr    Expr   // from
+	arg     Expr   // from
 }
 
 type IrExprConversionToInterface struct {

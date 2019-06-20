@@ -268,7 +268,7 @@ func (e *IrExprConversion) dump() {
 	debugf("conversion")
 	debugNest++
 	debugf("toType:%s", e.toGtype.String())
-	e.expr.dump()
+	e.arg.dump()
 	debugNest--
 }
 

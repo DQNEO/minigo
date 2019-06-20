@@ -462,7 +462,7 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	return &IrExprConversion{
 		tok:     ptok,
 		toGtype: gtype,
-		expr:    e,
+		arg:     e,
 	}
 }
 

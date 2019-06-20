@@ -176,7 +176,7 @@ func walkExpr(expr Expr) Expr {
 			r = &IrExprConversion{
 				tok:     funcall.token(),
 				toGtype: funcall.rel.gtype,
-				expr:    funcall.args[0],
+				arg:     funcall.args[0],
 			}
 			return r
 		}
