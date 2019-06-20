@@ -174,9 +174,9 @@ func walkExpr(expr Expr) Expr {
 		if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 			// Conversion
 			r = &IrExprConversion{
-				tok:   funcall.token(),
-				gtype: funcall.rel.gtype,
-				expr:  funcall.args[0],
+				tok:     funcall.token(),
+				toGtype: funcall.rel.gtype,
+				arg:     funcall.args[0],
 			}
 			return r
 		}
@@ -223,8 +223,8 @@ func walkExpr(expr Expr) Expr {
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
-						tok:  valueToAppend.token(),
-						expr: valueToAppend,
+						tok: valueToAppend.token(),
+						arg: valueToAppend,
 					}
 					funcall.args[1] = eConvertion
 				}
