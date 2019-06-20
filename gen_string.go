@@ -80,9 +80,9 @@ func emitStringsEqualFromStack(equal bool) {
 
 	// 3rd arg
 	if equal {
-		emit("LOAD_NUMBER $1")
+		emit("LOAD_NUMBER 1")
 	} else {
-		emit("LOAD_NUMBER $0")
+		emit("LOAD_NUMBER 0")
 	}
 	emit("PUSH_8")
 
