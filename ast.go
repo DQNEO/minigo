@@ -111,6 +111,13 @@ type ExprBinop struct {
 	right Expr
 }
 
+type IrExprStringComparison struct {
+	tok *Token
+	op gostring
+	left  Expr
+	right Expr
+}
+
 type ExprUop struct {
 	tok     *Token
 	op      gostring

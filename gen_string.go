@@ -9,7 +9,11 @@ func emitEmptyString() {
 	eEmpty.emit()
 }
 
-func (binop *ExprBinop) emitCompareStrings() {
+func (e *IrExprStringComparison) token() *Token {
+	return e.tok
+}
+
+func (binop *IrExprStringComparison) emit() {
 	emit("# emitCompareStrings")
 	var equal bool
 	switch cstring(binop.op) {

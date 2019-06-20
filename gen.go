@@ -184,10 +184,17 @@ func emitIncrDecl(inst string, operand Expr) {
 	emitSavePrimitive(left)
 }
 
+
 func (binop *ExprBinop) emitComp() {
 	emit("# emitComp")
 	if binop.left.getGtype().isString() {
-		binop.emitCompareStrings()
+		e := &IrExprStringComparison{
+			tok: binop.token(),
+			op: binop.op,
+			left: binop.left,
+			right: binop.right,
+		}
+		e.emit()
 		return
 	}
 
