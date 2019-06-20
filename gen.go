@@ -192,8 +192,8 @@ func (binop *ExprBinop) emitComp() {
 	}
 
 	var instruction string
-	op := string(binop.op)
-	switch op {
+	op := binop.op
+	switch cstring(op) {
 	case "<":
 		instruction = "setl"
 	case ">":
@@ -218,7 +218,7 @@ func (ast *ExprBinop) emit() {
 		emitStringConcate(ast.left, ast.right)
 		return
 	}
-	switch string(ast.op) {
+	switch cstring(ast.op) {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
