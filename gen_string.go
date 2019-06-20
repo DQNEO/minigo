@@ -77,14 +77,19 @@ func emitStringsEqualFromStack(equal bool) {
 	emitConvertNilToEmptyString()
 
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("POP_TO_ARG_1")
-	emit("FUNCALL iruntime.gostrcmp")
+
+	// 3rd arg
 	if equal {
-		emit("CMP_EQ_ZERO") // retval == 0
+		emit("LOAD_NUMBER $1")
 	} else {
-		emit("CMP_NE_ZERO") // retval != 0
+		emit("LOAD_NUMBER $0")
 	}
+	emit("PUSH_8")
+
+	emit("POP_TO_ARG_2")
+	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0")
+	emit("FUNCALL iruntime.eqCstrings")
 }
 
 func emitStringConcate(left Expr, right Expr) {

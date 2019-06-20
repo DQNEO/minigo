@@ -115,8 +115,13 @@ func strcopy(src string, dest string, slen int) string {
 	return dest
 }
 
-func gostrcmp(a string, b string) int {
-	return strcmp(a, b)
+func eqCstrings(a string, b string, eq bool) bool {
+	var ret bool = (strcmp(a, b) == 0)
+	if eq {
+		return ret
+	} else {
+		return !ret
+	}
 }
 
 const MiniGo int = 1
