@@ -29,7 +29,7 @@ func f4() {
 	fmt.Printf("%d\n", len(tokens)) // 26
 	fmt.Printf("----------\n")
 	for _, tok := range tokens {
-		fmt.Printf("%s:%s\n", string(tok.typ), tok.sval)
+		fmt.Printf("%s:%s\n", string(tok.typ), tok.getSval())
 	}
 }
 

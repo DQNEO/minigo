@@ -54,11 +54,16 @@ func (ts *TokenStream) isEnd() bool {
 	return ts.index > len(ts.tokens)-1
 }
 
-func (tok *Token) String() string {
+func (tok *Token) getSval() cstring {
 	var sval cstring = ""
 	if len(tok.sval) > 0 {
 		sval = cstring(tok.sval)
 	}
+	return sval
+}
+
+func (tok *Token) String() string {
+	sval := tok.getSval()
 	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
 		sval, tok.filename, tok.line, tok.column)
 }
@@ -137,7 +142,7 @@ func (tok *Token) isSemicolon() bool {
 */
 
 func (tok *Token) dump() {
-	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.sval)
+	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.getSval())
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
 }
