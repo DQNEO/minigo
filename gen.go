@@ -250,25 +250,26 @@ func (ast *ExprBinop) emit() {
 	ast.right.emit()
 	emit("PUSH_8")
 
-	if ast.op == "+" {
+	op := ast.op
+	if op == "+" {
 		emit("SUM_FROM_STACK")
-	} else if ast.op == "-" {
+	} else if op == "-" {
 		emit("SUB_FROM_STACK")
-	} else if ast.op == "*" {
+	} else if op == "*" {
 		emit("IMUL_FROM_STACK")
-	} else if ast.op == "%" {
+	} else if op == "%" {
 		emit("pop %%rcx")
 		emit("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 		emit("mov %%rdx, %%rax")
-	} else if ast.op == "/" {
+	} else if op == "/" {
 		emit("pop %%rcx")
 		emit("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 	} else {
-		errorft(ast.token(), "Unknown binop: %s", ast.op)
+		errorft(ast.token(), "Unknown binop: %s", op)
 	}
 }
 
