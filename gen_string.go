@@ -67,7 +67,6 @@ func emitConvertNilToEmptyString() {
 	emit("%s:", labelEnd)
 }
 
-// call strcmp
 func emitStringsEqualFromStack(equal bool) {
 	emit("pop %%rax") // left
 
