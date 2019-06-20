@@ -19,7 +19,15 @@ func eqGostring2(a gostring, b gostring) bool {
 }
 
 func eqGostring(a gostring, b gostring) bool {
-	return string(a) == string(b)
+	var ret1 bool
+	ret1 =  string(a) == string(b)
+
+	var ret2 bool
+	ret2 = eqGostring2(a, b)
+	if ret1 != ret2 {
+		panic("String Comparison Unmatch")
+	}
+	return ret1
 }
 
 func eqCstring(a cstring, b cstring) bool {
