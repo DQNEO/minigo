@@ -278,7 +278,7 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 }
 
 func (e *ExprUop) getGtype() *Gtype {
-	switch e.op {
+	switch cstring(e.op) {
 	case "&":
 		return &Gtype{
 			kind:     G_POINTER,
@@ -395,7 +395,7 @@ func (e *ExprConstVariable) getGtype() *Gtype {
 }
 
 func (e *ExprBinop) getGtype() *Gtype {
-	switch e.op {
+	switch cstring(e.op) {
 	case "<", ">", "<=", ">=", "!=", "==", "&&", "||":
 		return gBool
 	case "+":

@@ -12,7 +12,7 @@ func emitEmptyString() {
 func (binop *ExprBinop) emitCompareStrings() {
 	emit("# emitCompareStrings")
 	var equal bool
-	switch binop.op {
+	switch cstring(binop.op) {
 	case "<":
 		TBI(binop.token(), "")
 	case ">":

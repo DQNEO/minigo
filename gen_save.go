@@ -45,7 +45,7 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
 	emit("# *ExprUop.emitSavePrimitive()")
-	assert(uop.op == "*", uop.tok, "uop op should be *")
+	assert(eqGostring(uop.op , gostring("*")), uop.tok, "uop op should be *")
 	emit("PUSH_8 # what")
 	uop.operand.emit()
 	emit("PUSH_8 # where")

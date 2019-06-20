@@ -154,7 +154,7 @@ func (ast *ExprUop) emit() {
 	ast.operand = operand
 	emit("# emitting ExprUop")
 	op := ast.op
-	switch op {
+	switch cstring(op) {
 
 	case "&" :
 		switch ast.operand.(type) {
@@ -190,7 +190,7 @@ func (ast *ExprUop) emit() {
 		// -(x) -> (-1) * (x)
 		left := &ExprNumberLiteral{val: -1}
 		binop := &ExprBinop{
-			op:    "*",
+			op:    gostring("*"),
 			left:  left,
 			right: ast.operand,
 		}
@@ -364,14 +364,14 @@ func (e *ExprSlice) emitSubString() {
 	}
 	eNewStrlen := &ExprBinop{
 		tok:   e.token(),
-		op:    "-",
+		op:    gostring("-"),
 		left:  high,
 		right: e.low,
 	}
 	// mem size = strlen + 1
 	eMemSize := &ExprBinop{
 		tok:  e.token(),
-		op:   "+",
+		op:   gostring("+"),
 		left: eNewStrlen,
 		right: &ExprNumberLiteral{
 			val: 1,
@@ -433,7 +433,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcLen := &ExprBinop{
-		op:    "-",
+		op:    gostring("-"),
 		left:  e.high,
 		right: e.low,
 	}
@@ -451,7 +451,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcCap := &ExprBinop{
-		op:    "-",
+		op:    gostring("-"),
 		left:  max,
 		right: e.low,
 	}

@@ -652,7 +652,7 @@ func (p *parser) parseUnaryExpr() Expr {
 	case tok.isPunct("&"):
 		uop := &ExprUop{
 			tok:     tok,
-			op:      tok.sval,
+			op:      gostring(tok.sval),
 			operand: p.parsePrim(),
 		}
 		// when &T{}, allocate stack memory
@@ -667,19 +667,19 @@ func (p *parser) parseUnaryExpr() Expr {
 	case tok.isPunct("*"):
 		return &ExprUop{
 			tok:     tok,
-			op:      tok.sval,
+			op:      gostring(tok.sval),
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("!"):
 		return &ExprUop{
 			tok:     tok,
-			op:      tok.sval,
+			op:      gostring(tok.sval),
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
 		return &ExprUop{
 			tok:     tok,
-			op:      tok.sval,
+			op:      gostring(tok.sval),
 			operand: p.parsePrim(),
 		}
 	default:
@@ -742,7 +742,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 				}
 				ast = &ExprBinop{
 					tok:   tok,
-					op:    tok.sval,
+					op:    gostring(tok.sval),
 					left:  ast,
 					right: right,
 				}
@@ -1277,7 +1277,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssig
 	p.assert(len(rights) == 1, "num of rights is 1")
 	binop := &ExprBinop{
 		tok:   ptok,
-		op:    op,
+		op:    gostring(op),
 		left:  left,
 		right: rights[0],
 	}
