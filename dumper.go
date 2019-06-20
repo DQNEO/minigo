@@ -267,7 +267,7 @@ func (e *ExprVaArg) dump() {
 func (e *IrExprConversion) dump() {
 	debugf("conversion")
 	debugNest++
-	debugf("toType:%s", e.gtype.String())
+	debugf("toType:%s", e.toGtype.String())
 	e.expr.dump()
 	debugNest--
 }

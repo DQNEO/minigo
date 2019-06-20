@@ -174,9 +174,9 @@ func walkExpr(expr Expr) Expr {
 		if funcall.rel.expr == nil && funcall.rel.gtype != nil {
 			// Conversion
 			r = &IrExprConversion{
-				tok:   funcall.token(),
-				gtype: funcall.rel.gtype,
-				expr:  funcall.args[0],
+				tok:     funcall.token(),
+				toGtype: funcall.rel.gtype,
+				expr:    funcall.args[0],
 			}
 			return r
 		}

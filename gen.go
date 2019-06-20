@@ -476,7 +476,7 @@ func (e *ExprVaArg) emit() {
 
 func (e *IrExprConversion) emit() {
 	emit("# IrExprConversion.emit()")
-	if e.gtype.isString() {
+	if e.toGtype.isString() {
 		// s = string(bytes)
 		labelEnd := makeLabel()
 		e.expr.emit()
