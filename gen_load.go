@@ -153,7 +153,10 @@ func (ast *ExprUop) emit() {
 	operand := unwrapRel(ast.operand)
 	ast.operand = operand
 	emit("# emitting ExprUop")
-	if ast.op == "&" {
+	op := ast.op
+	switch op {
+
+	case "&" :
 		switch ast.operand.(type) {
 		case *ExprVariable:
 			vr := ast.operand.(*ExprVariable)
@@ -176,13 +179,13 @@ func (ast *ExprUop) emit() {
 		default:
 			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
-	} else if ast.op == "*" {
+	case "*":
 		ast.operand.emit()
 		emit("LOAD_8_BY_DEREF")
-	} else if ast.op == "!" {
+	case "!":
 		ast.operand.emit()
 		emit("CMP_EQ_ZERO")
-	} else if ast.op == "-" {
+	case "-":
 		// delegate to biop
 		// -(x) -> (-1) * (x)
 		left := &ExprNumberLiteral{val: -1}
@@ -192,7 +195,7 @@ func (ast *ExprUop) emit() {
 			right: ast.operand,
 		}
 		binop.emit()
-	} else {
+	default:
 		errorft(ast.token(), "unable to handle uop %s", ast.op)
 	}
 	//debugf("end of emitting ExprUop")
