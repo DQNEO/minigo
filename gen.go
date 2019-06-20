@@ -192,10 +192,11 @@ func (binop *ExprBinop) emitComp() {
 	}
 
 	var instruction string
-	switch binop.op {
+	op := string(binop.op)
+	switch op {
 	case "<":
 		instruction = "setl"
-	case ">":
+	case ">z":
 		instruction = "setg"
 	case "<=":
 		instruction = "setle"
@@ -211,11 +212,11 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if ast.op == "+" && ast.left.getGtype().isString() {
+	if eq(string(ast.op) , "+") && ast.left.getGtype().isString() {
 		emitStringConcate(ast.left, ast.right)
 		return
 	}
-	switch ast.op {
+	switch string(ast.op) {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
@@ -252,7 +253,7 @@ func (ast *ExprBinop) emit() {
 	emit("PUSH_8")
 
 	op := ast.op
-	switch op {
+	switch cstring(op) {
 	case "+":
 		emit("SUM_FROM_STACK")
 	case "-":

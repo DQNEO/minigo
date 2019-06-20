@@ -106,14 +106,14 @@ type ExprMethodcall struct {
 
 type ExprBinop struct {
 	tok   *Token
-	op    string
+	op    gostring
 	left  Expr
 	right Expr
 }
 
 type ExprUop struct {
 	tok     *Token
-	op      string
+	op      gostring
 	operand Expr
 }
 

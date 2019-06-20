@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+type gostring []byte
+type cstring string
+
+func eq(a string, b string) bool {
+	return a == b
+}
+
 var GENERATION int = 1
 
 var debugMode = false // execute debugf() or not
