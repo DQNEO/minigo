@@ -40,6 +40,15 @@ func (stmt *StmtSwitch) emit() {
 	// switch (expr) {
 	if stmt.cond != nil {
 		emit("# the subject expression")
+		if ! stmt.isTypeSwitch {
+			if stmt.cond.getGtype().isString() {
+				irConversion, ok := stmt.cond.(*IrExprConversion)
+				assert(ok, nil, "should be IrExprConversion")
+				origType := irConversion.expr.getGtype()
+				assert(origType.getKind() == G_SLICE, nil, "must be slice")
+				//debugf("# switch e type = %s, %s", origType.String(), stmt.cond.token().String())
+			}
+		}
 		stmt.cond.emit()
 		emit("PUSH_8 # the subject value")
 		emit("#")
