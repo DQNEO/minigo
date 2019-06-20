@@ -20,8 +20,8 @@ func eqGostringByByte(a gostring, b gostring) bool {
 }
 
 func eqGostring(a gostring, b gostring) bool {
-	dumpSlice(a)
-	dumpSlice(b)
+	//dumpSlice(a)
+	//dumpSlice(b)
 	var ret1 bool
 	ret1 =  string(a) == string(b)
 
