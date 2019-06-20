@@ -44,7 +44,7 @@ func (stmt *StmtSwitch) emit() {
 			if stmt.cond.getGtype().isString() {
 				irConversion, ok := stmt.cond.(*IrExprConversion)
 				assert(ok, nil, "should be IrExprConversion")
-				origType := irConversion.expr.getGtype()
+				origType := irConversion.arg.getGtype()
 				assert(origType.getKind() == G_SLICE, nil, "must be slice")
 				//debugf("# switch e type = %s, %s", origType.String(), stmt.cond.token().String())
 			}

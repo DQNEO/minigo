@@ -412,7 +412,7 @@ func (e *ExprNilLiteral) getGtype() *Gtype {
 }
 
 func (e *IrExprConversion) getGtype() *Gtype {
-	return e.gtype
+	return e.toGtype
 }
 
 func (e *ExprTypeSwitchGuard) getGtype() *Gtype {

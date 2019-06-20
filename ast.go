@@ -345,14 +345,14 @@ type ExprVaArg struct {
 }
 
 type IrExprConversion struct {
-	tok   *Token
-	gtype *Gtype // to
-	expr  Expr   // from
+	tok     *Token
+	toGtype *Gtype // to
+	arg     Expr   // from
 }
 
 type IrExprConversionToInterface struct {
-	tok  *Token
-	expr Expr // dynamic type
+	tok *Token
+	arg Expr // dynamic type
 }
 
 // ExprCaseClause or TypeCaseClause

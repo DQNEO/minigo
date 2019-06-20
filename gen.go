@@ -324,7 +324,7 @@ func emitCallMalloc(size int) {
 
 func (e *IrExprConversionToInterface) emit() {
 	emit("# IrExprConversionToInterface")
-	emitConversionToInterface(e.expr)
+	emitConversionToInterface(e.arg)
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
@@ -479,16 +479,16 @@ func (e *ExprVaArg) emit() {
 
 func (e *IrExprConversion) emit() {
 	emit("# IrExprConversion.emit()")
-	if e.gtype.isString() {
+	if e.toGtype.isString() {
 		// s = string(bytes)
 		labelEnd := makeLabel()
-		e.expr.emit()
+		e.arg.emit()
 		emit("TEST_IT")
 		emit("jne %s", labelEnd)
 		emitEmptyString()
 		emit("%s:", labelEnd)
 	} else {
-		e.expr.emit()
+		e.arg.emit()
 	}
 }
 

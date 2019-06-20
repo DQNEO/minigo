@@ -460,9 +460,9 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	p.expect(")")
 
 	return &IrExprConversion{
-		tok:   ptok,
-		gtype: gtype,
-		expr:  e,
+		tok:     ptok,
+		toGtype: gtype,
+		arg:     e,
 	}
 }
 
