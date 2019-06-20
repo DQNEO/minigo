@@ -28,6 +28,8 @@ func f4() {
 	tokens := Tokenize(bs)
 	fmt.Printf("%d\n", len(tokens)) // 26
 	fmt.Printf("----------\n")
+	return
+	// disable befow for now
 	for _, tok := range tokens {
 		fmt.Printf("%s:%s\n", string(tok.typ), tok.getSval())
 	}
