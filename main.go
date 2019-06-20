@@ -8,7 +8,7 @@ import (
 type gostring []byte
 type cstring string
 
-func eq(a string, b string) bool {
+func eqCstring(a string, b string) bool {
 	return a == b
 }
 
