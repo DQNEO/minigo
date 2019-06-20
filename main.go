@@ -12,6 +12,10 @@ func eq(a string, b string) bool {
 	return a == b
 }
 
+func eqGostring(a gostring, b gostring) bool {
+	return string(a) == string(b)
+}
+
 var GENERATION int = 1
 
 var debugMode = false // execute debugf() or not

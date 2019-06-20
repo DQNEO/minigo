@@ -526,7 +526,7 @@ func evalIntExpr(e Expr) int {
 		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
-		switch binop.op {
+		switch cstring(binop.op) {
 		case "+":
 			return evalIntExpr(binop.left) + evalIntExpr(binop.right)
 		case "-":
