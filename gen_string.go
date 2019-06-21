@@ -75,6 +75,7 @@ func (binop *IrExprStringComparison) emit() {
 
 	var params []*ExprVariable
 	// func eqGostring(a []byte, b []byte, eq bool) bool
+	// @TODO get params by DeclFunc dynamically
 	params = append(params, &ExprVariable{}) // a []byte
 	params = append(params, &ExprVariable{}) // b []byte
 	params = append(params, &ExprVariable{}) // eq bool
