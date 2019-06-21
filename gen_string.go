@@ -31,21 +31,7 @@ func (binop *IrExprStringComparison) emit() {
 		equal = true
 	}
 
-	labelElse := makeLabel()
-	labelEnd := makeLabel()
-
 	binop.left.emit()
-
-	// convert nil to the empty string
-	emit("CMP_EQ_ZERO")
-	emit("TEST_IT")
-	emit("LOAD_NUMBER 0")
-	emit("je %s", labelElse)
-	emitEmptyString()
-	emit("jmp %s", labelEnd)
-	emit("%s:", labelElse)
-	binop.left.emit()
-	emit("%s:", labelEnd)
 	emit("PUSH_8")
 
 	binop.right.emit()
