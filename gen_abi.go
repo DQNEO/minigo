@@ -15,7 +15,7 @@ package main
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
 */
 
-var retRegi [14]string = [14]string{
+var retRegi [14]cstring = [14]cstring{
 	"rax",
 	"rbx",
 	"rcx",
@@ -32,7 +32,7 @@ var retRegi [14]string = [14]string{
 	"r15",
 }
 
-var RegsForArguments [12]string = [12]string{
+var RegsForArguments [12]cstring = [12]cstring{
 	"rdi",
 	"rsi",
 	"rdx",
