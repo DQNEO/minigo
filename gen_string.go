@@ -32,10 +32,17 @@ func (binop *IrExprStringComparison) emit() {
 	}
 
 	// 3rd arg
+	var eEqual Expr
 	if equal {
 		emit("LOAD_NUMBER 1")
+		eEqual = &ExprNumberLiteral{
+			val:1,
+		}
 	} else {
 		emit("LOAD_NUMBER 0")
+		eEqual = &ExprNumberLiteral{
+			val:0,
+		}
 	}
 	emit("PUSH_8")
 
@@ -61,18 +68,27 @@ func (binop *IrExprStringComparison) emit() {
 	}
 
 	right.emit()
-	emit("PUSH_SLICE")
+	var args []Expr
+	args = append(args, left)
+	args = append(args, right)
+	args = append(args, eEqual)
 
-	emit("POP_TO_ARG_2")
-	emit("POP_TO_ARG_1")
-	emit("POP_TO_ARG_0")
-
-	emit("POP_TO_ARG_5")
-	emit("POP_TO_ARG_4")
-	emit("POP_TO_ARG_3")
-
-	emit("POP_TO_ARG_6")
-	emit("FUNCALL iruntime.eqGostring")
+	var params []*ExprVariable
+	// func eqGostring(a []byte, b []byte, eq bool) bool
+	params = append(params, &ExprVariable{}) // a []byte
+	params = append(params, &ExprVariable{}) // b []byte
+	params = append(params, &ExprVariable{}) // eq bool
+	// eqGostring(left, right, eEqual)
+	call := &IrStaticCall{
+		tok: binop.token(),
+		symbol: "iruntime.eqGostring",
+		isMethodCall:false,
+		args: args,
+		callee: &DeclFunc{
+			params: params,
+		},
+	}
+	call.emit()
 }
 
 func emitConvertNilToEmptyString() {
