@@ -191,8 +191,8 @@ func (binop *ExprBinop) emitComp() {
 		e := &IrExprStringComparison{
 			tok: binop.token(),
 			op: binop.op,
-			left: binop.left,
-			right: binop.right,
+			cstringLeft: binop.left,
+			cstringRight: binop.right,
 		}
 		e.emit()
 		return

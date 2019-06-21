@@ -47,24 +47,24 @@ func (binop *IrExprStringComparison) emit() {
 	emit("PUSH_8")
 
 	left := &IrExprConversion{
-		tok: binop.left.token(),
+		tok: binop.cstringLeft.token(),
 		toGtype: &Gtype{
 			kind: G_SLICE,
 			elementType:gByte,
 		},
-		arg: binop.left,
+		arg: binop.cstringLeft,
 	}
 
 	left.emit()
 	emit("PUSH_SLICE")
 
 	right := &IrExprConversion{
-		tok: binop.left.token(),
+		tok: binop.cstringRight.token(),
 		toGtype: &Gtype{
 			kind: G_SLICE,
 			elementType:gByte,
 		},
-		arg: binop.right,
+		arg: binop.cstringRight,
 	}
 
 	right.emit()
