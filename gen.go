@@ -462,7 +462,7 @@ func (e *ExprTypeAssertion) emit() {
 
 		emit("push %%rcx") // @TODO ????
 		emit("PUSH_8")
-		emitStringsEqualFromStack(true)
+		emitCStringsEqualFromStack(true)
 
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
 		// @TODO consider big data like slice, struct, etd

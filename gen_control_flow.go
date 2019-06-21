@@ -86,7 +86,7 @@ func (stmt *StmtSwitch) emit() {
 					emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
 				}
 				emit("PUSH_8")
-				emitStringsEqualFromStack(true)
+				emitCStringsEqualFromStack(true)
 
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
@@ -101,7 +101,7 @@ func (stmt *StmtSwitch) emit() {
 				e.emit()
 				emit("PUSH_8")
 				if e.getGtype().isString() {
-					emitStringsEqualFromStack(true)
+					emitCStringsEqualFromStack(true)
 				} else {
 					emit("CMP_FROM_STACK sete")
 				}

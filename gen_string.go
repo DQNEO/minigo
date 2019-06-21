@@ -50,7 +50,7 @@ func (binop *IrExprStringComparison) emit() {
 
 	binop.right.emit()
 	emit("PUSH_8")
-	emitStringsEqualFromStack(equal)
+	emitCStringsEqualFromStack(equal)
 }
 
 func emitConvertNilToEmptyString() {
@@ -67,7 +67,7 @@ func emitConvertNilToEmptyString() {
 	emit("%s:", labelEnd)
 }
 
-func emitStringsEqualFromStack(equal bool) {
+func emitCStringsEqualFromStack(equal bool) {
 	emit("pop %%rax") // left
 
 	emitConvertNilToEmptyString()
@@ -75,7 +75,6 @@ func emitStringsEqualFromStack(equal bool) {
 	emit("pop %%rax # right string")
 	emit("push %%rcx")
 	emitConvertNilToEmptyString()
-
 	emit("PUSH_8")
 
 	// 3rd arg
