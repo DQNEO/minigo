@@ -172,9 +172,9 @@ func emitStringConcate(left Expr, right Expr) {
 
 	emit("mov %%rax, %%rcx") // malloced
 	emit("POP_8")
+
 	emit("push %%rcx") // malloced
 	emit("PUSH_8")
-
 	e = &IrLowLevelCall{
 		symbol:        "strcat",
 		argsFromStack: 2,
