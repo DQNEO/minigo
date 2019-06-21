@@ -34,17 +34,14 @@ func (binop *IrExprStringComparison) emit() {
 	// 3rd arg
 	var eEqual Expr
 	if equal {
-		emit("LOAD_NUMBER 1")
 		eEqual = &ExprNumberLiteral{
 			val:1,
 		}
 	} else {
-		emit("LOAD_NUMBER 0")
 		eEqual = &ExprNumberLiteral{
 			val:0,
 		}
 	}
-	emit("PUSH_8")
 
 	left := &IrExprConversion{
 		tok: binop.cstringLeft.token(),
@@ -55,9 +52,6 @@ func (binop *IrExprStringComparison) emit() {
 		arg: binop.cstringLeft,
 	}
 
-	left.emit()
-	emit("PUSH_SLICE")
-
 	right := &IrExprConversion{
 		tok: binop.cstringRight.token(),
 		toGtype: &Gtype{
@@ -67,7 +61,6 @@ func (binop *IrExprStringComparison) emit() {
 		arg: binop.cstringRight,
 	}
 
-	right.emit()
 	var args []Expr
 	args = append(args, left)
 	args = append(args, right)
