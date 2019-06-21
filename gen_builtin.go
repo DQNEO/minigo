@@ -53,12 +53,29 @@ func (e *ExprLen) emit() {
 	case G_STRING:
 		arg.emit()
 		emit("PUSH_8")
-		emit("POP_TO_ARG_0")
-		emit("FUNCALL strlen")
+		eStrLen := &IrLowLevelCall{
+			symbol:        "strlen",
+			argsFromStack: 1,
+		}
+		eStrLen.emit()
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	}
 }
+
+type IrLowLevelCall struct {
+	token         *Token
+	symbol        cstring
+	argsFromStack int // args are taken from the stack
+}
+
+func (e *IrLowLevelCall) emit() {
+	for i:=e.argsFromStack - 1;i>=0;i-- {
+		emit("POP_TO_ARG_%d", i)
+	}
+	emit("FUNCALL %s", e.symbol)
+}
+
 
 func (e *ExprCap) emit() {
 	emit("# emit cap()")

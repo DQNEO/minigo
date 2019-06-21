@@ -128,16 +128,26 @@ func emitStringConcate(left Expr, right Expr) {
 	left.emit()
 	emit("PUSH_8 # left string")
 
+	// get left len
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL strlen # get left len")
-
+	eStrLen := &IrLowLevelCall{
+		symbol:        "strlen",
+		argsFromStack: 1,
+	}
+	eStrLen.emit()
 	emit("PUSH_8 # left len")
+
 	right.emit()
 	emit("PUSH_8 # right string")
+
+	// get right len
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL strlen # get right len")
+	eStrLen = &IrLowLevelCall{
+		symbol:        "strlen",
+		argsFromStack: 1,
+	}
+	eStrLen.emit()
+
 	emit("PUSH_8 # right len")
 
 	emit("pop %%rax # right len")
@@ -152,25 +162,33 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("add %%rax, %%rbx # len + len")
 	emit("add $1, %%rbx # + 1 (null byte)")
 	emit("mov %%rbx, %%rax")
+
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	e := &IrLowLevelCall{
+		symbol:        "iruntime.malloc",
+		argsFromStack: 1,
+	}
+	e.emit()
 
 	emit("mov %%rax, %%rcx") // malloced
 	emit("POP_8")
 	emit("push %%rcx") // malloced
 	emit("PUSH_8")
-	emit("POP_TO_ARG_1")
-	emit("POP_TO_ARG_0") // malloced
-	emit("FUNCALL strcat")
+
+	e = &IrLowLevelCall{
+		symbol:        "strcat",
+		argsFromStack: 2,
+	}
+	e.emit()
 
 	emit("mov %%rax, %%rcx") // strcatted
 	emit("POP_8")
 	emit("push %%rcx") // strcatted
 	emit("PUSH_8")
 
-	emit("POP_TO_ARG_1")
-	emit("POP_TO_ARG_0") // strcatted
-
-	emit("FUNCALL strcat")
+	e = &IrLowLevelCall{
+		symbol:        "strcat",
+		argsFromStack: 2,
+	}
+	e.emit()
 }
