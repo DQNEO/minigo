@@ -31,12 +31,48 @@ func (binop *IrExprStringComparison) emit() {
 		equal = true
 	}
 
-	binop.left.emit()
+	// 3rd arg
+	if equal {
+		emit("LOAD_NUMBER 1")
+	} else {
+		emit("LOAD_NUMBER 0")
+	}
 	emit("PUSH_8")
 
-	binop.right.emit()
-	emit("PUSH_8")
-	emitCStringsEqualFromStack(equal)
+	left := &IrExprConversion{
+		tok: binop.left.token(),
+		toGtype: &Gtype{
+			kind: G_SLICE,
+			elementType:gByte,
+		},
+		arg: binop.left,
+	}
+
+	left.emit()
+	emit("PUSH_SLICE")
+
+	right := &IrExprConversion{
+		tok: binop.left.token(),
+		toGtype: &Gtype{
+			kind: G_SLICE,
+			elementType:gByte,
+		},
+		arg: binop.right,
+	}
+
+	right.emit()
+	emit("PUSH_SLICE")
+
+	emit("POP_TO_ARG_2")
+	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0")
+
+	emit("POP_TO_ARG_5")
+	emit("POP_TO_ARG_4")
+	emit("POP_TO_ARG_3")
+
+	emit("POP_TO_ARG_6")
+	emit("FUNCALL iruntime.eqGostring")
 }
 
 func emitConvertNilToEmptyString() {

@@ -124,4 +124,27 @@ func eqCstrings(a string, b string, eq bool) bool {
 	}
 }
 
+func eqGostringInternal(a []byte, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i:=0;i<len(a);i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqGostring(a []byte, b []byte, eq bool) bool {
+	var ret bool
+	ret = eqGostringInternal(a,b)
+	if eq {
+		return ret
+	} else {
+		return !ret
+	}
+}
+
 const MiniGo int = 1
