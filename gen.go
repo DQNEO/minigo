@@ -486,7 +486,7 @@ func (e *ExprVaArg) emit() {
 
 func (e *IrExprConversion) emit() {
 	emit("# IrExprConversion.emit()")
-	if e.toGtype.isString() {
+	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isString() {
 		emit("# convert slice to string")
 		// string(bytes)
 		labelEnd := makeLabel()
@@ -496,7 +496,7 @@ func (e *IrExprConversion) emit() {
 		emit("# if nil then")
 		emitEmptyString()
 		emit("%s:", labelEnd)
-	} else if e.arg.getGtype().isString() && e.toGtype.getKind() == G_SLICE {
+	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
 		//  []byte(string)
 		emit("# convert string to slice")
 		labelEnd := makeLabel()

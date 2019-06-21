@@ -96,6 +96,14 @@ func (gtype *Gtype) is24WidthType() bool {
 	}
 }
 
+func (gtype *Gtype) isBytesSlice() bool {
+	underLying := gtype.Underlying()
+	if underLying.kind == G_SLICE && underLying.elementType.getKind() == G_BYTE {
+		return true
+	}
+	return false
+}
+
 func (gtype *Gtype) isString() bool {
 	if gtype.getKind() == G_STRING {
 		return true
