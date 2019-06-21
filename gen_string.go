@@ -156,13 +156,21 @@ func emitStringConcate(left Expr, right Expr) {
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL iruntime.malloc")
 
+	emit("mov %%rax, %%rcx") // malloced
+	emit("POP_8")
+	emit("push %%rcx") // malloced
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
 	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0") // malloced
 	emit("FUNCALL strcat")
 
+	emit("mov %%rax, %%rcx") // strcatted
+	emit("POP_8")
+	emit("push %%rcx") // strcatted
 	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
+
 	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0") // strcatted
+
 	emit("FUNCALL strcat")
 }
