@@ -454,8 +454,8 @@ func (e *ExprTypeAssertion) emit() {
 		// x.(T) asserts that the dynamic type of x is identical to the type T.
 
 		e.expr.emit() // emit interface
-		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
-		emit("PUSH_8")
+		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
+		emit("PUSH_8 # push dynamic data")
 		// @TODO DRY with type switch statement
 		typeLabel := symbolTable.getTypeLabel(e.gtype)
 		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
@@ -466,7 +466,7 @@ func (e *ExprTypeAssertion) emit() {
 
 		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
 		// @TODO consider big data like slice, struct, etd
-		emit("pop %%rax # load ptr")
+		emit("pop %%rax # load dynamic data")
 		emit("TEST_IT")
 		labelEnd := makeLabel()
 		emit("je %s # jmp if nil", labelEnd)
