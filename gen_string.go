@@ -117,11 +117,11 @@ func emitCStringsEqualFromStack(equal bool) {
 	}
 	emit("PUSH_8")
 
-	emit("POP_TO_ARG_2")
-	emit("POP_TO_ARG_1")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.eqCstrings")
-}
+	call := &IrLowLevelCall{
+		symbol:        "iruntime.eqCstrings",
+		argsFromStack: 3,
+	}
+	call.emit()}
 
 // emit []byte(cstring)
 func emitConvertStringToSlice(cstring Expr) {
