@@ -123,33 +123,44 @@ func emitCStringsEqualFromStack(equal bool) {
 	emit("FUNCALL iruntime.eqCstrings")
 }
 
-func emitStringConcate(left Expr, right Expr) {
-	emit("# emitStringConcate")
-	left.emit()
-	emit("PUSH_8 # left string")
+// emit []byte(cstring)
+func emitConvertStringToSlice(cstring Expr) {
+	labelEnd := makeLabel()
+	labelThen := makeLabel()
+	cstring.emit()
+	emit("TEST_IT") // check if string is nil
+	emit("jne %s # go to then if not nil", labelThen)
+	emit("# if nil ")
+	emit("LOAD_EMPTY_SLICE") // emit 0,0,0
+	emitEmptyString() // emit ""
+	emit("jmp %s", labelEnd)
+	emit("%s:", labelThen)
 
-	// get left len
+	emit("PUSH_8 # string addr")
+
+	// calc len
 	emit("PUSH_8")
 	eStrLen := &IrLowLevelCall{
 		symbol:        "strlen",
 		argsFromStack: 1,
 	}
 	eStrLen.emit()
-	emit("PUSH_8 # left len")
-	emit("PUSH_8 # left cap")
+	emit("mov %%rax, %%rbx # len")
+	emit("mov %%rax, %%rcx # cap")
 
-	right.emit()
-	emit("PUSH_8 # right string")
+	emit("POP_8 # string addr")
+	emit("%s:", labelEnd)
+}
 
-	// get right len
-	emit("PUSH_8")
-	eStrLen = &IrLowLevelCall{
-		symbol:        "strlen",
-		argsFromStack: 1,
-	}
-	eStrLen.emit()
-	emit("PUSH_8 # right len")
-	emit("PUSH_8 # right cap")
+func emitStringConcate(left Expr, right Expr) {
+	emit("# emitStringConcate")
+
+
+	emitConvertStringToSlice(left)
+	emit("PUSH_SLICE")
+
+	emitConvertStringToSlice(right)
+	emit("PUSH_SLICE")
 
 	eStrConCate := &IrLowLevelCall{
 		symbol:        "iruntime.gostringconcate",

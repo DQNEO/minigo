@@ -497,30 +497,9 @@ func (e *IrExprConversion) emit() {
 		emitEmptyString()
 		emit("%s:", labelEnd)
 	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
-		//  []byte(string)
-		emit("# convert string to slice")
-		labelEnd := makeLabel()
-		labelThen := makeLabel()
-		e.arg.emit() // load string
-		emit("TEST_IT") // check if string is nil
-		emit("jne %s # go to then if not nil", labelThen)
-		emit("# if nil ")
-		emit("LOAD_EMPTY_SLICE")
-		emitEmptyString()
-		emit("jmp %s", labelEnd)
-		emit("%s:", labelThen)
-
-		e.arg.emit() // load string
-		emit("PUSH_8")
-		elen := &ExprLen{
-			arg:e.arg,
-		}
-		elen.emit()
-		emit("PUSH_8 # len")
-		emit("PUSH_8 # cap")
-		emit("POP_SLICE")
-		emit("%s:", labelEnd)
-
+		//  []byte(cstring)
+		cstring := e.arg
+		emitConvertStringToSlice(cstring)
 	} else {
 		e.arg.emit()
 	}
