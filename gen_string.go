@@ -152,14 +152,14 @@ func emitConvertStringToSlice(cstring Expr) {
 	emit("%s:", labelEnd)
 }
 
-func emitStringConcate(left Expr, right Expr) {
+func emitStringConcate(leftCstring Expr, rightCstring Expr) {
 	emit("# emitStringConcate")
 
 
-	emitConvertStringToSlice(left)
+	emitConvertStringToSlice(leftCstring)
 	emit("PUSH_SLICE")
 
-	emitConvertStringToSlice(right)
+	emitConvertStringToSlice(rightCstring)
 	emit("PUSH_SLICE")
 
 	eStrConCate := &IrLowLevelCall{
