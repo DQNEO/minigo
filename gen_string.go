@@ -148,16 +148,12 @@ func emitStringConcate(left Expr, right Expr) {
 		argsFromStack: 1,
 	}
 	eStrLen.emit()
-
 	emit("PUSH_8 # right len")
 	emit("PUSH_8 # right cap")
 
-	emit("POP_TO_ARG_5 # cap")
-	emit("POP_TO_ARG_4 # len")
-	emit("POP_TO_ARG_3 # ptr")
-	emit("POP_TO_ARG_2 # cap")
-	emit("POP_TO_ARG_1 # len")
-	emit("POP_TO_ARG_0 # ptr")
-	emit("FUNCALL iruntime.gostringconcate")
-
+	eStrConCate := &IrLowLevelCall{
+		symbol:        "iruntime.gostringconcate",
+		argsFromStack: 6,
+	}
+	eStrConCate.emit()
 }
