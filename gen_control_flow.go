@@ -102,14 +102,10 @@ func (stmt *StmtSwitch) emit() {
 				emit("# Duplicate the cond value in stack")
 
 				if needSstringToSliceConversion {
+					assert(e.getGtype().isString(), e.token(), "caseClause should be string")
 					emit("POP_SLICE # the cond value")
 					emit("PUSH_SLICE # the cond value")
-				} else {
-					emit("POP_8 # the cond value")
-					emit("PUSH_8 # the cond value")
-				}
 
-				if e.getGtype().isString() {
 					emit("PUSH_SLICE # the cond valiue")
 
 					emitConvertStringToSlice(e)
@@ -117,6 +113,9 @@ func (stmt *StmtSwitch) emit() {
 
 					emitGoStringsEqualFromStack()
 				} else {
+					emit("POP_8 # the cond value")
+					emit("PUSH_8 # the cond value")
+
 					emit("PUSH_8 # arg1: the cond value")
 					e.emit()
 					emit("PUSH_8 # arg2: case value")
