@@ -36,7 +36,7 @@ func (stmt *StmtSwitch) emit() {
 	emit("# switch statement")
 	labelEnd := makeLabel()
 	var labels []string
-
+	var needSstringToSliceConversion bool
 	// switch (expr) {
 	if stmt.cond != nil {
 		emit("# the subject expression")
@@ -46,11 +46,17 @@ func (stmt *StmtSwitch) emit() {
 				assert(ok, nil, "should be IrExprConversion")
 				origType := irConversion.arg.getGtype()
 				assert(origType.getKind() == G_SLICE, nil, "must be slice")
+				needSstringToSliceConversion = true
 				//debugf("# switch e type = %s, %s", origType.String(), stmt.cond.token().String())
 			}
 		}
-		stmt.cond.emit()
-		emit("PUSH_8 # the subject value")
+		if needSstringToSliceConversion {
+			emitConvertStringToSlice(stmt.cond)
+			emit("PUSH_24 # the subject value")
+		} else {
+			stmt.cond.emit()
+			emit("PUSH_8 # the subject value")
+		}
 		emit("#")
 	} else {
 		// switch {
@@ -94,13 +100,17 @@ func (stmt *StmtSwitch) emit() {
 		} else {
 			for _, e := range caseClause.exprs {
 				emit("# Duplicate the cond value in stack")
-				emit("POP_8 # the cond value")
-				emit("PUSH_8 # the cond value")
+
+				if needSstringToSliceConversion {
+					emit("POP_SLICE # the cond value")
+					emit("PUSH_SLICE # the cond value")
+				} else {
+					emit("POP_8 # the cond value")
+					emit("PUSH_8 # the cond value")
+				}
 
 				if e.getGtype().isString() {
-					emit("PUSH_8 # arg1: the cond value")
-					emitConvertStringFromStackToSlice()
-					emit("PUSH_SLICE")
+					emit("PUSH_SLICE # the cond valiue")
 
 					emitConvertStringToSlice(e)
 					emit("PUSH_SLICE")
@@ -128,7 +138,12 @@ func (stmt *StmtSwitch) emit() {
 		emit("jmp %s", defaultLabel)
 	}
 
-	emit("POP_8 # destroy the subject value")
+	if needSstringToSliceConversion {
+		emit("POP_24 # destroy the subject value")
+	} else {
+		emit("POP_8 # destroy the subject value")
+
+	}
 	emit("#")
 	for i, caseClause := range stmt.cases {
 		emit("# case stmts")
