@@ -41,13 +41,12 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		emit("# the subject expression")
 		if ! stmt.isTypeSwitch {
-			if stmt.cond.getGtype().isString() {
+			if stmt.cond.getGtype().isString() && !gString.is24WidthType() {
 				irConversion, ok := stmt.cond.(*IrExprConversion)
 				assert(ok, nil, "should be IrExprConversion")
 				origType := irConversion.arg.getGtype()
 				assert(origType.getKind() == G_SLICE, nil, "must be slice")
 				needSstringToSliceConversion = true
-				//debugf("# switch e type = %s, %s", origType.String(), stmt.cond.token().String())
 			}
 		}
 		if needSstringToSliceConversion {
@@ -108,7 +107,11 @@ func (stmt *StmtSwitch) emit() {
 
 					emit("PUSH_SLICE # the cond valiue")
 
-					emitConvertStringToSlice(e)
+					if gString.is24WidthType() {
+						e.emit()
+					} else {
+						emitConvertStringToSlice(e)
+					}
 					emit("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()
