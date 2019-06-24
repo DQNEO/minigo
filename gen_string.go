@@ -121,7 +121,8 @@ func emitCStringsEqualFromStack(equal bool) {
 		symbol:        "iruntime.eqCstrings",
 		argsFromStack: 3,
 	}
-	call.emit()}
+	call.emit()
+}
 
 // emit []byte(cstring)
 func emitConvertStringToSlice(cstring Expr) {
