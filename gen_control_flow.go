@@ -102,10 +102,9 @@ func (stmt *StmtSwitch) emit() {
 					emitConvertStringFromStackToSlice()
 					emit("PUSH_SLICE")
 
-					e.emit()
-					emit("PUSH_8 # arg2: case value")
-					emitConvertStringFromStackToSlice()
+					emitConvertStringToSlice(e)
 					emit("PUSH_SLICE")
+
 					emitGoStringsEqualFromStack()
 				} else {
 					emit("PUSH_8 # arg1: the cond value")
