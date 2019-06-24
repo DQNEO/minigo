@@ -46,13 +46,13 @@ func (stmt *StmtSwitch) emit() {
 				assert(ok, nil, "should be IrExprConversion")
 				origType := irConversion.arg.getGtype()
 				assert(origType.getKind() == G_SLICE, nil, "must be slice")
+				irConversion.arg.emit()
+				emit("PUSH_24 # the subject value")
 				needSstringToSliceConversion = true
 			}
 		}
-		if needSstringToSliceConversion {
-			emitConvertStringToSlice(stmt.cond)
-			emit("PUSH_24 # the subject value")
-		} else {
+
+		if !needSstringToSliceConversion {
 			stmt.cond.emit()
 			emit("PUSH_8 # the subject value")
 		}
