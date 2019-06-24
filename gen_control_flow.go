@@ -93,13 +93,13 @@ func (stmt *StmtSwitch) emit() {
 			}
 		} else {
 			for _, e := range caseClause.exprs {
-				emit("# Duplicate the subject value in stack")
-				emit("POP_8")
-				emit("PUSH_8")
-				emit("PUSH_8")
+				emit("# Duplicate the cond value in stack")
+				emit("POP_8 # the cond value")
+				emit("PUSH_8 # the cond value")
 
+				emit("PUSH_8 # arg1: the cond value")
 				e.emit()
-				emit("PUSH_8")
+				emit("PUSH_8 # arg2: case value")
 				if e.getGtype().isString() {
 					emitCStringsEqualFromStack(true)
 				} else {
