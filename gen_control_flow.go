@@ -107,11 +107,7 @@ func (stmt *StmtSwitch) emit() {
 
 					emit("PUSH_SLICE # the cond valiue")
 
-					if gString.is24WidthType() {
-						e.emit()
-					} else {
-						emitConvertStringToSlice(e)
-					}
+					emitConvertStringToSlice(e)
 					emit("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()

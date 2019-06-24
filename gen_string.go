@@ -167,6 +167,11 @@ func emitConvertStringFromStackToSlice() {
 // emit []byte(cstring)
 func emitConvertStringToSlice(cstring Expr) {
 	cstring.emit()
+
+	if gString.is24WidthType() {
+		return
+	}
+
 	emit("PUSH_8")
 
 	emitConvertStringFromStackToSlice()
