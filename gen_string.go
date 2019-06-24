@@ -99,6 +99,17 @@ func emitConvertNilToEmptyString() {
 	emit("%s:", labelEnd)
 }
 
+func emitGoStringsEqualFromStack() {
+	emit("LOAD_NUMBER 1")
+	emit("PUSH_8")
+
+	call := &IrLowLevelCall{
+		symbol:        "iruntime.eqGostring",
+		argsFromStack: 7,
+	}
+	call.emit()
+}
+
 func emitCStringsEqualFromStack(equal bool) {
 	emit("pop %%rax") // left
 
@@ -125,10 +136,11 @@ func emitCStringsEqualFromStack(equal bool) {
 }
 
 // emit []byte(cstring)
-func emitConvertStringToSlice(cstring Expr) {
+func emitConvertStringFromStackToSlice() {
 	labelEnd := makeLabel()
 	labelThen := makeLabel()
-	cstring.emit()
+
+	emit("POP_8 # restore string")
 	emit("TEST_IT") // check if string is nil
 	emit("jne %s # go to then if not nil", labelThen)
 	emit("# if nil ")
@@ -151,6 +163,13 @@ func emitConvertStringToSlice(cstring Expr) {
 
 	emit("POP_8 # string addr")
 	emit("%s:", labelEnd)
+}
+// emit []byte(cstring)
+func emitConvertStringToSlice(cstring Expr) {
+	cstring.emit()
+	emit("PUSH_8")
+
+	emitConvertStringFromStackToSlice()
 }
 
 func emitStringConcate(leftCstring Expr, rightCstring Expr) {

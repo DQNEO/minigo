@@ -97,12 +97,20 @@ func (stmt *StmtSwitch) emit() {
 				emit("POP_8 # the cond value")
 				emit("PUSH_8 # the cond value")
 
-				emit("PUSH_8 # arg1: the cond value")
-				e.emit()
-				emit("PUSH_8 # arg2: case value")
 				if e.getGtype().isString() {
-					emitCStringsEqualFromStack(true)
+					emit("PUSH_8 # arg1: the cond value")
+					emitConvertStringFromStackToSlice()
+					emit("PUSH_SLICE")
+
+					e.emit()
+					emit("PUSH_8 # arg2: case value")
+					emitConvertStringFromStackToSlice()
+					emit("PUSH_SLICE")
+					emitGoStringsEqualFromStack()
 				} else {
+					emit("PUSH_8 # arg1: the cond value")
+					e.emit()
+					emit("PUSH_8 # arg2: case value")
 					emit("CMP_FROM_STACK sete")
 				}
 
