@@ -458,7 +458,7 @@ func (e *ExprTypeAssertion) emit() {
 		emit("PUSH_8 # push dynamic data")
 		// @TODO DRY with type switch statement
 		typeLabel := symbolTable.getTypeLabel(e.gtype)
-		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
+		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, e.gtype.String())
 
 		emit("push %%rcx") // @TODO ????
 		emit("PUSH_8")
