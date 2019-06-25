@@ -35,6 +35,14 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 	return isTypeSwitch
 }
 
+func emitCompareDynamicTypeFromStack(gtype *Gtype) {
+	emit("POP_INTERFACE")
+	emit("push %%rcx # serialized type")
+	emitSerializedType(gtype)
+	emit("PUSH_8")
+	emitCStringsEqualFromStack(true)
+}
+
 func (stmt *StmtSwitch) emit() {
 
 	emit("# switch statement")
@@ -88,12 +96,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("PUSH_24")
 
 				emit("PUSH_INTERFACE")
-
-				emit("POP_INTERFACE")
-				emit("push %%rcx")
-				emitSerializedType(gtype)
-				emit("PUSH_8")
-				emitCStringsEqualFromStack(true)
+				emitCompareDynamicTypeFromStack(gtype)
 
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)

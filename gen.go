@@ -467,13 +467,8 @@ func (e *ExprTypeAssertion) emit() {
 		emit("PUSH_8 # push dynamic data")
 
 		emit("PUSH_INTERFACE")
-
-		emit("POP_INTERFACE")
-		emit("push %%rcx # serialized type")
-		// @TODO DRY with type switch statement
-		emitSerializedType(e.gtype)
-		emit("PUSH_8")
-		emitCStringsEqualFromStack(true)
+		gtype := e.gtype
+		emitCompareDynamicTypeFromStack(gtype)
 
 		emit("mov %%rax, %%rbx") // move ok value @TODO consider big data like slice, struct, etc
 		emit("pop %%rax # load dynamic data")
