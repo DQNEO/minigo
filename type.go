@@ -424,8 +424,10 @@ func (e *IrExprConversion) getGtype() *Gtype {
 }
 
 func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
-	TBI(e.token(), "")
-	return nil
+	return &Gtype{
+		kind: G_POINTER,
+	}
+
 }
 
 func (e *ExprTypeAssertion) getGtype() *Gtype {

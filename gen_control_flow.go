@@ -37,29 +37,30 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 
 func (stmt *StmtSwitch) emit() {
 
-	emit("#")
 	emit("# switch statement")
 	labelEnd := makeLabel()
 	var labels []string
 	var needSstringToSliceConversion bool
 	// switch (expr) {
+	var cond Expr
 	if stmt.cond != nil {
+		cond = stmt.cond
 		emit("# the cond expression")
 		if ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType() {
-				irConversion, ok := stmt.cond.(*IrExprConversion)
-				assert(ok, nil, "should be IrExprConversion")
-				origType := irConversion.arg.getGtype()
-				assert(origType.getKind() == G_SLICE, nil, "must be slice")
-				irConversion.arg.emit()
-				emit("PUSH_24 # the cond value")
-				needSstringToSliceConversion = true
+			irConversion, ok := stmt.cond.(*IrExprConversion)
+			assert(ok, nil, "should be IrExprConversion")
+			origType := irConversion.arg.getGtype()
+			assert(origType.getKind() == G_SLICE, nil, "must be slice")
+			irConversion.arg.emit()
+			cond = irConversion.arg
+			needSstringToSliceConversion = true
 		}
-
-		if !needSstringToSliceConversion {
-			stmt.cond.emit()
+		cond.emit()
+		if cond.getGtype().is24WidthType() {
+			emit("PUSH_24 # the cond value")
+		} else {
 			emit("PUSH_8 # the cond value")
 		}
-		emit("#")
 	} else {
 		// switch {
 		emit("# no condition")
