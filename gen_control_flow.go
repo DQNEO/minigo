@@ -87,6 +87,9 @@ func (stmt *StmtSwitch) emit() {
 				emit("POP_24")
 				emit("PUSH_24")
 
+				emit("PUSH_INTERFACE")
+
+				emit("POP_INTERFACE")
 				emit("push %%rcx")
 				emitSerializedType(gtype)
 				emit("PUSH_8")

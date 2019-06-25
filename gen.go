@@ -466,6 +466,9 @@ func (e *ExprTypeAssertion) emit() {
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
 		emit("PUSH_8 # push dynamic data")
 
+		emit("PUSH_INTERFACE")
+
+		emit("POP_INTERFACE")
 		emit("push %%rcx # serialized type")
 		// @TODO DRY with type switch statement
 		emitSerializedType(e.gtype)
