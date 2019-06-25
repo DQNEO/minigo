@@ -38,9 +38,12 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emit("POP_INTERFACE")
 	emit("push %%rcx # serialized type")
+	emitConvertStringFromStackToSlice()
+	emit("PUSH_SLICE")
+
 	emitSerializedType(gtype)
-	emit("PUSH_8")
-	emitCStringsEqualFromStack(true)
+	emit("PUSH_SLICE")
+	emitGoStringsEqualFromStack()
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
