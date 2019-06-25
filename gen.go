@@ -518,7 +518,6 @@ func (e *ExprStructLiteral) emit() {
 
 func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
-	emit("mov %%rcx, %%rax # copy type id")
 }
 
 func bool2string(bol bool) string {

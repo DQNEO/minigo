@@ -424,10 +424,7 @@ func (e *IrExprConversion) getGtype() *Gtype {
 }
 
 func (e *ExprTypeSwitchGuard) getGtype() *Gtype {
-	return &Gtype{
-		kind: G_POINTER,
-	}
-
+	return e.expr.getGtype()
 }
 
 func (e *ExprTypeAssertion) getGtype() *Gtype {

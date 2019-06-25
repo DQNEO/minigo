@@ -84,10 +84,10 @@ func (stmt *StmtSwitch) emit() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
 				emit("# Duplicate the cond value in stack")
-				emit("POP_8")
-				emit("PUSH_8")
+				emit("POP_24")
+				emit("PUSH_24")
 
-				emit("PUSH_8")
+				emit("push %%rcx")
 				emitSerializedType(gtype)
 				emit("PUSH_8")
 				emitCStringsEqualFromStack(true)
@@ -135,7 +135,7 @@ func (stmt *StmtSwitch) emit() {
 		emit("jmp %s", defaultLabel)
 	}
 
-	if needSstringToSliceConversion {
+	if cond != nil && cond.getGtype().is24WidthType() {
 		emit("POP_24 # destroy the cond value")
 	} else {
 		emit("POP_8 # destroy the cond value")
