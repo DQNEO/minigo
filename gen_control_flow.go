@@ -45,8 +45,7 @@ func (stmt *StmtSwitch) emit() {
 	// switch (expr) {
 	if stmt.cond != nil {
 		emit("# the cond expression")
-		if ! stmt.isTypeSwitch() {
-			if stmt.cond.getGtype().isString() && !gString.is24WidthType() {
+		if ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType() {
 				irConversion, ok := stmt.cond.(*IrExprConversion)
 				assert(ok, nil, "should be IrExprConversion")
 				origType := irConversion.arg.getGtype()
@@ -54,7 +53,6 @@ func (stmt *StmtSwitch) emit() {
 				irConversion.arg.emit()
 				emit("PUSH_24 # the cond value")
 				needSstringToSliceConversion = true
-			}
 		}
 
 		if !needSstringToSliceConversion {
