@@ -43,25 +43,26 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emitCStringsEqualFromStack(true)
 }
 
+func (stmt *StmtSwitch) needStringToSliceConversion() bool {
+	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType()
+}
+
 func (stmt *StmtSwitch) emit() {
 
 	emit("# switch statement")
 	labelEnd := makeLabel()
 	var labels []string
-	var needSstringToSliceConversion bool
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
 		cond = stmt.cond
 		emit("# the cond expression")
-		if ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType() {
+		if stmt.needStringToSliceConversion() {
 			irConversion, ok := stmt.cond.(*IrExprConversion)
 			assert(ok, nil, "should be IrExprConversion")
 			origType := irConversion.arg.getGtype()
 			assert(origType.getKind() == G_SLICE, nil, "must be slice")
-			irConversion.arg.emit()
-			cond = irConversion.arg
-			needSstringToSliceConversion = true
+			cond = irConversion.arg // set original slice
 		}
 		cond.emit()
 		if cond.getGtype().is24WidthType() {
@@ -105,7 +106,7 @@ func (stmt *StmtSwitch) emit() {
 			for _, e := range caseClause.exprs {
 				emit("# Duplicate the cond value in stack")
 
-				if needSstringToSliceConversion {
+				if stmt.needStringToSliceConversion() {
 					assert(e.getGtype().isString(), e.token(), "caseClause should be string")
 					emit("POP_SLICE # the cond value")
 					emit("PUSH_SLICE # the cond value")
