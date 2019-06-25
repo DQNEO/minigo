@@ -373,7 +373,6 @@ type ExprCaseClause struct {
 // https://golang.org/ref/spec#Switch_statements
 type StmtSwitch struct {
 	tok          *Token
-	isTypeSwitch bool
 	cond         Expr
 	cases        []*ExprCaseClause
 	dflt         *StmtSatementList

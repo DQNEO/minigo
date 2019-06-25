@@ -30,6 +30,11 @@ func (stmt *StmtIf) emit() {
 	}
 }
 
+func (stmt *StmtSwitch) isTypeSwitch() bool {
+	_, isTypeSwitch := stmt.cond.(*ExprTypeSwitchGuard)
+	return isTypeSwitch
+}
+
 func (stmt *StmtSwitch) emit() {
 
 	emit("#")
@@ -40,7 +45,7 @@ func (stmt *StmtSwitch) emit() {
 	// switch (expr) {
 	if stmt.cond != nil {
 		emit("# the subject expression")
-		if ! stmt.isTypeSwitch {
+		if ! stmt.isTypeSwitch() {
 			if stmt.cond.getGtype().isString() && !gString.is24WidthType() {
 				irConversion, ok := stmt.cond.(*IrExprConversion)
 				assert(ok, nil, "should be IrExprConversion")
@@ -76,7 +81,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("TEST_IT")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
-		} else if stmt.isTypeSwitch {
+		} else if stmt.isTypeSwitch() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
 				emit("# Duplicate the subject value in stack")

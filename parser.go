@@ -1332,11 +1332,8 @@ func (p *parser) parseSwitchStmt() Stmt {
 		p.requireBlock = false
 	}
 
-	_, isTypeSwitch := cond.(*ExprTypeSwitchGuard)
-
 	p.expect("{")
 	r := &StmtSwitch{
-		isTypeSwitch: isTypeSwitch,
 		tok:          ptok,
 		cond:         cond,
 	}
@@ -1347,7 +1344,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			p.skip()
 			var exprs []Expr
 			var gtypes []*Gtype
-			if r.isTypeSwitch {
+			if r.isTypeSwitch() {
 				gtype := p.parseType()
 				gtypes = append(gtypes, gtype)
 				for {
