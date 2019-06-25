@@ -444,6 +444,15 @@ func (e ExprArrayLiteral) emit() {
 	errorft(e.token(), "DO NOT EMIT")
 }
 
+func emitSerializedType(gtype *Gtype) {
+	if gtype.isNil() {
+		emit("mov $0, %%rax # nil")
+	} else {
+		typeLabel := symbolTable.getTypeLabel(gtype)
+		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
+	}
+}
+
 // https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), "expr must be an Interface type")
@@ -456,11 +465,10 @@ func (e *ExprTypeAssertion) emit() {
 		e.expr.emit() // emit interface
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
 		emit("PUSH_8 # push dynamic data")
-		// @TODO DRY with type switch statement
-		typeLabel := symbolTable.getTypeLabel(e.gtype)
-		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, e.gtype.String())
 
-		emit("push %%rcx # stringed dtype")
+		emit("push %%rcx # serialized type")
+		// @TODO DRY with type switch statement
+		emitSerializedType(e.gtype)
 		emit("PUSH_8")
 		emitCStringsEqualFromStack(true)
 

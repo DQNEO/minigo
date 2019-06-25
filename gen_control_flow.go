@@ -87,14 +87,9 @@ func (stmt *StmtSwitch) emit() {
 				emit("# Duplicate the cond value in stack")
 				emit("POP_8")
 				emit("PUSH_8")
-				emit("PUSH_8")
 
-				if gtype.isNil() {
-					emit("mov $0, %%rax # nil")
-				} else {
-					typeLabel := symbolTable.getTypeLabel(gtype)
-					emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
-				}
+				emit("PUSH_8")
+				emitSerializedType(gtype)
 				emit("PUSH_8")
 				emitCStringsEqualFromStack(true)
 
