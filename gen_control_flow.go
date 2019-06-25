@@ -44,7 +44,7 @@ func (stmt *StmtSwitch) emit() {
 	var needSstringToSliceConversion bool
 	// switch (expr) {
 	if stmt.cond != nil {
-		emit("# the subject expression")
+		emit("# the cond expression")
 		if ! stmt.isTypeSwitch() {
 			if stmt.cond.getGtype().isString() && !gString.is24WidthType() {
 				irConversion, ok := stmt.cond.(*IrExprConversion)
@@ -52,14 +52,14 @@ func (stmt *StmtSwitch) emit() {
 				origType := irConversion.arg.getGtype()
 				assert(origType.getKind() == G_SLICE, nil, "must be slice")
 				irConversion.arg.emit()
-				emit("PUSH_24 # the subject value")
+				emit("PUSH_24 # the cond value")
 				needSstringToSliceConversion = true
 			}
 		}
 
 		if !needSstringToSliceConversion {
 			stmt.cond.emit()
-			emit("PUSH_8 # the subject value")
+			emit("PUSH_8 # the cond value")
 		}
 		emit("#")
 	} else {
@@ -84,7 +84,7 @@ func (stmt *StmtSwitch) emit() {
 		} else if stmt.isTypeSwitch() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				emit("# Duplicate the subject value in stack")
+				emit("# Duplicate the cond value in stack")
 				emit("POP_8")
 				emit("PUSH_8")
 				emit("PUSH_8")
@@ -142,9 +142,9 @@ func (stmt *StmtSwitch) emit() {
 	}
 
 	if needSstringToSliceConversion {
-		emit("POP_24 # destroy the subject value")
+		emit("POP_24 # destroy the cond value")
 	} else {
-		emit("POP_8 # destroy the subject value")
+		emit("POP_8 # destroy the cond value")
 
 	}
 	emit("#")
