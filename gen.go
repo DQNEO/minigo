@@ -444,19 +444,6 @@ func (e ExprArrayLiteral) emit() {
 	errorft(e.token(), "DO NOT EMIT")
 }
 
-func emitSerializedType(gtype *Gtype) {
-	if gtype.isNil() {
-		emitEmptyString()
-		emit("mov $0, %%rbx")
-		emit("mov $0, %%rcx")
-	} else {
-		typeLabel := symbolTable.getTypeLabel(gtype)
-		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
-		emit("mov $%d, %%rbx", len(gtype.String()))
-		emit("mov $%d, %%rcx", len(gtype.String()))
-	}
-}
-
 // https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), "expr must be an Interface type")

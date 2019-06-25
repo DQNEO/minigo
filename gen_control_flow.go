@@ -35,6 +35,19 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 	return isTypeSwitch
 }
 
+func emitSerializedType(gtype *Gtype) {
+	if gtype.isNil() {
+		emitEmptyString()
+		emit("mov $0, %%rbx")
+		emit("mov $0, %%rcx")
+	} else {
+		typeLabel := symbolTable.getTypeLabel(gtype)
+		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
+		emit("mov $%d, %%rbx", len(gtype.String()))
+		emit("mov $%d, %%rcx", len(gtype.String()))
+	}
+}
+
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emit("POP_INTERFACE")
 	emit("push %%rcx # serialized type")
