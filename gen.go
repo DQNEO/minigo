@@ -460,12 +460,11 @@ func (e *ExprTypeAssertion) emit() {
 		typeLabel := symbolTable.getTypeLabel(e.gtype)
 		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, e.gtype.String())
 
-		emit("push %%rcx") // @TODO ????
+		emit("push %%rcx # stringed dtype")
 		emit("PUSH_8")
 		emitCStringsEqualFromStack(true)
 
-		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
-		// @TODO consider big data like slice, struct, etd
+		emit("mov %%rax, %%rbx") // move ok value @TODO consider big data like slice, struct, etc
 		emit("pop %%rax # load dynamic data")
 		emit("TEST_IT")
 		labelEnd := makeLabel()
