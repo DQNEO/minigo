@@ -71,10 +71,15 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent("#--------------------------------------------------------")
 	emitWithoutIndent("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
-		emitWithoutIndent(".S.S.%s:", shortMethodName)
-		emit(".quad .S.%s", shortMethodName)
-		emitWithoutIndent(".S.%s:", shortMethodName)
+		emit(".data 0")
+		emit(".S.S.%s:", shortMethodName)
+		gasIndentLevel++
+		emit(".data 1")
+		emit(".S.%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
+		gasIndentLevel--
+		emit(".data 0")
+		emit(".quad .S.%s", shortMethodName)
 	}
 
 }
