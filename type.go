@@ -120,26 +120,27 @@ func (gtype *Gtype) getSize() int {
 		}
 		return gtype.relation.gtype.getSize()
 	} else {
-		if gtype.kind == G_ARRAY {
+		switch gtype.kind {
+		case G_ARRAY:
 			assertNotNil(gtype.elementType != nil, nil)
 			return gtype.length * gtype.elementType.getSize()
-		} else if gtype.kind == G_STRUCT {
+		case G_STRUCT:
 			if gtype.size == undefinedSize {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.kind == G_POINTER {
+		case G_POINTER:
 			return ptrSize
-		} else if gtype.kind == G_INTERFACE {
+		case G_INTERFACE:
 			//     data    ,  receiverTypeId, dtype
 			return ptrSize + ptrSize + ptrSize
-		} else if gtype.kind == G_SLICE {
+		case G_SLICE:
 			return ptrSize + IntSize + IntSize
-		} else if gtype.kind == G_MAP {
+		case G_MAP:
 			return ptrSize
-		} else if gtype.kind == G_STRING {
+		case G_STRING:
 			return ptrSize
-		} else {
+		default:
 			return gtype.size
 		}
 	}
