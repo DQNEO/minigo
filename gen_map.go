@@ -11,7 +11,7 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_POINTER,
 		},
 		mapValue: &Gtype{
-			kind: G_STRING,
+			kind: G_POINTER,
 		},
 	}
 	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
