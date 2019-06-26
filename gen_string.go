@@ -127,7 +127,7 @@ func emitConvertCstringFromStackToSlice() {
 	emit("%s:", labelEnd)
 }
 // emit []byte(cstring)
-func emitConvertStringToSlice(cstring Expr) {
+func emitConvertCstringToSlice(cstring Expr) {
 	cstring.emit()
 
 	if gString.is24WidthType() {
@@ -143,10 +143,10 @@ func emitStringConcate(leftCstring Expr, rightCstring Expr) {
 	emit("# emitStringConcate")
 
 
-	emitConvertStringToSlice(leftCstring)
+	emitConvertCstringToSlice(leftCstring)
 	emit("PUSH_SLICE")
 
-	emitConvertStringToSlice(rightCstring)
+	emitConvertCstringToSlice(rightCstring)
 	emit("PUSH_SLICE")
 
 	eStrConCate := &IrLowLevelCall{

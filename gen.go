@@ -494,7 +494,7 @@ func (e *IrExprConversion) emit() {
 	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
 		//  []byte(cstring)
 		cstring := e.arg
-		emitConvertStringToSlice(cstring)
+		emitConvertCstringToSlice(cstring)
 	} else {
 		e.arg.emit()
 	}

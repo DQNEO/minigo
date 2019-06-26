@@ -134,7 +134,7 @@ func (stmt *StmtSwitch) emit() {
 
 					emit("PUSH_SLICE # the cond valiue")
 
-					emitConvertStringToSlice(e)
+					emitConvertCstringToSlice(e)
 					emit("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()
