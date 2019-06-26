@@ -165,11 +165,11 @@ func emitMapGet(mapType *Gtype) {
 
 		emit("LOAD_8_BY_DEREF") // dereference
 		emit("PUSH_8")
-		emitConvertStringFromStackToSlice()
+		emitConvertCstringFromStackToSlice()
 		emit("PUSH_SLICE")
 
 		emit("push %%r12")
-		emitConvertStringFromStackToSlice()
+		emitConvertCstringFromStackToSlice()
 		emit("PUSH_SLICE")
 
 		emitGoStringsEqualFromStack()

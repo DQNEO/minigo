@@ -51,7 +51,7 @@ func emitSerializedType(gtype *Gtype) {
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emit("POP_INTERFACE")
 	emit("push %%rcx # serialized type")
-	emitConvertStringFromStackToSlice()
+	emitConvertCstringFromStackToSlice()
 	emit("PUSH_SLICE")
 
 	emitSerializedType(gtype)
