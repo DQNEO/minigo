@@ -33,7 +33,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("lea .S.%s, %%rax", call.methodName) // index value
 	emit("PUSH_8 # map index value")         // index value
 
-	emitMapGet(mapType, false)
+	emitMapGet(mapType)
 
 	emit("PUSH_8 # funcref")
 
@@ -89,7 +89,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("%s:", labelEnd)
 
 	emit("PUSH_24")
-	emitMapGet(_map.getGtype(), true)
+	emitMapGet(_map.getGtype())
 }
 
 func mapOkRegister(is24Width bool) string {
@@ -105,7 +105,7 @@ func mapOkRegister(is24Width bool) string {
 // r11: map len")
 // r12: specified index value")
 // r13: loop counter")
-func emitMapGet(mapType *Gtype, deref bool) {
+func emitMapGet(mapType *Gtype) {
 
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
@@ -193,12 +193,10 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("push %%rax # stash key address")
 	emit("ADD_NUMBER 8 # value address")
 	emit("LOAD_8_BY_DEREF # set the found value address")
-	if deref {
-		if mapValueType.is24WidthType() {
-			emit("LOAD_24_BY_DEREF")
-		} else {
-			emit("LOAD_8_BY_DEREF")
-		}
+	if mapValueType.is24WidthType() {
+		emit("LOAD_24_BY_DEREF")
+	} else {
+		emit("LOAD_8_BY_DEREF")
 	}
 
 	emit("mov $1, %%%s # ok = true", okRegister)

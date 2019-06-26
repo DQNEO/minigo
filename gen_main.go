@@ -40,7 +40,7 @@ func (program *Program) emitDynamicTypes() {
 func (program *Program) emitMethodTable() {
 	emitWithoutIndent("#--------------------------------------------------------")
 	emit("# Method table")
-
+	emit(".data 0")
 	emitWithoutIndent("%s:", "receiverTypes")
 	emit(".quad 0 # receiverTypeId:0")
 	for i := 1; i <= len(program.methodTable); i++ {
@@ -61,7 +61,16 @@ func (program *Program) emitMethodTable() {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
 			emit(".quad .S.S.%s # key", shortMethodName)
-			emit(".quad %s # method", methodNameFull)
+			label := makeLabel()
+			gasIndentLevel++
+			emit(".data 1")
+			emit("%s:", label)
+			emit(".quad %s # func addr", methodNameFull)
+			gasIndentLevel--
+			emit(".data 0")
+			emit(".quad %s # func addr addr", label)
+
+
 			if !in_array(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
