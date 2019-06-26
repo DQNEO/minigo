@@ -8,7 +8,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	mapType := &Gtype{
 		kind: G_MAP,
 		mapKey: &Gtype{
-			kind: G_STRING,
+			kind: G_POINTER,
 		},
 		mapValue: &Gtype{
 			kind: G_STRING,
