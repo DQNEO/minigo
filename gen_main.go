@@ -85,7 +85,7 @@ func (program *Program) emitMethodTable() {
 		gasIndentLevel++
 		emit(".data 1")
 		emit(".S.%s:", shortMethodName)
-		emit(".string \"%s\"", shortMethodName)
+		emit(".quad 0") // Any value is ok. This is not referred to.
 		gasIndentLevel--
 		emit(".data 0")
 		emit(".quad .S.%s", shortMethodName)
