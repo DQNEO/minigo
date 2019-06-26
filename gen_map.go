@@ -260,13 +260,6 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	e.index.emit()
 	emit("PUSH_8") // index value
 
-	mapType := e.collection.getGtype().Underlying()
-	mapKeyType := mapType.mapKey
-
-	if mapKeyType.isString() {
-		//emit("pop %%rcx")          // index value
-	} else {
-	}
 	// malloc(8)
 	emitCallMalloc(8)
 	// %%rax : malloced address
