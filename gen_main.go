@@ -59,7 +59,7 @@ func (program *Program) emitMethodTable() {
 		for _, methodNameFull := range methods {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
-			emit(".quad .M%s # key", shortMethodName)
+			emit(".quad .M.M%s # key", shortMethodName)
 			emit(".quad %s # method", methodNameFull)
 			if !in_array(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
@@ -69,6 +69,8 @@ func (program *Program) emitMethodTable() {
 
 	emit("# METHOD NAMES")
 	for _, shortMethodName := range shortMethodNames {
+		emitWithoutIndent(".M.M%s:", shortMethodName)
+		emit(".quad .M%s", shortMethodName)
 		emitWithoutIndent(".M%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
 	}

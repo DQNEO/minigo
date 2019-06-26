@@ -163,6 +163,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("push %%r11")
 		emit("push %%r10")
 
+		emit("LOAD_8_BY_DEREF") // dereference
 		emit("PUSH_8")
 		emitConvertStringFromStackToSlice()
 		emit("PUSH_SLICE")
@@ -265,18 +266,17 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	mapKeyType := mapType.mapKey
 
 	if mapKeyType.isString() {
-		emit("pop %%rcx")          // index value
-
+		//emit("pop %%rcx")          // index value
 	} else {
-		// malloc(8)
-		emitCallMalloc(8)
-		// %%rax : malloced address
-		// stack : [map tail address, index value]
-		emit("pop %%rcx")            // index value
-
-		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-		emit("mov %%rax, %%rcx") // malloced area
 	}
+	// malloc(8)
+	emitCallMalloc(8)
+	// %%rax : malloced address
+	// stack : [map tail address, index value]
+	emit("pop %%rcx")            // index value
+
+	emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+	emit("mov %%rax, %%rcx") // malloced area
 
 	emit("POP_8")          // map tail
 	emit("mov %%rcx, (%%rax)") // save indexvalue to map tail
@@ -302,8 +302,8 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 }
 
 func (em *IrStmtRangeMap) emit() {
-	mapType := em.rangeexpr.getGtype().Underlying()
-	mapKeyType := mapType.mapKey
+	//mapType := em.rangeexpr.getGtype().Underlying()
+	//mapKeyType := mapType.mapKey
 
 	// counter = 0
 	em.initstmt = &StmtAssignment{
@@ -352,9 +352,7 @@ func (em *IrStmtRangeMap) emit() {
 	emit("SUM_FROM_STACK # x + y")
 	emit("LOAD_8_BY_DEREF")
 
-	if !mapKeyType.isString() {
-		emit("LOAD_8_BY_DEREF")
-	}
+	emit("LOAD_8_BY_DEREF")
 	emitSavePrimitive(em.indexvar)
 
 	if em.valuevar != nil {
@@ -409,13 +407,13 @@ func (lit *ExprMapLiteral) emit() {
 	emitCallMalloc(size)
 	emit("PUSH_8") // map head
 
-	mapType := lit.getGtype()
-	mapKeyType := mapType.mapKey
+	//mapType := lit.getGtype()
+	//mapKeyType := mapType.mapKey
 
 	for i, element := range lit.elements {
 		// alloc key
-		if mapKeyType.isString() {
-			element.key.emit()
+		if false {
+		//	element.key.emit()
 		} else {
 			element.key.emit()
 			emit("PUSH_8") // value of key
