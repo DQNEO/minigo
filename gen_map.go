@@ -30,8 +30,8 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
 	emit("PUSH_8 # len")
 
-	emit("lea .S.%s, %%rax", call.methodName) // index value
-	emit("PUSH_8 # map index value")         // index value
+	emit("lea .S.%s, %%rax", call.methodName) // index value (addr)
+	emit("PUSH_8 # map index value")
 
 	emitMapGet(mapType)
 
