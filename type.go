@@ -128,7 +128,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		} else if gtype.kind == G_POINTER || gtype.kind == G_STRING {
+		} else if gtype.kind == G_POINTER {
 			return ptrSize
 		} else if gtype.kind == G_INTERFACE {
 			//     data    ,  receiverTypeId, dtype
@@ -136,6 +136,8 @@ func (gtype *Gtype) getSize() int {
 		} else if gtype.kind == G_SLICE {
 			return ptrSize + IntSize + IntSize
 		} else if gtype.kind == G_MAP {
+			return ptrSize
+		} else if gtype.kind == G_STRING {
 			return ptrSize
 		} else {
 			return gtype.size
