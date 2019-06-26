@@ -38,6 +38,7 @@ func (program *Program) emitDynamicTypes() {
 }
 
 func (program *Program) emitMethodTable() {
+	emitWithoutIndent("#--------------------------------------------------------")
 	emit("# Method table")
 
 	emitWithoutIndent("%s:", "receiverTypes")
@@ -67,7 +68,8 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	emit("# METHOD NAMES")
+	emitWithoutIndent("#--------------------------------------------------------")
+	emitWithoutIndent("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
 		emitWithoutIndent(".M.M%s:", shortMethodName)
 		emit(".quad .M%s", shortMethodName)
