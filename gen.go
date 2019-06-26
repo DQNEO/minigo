@@ -457,9 +457,8 @@ func (e *ExprTypeAssertion) emit() {
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
 		emit("PUSH_8 # push dynamic data")
 
-		emit("PUSH_INTERFACE")
-		gtype := e.gtype
-		emitCompareDynamicTypeFromStack(gtype)
+		emit("push %%rcx # push dynamic type addr")
+		emitCompareDynamicTypeFromStack(e.gtype)
 
 		emit("mov %%rax, %%rbx") // move ok value @TODO consider big data like slice, struct, etc
 		emit("pop %%rax # load dynamic data")

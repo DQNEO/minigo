@@ -35,28 +35,19 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 	return isTypeSwitch
 }
 
-func emitSerializedType(gtype *Gtype) {
+func emitCompareDynamicTypeFromStack(gtype *Gtype) {
+	emitConvertNilToEmptyString()
+	emit("PUSH_8")
+
 	if gtype.isNil() {
 		emitEmptyString()
-		emit("mov $0, %%rbx")
-		emit("mov $0, %%rcx")
 	} else {
 		typeLabel := symbolTable.getTypeLabel(gtype)
 		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
-		emit("mov $%d, %%rbx", len(gtype.String()))
-		emit("mov $%d, %%rcx", len(gtype.String()))
 	}
-}
 
-func emitCompareDynamicTypeFromStack(gtype *Gtype) {
-	emit("POP_INTERFACE")
-	emit("push %%rcx # serialized type")
-	emitConvertCstringFromStackToSlice()
-	emit("PUSH_SLICE")
-
-	emitSerializedType(gtype)
-	emit("PUSH_SLICE")
-	emitGoStringsEqualFromStack()
+	emit("PUSH_8")
+	emit("CMP_FROM_STACK sete") // compare addresses
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
@@ -112,7 +103,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("POP_24")
 				emit("PUSH_24")
 
-				emit("PUSH_INTERFACE")
+				emit("push %%rcx # push dynamic type addr")
 				emitCompareDynamicTypeFromStack(gtype)
 
 				emit("TEST_IT")

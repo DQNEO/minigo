@@ -88,7 +88,7 @@ func (binop *IrExprStringComparison) emit() {
 
 func emitConvertNilToEmptyString() {
 	emit("# emitConvertNilToEmptyString")
-
+	emit("POP_8")
 	emit("PUSH_8")
 	emit("# convert nil to an empty string")
 	emit("TEST_IT")
