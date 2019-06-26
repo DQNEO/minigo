@@ -126,8 +126,8 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("%s: # begin loop ", labelBegin)
 
-	emit("push %%r13")
-	emit("push %%r11")
+	emit("push %%r13 # loop counter")
+	emit("push %%r11 # map len")
 	emit("CMP_FROM_STACK setl")
 	emit("TEST_IT")
 	if is24Width {
@@ -164,8 +164,14 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("push %%r10")
 
 		emit("PUSH_8")
+		emitConvertStringFromStackToSlice()
+		emit("PUSH_SLICE")
+
 		emit("push %%r12")
-		emitCStringsEqualFromStack(true)
+		emitConvertStringFromStackToSlice()
+		emit("PUSH_SLICE")
+
+		emitGoStringsEqualFromStack()
 
 		emit("pop %%r10")
 		emit("pop %%r11")

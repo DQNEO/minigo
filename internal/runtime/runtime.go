@@ -115,15 +115,6 @@ func strcopy(src string, dest string, slen int) string {
 	return dest
 }
 
-func eqCstrings(a string, b string, eq bool) bool {
-	var ret bool = (strcmp(a, b) == 0)
-	if eq {
-		return ret
-	} else {
-		return !ret
-	}
-}
-
 func eqGostringInternal(a []byte, b []byte) bool {
 	if len(a) != len(b) {
 		return false

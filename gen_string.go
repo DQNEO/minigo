@@ -110,31 +110,6 @@ func emitGoStringsEqualFromStack() {
 	call.emit()
 }
 
-func emitCStringsEqualFromStack(equal bool) {
-	emit("pop %%rax") // left
-
-	emitConvertNilToEmptyString()
-	emit("mov %%rax, %%rcx")
-	emit("pop %%rax # right string")
-	emit("push %%rcx")
-	emitConvertNilToEmptyString()
-	emit("PUSH_8")
-
-	// 3rd arg
-	if equal {
-		emit("LOAD_NUMBER 1")
-	} else {
-		emit("LOAD_NUMBER 0")
-	}
-	emit("PUSH_8")
-
-	call := &IrLowLevelCall{
-		symbol:        "iruntime.eqCstrings",
-		argsFromStack: 3,
-	}
-	call.emit()
-}
-
 // emit []byte(cstring)
 func emitConvertStringFromStackToSlice() {
 	labelEnd := makeLabel()
