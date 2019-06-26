@@ -5,6 +5,7 @@ var eEmptyString = ExprStringLiteral{
 }
 
 func emitEmptyString() {
+	emit("LOAD_EMPTY_SLICE")
 	eEmpty := &eEmptyString
 	eEmpty.emit()
 }
