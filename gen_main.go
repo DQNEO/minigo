@@ -38,6 +38,7 @@ func (program *Program) emitDynamicTypes() {
 }
 
 func (program *Program) emitMethodTable() {
+	emitWithoutIndent("#--------------------------------------------------------")
 	emit("# Method table")
 
 	emitWithoutIndent("%s:", "receiverTypes")
@@ -59,7 +60,7 @@ func (program *Program) emitMethodTable() {
 		for _, methodNameFull := range methods {
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
-			emit(".quad .M%s # key", shortMethodName)
+			emit(".quad .S.S.%s # key", shortMethodName)
 			emit(".quad %s # method", methodNameFull)
 			if !in_array(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
@@ -67,9 +68,12 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	emit("# METHOD NAMES")
+	emitWithoutIndent("#--------------------------------------------------------")
+	emitWithoutIndent("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
-		emitWithoutIndent(".M%s:", shortMethodName)
+		emitWithoutIndent(".S.S.%s:", shortMethodName)
+		emit(".quad .S.%s", shortMethodName)
+		emitWithoutIndent(".S.%s:", shortMethodName)
 		emit(".string \"%s\"", shortMethodName)
 	}
 
