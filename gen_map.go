@@ -266,6 +266,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 
 	if mapKeyType.isString() {
 		emit("pop %%rcx")          // index value
+
 		emit("pop %%rax")          // map tail address
 		emit("mov %%rcx, (%%rax)") // save indexvalue to malloced area
 		emit("PUSH_8")             // push map tail
@@ -275,10 +276,13 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		// %%rax : malloced address
 		// stack : [map tail address, index value]
 		emit("pop %%rcx")            // index value
+
 		emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-		emit("pop %%rcx")            // map tail address
-		emit("mov %%rax, (%%rcx) #") // save index address to the tail
-		emit("push %%rcx")           // push map tail
+
+		emit("mov %%rax, %%rcx") // malloced area
+		emit("pop %%rax")            // map tail address
+		emit("mov %%rcx, (%%rax) #") // save index address to the tail
+		emit("push %%rax")           // push map tail
 	}
 
 	// save value
