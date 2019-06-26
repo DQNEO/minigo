@@ -5,9 +5,10 @@ var eEmptyString = ExprStringLiteral{
 }
 
 func emitEmptyString() {
-	emit("LOAD_EMPTY_SLICE")
 	eEmpty := &eEmptyString
 	eEmpty.emit()
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
 }
 
 func (e *IrExprStringComparison) token() *Token {
