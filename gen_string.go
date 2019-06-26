@@ -11,6 +11,12 @@ func emitEmptyString() {
 	emit("mov $0, %%rcx")
 }
 
+func (ast *ExprStringLiteral) emit() {
+	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
+	emit("mov $%d, %%rbx", len(ast.val))
+	emit("mov $%d, %%rcx", len(ast.val))
+}
+
 func (e *IrExprStringComparison) token() *Token {
 	return e.tok
 }

@@ -7,12 +7,6 @@ func (ast *ExprNumberLiteral) emit() {
 	emit("LOAD_NUMBER %d", ast.val)
 }
 
-func (ast *ExprStringLiteral) emit() {
-	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
-	emit("mov $%d, %%rbx", len(ast.val))
-	emit("mov $%d, %%rcx", len(ast.val))
-}
-
 func loadStructField(strct Expr, field *Gtype, offset int) {
 	strct = unwrapRel(strct)
 	emit("# loadStructField")
