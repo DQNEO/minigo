@@ -109,14 +109,8 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 					continue
 				}
 				assert(left.getGtype() != nil, left.token(), "should not be nil")
-				switch left.getGtype().getKind() {
-				case G_SLICE,G_INTERFACE:
-					emit("POP_24")
-					emitSave24(left, 0)
-				default:
-					emit("pop %%rax")
-					emitSavePrimitive(left)
-				}
+				emitPop(left.getGtype())
+				emitOffsetSave(left, 0)
 			}
 			return
 		}
