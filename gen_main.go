@@ -50,8 +50,7 @@ func (program *Program) emitMethodTable() {
 
 	for i := 1; i <= len(program.methodTable); i++ {
 		emitWithoutIndent("receiverType%d:", i)
-		mt := program.methodTable
-		methods, ok := mt[i]
+		methods, ok := program.methodTable[i]
 		if !ok {
 			debugf("methods not found in methodTable %d", i)
 			continue
