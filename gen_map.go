@@ -158,9 +158,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 	emit("LOAD_8_BY_DEREF") // emit index address
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
-	if !mapKeyType.isString() {
-		emit("LOAD_8_BY_DEREF") // dereference
-	}
+
 	if mapKeyType.isString() {
 		emit("push %%r13")
 		emit("push %%r11")
@@ -174,6 +172,7 @@ func emitMapGet(mapType *Gtype, deref bool) {
 		emit("pop %%r11")
 		emit("pop %%r13")
 	} else {
+		emit("LOAD_8_BY_DEREF") // dereference
 		// primitive comparison
 		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
 		emit("sete %%al")
