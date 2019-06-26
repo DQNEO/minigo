@@ -86,20 +86,6 @@ func (binop *IrExprStringComparison) emit() {
 	call.emit()
 }
 
-func emitConvertNilToEmptyString() {
-	emit("# emitConvertNilToEmptyString")
-	emit("POP_8")
-	emit("PUSH_8")
-	emit("# convert nil to an empty string")
-	emit("TEST_IT")
-	emit("pop %%rax")
-	labelEnd := makeLabel()
-	emit("jne %s # jump if not nil", labelEnd)
-	emit("# if nil then")
-	emitEmptyString()
-	emit("%s:", labelEnd)
-}
-
 func emitGoStringsEqualFromStack() {
 	emit("LOAD_NUMBER 1")
 	emit("PUSH_8")
