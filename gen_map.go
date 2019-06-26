@@ -114,13 +114,9 @@ func emitMapGet(mapType *Gtype, deref bool) {
 
 	emit("# emitMapGet")
 
-	emit("pop %%rcx")
-	emit("pop %%rbx")
-	emit("pop %%rax")
-
-	emit("mov %%rax, %%r10")
-	emit("mov %%rbx, %%r11")
-	emit("mov %%rcx, %%r12")
+	emit("pop %%r12")
+	emit("pop %%r11")
+	emit("pop %%r10")
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
