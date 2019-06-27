@@ -51,10 +51,9 @@ func (program *Program) emitMethodTable() {
 
 	for i := 1; i <= len(program.methodTable); i++ {
 		emitWithoutIndent("receiverType%d:", i)
-		mt := program.methodTable
-		methods, ok := mt[i]
+		methods, ok := program.methodTable[i]
 		if !ok {
-			debugf("methods not found in methodTable %d", i)
+			// This seems not to be harmful? I'm not 100% sure.
 			continue
 		}
 		for _, methodNameFull := range methods {

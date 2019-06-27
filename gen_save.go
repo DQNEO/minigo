@@ -2,6 +2,22 @@ package main
 
 import "fmt"
 
+func emitPop(gtype *Gtype) {
+	if gtype.is24WidthType() {
+		emit("POP_24")
+	} else {
+		emit("POP_8")
+	}
+}
+
+func emitOffsetSave(lhs Expr, offset int) {
+	if lhs.getGtype().is24WidthType() {
+		emitSave24(lhs, offset)
+	} else {
+		emitSavePrimitive(lhs)
+	}
+}
+
 // Each left-hand side operand must be addressable,
 // a map index expression,
 // or (for = assignments only) the blank identifier.
