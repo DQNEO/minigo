@@ -127,7 +127,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 		typeId := gtype.relation.gtype.receiverTypeId
 		symbol := funcdecl.getSymbol()
 		methods := methodTable[typeId]
-		methods = append(methods, symbol)
+		methods = append(methods, string(symbol))
 		methodTable[typeId] = methods
 	}
 	debugf("set methodTable")

@@ -93,17 +93,17 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg identifier, fname string) string {
+func getFuncSymbol(pkg identifier, fname string) gostring {
 	if pkg == "libc" {
-		return fname
+		return S(fname)
 	}
 	if pkg == "" {
 		pkg = ""
 	}
-	return fmt.Sprintf("%s.%s", pkg, fname)
+	return GoSprintf(S("%s.%s"), pkg, fname)
 }
 
-func (f *DeclFunc) getSymbol() string {
+func (f *DeclFunc) getSymbol() gostring {
 	if f.receiver != nil {
 		// method
 		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))

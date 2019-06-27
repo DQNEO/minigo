@@ -112,7 +112,7 @@ func (f *DeclFunc) prepare() Emitter {
 
 type funcPrologueEmitter struct {
 	token        *Token
-	symbol       string
+	symbol       gostring
 	argRegisters []int
 	localvars    []*ExprVariable
 	localarea    int
@@ -179,7 +179,7 @@ func (ircall *IrStaticCall) emit() {
 
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
-			if param != nil && ircall.symbol != "printf" {
+			if param != nil && !eq(ircall.symbol , "printf") {
 				emit("# has a corresponding param")
 
 				var fromGtype *Gtype
@@ -200,7 +200,7 @@ func (ircall *IrStaticCall) emit() {
 			}
 		}
 
-		if ircall.symbol == ".println" {
+		if eq(ircall.symbol, ".println") {
 			doConvertToInterface = false
 		}
 
