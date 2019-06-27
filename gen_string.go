@@ -75,15 +75,15 @@ func (binop *IrExprStringComparison) emit() {
 	args = append(args, eEqual)
 
 	var params []*ExprVariable
-	// func eqGostring(a []byte, b []byte, eq bool) bool
+	// func eqGostrings(a []byte, b []byte, eq bool) bool
 	// @TODO get params by DeclFunc dynamically
 	params = append(params, &ExprVariable{}) // a []byte
 	params = append(params, &ExprVariable{}) // b []byte
 	params = append(params, &ExprVariable{}) // eq bool
-	// eqGostring(left, right, eEqual)
+	// eqGostrings(left, right, eEqual)
 	call := &IrStaticCall{
 		tok: binop.token(),
-		symbol: "iruntime.eqGostring",
+		symbol: "iruntime.eqGostrings",
 		isMethodCall:false,
 		args: args,
 		callee: &DeclFunc{
@@ -98,7 +98,7 @@ func emitGoStringsEqualFromStack() {
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
-		symbol:        "iruntime.eqGostring",
+		symbol:        "iruntime.eqGostrings",
 		argsFromStack: 7,
 	}
 	call.emit()

@@ -128,7 +128,7 @@ func eqGostringInternal(a []byte, b []byte) bool {
 	return true
 }
 
-func eqGostring(a []byte, b []byte, eq bool) bool {
+func eqGostrings(a []byte, b []byte, eq bool) bool {
 	var ret bool
 	ret = eqGostringInternal(a,b)
 	if eq {

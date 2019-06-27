@@ -74,17 +74,17 @@ func (tok *Token) isEOF() bool {
 
 func (tok *Token) isPunct(s string) bool {
 	gs := gostring(s)
-	return tok != nil && tok.typ == T_PUNCT && eqGostring(tok.sval, gs)
+	return tok != nil && tok.typ == T_PUNCT && eqGostrings(tok.sval, gs)
 }
 
 func (tok *Token) isKeyword(s string) bool {
 	gs := gostring(s)
-	return tok != nil && tok.typ == T_KEYWORWD && eqGostring(tok.sval,gs)
+	return tok != nil && tok.typ == T_KEYWORWD && eqGostrings(tok.sval,gs)
 }
 
 func (tok *Token) isIdent(s string) bool {
 	gs := gostring(s)
-	return tok != nil && tok.typ == T_IDENT && eqGostring(tok.sval,gs)
+	return tok != nil && tok.typ == T_IDENT && eqGostrings(tok.sval,gs)
 }
 
 func (tok *Token) getIdent() identifier {

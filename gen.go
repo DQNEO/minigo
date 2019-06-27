@@ -65,13 +65,13 @@ func emit(format string, v ...interface{}) {
 		write("  ")
 	}
 
-	frmt := strcatToSlice(format2,gostring("\n"))
+	frmt := catGostrings(format2,gostring("\n"))
 	writef(frmt, v...)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	writef(strcatToSlice(gostring(format), gostring("\n")), v...)
+	writef(catGostrings(gostring(format), gostring("\n")), v...)
 }
 
 func unwrapRel(e Expr) Expr {
@@ -221,7 +221,7 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if eqGostring(ast.op , gostring("+")) && ast.left.getGtype().isString() {
+	if eqGostrings(ast.op , gostring("+")) && ast.left.getGtype().isString() {
 		emitStringConcate(ast.left, ast.right)
 		return
 	}
