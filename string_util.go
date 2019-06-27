@@ -3,7 +3,7 @@ package main
 type gostring []byte
 type cstring string
 
-func catGostrings(a []byte, b []byte) []byte {
+func catGostrings(a gostring, b gostring) gostring {
 	var c []byte
 	for i:=0;i<len(a);i++ {
 		c = append(c, a[i])
