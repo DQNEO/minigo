@@ -43,8 +43,7 @@ func writePos() {
 	writef(gostring("/*%s*/"), spos)
 }
 
-func write(s string) {
-	var b []byte = []byte(s)
+func write(b gostring) {
 	os.Stdout.Write(b)
 }
 
@@ -62,7 +61,7 @@ func emit(format string, v ...interface{}) {
 	var format2 gostring = gostring(format)
 
 	for i := 0; i < gasIndentLevel; i++ {
-		write("  ")
+		write(gostring("  "))
 	}
 
 	frmt := catGostrings(format2,gostring("\n"))
