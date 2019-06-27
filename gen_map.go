@@ -67,7 +67,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("TEST_IT # map && map (check if map is nil)")
 	emit("je %s # jump if map is nil", labelNil)
 	// not nil case
-	emit("# not null")
+	emit("# not nil")
 	emit("LOAD_8_BY_DEREF")
 	emit("PUSH_8 # map head")
 	_map.emit()
