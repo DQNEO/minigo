@@ -182,7 +182,7 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
-	// avoi emitting '(null')
+	// avoid emitting '(null')
 	if len(ast.val) == 0 {
 		ast.val = gostring("")
 	}
