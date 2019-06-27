@@ -2,11 +2,13 @@ package main
 
 import "fmt"
 
+type gostring []byte
+
 func f1() {
 	path := "t/min/min.go"
 	s := readFile(path)
 	_bs := ByteStream{
-		filename:  path,
+		filename:  gostring(path),
 		source:    s,
 		nextIndex: 0,
 		line:      1,

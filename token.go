@@ -30,7 +30,7 @@ const (
 type Token struct {
 	typ      TokenType
 	sval     gostring
-	filename string
+	filename gostring
 	line     int
 	column   int
 }

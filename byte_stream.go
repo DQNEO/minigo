@@ -7,7 +7,7 @@ import (
 )
 
 type ByteStream struct {
-	filename  string
+	filename  gostring
 	source    []byte
 	nextIndex int
 	line      int
@@ -16,7 +16,7 @@ type ByteStream struct {
 
 func NewByteStreamFromString(name string, contents string) *ByteStream {
 	return &ByteStream{
-		filename:  name,
+		filename:  gostring(name),
 		source:    []byte(contents),
 		nextIndex: 0,
 		line:      1,
@@ -27,7 +27,7 @@ func NewByteStreamFromString(name string, contents string) *ByteStream {
 func NewByteStreamFromFile(path string) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
-		filename:  path,
+		filename:  gostring(path),
 		source:    s,
 		nextIndex: 0,
 		line:      1,

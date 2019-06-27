@@ -16,7 +16,7 @@ type AstPackage struct {
 
 type AstFile struct {
 	tok               *Token
-	name              string
+	name              gostring
 	packageClause     *PackageClause
 	importDecls       []*ImportDecl
 	DeclList          []*TopLevelDecl

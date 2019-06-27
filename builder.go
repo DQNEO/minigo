@@ -2,14 +2,14 @@
 package main
 
 // analyze imports of given go files
-func parseImports(sourceFiles []string) []string {
+func parseImports(sourceFiles []gostring) []string {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
 	var imported []string = []string{"os"}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
-		astFile := p.ParseFile(sourceFile, nil, true)
+		astFile := p.ParseFile(string(sourceFile), nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
@@ -66,7 +66,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 }
 
 // compileFiles parses files into *AstPackage
-func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
+func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 	// compile the main package
 	var pkgName identifier = "main"
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
@@ -101,7 +101,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		if !ok {
 			errorf("package '" + spkgName + "' is not a standard library.")
 		}
-		var codes []string = []string{pkgCode}
+		var codes []gostring = []gostring{gostring(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)

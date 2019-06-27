@@ -3,6 +3,15 @@ package main
 type gostring []byte
 type cstring string
 
+func convertCstringsToGostrings(cstrings []string) []gostring {
+	var r []gostring
+	for _, cs := range cstrings {
+		r = append(r, gostring(cs))
+	}
+
+	return r
+}
+
 func catGostrings(a gostring, b gostring) gostring {
 	var c []byte
 	for i:=0;i<len(a);i++ {
@@ -12,6 +21,10 @@ func catGostrings(a gostring, b gostring) gostring {
 		c = append(c, b[i])
 	}
 	return c
+}
+
+func eq(a gostring, b cstring) bool {
+	return eqGostrings(a, gostring(b))
 }
 
 func eqGostrings(a gostring, b gostring) bool {

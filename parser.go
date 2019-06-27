@@ -2004,7 +2004,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage {
+func ParseFiles(pkgname identifier, sources []gostring, onMemory bool) *AstPackage {
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile
@@ -2023,9 +2023,9 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 		}
 		if onMemory {
 			var filename string = string(pkgname) + ".memory"
-			astFile = p.ParseString(filename, source, pkgScope, false)
+			astFile = p.ParseString(filename, string(source), pkgScope, false)
 		} else {
-			astFile = p.ParseFile(source, pkgScope, false)
+			astFile = p.ParseFile(string(source), pkgScope, false)
 		}
 		astFiles = append(astFiles, astFile)
 		for _, g := range astFile.uninferredGlobals {

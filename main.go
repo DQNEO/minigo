@@ -22,42 +22,42 @@ func printVersion() {
 	println("Copyright (C) 2019 @DQNEO")
 }
 
-func parseOpts(args []string) []string {
-	var r []string
+func parseOpts(args []gostring) []gostring {
+	var r []gostring
 
 	for _, opt := range args {
-		if opt == "--version" {
+		if eq(opt,"--version") {
 			printVersion()
 			return nil
 		}
-		if opt == "-t" {
+		if eq(opt, "-t") {
 			debugToken = true
 		}
-		if opt == "-a" {
+		if eq(opt, "-a") {
 			debugAst = true
 		}
-		if opt == "-p" {
+		if eq(opt, "-p") {
 			debugParser = true
 		}
-		if opt == "--position" {
+		if eq(opt, "--position") {
 			emitPosition = true
 		}
-		if opt == "-d" {
+		if eq(opt, "-d") {
 			debugMode = true
 		}
-		if opt == "--tokenize-only" {
+		if eq(opt, "--tokenize-only") {
 			tokenizeOnly = true
 		}
-		if opt == "--parse-only" {
+		if eq(opt, "--parse-only") {
 			parseOnly = true
 		}
-		if opt == "--resolve-only" {
+		if eq(opt, "--resolve-only") {
 			resolveOnly = true
 		}
-		if strings.HasSuffix(opt, ".go") {
-			r = append(r, opt)
-		} else if opt == "-" {
-			return []string{"/dev/stdin"}
+		if strings.HasSuffix(string(opt), ".go") {
+			r = append(r, gostring(opt))
+		} else if eq(opt, "-") {
+			return []gostring{gostring("/dev/stdin")}
 		}
 	}
 
@@ -66,11 +66,11 @@ func parseOpts(args []string) []string {
 
 func main() {
 	// parsing arguments
-	var sourceFiles []string
-
-	assert(len(os.Args) > 0, nil, "os.Args should not be empty")
+	var sourceFiles []gostring
+	osArgs := convertCstringsToGostrings(os.Args)
+	assert(len(osArgs) > 0, nil, "os.Args should not be empty")
 	if len(os.Args) > 1 {
-		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
+		sourceFiles = parseOpts(osArgs[1:len(osArgs)])
 	}
 
 	if len(sourceFiles) == 0 {

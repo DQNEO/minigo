@@ -1,9 +1,9 @@
 package main
 
-func dumpTokenForFiles(sourceFiles []string) {
+func dumpTokenForFiles(sourceFiles []gostring) {
 	for _, sourceFile := range sourceFiles {
 		debugf("--- file:%s", sourceFile)
-		bs := NewByteStreamFromFile(sourceFile)
+		bs := NewByteStreamFromFile(string(sourceFile))
 		NewTokenStream(bs)
 	}
 }
