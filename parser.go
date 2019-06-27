@@ -182,6 +182,10 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
+	// avoi emitting '(null')
+	if len(ast.val) == 0 {
+		ast.val = gostring("")
+	}
 	p.stringLiterals = append(p.stringLiterals, ast)
 }
 
@@ -209,7 +213,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	}
 	if rel.name == "__func__" {
 		sliteral := &ExprStringLiteral{
-			val: cstring(p.currentFunc.fname),
+			val: gostring(p.currentFunc.fname),
 		}
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)
@@ -479,7 +483,7 @@ func (p *parser) parsePrim() Expr {
 		p.skip()
 		ast := &ExprStringLiteral{
 			tok: tok,
-			val: cstring(tok.sval),
+			val: tok.sval,
 		}
 		p.addStringLiteral(ast)
 		return ast

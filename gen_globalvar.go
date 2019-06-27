@@ -100,6 +100,16 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emitDataAddr(arrayLiteral, depth)               // emit underlying array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
+		case *ExprFuncallOrConversion:
+			call := value.(*ExprFuncallOrConversion)
+			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
+			toGtype := call.rel.gtype
+			assert(toGtype.getKind() == G_SLICE && call.args[0].getGtype().isString(), call.token(), "should be string to slice conversion")
+			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
+			assert(ok, call.token(), "arg0 should be stringliteral")
+			emit(".quad .%s", stringLiteral.slabel)
+			emit(".quad %d", len(stringLiteral.val))
+			emit(".quad %d", len(stringLiteral.val))
 		default:
 			TBI(ptok, "unable to handle gtype %s", gtype.String())
 		}

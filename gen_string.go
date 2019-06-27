@@ -1,7 +1,7 @@
 package main
 
 var eEmptyString = ExprStringLiteral{
-	val: "",
+	val: gostring(""),
 }
 
 func emitEmptyString() {
