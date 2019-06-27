@@ -5,6 +5,10 @@ import "fmt"
 type gostring []byte
 type cstring string
 
+func S(s string) gostring {
+	return gostring(s)
+}
+
 func GoSprintf(format gostring, param ...interface{}) gostring {
 	s := fmt.Sprintf(string(format), param...)
 	return gostring(s)

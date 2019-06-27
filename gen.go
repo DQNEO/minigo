@@ -36,11 +36,11 @@ func writePos() {
 	}
 	var spos gostring
 	if pos == nil {
-		spos = gostring("()")
+		spos = S("()")
 	} else {
 		spos = pos.GoString()
 	}
-	writef(gostring("/*%s*/"), spos)
+	writef(S("/*%s*/"), spos)
 }
 
 func write(b gostring) {
@@ -64,7 +64,7 @@ func emit(format string, v ...interface{}) {
 		write(gostring("  "))
 	}
 
-	frmt := catGostrings(format2,gostring("\n"))
+	frmt := catGostrings(format2,S("\n"))
 	writef(frmt, v...)
 }
 
