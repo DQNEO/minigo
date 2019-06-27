@@ -64,13 +64,13 @@ func emit(format string, v ...interface{}) {
 		write(gostring("  "))
 	}
 
-	frmt := catGostrings(format2,S("\n"))
+	frmt := concat(format2,S("\n"))
 	writef(frmt, v...)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	writef(catGostrings(gostring(format), gostring("\n")), v...)
+	writef(concat(gostring(format), gostring("\n")), v...)
 }
 
 func unwrapRel(e Expr) Expr {

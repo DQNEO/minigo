@@ -23,7 +23,7 @@ func convertCstringsToGostrings(cstrings []string) []gostring {
 	return r
 }
 
-func catGostrings(a gostring, b gostring) gostring {
+func concat(a gostring, b gostring) gostring {
 	var c []byte
 	for i:=0;i<len(a);i++ {
 		c = append(c, a[i])
