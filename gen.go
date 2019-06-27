@@ -40,7 +40,7 @@ func writePos() {
 	} else {
 		spos = pos.String()
 	}
-	writef("/*%s*/", spos)
+	writef(gostring("/*%s*/"), spos)
 }
 
 func write(s string) {
@@ -48,8 +48,8 @@ func write(s string) {
 	os.Stdout.Write(b)
 }
 
-func writef(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v...)
+func writef(format gostring, v ...interface{}) {
+	s := fmt.Sprintf(string(format), v...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
@@ -59,19 +59,19 @@ var gasIndentLevel int = 1
 func emit(format string, v ...interface{}) {
 	writePos()
 
-	var format2 string = format
+	var format2 gostring = gostring(format)
 
 	for i := 0; i < gasIndentLevel; i++ {
 		write("  ")
 	}
 
-	frmt := format2 + "\n"
+	frmt := strcatToSlice(format2,gostring("\n"))
 	writef(frmt, v...)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	writef(format+"\n", v...)
+	writef(strcatToSlice(gostring(format), gostring("\n")), v...)
 }
 
 func unwrapRel(e Expr) Expr {

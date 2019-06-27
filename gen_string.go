@@ -157,7 +157,7 @@ func emitStringConcate(leftCstring Expr, rightCstring Expr) {
 	emit("PUSH_SLICE")
 
 	eStrConCate := &IrLowLevelCall{
-		symbol:        "iruntime.gostringconcate",
+		symbol:        "iruntime.strcat",
 		argsFromStack: 6,
 	}
 	eStrConCate.emit()
