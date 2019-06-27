@@ -22,7 +22,7 @@ func (program *Program) emitSpecialStrings() {
 	emit(".string \"%s\"", builtinStringValue2)
 
 	// empty string
-	eEmptyString.slabel = "empty"
+	eEmptyString.slabel = gostring("empty")
 	emitWithoutIndent(".%s:", eEmptyString.slabel)
 	emit(".string \"%s\"", eEmptyString.val)
 }

@@ -68,7 +68,7 @@ type ExprNumberLiteral struct {
 type ExprStringLiteral struct {
 	tok    *Token
 	val    gostring
-	slabel string
+	slabel gostring
 }
 
 // local or global variable

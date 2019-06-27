@@ -84,7 +84,7 @@ func collectDecls(pkg *AstPackage) {
 
 func setStringLables(pkg *AstPackage, prefix string) {
 	for id, sl := range pkg.stringLiterals {
-		sl.slabel = fmt.Sprintf("%s.S%d", prefix, id+1)
+		sl.slabel = gostring(fmt.Sprintf("%s.S%d", prefix, id+1))
 	}
 }
 
