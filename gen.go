@@ -34,11 +34,11 @@ func writePos() {
 	if !emitPosition {
 		return
 	}
-	var spos string
+	var spos gostring
 	if pos == nil {
-		spos = "()"
+		spos = gostring("()")
 	} else {
-		spos = pos.String()
+		spos = pos.GoString()
 	}
 	writef(gostring("/*%s*/"), spos)
 }

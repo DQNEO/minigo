@@ -1,7 +1,14 @@
 package main
 
+import "fmt"
+
 type gostring []byte
 type cstring string
+
+func GoSprintf(format gostring, param ...interface{}) gostring {
+	s := fmt.Sprintf(string(format), param...)
+	return gostring(s)
+}
 
 func convertCstringsToGostrings(cstrings []string) []gostring {
 	var r []gostring
