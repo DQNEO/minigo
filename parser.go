@@ -405,7 +405,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			r = &ExprStructField{
 				tok:       tok,
 				strct:     e,
-				fieldname: tok.getIdent(),
+				fieldname: goidentifier(tok.getIdent()),
 			}
 			return p.succeedingExpr(r)
 		}
@@ -629,7 +629,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		value := p.parseExpr()
 		f := &KeyedElement{
 			tok:   tok,
-			key:   tok.getIdent(),
+			key:   goidentifier(tok.getIdent()),
 			value: value,
 		}
 		r.fields = append(r.fields, f)
@@ -1768,7 +1768,7 @@ func (p *parser) parseStructDef() *Gtype {
 		gtype := p.parseType()
 		fieldtype := gtype
 		//fieldtype.origType = gtype
-		fieldtype.fieldname = fieldname
+		fieldtype.fieldname = goidentifier(fieldname)
 		fieldtype.offset = undefinedSize // will be calculated later
 		fields = append(fields, fieldtype)
 		p.expect(";")

@@ -6,6 +6,7 @@ type gostring []byte
 type cstring string
 
 type identifier string
+type goidentifier gostring
 
 func S(s string) gostring {
 	return gostring(s)

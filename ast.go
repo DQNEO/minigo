@@ -380,7 +380,7 @@ type StmtSwitch struct {
 
 type KeyedElement struct {
 	tok   *Token
-	key   identifier // should be Expr ?
+	key   goidentifier // should be Expr ?
 	value Expr
 }
 
@@ -394,7 +394,7 @@ type ExprStructLiteral struct {
 type ExprStructField struct {
 	tok       *Token
 	strct     Expr
-	fieldname identifier
+	fieldname goidentifier
 }
 
 type MapElement struct {

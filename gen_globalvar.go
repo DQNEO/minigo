@@ -21,9 +21,9 @@ func (decl *DeclVar) emitData() {
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
-func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
+func (e *ExprStructLiteral) lookup(fieldname goidentifier) Expr {
 	for _, field := range e.fields {
-		if field.key == fieldname {
+		if eqGostrings(gostring(field.key) , gostring(fieldname)) {
 			return field.value
 		}
 	}

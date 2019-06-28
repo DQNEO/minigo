@@ -40,7 +40,7 @@ type Gtype struct {
 	size           int                         // for scalar type like int, bool, byte, for struct
 	origType       *Gtype                      // for pointer
 	fields         []*Gtype                    // for struct
-	fieldname      identifier                  // for struct field
+	fieldname      goidentifier                  // for struct field
 	offset         int                         // for struct field
 	padding        int                         // for struct field
 	length         int                         // for array, string(len without the terminating \0)
@@ -200,11 +200,11 @@ func (gtype *Gtype) String() string {
 	return ""
 }
 
-func (strct *Gtype) getField(name identifier) *Gtype {
+func (strct *Gtype) getField(name goidentifier) *Gtype {
 	assertNotNil(strct != nil, nil)
 	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type")
 	for _, field := range strct.fields {
-		if field.fieldname == name {
+		if eqGostrings(gostring(field.fieldname), gostring(name)) {
 			return field
 		}
 	}
@@ -366,7 +366,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	fields := strctType.relation.gtype.fields
 	//debugf("fields=%v", fields)
 	for _, field := range fields {
-		if e.fieldname == field.fieldname {
+		if eqGostrings(gostring(e.fieldname),  gostring(field.fieldname)) {
 			//return field.origType
 			return field
 		}
