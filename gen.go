@@ -89,7 +89,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
 	} else {
 		typename = gtype.relation.name
 	}
-	return GoSprintf(S("%s$%s"), string(typename), string(fname))
+	return GoSprintf(S("%s$%s"), cstring(typename), cstring(fname))
 }
 
 // "main","f1" -> "main.f1"
@@ -100,7 +100,7 @@ func getFuncSymbol(pkg identifier, fname gostring) gostring {
 	if pkg == "" {
 		pkg = ""
 	}
-	return GoSprintf(S("%s.%s"), pkg, string(fname))
+	return GoSprintf(S("%s.%s"), pkg, cstring(fname))
 }
 
 func (f *DeclFunc) getSymbol() gostring {
