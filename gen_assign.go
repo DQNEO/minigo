@@ -359,6 +359,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
 		if fromExpr.getGtype().getKind() == G_SLICE {
 			fromExpr.emit()
+			emitSave24(lhs, 0)
 			return
 		}
 		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.arg.getGtype().String())
