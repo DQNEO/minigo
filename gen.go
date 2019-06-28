@@ -43,7 +43,8 @@ func writePos() {
 	writef(S("/*%s*/"), spos)
 }
 
-func write(b gostring) {
+func write(s gostring) {
+	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
 
