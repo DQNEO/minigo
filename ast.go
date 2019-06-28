@@ -342,7 +342,7 @@ type StmtExpr struct {
 type StmtDefer struct {
 	tok   *Token
 	expr  Expr
-	label string // start of defer
+	label gostring // start of defer
 }
 
 // f( ,...slice)
