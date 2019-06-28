@@ -13,8 +13,6 @@ var keywords = []string{
 	"if", "range", "type", "continue", "for", "import", "return", "var",
 }
 
-type identifier string
-
 type TokenType string
 
 const (

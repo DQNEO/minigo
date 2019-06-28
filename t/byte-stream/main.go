@@ -2,8 +2,6 @@ package main
 
 import "fmt"
 
-type gostring []byte
-
 func f1() {
 	path := "t/min/min.go"
 	s := readFile(path)

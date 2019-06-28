@@ -5,6 +5,8 @@ import "fmt"
 type gostring []byte
 type cstring string
 
+type identifier string
+
 func S(s string) gostring {
 	return gostring(s)
 }
