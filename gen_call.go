@@ -15,7 +15,7 @@ func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 	return funcall.getFuncDef().rettypes
 }
 
-func (ast *ExprMethodcall) getUniqueName() string {
+func (ast *ExprMethodcall) getUniqueName() gostring {
 	gtype := ast.receiver.getGtype()
 	return getMethodUniqueName(gtype, ast.fname)
 }
@@ -148,7 +148,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrStaticCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(decl.pkg, funcall.fname),
+			symbol:   getFuncSymbol(decl.pkg, gostring(funcall.fname)),
 			callee:   decl,
 			args:     funcall.args,
 			origExpr: funcall,

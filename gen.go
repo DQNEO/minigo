@@ -81,7 +81,7 @@ func unwrapRel(e Expr) Expr {
 }
 
 // Mytype.method -> Mytype#method
-func getMethodUniqueName(gtype *Gtype, fname identifier) string {
+func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
 	if gtype.kind == G_POINTER {
@@ -89,18 +89,18 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "$" + string(fname)
+	return GoSprintf(S("%s$%s"), string(typename), string(fname))
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg identifier, fname string) gostring {
+func getFuncSymbol(pkg identifier, fname gostring) gostring {
 	if pkg == "libc" {
-		return S(fname)
+		return fname
 	}
 	if pkg == "" {
 		pkg = ""
 	}
-	return GoSprintf(S("%s.%s"), pkg, fname)
+	return GoSprintf(S("%s.%s"), pkg, string(fname))
 }
 
 func (f *DeclFunc) getSymbol() gostring {
@@ -110,7 +110,7 @@ func (f *DeclFunc) getSymbol() gostring {
 	}
 
 	// other functions
-	return getFuncSymbol(f.pkg, string(f.fname))
+	return getFuncSymbol(f.pkg, gostring(f.fname))
 }
 
 func align(n int, m int) int {

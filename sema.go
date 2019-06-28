@@ -202,7 +202,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
+			staticCall.symbol = getFuncSymbol("iruntime", S("makeSlice"))
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
@@ -217,9 +217,9 @@ func walkExpr(expr Expr) Expr {
 			}
 			switch slice.getGtype().elementType.getSize() {
 			case 1:
-				staticCall.symbol = getFuncSymbol("iruntime", "append1")
+				staticCall.symbol = getFuncSymbol("iruntime", S("append1"))
 			case 8:
-				staticCall.symbol = getFuncSymbol("iruntime", "append8")
+				staticCall.symbol = getFuncSymbol("iruntime", S("append8"))
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
@@ -228,7 +228,7 @@ func walkExpr(expr Expr) Expr {
 					}
 					funcall.args[1] = eConvertion
 				}
-				staticCall.symbol = getFuncSymbol("iruntime", "append24")
+				staticCall.symbol = getFuncSymbol("iruntime", S("append24"))
 			default:
 				TBI(slice.token(), "")
 			}
