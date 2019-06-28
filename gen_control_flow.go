@@ -72,7 +72,7 @@ func (stmt *StmtSwitch) emit() {
 
 	emit("# switch statement")
 	labelEnd := makeLabel()
-	var labels []string
+	var labels []gostring
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
@@ -154,7 +154,7 @@ func (stmt *StmtSwitch) emit() {
 		}
 	}
 
-	var defaultLabel string
+	var defaultLabel gostring
 	if stmt.dflt == nil {
 		emit("jmp %s", labelEnd)
 	} else {
@@ -249,9 +249,12 @@ func (f *StmtFor) convert() Stmt {
 		f.kind = FOR_KIND_CLIKE
 	}
 
-	f.labels.labelBegin = makeLabel()
-	f.labels.labelEndBlock = makeLabel()
-	f.labels.labelEndLoop = makeLabel()
+	l1 := makeLabel()
+	l2  := makeLabel()
+	l3 := makeLabel()
+	f.labels.labelBegin = string(l1)
+	f.labels.labelEndBlock = string(l2)
+	f.labels.labelEndLoop = string(l3)
 
 	var em Stmt
 
