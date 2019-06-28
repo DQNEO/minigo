@@ -85,7 +85,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
 		tok:          methodCall.token(),
-		symbol:       getFuncSymbol(pkgname, name),
+		symbol:       getFuncSymbol(gostring(pkgname), name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:         args,
@@ -148,7 +148,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrStaticCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(decl.pkg, gostring(funcall.fname)),
+			symbol:   getFuncSymbol(gostring(decl.pkg), gostring(funcall.fname)),
 			callee:   decl,
 			args:     funcall.args,
 			origExpr: funcall,
