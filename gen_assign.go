@@ -348,6 +348,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 	case *ExprNilLiteral:
 		emit("LOAD_EMPTY_SLICE")
 	case *IrExprConversion:
+		emit("# IrExprConversion in assignToSlice")
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
 		// yields a slice whose successive elements are the bytes of the string.
