@@ -142,9 +142,9 @@ func emit_intcast(gtype *Gtype) {
 	}
 }
 
-func emit_comp_primitive(inst string, binop *ExprBinop) {
+func emit_comp_primitive(inst gostring, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
-	assert(inst != "", binop.token(), "inst shoud not be empty")
+	assert(len(inst) > 0 , binop.token(), "inst shoud not be empty")
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
@@ -155,7 +155,7 @@ func emit_comp_primitive(inst string, binop *ExprBinop) {
 		emit_intcast(binop.right.getGtype())
 	}
 	emit("PUSH_8 # right") // right
-	emit("CMP_FROM_STACK %s", inst)
+	emit("CMP_FROM_STACK %s", cstring(inst))
 }
 
 var labelSeq = 0
@@ -197,21 +197,21 @@ func (binop *ExprBinop) emitComp() {
 		return
 	}
 
-	var instruction string
+	var instruction gostring
 	op := binop.op
 	switch cstring(op) {
 	case "<":
-		instruction = "setl"
+		instruction = S("setl")
 	case ">":
-		instruction = "setg"
+		instruction = S("setg")
 	case "<=":
-		instruction = "setle"
+		instruction = S("setle")
 	case ">=":
-		instruction = "setge"
+		instruction = S("setge")
 	case "!=":
-		instruction = "setne"
+		instruction = S("setne")
 	case "==":
-		instruction = "sete"
+		instruction = S("sete")
 	default:
 		assertNotReached(binop.token())
 	}
