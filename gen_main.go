@@ -146,7 +146,7 @@ func emitRuntimeArgs() {
 	emit("mov runtimeArgc(%%rip), %%rbx # len")
 	emit("mov runtimeArgc(%%rip), %%rcx # cap")
 
-	emitFuncEpilogue(".runtime_args_noop_handler", nil)
+	emitFuncEpilogue(S(".runtime_args_noop_handler"), nil)
 }
 
 func emitMainFunc(importOS bool) {
@@ -174,5 +174,5 @@ func emitMainFunc(importOS bool) {
 	emitNewline()
 	emit("FUNCALL main.main")
 	//emit("FUNCALL iruntime.reportMemoryUsage")
-	emitFuncEpilogue("noop_handler", nil)
+	emitFuncEpilogue(S("noop_handler"), nil)
 }

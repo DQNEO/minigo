@@ -355,7 +355,7 @@ func (f *StmtFor) convert() Stmt {
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
-	if stmt.labelDeferHandler != "" {
+	if len(stmt.labelDeferHandler) != 0 {
 		emit("# defer and return")
 		emit("jmp %s", stmt.labelDeferHandler)
 	}
