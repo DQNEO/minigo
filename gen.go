@@ -7,7 +7,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -49,7 +48,7 @@ func write(s gostring) {
 }
 
 func writef(format gostring, v ...interface{}) {
-	s := fmt.Sprintf(string(format), v...)
+	s := GoSprintf(format, v...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
