@@ -1,7 +1,7 @@
 package main
 
 type AstPackage struct {
-	name              identifier
+	name              packageName
 	scope             *Scope
 	files             []*AstFile
 	namedTypes        []*DeclType
@@ -47,7 +47,7 @@ type Node interface {
 }
 
 type Relation struct {
-	pkg  identifier
+	pkg  packageName
 	name identifier
 	tok  *Token
 
@@ -139,7 +139,7 @@ type ExprCap struct {
 // local or global
 type DeclVar struct {
 	tok      *Token
-	pkg      identifier
+	pkg      packageName
 	varname  *Relation
 	variable *ExprVariable
 	initval  Expr
@@ -252,7 +252,7 @@ type ExprFuncRef struct {
 
 type DeclFunc struct {
 	tok       *Token
-	pkg       identifier
+	pkg       packageName
 	receiver  *ExprVariable
 	fname     identifier
 	rettypes  []*Gtype

@@ -6,7 +6,7 @@ import "fmt"
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
-	allScopes     map[identifier]*Scope
+	allScopes     map[packageName]*Scope
 	uniquedDTypes []string
 }
 

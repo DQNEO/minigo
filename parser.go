@@ -18,7 +18,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	packageName         identifier
+	packageName         packageName
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
@@ -198,9 +198,10 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
-	var pkg identifier // ignored for now
+	var pkg packageName // ignored for now
 	if _, ok := p.importedNames[firstIdent]; ok {
-		pkg = firstIdent
+		ident := string(firstIdent)
+		pkg = packageName(ident)
 		p.expect(".")
 		// shift firstident
 		firstIdent = p.expectIdent()
@@ -1825,7 +1826,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg identifier, rel *Relation) {
+func (p *parser) tryResolve(pkg packageName, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
@@ -2008,7 +2009,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname identifier, sources []gostring, onMemory bool) *AstPackage {
+func ParseFiles(pkgname packageName, sources []gostring, onMemory bool) *AstPackage {
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile

@@ -68,7 +68,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 	// compile the main package
-	var pkgName identifier = "main"
+	var pkgName packageName = "main"
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
@@ -90,13 +90,13 @@ func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 // parse standard libraries
 func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages:         map[identifier]*AstPackage{},
+		compiledPackages:         map[packageName]*AstPackage{},
 		uniqImportedPackageNames: nil,
 	}
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
-		pkgName := identifier(spkgName)
+		pkgName := packageName(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
 			errorf("package '" + spkgName + "' is not a standard library.")
@@ -112,7 +112,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 }
 
 type compiledStdlib struct {
-	compiledPackages         map[identifier]*AstPackage
+	compiledPackages         map[packageName]*AstPackage
 	uniqImportedPackageNames []string
 }
 
@@ -120,7 +120,7 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(pkgName)]
+		compiledPkg := csl.compiledPackages[packageName(pkgName)]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	return importedPackages

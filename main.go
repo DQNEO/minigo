@@ -93,8 +93,8 @@ func main() {
 
 	symbolTable = &SymbolTable{}
 
-	var allScopes map[identifier]*Scope
-	allScopes = map[identifier]*Scope{}
+	var allScopes map[packageName]*Scope
+	allScopes = map[packageName]*Scope{}
 	symbolTable.allScopes = allScopes
 	libs := compileStdLibs(universe, imported)
 

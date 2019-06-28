@@ -6,6 +6,8 @@ type gostring []byte
 type cstring string
 
 type identifier string
+type packageName identifier
+
 type goidentifier gostring
 
 func S(s string) gostring {

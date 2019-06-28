@@ -93,7 +93,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg identifier, fname gostring) gostring {
+func getFuncSymbol(pkg packageName, fname gostring) gostring {
 	if pkg == "libc" {
 		return fname
 	}
