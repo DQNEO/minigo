@@ -29,14 +29,28 @@ func convertCstringsToGostrings(cstrings []string) []gostring {
 }
 
 func concat(a gostring, b gostring) gostring {
-	var c []byte
+	var r []byte
 	for i:=0;i<len(a);i++ {
-		c = append(c, a[i])
+		r = append(r, a[i])
 	}
 	for i:=0;i<len(b);i++ {
-		c = append(c, b[i])
+		r = append(r, b[i])
 	}
-	return c
+	return r
+}
+
+func concat3(a gostring, b gostring, c gostring) gostring {
+	var r []byte
+	for i:=0;i<len(a);i++ {
+		r = append(r, a[i])
+	}
+	for i:=0;i<len(b);i++ {
+		r = append(r, b[i])
+	}
+	for i:=0;i<len(c);i++ {
+		r = append(r, c[i])
+	}
+	return r
 }
 
 func eq(a gostring, b cstring) bool {
