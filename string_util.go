@@ -51,14 +51,14 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 			//dumpInterface(arg)
 			switch arg.(type) {
 			case []byte:
+				//fmt.Printf("# byte\n")
 				var _arg []byte
 				_arg = arg.([]byte)
-				//fmt.Printf("# append=%s\n", _arg)
 				blocks = append(blocks, _arg)
-			case gostring:
+			case gostring:  // This case is not reached by 2nd gen compiler
+				// fmt.Printf("# gostring\n")
 				var _arg []byte
 				_arg = arg.(gostring)
-				//fmt.Printf("# append=%s\n", _arg)
 				blocks = append(blocks, _arg)
 			case int:
 				var _argInt int
