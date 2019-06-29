@@ -57,7 +57,7 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 		emitEmptyString()
 	} else {
 		typeLabel := symbolTable.getTypeLabel(gtype)
-		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
+		emit2("LOAD_STRING_LITERAL .%s # type: %s", gostring(typeLabel), gostring(gtype.String()))
 	}
 
 	emit2("PUSH_8")
@@ -219,19 +219,19 @@ func (f *IrStmtClikeFor) emit() {
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", f.labels.labelBegin)
+	emit2("%s: # begin loop ", gostring(f.labels.labelBegin))
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
-		emit("TEST_IT")
-		emit("je %s  # jump if false", f.labels.labelEndLoop)
+		emit2("TEST_IT")
+		emit2("je %s  # jump if false", gostring(f.labels.labelEndLoop))
 	}
 	f.block.emit()
-	emit("%s: # end block", f.labels.labelEndBlock)
+	emit2("%s: # end block", gostring(f.labels.labelEndBlock))
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit("jmp %s", f.labels.labelBegin)
-	emit("%s: # end loop", f.labels.labelEndLoop)
+	emit2("jmp %s", gostring(f.labels.labelBegin))
+	emit2("%s: # end loop", gostring(f.labels.labelEndLoop))
 }
 
 func (f *StmtFor) emit() {
@@ -272,7 +272,7 @@ func (f *StmtFor) convert() Stmt {
 			mapCounter: f.rng.invisibleMapCounter,
 		}
 	case FOR_KIND_RANGE_LIST:
-		emit("# for range %s", f.rng.rangeexpr.getGtype().String())
+		emit2("# for range list")
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
 
@@ -360,13 +360,13 @@ func (f *StmtFor) convert() Stmt {
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
 	if len(stmt.labelDeferHandler) != 0 {
-		emit("# defer and return")
-		emit("jmp %s", stmt.labelDeferHandler)
+		emit2("# defer and return")
+		emit2("jmp %s", stmt.labelDeferHandler)
 	}
 }
 
 func (ast *StmtDefer) emit() {
-	emit("# defer")
+	emit2("# defer")
 	/*
 		// arguments should be evaluated immediately
 		var args []Expr
@@ -385,31 +385,31 @@ func (ast *StmtDefer) emit() {
 	labelEnd := concat(gostring(makeLabel()) , S("_defer"))
 	ast.label = (labelStart)
 
-	emit("jmp %s", labelEnd)
-	emit("%s: # defer start", labelStart)
+	emit2("jmp %s", labelEnd)
+	emit2("%s: # defer start", labelStart)
 
 	for i := 0; i < len(retRegi); i++ {
-		emit("push %%%s", retRegi[i])
+		emit2("push %%%s", gostring(retRegi[i]))
 	}
 
 	ast.expr.emit()
 
 	for i := len(retRegi) - 1; i >= 0; i-- {
-		emit("pop %%%s", retRegi[i])
+		emit2("pop %%%s", gostring(retRegi[i]))
 	}
 
-	emit("leave")
-	emit("ret")
-	emit("%s: # defer end", labelEnd)
+	emit2("leave")
+	emit2("ret")
+	emit2("%s: # defer end", labelEnd)
 
 }
 
 func (ast *StmtContinue) emit() {
 	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # continue", ast.labels.labelEndBlock)
+	emit2("jmp %s # continue", gostring(ast.labels.labelEndBlock))
 }
 
 func (ast *StmtBreak) emit() {
 	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # break", ast.labels.labelEndLoop)
+	emit2("jmp %s # break", gostring(ast.labels.labelEndLoop))
 }
