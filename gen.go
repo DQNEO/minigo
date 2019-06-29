@@ -175,7 +175,7 @@ func (ast *StmtDec) emit() {
 // As with an assignment, the operand must be addressable or a map index expression.
 func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
-	emit(inst)
+	emit2(inst)
 
 	left := operand
 	emitSavePrimitive(left)
@@ -183,7 +183,7 @@ func emitIncrDecl(inst string, operand Expr) {
 
 
 func (binop *ExprBinop) emitComp() {
-	emit("# emitComp")
+	emit2("# emitComp")
 	if binop.left.getGtype().isString() {
 		e := &IrExprStringComparison{
 			tok: binop.token(),
