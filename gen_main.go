@@ -23,7 +23,7 @@ func (program *Program) emitSpecialStrings() {
 
 	// empty string
 	eEmptyString.slabel = S("empty")
-	emitWithoutIndent(".empty:")
+	emitWithoutIndent2(".empty:")
 	emit2(".string \"%s\"", eEmptyString.val)
 }
 
@@ -80,8 +80,8 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	emitWithoutIndent("#--------------------------------------------------------")
-	emitWithoutIndent("# Short method names")
+	emitWithoutIndent2("#--------------------------------------------------------")
+	emitWithoutIndent2("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
 		emit2(".data 0")
 		emit2(".S.S.%s:", gostring(shortMethodName))
@@ -141,7 +141,7 @@ func (program *Program) emit() {
 }
 
 func emitRuntimeArgs() {
-	emitWithoutIndent(".runtime_args:")
+	emitWithoutIndent2(".runtime_args:")
 	emit2("push %%rbp")
 	emit2("mov %%rsp, %%rbp")
 
@@ -156,7 +156,7 @@ func emitRuntimeArgs() {
 func emitMainFunc(importOS bool) {
 	fname := S("main")
 	emit2(".global	%s", fname)
-	emitWithoutIndent("%s:", fname)
+	emitWithoutIndent2("%s:", fname)
 	emit2("push %%rbp")
 	emit2("mov %%rsp, %%rbp")
 

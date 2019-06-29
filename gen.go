@@ -65,12 +65,6 @@ func emit(format string, v ...interface{}) {
 	writeln(s)
 }
 
-func emitWithoutIndent(format string, v ...interface{}) {
-	writePos()
-	s := GoSprintf(gostring(format), v...)
-	writeln(s)
-}
-
 func emitWithoutIndent2(format string, v ...interface{}) {
 	writePos()
 	s := GoSprintf2(gostring(format), v...)
