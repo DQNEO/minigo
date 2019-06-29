@@ -125,27 +125,27 @@ func (e *ExprCap) emit() {
 func emitMakeSliceFunc() {
 	// makeSlice
 	emitWithoutIndent("%s:", gostring("iruntime.makeSlice"))
-	emit("FUNC_PROLOGUE")
+	emit2("FUNC_PROLOGUE")
 	emitNewline()
 
-	emit("PUSH_ARG_2") // -8
-	emit("PUSH_ARG_1") // -16
-	emit("PUSH_ARG_0") // -24
+	emit2("PUSH_ARG_2") // -8
+	emit2("PUSH_ARG_1") // -16
+	emit2("PUSH_ARG_0") // -24
 
-	emit("LOAD_8_FROM_LOCAL -16 # newcap")
-	emit("PUSH_8")
-	emit("LOAD_8_FROM_LOCAL -8 # unit")
-	emit("PUSH_8")
-	emit("IMUL_FROM_STACK")
-	emit("ADD_NUMBER 1 # 1 byte buffer")
+	emit2("LOAD_8_FROM_LOCAL -16 # newcap")
+	emit2("PUSH_8")
+	emit2("LOAD_8_FROM_LOCAL -8 # unit")
+	emit2("PUSH_8")
+	emit2("IMUL_FROM_STACK")
+	emit2("ADD_NUMBER 1 # 1 byte buffer")
 
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit2("PUSH_8")
+	emit2("POP_TO_ARG_0")
+	emit2("FUNCALL iruntime.malloc")
 
-	emit("mov -24(%%rbp), %%rbx # newlen")
-	emit("mov -16(%%rbp), %%rcx # newcap")
+	emit2("mov -24(%%rbp), %%rbx # newlen")
+	emit2("mov -16(%%rbp), %%rcx # newcap")
 
-	emit("LEAVE_AND_RET")
+	emit2("LEAVE_AND_RET")
 	emitNewline()
 }
