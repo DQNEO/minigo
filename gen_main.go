@@ -16,14 +16,14 @@ func (program *Program) emitSpecialStrings() {
 	emit2("# special strings")
 
 	// emit builtin string
-	emitWithoutIndent(".%s:", builtinStringKey1)
-	emit2(".string \"%s\"", builtinStringValue1)
-	emitWithoutIndent(".%s:", builtinStringKey2)
-	emit2(".string \"%s\"", builtinStringValue2)
+	emitWithoutIndent2(".%s:", gostring(builtinStringKey1))
+	emit2(".string \"%s\"", gostring(builtinStringValue1))
+	emitWithoutIndent2(".%s:", gostring(builtinStringKey2))
+	emit2(".string \"%s\"", gostring(builtinStringValue2))
 
 	// empty string
-	eEmptyString.slabel = gostring("empty")
-	emitWithoutIndent(".%s:", eEmptyString.slabel)
+	eEmptyString.slabel = S("empty")
+	emitWithoutIndent(".empty:")
 	emit2(".string \"%s\"", eEmptyString.val)
 }
 
@@ -32,16 +32,16 @@ func (program *Program) emitDynamicTypes() {
 	emit2("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitWithoutIndent(".%s:", label)
+		emitWithoutIndent2(".%s:", gostring(label))
 		emit2(".string \"%s\"", gs)
 	}
 }
 
 func (program *Program) emitMethodTable() {
-	emitWithoutIndent("#--------------------------------------------------------")
+	emitWithoutIndent2("#--------------------------------------------------------")
 	emit2("# Method table")
 	emit2(".data 0")
-	emitWithoutIndent("%s:", "receiverTypes")
+	emitWithoutIndent2("%s:", S("receiverTypes"))
 	emit2(".quad 0 # receiverTypeId:0")
 	var i int
 	for i = 1; i <= len(program.methodTable); i++ {
@@ -51,7 +51,7 @@ func (program *Program) emitMethodTable() {
 	var shortMethodNames []string
 
 	for i = 1; i <= len(program.methodTable); i++ {
-		emitWithoutIndent("receiverType%d:", i)
+		emitWithoutIndent2("receiverType%d:", i)
 		methods, ok := program.methodTable[i]
 		if !ok {
 			// This seems not to be harmful? I'm not 100% sure.
