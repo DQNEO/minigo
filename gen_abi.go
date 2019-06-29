@@ -90,7 +90,7 @@ func (f *DeclFunc) prepare() Emitter {
 	var localarea int
 	for _, lvar := range f.localvars {
 		if lvar.gtype == nil {
-			debugf("%s has nil gtype ", lvar)
+			debugf("%s has nil gtype ", lvar.varname)
 		}
 		size := lvar.gtype.getSize()
 		assert(size != 0, lvar.token(), "size should  not be zero:"+lvar.gtype.String())
