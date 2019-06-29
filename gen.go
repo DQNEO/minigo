@@ -41,14 +41,27 @@ func writePos() {
 
 var gasIndentLevel int = 1
 
-func emit(format string, v ...interface{}) {
+func emit2(format string, v ...interface{}) {
+	var frmt gostring = gostring(format)
 	writePos()
 
 	for i := 0; i < gasIndentLevel; i++ {
 		write(gostring("  "))
 	}
 
-	s := GoSprintf(gostring(format), v...)
+	s := GoSprintf2(frmt, v...)
+	writeln(s)
+}
+
+func emit(format string, v ...interface{}) {
+	var frmt gostring = gostring(format)
+	writePos()
+
+	for i := 0; i < gasIndentLevel; i++ {
+		write(gostring("  "))
+	}
+
+	s := GoSprintf(frmt, v...)
 	writeln(s)
 }
 
@@ -109,38 +122,38 @@ func align(n int, m int) int {
 
 func emitFuncEpilogue(labelDeferHandler gostring, stmtDefer *StmtDefer) {
 	emitNewline()
-	emit("# func epilogue")
+	emit2("# func epilogue")
 	// every function has a defer handler
-	emit("%s: # defer handler", labelDeferHandler)
+	emit2("%s: # defer handler", labelDeferHandler)
 
 	// if the function has a defer statement, jump to there
 	if stmtDefer != nil {
-		emit("jmp %s", stmtDefer.label)
+		emit2("jmp %s", stmtDefer.label)
 	}
 
-	emit("LEAVE_AND_RET")
+	emit2("LEAVE_AND_RET")
 }
 
 func emit_intcast(gtype *Gtype) {
 	if gtype.getKind() == G_BYTE {
-		emit("CAST_BYTE_TO_INT")
+		emit2("CAST_BYTE_TO_INT")
 	}
 }
 
 func emit_comp_primitive(inst gostring, binop *ExprBinop) {
-	emit("# emit_comp_primitive")
+	emit2("# emit_comp_primitive")
 	assert(len(inst) > 0 , binop.token(), "inst shoud not be empty")
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
-	emit("PUSH_8 # left") // left
+	emit2("PUSH_8 # left") // left
 	binop.right.emit()
 	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
 	}
-	emit("PUSH_8 # right") // right
-	emit("CMP_FROM_STACK %s", cstring(inst))
+	emit2("PUSH_8 # right") // right
+	emit2("CMP_FROM_STACK %s", inst)
 }
 
 var labelSeq = 0
