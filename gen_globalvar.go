@@ -5,9 +5,9 @@ import "fmt"
 // gloabal var which should be initialized with zeros
 // https://en.wikipedia.org/wiki/.bss
 func (decl *DeclVar) emitBss() {
-	emit(".data")
+	emit2(".data")
 	// https://sourceware.org/binutils/docs-2.30/as/Lcomm.html#Lcomm
-	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
+	emit2(".lcomm %s, %d", gostring(decl.variable.varname), decl.variable.getGtype().getSize())
 }
 
 func (decl *DeclVar) emitData() {
