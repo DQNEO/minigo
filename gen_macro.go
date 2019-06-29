@@ -151,30 +151,34 @@ func emitMacroDefinitions() {
 	emit2("mov \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
+	var offset0 int = 0
+	var offset8 int = 8
+	var offset16 int = 16
+
 	macroStart("LOAD_24_BY_DEREF", "")
-	emit("mov %d(%%rax), %%rcx", 16)
-	emit("mov %d(%%rax), %%rbx", 8)
-	emit("mov %d(%%rax), %%rax", 0)
+	emit2("mov %d(%%rax), %%rcx", offset16)
+	emit2("mov %d(%%rax), %%rbx", offset8)
+	emit2("mov %d(%%rax), %%rax", offset0)
 	macroEnd()
 
 	macroStart("LOAD_8_BY_DEREF", "")
-	emit("mov (%%rax), %%rax")
+	emit2("mov (%%rax), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_1_BY_DEREF", "")
-	emit("movsbq (%%rax), %%rax")
+	emit2("movsbq (%%rax), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_24_FROM_GLOBAL", "varname")
-	emit("mov \\varname+%2d(%%rip), %%rax # 1st", 0)
-	emit("mov \\varname+%2d(%%rip), %%rbx # 2nd", 8)
-	emit("mov \\varname+%2d(%%rip), %%rcx # 3rd", 16)
+	emit2("mov \\varname+%d(%%rip), %%rax # 1st", offset0)
+	emit2("mov \\varname+%d(%%rip), %%rbx # 2nd", offset8)
+	emit2("mov \\varname+%d(%%rip), %%rcx # 3rd", offset16)
 	macroEnd()
 
 	macroStart("LOAD_24_FROM_LOCAL", "offset")
-	emit("mov \\offset+%2d(%%rbp), %%rax # 1st", 0)
-	emit("mov \\offset+%2d(%%rbp), %%rbx # 2nd", 8)
-	emit("mov \\offset+%2d(%%rbp), %%rcx # 3rd", 16)
+	emit2("mov \\offset+%d(%%rbp), %%rax # 1st", offset0)
+	emit2("mov \\offset+%d(%%rbp), %%rbx # 2nd", offset8)
+	emit2("mov \\offset+%d(%%rbp), %%rcx # 3rd", offset16)
 	macroEnd()
 
 	macroStart("CAST_BYTE_TO_INT", "")
