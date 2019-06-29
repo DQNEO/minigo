@@ -74,7 +74,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
 	} else {
 		typename = gtype.relation.name
 	}
-	return GoSprintf(S("%s$%s"), cstring(typename), cstring(fname))
+	return GoSprintf2(S("%s$%s"), gostring(typename), gostring(fname))
 }
 
 // "main","f1" -> "main.f1"
