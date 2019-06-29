@@ -60,14 +60,12 @@ var gasIndentLevel int = 1
 func emit(format string, v ...interface{}) {
 	writePos()
 
-	var format2 gostring = gostring(format)
-
 	for i := 0; i < gasIndentLevel; i++ {
 		write(gostring("  "))
 	}
 
-	frmt := concat(format2,S("\n"))
-	writef(frmt, v...)
+	writef(gostring(format), v...)
+	write(S("\n"))
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
