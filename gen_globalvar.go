@@ -196,12 +196,12 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 
 // this logic is stolen from 8cc.
 func emitDataAddr(operand Expr, depth int) {
-	emit(".data %d", depth+1)
+	emit2(".data %d", depth+1)
 	label := makeLabel()
-	emit("%s:", label)
+	emit2("%s:", label)
 	doEmitData(nil, operand.getGtype(), operand, "", depth+1)
-	emit(".data %d", depth)
-	emit(".quad %s", label)
+	emit2(".data %d", depth)
+	emit2(".quad %s", label)
 }
 
 func (decl *DeclVar) emitGlobal() {
