@@ -85,7 +85,7 @@ func getFuncSymbol(pkg gostring, fname gostring) gostring {
 	if len(pkg) == 0 {
 		pkg = gostring("")
 	}
-	return GoSprintf(S("%s.%s"), cstring(pkg), cstring(fname))
+	return GoSprintf2(S("%s.%s"), pkg, fname)
 }
 
 func (f *DeclFunc) getSymbol() gostring {

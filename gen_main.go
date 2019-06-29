@@ -57,6 +57,9 @@ func (program *Program) emitMethodTable() {
 			continue
 		}
 		for _, methodNameFull := range methods {
+			if methodNameFull == "." {
+				panic("invalid method name")
+			}
 			splitted := strings.Split(methodNameFull, "$")
 			shortMethodName := splitted[1]
 			emit(".quad .S.S.%s # key", shortMethodName)
