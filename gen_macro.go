@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func emitMacroDefinitions() {
-	emitWithoutIndent("// MACROS")
+	emitWithoutIndent2("// MACROS")
 
 	macroStart("FUNC_PROLOGUE", "")
 	emit("push %%rbp")
@@ -270,10 +270,10 @@ func emitMacroDefinitions() {
 }
 
 func macroStart(name string, args string) {
-	emitWithoutIndent(".macro %s %s", name, args)
+	emitWithoutIndent2(".macro %s %s", gostring(name), gostring(args))
 }
 
 func macroEnd() {
-	emitWithoutIndent(".endm")
+	emitWithoutIndent2(".endm")
 	emitNewline()
 }
