@@ -66,12 +66,12 @@ func (program *Program) emitMethodTable() {
 			emit2(".quad .S.S.%s # key", gostring(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
-			emit(".data 1")
-			emit("%s:", label)
-			emit(".quad %s # func addr", gostring(methodNameFull))
+			emit2(".data 1")
+			emit2("%s:", label)
+			emit2(".quad %s # func addr", gostring(methodNameFull))
 			gasIndentLevel--
-			emit(".data 0")
-			emit(".quad %s # func addr addr", label)
+			emit2(".data 0")
+			emit2(".quad %s # func addr addr", label)
 
 
 			if !in_array(shortMethodName, shortMethodNames) {
@@ -83,15 +83,15 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent("#--------------------------------------------------------")
 	emitWithoutIndent("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
-		emit(".data 0")
-		emit(".S.S.%s:", shortMethodName)
+		emit2(".data 0")
+		emit2(".S.S.%s:", gostring(shortMethodName))
 		gasIndentLevel++
-		emit(".data 1")
-		emit(".S.%s:", shortMethodName)
-		emit(".quad 0") // Any value is ok. This is not referred to.
+		emit2(".data 1")
+		emit2(".S.%s:", gostring(shortMethodName))
+		emit2(".quad 0") // Any value is ok. This is not referred to.
 		gasIndentLevel--
-		emit(".data 0")
-		emit(".quad .S.%s", shortMethodName)
+		emit2(".data 0")
+		emit2(".quad .S.%s", gostring(shortMethodName))
 	}
 
 }
@@ -101,7 +101,7 @@ func (program *Program) emit() {
 
 	emitMacroDefinitions()
 
-	emit(".data 0")
+	emit2(".data 0")
 	program.emitSpecialStrings()
 	program.emitDynamicTypes()
 	program.emitMethodTable()
@@ -121,7 +121,7 @@ func (program *Program) emit() {
 			emitWithoutIndent(".%s:", ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
-			emit(".string \"%s\"", ast.val)
+			emit2(".string \"%s\"", ast.val)
 		}
 
 		for _, vardecl := range pkg.vars {
@@ -142,41 +142,41 @@ func (program *Program) emit() {
 
 func emitRuntimeArgs() {
 	emitWithoutIndent(".runtime_args:")
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	emit2("push %%rbp")
+	emit2("mov %%rsp, %%rbp")
 
-	emit("# set argv, argc, argc")
-	emit("mov runtimeArgv(%%rip), %%rax # ptr")
-	emit("mov runtimeArgc(%%rip), %%rbx # len")
-	emit("mov runtimeArgc(%%rip), %%rcx # cap")
+	emit2("# set argv, argc, argc")
+	emit2("mov runtimeArgv(%%rip), %%rax # ptr")
+	emit2("mov runtimeArgc(%%rip), %%rbx # len")
+	emit2("mov runtimeArgc(%%rip), %%rcx # cap")
 
 	emitFuncEpilogue(S(".runtime_args_noop_handler"), nil)
 }
 
 func emitMainFunc(importOS bool) {
-	fname := "main"
-	emit(".global	%s", fname)
+	fname := S("main")
+	emit2(".global	%s", fname)
 	emitWithoutIndent("%s:", fname)
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	emit2("push %%rbp")
+	emit2("mov %%rsp, %%rbp")
 
-	emit("mov %%rsi, runtimeArgv(%%rip)")
-	emit("mov %%rdi, runtimeArgc(%%rip)")
-	emit("mov $0, %%rsi")
-	emit("mov $0, %%rdi")
+	emit2("mov %%rsi, runtimeArgv(%%rip)")
+	emit2("mov %%rdi, runtimeArgc(%%rip)")
+	emit2("mov $0, %%rsi")
+	emit2("mov $0, %%rdi")
 
 	// init runtime
-	emit("# init runtime")
-	emit("FUNCALL iruntime.init")
+	emit2("# init runtime")
+	emit2("FUNCALL iruntime.init")
 
 	// init imported packages
 	if importOS {
-		emit("# init os")
-		emit("FUNCALL os.init")
+		emit2("# init os")
+		emit2("FUNCALL os.init")
 	}
 
 	emitNewline()
-	emit("FUNCALL main.main")
-	//emit("FUNCALL iruntime.reportMemoryUsage")
+	emit2("FUNCALL main.main")
+	//emit2("FUNCALL iruntime.reportMemoryUsage")
 	emitFuncEpilogue(S("noop_handler"), nil)
 }
