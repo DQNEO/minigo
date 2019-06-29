@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func receiveSliceInVariadic(format []byte, a... interface{})  {
@@ -55,9 +56,7 @@ func myPrintf(format gostring, a... interface{}) gostring {
 				var _argInt int
 				_argInt = arg.(int)
 				var s string
-				if _argInt == 123 {
-					s = "123"
-				}
+				s = strconv.Itoa(_argInt)
 				b := []byte(s)
 				blocks = append(blocks, b)
 			}
@@ -97,11 +96,11 @@ func f1() {
 	var i int
 
 	i = 123
-
 	b = myPrintf(gostring("123=%d\n"), i)
 	os.Stdout.Write(b)
 
-	b = myPrintf(gostring("%s=%d\n"), gostring("123"), i)
+	i = 4567
+	b = myPrintf(gostring("%s=%d\n"), gostring("4567"), i)
 	os.Stdout.Write(b)
 }
 
