@@ -96,6 +96,9 @@ func f1() {
 	b = mySprintf(gostring("left center %s"), gostring("right\n"))
 	os.Stdout.Write(b)
 
+	b = mySprintf(gostring("%s center %s\n"), gostring("left"), gostring("right"))
+	os.Stdout.Write(b)
+
 	var i int
 
 	i = 123
