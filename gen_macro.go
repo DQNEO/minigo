@@ -96,59 +96,59 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	macroStart("LOAD_STRING_LITERAL", "slabel")
-	emit("lea \\slabel(%%rip), %%rax")
+	emit2("lea \\slabel(%%rip), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_NUMBER", "n")
-	emit("mov $\\n, %%rax")
+	emit2("mov $\\n, %%rax")
 	macroEnd()
 
 	macroStart("STORE_1_TO_LOCAL", "offset")
-	emit("mov %%al, \\offset(%%rbp)")
+	emit2("mov %%al, \\offset(%%rbp)")
 	macroEnd()
 
 	macroStart("STORE_8_TO_LOCAL", "offset")
-	emit("mov %%rax, \\offset(%%rbp)")
+	emit2("mov %%rax, \\offset(%%rbp)")
 	macroEnd()
 
 	macroStart("LOAD_GLOBAL_ADDR", "varname, offset")
-	emit("lea \\varname+\\offset(%%rip), %%rax")
+	emit2("lea \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_LOCAL_ADDR", "offset")
-	emit("lea \\offset(%%rbp), %%rax")
+	emit2("lea \\offset(%%rbp), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_1_FROM_LOCAL_CAST", "offset")
-	emit("movsbq \\offset(%%rbp), %%rax")
+	emit2("movsbq \\offset(%%rbp), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_1_FROM_LOCAL", "offset")
-	emit("mov \\offset(%%rbp), %%al")
+	emit2("mov \\offset(%%rbp), %%al")
 	macroEnd()
 
 	macroStart("LOAD_8_FROM_LOCAL", "offset")
-	emit("mov \\offset(%%rbp), %%rax")
+	emit2("mov \\offset(%%rbp), %%rax")
 	macroEnd()
 
 	macroStart("STORE_1_TO_GLOBAL", "varname, offset")
-	emit("mov %%al, \\varname+\\offset(%%rip)")
+	emit2("mov %%al, \\varname+\\offset(%%rip)")
 	macroEnd()
 
 	macroStart("STORE_8_TO_GLOBAL", "varname, offset")
-	emit("mov %%rax, \\varname+\\offset(%%rip)")
+	emit2("mov %%rax, \\varname+\\offset(%%rip)")
 	macroEnd()
 
 	macroStart("LOAD_1_FROM_GLOBAL_CAST", "varname, offset=0")
-	emit("movsbq \\varname+\\offset(%%rip), %%rax")
+	emit2("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_1_FROM_GLOBAL", "varname, offset=0")
-	emit("mov \\varname+\\offset(%%rip), %%al")
+	emit2("mov \\varname+\\offset(%%rip), %%al")
 	macroEnd()
 
 	macroStart("LOAD_8_FROM_GLOBAL", "varname, offset=0")
-	emit("mov \\varname+\\offset(%%rip), %%rax")
+	emit2("mov \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
 	macroStart("LOAD_24_BY_DEREF", "")
