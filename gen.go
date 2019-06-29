@@ -314,9 +314,9 @@ const sliceOffsetForLen = 8
 
 func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit2("PUSH_8")
+	emit2("POP_TO_ARG_0")
+	emit2("FUNCALL iruntime.malloc")
 }
 
 func emitCallMalloc(size int) {
@@ -327,47 +327,47 @@ func emitCallMalloc(size int) {
 }
 
 func (e *IrExprConversionToInterface) emit() {
-	emit("# IrExprConversionToInterface")
+	emit2("# IrExprConversionToInterface")
 	emitConversionToInterface(e.arg)
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		emit("# receiverType is nil. emit nil for interface")
-		emit("LOAD_EMPTY_INTERFACE")
+		emit2("# receiverType is nil. emit nil for interface")
+		emit2("LOAD_EMPTY_INTERFACE")
 		return
 	}
 
-	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
+	emit2("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
 	if dynamicValue.getGtype().is24WidthType() {
-		emit("PUSH_24")
+		emit2("PUSH_24")
 		emitCallMalloc(24)
-		emit("PUSH_8")
-		emit("STORE_24_INDIRECT_FROM_STACK")
+		emit2("PUSH_8")
+		emit2("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit("PUSH_8")
+		emit2("PUSH_8")
 		emitCallMalloc(8)
-		emit("PUSH_8")
-		emit("STORE_8_INDIRECT_FROM_STACK")
+		emit2("PUSH_8")
+		emit2("STORE_8_INDIRECT_FROM_STACK")
 	}
 
-	emit("PUSH_8 # addr of dynamicValue") // address
+	emit2("PUSH_8 # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
 	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
-	emit("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
-	emit("PUSH_8 # receiverTypeId")
+	emit2("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
+	emit2("PUSH_8 # receiverTypeId")
 
 	gtype := dynamicValue.getGtype()
 	label := symbolTable.getTypeLabel(gtype)
-	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("PUSH_8 # dynamicType")
+	emit2("lea .%s, %%rax# dynamicType %s", label, gtype.String())
+	emit2("PUSH_8 # dynamicType")
 
-	emit("POP_INTERFACE")
+	emit2("POP_INTERFACE")
 	emitNewline()
 }
 
@@ -386,7 +386,7 @@ func (decl *DeclVar) emit() {
 }
 
 func (decl *DeclVar) emitLocal() {
-	emit("# DeclVar \"%s\"", decl.variable.varname)
+	emit2("# DeclVar \"%s\"", decl.variable.varname)
 	gtype := decl.variable.gtype
 	variable := decl.variable
 	rhs := decl.initval
@@ -415,7 +415,7 @@ func (decl *DeclConst) emit() {
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		setPos(ast.token())
-		emit("# Statement")
+		emit2("# Statement")
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
@@ -423,12 +423,12 @@ func (ast *StmtSatementList) emit() {
 }
 
 func (e *ExprIndex) emit() {
-	emit("# emit *ExprIndex")
+	emit2("# emit *ExprIndex")
 	e.emitOffsetLoad(0)
 }
 
 func (e *ExprNilLiteral) emit() {
-	emit("LOAD_NUMBER 0 # nil literal")
+	emit2("LOAD_NUMBER 0 # nil literal")
 }
 
 func (s *StmtShortVarDecl) emit() {
@@ -442,7 +442,7 @@ func (s *StmtShortVarDecl) emit() {
 }
 
 func (f *ExprFuncRef) emit() {
-	emit("LOAD_NUMBER 1 # funcref") // emit 1 for now.  @FIXME
+	emit2("LOAD_NUMBER 1 # funcref") // emit 1 for now.  @FIXME
 }
 
 func (e ExprArrayLiteral) emit() {
@@ -460,25 +460,25 @@ func (e *ExprTypeAssertion) emit() {
 
 		e.expr.emit() // emit interface
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
-		emit("PUSH_8 # push dynamic data")
+		emit2("PUSH_8 # push dynamic data")
 
-		emit("push %%rcx # push dynamic type addr")
+		emit2("push %%rcx # push dynamic type addr")
 		emitCompareDynamicTypeFromStack(e.gtype)
 
 		// move ok value
 		if e.gtype.is24WidthType() {
-			emit("mov %%rax, %%rdx")
+			emit2("mov %%rax, %%rdx")
 		} else {
-			emit("mov %%rax, %%rbx")
+			emit2("mov %%rax, %%rbx")
 		}
-		emit("pop %%rax # load dynamic data")
-		emit("TEST_IT")
+		emit2("pop %%rax # load dynamic data")
+		emit2("TEST_IT")
 		labelEnd := makeLabel()
-		emit("je %s # exit if nil", labelEnd)
+		emit2("je %s # exit if nil", labelEnd)
 		if e.gtype.is24WidthType() {
-			emit("LOAD_24_BY_DEREF")
+			emit2("LOAD_24_BY_DEREF")
 		} else {
-			emit("LOAD_8_BY_DEREF")
+			emit2("LOAD_8_BY_DEREF")
 		}
 		emitWithoutIndent("%s:", labelEnd)
 	}
@@ -494,17 +494,17 @@ func (e *ExprVaArg) emit() {
 }
 
 func (e *IrExprConversion) emit() {
-	emit("# IrExprConversion.emit()")
+	emit2("# IrExprConversion.emit()")
 	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isString() {
-		emit("# convert slice to string")
+		emit2("# convert slice to string")
 		// string(bytes)
 		labelEnd := makeLabel()
 		e.arg.emit() // load slice
-		emit("TEST_IT") // check if ptr is nil
-		emit("jne %s # exit if not nil", labelEnd)
-		emit("# if nil then")
+		emit2("TEST_IT") // check if ptr is nil
+		emit2("jne %s # exit if not nil", labelEnd)
+		emit2("# if nil then")
 		emitEmptyString()
-		emit("%s:", labelEnd)
+		emit2("%s:", labelEnd)
 	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
 		//  []byte(cstring)
 		cstring := e.arg
@@ -533,7 +533,7 @@ func bool2string(bol bool) string {
 func (f *DeclFunc) emit() {
 	f.prologue.emit()
 	f.body.emit()
-	emit("mov $0, %%rax")
+	emit2("mov $0, %%rax")
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
 

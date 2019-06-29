@@ -57,6 +57,12 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 			arg := a[argIndex]
 			//dumpInterface(arg)
 			switch arg.(type) {
+			case string:
+				var s string
+				var bytes []byte
+				s = arg.(string)
+				bytes = []byte(s)
+				blocks = append(blocks, bytes)
 			case []byte:
 				//fmt.Printf("# byte\n")
 				var _arg []byte
