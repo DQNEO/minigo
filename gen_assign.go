@@ -4,7 +4,7 @@ import "fmt"
 
 // Assignment: a,b,c = expr1,expr2,expr3
 func emitAssignMultiToMulti(ast *StmtAssignment) {
-	emit("# multi(%d) = multi(%d)", len(ast.lefts), len(ast.rights))
+	emit2("# emitAssignMultiToMulti")
 	// The number of operands on the left hand side must match the number of values.
 	if len(ast.lefts) != len(ast.rights) {
 		errorft(ast.token(), "number of exprs does not match")
@@ -44,8 +44,8 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 //
 
 func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
-	numLeft := len(ast.lefts)
-	emit("# multi(%d) = expr", numLeft)
+	var numLeft int = len(ast.lefts)
+	emit2("# multi(%d) = expr", numLeft)
 	// a,b,c = expr
 	numRight := 0
 	right := ast.rights[0]
@@ -62,7 +62,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		indexExpr := right.(*ExprIndex)
 		if indexExpr.collection.getGtype().getKind() == G_MAP {
 			// map get
-			emit("# v, ok = map[k]")
+			emit2("# v, ok = map[k]")
 			leftsMayBeTwo = true
 		}
 		numRight++
@@ -86,7 +86,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		rettypes := getRettypes(right)
 		if len(rettypes) > 1 {
 			// a,b,c = f()
-			emit("# a,b,c = f()")
+			emit2("# a,b,c = f()")
 			right.emit()
 			var retRegiLen int
 			for _, rettype := range rettypes {
@@ -96,9 +96,10 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 				}
 				retRegiLen += retSize / 8
 			}
-			emit("# retRegiLen=%d\n", retRegiLen)
-			for i := retRegiLen - 1; i >= 0; i-- {
-				emit("push %%%s # %d", retRegi[i], i)
+			emit2("# retRegiLen=%d\n", retRegiLen)
+			var i int
+			for i = retRegiLen - 1; i >= 0; i-- {
+				emit("push %%%s # %d", gostring(retRegi[i]), i)
 			}
 			for _, left := range ast.lefts {
 				if isUnderScore(left) {

@@ -84,7 +84,7 @@ func (e *ExprCap) emit() {
 	gtype := arg.getGtype()
 	switch gtype.getKind() {
 	case G_ARRAY:
-		emit("LOAD_NUMBER %d", gtype.length)
+		emit2("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
 		case *ExprVariable, *ExprStructField, *ExprIndex:
