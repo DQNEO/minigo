@@ -248,7 +248,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 
 	slabel := makeLabel()
 	emit(".data 0")
-	emitWithoutIndent2("%s:", slabel)
+	emitWithoutIndent("%s:", slabel)
 	emit(".string \"%s\"", "assertInterface failed")
 	emit(".text")
 	emit("lea %s, %%rax", slabel)
@@ -256,7 +256,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL %s", ".panic")
 
-	emitWithoutIndent2("%s:", labelEnd)
+	emitWithoutIndent("%s:", labelEnd)
 	emitNewline()
 }
 
@@ -266,6 +266,6 @@ type builtinAsCommentEmitter struct {
 
 func (em *builtinAsCommentEmitter) emit() {
 	if stringLiteral, ok := em.arg.(*ExprStringLiteral); ok {
-		emitWithoutIndent2("# %s", stringLiteral.val)
+		emitWithoutIndent("# %s", stringLiteral.val)
 	}
 }

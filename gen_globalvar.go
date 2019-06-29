@@ -15,9 +15,9 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emitWithoutIndent2("%s: # gtype=%s", gostring(decl.variable.varname), gostring(gtype.String()))
-	emitWithoutIndent2("# right.gtype = %s", gostring(right.getGtype().String()))
-	emitWithoutIndent2(".data 0")
+	emitWithoutIndent("%s: # gtype=%s", gostring(decl.variable.varname), gostring(gtype.String()))
+	emitWithoutIndent("# right.gtype = %s", gostring(right.getGtype().String()))
+	emitWithoutIndent(".data 0")
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
@@ -205,7 +205,7 @@ func emitDataAddr(operand Expr, depth int) {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitWithoutIndent2("# emitGlobal for %s", gostring(decl.variable.varname))
+	emitWithoutIndent("# emitGlobal for %s", gostring(decl.variable.varname))
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {
