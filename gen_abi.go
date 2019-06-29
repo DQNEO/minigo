@@ -121,14 +121,14 @@ type funcPrologueEmitter struct {
 func (fe *funcPrologueEmitter) emit() {
 	setPos(fe.token)
 	emitWithoutIndent("%s:", fe.symbol)
-	emit("FUNC_PROLOGUE")
+	emit2("FUNC_PROLOGUE")
 
 	if len(fe.argRegisters) > 0 {
-		emit("# set params")
+		emit2("# set params")
 	}
 
 	for _, regi := range fe.argRegisters {
-		emit("PUSH_ARG_%d", regi)
+		emit2("PUSH_ARG_%d", regi)
 	}
 
 	if len(fe.localvars) > 0 {
@@ -137,8 +137,8 @@ func (fe *funcPrologueEmitter) emit() {
 			lvar := fe.localvars[i]
 			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 		}
-		localarea := fe.localarea
-		emit("sub $%d, %%rsp # total stack size", -localarea)
+		var localarea int = -fe.localarea
+		emit2("sub $%d, %%rsp # total stack size", localarea)
 	}
 
 	emitNewline()
@@ -146,7 +146,7 @@ func (fe *funcPrologueEmitter) emit() {
 
 func (ircall *IrStaticCall) emit() {
 	// nothing to do
-	emit("# emitCall %s", ircall.symbol)
+	emit2("# emitCall %s", ircall.symbol)
 
 	var numRegs int
 	var param *ExprVariable
@@ -157,10 +157,10 @@ func (ircall *IrStaticCall) emit() {
 	for argIndex, arg = range ircall.args {
 		var fromGtype string = ""
 		if arg.getGtype() != nil {
-			emit("# get fromGtype")
+			emit2("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
-		emit("# from %s", fromGtype)
+		emit2("# from %s", gostring(fromGtype))
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
