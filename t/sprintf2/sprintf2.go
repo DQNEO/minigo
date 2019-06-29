@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 )
 
 func receiveSliceInVariadic(format []byte, a... interface{})  {
@@ -24,6 +23,9 @@ func f0() {
 func f1() {
 	var b gostring
 	b = GoSprintf2(gostring("hello\n"))
+	os.Stdout.Write(b)
+
+	b = GoSprintf2(gostring("%s\n"), []byte("world"))
 	os.Stdout.Write(b)
 
 	b = GoSprintf2(gostring("%s\n"), gostring("world"))

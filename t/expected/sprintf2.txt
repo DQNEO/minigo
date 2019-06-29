@@ -4,6 +4,7 @@ b=abc,len=3,cap=3
 --- f1 ---
 hello
 world
+world
 left center right
 left center right
 left center right

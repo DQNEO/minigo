@@ -26,7 +26,7 @@ func GoSprintf(format gostring, param ...interface{}) gostring {
 var trash int
 func GoSprintf2(format gostring, a... interface{}) gostring {
 	var r []byte
-	var blocks [][]byte
+	var blocks []gostring
 	var str []byte
 	var f []byte = []byte(format)
 	var c byte
@@ -37,6 +37,7 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 	var argIndex int
 	//var sign byte
 	for i,c = range f {
+		//fmt.Printf("# c=%c\n", c)
 		if c == '%' {
 			inPercent = true
 			blocks = append(blocks, str)
@@ -52,6 +53,12 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
+				//fmt.Printf("# append=%s\n", _arg)
+				blocks = append(blocks, _arg)
+			case gostring:
+				var _arg []byte
+				_arg = arg.(gostring)
+				//fmt.Printf("# append=%s\n", _arg)
 				blocks = append(blocks, _arg)
 			case int:
 				var _argInt int
@@ -68,6 +75,7 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 		}
 		str = append(str,c)
 	}
+	//fmt.Printf("# blocks:%v", blocks)
 	blocks = append(blocks, str)
 	for i, str = range blocks {
 		for j, c = range str {
