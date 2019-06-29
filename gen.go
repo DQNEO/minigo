@@ -156,10 +156,10 @@ func emit_comp_primitive(inst gostring, binop *ExprBinop) {
 	emit2("CMP_FROM_STACK %s", inst)
 }
 
-var labelSeq = 0
+var labelSeq int = 0
 
 func makeLabel() gostring {
-	r := GoSprintf(S(".L%d"), labelSeq)
+	r := GoSprintf2(S(".L%d"), labelSeq)
 	labelSeq++
 	return r
 }
