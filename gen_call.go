@@ -211,18 +211,19 @@ type builtinDumpInterfaceEmitter struct {
 }
 
 func (em *builtinDumpInterfaceEmitter) emit() {
-	emit("lea .%s, %%rax", builtinStringKey1)
-	emit("PUSH_8")
+	emit2("lea .%s, %%rax", gostring(builtinStringKey1))
+	emit2("PUSH_8")
 
 	em.arg.emit()
-	emit("PUSH_INTERFACE")
+	emit2("PUSH_INTERFACE")
 
 	numRegs := 4
-	for i := numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
+	var i int
+	for i = numRegs - 1; i >= 0; i-- {
+		emit2("POP_TO_ARG_%d", i)
 	}
 
-	emit("FUNCALL %s", "printf")
+	emit2("FUNCALL %s", S("printf"))
 	emitNewline()
 }
 
@@ -231,31 +232,31 @@ type builtinAssertInterfaceEmitter struct {
 }
 
 func (em *builtinAssertInterfaceEmitter) emit() {
-	emit("# builtinAssertInterface")
+	emit2("# builtinAssertInterface")
 	labelEnd := makeLabel()
 	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
 
 	// (ptr != nil && rcx == nil) => Error
 
-	emit("CMP_NE_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit2("CMP_NE_ZERO")
+	emit2("TEST_IT")
+	emit2("je %s", labelEnd)
 
-	emit("mov %%rcx, %%rax")
+	emit2("mov %%rcx, %%rax")
 
-	emit("CMP_EQ_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit2("CMP_EQ_ZERO")
+	emit2("TEST_IT")
+	emit2("je %s", labelEnd)
 
 	slabel := makeLabel()
-	emit(".data 0")
+	emit2(".data 0")
 	emitWithoutIndent("%s:", slabel)
-	emit(".string \"%s\"", "assertInterface failed")
-	emit(".text")
-	emit("lea %s, %%rax", slabel)
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL %s", ".panic")
+	emit2(".string \"%s\"", S("assertInterface failed"))
+	emit2(".text")
+	emit2("lea %s, %%rax", slabel)
+	emit2("PUSH_8")
+	emit2("POP_TO_ARG_0")
+	emit2("FUNCALL %s", S(".panic"))
 
 	emitWithoutIndent("%s:", labelEnd)
 	emitNewline()
