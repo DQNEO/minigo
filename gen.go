@@ -6,10 +6,6 @@
 
 package main
 
-import (
-	"os"
-)
-
 const IntSize int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
 const sliceWidth int = 3
@@ -19,8 +15,7 @@ const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
 	writePos()
-	var b []byte = []byte{'\n'}
-	os.Stdout.Write(b)
+	write(S("\n"))
 }
 
 var pos *Token // current source position
@@ -44,17 +39,6 @@ func writePos() {
 	write(b)
 }
 
-func write(s gostring) {
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
-}
-
-func writef(format gostring, v ...interface{}) {
-	s := GoSprintf(format, v...)
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
-}
-
 var gasIndentLevel int = 1
 
 func emit(format string, v ...interface{}) {
@@ -64,13 +48,14 @@ func emit(format string, v ...interface{}) {
 		write(gostring("  "))
 	}
 
-	writef(gostring(format), v...)
-	write(S("\n"))
+	s := GoSprintf(gostring(format), v...)
+	writeln(s)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	writef(concat(gostring(format), gostring("\n")), v...)
+	s := GoSprintf(gostring(format), v...)
+	writeln(s)
 }
 
 func unwrapRel(e Expr) Expr {
