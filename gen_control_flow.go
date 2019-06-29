@@ -188,34 +188,34 @@ func (stmt *StmtSwitch) emit() {
 
 func (f *IrStmtForRangeList) emit() {
 	// i = 0
-	emit("# init index")
+	emit2("# init index")
 	f.init.emit()
 
-	emit("%s: # begin loop ", f.labels.labelBegin)
+	emit2("%s: # begin loop ", gostring(f.labels.labelBegin))
 
 	f.cond.emit()
-	emit("TEST_IT")
-	emit("je %s  # if false, go to loop end", f.labels.labelEndLoop)
+	emit2("TEST_IT")
+	emit2("je %s  # if false, go to loop end", gostring(f.labels.labelEndLoop))
 
 	if f.assignVar != nil {
 		f.assignVar.emit()
 	}
 
 	f.block.emit()
-	emit("%s: # end block", f.labels.labelEndBlock)
+	emit2("%s: # end block", gostring(f.labels.labelEndBlock))
 
 	f.cond2.emit()
-	emit("TEST_IT")
-	emit("jne %s  # if this iteration is final, go to loop end", f.labels.labelEndLoop)
+	emit2("TEST_IT")
+	emit2("jne %s  # if this iteration is final, go to loop end", gostring(f.labels.labelEndLoop))
 
 	f.incr.emit()
 
-	emit("jmp %s", f.labels.labelBegin)
-	emit("%s: # end loop", f.labels.labelEndLoop)
+	emit2("jmp %s", gostring(f.labels.labelBegin))
+	emit2("%s: # end loop", gostring(f.labels.labelEndLoop))
 }
 
 func (f *IrStmtClikeFor) emit() {
-	emit("# emit IrStmtClikeFor")
+	emit2("# emit IrStmtClikeFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
