@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type gostring []byte
@@ -20,6 +21,62 @@ func S(s string) gostring {
 func GoSprintf(format gostring, param ...interface{}) gostring {
 	s := fmt.Sprintf(string(format), param...)
 	return gostring(s)
+}
+
+var trash int
+func GoSprintf2(format gostring, a... interface{}) gostring {
+	var r []byte
+	var blocks [][]byte
+	var str []byte
+	var f []byte = []byte(format)
+	var c byte
+	var i int
+	var j int
+	var numPercent int
+	var inPercent bool
+	var argIndex int
+	//var sign byte
+	for i,c = range f {
+		if c == '%' {
+			inPercent = true
+			blocks = append(blocks, str)
+			str = nil
+			numPercent++
+			continue
+		}
+		if inPercent {
+			//sign = c
+			arg := a[argIndex]
+			//dumpInterface(arg)
+			switch arg.(type) {
+			case []byte:
+				var _arg []byte
+				_arg = arg.([]byte)
+				blocks = append(blocks, _arg)
+			case int:
+				var _argInt int
+				_argInt = arg.(int)
+				var s string
+				s = strconv.Itoa(_argInt)
+				b := []byte(s)
+				blocks = append(blocks, b)
+			}
+			argIndex++
+			inPercent = false
+			str = nil
+			continue
+		}
+		str = append(str,c)
+	}
+	blocks = append(blocks, str)
+	for i, str = range blocks {
+		for j, c = range str {
+			r = append(r, c)
+		}
+	}
+	trash = i
+	trash = j
+	return r
 }
 
 func write(s gostring) {
