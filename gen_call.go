@@ -190,18 +190,19 @@ type builtinDumpSliceEmitter struct {
 }
 
 func (em *builtinDumpSliceEmitter) emit() {
-	emit("lea .%s, %%rax", builtinStringKey2)
-	emit("PUSH_8")
+	emit2("lea .%s, %%rax", gostring(builtinStringKey2))
+	emit2("PUSH_8")
 
 	em.arg.emit()
-	emit("PUSH_SLICE")
+	emit2("PUSH_SLICE")
 
 	numRegs := 4
-	for i := numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
+	var i int
+	for i = numRegs - 1; i >= 0; i-- {
+		emit2("POP_TO_ARG_%d", i)
 	}
 
-	emit("FUNCALL %s", "printf")
+	emit2("FUNCALL %s", S("printf"))
 	emitNewline()
 }
 
