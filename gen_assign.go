@@ -99,7 +99,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 			emit2("# retRegiLen=%d\n", retRegiLen)
 			var i int
 			for i = retRegiLen - 1; i >= 0; i-- {
-				emit("push %%%s # %d", gostring(retRegi[i]), i)
+				emit2("push %%%s # %d", gostring(retRegi[i]), i)
 			}
 			for _, left := range ast.lefts {
 				if isUnderScore(left) {
@@ -118,10 +118,10 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 	}
 
 	emitAssignOne(left, right)
-	//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
+	//emit2("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
 	if leftsMayBeTwo && len(ast.lefts) == 2 {
 		okVariable := ast.lefts[1]
-		//emit("# lefts[0] type = %s", ast.lefts[0].getGtype().String())
+		//emit2("# lefts[0] type = %s", ast.lefts[0].getGtype().String())
 		okRegister := mapOkRegister(ast.lefts[0].getGtype().is24WidthType())
 		emit2("mov %%%s, %%rax # emit okValue", gostring(okRegister))
 		emitSavePrimitive(okVariable)
@@ -152,7 +152,7 @@ func emitAssignOne(lhs Expr, rhs Expr) {
 	}
 }
 func (ast *StmtAssignment) emit() {
-	emit("# StmtAssignment")
+	emit2("# StmtAssignment")
 	// the right hand operand is a single multi-valued expression
 	// such as a function call, a channel or map operation, or a type assertion.
 	// The number of operands on the left hand side must match the number of values.
@@ -180,15 +180,15 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 }
 
 func assignToStruct(lhs Expr, rhs Expr) {
-	emit("# assignToStruct start")
+	emit2("# assignToStruct start")
 	lhs = unwrapRel(lhs)
 	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
 		lhs.token(), "rhs should be struct type")
 	// initializes with zero values
-	emit("# initialize struct with zero values: start")
+	emit2("# initialize struct with zero values: start")
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
 		if fieldtype.is24WidthType() {
-			emit("LOAD_EMPTY_24")
+			emit2("LOAD_EMPTY_24")
 			emitSave24(lhs, fieldtype.offset)
 			continue
 		}
@@ -207,7 +207,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			default:
 				assert(0 <= elmSize && elmSize <= 8, lhs.token(), "invalid size")
 				for i := 0; i < arrayType.length; i++ {
-					emit("mov $0, %%rax")
+					emit2("mov $0, %%rax")
 					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
 				}
 			}
@@ -218,13 +218,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 			assignToStruct(left, nil)
 		default:
-			emit("mov $0, %%rax")
+			emit2("mov $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, lhs.token(), fieldtype.String())
 			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)
 		}
 	}
-	emit("# initialize struct with zero values: end")
+	emit2("# initialize struct with zero values: end")
 
 	if rhs == nil {
 		return
@@ -236,18 +236,18 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	switch rhs.(type) {
 	case *ExprVariable:
 		emitAddress(lhs)
-		emit("PUSH_8")
+		emit2("PUSH_8")
 		emitAddress(rhs)
-		emit("PUSH_8")
+		emit2("PUSH_8")
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
 		if eqGostrings(re.op, gostring("*")) {
 			// copy struct
 			emitAddress(lhs)
-			emit("PUSH_8")
+			emit2("PUSH_8")
 			re.operand.emit()
-			emit("PUSH_8")
+			emit2("PUSH_8")
 			emitCopyStructFromStack(lhs.getGtype().getSize())
 		} else {
 			TBI(rhs.token(), "")
@@ -258,7 +258,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 		// do assignment for each field
 		for _, field := range structliteral.fields {
-			emit("# .%s", field.key)
+			emit2("# .%s", gostring(field.key))
 			fieldtype := strcttyp.getField(field.key)
 
 			switch fieldtype.getKind() {
@@ -317,13 +317,13 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		TBI(rhs.token(), "")
 	}
 
-	emit("# assignToStruct end")
+	emit2("# assignToStruct end")
 }
 
 func assignToInterface(lhs Expr, rhs Expr) {
-	emit("# assignToInterface")
+	emit2("# assignToInterface")
 	if rhs == nil || isNil(rhs) {
-		emit("LOAD_EMPTY_INTERFACE")
+		emit2("LOAD_EMPTY_INTERFACE")
 		emitSave24(lhs, 0)
 		return
 	}
@@ -340,17 +340,17 @@ func assignToInterface(lhs Expr, rhs Expr) {
 }
 
 func assignToSlice(lhs Expr, rhs Expr) {
-	emit("# assignToSlice")
+	emit2("# assignToSlice")
 	assertInterface(lhs)
 	rhs = unwrapRel(rhs)
 
 	switch rhs.(type) {
 	case nil:
-		emit("LOAD_EMPTY_SLICE")
+		emit2("LOAD_EMPTY_SLICE")
 	case *ExprNilLiteral:
-		emit("LOAD_EMPTY_SLICE")
+		emit2("LOAD_EMPTY_SLICE")
 	case *IrExprConversion:
-		emit("# IrExprConversion in assignToSlice")
+		emit2("# IrExprConversion in assignToSlice")
 		// https://golang.org/ref/spec#Conversions
 		// Converting a value of a string type to a slice of bytes type
 		// yields a slice whose successive elements are the bytes of the string.
@@ -366,16 +366,16 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		}
 		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got "+conversion.arg.getGtype().String())
 		fromExpr.emit()
-		emit("PUSH_8 # ptr")
+		emit2("PUSH_8 # ptr")
 		strlen := &ExprLen{
 			arg: fromExpr,
 		}
 		strlen.emit()
-		emit("PUSH_8 # len")
-		emit("PUSH_8 # cap")
-		emit("POP_SLICE")
+		emit2("PUSH_8 # len")
+		emit2("PUSH_8 # cap")
+		emit2("POP_SLICE")
 	default:
-		//emit("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
+		//emit2("# emit rhs of type %T %s", rhs, rhs.getGtype().String())
 		rhs.emit() // it should put values to rax,rbx,rcx
 	}
 
@@ -385,7 +385,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 // copy each element
 func assignToArray(lhs Expr, rhs Expr) {
 	rhs = unwrapRel(rhs)
-	emit("# assignToArray")
+	emit2("# assignToArray")
 	lhs = unwrapRel(lhs)
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
@@ -415,25 +415,25 @@ func assignToArray(lhs Expr, rhs Expr) {
 			case nil:
 				// assign zero values
 				if elementType.getKind() == G_INTERFACE {
-					emit("LOAD_EMPTY_INTERFACE")
+					emit2("LOAD_EMPTY_INTERFACE")
 					emitSave24(lhs, offsetByIndex)
 					continue
 				} else {
-					emit("mov $0, %%rax")
+					emit2("mov $0, %%rax")
 				}
 			case *ExprArrayLiteral:
 				arrayLiteral := rhs.(*ExprArrayLiteral)
 				if elementType.getKind() == G_INTERFACE {
 					if i >= len(arrayLiteral.values) {
 						// zero value
-						emit("LOAD_EMPTY_INTERFACE")
+						emit2("LOAD_EMPTY_INTERFACE")
 						emitSave24(lhs, offsetByIndex)
 						continue
 					} else if arrayLiteral.values[i].getGtype().getKind() != G_INTERFACE {
 						// conversion of dynamic type => interface type
 						dynamicValue := arrayLiteral.values[i]
 						emitConversionToInterface(dynamicValue)
-						emit("LOAD_EMPTY_INTERFACE")
+						emit2("LOAD_EMPTY_INTERFACE")
 						emitSave24(lhs, offsetByIndex)
 						continue
 					} else {
@@ -445,7 +445,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 				if i >= len(arrayLiteral.values) {
 					// zero value
-					emit("mov $0, %%rax")
+					emit2("mov $0, %%rax")
 				} else {
 					val := arrayLiteral.values[i]
 					val.emit()
