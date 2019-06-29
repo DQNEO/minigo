@@ -1,32 +1,32 @@
 package main
 
 func (stmt *StmtIf) emit() {
-	emit("# if")
+	emit2("# if")
 	if stmt.simplestmt != nil {
 		stmt.simplestmt.emit()
 	}
 	stmt.cond.emit()
-	emit("TEST_IT")
+	emit2("TEST_IT")
 	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelElse)
-		emit("# then block")
+		emit2("je %s  # jump if 0", labelElse)
+		emit2("# then block")
 		stmt.then.emit()
-		emit("jmp %s # jump to endif", labelEndif)
-		emit("# else block")
-		emit("%s:", labelElse)
+		emit2("jmp %s # jump to endif", labelEndif)
+		emit2("# else block")
+		emit2("%s:", labelElse)
 		stmt.els.emit()
-		emit("# endif")
-		emit("%s:", labelEndif)
+		emit2("# endif")
+		emit2("%s:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelEndif)
-		emit("# then block")
+		emit2("je %s  # jump if 0", labelEndif)
+		emit2("# then block")
 		stmt.then.emit()
-		emit("# endif")
-		emit("%s:", labelEndif)
+		emit2("# endif")
+		emit2("%s:", labelEndif)
 	}
 }
 
@@ -36,22 +36,22 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 }
 
 func emitConvertNilToEmptyString() {
-	emit("# emitConvertNilToEmptyString")
-	emit("POP_8")
-	emit("PUSH_8")
-	emit("# convert nil to an empty string")
-	emit("TEST_IT")
-	emit("pop %%rax")
+	emit2("# emitConvertNilToEmptyString")
+	emit2("POP_8")
+	emit2("PUSH_8")
+	emit2("# convert nil to an empty string")
+	emit2("TEST_IT")
+	emit2("pop %%rax")
 	labelEnd := makeLabel()
-	emit("jne %s # jump if not nil", labelEnd)
-	emit("# if nil then")
+	emit2("jne %s # jump if not nil", labelEnd)
+	emit2("# if nil then")
 	emitEmptyString()
-	emit("%s:", labelEnd)
+	emit2("%s:", labelEnd)
 }
 
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emitConvertNilToEmptyString()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 
 	if gtype.isNil() {
 		emitEmptyString()
@@ -60,8 +60,8 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 		emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
 	}
 
-	emit("PUSH_8")
-	emit("CMP_FROM_STACK sete") // compare addresses
+	emit2("PUSH_8")
+	emit2("CMP_FROM_STACK sete") // compare addresses
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
@@ -70,14 +70,14 @@ func (stmt *StmtSwitch) needStringToSliceConversion() bool {
 
 func (stmt *StmtSwitch) emit() {
 
-	emit("# switch statement")
+	emit2("# switch statement")
 	labelEnd := makeLabel()
 	var labels []gostring
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
 		cond = stmt.cond
-		emit("# the cond expression")
+		emit2("# the cond expression")
 		if stmt.needStringToSliceConversion() {
 			irConversion, ok := stmt.cond.(*IrExprConversion)
 			assert(ok, nil, "should be IrExprConversion")
@@ -87,13 +87,13 @@ func (stmt *StmtSwitch) emit() {
 		}
 		cond.emit()
 		if cond.getGtype().is24WidthType() {
-			emit("PUSH_24 # the cond value")
+			emit2("PUSH_24 # the cond value")
 		} else {
-			emit("PUSH_8 # the cond value")
+			emit2("PUSH_8 # the cond value")
 		}
 	} else {
 		// switch {
-		emit("# no condition")
+		emit2("# no condition")
 	}
 
 	// case exp1,exp2,..:
@@ -101,7 +101,8 @@ func (stmt *StmtSwitch) emit() {
 	//     stmt2;
 	//     ...
 	for i, caseClause := range stmt.cases {
-		emit("# case %d", i)
+		var j int = i
+		emit2("# case %d", j)
 		myCaseLabel := makeLabel()
 		labels = append(labels, myCaseLabel)
 		if stmt.cond == nil {
