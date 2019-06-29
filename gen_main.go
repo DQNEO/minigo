@@ -43,13 +43,14 @@ func (program *Program) emitMethodTable() {
 	emit2(".data 0")
 	emitWithoutIndent("%s:", "receiverTypes")
 	emit2(".quad 0 # receiverTypeId:0")
-	for i := 1; i <= len(program.methodTable); i++ {
-		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
+	var i int
+	for i = 1; i <= len(program.methodTable); i++ {
+		emit2(".quad receiverType%d # receiverTypeId:%d", i, i)
 	}
 
 	var shortMethodNames []string
 
-	for i := 1; i <= len(program.methodTable); i++ {
+	for i = 1; i <= len(program.methodTable); i++ {
 		emitWithoutIndent("receiverType%d:", i)
 		methods, ok := program.methodTable[i]
 		if !ok {
@@ -61,13 +62,13 @@ func (program *Program) emitMethodTable() {
 				panic("invalid method name")
 			}
 			splitted := strings.Split(methodNameFull, "$")
-			shortMethodName := splitted[1]
-			emit(".quad .S.S.%s # key", shortMethodName)
+			var shortMethodName = splitted[1]
+			emit2(".quad .S.S.%s # key", gostring(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
 			emit(".data 1")
 			emit("%s:", label)
-			emit(".quad %s # func addr", methodNameFull)
+			emit(".quad %s # func addr", gostring(methodNameFull))
 			gasIndentLevel--
 			emit(".data 0")
 			emit(".quad %s # func addr addr", label)
