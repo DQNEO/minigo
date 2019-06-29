@@ -106,19 +106,19 @@ func (program *Program) emit() {
 	program.emitDynamicTypes()
 	program.emitMethodTable()
 
-	emitWithoutIndent(".text")
+	emitWithoutIndent2(".text")
 	emitRuntimeArgs()
 	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
 
 	// emit packages
 	for _, pkg := range program.packages {
-		emitWithoutIndent("#--------------------------------------------------------")
-		emitWithoutIndent("# package %s", pkg.name)
-		emitWithoutIndent("# string literals")
-		emitWithoutIndent(".data 0")
+		emitWithoutIndent2("#--------------------------------------------------------")
+		emitWithoutIndent2("# package %s", gostring(pkg.name))
+		emitWithoutIndent2("# string literals")
+		emitWithoutIndent2(".data 0")
 		for _, ast := range pkg.stringLiterals {
-			emitWithoutIndent(".%s:", ast.slabel)
+			emitWithoutIndent2(".%s:", ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
 			emit2(".string \"%s\"", ast.val)
@@ -130,7 +130,7 @@ func (program *Program) emit() {
 		}
 		emitNewline()
 
-		emitWithoutIndent(".text")
+		emitWithoutIndent2(".text")
 		for _, funcdecl := range pkg.funcs {
 			funcdecl.emit()
 			emitNewline()
