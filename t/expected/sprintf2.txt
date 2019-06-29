@@ -1,2 +1,11 @@
+--- f0 ---
 ok=1
 b=abc,len=3,cap=3
+--- f1 ---
+hello
+world
+left center right
+left center right
+left center right
+123=123
+123=123
