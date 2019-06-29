@@ -16,6 +16,25 @@ func f1() {
 	fmt.Printf("%d\n", i) // 1
 }
 
+func f2() {
+	var s string
+	s = strconv.Itoa(0)
+	fmt.Printf("%s\n", s)
+
+	s = strconv.Itoa(7)
+	fmt.Printf("%s\n", s)
+
+	s = strconv.Itoa(10)
+	fmt.Printf("%s\n", s)
+
+	s = strconv.Itoa(100)
+	fmt.Printf("%s\n", s)
+
+	s = strconv.Itoa(1234567890)
+	fmt.Printf("%s\n", s)
+}
+
 func main() {
 	f1()
+	f2()
 }
