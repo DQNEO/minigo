@@ -12,37 +12,37 @@ var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
-	emit(".data 0")
-	emit("# special strings")
+	emit2(".data 0")
+	emit2("# special strings")
 
 	// emit builtin string
 	emitWithoutIndent(".%s:", builtinStringKey1)
-	emit(".string \"%s\"", builtinStringValue1)
+	emit2(".string \"%s\"", builtinStringValue1)
 	emitWithoutIndent(".%s:", builtinStringKey2)
-	emit(".string \"%s\"", builtinStringValue2)
+	emit2(".string \"%s\"", builtinStringValue2)
 
 	// empty string
 	eEmptyString.slabel = gostring("empty")
 	emitWithoutIndent(".%s:", eEmptyString.slabel)
-	emit(".string \"%s\"", eEmptyString.val)
+	emit2(".string \"%s\"", eEmptyString.val)
 }
 
 func (program *Program) emitDynamicTypes() {
 	emitNewline()
-	emit("# Dynamic Types")
+	emit2("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitWithoutIndent(".%s:", label)
-		emit(".string \"%s\"", gs)
+		emit2(".string \"%s\"", gs)
 	}
 }
 
 func (program *Program) emitMethodTable() {
 	emitWithoutIndent("#--------------------------------------------------------")
-	emit("# Method table")
-	emit(".data 0")
+	emit2("# Method table")
+	emit2(".data 0")
 	emitWithoutIndent("%s:", "receiverTypes")
-	emit(".quad 0 # receiverTypeId:0")
+	emit2(".quad 0 # receiverTypeId:0")
 	for i := 1; i <= len(program.methodTable); i++ {
 		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 	}
