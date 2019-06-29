@@ -343,10 +343,18 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
-	emit("PUSH_8")
-	emitCallMalloc(8)
-	emit("PUSH_8")
-	emit("STORE_8_INDIRECT_FROM_STACK")
+	if dynamicValue.getGtype().is24WidthType() {
+		emit("PUSH_24")
+		emitCallMalloc(24)
+		emit("PUSH_8")
+		emit("STORE_24_INDIRECT_FROM_STACK")
+	} else {
+		emit("PUSH_8")
+		emitCallMalloc(8)
+		emit("PUSH_8")
+		emit("STORE_8_INDIRECT_FROM_STACK")
+	}
+
 	emit("PUSH_8 # addr of dynamicValue") // address
 
 	if receiverType.kind == G_POINTER {
@@ -459,12 +467,21 @@ func (e *ExprTypeAssertion) emit() {
 		emit("push %%rcx # push dynamic type addr")
 		emitCompareDynamicTypeFromStack(e.gtype)
 
-		emit("mov %%rax, %%rbx") // move ok value @TODO consider big data like slice, struct, etc
+		// move ok value
+		if e.gtype.is24WidthType() {
+			emit("mov %%rax, %%rdx")
+		} else {
+			emit("mov %%rax, %%rbx")
+		}
 		emit("pop %%rax # load dynamic data")
 		emit("TEST_IT")
 		labelEnd := makeLabel()
-		emit("je %s # jmp if nil", labelEnd)
-		emit("LOAD_8_BY_DEREF")
+		emit("je %s # exit if nil", labelEnd)
+		if e.gtype.is24WidthType() {
+			emit("LOAD_24_BY_DEREF")
+		} else {
+			emit("LOAD_8_BY_DEREF")
+		}
 		emitWithoutIndent("%s:", labelEnd)
 	}
 }
