@@ -12,13 +12,13 @@ func emitMacroDefinitions() {
 
 	for i, regi := range RegsForArguments {
 		macroStart(fmt.Sprintf("POP_TO_ARG_%d", i), "")
-		emit("pop %%%s", regi)
+		emit2("pop %%%s", gostring(regi))
 		macroEnd()
 	}
 
 	for i, regi := range RegsForArguments {
 		macroStart(fmt.Sprintf("PUSH_ARG_%d", i), "")
-		emit("push %%%s", regi)
+		emit2("push %%%s", gostring(regi))
 		macroEnd()
 	}
 
