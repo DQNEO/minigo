@@ -254,21 +254,21 @@ func (ast *ExprBinop) emit() {
 		return
 	}
 	ast.left.emit()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 	ast.right.emit()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 
 	op := ast.op
 	switch cstring(op) {
 	case "+":
-		emit("SUM_FROM_STACK")
+		emit2("SUM_FROM_STACK")
 	case "-":
-		emit("SUB_FROM_STACK")
+		emit2("SUB_FROM_STACK")
 	case "*":
-		emit("IMUL_FROM_STACK")
+		emit2("IMUL_FROM_STACK")
 	case "%":
-		emit("pop %%rcx")
-		emit("pop %%rax")
+		emit2("pop %%rcx")
+		emit2("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 		emit("mov %%rdx, %%rax")

@@ -38,15 +38,22 @@ func GoSprintf2(format gostring, a... interface{}) gostring {
 	//var sign byte
 	for i,c = range f {
 		//fmt.Printf("# c=%c\n", c)
-		if c == '%' {
+		if !inPercent && c == '%' {
 			inPercent = true
+			//fmt.Printf("# in Percent \n")
 			blocks = append(blocks, str)
 			str = nil
 			numPercent++
 			continue
 		}
 		if inPercent {
-			//sign = c
+			if c == '%' {
+				str = append(str,c)
+				inPercent = false
+				//fmt.Printf("# outof Percent \n")
+				continue
+			}
+			//fmt.Printf("# check arg for c=%c\n", c)
 			arg := a[argIndex]
 			//dumpInterface(arg)
 			switch arg.(type) {

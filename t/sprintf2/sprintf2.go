@@ -54,7 +54,11 @@ func f1() {
 	os.Stdout.Write(b)
 }
 
-
+func f2() {
+	var b gostring
+	b = GoSprintf2(gostring("push %%rax\n"))
+	os.Stdout.Write(b)
+}
 
 
 func main() {
@@ -62,4 +66,6 @@ func main() {
 	f0()
 	fmt.Printf("--- f1 ---\n")
 	f1()
+	fmt.Printf("--- f2 ---\n")
+	f2()
 }
