@@ -71,6 +71,12 @@ func emitWithoutIndent(format string, v ...interface{}) {
 	writeln(s)
 }
 
+func emitWithoutIndent2(format string, v ...interface{}) {
+	writePos()
+	s := GoSprintf2(gostring(format), v...)
+	writeln(s)
+}
+
 func unwrapRel(e Expr) Expr {
 	if rel, ok := e.(*Relation); ok {
 		return rel.expr
@@ -480,7 +486,7 @@ func (e *ExprTypeAssertion) emit() {
 		} else {
 			emit2("LOAD_8_BY_DEREF")
 		}
-		emitWithoutIndent("%s:", labelEnd)
+		emitWithoutIndent2("%s:", labelEnd)
 	}
 }
 
