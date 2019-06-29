@@ -292,21 +292,21 @@ func isUnderScore(e Expr) bool {
 
 // expect rhs address is in the stack top, lhs is in the second top
 func emitCopyStructFromStack(size int) {
-	emit("pop %%rbx") // to
-	emit("pop %%rax") // from
+	emit2("pop %%rbx") // to
+	emit2("pop %%rax") // from
 
 	var i int
 	for ; i < size; i += 8 {
-		emit("movq %d(%%rbx), %%rcx", i)
-		emit("movq %%rcx, %d(%%rax)", i)
+		emit2("movq %d(%%rbx), %%rcx", i)
+		emit2("movq %%rcx, %d(%%rax)", i)
 	}
 	for ; i < size; i += 4 {
-		emit("movl %d(%%rbx), %%rcx", i)
-		emit("movl %%rcx, %d(%%rax)", i)
+		emit2("movl %d(%%rbx), %%rcx", i)
+		emit2("movl %%rcx, %d(%%rax)", i)
 	}
 	for ; i < size; i++ {
-		emit("movb %d(%%rbx), %%rcx", i)
-		emit("movb %%rcx, %d(%%rax)", i)
+		emit2("movb %d(%%rbx), %%rcx", i)
+		emit2("movb %%rcx, %d(%%rax)", i)
 	}
 }
 
