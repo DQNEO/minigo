@@ -108,82 +108,82 @@ func (stmt *StmtSwitch) emit() {
 		if stmt.cond == nil {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit2("TEST_IT")
+				emit2("jne %s # jump if matches", myCaseLabel)
 			}
 		} else if stmt.isTypeSwitch() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				emit("# Duplicate the cond value in stack")
-				emit("POP_24")
-				emit("PUSH_24")
+				emit2("# Duplicate the cond value in stack")
+				emit2("POP_24")
+				emit2("PUSH_24")
 
-				emit("push %%rcx # push dynamic type addr")
+				emit2("push %%rcx # push dynamic type addr")
 				emitCompareDynamicTypeFromStack(gtype)
 
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit2("TEST_IT")
+				emit2("jne %s # jump if matches", myCaseLabel)
 			}
 		} else {
 			for _, e := range caseClause.exprs {
-				emit("# Duplicate the cond value in stack")
+				emit2("# Duplicate the cond value in stack")
 
 				if stmt.needStringToSliceConversion() {
 					assert(e.getGtype().isString(), e.token(), "caseClause should be string")
-					emit("POP_SLICE # the cond value")
-					emit("PUSH_SLICE # the cond value")
+					emit2("POP_SLICE # the cond value")
+					emit2("PUSH_SLICE # the cond value")
 
-					emit("PUSH_SLICE # the cond valiue")
+					emit2("PUSH_SLICE # the cond valiue")
 
 					emitConvertCstringToSlice(e)
-					emit("PUSH_SLICE")
+					emit2("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()
 				} else {
-					emit("POP_8 # the cond value")
-					emit("PUSH_8 # the cond value")
+					emit2("POP_8 # the cond value")
+					emit2("PUSH_8 # the cond value")
 
-					emit("PUSH_8 # arg1: the cond value")
+					emit2("PUSH_8 # arg1: the cond value")
 					e.emit()
-					emit("PUSH_8 # arg2: case value")
-					emit("CMP_FROM_STACK sete")
+					emit2("PUSH_8 # arg2: case value")
+					emit2("CMP_FROM_STACK sete")
 				}
 
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit2("TEST_IT")
+				emit2("jne %s # jump if matches", myCaseLabel)
 			}
 		}
 	}
 
 	var defaultLabel gostring
 	if stmt.dflt == nil {
-		emit("jmp %s", labelEnd)
+		emit2("jmp %s", labelEnd)
 	} else {
-		emit("# default")
+		emit2("# default")
 		defaultLabel = makeLabel()
-		emit("jmp %s", defaultLabel)
+		emit2("jmp %s", defaultLabel)
 	}
 
 	if cond != nil && cond.getGtype().is24WidthType() {
-		emit("POP_24 # destroy the cond value")
+		emit2("POP_24 # destroy the cond value")
 	} else {
-		emit("POP_8 # destroy the cond value")
+		emit2("POP_8 # destroy the cond value")
 
 	}
-	emit("#")
+	emit2("#")
 	for i, caseClause := range stmt.cases {
-		emit("# case stmts")
-		emit("%s:", labels[i])
+		emit2("# case stmts")
+		emit2("%s:", labels[i])
 		caseClause.compound.emit()
-		emit("jmp %s", labelEnd)
+		emit2("jmp %s", labelEnd)
 	}
 
 	if stmt.dflt != nil {
-		emit("%s:", defaultLabel)
+		emit2("%s:", defaultLabel)
 		stmt.dflt.emit()
 	}
 
-	emit("%s: # end of switch", labelEnd)
+	emit2("%s: # end of switch", labelEnd)
 }
 
 func (f *IrStmtForRangeList) emit() {
