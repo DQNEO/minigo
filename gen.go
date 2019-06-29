@@ -522,11 +522,11 @@ func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
 }
 
-func bool2string(bol bool) string {
+func bool2string(bol bool) gostring {
 	if bol {
-		return "true"
+		return S("true")
 	} else {
-		return "false"
+		return S("false")
 	}
 }
 

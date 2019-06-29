@@ -132,10 +132,10 @@ func (fe *funcPrologueEmitter) emit() {
 	}
 
 	if len(fe.localvars) > 0 {
-		emit("# Allocating stack for localvars len=%d", len(fe.localvars))
+		//emit("# Allocating stack for localvars len=%d", len(fe.localvars))
 		for i := len(fe.localvars) - 1; i >= 0; i-- {
 			lvar := fe.localvars[i]
-			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
+			emit2("# offset %d variable \"%s\" %s", lvar.offset, gostring(lvar.varname), gostring(lvar.gtype.String()))
 		}
 		var localarea int = -fe.localarea
 		emit2("sub $%d, %%rsp # total stack size", localarea)
@@ -180,18 +180,18 @@ func (ircall *IrStaticCall) emit() {
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
 			if param != nil && !eq(ircall.symbol , "printf") {
-				emit("# has a corresponding param")
+				emit2("# has a corresponding param")
 
 				var fromGtype *Gtype
 				if arg.getGtype() != nil {
 					fromGtype = arg.getGtype()
-					emit("# fromGtype:%s", fromGtype.String())
+					emit2("# fromGtype:%s", gostring(fromGtype.String()))
 				}
 
 				var toGtype *Gtype
 				if param.getGtype() != nil {
 					toGtype = param.getGtype()
-					emit("# toGtype:%s", toGtype.String())
+					emit2("# toGtype:%s", gostring(toGtype.String()))
 				}
 
 				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
@@ -204,11 +204,11 @@ func (ircall *IrStaticCall) emit() {
 			doConvertToInterface = false
 		}
 
-		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
+		emit2("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
 		if doConvertToInterface {
-			emit("# doConvertToInterface !!!")
+			emit2("# doConvertToInterface !!!")
 			emitConversionToInterface(arg)
 		} else {
 			arg.emit()
@@ -216,10 +216,10 @@ func (ircall *IrStaticCall) emit() {
 
 		var width int
 		if doConvertToInterface || arg.getGtype().is24WidthType() {
-			emit("PUSH_24")
+			emit2("PUSH_24")
 			width = 3
 		} else {
-			emit("PUSH_8")
+			emit2("PUSH_8")
 			width = 1
 		}
 		numRegs += width
@@ -238,19 +238,19 @@ func (ircall *IrStaticCall) emit() {
 	}
 
 	if collectVariadicArgs {
-		emit("# collectVariadicArgs = true")
+		emit2("# collectVariadicArgs = true")
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
-			emit("LOAD_EMPTY_SLICE")
-			emit("PUSH_SLICE")
+			emit2("LOAD_EMPTY_SLICE")
+			emit2("PUSH_SLICE")
 		} else {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
-				emit("# emit variadic arg")
+				emit2("# emit variadic arg")
 				if vargIndex == 0 {
-					emit("# make an empty slice to append")
-					emit("LOAD_EMPTY_SLICE")
-					emit("PUSH_SLICE")
+					emit2("# make an empty slice to append")
+					emit2("LOAD_EMPTY_SLICE")
+					emit2("PUSH_SLICE")
 				}
 				// conversion : var ifc = x
 				if varg.getGtype().getKind() == G_INTERFACE {
@@ -258,16 +258,16 @@ func (ircall *IrStaticCall) emit() {
 				} else {
 					emitConversionToInterface(varg)
 				}
-				emit("PUSH_INTERFACE")
-				emit("# calling append24")
-				emit("POP_TO_ARG_5 # ifc_c")
-				emit("POP_TO_ARG_4 # ifc_b")
-				emit("POP_TO_ARG_3 # ifc_a")
-				emit("POP_TO_ARG_2 # cap")
-				emit("POP_TO_ARG_1 # len")
-				emit("POP_TO_ARG_0 # ptr")
-				emit("FUNCALL iruntime.append24")
-				emit("PUSH_SLICE")
+				emit2("PUSH_INTERFACE")
+				emit2("# calling append24")
+				emit2("POP_TO_ARG_5 # ifc_c")
+				emit2("POP_TO_ARG_4 # ifc_b")
+				emit2("POP_TO_ARG_3 # ifc_a")
+				emit2("POP_TO_ARG_2 # cap")
+				emit2("POP_TO_ARG_1 # len")
+				emit2("POP_TO_ARG_0 # ptr")
+				emit2("FUNCALL iruntime.append24")
+				emit2("PUSH_SLICE")
 			}
 		}
 		numRegs += 3
@@ -277,10 +277,11 @@ func (ircall *IrStaticCall) emit() {
 		if i >= len(RegsForArguments) {
 			errorft(ircall.args[0].token(), "too many arguments")
 		}
-		emit("POP_TO_ARG_%d", i)
+		var j int = i
+		emit2("POP_TO_ARG_%d", j)
 	}
 
-	emit("FUNCALL %s", ircall.symbol)
+	emit2("FUNCALL %s", ircall.symbol)
 	emitNewline()
 }
 
@@ -289,28 +290,31 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	for i, arg := range call.args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
-			emit("mov $0, %%rax")
+			emit2("mov $0, %%rax")
 		} else {
 			arg.emit()
 		}
-		emit("PUSH_8 # argument no %d", i+2)
+		var no int = i + 2
+		emit2("PUSH_8 # argument no %d", no)
 	}
 
-	emit("POP_TO_ARG_%d", len(call.args))
+	var ln int = len(call.args)
+	emit2("POP_TO_ARG_%d", ln)
 
 	for i := range call.args {
 		j := len(call.args) - 1 - i
-		emit("POP_TO_ARG_%d", j)
+		var n int = j
+		emit2("POP_TO_ARG_%d", n)
 	}
 
-	emit("POP_8 # funcref")
-	emit("call *%%rax")
+	emit2("POP_8 # funcref")
+	emit2("call *%%rax")
 }
 
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		// return void
-		emit("mov $0, %%rax")
+		emit2("mov $0, %%rax")
 		stmt.emitDeferAndReturn()
 		return
 	}
@@ -325,14 +329,14 @@ func (stmt *StmtReturn) emit() {
 		rettype := stmt.rettypes[0]
 		if rettype.getKind() == G_INTERFACE && expr.getGtype().getKind() != G_INTERFACE {
 			if expr.getGtype() == nil {
-				emit("LOAD_EMPTY_INTERFACE")
+				emit2("LOAD_EMPTY_INTERFACE")
 			} else {
 				emitConversionToInterface(expr)
 			}
 		} else {
 			expr.emit()
 			if expr.getGtype() == nil && stmt.rettypes[0].getKind() == G_SLICE {
-				emit("LOAD_EMPTY_SLICE")
+				emit2("LOAD_EMPTY_SLICE")
 			}
 		}
 		stmt.emitDeferAndReturn()
@@ -343,7 +347,7 @@ func (stmt *StmtReturn) emit() {
 		expr.emit()
 		//		rettype := stmt.rettypes[i]
 		if expr.getGtype() == nil && rettype.getKind() == G_SLICE {
-			emit("LOAD_EMPTY_SLICE")
+			emit2("LOAD_EMPTY_SLICE")
 		}
 		size := rettype.getSize()
 		if size < 8 {
@@ -351,12 +355,14 @@ func (stmt *StmtReturn) emit() {
 		}
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
-			emit("push %%%s", retRegi[num64bit-1-j])
+			var reg gostring = gostring(retRegi[num64bit-1-j])
+			emit2("push %%%s", reg)
 			retRegiIndex++
 		}
 	}
 	for i := 0; i < retRegiIndex; i++ {
-		emit("pop %%%s", retRegi[retRegiIndex-1-i])
+		var reg gostring = gostring(retRegi[retRegiIndex-1-i])
+		emit2("pop %%%s", reg)
 	}
 
 	stmt.emitDeferAndReturn()
