@@ -269,14 +269,14 @@ func (ast *ExprBinop) emit() {
 	case "%":
 		emit2("pop %%rcx")
 		emit2("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
-		emit("mov %%rdx, %%rax")
+		emit2("mov $0, %%rdx # init %%rdx")
+		emit2("div %%rcx")
+		emit2("mov %%rdx, %%rax")
 	case"/":
-		emit("pop %%rcx")
-		emit("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
+		emit2("pop %%rcx")
+		emit2("pop %%rax")
+		emit2("mov $0, %%rdx # init %%rdx")
+		emit2("div %%rcx")
 	default:
 		errorft(ast.token(), "Unknown binop: %s", op)
 	}
