@@ -23,7 +23,8 @@ func f0() {
 
 type gostring []byte
 
-func myPrintf(format gostring, a... interface{}) gostring {
+var trash int
+func mySprintf(format gostring, a... interface{}) gostring {
 	var r []byte
 	var blocks [][]byte
 	var str []byte
@@ -73,34 +74,36 @@ func myPrintf(format gostring, a... interface{}) gostring {
 			r = append(r, c)
 		}
 	}
+	trash = i
+	trash = j
 	return r
 }
 
 func f1() {
 	var b gostring
-	b = myPrintf(gostring("hello\n"))
+	b = mySprintf(gostring("hello\n"))
 	os.Stdout.Write(b)
 
-	b = myPrintf(gostring("%s\n"), gostring("world"))
+	b = mySprintf(gostring("%s\n"), gostring("world"))
 	os.Stdout.Write(b)
 
-	b = myPrintf(gostring("left %s right\n"), gostring("center"))
+	b = mySprintf(gostring("left %s right\n"), gostring("center"))
 	os.Stdout.Write(b)
 
-	b = myPrintf(gostring("%s center right\n"), gostring("left"))
+	b = mySprintf(gostring("%s center right\n"), gostring("left"))
 	os.Stdout.Write(b)
 
-	b = myPrintf(gostring("left center %s"), gostring("right\n"))
+	b = mySprintf(gostring("left center %s"), gostring("right\n"))
 	os.Stdout.Write(b)
 
 	var i int
 
 	i = 123
-	b = myPrintf(gostring("123=%d\n"), i)
+	b = mySprintf(gostring("123=%d\n"), i)
 	os.Stdout.Write(b)
 
 	i = 4567
-	b = myPrintf(gostring("%s=%d\n"), gostring("4567"), i)
+	b = mySprintf(gostring("%s=%d\n"), gostring("4567"), i)
 	os.Stdout.Write(b)
 }
 
