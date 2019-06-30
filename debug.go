@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -16,10 +15,10 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 		indents = append(indents, ' ')
 	}
-
-	var format2 string = string(indents) + format + "\n"
-	s2 := fmt.Sprintf(format2, v...)
+	os.Stderr.Write(indents)
+	s2 := Sprintf(gostring(format), v...)
 	var b []byte = []byte(s2)
+	b = append(b, '\n')
 	os.Stderr.Write(b)
 }
 
