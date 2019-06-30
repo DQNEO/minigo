@@ -73,13 +73,13 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						}
 					}
 				} else if size == 1 {
-					emit(".byte %d", evalIntExpr(value))
+					emit2(".byte %d", evalIntExpr(value))
 				} else {
 					doEmitData(ptok, gtype.elementType, value, selector, depth)
 				}
 			}
 		}
-		emit(".quad 0 # nil terminator")
+		emit2(".quad 0 # nil terminator")
 
 	} else if primType == G_SLICE {
 		switch value.(type) {
@@ -98,8 +98,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			}
 
 			emitDataAddr(arrayLiteral, depth)               // emit underlying array
-			emit(".quad %d", lit.invisiblevar.gtype.length) // len
-			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
+			emit2(".quad %d", lit.invisiblevar.gtype.length) // len
+			emit2(".quad %d", lit.invisiblevar.gtype.length) // cap
 		case *ExprFuncallOrConversion:
 			call := value.(*ExprFuncallOrConversion)
 			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
@@ -107,9 +107,10 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			assert(toGtype.getKind() == G_SLICE && call.args[0].getGtype().isString(), call.token(), "should be string to slice conversion")
 			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
 			assert(ok, call.token(), "arg0 should be stringliteral")
-			emit(".quad .%s", stringLiteral.slabel)
-			emit(".quad %d", len(stringLiteral.val))
-			emit(".quad %d", len(stringLiteral.val))
+			emit2(".quad .%s", stringLiteral.slabel)
+			var length int = len(stringLiteral.val)
+			emit2(".quad %d", length)
+			emit2(".quad %d", length)
 		default:
 			TBI(ptok, "unable to handle gtype %s", gtype.String())
 		}
@@ -121,7 +122,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad %d # %s %s", 0, gtype.String(), containerName)
+			emit2(".quad 0 # %s %s",  gostring(gtype.String()), gostring(containerName))
 			return
 		}
 		val := evalIntExpr(value)
