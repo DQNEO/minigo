@@ -416,8 +416,10 @@ func (lit *ExprMapLiteral) emit() {
 			emit2("STORE_8_INDIRECT_FROM_STACK") // save key to heap
 		}
 
+		var offsetKey int = i*2*8
+		var offsetValue int = i*2*8+8
 		emit2("pop %%rbx")                     // map head
-		emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
+		emit2("mov %%rax, %d(%%rbx) #", offsetKey) // save key address
 		emit2("push %%rbx")                    // map head
 
 		if element.value.getGtype().getSize() <= 8 {
@@ -439,7 +441,7 @@ func (lit *ExprMapLiteral) emit() {
 		}
 
 		emit2("pop %%rbx") // map head
-		emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
+		emit2("mov %%rax, %d(%%rbx) #", offsetValue)
 		emit2("push %%rbx")
 	}
 
