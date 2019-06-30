@@ -29,8 +29,7 @@ func Itoa(i int) string {
 	}
 
 	if len(r) == 0 {
-		return "0"
+		r = []byte{'0'}
 	}
 	return string(r)
 }
-
