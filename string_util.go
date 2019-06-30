@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
@@ -15,11 +14,6 @@ type packageName identifier
 type goidentifier gostring
 
 func S(s string) gostring {
-	return gostring(s)
-}
-
-func GoSprintf(format gostring, param ...interface{}) gostring {
-	s := fmt.Sprintf(string(format), param...)
 	return gostring(s)
 }
 

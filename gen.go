@@ -57,18 +57,6 @@ func emit2(format string, v ...interface{}) {
 	writeln(s)
 }
 
-func emit(format string, v ...interface{}) {
-	var frmt gostring = gostring(format)
-	writePos()
-
-	for i := 0; i < gasIndentLevel; i++ {
-		write(gostring("  "))
-	}
-
-	s := GoSprintf(frmt, v...)
-	writeln(s)
-}
-
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
 	s := GoSprintf2(gostring(format), v...)
