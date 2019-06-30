@@ -152,6 +152,7 @@ func (gtype *Gtype) String2() gostring {
 }
 
 func (gtype *Gtype) String() string {
+	var gs gostring
 	if gtype == nil {
 		return "NO_TYPE"
 	}
@@ -162,8 +163,8 @@ func (gtype *Gtype) String() string {
 		if gtype.relation.pkg == "" {
 			//errorf("pkg is empty: %s", gtype.relation.name)
 		}
-		return fmt.Sprintf("G_NAMED(%s.%s)",
-			gtype.relation.pkg, gtype.relation.name)
+		 gs = Sprintf(S("G_NAMED(%s.%s)"),
+			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
 	case G_INT:
 		return "int"
 	case G_BOOL:
@@ -202,7 +203,7 @@ func (gtype *Gtype) String() string {
 	default:
 		errorf("gtype.String() error: invalid gtype.type=%d", gtype.kind)
 	}
-	return ""
+	return string(gs)
 }
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {
