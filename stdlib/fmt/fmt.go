@@ -10,9 +10,6 @@ func Printf(format string, a ...interface{}) {
 	os.Stdout.Write(b)
 }
 
-func Println(s string) {
-}
-
 var pbuf [1024]byte
 
 func doPrintf(format string, a ...interface{}) string {

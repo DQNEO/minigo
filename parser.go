@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 )
@@ -134,7 +133,6 @@ func (p *parser) traceOut(funcname string) {
 		return
 	}
 	if r := recover(); r != nil {
-		fmt.Println(r)
 		os.Exit(1)
 	}
 	if GENERATION == 1 {
