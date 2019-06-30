@@ -317,7 +317,7 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 }
 
 func (e *ExprIndex) emitOffsetLoad(offset int) {
-	emit("# ExprIndex.emitOffsetLoad")
+	emit2("# ExprIndex.emitOffsetLoad")
 	collection := e.collection
 	index := e.index
 	switch collection.getGtype().getKind() {
@@ -334,14 +334,14 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 		// if x is out of range at run time, a run-time panic occurs
 		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
 		// a[x] may not be assigned to
-		emit("# load head address of the string")
+		emit2("# load head address of the string")
 		collection.emit() // emit address
-		emit("PUSH_8")
+		emit2("PUSH_8")
 		index.emit()
-		emit("PUSH_8")
-		emit("SUM_FROM_STACK")
-		emit("ADD_NUMBER %d", offset)
-		emit("LOAD_8_BY_DEREF")
+		emit2("PUSH_8")
+		emit2("SUM_FROM_STACK")
+		emit2("ADD_NUMBER %d", offset)
+		emit2("LOAD_8_BY_DEREF")
 	default:
 		TBI(collection.token(), "unable to handle %s", collection.getGtype())
 	}
@@ -377,23 +377,23 @@ func (e *ExprSlice) emitSubString() {
 
 	// src address + low
 	e.collection.emit()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 	e.low.emit()
-	emit("PUSH_8")
-	emit("SUM_FROM_STACK")
-	emit("PUSH_8")
+	emit2("PUSH_8")
+	emit2("SUM_FROM_STACK")
+	emit2("PUSH_8")
 
 	emitCallMallocDinamicSize(eMemSize)
-	emit("PUSH_8")
+	emit2("PUSH_8")
 
 	eNewStrlen.emit()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 
-	emit("POP_TO_ARG_2")
-	emit("POP_TO_ARG_1")
-	emit("POP_TO_ARG_0")
+	emit2("POP_TO_ARG_2")
+	emit2("POP_TO_ARG_1")
+	emit2("POP_TO_ARG_0")
 
-	emit("FUNCALL iruntime.strcopy")
+	emit2("FUNCALL iruntime.strcopy")
 }
 
 func (e *ExprSlice) emit() {
@@ -409,20 +409,20 @@ func (e *ExprSlice) emitSlice() {
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 
-	emit("# assign to a slice")
-	emit("#   emit address of the array")
+	emit2("# assign to a slice")
+	emit2("#   emit address of the array")
 	e.collection.emit()
-	emit("PUSH_8 # head of the array")
+	emit2("PUSH_8 # head of the array")
 	e.low.emit()
-	emit("PUSH_8 # low index")
-	emit("LOAD_NUMBER %d", size)
-	emit("PUSH_8")
-	emit("IMUL_FROM_STACK")
-	emit("PUSH_8")
-	emit("SUM_FROM_STACK")
-	emit("PUSH_8")
+	emit2("PUSH_8 # low index")
+	emit2("LOAD_NUMBER %d", size)
+	emit2("PUSH_8")
+	emit2("IMUL_FROM_STACK")
+	emit2("PUSH_8")
+	emit2("SUM_FROM_STACK")
+	emit2("PUSH_8")
 
-	emit("#   calc and set len")
+	emit2("#   calc and set len")
 
 	if e.high == nil {
 		e.high = &ExprNumberLiteral{
@@ -435,9 +435,9 @@ func (e *ExprSlice) emitSlice() {
 		right: e.low,
 	}
 	calcLen.emit()
-	emit("PUSH_8")
+	emit2("PUSH_8")
 
-	emit("#   calc and set cap")
+	emit2("#   calc and set cap")
 	var max Expr
 	if e.max != nil {
 		max = e.max
@@ -455,6 +455,6 @@ func (e *ExprSlice) emitSlice() {
 
 	calcCap.emit()
 
-	emit("PUSH_8")
-	emit("POP_SLICE")
+	emit2("PUSH_8")
+	emit2("POP_SLICE")
 }
