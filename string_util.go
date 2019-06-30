@@ -18,7 +18,7 @@ func S(s string) gostring {
 }
 
 var trash int
-func GoSprintf2(format gostring, a... interface{}) gostring {
+func Sprintf(format gostring, a... interface{}) gostring {
 	var r []byte
 	var blocks []gostring
 	var str []byte

@@ -53,13 +53,13 @@ func emit(format string, v ...interface{}) {
 		write(gostring("  "))
 	}
 
-	s := GoSprintf2(frmt, v...)
+	s := Sprintf(frmt, v...)
 	writeln(s)
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
-	s := GoSprintf2(gostring(format), v...)
+	s := Sprintf(gostring(format), v...)
 	writeln(s)
 }
 
@@ -79,7 +79,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
 	} else {
 		typename = gtype.relation.name
 	}
-	return GoSprintf2(S("%s$%s"), gostring(typename), gostring(fname))
+	return Sprintf(S("%s$%s"), gostring(typename), gostring(fname))
 }
 
 // "main","f1" -> "main.f1"
@@ -90,7 +90,7 @@ func getFuncSymbol(pkg gostring, fname gostring) gostring {
 	if len(pkg) == 0 {
 		pkg = gostring("")
 	}
-	return GoSprintf2(S("%s.%s"), pkg, fname)
+	return Sprintf(S("%s.%s"), pkg, fname)
 }
 
 func (f *DeclFunc) getSymbol() gostring {
@@ -151,7 +151,7 @@ func emit_comp_primitive(inst gostring, binop *ExprBinop) {
 var labelSeq int = 0
 
 func makeLabel() gostring {
-	r := GoSprintf2(S(".L%d"), labelSeq)
+	r := Sprintf(S(".L%d"), labelSeq)
 	labelSeq++
 	return r
 }
