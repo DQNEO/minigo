@@ -33,7 +33,7 @@ func (program *Program) emitDynamicTypes() {
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitWithoutIndent(".%s:", gostring(label))
-		emit(".string \"%s\"", gs)
+		emit(".string \"%s\"", gostring(gs))
 	}
 }
 
