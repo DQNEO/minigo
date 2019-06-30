@@ -52,7 +52,11 @@ func Sprintf(format gostring, a... interface{}) gostring {
 			//dumpInterface(arg)
 			switch arg.(type) {
 			case string:
-				panic("string should not be passed to Sprintf")
+				var s string
+				var bytes []byte
+				s = arg.(string)
+				bytes = []byte(s)
+				blocks = append(blocks, bytes)
 			case []byte:
 				//fmt.Printf("# byte\n")
 				var _arg []byte
