@@ -41,7 +41,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		if ok {
 			values = arrayliteral.values
 		}
-		assert(ok || arrayliteral == nil, ptok, fmt.Sprintf("*ExprArrayLiteral expected, but got %T", value))
+		assert(ok || arrayliteral == nil, ptok, "*ExprArrayLiteral expected, but got ")
 		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
