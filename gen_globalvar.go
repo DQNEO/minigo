@@ -116,9 +116,9 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		}
 	} else if primType == G_MAP || primType == G_INTERFACE {
 		// @TODO
-		emit(".quad 0")
-		emit(".quad 0")
-		emit(".quad 0")
+		emit2(".quad 0")
+		emit2(".quad 0")
+		emit2(".quad 0")
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
