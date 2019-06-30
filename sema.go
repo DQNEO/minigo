@@ -1,8 +1,6 @@
 // Semantic Analyzer to produce IR struct
 package main
 
-import "fmt"
-
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
@@ -10,11 +8,11 @@ type SymbolTable struct {
 	uniquedDTypes []string
 }
 
-func makeDynamicTypeLabel(id int) string {
-	return fmt.Sprintf("DynamicTypeId%d", id)
+func makeDynamicTypeLabel(id int) gostring {
+	return Sprintf(S("DynamicTypeId%d"), id)
 }
 
-func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) gostring {
 	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())

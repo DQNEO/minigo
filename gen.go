@@ -356,7 +356,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	label := symbolTable.getTypeLabel(gtype)
-	emit("lea .%s, %%rax# dynamicType %s", gostring(label), gtype.String2())
+	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String2())
 	emit("PUSH_8 # dynamicType")
 
 	emit("POP_INTERFACE")
