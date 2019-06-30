@@ -151,10 +151,6 @@ func emitMacroDefinitions() {
 	emit2("mov \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
-	var offset0 int = 0
-	var offset8 int = 8
-	var offset16 int = 16
-
 	macroStart("LOAD_24_BY_DEREF", "")
 	emit2("mov %d(%%rax), %%rcx", offset16)
 	emit2("mov %d(%%rax), %%rbx", offset8)

@@ -225,10 +225,11 @@ func (e *ExprSliceLiteral) emit() {
 
 		emit2("pop %%r10 # ptr")
 
+		var baseOffset int = IntSize*3*i
 		if e.gtype.elementType.is24WidthType() {
-			emit("mov %%rax, %d+%d(%%r10)", IntSize*3*i, 0)
-			emit("mov %%rbx, %d+%d(%%r10)", IntSize*3*i, 8)
-			emit("mov %%rcx, %d+%d(%%r10)", IntSize*3*i, 16)
+			emit2("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
+			emit("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
+			emit("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
 		} else if e.gtype.elementType.getSize() <= 8 {
 			emit("mov %%rax, %d(%%r10)", IntSize*i)
 		} else {

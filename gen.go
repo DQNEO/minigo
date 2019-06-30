@@ -6,6 +6,10 @@
 
 package main
 
+var offset0 int = 0
+var offset8 int = 8
+var offset16 int = 16
+
 const IntSize int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
 const sliceWidth int = 3
