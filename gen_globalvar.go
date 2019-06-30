@@ -33,7 +33,7 @@ func (e *ExprStructLiteral) lookup(fieldname goidentifier) Expr {
 
 func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
 	value = unwrapRel(value)
-	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
+	emit2("# doEmitData: containerName=%s, depth=%d", gostring(containerName), depth)
 	primType := gtype.getKind()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
@@ -57,7 +57,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 					if value.getGtype().getKind() == G_STRING {
 						stringLiteral, ok := value.(*ExprStringLiteral)
 						assert(ok, nil, "ok")
-						emit(".quad .%s", stringLiteral.slabel)
+						emit2(".quad .%s", gostring(stringLiteral.slabel))
 					} else {
 						switch value.(type) {
 						case *ExprUop:
