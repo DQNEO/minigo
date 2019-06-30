@@ -223,20 +223,20 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	e.emit()
 	// jusdge update or append
 	emit2("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
-	emit("sete %%al")
-	emit("movzb %%al, %%eax")
-	emit("TEST_IT")
-	emit("je %s  # jump to append if not found", labelAppend)
+	emit2("sete %%al")
+	emit2("movzb %%al, %%eax")
+	emit2("TEST_IT")
+	emit2("je %s  # jump to append if not found", labelAppend)
 
 	// update
-	emit("push %%r12") // push address of the key
-	emit("jmp %s", labelSave)
+	emit2("push %%r12") // push address of the key
+	emit2("jmp %s", labelSave)
 
 	// append
-	emit("%s: # append to a map ", labelAppend)
+	emit2("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
-	emit("LOAD_8_BY_DEREF")
-	emit("PUSH_8")
+	emit2("LOAD_8_BY_DEREF")
+	emit2("PUSH_8")
 
 	// emit len of the map
 	elen := &ExprLen{
@@ -244,35 +244,35 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	}
 	elen.emit()
 	emit("IMUL_NUMBER %d", 2*8) // distance from head to tail
-	emit("PUSH_8")
-	emit("SUM_FROM_STACK")
-	emit("PUSH_8")
+	emit2("PUSH_8")
+	emit2("SUM_FROM_STACK")
+	emit2("PUSH_8")
 
 	// map len++
 	elen.emit()
-	emit("ADD_NUMBER 1")
-	emit("PUSH_8")
+	emit2("ADD_NUMBER 1")
+	emit2("PUSH_8")
 	e.collection.emit()
-	emit("pop %%rbx # new len")
-	emit("mov %%rbx, 8(%%rax) # update map len")
+	emit2("pop %%rbx # new len")
+	emit2("mov %%rbx, 8(%%rax) # update map len")
 
 	// Save key and value
-	emit("%s: # end loop", labelSave)
+	emit2("%s: # end loop", labelSave)
 	e.index.emit()
-	emit("PUSH_8") // index value
+	emit2("PUSH_8") // index value
 
 	// malloc(8)
 	emitCallMalloc(8)
 	// %%rax : malloced address
 	// stack : [map tail address, index value]
-	emit("pop %%rcx")            // index value
+	emit2("pop %%rcx")            // index value
 
-	emit("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
-	emit("mov %%rax, %%rcx") // malloced area
+	emit2("mov %%rcx, (%%rax)")   // save indexvalue to malloced area
+	emit2("mov %%rax, %%rcx") // malloced area
 
-	emit("POP_8")          // map tail
-	emit("mov %%rcx, (%%rax)") // save indexvalue to map tail
-	emit("PUSH_8")             // push map tail
+	emit2("POP_8")          // map tail
+	emit2("mov %%rcx, (%%rax)") // save indexvalue to map tail
+	emit2("PUSH_8")             // push map tail
 
 	// save value
 
@@ -283,13 +283,13 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	}
 	emitCallMalloc(size)
 
-	emit("pop %%rcx")           // map tail address
-	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
-	emit("PUSH_8")
+	emit2("pop %%rcx")           // map tail address
+	emit2("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+	emit2("PUSH_8")
 	if isWidth24 {
-		emit("STORE_24_INDIRECT_FROM_STACK")
+		emit2("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit("STORE_8_INDIRECT_FROM_STACK")
+		emit2("STORE_8_INDIRECT_FROM_STACK")
 	}
 }
 
