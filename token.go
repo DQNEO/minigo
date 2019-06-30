@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
@@ -146,7 +145,9 @@ func (tok *Token) isSemicolon() bool {
 */
 
 func (tok *Token) dump() {
-	var s string = fmt.Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n", tok.line, tok.typ, tok.getSval())
+	sval := tok.getSval()
+	s := Sprintf(S("tok: line=%d, type=%s, sval=\"%s\"\n"),
+		tok.line, gostring(tok.typ), gostring(sval))
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
 }
