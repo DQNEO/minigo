@@ -243,7 +243,8 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 		arg: e.collection,
 	}
 	elen.emit()
-	emit("IMUL_NUMBER %d", 2*8) // distance from head to tail
+	var unitSize int = 2*8
+	emit2("IMUL_NUMBER %d", unitSize) // distance from head to tail
 	emit2("PUSH_8")
 	emit2("SUM_FROM_STACK")
 	emit2("PUSH_8")
