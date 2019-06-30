@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func emitMacroDefinitions() {
 	emitWithoutIndent("// MACROS")
 
@@ -10,14 +8,18 @@ func emitMacroDefinitions() {
 	emit("mov %%rsp, %%rbp")
 	macroEnd()
 
-	for i, regi := range RegsForArguments {
-		macroStart(fmt.Sprintf("POP_TO_ARG_%d", i), "")
+	var i int
+	var regi cstring
+	for i, regi = range RegsForArguments {
+		macroName := Sprintf(S("POP_TO_ARG_%d"), i)
+		macroStart(string(macroName), "")
 		emit("pop %%%s", gostring(regi))
 		macroEnd()
 	}
 
-	for i, regi := range RegsForArguments {
-		macroStart(fmt.Sprintf("PUSH_ARG_%d", i), "")
+	for i, regi = range RegsForArguments {
+		macroName := Sprintf(S("PUSH_ARG_%d"), i)
+		macroStart(string(macroName), "")
 		emit("push %%%s", gostring(regi))
 		macroEnd()
 	}
