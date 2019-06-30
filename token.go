@@ -62,14 +62,14 @@ func (tok *Token) getSval() cstring {
 
 func (tok *Token) GoString() gostring {
 	sval := tok.getSval()
-	return Sprintf(gostring("(\"%s\" at %s:%d:%d)"),
-		sval, tok.filename, tok.line, tok.column)
+	gs := Sprintf(S("(\"%s\" at %s:%d:%d)"),
+		gostring(sval), gostring(tok.filename), tok.line, tok.column)
+	return gs
 }
 
 func (tok *Token) String() string {
-	sval := tok.getSval()
-	return fmt.Sprintf("(\"%s\" at %s:%d:%d)",
-		sval, tok.filename, tok.line, tok.column)
+	gs := tok.GoString()
+	return string(gs)
 }
 
 func (tok *Token) isEOF() bool {
