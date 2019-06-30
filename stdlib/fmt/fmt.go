@@ -10,10 +10,6 @@ func Printf(format string, a ...interface{}) {
 	os.Stdout.Write(b)
 }
 
-func Sprintf(format string, param ...interface{}) string {
-	return doPrintf(format, param...)
-}
-
 func Println(s string) {
 }
 
