@@ -177,10 +177,10 @@ func (ast *ExprUop) emit() {
 		}
 	case "*":
 		ast.operand.emit()
-		emit("LOAD_8_BY_DEREF")
+		emit2("LOAD_8_BY_DEREF")
 	case "!":
 		ast.operand.emit()
-		emit("CMP_EQ_ZERO")
+		emit2("CMP_EQ_ZERO")
 	case "-":
 		// delegate to biop
 		// -(x) -> (-1) * (x)
@@ -201,9 +201,9 @@ func (ast *ExprUop) emit() {
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.isGlobal {
-		emit("LOAD_%d_FROM_GLOBAL %s %d", size, variable.varname, offset)
+		emit2("LOAD_%d_FROM_GLOBAL %s %d", size, gostring(variable.varname), offset)
 	} else {
-		emit("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
+		emit2("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
 	}
 }
 
@@ -211,11 +211,11 @@ func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 // rbx: len
 // rcx: cap
 func (e *ExprSliceLiteral) emit() {
-	emit("# (*ExprSliceLiteral).emit()")
-	length := len(e.values)
+	emit2("# (*ExprSliceLiteral).emit()")
+	var length int = len(e.values)
 	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
 	emitCallMalloc(e.gtype.getSize() * length)
-	emit("PUSH_8 # ptr")
+	emit2("PUSH_8 # ptr")
 	for i, value := range e.values {
 		if e.gtype.elementType.getKind() == G_INTERFACE && value.getGtype().getKind() != G_INTERFACE {
 			emitConversionToInterface(value)
@@ -223,7 +223,7 @@ func (e *ExprSliceLiteral) emit() {
 			value.emit()
 		}
 
-		emit("pop %%r10 # ptr")
+		emit2("pop %%r10 # ptr")
 
 		if e.gtype.elementType.is24WidthType() {
 			emit("mov %%rax, %d+%d(%%r10)", IntSize*3*i, 0)
@@ -234,12 +234,12 @@ func (e *ExprSliceLiteral) emit() {
 		} else {
 			TBI(e.token(), "")
 		}
-		emit("push %%r10 # ptr")
+		emit2("push %%r10 # ptr")
 	}
 
-	emit("pop %%rax # ptr")
-	emit("mov $%d, %%rbx # len", length)
-	emit("mov $%d, %%rcx # cap", length)
+	emit2("pop %%rax # ptr")
+	emit2("mov $%d, %%rbx # len", length)
+	emit2("mov $%d, %%rcx # cap", length)
 }
 
 func emitAddress(e Expr) {
