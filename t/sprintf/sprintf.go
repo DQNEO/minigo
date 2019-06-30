@@ -81,13 +81,6 @@ func f5() {
 	myPrintf("%s %d %d\n", a)
 }
 
-/*
-func dumpToken(tok *Token) {
-	s := fmt.Sprintf("tok: type=%-8s, sval=\"%s\"", tok.typ, tok.sval)
-	debugf(s)
-}
-*/
-
 func test_dumpToken() {
 	format := "string=%s,int=%d\n" // "string=abcdefg,int=12345"
 	var s1 string = "abcdefg"
@@ -97,8 +90,8 @@ func test_dumpToken() {
 	var ifc2 interface{} = s2
 	ifcs = append(ifcs, ifc1)
 	ifcs = append(ifcs, ifc2)
-	var s string = fmt.Sprintf(format, ifcs...)
-	fmt.Printf(s)
+	b := Sprintf(gostring(format), ifcs...)
+	os.Stdout.Write(b)
 }
 
 func main() {
