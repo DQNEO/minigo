@@ -15,37 +15,37 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_POINTER,
 		},
 	}
-	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
+	emit2("# emit receiverTypeId of %s", receiver.getGtype().String())
 	emitOffsetLoad(receiver, ptrSize, ptrSize)
-	emit("IMUL_NUMBER 8")
-	emit("PUSH_8")
+	emit2("IMUL_NUMBER 8")
+	emit2("PUSH_8")
 
-	emit("lea receiverTypes(%%rip), %%rax")
-	emit("PUSH_8")
-	emit("SUM_FROM_STACK")
+	emit2("lea receiverTypes(%%rip), %%rax")
+	emit2("PUSH_8")
+	emit2("SUM_FROM_STACK")
 
 	emit2("# find method %s", methodName)
-	emit("mov (%%rax), %%rax") // address of receiverType
-	emit("PUSH_8 # map head")
+	emit2("mov (%%rax), %%rax") // address of receiverType
+	emit2("PUSH_8 # map head")
 
-	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
-	emit("PUSH_8 # len")
+	emit2("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
+	emit2("PUSH_8 # len")
 
 	emit2("lea .S.%s, %%rax", methodName) // index value (addr)
-	emit("PUSH_8 # map index value")
+	emit2("PUSH_8 # map index value")
 
 	emitMapGet(mapType)
 
-	emit("PUSH_8 # funcref")
+	emit2("PUSH_8 # funcref")
 
-	emit("mov $0, %%rax")
+	emit2("mov $0, %%rax")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
 
 	receiver.emit()
-	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
+	emit2("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 
-	emit("PUSH_8 # receiver")
+	emit2("PUSH_8 # receiver")
 
 	call.emitMethodCall()
 }
@@ -57,7 +57,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	_map := e.collection
 	// rax: found value (zero if not found)
 	// rcx: ok (found: address of the index,  not found:0)
-	emit("# emit mapData head address")
+	emit2("# emit mapData head address")
 	_map.emit()
 
 	// if not nil
@@ -65,31 +65,31 @@ func loadMapIndexExpr(e *ExprIndex) {
 	// else emit 24width 0
 	labelNil := makeLabel()
 	labelEnd := makeLabel()
-	emit("TEST_IT # map && map (check if map is nil)")
-	emit("je %s # jump if map is nil", labelNil)
+	emit2("TEST_IT # map && map (check if map is nil)")
+	emit2("je %s # jump if map is nil", labelNil)
 	// not nil case
-	emit("# not nil")
-	emit("LOAD_8_BY_DEREF")
-	emit("PUSH_8 # map head")
+	emit2("# not nil")
+	emit2("LOAD_8_BY_DEREF")
+	emit2("PUSH_8 # map head")
 	_map.emit()
-	emit("mov 8(%%rax), %%rax")
-	emit("PUSH_8 # len")
+	emit2("mov 8(%%rax), %%rax")
+	emit2("PUSH_8 # len")
 	e.index.emit()
-	emit("PUSH_8 # index value")
+	emit2("PUSH_8 # index value")
 
-	emit("pop %%rcx # index value")
-	emit("pop %%rbx # len")
-	emit("pop %%rax # heap")
+	emit2("pop %%rcx # index value")
+	emit2("pop %%rbx # len")
+	emit2("pop %%rax # heap")
 
-	emit("jmp %s", labelEnd)
+	emit2("jmp %s", labelEnd)
 	// nil case
-	emit("%s:", labelNil)
-	emit("mov $0, %%rax")
-	emit("mov $0, %%rbx")
-	emit("mov $0, %%rcx")
-	emit("%s:", labelEnd)
+	emit2("%s:", labelNil)
+	emit2("mov $0, %%rax")
+	emit2("mov $0, %%rbx")
+	emit2("mov $0, %%rcx")
+	emit2("%s:", labelEnd)
 
-	emit("PUSH_24")
+	emit2("PUSH_24")
 	emitMapGet(_map.getGtype())
 }
 
@@ -113,26 +113,26 @@ func emitMapGet(mapType *Gtype) {
 	mapValueType := mapType.mapValue
 	is24Width := mapValueType.is24WidthType()
 
-	emit("# emitMapGet")
+	emit2("# emitMapGet")
 
-	emit("pop %%r12")
-	emit("pop %%r11")
-	emit("pop %%r10")
+	emit2("pop %%r12")
+	emit2("pop %%r11")
+	emit2("pop %%r10")
 
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 	labelIncr := makeLabel()
 
-	emit("mov $0, %%r13 # init loop counter") // i = 0
+	emit2("mov $0, %%r13 # init loop counter") // i = 0
 
-	emit("%s: # begin loop ", labelBegin)
+	emit2("%s: # begin loop ", labelBegin)
 
-	emit("push %%r13 # loop counter")
-	emit("push %%r11 # map len")
-	emit("CMP_FROM_STACK setl")
-	emit("TEST_IT")
+	emit2("push %%r13 # loop counter")
+	emit2("push %%r11 # map len")
+	emit2("CMP_FROM_STACK setl")
+	emit2("TEST_IT")
 	if is24Width {
-		emit("LOAD_EMPTY_SLICE # NOT FOUND")
+		emit2("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else if mapValueType.isString() {
 		emitEmptyString()
 	} else {
