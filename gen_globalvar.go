@@ -45,7 +45,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
-			selector := fmt.Sprintf("%s[%d]", containerName, i)
+			var selector string
+			selector = fmt.Sprintf("x%d", 0)
 			if i >= len(values) {
 				// zero value
 				doEmitData(ptok, elmType, nil, selector, depth)
