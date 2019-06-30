@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 )
 
@@ -41,10 +40,6 @@ func readFile(filename string) []byte {
 		panic(err)
 	}
 	return bytes
-}
-
-func (bs *ByteStream) location() string {
-	return fmt.Sprintf("%s:%d:%d", bs.filename, bs.line, bs.column)
 }
 
 func (bs *ByteStream) get() (byte, error) {
