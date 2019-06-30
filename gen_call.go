@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Emitter interface {
 	emit()
 }
@@ -34,7 +32,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	}
 	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, "method must belong to a named type")
 	origType := typeToBeloing.relation.gtype
-	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), fmt.Sprintf("origType should not be nil:%#v", typeToBeloing.relation))
+	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), "origType should not be nil")
 	return origType
 }
 
@@ -108,7 +106,7 @@ func (methodCall *ExprMethodcall) emit() {
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
-	assert(relexpr != nil, funcall.token(), fmt.Sprintf("relexpr should NOT be nil for %s", funcall.fname))
+	assert(relexpr != nil, funcall.token(), "relexpr should NOT be nil")
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
 		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef (%s)", funcall.fname)

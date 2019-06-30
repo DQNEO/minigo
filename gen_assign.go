@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // Assignment: a,b,c = expr1,expr2,expr3
 func emitAssignMultiToMulti(ast *StmtAssignment) {
 	emit("# emitAssignMultiToMulti")
@@ -172,8 +170,8 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 		}
 	}
 
-	assert(lhs.getGtype().getSize() <= 8, lhs.token(), fmt.Sprintf("invalid type for lhs: %s", lhs.getGtype()))
-	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(), fmt.Sprintf("invalid type for rhs: %s", rhs.getGtype()))
+	assert(lhs.getGtype().getSize() <= 8, lhs.token(), "invalid type for lhs")
+	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(),"invalid type for rhs")
 	rhs.emit()             //   expr => %rax
 	emitSavePrimitive(lhs) //   %rax => memory
 }
@@ -253,7 +251,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		}
 	case *ExprStructLiteral:
 		structliteral, ok := rhs.(*ExprStructLiteral)
-		assert(ok || rhs == nil, rhs.token(), fmt.Sprintf("invalid rhs: %T", rhs))
+		assert(ok || rhs == nil, rhs.token(), "invalid rhs")
 
 		// do assignment for each field
 		for _, field := range structliteral.fields {
@@ -327,7 +325,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
-	assert(rhs.getGtype() != nil, rhs.token(), fmt.Sprintf("rhs gtype is nil:%T", rhs))
+	assert(rhs.getGtype() != nil, rhs.token(), "rhs gtype is nil")
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
 		emitSave24(lhs, 0)

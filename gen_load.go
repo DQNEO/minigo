@@ -1,8 +1,6 @@
 // gen_load handles loading of expressions
 package main
 
-import "fmt"
-
 func (ast *ExprNumberLiteral) emit() {
 	emit("LOAD_NUMBER %d", ast.val)
 }
@@ -125,7 +123,7 @@ func (variable *ExprVariable) emitAddress(offset int) {
 }
 
 func (rel *Relation) emit() {
-	assert(rel.expr != nil, rel.token(), fmt.Sprintf("rel.expr is nil: %s", rel.name))
+	assert(rel.expr != nil, rel.token(), "rel.expr is nil")
 	rel.expr.emit()
 }
 

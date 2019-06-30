@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func emitPop(gtype *Gtype) {
 	if gtype.is24WidthType() {
 		emit("POP_24")
@@ -70,7 +68,7 @@ func (uop *ExprUop) emitSavePrimitive() {
 
 // x = 1
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
-	assert(0 <= size && size <= 8, variable.token(), fmt.Sprintf("invalid size %d", size))
+	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), "")
 		emit("PUSH_8 # what")

@@ -1,12 +1,10 @@
 package main
 
-import "fmt"
-
 func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
-	assert(gtype != nil, e.token(), "gtype should not be  nil:\n"+fmt.Sprintf("%#v", arg))
+	assert(gtype != nil, e.token(), "gtype should not be  nil:\n")
 
 	switch gtype.getKind() {
 	case G_ARRAY:
