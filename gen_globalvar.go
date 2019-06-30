@@ -175,7 +175,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s ", val, gtype.String())
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
-			emit(".quad .%s", stringLiteral.slabel)
+			emit2(".quad .%s", stringLiteral.slabel)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(eqGostrings(uop.op, gostring("&")), ptok, "only uop & is allowed")
@@ -183,7 +183,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			vr, ok := operand.(*ExprVariable)
 			if ok {
 				assert(vr.isGlobal, value.token(), "operand should be a global variable")
-				emit(".quad %s", vr.varname)
+				emit2(".quad %s", gostring(vr.varname))
 			} else {
 				// var gv = &Struct{_}
 				emitDataAddr(operand, depth)
