@@ -136,79 +136,79 @@ func emitMapGet(mapType *Gtype) {
 	} else if mapValueType.isString() {
 		emitEmptyString()
 	} else {
-		emit("mov $0, %%rax # key not found")
+		emit2("mov $0, %%rax # key not found")
 	}
 
 	okRegister := mapOkRegister(is24Width)
-	emit("mov $0, %%%s # ok = false", okRegister)
+	emit2("mov $0, %%%s # ok = false", okRegister)
 
-	emit("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
+	emit2("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
 
-	emit("# check if key matches")
-	emit("mov %%r13, %%rax") // i
-	emit("IMUL_NUMBER 16")   // i * 16
-	emit("PUSH_8")
+	emit2("# check if key matches")
+	emit2("mov %%r13, %%rax") // i
+	emit2("IMUL_NUMBER 16")   // i * 16
+	emit2("PUSH_8")
 
-	emit("mov %%r10, %%rax") // head
-	emit("PUSH_8")
+	emit2("mov %%r10, %%rax") // head
+	emit2("PUSH_8")
 
-	emit("SUM_FROM_STACK") // head + i * 16
+	emit2("SUM_FROM_STACK") // head + i * 16
 
-	emit("PUSH_8")          // index address
-	emit("LOAD_8_BY_DEREF") // emit index address
+	emit2("PUSH_8")          // index address
+	emit2("LOAD_8_BY_DEREF") // emit index address
 
 	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
 
 	if mapKeyType.isString() {
-		emit("push %%r13")
-		emit("push %%r11")
-		emit("push %%r10")
+		emit2("push %%r13")
+		emit2("push %%r11")
+		emit2("push %%r10")
 
-		emit("LOAD_8_BY_DEREF") // dereference
-		emit("PUSH_8")
+		emit2("LOAD_8_BY_DEREF") // dereference
+		emit2("PUSH_8")
 		emitConvertCstringFromStackToSlice()
-		emit("PUSH_SLICE")
+		emit2("PUSH_SLICE")
 
-		emit("push %%r12")
+		emit2("push %%r12")
 		emitConvertCstringFromStackToSlice()
-		emit("PUSH_SLICE")
+		emit2("PUSH_SLICE")
 
 		emitGoStringsEqualFromStack()
 
-		emit("pop %%r10")
-		emit("pop %%r11")
-		emit("pop %%r13")
+		emit2("pop %%r10")
+		emit2("pop %%r11")
+		emit2("pop %%r13")
 	} else {
-		emit("LOAD_8_BY_DEREF") // dereference
+		emit2("LOAD_8_BY_DEREF") // dereference
 		// primitive comparison
-		emit("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
-		emit("sete %%al")
-		emit("movzb %%al, %%eax")
+		emit2("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue")
+		emit2("sete %%al")
+		emit2("movzb %%al, %%eax")
 	}
 
-	emit("TEST_IT")
-	emit("pop %%rax") // index address
-	emit("je %s  # Not match. go to next iteration", labelIncr)
+	emit2("TEST_IT")
+	emit2("pop %%rax") // index address
+	emit2("je %s  # Not match. go to next iteration", labelIncr)
 
-	emit("# Value found!")
-	emit("push %%rax # stash key address")
-	emit("ADD_NUMBER 8 # value address")
-	emit("LOAD_8_BY_DEREF # set the found value address")
+	emit2("# Value found!")
+	emit2("push %%rax # stash key address")
+	emit2("ADD_NUMBER 8 # value address")
+	emit2("LOAD_8_BY_DEREF # set the found value address")
 	if mapValueType.is24WidthType() {
-		emit("LOAD_24_BY_DEREF")
+		emit2("LOAD_24_BY_DEREF")
 	} else {
-		emit("LOAD_8_BY_DEREF")
+		emit2("LOAD_8_BY_DEREF")
 	}
 
-	emit("mov $1, %%%s # ok = true", okRegister)
-	emit("pop %%r12 # key address. will be in map set")
-	emit("jmp %s # exit loop", labelEnd)
+	emit2("mov $1, %%%s # ok = true", okRegister)
+	emit2("pop %%r12 # key address. will be in map set")
+	emit2("jmp %s # exit loop", labelEnd)
 
-	emit("%s: # incr", labelIncr)
-	emit("add $1, %%r13") // i++
-	emit("jmp %s", labelBegin)
+	emit2("%s: # incr", labelIncr)
+	emit2("add $1, %%r13") // i++
+	emit2("jmp %s", labelBegin)
 
-	emit("%s: # end loop", labelEnd)
+	emit2("%s: # end loop", labelEnd)
 
 }
 
