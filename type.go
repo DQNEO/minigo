@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type EType int
 
 const undefinedSize = -1
@@ -173,7 +171,7 @@ func (gtype *Gtype) String() string {
 		return "byte"
 	case G_ARRAY:
 		elm := gtype.elementType
-		return fmt.Sprintf("[%d]%s", gtype.length, elm.String())
+		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String2())
 	case G_STRUCT:
 		var r = "struct{"
 		for _, field := range gtype.fields {
@@ -185,9 +183,9 @@ func (gtype *Gtype) String() string {
 		return "structfield"
 	case G_POINTER:
 		origType := gtype.origType
-		return fmt.Sprintf("*%s", origType.String())
+		gs = Sprintf(S("*%s"), origType.String2())
 	case G_SLICE:
-		return fmt.Sprintf("[]%s", gtype.elementType.String())
+		gs = Sprintf(S("[]%s"), gtype.elementType.String2())
 	case G_STRING:
 		return "string"
 	case G_FUNC:
@@ -196,7 +194,7 @@ func (gtype *Gtype) String() string {
 		if len(gtype.imethods) == 0 {
 			return "interface{}"
 		} else {
-			return fmt.Sprintf("interface {...}")
+			return "interface {...}"
 		}
 	case G_MAP:
 		return "map"
