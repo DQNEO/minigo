@@ -50,18 +50,18 @@ func (a *ExprStructField) emitAddress() {
 }
 
 func (a *ExprStructField) emit() {
-	emit("# LOAD ExprStructField")
+	emit2("# LOAD ExprStructField")
 	switch a.strct.getGtype().getKind() {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
-		emit("ADD_NUMBER %d", field.offset)
+		emit2("ADD_NUMBER %d", field.offset)
 		switch field.is24WidthType() {
 		case true:
-			emit("LOAD_24_BY_DEREF")
+			emit2("LOAD_24_BY_DEREF")
 		default:
-			emit("LOAD_8_BY_DEREF")
+			emit2("LOAD_8_BY_DEREF")
 		}
 
 	case G_STRUCT:
@@ -85,7 +85,7 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
+	emit2("# load variable \"%s\" %s", gostring(ast.varname), gostring(ast.getGtype().String()))
 	if ast.isGlobal {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
@@ -104,11 +104,11 @@ func (ast *ExprVariable) emit() {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.gtype.is24WidthType() {
-			emit("LOAD_24_FROM_LOCAL %d", ast.offset)
+			emit2("LOAD_24_FROM_LOCAL %d", ast.offset)
 		} else if ast.getGtype().getSize() == 1 {
-			emit("LOAD_1_FROM_LOCAL_CAST %d", ast.offset)
+			emit2("LOAD_1_FROM_LOCAL_CAST %d", ast.offset)
 		} else {
-			emit("LOAD_8_FROM_LOCAL %d", ast.offset)
+			emit2("LOAD_8_FROM_LOCAL %d", ast.offset)
 		}
 	}
 }
@@ -297,22 +297,22 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	assert(elmSize > 0, nil, "elmSize > 0")
 
 	collection.emit()
-	emit("PUSH_8 # head")
+	emit2("PUSH_8 # head")
 
 	index.emit()
-	emit("IMUL_NUMBER %d", elmSize)
-	emit("PUSH_8 # index * elmSize")
+	emit2("IMUL_NUMBER %d", elmSize)
+	emit2("PUSH_8 # index * elmSize")
 
-	emit("SUM_FROM_STACK # (index * elmSize) + head")
-	emit("ADD_NUMBER %d", offset)
+	emit2("SUM_FROM_STACK # (index * elmSize) + head")
+	emit2("ADD_NUMBER %d", offset)
 
 	// dereference the content of an emelment
 	if elmType.is24WidthType() {
-		emit("LOAD_24_BY_DEREF")
+		emit2("LOAD_24_BY_DEREF")
 	} else if elmSize == 1 {
-		emit("LOAD_1_BY_DEREF")
+		emit2("LOAD_1_BY_DEREF")
 	} else {
-		emit("LOAD_8_BY_DEREF")
+		emit2("LOAD_8_BY_DEREF")
 	}
 }
 
