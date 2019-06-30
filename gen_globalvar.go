@@ -69,7 +69,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						case *ExprVariable:
 							assert(false, value.token(), "variable here is not allowed")
 						default:
-							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
+							emit2(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
 						}
 					}
 				} else if size == 1 {
