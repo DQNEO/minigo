@@ -4,7 +4,8 @@ const MAX_METHODS_PER_TYPE int = 128
 
 func (call *IrInterfaceMethodCall) emit() {
 	receiver := call.receiver
-	emit("# emit interface method call \"%s\"", call.methodName)
+	var methodName gostring = gostring(call.methodName)
+	emit2("# emit interface method call \"%s\"", methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
 		mapKey: &Gtype{
@@ -23,14 +24,14 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("PUSH_8")
 	emit("SUM_FROM_STACK")
 
-	emit("# find method %s", call.methodName)
+	emit2("# find method %s", methodName)
 	emit("mov (%%rax), %%rax") // address of receiverType
 	emit("PUSH_8 # map head")
 
 	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
 	emit("PUSH_8 # len")
 
-	emit("lea .S.%s, %%rax", call.methodName) // index value (addr)
+	emit2("lea .S.%s, %%rax", methodName) // index value (addr)
 	emit("PUSH_8 # map index value")
 
 	emitMapGet(mapType)
