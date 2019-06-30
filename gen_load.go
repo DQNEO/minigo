@@ -4,12 +4,12 @@ package main
 import "fmt"
 
 func (ast *ExprNumberLiteral) emit() {
-	emit("LOAD_NUMBER %d", ast.val)
+	emit2("LOAD_NUMBER %d", ast.val)
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
 	strct = unwrapRel(strct)
-	emit("# loadStructField")
+	emit2("# loadStructField")
 	switch strct.(type) {
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
@@ -17,9 +17,9 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.varname, field.offset, offset)
+				emit2("LOAD_8_FROM_GLOBAL %s, %d+%d", gostring(variable.varname), field.offset, offset)
 			} else {
-				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
+				emit2("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
 		}
 	case *ExprStructField: // strct.field.field
@@ -46,7 +46,7 @@ func (a *ExprStructField) emitAddress() {
 	strcttype := a.strct.getGtype().origType.relation.gtype
 	field := strcttype.getField(a.fieldname)
 	a.strct.emit()
-	emit("ADD_NUMBER %d", field.offset)
+	emit2("ADD_NUMBER %d", field.offset)
 }
 
 func (a *ExprStructField) emit() {
