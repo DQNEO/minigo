@@ -324,52 +324,52 @@ func (em *IrStmtRangeMap) emit() {
 		operand: em.mapCounter,
 	}
 
-	emit("# init index")
+	emit2("# init index")
 	em.initstmt.emit()
 
 	emit("%s: # begin loop ", em.labels.labelBegin)
 
 	em.condition.emit()
-	emit("TEST_IT")
+	emit2("TEST_IT")
 	emit("je %s  # if false, exit loop", em.labels.labelEndLoop)
 
 	// set key and value
 	em.mapCounter.emit()
-	emit("IMUL_NUMBER 16")
-	emit("PUSH_8 # x")
+	emit2("IMUL_NUMBER 16")
+	emit2("PUSH_8 # x")
 	em.rangeexpr.emit() // emit address of map data head
-	emit("LOAD_8_BY_DEREF")
-	emit("PUSH_8 # y")
+	emit2("LOAD_8_BY_DEREF")
+	emit2("PUSH_8 # y")
 
-	emit("SUM_FROM_STACK # x + y")
-	emit("LOAD_8_BY_DEREF")
+	emit2("SUM_FROM_STACK # x + y")
+	emit2("LOAD_8_BY_DEREF")
 
-	emit("LOAD_8_BY_DEREF")
+	emit2("LOAD_8_BY_DEREF")
 	emitSavePrimitive(em.indexvar)
 
 	if em.valuevar != nil {
-		emit("# Setting valuevar")
-		emit("## rangeexpr.emit()")
+		emit2("# Setting valuevar")
+		emit2("## rangeexpr.emit()")
 		em.rangeexpr.emit()
-		emit("LOAD_8_BY_DEREF# map head")
-		emit("PUSH_8")
+		emit2("LOAD_8_BY_DEREF# map head")
+		emit2("PUSH_8")
 
-		emit("## mapCounter.emit()")
+		emit2("## mapCounter.emit()")
 		em.mapCounter.emit()
-		emit("## eval value")
-		emit("IMUL_NUMBER 16  # counter * 16")
-		emit("ADD_NUMBER 8 # counter * 16 + 8")
-		emit("PUSH_8")
+		emit2("## eval value")
+		emit2("IMUL_NUMBER 16  # counter * 16")
+		emit2("ADD_NUMBER 8 # counter * 16 + 8")
+		emit2("PUSH_8")
 
-		emit("SUM_FROM_STACK")
+		emit2("SUM_FROM_STACK")
 
-		emit("LOAD_8_BY_DEREF")
+		emit2("LOAD_8_BY_DEREF")
 
 		if em.valuevar.getGtype().is24WidthType() {
-			emit("LOAD_24_BY_DEREF")
+			emit2("LOAD_24_BY_DEREF")
 			emitSave24(em.valuevar, 0)
 		} else {
-			emit("LOAD_8_BY_DEREF")
+			emit2("LOAD_8_BY_DEREF")
 			emitSavePrimitive(em.valuevar)
 		}
 
@@ -397,7 +397,7 @@ func (lit *ExprMapLiteral) emit() {
 		size = length * ptrSize * 1024
 	}
 	emitCallMalloc(size)
-	emit("PUSH_8") // map head
+	emit2("PUSH_8") // map head
 
 	//mapType := lit.getGtype()
 	//mapKeyType := mapType.mapKey
@@ -408,44 +408,44 @@ func (lit *ExprMapLiteral) emit() {
 		//	element.key.emit()
 		} else {
 			element.key.emit()
-			emit("PUSH_8") // value of key
+			emit2("PUSH_8") // value of key
 			// call malloc for key
 			emitCallMalloc(8)
-			emit("PUSH_8")
+			emit2("PUSH_8")
 
-			emit("STORE_8_INDIRECT_FROM_STACK") // save key to heap
+			emit2("STORE_8_INDIRECT_FROM_STACK") // save key to heap
 		}
 
 		emit("pop %%rbx")                     // map head
 		emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
-		emit("push %%rbx")                    // map head
+		emit2("push %%rbx")                    // map head
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
-			emit("PUSH_8") // value of value
+			emit2("PUSH_8") // value of value
 			emitCallMalloc(8)
-			emit("PUSH_8")
-			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
+			emit2("PUSH_8")
+			emit2("STORE_8_INDIRECT_FROM_STACK") // save value to heap
 		} else if element.value.getGtype().is24WidthType() {
 			// rax,rbx,rcx
 			element.value.emit()
-			emit("PUSH_24") // ptr
+			emit2("PUSH_24") // ptr
 			emitCallMalloc(8 * 3)
-			emit("PUSH_8")
-			emit("STORE_24_INDIRECT_FROM_STACK")
+			emit2("PUSH_8")
+			emit2("STORE_24_INDIRECT_FROM_STACK")
 		} else {
 			TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
 
 		}
 
-		emit("pop %%rbx") // map head
+		emit2("pop %%rbx") // map head
 		emit("mov %%rax, %d(%%rbx) #", i*2*8+8)
-		emit("push %%rbx")
+		emit2("push %%rbx")
 	}
 
 	emitCallMalloc(16)
-	emit("pop %%rbx") // address (head of the heap)
-	emit("mov %%rbx, (%%rax)")
+	emit2("pop %%rbx") // address (head of the heap)
+	emit2("mov %%rbx, (%%rax)")
 	emit("mov $%d, %%rcx", length) // len
-	emit("mov %%rcx, 8(%%rax)")
+	emit2("mov %%rcx, 8(%%rax)")
 }
