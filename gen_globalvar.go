@@ -15,8 +15,8 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emitWithoutIndent("%s: # gtype=%s", gostring(decl.variable.varname), gostring(gtype.String()))
-	emitWithoutIndent("# right.gtype = %s", gostring(right.getGtype().String()))
+	emitWithoutIndent("%s: # gtype=%s", gostring(decl.variable.varname), gtype.String2())
+	emitWithoutIndent("# right.gtype = %s", right.getGtype().String2())
 	emitWithoutIndent(".data 0")
 	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
@@ -65,11 +65,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 							operand := unwrapRel(uop.operand)
 							vr, ok := operand.(*ExprVariable)
 							assert(ok, uop.token(), "only variable is allowed")
-							emit(".quad %s # %s %s", gostring(vr.varname), gostring(value.getGtype().String()), gostring(selector))
+							emit(".quad %s # %s %s", gostring(vr.varname), value.getGtype().String2(), gostring(selector))
 						case *ExprVariable:
 							assert(false, value.token(), "variable here is not allowed")
 						default:
-							emit(".quad %d # %s %s", evalIntExpr(value), gostring(value.getGtype().String()), gostring(selector))
+							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String2(), gostring(selector))
 						}
 					}
 				} else if size == 1 {
@@ -122,11 +122,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad 0 # %s %s",  gostring(gtype.String()), gostring(containerName))
+			emit(".quad 0 # %s %s",  gtype.String2(), gostring(containerName))
 			return
 		}
 		var val int = evalIntExpr(value)
-		emit(".quad %d # %s %s", val, gostring(gtype.String()), gostring(containerName))
+		emit(".quad %d # %s %s", val, gtype.String2(), gostring(containerName))
 	} else if primType == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
 		for _, field := range gtype.relation.gtype.fields {

@@ -331,7 +331,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 		return
 	}
 
-	emit("# emitConversionToInterface from %s", gostring(dynamicValue.getGtype().String()))
+	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String2())
 	dynamicValue.emit()
 	if dynamicValue.getGtype().is24WidthType() {
 		emit("PUSH_24")
@@ -356,7 +356,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	label := symbolTable.getTypeLabel(gtype)
-	emit("lea .%s, %%rax# dynamicType %s", gostring(label), gostring(gtype.String()))
+	emit("lea .%s, %%rax# dynamicType %s", gostring(label), gtype.String2())
 	emit("PUSH_8 # dynamicType")
 
 	emit("POP_INTERFACE")

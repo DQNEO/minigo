@@ -85,7 +85,7 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 }
 
 func (ast *ExprVariable) emit() {
-	emit("# load variable \"%s\" %s", gostring(ast.varname), gostring(ast.getGtype().String()))
+	emit("# load variable \"%s\" %s", gostring(ast.varname), ast.getGtype().String2())
 	if ast.isGlobal {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)

@@ -146,6 +146,11 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
+func (gtype *Gtype) String2() gostring {
+	var s string = gtype.String()
+	return gostring(s)
+}
+
 func (gtype *Gtype) String() string {
 	if gtype == nil {
 		return "NO_TYPE"

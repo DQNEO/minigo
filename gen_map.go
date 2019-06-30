@@ -15,7 +15,7 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_POINTER,
 		},
 	}
-	emit("# emit receiverTypeId of %s", gostring(receiver.getGtype().String()))
+	emit("# emit receiverTypeId of %s", receiver.getGtype().String2())
 	emitOffsetLoad(receiver, ptrSize, ptrSize)
 	emit("IMUL_NUMBER 8")
 	emit("PUSH_8")

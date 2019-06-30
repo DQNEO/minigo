@@ -118,7 +118,6 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 	}
 
 	emitAssignOne(left, right)
-	//emit("# Assign %T %s = %T %s", left, gtype.String(), right, right.getGtype())
 	if leftsMayBeTwo && len(ast.lefts) == 2 {
 		okVariable := ast.lefts[1]
 		//emit("# lefts[0] type = %s", ast.lefts[0].getGtype().String())

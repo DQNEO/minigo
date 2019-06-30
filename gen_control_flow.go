@@ -57,7 +57,7 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 		emitEmptyString()
 	} else {
 		typeLabel := symbolTable.getTypeLabel(gtype)
-		emit("LOAD_STRING_LITERAL .%s # type: %s", gostring(typeLabel), gostring(gtype.String()))
+		emit("LOAD_STRING_LITERAL .%s # type: %s", gostring(typeLabel), gtype.String2())
 	}
 
 	emit("PUSH_8")
