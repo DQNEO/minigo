@@ -93,11 +93,11 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emitMapGet(_map.getGtype())
 }
 
-func mapOkRegister(is24Width bool) string {
+func mapOkRegister(is24Width bool) gostring {
 	if is24Width {
-		return "rdx"
+		return S("rdx")
 	} else {
-		return "rbx"
+		return S("rbx")
 	}
 }
 
@@ -222,7 +222,7 @@ func (e *ExprIndex) emitMapSet(isWidth24 bool) {
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
+	emit2("cmp $1, %%%s # ok == true", mapOkRegister(isWidth24))
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	emit("TEST_IT")

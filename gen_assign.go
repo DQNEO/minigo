@@ -123,7 +123,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		okVariable := ast.lefts[1]
 		//emit2("# lefts[0] type = %s", ast.lefts[0].getGtype().String())
 		okRegister := mapOkRegister(ast.lefts[0].getGtype().is24WidthType())
-		emit2("mov %%%s, %%rax # emit okValue", gostring(okRegister))
+		emit2("mov %%%s, %%rax # emit okValue", okRegister)
 		emitSavePrimitive(okVariable)
 	}
 }
