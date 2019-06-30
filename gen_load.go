@@ -228,10 +228,11 @@ func (e *ExprSliceLiteral) emit() {
 		var baseOffset int = IntSize*3*i
 		if e.gtype.elementType.is24WidthType() {
 			emit2("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
-			emit("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
-			emit("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
+			emit2("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
+			emit2("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
 		} else if e.gtype.elementType.getSize() <= 8 {
-			emit("mov %%rax, %d(%%r10)", IntSize*i)
+			var offset int = IntSize*i
+			emit2("mov %%rax, %d(%%r10)", offset)
 		} else {
 			TBI(e.token(), "")
 		}
@@ -255,7 +256,7 @@ func emitAddress(e Expr) {
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
 	lhs = unwrapRel(lhs)
-	emit("# emitOffsetLoad(offset %d)", offset)
+	emit2("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
@@ -266,9 +267,9 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			emit("# offset %d + %d = %d", fieldType.offset, offset, fieldType.offset+offset)
-			emit("ADD_NUMBER %d+%d", fieldType.offset, offset)
+			emit2("ADD_NUMBER %d+%d", fieldType.offset, offset)
 			//reg := getReg(size)
-			emit("LOAD_8_BY_DEREF")
+			emit2("LOAD_8_BY_DEREF")
 		} else {
 			emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 		}
