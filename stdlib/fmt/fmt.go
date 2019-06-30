@@ -4,22 +4,23 @@ import (
 	"os"
 )
 
+// used only in tests
 func Printf(format string, a ...interface{}) {
-	s := doPrintf(format, a...)
+	s := mySprintf(format, a...)
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
 
 var pbuf [1024]byte
 
-func doPrintf(format string, a ...interface{}) string {
+func mySprintf(format string, a ...interface{}) string {
 	var a0 interface{}
 	var a1 interface{}
 	var a2 interface{}
 	var a3 interface{}
 	var numred int
 	if len(a) > 100 {
-		panic("runtime error: a in doPrintf is an invalid slice:" + format)
+		panic("runtime error: a in mySprintf is an invalid slice:" + format)
 	}
 
 	switch len(a) {
@@ -46,7 +47,7 @@ func doPrintf(format string, a ...interface{}) string {
 		numred = sprintf(pbuf, format, *a0, *a1, *a2, *a3)
 	default:
 		printf("len(a)=%d\n", len(a))
-		panic("ERROR: doPrintf cannot handle more than 4 params")
+		panic("ERROR: mySprintf cannot handle more than 4 params")
 	}
 
 	// copy string to heap area
