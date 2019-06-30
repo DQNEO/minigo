@@ -129,17 +129,17 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_STRUCT {
 		containerName = containerName + "." + string(gtype.relation.name)
 		for _, field := range gtype.relation.gtype.fields {
-			emit("# padding=%d", field.padding)
+			emit2("# padding=%d", field.padding)
 			switch field.padding {
 			case 1:
-				emit(".byte 0 # padding")
+				emit2(".byte 0 # padding")
 			case 4:
-				emit(".double 0 # padding")
+				emit2(".double 0 # padding")
 			case 8:
-				emit(".quad 0 # padding")
+				emit2(".quad 0 # padding")
 			default:
 			}
-			emit("# field:offesr=%d, fieldname=%s", field.offset, field.fieldname)
+			emit2("# field:offesr=%d, fieldname=%s", field.offset, gostring(field.fieldname))
 			if value == nil {
 				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname), depth)
 				continue
