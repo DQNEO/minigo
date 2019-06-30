@@ -90,11 +90,11 @@ func (ast *ExprVariable) emit() {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.getGtype().is24WidthType() {
-			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
+			emit2("LOAD_24_FROM_GLOBAL %s", gostring(ast.varname))
 		} else if ast.getGtype().getSize() == 1 {
-			emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
+			emit2("LOAD_1_FROM_GLOBAL_CAST %s", gostring(ast.varname))
 		} else {
-			emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
+			emit2("LOAD_8_FROM_GLOBAL %s", gostring(ast.varname))
 		}
 
 	} else {
@@ -115,12 +115,12 @@ func (ast *ExprVariable) emit() {
 
 func (variable *ExprVariable) emitAddress(offset int) {
 	if variable.isGlobal {
-		emit("LOAD_GLOBAL_ADDR %s, %d", variable.varname, offset)
+		emit2("LOAD_GLOBAL_ADDR %s, %d", gostring(variable.varname), offset)
 	} else {
 		if variable.offset == 0 {
 			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
-		emit("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
+		emit2("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
 	}
 }
 
@@ -130,17 +130,17 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	emit("# *ExprConstVariable.emit() name=%s iotaindex=%d", ast.name, ast.iotaIndex)
+	emit2("# *ExprConstVariable.emit() name=%s iotaindex=%d", gostring(ast.name), ast.iotaIndex)
 	assert(ast.iotaIndex < 10000, ast.token(), "iotaindex is too large")
 	assert(ast.val != nil, ast.token(), "const.val for should not be nil:"+string(ast.name))
 	if ast.hasIotaValue() {
-		emit("# const is iota")
+		emit2("# const is iota")
 		val := &ExprNumberLiteral{
 			val: ast.iotaIndex,
 		}
 		val.emit()
 	} else {
-		emit("# const is not iota")
+		emit2("# const is not iota")
 		ast.val.emit()
 	}
 }
@@ -148,7 +148,7 @@ func (ast *ExprConstVariable) emit() {
 func (ast *ExprUop) emit() {
 	operand := unwrapRel(ast.operand)
 	ast.operand = operand
-	emit("# emitting ExprUop")
+	emit2("# emitting ExprUop")
 	op := ast.op
 	switch cstring(op) {
 
@@ -164,9 +164,9 @@ func (ast *ExprUop) emit() {
 			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize())
-			emit("PUSH_8") // to:ptr addr
+			emit2("PUSH_8") // to:ptr addr
 			e.invisiblevar.emitAddress(0)
-			emit("PUSH_8") // from:address of invisible var
+			emit2("PUSH_8") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype().getSize())
 			// emit address
 		case *ExprStructField:
