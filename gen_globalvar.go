@@ -86,9 +86,9 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case nil:
 			return
 		case *ExprNilLiteral:
-			emit(".quad %d", 0)
-			emit(".quad %d", 0)
-			emit(".quad %d", 0)
+			emit2(".quad 0")
+			emit2(".quad 0")
+			emit2(".quad 0")
 		case *ExprSliceLiteral:
 			// initialize a hidden array
 			lit := value.(*ExprSliceLiteral)
