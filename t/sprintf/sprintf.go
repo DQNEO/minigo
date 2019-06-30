@@ -39,8 +39,8 @@ func f2() {
 
 func f3() {
 	var a []interface{}
-	var s string = "hello"
-	var s2 string = "world"
+	var s gostring = S("hello")
+	var s2 gostring = S("world")
 	var ifc interface{}
 	var ifc2 interface{}
 	ifc = s
@@ -52,7 +52,7 @@ func f3() {
 
 func f4() {
 	var a []interface{}
-	var s string = "hello"
+	var s gostring = S("hello")
 	var i int = 123
 	var ifc interface{}
 	var ifc2 interface{}
@@ -65,7 +65,7 @@ func f4() {
 
 func f5() {
 	var a []interface{}
-	var s string = "hello"
+	var s gostring = S("hello")
 	var i int = 123
 	var i2 int = 456
 	var ifc interface{}
@@ -82,7 +82,7 @@ func f5() {
 
 func test_dumpToken() {
 	format := "string=%s,int=%d\n" // "string=abcdefg,int=12345"
-	var s1 string = "abcdefg"
+	var s1 gostring = S("abcdefg")
 	var s2 int = 12345
 	var ifcs []interface{}
 	var ifc1 interface{} = s1
