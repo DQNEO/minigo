@@ -4,12 +4,12 @@ package main
 import "fmt"
 
 func (ast *ExprNumberLiteral) emit() {
-	emit2("LOAD_NUMBER %d", ast.val)
+	emit("LOAD_NUMBER %d", ast.val)
 }
 
 func loadStructField(strct Expr, field *Gtype, offset int) {
 	strct = unwrapRel(strct)
-	emit2("# loadStructField")
+	emit("# loadStructField")
 	switch strct.(type) {
 	case *ExprVariable:
 		variable := strct.(*ExprVariable)
@@ -17,9 +17,9 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit2("LOAD_8_FROM_GLOBAL %s, %d+%d", gostring(variable.varname), field.offset, offset)
+				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", gostring(variable.varname), field.offset, offset)
 			} else {
-				emit2("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
+				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
 		}
 	case *ExprStructField: // strct.field.field
@@ -46,22 +46,22 @@ func (a *ExprStructField) emitAddress() {
 	strcttype := a.strct.getGtype().origType.relation.gtype
 	field := strcttype.getField(a.fieldname)
 	a.strct.emit()
-	emit2("ADD_NUMBER %d", field.offset)
+	emit("ADD_NUMBER %d", field.offset)
 }
 
 func (a *ExprStructField) emit() {
-	emit2("# LOAD ExprStructField")
+	emit("# LOAD ExprStructField")
 	switch a.strct.getGtype().getKind() {
 	case G_POINTER: // pointer to struct
 		strcttype := a.strct.getGtype().origType.relation.gtype
 		field := strcttype.getField(a.fieldname)
 		a.strct.emit()
-		emit2("ADD_NUMBER %d", field.offset)
+		emit("ADD_NUMBER %d", field.offset)
 		switch field.is24WidthType() {
 		case true:
-			emit2("LOAD_24_BY_DEREF")
+			emit("LOAD_24_BY_DEREF")
 		default:
-			emit2("LOAD_8_BY_DEREF")
+			emit("LOAD_8_BY_DEREF")
 		}
 
 	case G_STRUCT:
@@ -85,16 +85,16 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 }
 
 func (ast *ExprVariable) emit() {
-	emit2("# load variable \"%s\" %s", gostring(ast.varname), gostring(ast.getGtype().String()))
+	emit("# load variable \"%s\" %s", gostring(ast.varname), gostring(ast.getGtype().String()))
 	if ast.isGlobal {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.getGtype().is24WidthType() {
-			emit2("LOAD_24_FROM_GLOBAL %s", gostring(ast.varname))
+			emit("LOAD_24_FROM_GLOBAL %s", gostring(ast.varname))
 		} else if ast.getGtype().getSize() == 1 {
-			emit2("LOAD_1_FROM_GLOBAL_CAST %s", gostring(ast.varname))
+			emit("LOAD_1_FROM_GLOBAL_CAST %s", gostring(ast.varname))
 		} else {
-			emit2("LOAD_8_FROM_GLOBAL %s", gostring(ast.varname))
+			emit("LOAD_8_FROM_GLOBAL %s", gostring(ast.varname))
 		}
 
 	} else {
@@ -104,23 +104,23 @@ func (ast *ExprVariable) emit() {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.gtype.is24WidthType() {
-			emit2("LOAD_24_FROM_LOCAL %d", ast.offset)
+			emit("LOAD_24_FROM_LOCAL %d", ast.offset)
 		} else if ast.getGtype().getSize() == 1 {
-			emit2("LOAD_1_FROM_LOCAL_CAST %d", ast.offset)
+			emit("LOAD_1_FROM_LOCAL_CAST %d", ast.offset)
 		} else {
-			emit2("LOAD_8_FROM_LOCAL %d", ast.offset)
+			emit("LOAD_8_FROM_LOCAL %d", ast.offset)
 		}
 	}
 }
 
 func (variable *ExprVariable) emitAddress(offset int) {
 	if variable.isGlobal {
-		emit2("LOAD_GLOBAL_ADDR %s, %d", gostring(variable.varname), offset)
+		emit("LOAD_GLOBAL_ADDR %s, %d", gostring(variable.varname), offset)
 	} else {
 		if variable.offset == 0 {
 			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
-		emit2("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
+		emit("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
 	}
 }
 
@@ -130,17 +130,17 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	emit2("# *ExprConstVariable.emit() name=%s iotaindex=%d", gostring(ast.name), ast.iotaIndex)
+	emit("# *ExprConstVariable.emit() name=%s iotaindex=%d", gostring(ast.name), ast.iotaIndex)
 	assert(ast.iotaIndex < 10000, ast.token(), "iotaindex is too large")
 	assert(ast.val != nil, ast.token(), "const.val for should not be nil:"+string(ast.name))
 	if ast.hasIotaValue() {
-		emit2("# const is iota")
+		emit("# const is iota")
 		val := &ExprNumberLiteral{
 			val: ast.iotaIndex,
 		}
 		val.emit()
 	} else {
-		emit2("# const is not iota")
+		emit("# const is not iota")
 		ast.val.emit()
 	}
 }
@@ -148,7 +148,7 @@ func (ast *ExprConstVariable) emit() {
 func (ast *ExprUop) emit() {
 	operand := unwrapRel(ast.operand)
 	ast.operand = operand
-	emit2("# emitting ExprUop")
+	emit("# emitting ExprUop")
 	op := ast.op
 	switch cstring(op) {
 
@@ -164,9 +164,9 @@ func (ast *ExprUop) emit() {
 			assignToStruct(ivv, e)
 
 			emitCallMalloc(e.getGtype().getSize())
-			emit2("PUSH_8") // to:ptr addr
+			emit("PUSH_8") // to:ptr addr
 			e.invisiblevar.emitAddress(0)
-			emit2("PUSH_8") // from:address of invisible var
+			emit("PUSH_8") // from:address of invisible var
 			emitCopyStructFromStack(e.getGtype().getSize())
 			// emit address
 		case *ExprStructField:
@@ -177,10 +177,10 @@ func (ast *ExprUop) emit() {
 		}
 	case "*":
 		ast.operand.emit()
-		emit2("LOAD_8_BY_DEREF")
+		emit("LOAD_8_BY_DEREF")
 	case "!":
 		ast.operand.emit()
-		emit2("CMP_EQ_ZERO")
+		emit("CMP_EQ_ZERO")
 	case "-":
 		// delegate to biop
 		// -(x) -> (-1) * (x)
@@ -201,9 +201,9 @@ func (ast *ExprUop) emit() {
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.isGlobal {
-		emit2("LOAD_%d_FROM_GLOBAL %s %d", size, gostring(variable.varname), offset)
+		emit("LOAD_%d_FROM_GLOBAL %s %d", size, gostring(variable.varname), offset)
 	} else {
-		emit2("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
+		emit("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
 	}
 }
 
@@ -211,11 +211,11 @@ func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 // rbx: len
 // rcx: cap
 func (e *ExprSliceLiteral) emit() {
-	emit2("# (*ExprSliceLiteral).emit()")
+	emit("# (*ExprSliceLiteral).emit()")
 	var length int = len(e.values)
 	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
 	emitCallMalloc(e.gtype.getSize() * length)
-	emit2("PUSH_8 # ptr")
+	emit("PUSH_8 # ptr")
 	for i, value := range e.values {
 		if e.gtype.elementType.getKind() == G_INTERFACE && value.getGtype().getKind() != G_INTERFACE {
 			emitConversionToInterface(value)
@@ -223,25 +223,25 @@ func (e *ExprSliceLiteral) emit() {
 			value.emit()
 		}
 
-		emit2("pop %%r10 # ptr")
+		emit("pop %%r10 # ptr")
 
 		var baseOffset int = IntSize*3*i
 		if e.gtype.elementType.is24WidthType() {
-			emit2("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
-			emit2("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
-			emit2("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
+			emit("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
+			emit("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
+			emit("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
 		} else if e.gtype.elementType.getSize() <= 8 {
 			var offset int = IntSize*i
-			emit2("mov %%rax, %d(%%r10)", offset)
+			emit("mov %%rax, %d(%%r10)", offset)
 		} else {
 			TBI(e.token(), "")
 		}
-		emit2("push %%r10 # ptr")
+		emit("push %%r10 # ptr")
 	}
 
-	emit2("pop %%rax # ptr")
-	emit2("mov $%d, %%rbx # len", length)
-	emit2("mov $%d, %%rcx # cap", length)
+	emit("pop %%rax # ptr")
+	emit("mov $%d, %%rbx # len", length)
+	emit("mov $%d, %%rcx # cap", length)
 }
 
 func emitAddress(e Expr) {
@@ -256,7 +256,7 @@ func emitAddress(e Expr) {
 
 func emitOffsetLoad(lhs Expr, size int, offset int) {
 	lhs = unwrapRel(lhs)
-	emit2("# emitOffsetLoad(offset %d)", offset)
+	emit("# emitOffsetLoad(offset %d)", offset)
 	switch lhs.(type) {
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
@@ -267,10 +267,10 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
 			var sum int = fieldType.offset+offset
-			emit2("# offset %d + %d = %d", fieldType.offset, offset, sum)
-			emit2("ADD_NUMBER %d+%d", fieldType.offset, offset)
+			emit("# offset %d + %d = %d", fieldType.offset, offset, sum)
+			emit("ADD_NUMBER %d+%d", fieldType.offset, offset)
 			//reg := getReg(size)
-			emit2("LOAD_8_BY_DEREF")
+			emit("LOAD_8_BY_DEREF")
 		} else {
 			emitOffsetLoad(structfield.strct, size, fieldType.offset+offset)
 		}
@@ -286,8 +286,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		rettype := rettypes[0]
 		assert(rettype.getKind() == G_POINTER, lhs.token(), "only pointer is supported")
 		mcall.emit()
-		emit2("ADD_NUMBER %d", offset)
-		emit2("LOAD_8_BY_DEREF")
+		emit("ADD_NUMBER %d", offset)
+		emit("LOAD_8_BY_DEREF")
 	default:
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
@@ -300,27 +300,27 @@ func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
 	assert(elmSize > 0, nil, "elmSize > 0")
 
 	collection.emit()
-	emit2("PUSH_8 # head")
+	emit("PUSH_8 # head")
 
 	index.emit()
-	emit2("IMUL_NUMBER %d", elmSize)
-	emit2("PUSH_8 # index * elmSize")
+	emit("IMUL_NUMBER %d", elmSize)
+	emit("PUSH_8 # index * elmSize")
 
-	emit2("SUM_FROM_STACK # (index * elmSize) + head")
-	emit2("ADD_NUMBER %d", offset)
+	emit("SUM_FROM_STACK # (index * elmSize) + head")
+	emit("ADD_NUMBER %d", offset)
 
 	// dereference the content of an emelment
 	if elmType.is24WidthType() {
-		emit2("LOAD_24_BY_DEREF")
+		emit("LOAD_24_BY_DEREF")
 	} else if elmSize == 1 {
-		emit2("LOAD_1_BY_DEREF")
+		emit("LOAD_1_BY_DEREF")
 	} else {
-		emit2("LOAD_8_BY_DEREF")
+		emit("LOAD_8_BY_DEREF")
 	}
 }
 
 func (e *ExprIndex) emitOffsetLoad(offset int) {
-	emit2("# ExprIndex.emitOffsetLoad")
+	emit("# ExprIndex.emitOffsetLoad")
 	collection := e.collection
 	index := e.index
 	switch collection.getGtype().getKind() {
@@ -337,14 +337,14 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 		// if x is out of range at run time, a run-time panic occurs
 		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
 		// a[x] may not be assigned to
-		emit2("# load head address of the string")
+		emit("# load head address of the string")
 		collection.emit() // emit address
-		emit2("PUSH_8")
+		emit("PUSH_8")
 		index.emit()
-		emit2("PUSH_8")
-		emit2("SUM_FROM_STACK")
-		emit2("ADD_NUMBER %d", offset)
-		emit2("LOAD_8_BY_DEREF")
+		emit("PUSH_8")
+		emit("SUM_FROM_STACK")
+		emit("ADD_NUMBER %d", offset)
+		emit("LOAD_8_BY_DEREF")
 	default:
 		TBI(collection.token(), "unable to handle %s", collection.getGtype())
 	}
@@ -380,23 +380,23 @@ func (e *ExprSlice) emitSubString() {
 
 	// src address + low
 	e.collection.emit()
-	emit2("PUSH_8")
+	emit("PUSH_8")
 	e.low.emit()
-	emit2("PUSH_8")
-	emit2("SUM_FROM_STACK")
-	emit2("PUSH_8")
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_8")
 
 	emitCallMallocDinamicSize(eMemSize)
-	emit2("PUSH_8")
+	emit("PUSH_8")
 
 	eNewStrlen.emit()
-	emit2("PUSH_8")
+	emit("PUSH_8")
 
-	emit2("POP_TO_ARG_2")
-	emit2("POP_TO_ARG_1")
-	emit2("POP_TO_ARG_0")
+	emit("POP_TO_ARG_2")
+	emit("POP_TO_ARG_1")
+	emit("POP_TO_ARG_0")
 
-	emit2("FUNCALL iruntime.strcopy")
+	emit("FUNCALL iruntime.strcopy")
 }
 
 func (e *ExprSlice) emit() {
@@ -412,20 +412,20 @@ func (e *ExprSlice) emitSlice() {
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 
-	emit2("# assign to a slice")
-	emit2("#   emit address of the array")
+	emit("# assign to a slice")
+	emit("#   emit address of the array")
 	e.collection.emit()
-	emit2("PUSH_8 # head of the array")
+	emit("PUSH_8 # head of the array")
 	e.low.emit()
-	emit2("PUSH_8 # low index")
-	emit2("LOAD_NUMBER %d", size)
-	emit2("PUSH_8")
-	emit2("IMUL_FROM_STACK")
-	emit2("PUSH_8")
-	emit2("SUM_FROM_STACK")
-	emit2("PUSH_8")
+	emit("PUSH_8 # low index")
+	emit("LOAD_NUMBER %d", size)
+	emit("PUSH_8")
+	emit("IMUL_FROM_STACK")
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_8")
 
-	emit2("#   calc and set len")
+	emit("#   calc and set len")
 
 	if e.high == nil {
 		e.high = &ExprNumberLiteral{
@@ -438,9 +438,9 @@ func (e *ExprSlice) emitSlice() {
 		right: e.low,
 	}
 	calcLen.emit()
-	emit2("PUSH_8")
+	emit("PUSH_8")
 
-	emit2("#   calc and set cap")
+	emit("#   calc and set cap")
 	var max Expr
 	if e.max != nil {
 		max = e.max
@@ -458,6 +458,6 @@ func (e *ExprSlice) emitSlice() {
 
 	calcCap.emit()
 
-	emit2("PUSH_8")
-	emit2("POP_SLICE")
+	emit("PUSH_8")
+	emit("POP_SLICE")
 }

@@ -1,32 +1,32 @@
 package main
 
 func (stmt *StmtIf) emit() {
-	emit2("# if")
+	emit("# if")
 	if stmt.simplestmt != nil {
 		stmt.simplestmt.emit()
 	}
 	stmt.cond.emit()
-	emit2("TEST_IT")
+	emit("TEST_IT")
 	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit2("je %s  # jump if 0", labelElse)
-		emit2("# then block")
+		emit("je %s  # jump if 0", labelElse)
+		emit("# then block")
 		stmt.then.emit()
-		emit2("jmp %s # jump to endif", labelEndif)
-		emit2("# else block")
-		emit2("%s:", labelElse)
+		emit("jmp %s # jump to endif", labelEndif)
+		emit("# else block")
+		emit("%s:", labelElse)
 		stmt.els.emit()
-		emit2("# endif")
-		emit2("%s:", labelEndif)
+		emit("# endif")
+		emit("%s:", labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit2("je %s  # jump if 0", labelEndif)
-		emit2("# then block")
+		emit("je %s  # jump if 0", labelEndif)
+		emit("# then block")
 		stmt.then.emit()
-		emit2("# endif")
-		emit2("%s:", labelEndif)
+		emit("# endif")
+		emit("%s:", labelEndif)
 	}
 }
 
@@ -36,32 +36,32 @@ func (stmt *StmtSwitch) isTypeSwitch() bool {
 }
 
 func emitConvertNilToEmptyString() {
-	emit2("# emitConvertNilToEmptyString")
-	emit2("POP_8")
-	emit2("PUSH_8")
-	emit2("# convert nil to an empty string")
-	emit2("TEST_IT")
-	emit2("pop %%rax")
+	emit("# emitConvertNilToEmptyString")
+	emit("POP_8")
+	emit("PUSH_8")
+	emit("# convert nil to an empty string")
+	emit("TEST_IT")
+	emit("pop %%rax")
 	labelEnd := makeLabel()
-	emit2("jne %s # jump if not nil", labelEnd)
-	emit2("# if nil then")
+	emit("jne %s # jump if not nil", labelEnd)
+	emit("# if nil then")
 	emitEmptyString()
-	emit2("%s:", labelEnd)
+	emit("%s:", labelEnd)
 }
 
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emitConvertNilToEmptyString()
-	emit2("PUSH_8")
+	emit("PUSH_8")
 
 	if gtype.isNil() {
 		emitEmptyString()
 	} else {
 		typeLabel := symbolTable.getTypeLabel(gtype)
-		emit2("LOAD_STRING_LITERAL .%s # type: %s", gostring(typeLabel), gostring(gtype.String()))
+		emit("LOAD_STRING_LITERAL .%s # type: %s", gostring(typeLabel), gostring(gtype.String()))
 	}
 
-	emit2("PUSH_8")
-	emit2("CMP_FROM_STACK sete") // compare addresses
+	emit("PUSH_8")
+	emit("CMP_FROM_STACK sete") // compare addresses
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
@@ -70,14 +70,14 @@ func (stmt *StmtSwitch) needStringToSliceConversion() bool {
 
 func (stmt *StmtSwitch) emit() {
 
-	emit2("# switch statement")
+	emit("# switch statement")
 	labelEnd := makeLabel()
 	var labels []gostring
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
 		cond = stmt.cond
-		emit2("# the cond expression")
+		emit("# the cond expression")
 		if stmt.needStringToSliceConversion() {
 			irConversion, ok := stmt.cond.(*IrExprConversion)
 			assert(ok, nil, "should be IrExprConversion")
@@ -87,13 +87,13 @@ func (stmt *StmtSwitch) emit() {
 		}
 		cond.emit()
 		if cond.getGtype().is24WidthType() {
-			emit2("PUSH_24 # the cond value")
+			emit("PUSH_24 # the cond value")
 		} else {
-			emit2("PUSH_8 # the cond value")
+			emit("PUSH_8 # the cond value")
 		}
 	} else {
 		// switch {
-		emit2("# no condition")
+		emit("# no condition")
 	}
 
 	// case exp1,exp2,..:
@@ -102,136 +102,136 @@ func (stmt *StmtSwitch) emit() {
 	//     ...
 	for i, caseClause := range stmt.cases {
 		var j int = i
-		emit2("# case %d", j)
+		emit("# case %d", j)
 		myCaseLabel := makeLabel()
 		labels = append(labels, myCaseLabel)
 		if stmt.cond == nil {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit2("TEST_IT")
-				emit2("jne %s # jump if matches", myCaseLabel)
+				emit("TEST_IT")
+				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		} else if stmt.isTypeSwitch() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				emit2("# Duplicate the cond value in stack")
-				emit2("POP_24")
-				emit2("PUSH_24")
+				emit("# Duplicate the cond value in stack")
+				emit("POP_24")
+				emit("PUSH_24")
 
-				emit2("push %%rcx # push dynamic type addr")
+				emit("push %%rcx # push dynamic type addr")
 				emitCompareDynamicTypeFromStack(gtype)
 
-				emit2("TEST_IT")
-				emit2("jne %s # jump if matches", myCaseLabel)
+				emit("TEST_IT")
+				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		} else {
 			for _, e := range caseClause.exprs {
-				emit2("# Duplicate the cond value in stack")
+				emit("# Duplicate the cond value in stack")
 
 				if stmt.needStringToSliceConversion() {
 					assert(e.getGtype().isString(), e.token(), "caseClause should be string")
-					emit2("POP_SLICE # the cond value")
-					emit2("PUSH_SLICE # the cond value")
+					emit("POP_SLICE # the cond value")
+					emit("PUSH_SLICE # the cond value")
 
-					emit2("PUSH_SLICE # the cond valiue")
+					emit("PUSH_SLICE # the cond valiue")
 
 					emitConvertCstringToSlice(e)
-					emit2("PUSH_SLICE")
+					emit("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()
 				} else {
-					emit2("POP_8 # the cond value")
-					emit2("PUSH_8 # the cond value")
+					emit("POP_8 # the cond value")
+					emit("PUSH_8 # the cond value")
 
-					emit2("PUSH_8 # arg1: the cond value")
+					emit("PUSH_8 # arg1: the cond value")
 					e.emit()
-					emit2("PUSH_8 # arg2: case value")
-					emit2("CMP_FROM_STACK sete")
+					emit("PUSH_8 # arg2: case value")
+					emit("CMP_FROM_STACK sete")
 				}
 
-				emit2("TEST_IT")
-				emit2("jne %s # jump if matches", myCaseLabel)
+				emit("TEST_IT")
+				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		}
 	}
 
 	var defaultLabel gostring
 	if stmt.dflt == nil {
-		emit2("jmp %s", labelEnd)
+		emit("jmp %s", labelEnd)
 	} else {
-		emit2("# default")
+		emit("# default")
 		defaultLabel = makeLabel()
-		emit2("jmp %s", defaultLabel)
+		emit("jmp %s", defaultLabel)
 	}
 
 	if cond != nil && cond.getGtype().is24WidthType() {
-		emit2("POP_24 # destroy the cond value")
+		emit("POP_24 # destroy the cond value")
 	} else {
-		emit2("POP_8 # destroy the cond value")
+		emit("POP_8 # destroy the cond value")
 
 	}
-	emit2("#")
+	emit("#")
 	for i, caseClause := range stmt.cases {
-		emit2("# case stmts")
-		emit2("%s:", labels[i])
+		emit("# case stmts")
+		emit("%s:", labels[i])
 		caseClause.compound.emit()
-		emit2("jmp %s", labelEnd)
+		emit("jmp %s", labelEnd)
 	}
 
 	if stmt.dflt != nil {
-		emit2("%s:", defaultLabel)
+		emit("%s:", defaultLabel)
 		stmt.dflt.emit()
 	}
 
-	emit2("%s: # end of switch", labelEnd)
+	emit("%s: # end of switch", labelEnd)
 }
 
 func (f *IrStmtForRangeList) emit() {
 	// i = 0
-	emit2("# init index")
+	emit("# init index")
 	f.init.emit()
 
-	emit2("%s: # begin loop ", gostring(f.labels.labelBegin))
+	emit("%s: # begin loop ", gostring(f.labels.labelBegin))
 
 	f.cond.emit()
-	emit2("TEST_IT")
-	emit2("je %s  # if false, go to loop end", gostring(f.labels.labelEndLoop))
+	emit("TEST_IT")
+	emit("je %s  # if false, go to loop end", gostring(f.labels.labelEndLoop))
 
 	if f.assignVar != nil {
 		f.assignVar.emit()
 	}
 
 	f.block.emit()
-	emit2("%s: # end block", gostring(f.labels.labelEndBlock))
+	emit("%s: # end block", gostring(f.labels.labelEndBlock))
 
 	f.cond2.emit()
-	emit2("TEST_IT")
-	emit2("jne %s  # if this iteration is final, go to loop end", gostring(f.labels.labelEndLoop))
+	emit("TEST_IT")
+	emit("jne %s  # if this iteration is final, go to loop end", gostring(f.labels.labelEndLoop))
 
 	f.incr.emit()
 
-	emit2("jmp %s", gostring(f.labels.labelBegin))
-	emit2("%s: # end loop", gostring(f.labels.labelEndLoop))
+	emit("jmp %s", gostring(f.labels.labelBegin))
+	emit("%s: # end loop", gostring(f.labels.labelEndLoop))
 }
 
 func (f *IrStmtClikeFor) emit() {
-	emit2("# emit IrStmtClikeFor")
+	emit("# emit IrStmtClikeFor")
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit2("%s: # begin loop ", gostring(f.labels.labelBegin))
+	emit("%s: # begin loop ", gostring(f.labels.labelBegin))
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
-		emit2("TEST_IT")
-		emit2("je %s  # jump if false", gostring(f.labels.labelEndLoop))
+		emit("TEST_IT")
+		emit("je %s  # jump if false", gostring(f.labels.labelEndLoop))
 	}
 	f.block.emit()
-	emit2("%s: # end block", gostring(f.labels.labelEndBlock))
+	emit("%s: # end block", gostring(f.labels.labelEndBlock))
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit2("jmp %s", gostring(f.labels.labelBegin))
-	emit2("%s: # end loop", gostring(f.labels.labelEndLoop))
+	emit("jmp %s", gostring(f.labels.labelBegin))
+	emit("%s: # end loop", gostring(f.labels.labelEndLoop))
 }
 
 func (f *StmtFor) emit() {
@@ -272,7 +272,7 @@ func (f *StmtFor) convert() Stmt {
 			mapCounter: f.rng.invisibleMapCounter,
 		}
 	case FOR_KIND_RANGE_LIST:
-		emit2("# for range list")
+		emit("# for range list")
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
 
@@ -360,13 +360,13 @@ func (f *StmtFor) convert() Stmt {
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
 	if len(stmt.labelDeferHandler) != 0 {
-		emit2("# defer and return")
-		emit2("jmp %s", stmt.labelDeferHandler)
+		emit("# defer and return")
+		emit("jmp %s", stmt.labelDeferHandler)
 	}
 }
 
 func (ast *StmtDefer) emit() {
-	emit2("# defer")
+	emit("# defer")
 	/*
 		// arguments should be evaluated immediately
 		var args []Expr
@@ -385,31 +385,31 @@ func (ast *StmtDefer) emit() {
 	labelEnd := concat(gostring(makeLabel()) , S("_defer"))
 	ast.label = (labelStart)
 
-	emit2("jmp %s", labelEnd)
-	emit2("%s: # defer start", labelStart)
+	emit("jmp %s", labelEnd)
+	emit("%s: # defer start", labelStart)
 
 	for i := 0; i < len(retRegi); i++ {
-		emit2("push %%%s", gostring(retRegi[i]))
+		emit("push %%%s", gostring(retRegi[i]))
 	}
 
 	ast.expr.emit()
 
 	for i := len(retRegi) - 1; i >= 0; i-- {
-		emit2("pop %%%s", gostring(retRegi[i]))
+		emit("pop %%%s", gostring(retRegi[i]))
 	}
 
-	emit2("leave")
-	emit2("ret")
-	emit2("%s: # defer end", labelEnd)
+	emit("leave")
+	emit("ret")
+	emit("%s: # defer end", labelEnd)
 
 }
 
 func (ast *StmtContinue) emit() {
 	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), "labelEndLoop should not be empty")
-	emit2("jmp %s # continue", gostring(ast.labels.labelEndBlock))
+	emit("jmp %s # continue", gostring(ast.labels.labelEndBlock))
 }
 
 func (ast *StmtBreak) emit() {
 	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), "labelEndLoop should not be empty")
-	emit2("jmp %s # break", gostring(ast.labels.labelEndLoop))
+	emit("jmp %s # break", gostring(ast.labels.labelEndLoop))
 }

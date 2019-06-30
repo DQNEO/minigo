@@ -7,15 +7,15 @@ var eEmptyString = ExprStringLiteral{
 func emitEmptyString() {
 	eEmpty := &eEmptyString
 	eEmpty.emit()
-	emit2("mov $0, %%rbx")
-	emit2("mov $0, %%rcx")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
 }
 
 func (ast *ExprStringLiteral) emit() {
-	emit2("LOAD_STRING_LITERAL .%s", ast.slabel)
+	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
 	var length int = len(ast.val)
-	emit2("mov $%d, %%rbx", length)
-	emit2("mov $%d, %%rcx", length)
+	emit("mov $%d, %%rbx", length)
+	emit("mov $%d, %%rcx", length)
 }
 
 func (e *IrExprStringComparison) token() *Token {
@@ -23,7 +23,7 @@ func (e *IrExprStringComparison) token() *Token {
 }
 
 func (binop *IrExprStringComparison) emit() {
-	emit2("# emitCompareStrings")
+	emit("# emitCompareStrings")
 	var equal bool
 	switch cstring(binop.op) {
 	case "<":
@@ -95,8 +95,8 @@ func (binop *IrExprStringComparison) emit() {
 }
 
 func emitGoStringsEqualFromStack() {
-	emit2("LOAD_NUMBER 1")
-	emit2("PUSH_8")
+	emit("LOAD_NUMBER 1")
+	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
 		symbol:        "iruntime.eqGostrings",
@@ -110,29 +110,29 @@ func emitConvertCstringFromStackToSlice() {
 	labelEnd := makeLabel()
 	labelThen := makeLabel()
 
-	emit2("POP_8 # restore string")
-	emit2("TEST_IT") // check if string is nil
-	emit2("jne %s # go to then if not nil", labelThen)
-	emit2("# if nil ")
-	emit2("LOAD_EMPTY_SLICE") // emit 0,0,0
-	emitEmptyString() // emit ""
-	emit2("jmp %s", labelEnd)
-	emit2("%s:", labelThen)
+	emit("POP_8 # restore string")
+	emit("TEST_IT") // check if string is nil
+	emit("jne %s # go to then if not nil", labelThen)
+	emit("# if nil ")
+	emit("LOAD_EMPTY_SLICE") // emit 0,0,0
+	emitEmptyString()        // emit ""
+	emit("jmp %s", labelEnd)
+	emit("%s:", labelThen)
 
-	emit2("PUSH_8 # string addr")
+	emit("PUSH_8 # string addr")
 
 	// calc len
-	emit2("PUSH_8")
+	emit("PUSH_8")
 	eStrLen := &IrLowLevelCall{
 		symbol:        "strlen",
 		argsFromStack: 1,
 	}
 	eStrLen.emit()
-	emit2("mov %%rax, %%rbx # len")
-	emit2("mov %%rax, %%rcx # cap")
+	emit("mov %%rax, %%rbx # len")
+	emit("mov %%rax, %%rcx # cap")
 
-	emit2("POP_8 # string addr")
-	emit2("%s:", labelEnd)
+	emit("POP_8 # string addr")
+	emit("%s:", labelEnd)
 }
 // emit []byte(cstring)
 func emitConvertCstringToSlice(cstring Expr) {
@@ -142,20 +142,20 @@ func emitConvertCstringToSlice(cstring Expr) {
 		return
 	}
 
-	emit2("PUSH_8")
+	emit("PUSH_8")
 
 	emitConvertCstringFromStackToSlice()
 }
 
 func emitStringConcate(leftCstring Expr, rightCstring Expr) {
-	emit2("# emitStringConcate")
+	emit("# emitStringConcate")
 
 
 	emitConvertCstringToSlice(leftCstring)
-	emit2("PUSH_SLICE")
+	emit("PUSH_SLICE")
 
 	emitConvertCstringToSlice(rightCstring)
-	emit2("PUSH_SLICE")
+	emit("PUSH_SLICE")
 
 	eStrConCate := &IrLowLevelCall{
 		symbol:        "iruntime.strcat",
