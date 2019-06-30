@@ -386,7 +386,7 @@ func (em *IrStmtRangeMap) emit() {
 
 // push addr, len, cap
 func (lit *ExprMapLiteral) emit() {
-	length := len(lit.elements)
+	var length int = len(lit.elements)
 
 	// allocaated address of the map head
 	// @FIXME 1024 is a tentative number
@@ -416,7 +416,7 @@ func (lit *ExprMapLiteral) emit() {
 			emit2("STORE_8_INDIRECT_FROM_STACK") // save key to heap
 		}
 
-		emit("pop %%rbx")                     // map head
+		emit2("pop %%rbx")                     // map head
 		emit("mov %%rax, %d(%%rbx) #", i*2*8) // save key address
 		emit2("push %%rbx")                    // map head
 
@@ -446,6 +446,6 @@ func (lit *ExprMapLiteral) emit() {
 	emitCallMalloc(16)
 	emit2("pop %%rbx") // address (head of the heap)
 	emit2("mov %%rbx, (%%rax)")
-	emit("mov $%d, %%rcx", length) // len
+	emit2("mov $%d, %%rcx", length) // len
 	emit2("mov %%rcx, 8(%%rax)")
 }
