@@ -157,23 +157,24 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		}
 	} else {
 		var val int
+		var gtypeString gostring = gtype.String2()
 		switch value.(type) {
 		case nil:
-			emit(".quad %d # %s %s zero value", val, gostring(gtype.String()), gostring(containerName))
+			emit(".quad %d # %s %s zero value", val, gtypeString, gostring(containerName))
 		case *ExprNumberLiteral:
 			val = value.(*ExprNumberLiteral).val
-			emit(".quad %d # %s %s", val, gostring(gtype.String()), gostring(containerName))
+			emit(".quad %d # %s %s", val, gtypeString, gostring(containerName))
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
 			val = evalIntExpr(cnst)
-			emit(".quad %d # %s ", val, gostring(gtype.String()))
+			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprVariable:
 			vr := value.(*ExprVariable)
 			val = evalIntExpr(vr)
-			emit(".quad %d # %s ", val, gostring(gtype.String()))
+			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprBinop:
 			val = evalIntExpr(value)
-			emit(".quad %d # %s ", val, gostring(gtype.String()))
+			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
 			emit(".quad .%s", stringLiteral.slabel)
