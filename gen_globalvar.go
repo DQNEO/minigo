@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // gloabal var which should be initialized with zeros
 // https://en.wikipedia.org/wiki/.bss
 func (decl *DeclVar) emitBss() {
@@ -46,7 +44,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
 			var selector string
-			selector = fmt.Sprintf("x%d", 0)
+			var x int = 0
+			selector = string(Sprintf(S("x%d"), x)) // ????
 			if i >= len(values) {
 				// zero value
 				doEmitData(ptok, elmType, nil, selector, depth)
