@@ -327,11 +327,11 @@ func (em *IrStmtRangeMap) emit() {
 	emit2("# init index")
 	em.initstmt.emit()
 
-	emit("%s: # begin loop ", em.labels.labelBegin)
+	emit2("%s: # begin loop ", gostring(em.labels.labelBegin))
 
 	em.condition.emit()
 	emit2("TEST_IT")
-	emit("je %s  # if false, exit loop", em.labels.labelEndLoop)
+	emit2("je %s  # if false, exit loop", gostring(em.labels.labelEndLoop))
 
 	// set key and value
 	em.mapCounter.emit()
@@ -376,12 +376,12 @@ func (em *IrStmtRangeMap) emit() {
 	}
 
 	em.block.emit()
-	emit("%s: # end block", em.labels.labelEndBlock)
+	emit2("%s: # end block", gostring(em.labels.labelEndBlock))
 
 	em.indexIncr.emit()
 
-	emit("jmp %s", em.labels.labelBegin)
-	emit("%s: # end loop", em.labels.labelEndLoop)
+	emit2("jmp %s", gostring(em.labels.labelBegin))
+	emit2("%s: # end loop", gostring(em.labels.labelEndLoop))
 }
 
 // push addr, len, cap
