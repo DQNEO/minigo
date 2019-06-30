@@ -40,7 +40,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 }
 
 func errorf(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v...)
+	s := Sprintf(gostring(format), v...)
 	panic(s)
 }
 
