@@ -80,7 +80,7 @@ func (a *DeclConst) dump() {
 
 func (a *DeclType) dump() {
 	debugf("decl type def %s %s",
-		a.name, a.gtype.String())
+		a.name, a.gtype.String2())
 }
 
 func (stmt *StmtIf) dump() {
@@ -141,7 +141,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf("var %s T %s", ast.varname, ast.getGtype().String())
+	debugf("var %s T %s", gostring(ast.varname), ast.getGtype().String2())
 }
 
 func (ast *ExprConstVariable) dump() {
