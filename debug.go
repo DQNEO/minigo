@@ -46,7 +46,8 @@ func errorf(format string, v ...interface{}) {
 
 func assert(cond bool, tok *Token, msg string) {
 	if !cond {
-		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok.String()))
+		msg := concat3(S("assertion failed: "), gostring(msg), gostring(tok.String()))
+		panic(msg)
 	}
 }
 
