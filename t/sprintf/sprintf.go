@@ -1,10 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func myPrintf(format string, a []interface{}) {
-	var s string = fmt.Sprintf(format, a...)
-	fmt.Printf(s)
+	var s gostring = Sprintf(gostring(format), a...)
+	os.Stdout.Write(s)
 }
 
 func f0() {
