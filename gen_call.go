@@ -26,7 +26,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	var typeToBeloing *Gtype
 	if gtype.kind == G_POINTER {
 		typeToBeloing = gtype.origType
-		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:%s", gtype.String2())
+		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:%s", gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
@@ -48,7 +48,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	} else {
 		funcref, ok := methodGet(origType.methods, methodCall.fname)
 		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String2())
+			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 		}
 		return funcref.funcdef.rettypes
 	}
@@ -74,7 +74,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
 	funcref, ok := methodGet(origType.methods, methodCall.fname)
 	if !ok {
-		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String2())
+		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
 	args := []Expr{methodCall.receiver}

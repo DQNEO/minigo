@@ -93,7 +93,7 @@ func (f *DeclFunc) prepare() Emitter {
 			debugf("%s has nil gtype ", lvar.varname)
 		}
 		size := lvar.gtype.getSize()
-		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String2())
+		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String())
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
@@ -135,7 +135,7 @@ func (fe *funcPrologueEmitter) emit() {
 		//emit("# Allocating stack for localvars len=%d", len(fe.localvars))
 		for i := len(fe.localvars) - 1; i >= 0; i-- {
 			lvar := fe.localvars[i]
-			emit("# offset %d variable \"%s\" %s", lvar.offset, gostring(lvar.varname), lvar.gtype.String2())
+			emit("# offset %d variable \"%s\" %s", lvar.offset, gostring(lvar.varname), lvar.gtype.String())
 		}
 		var localarea int = -fe.localarea
 		emit("sub $%d, %%rsp # total stack size", localarea)
@@ -158,7 +158,7 @@ func (ircall *IrStaticCall) emit() {
 		var fromGtype gostring
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
-			fromGtype = arg.getGtype().String2()
+			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", gostring(fromGtype))
 		if argIndex < len(ircall.callee.params) {
@@ -185,13 +185,13 @@ func (ircall *IrStaticCall) emit() {
 				var fromGtype *Gtype
 				if arg.getGtype() != nil {
 					fromGtype = arg.getGtype()
-					emit("# fromGtype:%s", fromGtype.String2())
+					emit("# fromGtype:%s", fromGtype.String())
 				}
 
 				var toGtype *Gtype
 				if param.getGtype() != nil {
 					toGtype = param.getGtype()
-					emit("# toGtype:%s", toGtype.String2())
+					emit("# toGtype:%s", toGtype.String())
 				}
 
 				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {

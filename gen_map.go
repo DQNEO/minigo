@@ -15,7 +15,7 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_POINTER,
 		},
 	}
-	emit("# emit receiverTypeId of %s", receiver.getGtype().String2())
+	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
 	emitOffsetLoad(receiver, ptrSize, ptrSize)
 	emit("IMUL_NUMBER 8")
 	emit("PUSH_8")
@@ -157,7 +157,7 @@ func emitMapGet(mapType *Gtype) {
 	emit("PUSH_8")          // index address
 	emit("LOAD_8_BY_DEREF") // emit index address
 
-	assert(mapKeyType != nil, nil, "key kind should not be nil:%s", mapType.String2())
+	assert(mapKeyType != nil, nil, "key kind should not be nil:%s", mapType.String())
 
 	if mapKeyType.isString() {
 		emit("push %%r13")

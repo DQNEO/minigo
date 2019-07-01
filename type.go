@@ -167,7 +167,7 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
-func (gtype *Gtype) String2() gostring {
+func (gtype *Gtype) String() gostring {
 	var gs gostring
 	if gtype == nil {
 		return S("NO_TYPE")
@@ -190,12 +190,12 @@ func (gtype *Gtype) String2() gostring {
 		return S("byte")
 	case G_ARRAY:
 		elm := gtype.elementType
-		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String2())
+		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String())
 		return gs
 	case G_STRUCT:
 		var r = "struct{"
 		for _, field := range gtype.fields {
-			r += string(field.String2()) + ","
+			r += string(field.String()) + ","
 		}
 		r += "}"
 		return gostring(r)
@@ -203,10 +203,10 @@ func (gtype *Gtype) String2() gostring {
 		return S("structfield")
 	case G_POINTER:
 		origType := gtype.origType
-		gs = Sprintf(S("*%s"), origType.String2())
+		gs = Sprintf(S("*%s"), origType.String())
 		return gs
 	case G_SLICE:
-		gs = Sprintf(S("[]%s"), gtype.elementType.String2())
+		gs = Sprintf(S("[]%s"), gtype.elementType.String())
 		return gs
 	case G_STRING:
 		return S("string")
@@ -239,13 +239,13 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got %s", strct.String2())
+	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got %s", strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
-			assert(align > 0, nil, "field size should be > 0: filed=%s", fieldtype.String2())
+			assert(align > 0, nil, "field size should be > 0: filed=%s", fieldtype.String())
 		} else {
 			align = MaxAlign
 		}

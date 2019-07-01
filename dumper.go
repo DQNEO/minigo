@@ -58,7 +58,7 @@ func (ast *StmtAssignment) dump() {
 func (a *DeclVar) dump() {
 	if a.initval == nil {
 		debugf("decl var %s %s",
-			a.variable.varname, a.variable.gtype.String2())
+			a.variable.varname, a.variable.gtype.String())
 	} else {
 		debugf("decl var")
 		debugNest++
@@ -80,7 +80,7 @@ func (a *DeclConst) dump() {
 
 func (a *DeclType) dump() {
 	debugf("decl type def %s %s",
-		a.name, a.gtype.String2())
+		a.name, a.gtype.String())
 }
 
 func (stmt *StmtIf) dump() {
@@ -141,7 +141,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf("var %s T %s", gostring(ast.varname), ast.getGtype().String2())
+	debugf("var %s T %s", gostring(ast.varname), ast.getGtype().String())
 }
 
 func (ast *ExprConstVariable) dump() {
@@ -201,7 +201,7 @@ func (stmt *ExprCaseClause) dump() {
 		expr.dump()
 	}
 	for _, gtype := range stmt.gtypes {
-		debugf("%s", gtype.String2())
+		debugf("%s", gtype.String())
 	}
 	stmt.compound.dump()
 	debugNest--
@@ -256,7 +256,7 @@ func (e *ExprIndex) dump() {
 func (e *ExprTypeAssertion) dump() {
 	debugf("type assertion")
 	e.expr.dump()
-	debugf(".(%s)", e.gtype.String2())
+	debugf(".(%s)", e.gtype.String())
 }
 
 func (e *ExprVaArg) dump() {
@@ -267,7 +267,7 @@ func (e *ExprVaArg) dump() {
 func (e *IrExprConversion) dump() {
 	debugf("conversion")
 	debugNest++
-	debugf("toType:%s", e.toGtype.String2())
+	debugf("toType:%s", e.toGtype.String())
 	e.arg.dump()
 	debugNest--
 }
@@ -355,7 +355,7 @@ func (e *ExprCap) dump() {
 }
 
 func (e *ExprSliceLiteral) dump() {
-	debugf("slice %s", e.gtype.String2())
+	debugf("slice %s", e.gtype.String())
 	debugNest++
 	for _, v := range e.values {
 		v.dump()
@@ -408,7 +408,7 @@ func (ast *StmtDefer) dump() {
 }
 
 func (e *ExprMapLiteral) dump() {
-	debugf("map literal T %s", e.gtype.String2())
+	debugf("map literal T %s", e.gtype.String())
 	debugNest++
 	for _, element := range e.elements {
 		debugf("element key:")

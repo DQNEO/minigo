@@ -217,7 +217,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		default:
 			emit("mov $0, %%rax")
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, lhs.token(), "%s", fieldtype.String2())
+			assert(0 < regSize && regSize <= 8, lhs.token(), "%s", fieldtype.String())
 			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)
 		}
 	}
@@ -306,7 +306,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				field.value.emit()
 
 				regSize := fieldtype.getSize()
-				assert(0 < regSize && regSize <= 8, variable.token(), "%s", fieldtype.String2())
+				assert(0 < regSize && regSize <= 8, variable.token(), "%s", fieldtype.String())
 				emitOffsetSavePrimitive(variable, regSize, fieldtype.offset)
 			}
 		}
@@ -361,7 +361,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			emitSave24(lhs, 0)
 			return
 		}
-		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got %s", conversion.arg.getGtype().String2())
+		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got %s", conversion.arg.getGtype().String())
 		fromExpr.emit()
 		emit("PUSH_8 # ptr")
 		strlen := &ExprLen{
