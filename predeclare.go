@@ -150,46 +150,47 @@ func predeclareConsts(universe *Scope) {
 }
 
 func predeclareLibcFuncs(universe *Scope) {
+	libc := packageName("libc")
 	universe.setFunc(goidentifier("printf"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: "libc",
+			pkg: libc,
 		},
 	})
 	universe.setFunc(goidentifier("sprintf"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      "libc",
+			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 	universe.setFunc(goidentifier("exit"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: "libc",
+			pkg: libc,
 		},
 	})
 	universe.setFunc(goidentifier("open"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      "libc",
+			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc(goidentifier("read"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      "libc",
+			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc(goidentifier("write"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      "libc",
+			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc(goidentifier("atoi"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      "libc",
+			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
