@@ -17,7 +17,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	packageName         packageName
+	packageName         goidentifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
@@ -890,7 +890,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
 		tok: ptok,
-		pkg: p.packageName,
+		pkg: packageName(p.packageName),
 		varname: &Relation{
 			expr: variable,
 			pkg:  p.packageName,
@@ -1616,7 +1616,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	r := &DeclFunc{
 		tok:      fnameToken,
-		pkg:      p.packageName,
+		pkg:      packageName(p.packageName),
 		receiver: receiver,
 		fname:    identifier(fname),
 		rettypes: rettypes,
@@ -2000,7 +2000,7 @@ func ParseFiles(pkgname packageName, sources []gostring, onMemory bool) *AstPack
 	for _, source := range sources {
 		var astFile *AstFile
 		p := &parser{
-			packageName: pkgname,
+			packageName: goidentifier(pkgname),
 		}
 		if onMemory {
 			var filename string = string(pkgname) + ".memory"

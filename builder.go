@@ -26,7 +26,7 @@ func parseImports(sourceFiles []gostring) []gostring {
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: "",
+		packageName: goidentifier(""),
 	}
 	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
@@ -43,7 +43,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: "iruntime",
+		packageName: goidentifier("iruntime"),
 	}
 	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
