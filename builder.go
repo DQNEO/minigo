@@ -2,19 +2,19 @@
 package main
 
 // analyze imports of given go files
-func parseImports(sourceFiles []gostring) []string {
+func parseImports(sourceFiles []gostring) []gostring {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
-	var imported []string = []string{"os"}
+	var imported []gostring = []gostring{gostring("os")}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(string(sourceFile), nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				if !in_array(string(baseName), imported) {
-					imported = append(imported, string(baseName))
+				if !inArray2(baseName, imported) {
+					imported = append(imported, baseName)
 				}
 			}
 		}
@@ -88,7 +88,7 @@ func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 }
 
 // parse standard libraries
-func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
+func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{
 		compiledPackages:         map[packageName]*AstPackage{},
 		uniqImportedPackageNames: nil,
@@ -99,7 +99,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 		pkgName := packageName(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
-			errorf("package '" + spkgName + "' is not a standard library.")
+			errorf("package '" + string(spkgName) + "' is not a standard library.")
 		}
 		var codes []gostring = []gostring{gostring(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)
