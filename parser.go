@@ -1795,7 +1795,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 		}
 
 		fnameToken, params, rettypes := p.parseFuncSignature()
-		fname := fnameToken.getIdent()
+		fname := fnameToken.getIdent2()
 		p.expect(";")
 
 		var paramTypes []*Gtype
@@ -1807,7 +1807,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			paramTypes: paramTypes,
 			rettypes:   rettypes,
 		}
-		methods[fname] = method
+		methods[identifier(fname)] = method
 	}
 	p.expect("}")
 

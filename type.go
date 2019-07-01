@@ -25,7 +25,7 @@ const (
 )
 
 type signature struct {
-	fname      identifier
+	fname      goidentifier
 	paramTypes []*Gtype
 	rettypes   []*Gtype
 }
