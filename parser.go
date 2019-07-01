@@ -87,7 +87,7 @@ func (p *parser) expectIdent2() goidentifier {
 	if !tok.isTypeIdent() {
 		errorft(tok, "Identifier expected, but got %s", tok)
 	}
-	return tok.getIdent2()
+	return tok.getIdent()
 }
 
 func (p *parser) expectKeyword(name string) *Token {
@@ -193,7 +193,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
-	firstIdent := firstIdentToken.getIdent2()
+	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg packageName // ignored for now
@@ -390,7 +390,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			r = &ExprMethodcall{
 				tok:      tok,
 				receiver: e,
-				fname:    tok.getIdent2(),
+				fname:    tok.getIdent(),
 				args:     args,
 			}
 			return p.succeedingExpr(r)
@@ -404,7 +404,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			r = &ExprStructField{
 				tok:       tok,
 				strct:     e,
-				fieldname: tok.getIdent2(),
+				fieldname: tok.getIdent(),
 			}
 			return p.succeedingExpr(r)
 		}
@@ -628,7 +628,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		value := p.parseExpr()
 		f := &KeyedElement{
 			tok:   tok,
-			key:   tok.getIdent2(),
+			key:   tok.getIdent(),
 			value: value,
 		}
 		r.fields = append(r.fields, f)
@@ -795,7 +795,7 @@ func (p *parser) parseType() *Gtype {
 	for {
 		tok := p.readToken()
 		if tok.isTypeIdent() {
-			ident := tok.getIdent2()
+			ident := tok.getIdent()
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
@@ -996,7 +996,7 @@ func (p *parser) parseIdentList() []identifier {
 	for {
 		tok := p.readToken()
 		if tok.isTypeIdent() {
-			r = append(r, identifier(tok.getIdent2()))
+			r = append(r, identifier(tok.getIdent()))
 		} else if len(r) == 0 {
 			// at least one ident is needed
 			errorft(tok, "Ident expected")
@@ -1538,7 +1538,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 	} else {
 		for {
 			tok := p.readToken()
-			pname := tok.getIdent2()
+			pname := tok.getIdent()
 			if p.peekToken().isPunct("...") {
 				p.expect("...")
 				gtype := p.parseType()
@@ -1622,7 +1622,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.expect("(")
 		// method definition
 		tok := p.readToken()
-		pname := tok.getIdent2()
+		pname := tok.getIdent()
 		ptype := p.parseType()
 		receiver = &ExprVariable{
 			tok:     tok,
@@ -1634,7 +1634,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	}
 
 	fnameToken, params, rettypes := p.parseFuncSignature()
-	fname := fnameToken.getIdent2()
+	fname := fnameToken.getIdent()
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
@@ -1763,7 +1763,7 @@ func (p *parser) parseStructDef() *Gtype {
 			p.skip()
 			break
 		}
-		fieldname := tok.getIdent2()
+		fieldname := tok.getIdent()
 		p.skip()
 		gtype := p.parseType()
 		fieldtype := gtype
@@ -1796,7 +1796,7 @@ func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 		}
 
 		fnameToken, params, rettypes := p.parseFuncSignature()
-		fname := fnameToken.getIdent2()
+		fname := fnameToken.getIdent()
 		p.expect(";")
 
 		var paramTypes []*Gtype

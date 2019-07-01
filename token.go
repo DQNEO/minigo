@@ -90,7 +90,7 @@ func (tok *Token) isIdent(s string) bool {
 	return tok != nil && tok.typ == T_IDENT && eqGostrings(tok.sval,gs)
 }
 
-func (tok *Token) getIdent2() goidentifier {
+func (tok *Token) getIdent() goidentifier {
 	if !tok.isTypeIdent() {
 		errorft(tok, "ident expeced, but got %v", tok)
 	}
