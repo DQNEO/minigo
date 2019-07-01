@@ -232,7 +232,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		// funcall or method call
 		p.skip()
 		args := p.readFuncallArgs()
-		fname := string(rel.name)
+		fname := rel.name
 		e = &ExprFuncallOrConversion{
 			tok:   next,
 			rel:   rel,

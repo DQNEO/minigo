@@ -93,7 +93,7 @@ type ExprConstVariable struct {
 type ExprFuncallOrConversion struct {
 	tok   *Token
 	rel   *Relation
-	fname string
+	fname goidentifier
 	args  []Expr
 }
 
