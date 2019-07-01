@@ -66,11 +66,6 @@ func (tok *Token) GoString() gostring {
 	return gs
 }
 
-func (tok *Token) String() string {
-	gs := tok.GoString()
-	return string(gs)
-}
-
 func (tok *Token) isEOF() bool {
 	return tok != nil && tok.typ == T_EOF
 }

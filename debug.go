@@ -31,11 +31,13 @@ func TBI(tok *Token, format string, v ...interface{}) {
 
 // errorf with a position token
 func errorft(tok *Token, format string, v ...interface{}) {
-	var tokString string
+	var format2 gostring = gostring(format)
+	var tokString gostring
 	if tok != nil {
-		tokString = tok.String()
+		tokString = tok.GoString()
 	}
-	errorf(format+"\n "+tokString, v...)
+	gs := concat3(format2,S("\n "), tokString)
+	errorf(string(gs), v...)
 }
 
 func errorf(format string, v ...interface{}) {
@@ -52,7 +54,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 }
 
 func assertNotReached(tok *Token) {
-	msg := concat(S("assertNotReached "), S(tok.String()))
+	msg := concat(S("assertNotReached "), tok.GoString())
 	panic(msg)
 }
 
