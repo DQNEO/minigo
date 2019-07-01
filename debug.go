@@ -43,9 +43,10 @@ func errorf(format string, v ...interface{}) {
 	panic(s)
 }
 
-func assert(cond bool, tok *Token, msg string) {
+func assert(cond bool, tok *Token, format string, v ...interface{}) {
 	if !cond {
-		msg := concat3(S("assertion failed: "), gostring(msg), gostring(tok.String()))
+		s := Sprintf(gostring(format), v...)
+		msg := concat3(S("assertion failed: "), s,  tok.GoString())
 		panic(msg)
 	}
 }
