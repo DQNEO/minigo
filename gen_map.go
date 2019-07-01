@@ -157,7 +157,7 @@ func emitMapGet(mapType *Gtype) {
 	emit("PUSH_8")          // index address
 	emit("LOAD_8_BY_DEREF") // emit index address
 
-	assert(mapKeyType != nil, nil, "key kind should not be nil:"+mapType.String())
+	assert(mapKeyType != nil, nil, "key kind should not be nil:%s", mapType.String2())
 
 	if mapKeyType.isString() {
 		emit("push %%r13")

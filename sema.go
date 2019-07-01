@@ -13,9 +13,9 @@ func makeDynamicTypeLabel(id int) gostring {
 }
 
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) gostring {
-	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
+	dynamicTypeId := get_index(string(gtype.String2()), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
-		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
+		errorft(nil, "type %s not found in uniquedDTypes", gtype.String2())
 	}
 	return makeDynamicTypeLabel(dynamicTypeId)
 }
@@ -99,7 +99,7 @@ func calcStructSize(gtypes []*Gtype) {
 func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
 	var r []string = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
-		gs := gtype.String()
+		gs := string(gtype.String2())
 		if !in_array(gs, r) {
 			r = append(r, gs)
 		}
@@ -207,7 +207,7 @@ func walkExpr(expr Expr) Expr {
 			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
-			emit("# append(%s, %s)", gostring(slice.getGtype().String()), gostring(valueToAppend.getGtype().String()))
+			emit("# append(%s, %s)", slice.getGtype().String2(), valueToAppend.getGtype().String2())
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,

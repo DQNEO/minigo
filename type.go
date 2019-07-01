@@ -167,10 +167,6 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
-func (gtype *Gtype) String() string {
-	return string(gtype.String2())
-}
-
 func (gtype *Gtype) String2() gostring {
 	var gs gostring
 	if gtype == nil {
@@ -199,7 +195,7 @@ func (gtype *Gtype) String2() gostring {
 	case G_STRUCT:
 		var r = "struct{"
 		for _, field := range gtype.fields {
-			r += field.String() + ","
+			r += string(field.String2()) + ","
 		}
 		r += "}"
 		return gostring(r)
@@ -243,13 +239,13 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got "+strct.String())
+	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got %s", strct.String2())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
-			assert(align > 0, nil, "field size should be > 0: filed="+fieldtype.String())
+			assert(align > 0, nil, "field size should be > 0: filed=%s", fieldtype.String2())
 		} else {
 			align = MaxAlign
 		}

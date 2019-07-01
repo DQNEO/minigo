@@ -68,7 +68,7 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field, 0)
 	default:
-		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String())
+		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String2())
 	}
 }
 
@@ -77,7 +77,7 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	strct = unwrapRel(strct)
 	vr, ok := strct.(*ExprVariable)
 	assert(ok, e.tok, "should be *ExprVariable")
-	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got "+vr.gtype.String())
+	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got ", vr.gtype.String2())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
 	vr.emitOffsetLoad(size, field.offset+offset)
 }

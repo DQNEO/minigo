@@ -274,7 +274,7 @@ func (f *StmtFor) convert() Stmt {
 	case FOR_KIND_RANGE_LIST:
 		emit("# for range list")
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got ", f.rng.rangeexpr.getGtype().String2())
 
 		var init = &StmtAssignment{
 			lefts: []Expr{

@@ -93,7 +93,7 @@ func (f *DeclFunc) prepare() Emitter {
 			debugf("%s has nil gtype ", lvar.varname)
 		}
 		size := lvar.gtype.getSize()
-		assert(size != 0, lvar.token(), "size should  not be zero:"+lvar.gtype.String())
+		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String2())
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
