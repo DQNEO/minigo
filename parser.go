@@ -1679,7 +1679,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 		methodSet(pmethods, fname, ref)
 	} else {
-		p.packageBlockScope.setFunc(identifier(fname), ref)
+		p.packageBlockScope.setFunc(fname, ref)
 	}
 
 	// every function has a defer_handler

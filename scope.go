@@ -22,8 +22,8 @@ func (sc *Scope) get(name identifier) *IdentBody {
 	return nil
 }
 
-func (sc *Scope) setFunc(name identifier, funcref *ExprFuncRef) {
-	sc.set(name, &IdentBody{
+func (sc *Scope) setFunc(name goidentifier, funcref *ExprFuncRef) {
+	sc.set(identifier(name), &IdentBody{
 		expr: funcref,
 	})
 }

@@ -78,36 +78,36 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
 
-	universe.setFunc("len", &ExprFuncRef{
+	universe.setFunc(goidentifier("len"), &ExprFuncRef{
 		funcdef: builtinLen,
 	})
-	universe.setFunc("cap", &ExprFuncRef{
+	universe.setFunc(goidentifier("cap"), &ExprFuncRef{
 		funcdef: builtinCap,
 	})
-	universe.setFunc("append", &ExprFuncRef{
+	universe.setFunc(goidentifier("append"), &ExprFuncRef{
 		funcdef: builtinAppend,
 	})
-	universe.setFunc("makeSlice", &ExprFuncRef{
+	universe.setFunc(goidentifier("makeSlice"), &ExprFuncRef{
 		funcdef: builtinMakeSlice,
 	})
 
-	universe.setFunc("dumpSlice", &ExprFuncRef{
+	universe.setFunc(goidentifier("dumpSlice"), &ExprFuncRef{
 		funcdef: builtinDumpSlice,
 	})
 
-	universe.setFunc("dumpInterface", &ExprFuncRef{
+	universe.setFunc(goidentifier("dumpInterface"), &ExprFuncRef{
 		funcdef: builtinDumpInterface,
 	})
 
-	universe.setFunc("assertInterface", &ExprFuncRef{
+	universe.setFunc(goidentifier("assertInterface"), &ExprFuncRef{
 		funcdef: builtinAssertInterface,
 	})
 
-	universe.setFunc("asComment", &ExprFuncRef{
+	universe.setFunc(goidentifier("asComment"), &ExprFuncRef{
 		funcdef: builtinAsComment,
 	})
 
-	universe.setFunc("runtime_args", &ExprFuncRef{
+	universe.setFunc(goidentifier("runtime_args"), &ExprFuncRef{
 		funcdef: builtinRunTimeArgs,
 	})
 }
@@ -150,44 +150,44 @@ func predeclareConsts(universe *Scope) {
 }
 
 func predeclareLibcFuncs(universe *Scope) {
-	universe.setFunc("printf", &ExprFuncRef{
+	universe.setFunc(goidentifier("printf"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
 		},
 	})
-	universe.setFunc("sprintf", &ExprFuncRef{
+	universe.setFunc(goidentifier("sprintf"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})
-	universe.setFunc("exit", &ExprFuncRef{
+	universe.setFunc(goidentifier("exit"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: "libc",
 		},
 	})
-	universe.setFunc("open", &ExprFuncRef{
+	universe.setFunc(goidentifier("open"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
-	universe.setFunc("read", &ExprFuncRef{
+	universe.setFunc(goidentifier("read"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
-	universe.setFunc("write", &ExprFuncRef{
+	universe.setFunc(goidentifier("write"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
-	universe.setFunc("atoi", &ExprFuncRef{
+	universe.setFunc(goidentifier("atoi"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg:      "libc",
 			rettypes: []*Gtype{gInt},
