@@ -167,19 +167,19 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
-func (gtype *Gtype) String2() gostring {
-	var s string = gtype.String()
-	return gostring(s)
+func (gtype *Gtype) String() string {
+	var s gostring = gtype.String2()
+	return string(s)
 }
 
-func (gtype *Gtype) String() string {
+func (gtype *Gtype) String2() gostring {
 	var gs gostring
 	if gtype == nil {
-		return "NO_TYPE"
+		return S("NO_TYPE")
 	}
 	switch gtype.kind {
 	case G_DEPENDENT:
-		return "dependent"
+		return S("dependent")
 	case G_NAMED:
 		if gtype.relation.pkg == "" {
 			//errorf("pkg is empty: %s", gtype.relation.name)
@@ -187,11 +187,11 @@ func (gtype *Gtype) String() string {
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
 			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
 	case G_INT:
-		return "int"
+		return S("int")
 	case G_BOOL:
-		return "bool"
+		return S("bool")
 	case G_BYTE:
-		return "byte"
+		return S("byte")
 	case G_ARRAY:
 		elm := gtype.elementType
 		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String2())
@@ -201,30 +201,30 @@ func (gtype *Gtype) String() string {
 			r += field.String() + ","
 		}
 		r += "}"
-		return r
+		return gostring(r)
 	case G_STRUCT_FIELD:
-		return "structfield"
+		return S("structfield")
 	case G_POINTER:
 		origType := gtype.origType
 		gs = Sprintf(S("*%s"), origType.String2())
 	case G_SLICE:
 		gs = Sprintf(S("[]%s"), gtype.elementType.String2())
 	case G_STRING:
-		return "string"
+		return S("string")
 	case G_FUNC:
-		return "func"
+		return S("func")
 	case G_INTERFACE:
 		if len(gtype.imethods) == 0 {
-			return "interface{}"
+			return S("interface{}")
 		} else {
-			return "interface {...}"
+			return S("interface {...}")
 		}
 	case G_MAP:
-		return "map"
+		return S("map")
 	default:
 		errorf("gtype.String() error: invalid gtype.type=%d", gtype.kind)
 	}
-	return string(gs)
+	return gs
 }
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {
