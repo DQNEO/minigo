@@ -1787,7 +1787,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.expectKeyword("interface")
 
 	p.expect("{")
-	var methods map[identifier]*signature = map[identifier]*signature{}
+	var imethods map[identifier]*signature = map[identifier]*signature{}
 
 	for {
 		if p.peekToken().isPunct("}") {
@@ -1807,13 +1807,13 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			paramTypes: paramTypes,
 			rettypes:   rettypes,
 		}
-		imethodSet(methods, fname, method)
+		imethodSet(imethods, fname, method)
 	}
 	p.expect("}")
 
 	gtype := &Gtype{
 		kind:     G_INTERFACE,
-		imethods: methods,
+		imethods: imethods,
 	}
 
 	p.currentScope.setGtype(newName, gtype)
