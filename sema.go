@@ -61,7 +61,6 @@ func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) 
 	for typeName, methods := range pmethods {
 		gtype := packageScope.getGtype(typeName)
 		if gtype == nil {
-			debugf("%#v", packageScope.idents)
 			errorf("typaneme %s is not found in the package scope %s", typeName, packageScope.name)
 		}
 		gtype.methods = methods
