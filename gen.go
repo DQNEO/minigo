@@ -71,7 +71,7 @@ func unwrapRel(e Expr) Expr {
 }
 
 // Mytype.method -> Mytype#method
-func getMethodUniqueName(gtype *Gtype, fname identifier) gostring {
+func getMethodUniqueName(gtype *Gtype, fname goidentifier) gostring {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
 	if gtype.kind == G_POINTER {
@@ -96,7 +96,8 @@ func getFuncSymbol(pkg gostring, fname gostring) gostring {
 func (f *DeclFunc) getSymbol() gostring {
 	if f.receiver != nil {
 		// method
-		return getFuncSymbol(gostring(f.pkg), getMethodUniqueName(f.receiver.gtype, f.fname))
+		fname := goidentifier(f.fname)
+		return getFuncSymbol(gostring(f.pkg), getMethodUniqueName(f.receiver.gtype, fname))
 	}
 
 	// other functions

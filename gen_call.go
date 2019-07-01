@@ -41,10 +41,12 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	if origType == nil {
 		errorft(methodCall.token(), "origType should not be nil")
 	}
+
 	if origType.getKind() == G_INTERFACE {
-		return origType.imethods[methodCall.fname].rettypes
+		imethod, _ := imethodGet(origType.imethods, methodCall.fname)
+		return imethod.rettypes
 	} else {
-		funcref, ok := origType.methods[methodCall.fname]
+		funcref, ok := methodGet(origType.methods, methodCall.fname)
 		if !ok {
 			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 		}
@@ -54,7 +56,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 
 type IrInterfaceMethodCall struct {
 	receiver   Expr
-	methodName identifier
+	methodName goidentifier
 	args       []Expr
 }
 
@@ -67,9 +69,10 @@ func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	return call
 }
 
+
 func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
-	funcref, ok := origType.methods[methodCall.fname]
+	funcref, ok := methodGet(origType.methods, methodCall.fname)
 	if !ok {
 		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}

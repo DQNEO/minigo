@@ -100,7 +100,7 @@ type ExprFuncallOrConversion struct {
 type ExprMethodcall struct {
 	tok      *Token
 	receiver Expr
-	fname    identifier
+	fname    goidentifier
 	args     []Expr
 }
 

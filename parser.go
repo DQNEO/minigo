@@ -390,7 +390,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			r = &ExprMethodcall{
 				tok:      tok,
 				receiver: e,
-				fname:    tok.getIdent(),
+				fname:    tok.getIdent2(),
 				args:     args,
 			}
 			return p.succeedingExpr(r)
@@ -1807,7 +1807,7 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 			paramTypes: paramTypes,
 			rettypes:   rettypes,
 		}
-		methods[identifier(fname)] = method
+		imethodSet(methods, fname, method)
 	}
 	p.expect("}")
 

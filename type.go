@@ -49,6 +49,29 @@ type Gtype struct {
 	mapValue       *Gtype                      // for map
 }
 
+func imethodGet(imethods map[identifier]*signature, name goidentifier) (*signature, bool) {
+	methodName := identifier(name)
+	ref, ok := imethods[methodName]
+	return ref, ok
+}
+
+func imethodSet(imethods map[identifier]*signature, name goidentifier, sig *signature) {
+	methodName := identifier(name)
+	imethods[methodName] = sig
+}
+
+func methodGet(methods map[identifier]*ExprFuncRef, name goidentifier) (*ExprFuncRef, bool) {
+	methodName := identifier(name)
+	ref, ok := methods[methodName]
+	return ref, ok
+}
+
+func methodSet(methods map[identifier]*ExprFuncRef, name goidentifier, ref *ExprFuncRef) {
+	methodName := identifier(name)
+	methods[methodName] = ref
+}
+
+
 func (gtype *Gtype) isNil() bool {
 	if gtype == nil {
 		return true
@@ -276,14 +299,14 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 
 	underlyingType := gtype.relation.gtype // I forgot the reason to do this :(
 	if underlyingType.kind == G_INTERFACE {
-		methodsig, ok := underlyingType.imethods[e.fname]
+		methodsig, ok := imethodGet(underlyingType.imethods, e.fname)
 		if !ok {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(methodsig != nil, e.tok)
 		return methodsig.rettypes[0]
 	} else {
-		method, ok := underlyingType.methods[e.fname]
+		method, ok := methodGet(underlyingType.methods, e.fname)
 		if !ok {
 			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
