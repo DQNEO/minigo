@@ -2,16 +2,15 @@ package main
 
 import "strings"
 
-func getBaseNameFromImport(path string) string {
-	var r string
-	if strings.Contains(path, "/") {
-		words := strings.Split(path, "/")
-		r = words[len(words)-1]
+func getBaseNameFromImport(path gostring) gostring {
+	if strings.Contains(string(path), "/") {
+		words := strings.Split(string(path), "/")
+		r := words[len(words)-1]
+		return gostring(r)
 	} else {
-		r = path
+		return path
 	}
 
-	return r
 }
 
 func get_index(item string, list []string) int {

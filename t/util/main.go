@@ -4,9 +4,11 @@ import (
 	"fmt"
 )
 
+type gostring []byte
+
 func f1() {
-	baseName := getBaseNameFromImport("foo/bar")
-	fmt.Printf("%s\n", baseName) // bar
+	baseName := getBaseNameFromImport(gostring("foo/bar"))
+	fmt.Printf("%s\n", string(baseName)) // bar
 }
 
 func main() {

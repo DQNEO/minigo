@@ -13,8 +13,8 @@ func parseImports(sourceFiles []gostring) []string {
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				if !in_array(baseName, imported) {
-					imported = append(imported, baseName)
+				if !in_array(string(baseName), imported) {
+					imported = append(imported, string(baseName))
 				}
 			}
 		}

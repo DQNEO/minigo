@@ -232,7 +232,7 @@ type PackageClause struct {
 
 type ImportSpec struct {
 	tok  *Token
-	path string
+	path gostring
 }
 
 type ImportDecl struct {

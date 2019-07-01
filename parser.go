@@ -1676,7 +1676,7 @@ func (p *parser) parseImport() *ImportDecl {
 			if tok.isTypeString() {
 				specs = append(specs, &ImportSpec{
 					tok:  tok,
-					path: string(tok.sval),
+					path: tok.sval,
 				})
 				p.expect(";")
 			} else if tok.isPunct(")") {
@@ -1691,7 +1691,7 @@ func (p *parser) parseImport() *ImportDecl {
 		}
 		specs = []*ImportSpec{&ImportSpec{
 			tok:  tok,
-			path: string(tok.sval),
+			path: tok.sval,
 		},
 		}
 	}
