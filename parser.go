@@ -82,14 +82,6 @@ func (p *parser) unreadToken() {
 	p.tokenStream.index--
 }
 
-func (p *parser) expectIdent() identifier {
-	tok := p.readToken()
-	if !tok.isTypeIdent() {
-		errorft(tok, "Identifier expected, but got %s", tok)
-	}
-	return tok.getIdent()
-}
-
 func (p *parser) expectIdent2() goidentifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
@@ -201,21 +193,21 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
-	firstIdent := firstIdentToken.getIdent()
+	firstIdent := firstIdentToken.getIdent2()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg packageName // ignored for now
-	if _, ok := p.importedNames[firstIdent]; ok {
+	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
 		ident := string(firstIdent)
 		pkg = packageName(ident)
 		p.expect(".")
 		// shift firstident
-		firstIdent = p.expectIdent()
+		firstIdent = p.expectIdent2()
 	}
 
 	rel := &Relation{
 		tok:  firstIdentToken,
-		name: firstIdent,
+		name: identifier(firstIdent),
 		pkg:  p.packageName, // @TODO is this right?
 	}
 	if rel.name == "__func__" {
@@ -1738,11 +1730,11 @@ func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(__func__)
 	tokPkg := p.expectKeyword("package")
 
-	name := p.expectIdent()
+	name := p.expectIdent2()
 	p.expect(";")
 	return &PackageClause{
 		tok:  tokPkg,
-		name: name,
+		name: identifier(name),
 	}
 }
 
