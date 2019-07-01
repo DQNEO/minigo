@@ -168,8 +168,7 @@ func (gtype *Gtype) getSize() int {
 }
 
 func (gtype *Gtype) String() string {
-	var s gostring = gtype.String2()
-	return string(s)
+	return string(gtype.String2())
 }
 
 func (gtype *Gtype) String2() gostring {
@@ -186,6 +185,7 @@ func (gtype *Gtype) String2() gostring {
 		}
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
 			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
+		return gs
 	case G_INT:
 		return S("int")
 	case G_BOOL:
@@ -195,6 +195,7 @@ func (gtype *Gtype) String2() gostring {
 	case G_ARRAY:
 		elm := gtype.elementType
 		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String2())
+		return gs
 	case G_STRUCT:
 		var r = "struct{"
 		for _, field := range gtype.fields {
@@ -207,8 +208,10 @@ func (gtype *Gtype) String2() gostring {
 	case G_POINTER:
 		origType := gtype.origType
 		gs = Sprintf(S("*%s"), origType.String2())
+		return gs
 	case G_SLICE:
 		gs = Sprintf(S("[]%s"), gtype.elementType.String2())
+		return gs
 	case G_STRING:
 		return S("string")
 	case G_FUNC:
@@ -224,7 +227,7 @@ func (gtype *Gtype) String2() gostring {
 	default:
 		errorf("gtype.String() error: invalid gtype.type=%d", gtype.kind)
 	}
-	return gs
+	return S("")
 }
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {
