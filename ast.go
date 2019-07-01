@@ -74,7 +74,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	tok        *Token
-	varname    identifier
+	varname    goidentifier
 	gtype      *Gtype
 	offset     int // for local variable
 	isGlobal   bool

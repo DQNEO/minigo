@@ -565,7 +565,7 @@ func (p *parser) parsePrim() Expr {
 				tok:    tok,
 				gtype:  gtype,
 				values: values,
-				invisiblevar: p.newVariable("", &Gtype{
+				invisiblevar: p.newVariable(goidentifier(""), &Gtype{
 					kind:        G_ARRAY,
 					elementType: gtype.elementType,
 					length:      len(values),
@@ -669,7 +669,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		// when &T{}, allocate stack memory
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
-			strctliteral.invisiblevar = p.newVariable("", &Gtype{
+			strctliteral.invisiblevar = p.newVariable(goidentifier(""), &Gtype{
 				kind:     G_NAMED,
 				relation: strctliteral.strctname,
 			})
@@ -768,7 +768,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 	}
 }
 
-func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
+func (p *parser) newVariable(varname goidentifier, gtype *Gtype) *ExprVariable {
 	var variable *ExprVariable
 	if p.isGlobal() {
 		variable = &ExprVariable{
@@ -878,7 +878,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	ptok := p.expectKeyword("var")
 
 	// read newName
-	newName := p.expectIdent()
+	newName := p.expectIdent2()
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
@@ -1149,7 +1149,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 		outer: p.currentForStmt,
 		rng: &ForRangeClause{
 			tok:                 tokRange,
-			invisibleMapCounter: p.newVariable("", gInt),
+			invisibleMapCounter: p.newVariable(goidentifier(""), gInt),
 			indexvar:            eIndexvar,
 			valuevar:            eValuevar,
 			rangeexpr:           rangeExpr,
@@ -1305,8 +1305,9 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAss
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
 	assert(p.isGlobal() == false, e.token(), "should not be in global scope")
-	variable := p.newVariable(rel.name, nil)
-	p.currentScope.setVar(rel.name, variable)
+	var name goidentifier = goidentifier(rel.name)
+	variable := p.newVariable(name, nil)
+	p.currentScope.setVar(name, variable)
 	rel.expr = variable
 }
 
@@ -1545,7 +1546,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 	} else {
 		for {
 			tok := p.readToken()
-			pname := tok.getIdent()
+			pname := tok.getIdent2()
 			if p.peekToken().isPunct("...") {
 				p.expect("...")
 				gtype := p.parseType()
@@ -1629,7 +1630,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		p.expect("(")
 		// method definition
 		tok := p.readToken()
-		pname := tok.getIdent()
+		pname := tok.getIdent2()
 		ptype := p.parseType()
 		receiver = &ExprVariable{
 			tok:     tok,

@@ -34,8 +34,8 @@ func (sc *Scope) setConst(name goidentifier, cnst *ExprConstVariable) {
 	})
 }
 
-func (sc *Scope) setVar(name identifier, variable *ExprVariable) {
-	sc.set(name, &IdentBody{
+func (sc *Scope) setVar(name goidentifier, variable *ExprVariable) {
+	sc.set(identifier(name), &IdentBody{
 		expr: variable,
 	})
 }
