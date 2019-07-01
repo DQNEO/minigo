@@ -90,6 +90,14 @@ func (p *parser) expectIdent() identifier {
 	return tok.getIdent()
 }
 
+func (p *parser) expectIdent2() goidentifier {
+	tok := p.readToken()
+	if !tok.isTypeIdent() {
+		errorft(tok, "Identifier expected, but got %s", tok)
+	}
+	return tok.getIdent2()
+}
+
 func (p *parser) expectKeyword(name string) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
@@ -916,7 +924,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex int) *ExprConstVariable {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	newName := p.expectIdent()
+	newName := p.expectIdent2()
 
 	// Type or "=" or ";"
 	var val Expr

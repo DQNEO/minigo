@@ -16,7 +16,7 @@ var gString = &Gtype{
 var builtinTypesAsString []string = []string{"bool", "byte", "int", "string", "func"}
 
 var eIota = &ExprConstVariable{
-	name: "iota",
+	name: goidentifier("iota"),
 }
 
 var builtinLen = &DeclFunc{
@@ -135,18 +135,18 @@ func predeclareTypes(universe *Scope) {
 // Constants:
 // true false iota
 func predeclareConsts(universe *Scope) {
-	universe.setConst("true", &ExprConstVariable{
-		name:  "true",
+	universe.setConst(goidentifier("true"), &ExprConstVariable{
+		name:  goidentifier("true"),
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 1},
 	})
-	universe.setConst("false", &ExprConstVariable{
-		name:  "false",
+	universe.setConst(goidentifier("false"), &ExprConstVariable{
+		name:  goidentifier("false"),
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 0},
 	})
 
-	universe.setConst("iota", eIota)
+	universe.setConst(goidentifier("iota"), eIota)
 }
 
 func predeclareLibcFuncs(universe *Scope) {

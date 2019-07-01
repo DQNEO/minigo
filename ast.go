@@ -83,7 +83,7 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	tok       *Token
-	name      identifier
+	name      goidentifier
 	gtype     *Gtype
 	val       Expr // like ExprConstExpr ?
 	iotaIndex int  // for iota
