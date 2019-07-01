@@ -12,9 +12,9 @@ type IdentBody struct {
 	expr  Expr
 }
 
-func (sc *Scope) get(name identifier) *IdentBody {
+func (sc *Scope) get(name goidentifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
-		v, ok := s.idents[name]
+		v, ok := s.idents[identifier(name)]
 		if ok {
 			return v
 		}

@@ -48,7 +48,7 @@ type Node interface {
 
 type Relation struct {
 	pkg  packageName
-	name identifier
+	name goidentifier
 	tok  *Token
 
 	// either of expr(var, const, funcref) or gtype

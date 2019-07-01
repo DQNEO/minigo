@@ -207,10 +207,10 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 
 	rel := &Relation{
 		tok:  firstIdentToken,
-		name: identifier(firstIdent),
+		name: firstIdent,
 		pkg:  p.packageName, // @TODO is this right?
 	}
-	if rel.name == "__func__" {
+	if eq(gostring(rel.name), "__func__") {
 		sliteral := &ExprStringLiteral{
 			val: gostring(p.currentFunc.fname),
 		}
@@ -800,7 +800,7 @@ func (p *parser) parseType() *Gtype {
 			rel := &Relation{
 				tok:  tok,
 				pkg:  p.packageName,
-				name: identifier(ident),
+				name: ident,
 			}
 			p.tryResolve("", rel)
 			gtype = &Gtype{
@@ -1663,10 +1663,10 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		var pmethods methods
 		var ok bool
 		typeName := typeToBelong.relation.name
-		pmethods, ok = p.methods[typeName]
+		pmethods, ok = p.methods[identifier(typeName)]
 		if !ok {
 			pmethods = map[identifier]*ExprFuncRef{}
-			p.methods[typeName] = pmethods
+			p.methods[identifier(typeName)] = pmethods
 		}
 
 		methodSet(pmethods, fname, ref)
@@ -1832,7 +1832,7 @@ func (p *parser) tryResolve(pkg packageName, rel *Relation) {
 
 	if pkg == "" {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
-		if relbody == nil && rel.name != "_" {
+		if relbody == nil && !eq(gostring(rel.name) ,"_") {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {

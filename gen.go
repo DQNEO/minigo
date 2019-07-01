@@ -73,7 +73,7 @@ func unwrapRel(e Expr) Expr {
 // Mytype.method -> Mytype#method
 func getMethodUniqueName(gtype *Gtype, fname goidentifier) gostring {
 	assertNotNil(gtype != nil, nil)
-	var typename identifier
+	var typename goidentifier
 	if gtype.kind == G_POINTER {
 		typename = gtype.origType.relation.name
 	} else {
@@ -280,7 +280,7 @@ func isUnderScore(e Expr) bool {
 	if !ok {
 		return false
 	}
-	return rel.name == "_"
+	return eq(gostring(rel.name), "_")
 }
 
 // expect rhs address is in the stack top, lhs is in the second top
