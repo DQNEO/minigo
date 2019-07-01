@@ -1633,14 +1633,14 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	}
 
 	fnameToken, params, rettypes := p.parseFuncSignature()
-	fname := fnameToken.getIdent()
+	fname := fnameToken.getIdent2()
 	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
 		tok:      fnameToken,
 		pkg:      p.packageName,
 		receiver: receiver,
-		fname:    fname,
+		fname:    identifier(fname),
 		rettypes: rettypes,
 		params:   params,
 	}
@@ -1668,9 +1668,9 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			p.methods[typeName] = pmethods
 		}
 
-		pmethods[fname] = ref
+		methodSet(pmethods, fname, ref)
 	} else {
-		p.packageBlockScope.setFunc(fname, ref)
+		p.packageBlockScope.setFunc(identifier(fname), ref)
 	}
 
 	// every function has a defer_handler
