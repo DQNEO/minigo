@@ -176,7 +176,7 @@ func (gtype *Gtype) String() gostring {
 	case G_DEPENDENT:
 		return S("dependent")
 	case G_NAMED:
-		if gtype.relation.pkg == "" {
+		if len(gtype.relation.pkg) == 0 {
 			//errorf("pkg is empty: %s", gtype.relation.name)
 		}
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
