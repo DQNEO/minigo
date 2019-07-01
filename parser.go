@@ -989,29 +989,6 @@ func (p *parser) parseConstDecl() *DeclConst {
 	return r
 }
 
-func (p *parser) parseIdentList() []identifier {
-	p.traceIn(__func__)
-	defer p.traceOut(__func__)
-	var r []identifier
-	for {
-		tok := p.readToken()
-		if tok.isTypeIdent() {
-			r = append(r, identifier(tok.getIdent()))
-		} else if len(r) == 0 {
-			// at least one ident is needed
-			errorft(tok, "Ident expected")
-		}
-
-		tok = p.peekToken()
-		if tok.isPunct(",") {
-			p.skip()
-			continue
-		} else {
-			return r
-		}
-	}
-}
-
 func (p *parser) enterNewScope(name string) {
 	p.currentScope = newScope(p.currentScope, name)
 }
