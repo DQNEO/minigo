@@ -115,7 +115,7 @@ func setPredeclaredIdentifiers(universe *Scope) {
 // Zero value:
 // nil
 func predeclareNil(universe *Scope) {
-	universe.set("nil", &IdentBody{
+	universe.set(goidentifier("nil"), &IdentBody{
 		expr: &ExprNilLiteral{},
 	})
 }

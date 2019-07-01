@@ -23,34 +23,34 @@ func (sc *Scope) get(name identifier) *IdentBody {
 }
 
 func (sc *Scope) setFunc(name goidentifier, funcref *ExprFuncRef) {
-	sc.set(identifier(name), &IdentBody{
+	sc.set(name, &IdentBody{
 		expr: funcref,
 	})
 }
 
 func (sc *Scope) setConst(name goidentifier, cnst *ExprConstVariable) {
-	sc.set(identifier(name), &IdentBody{
+	sc.set(name, &IdentBody{
 		expr: cnst,
 	})
 }
 
 func (sc *Scope) setVar(name goidentifier, variable *ExprVariable) {
-	sc.set(identifier(name), &IdentBody{
+	sc.set(name, &IdentBody{
 		expr: variable,
 	})
 }
 
 func (sc *Scope) setGtype(name goidentifier, gtype *Gtype) {
-	sc.set(identifier(name), &IdentBody{
+	sc.set(name, &IdentBody{
 		gtype: gtype,
 	})
 }
 
-func (sc *Scope) set(name identifier, elm *IdentBody) {
+func (sc *Scope) set(name goidentifier, elm *IdentBody) {
 	if elm == nil {
 		panic("nil cannot be set")
 	}
-	sc.idents[name] = elm
+	sc.idents[identifier(name)] = elm
 }
 
 func (sc *Scope) getGtype(name identifier) *Gtype {
