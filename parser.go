@@ -404,7 +404,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			r = &ExprStructField{
 				tok:       tok,
 				strct:     e,
-				fieldname: goidentifier(tok.getIdent()),
+				fieldname: tok.getIdent2(),
 			}
 			return p.succeedingExpr(r)
 		}
@@ -628,7 +628,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 		value := p.parseExpr()
 		f := &KeyedElement{
 			tok:   tok,
-			key:   goidentifier(tok.getIdent()),
+			key:   tok.getIdent2(),
 			value: value,
 		}
 		r.fields = append(r.fields, f)
@@ -795,12 +795,12 @@ func (p *parser) parseType() *Gtype {
 	for {
 		tok := p.readToken()
 		if tok.isTypeIdent() {
-			ident := tok.getIdent()
+			ident := tok.getIdent2()
 			// unresolved
 			rel := &Relation{
 				tok:  tok,
 				pkg:  p.packageName,
-				name: ident,
+				name: identifier(ident),
 			}
 			p.tryResolve("", rel)
 			gtype = &Gtype{
@@ -996,7 +996,7 @@ func (p *parser) parseIdentList() []identifier {
 	for {
 		tok := p.readToken()
 		if tok.isTypeIdent() {
-			r = append(r, tok.getIdent())
+			r = append(r, identifier(tok.getIdent2()))
 		} else if len(r) == 0 {
 			// at least one ident is needed
 			errorft(tok, "Ident expected")
@@ -1763,12 +1763,12 @@ func (p *parser) parseStructDef() *Gtype {
 			p.skip()
 			break
 		}
-		fieldname := tok.getIdent()
+		fieldname := tok.getIdent2()
 		p.skip()
 		gtype := p.parseType()
 		fieldtype := gtype
 		//fieldtype.origType = gtype
-		fieldtype.fieldname = goidentifier(fieldname)
+		fieldtype.fieldname = fieldname
 		fieldtype.offset = undefinedSize // will be calculated later
 		fields = append(fields, fieldtype)
 		p.expect(";")

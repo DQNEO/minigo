@@ -97,13 +97,6 @@ func (tok *Token) getIdent2() goidentifier {
 	return goidentifier(tok.sval)
 }
 
-func (tok *Token) getIdent() identifier {
-	if !tok.isTypeIdent() {
-		errorft(tok, "ident expeced, but got %v", tok)
-	}
-	return identifier(tok.sval)
-}
-
 func (tok *Token) getIntval() int {
 	val, _ := strconv.Atoi(string(tok.sval))
 	return val
