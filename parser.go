@@ -1790,7 +1790,7 @@ func (p *parser) parseStructDef() *Gtype {
 	}
 }
 
-func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
+func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	p.expectKeyword("interface")
@@ -1865,7 +1865,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(__func__)
 	ptok := p.expectKeyword("type")
 
-	newName := p.expectIdent()
+	newName := p.expectIdent2()
 	if p.peekToken().isKeyword("interface") {
 		return p.parseInterfaceDef(newName)
 	}

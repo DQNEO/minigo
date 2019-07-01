@@ -125,11 +125,11 @@ func predeclareNil(universe *Scope) {
 // int int8 int16 int32 int64 rune string
 // uint uint8 uint16 uint32 uint64 uintptr
 func predeclareTypes(universe *Scope) {
-	universe.setGtype("bool", gBool)
-	universe.setGtype("byte", gByte)
-	universe.setGtype("int", gInt)
-	universe.setGtype("string", gString)
-	universe.setGtype("uint8", gByte)
+	universe.setGtype(goidentifier("bool"), gBool)
+	universe.setGtype(goidentifier("byte"), gByte)
+	universe.setGtype(goidentifier("int"), gInt)
+	universe.setGtype(goidentifier("string"), gString)
+	universe.setGtype(goidentifier("uint8"), gByte)
 }
 
 // Constants:

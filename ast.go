@@ -276,7 +276,7 @@ type TopLevelDecl struct {
 
 type DeclType struct {
 	tok   *Token
-	name  identifier
+	name  goidentifier
 	gtype *Gtype
 }
 

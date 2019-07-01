@@ -40,8 +40,8 @@ func (sc *Scope) setVar(name goidentifier, variable *ExprVariable) {
 	})
 }
 
-func (sc *Scope) setGtype(name identifier, gtype *Gtype) {
-	sc.set(name, &IdentBody{
+func (sc *Scope) setGtype(name goidentifier, gtype *Gtype) {
+	sc.set(identifier(name), &IdentBody{
 		gtype: gtype,
 	})
 }
