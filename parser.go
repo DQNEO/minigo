@@ -82,7 +82,7 @@ func (p *parser) unreadToken() {
 	p.tokenStream.index--
 }
 
-func (p *parser) expectIdent2() goidentifier {
+func (p *parser) expectIdent() goidentifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
 		errorft(tok, "Identifier expected, but got %s", tok)
@@ -202,7 +202,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		pkg = packageName(ident)
 		p.expect(".")
 		// shift firstident
-		firstIdent = p.expectIdent2()
+		firstIdent = p.expectIdent()
 	}
 
 	rel := &Relation{
@@ -870,7 +870,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	ptok := p.expectKeyword("var")
 
 	// read newName
-	newName := p.expectIdent2()
+	newName := p.expectIdent()
 	var typ *Gtype
 	var initval Expr
 	// "=" or Type
@@ -916,7 +916,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex int) *ExprConstVariable {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	newName := p.expectIdent2()
+	newName := p.expectIdent()
 
 	// Type or "=" or ";"
 	var val Expr
@@ -1730,7 +1730,7 @@ func (p *parser) parsePackageClause() *PackageClause {
 	defer p.traceOut(__func__)
 	tokPkg := p.expectKeyword("package")
 
-	name := p.expectIdent2()
+	name := p.expectIdent()
 	p.expect(";")
 	return &PackageClause{
 		tok:  tokPkg,
@@ -1857,7 +1857,7 @@ func (p *parser) parseTypeDecl() *DeclType {
 	defer p.traceOut(__func__)
 	ptok := p.expectKeyword("type")
 
-	newName := p.expectIdent2()
+	newName := p.expectIdent()
 	if p.peekToken().isKeyword("interface") {
 		return p.parseInterfaceDef(newName)
 	}
