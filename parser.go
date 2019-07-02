@@ -1711,7 +1711,7 @@ func (p *parser) parsePackageClause() *PackageClause {
 	p.expect(";")
 	return &PackageClause{
 		tok:  tokPkg,
-		name: identifier(name),
+		name: name,
 	}
 }
 

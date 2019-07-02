@@ -227,7 +227,7 @@ type StmtDec struct {
 
 type PackageClause struct {
 	tok  *Token
-	name identifier
+	name goidentifier
 }
 
 type ImportSpec struct {
