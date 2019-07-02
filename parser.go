@@ -196,10 +196,9 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
-	var pkg identifier // ignored for now
+	var pkg goidentifier // ignored for now
 	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
-		ident := string(firstIdent)
-		pkg = identifier(ident)
+		pkg = firstIdent
 		p.expect(".")
 		// shift firstident
 		firstIdent = p.expectIdent()
@@ -802,7 +801,7 @@ func (p *parser) parseType() *Gtype {
 				pkg:  p.packageName,
 				name: ident,
 			}
-			p.tryResolve("", rel)
+			p.tryResolve(goidentifier(""), rel)
 			gtype = &Gtype{
 				kind:     G_NAMED,
 				relation: rel,
@@ -1802,19 +1801,19 @@ func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg identifier, rel *Relation) {
+func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
 
-	if pkg == "" {
+	if len(pkg) == 0 {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
 		if relbody == nil && !eq(gostring(rel.name) ,"_") {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {
 		// foreign package
-		relbody := symbolTable.allScopes[pkg].get(rel.name)
+		relbody := symbolTable.allScopes[identifier(pkg)].get(rel.name)
 		if relbody == nil {
 			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}
