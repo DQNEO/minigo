@@ -65,6 +65,7 @@ func parseOpts(args []gostring) []gostring {
 }
 
 func main() {
+	gobinops = convertCstringsToGostrings(binops)
 	// parsing arguments
 	var sourceFiles []gostring
 	osArgs := convertCstringsToGostrings(os.Args)

@@ -718,6 +718,8 @@ var binops = []string{
 	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "/", "%",
 }
 
+var gobinops []gostring
+
 func (p *parser) parseExprInt(prior int) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
@@ -734,7 +736,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if in_array(string(tok.sval), binops) {
+		if inArray2(tok.sval, gobinops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
