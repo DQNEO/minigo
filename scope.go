@@ -53,12 +53,12 @@ func (sc *Scope) set(name goidentifier, elm *IdentBody) {
 	sc.idents[toKey(name)] = elm
 }
 
-func (sc *Scope) getGtype(name identifier) *Gtype {
+func (sc *Scope) getGtype(name goidentifier) *Gtype {
 	if sc == nil {
 		errorf("sc is nil")
 	}
 	idents := sc.idents
-	elm, ok := idents[name]
+	elm, ok := idents[identifier(name)]
 	if !ok {
 		return nil
 	}

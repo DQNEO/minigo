@@ -59,7 +59,8 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 // copy methods from p.nameTypes to gtype.methods of each type
 func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) {
 	for typeName, methods := range pmethods {
-		gtype := packageScope.getGtype(typeName)
+		var gTypeName goidentifier = goidentifier(typeName)
+		gtype := packageScope.getGtype(gTypeName)
 		if gtype == nil {
 			errorf("typaneme %s is not found in the package scope %s", typeName, packageScope.name)
 		}
