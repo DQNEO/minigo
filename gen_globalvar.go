@@ -116,8 +116,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		default:
 			TBI(ptok, "unable to handle gtype %s", gtype.String())
 		}
-	} else if primType == G_MAP || primType == G_INTERFACE {
-		// @TODO
+	} else if primType == G_INTERFACE {
 		emit(".quad 0")
 		emit(".quad 0")
 		emit(".quad 0")
