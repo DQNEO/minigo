@@ -189,12 +189,13 @@ func (gtype *Gtype) String() gostring {
 		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String())
 		return gs
 	case G_STRUCT:
-		var r = "struct{"
+		var r gostring = S("struct{")
 		for _, field := range gtype.fields {
-			r += string(field.String()) + ","
+			var tmp gostring = concat(field.String(), S(","))
+			r = concat(r, tmp)
 		}
-		r += "}"
-		return gostring(r)
+		r = concat(r, S("}"))
+		return r
 	case G_STRUCT_FIELD:
 		return S("structfield")
 	case G_POINTER:
