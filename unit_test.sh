@@ -38,7 +38,7 @@ function as_run {
 }
 
 function run_unit_test {
-    echo -n "unit_test $basename ... "
+    echo -n "./unit_test.sh $progname $basename ... "
     compile
     as_run
     if [[ $? -ne 0 ]];then
