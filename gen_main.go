@@ -1,9 +1,5 @@
 package main
 
-import (
-	"strings"
-)
-
 // builtin string
 var builtinStringKey1 string = "SfmtDumpInterface"
 var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\\n"
@@ -61,9 +57,8 @@ func (program *Program) emitMethodTable() {
 			if eq(methodNameFull, ".") {
 				panic("invalid method name")
 			}
-			splitted := strings.Split(string(methodNameFull), "$")
-			gss := convertCstringsToGostrings(splitted)
-			var shortMethodName gostring = gss[1]
+			splitted := strings_Split(methodNameFull, S("$"))
+			var shortMethodName gostring = splitted[1]
 			emit(".quad .S.S.%s # key", gostring(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
