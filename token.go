@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 )
 
 // https://golang.org/ref/spec#Keywords
@@ -94,7 +93,7 @@ func (tok *Token) getIdent() goidentifier {
 }
 
 func (tok *Token) getIntval() int {
-	val, _ := strconv.Atoi(string(tok.sval))
+	val, _ := strconv_Atoi(tok.sval)
 	return val
 }
 
