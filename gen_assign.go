@@ -45,7 +45,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 	var numLeft int = len(ast.lefts)
 	emit("# multi(%d) = expr", numLeft)
 	// a,b,c = expr
-	numRight := 0
+	var numRight int = 0
 	right := ast.rights[0]
 
 	var leftsMayBeTwo bool // a(,b) := expr // map index or type assertion
