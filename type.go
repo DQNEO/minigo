@@ -41,7 +41,7 @@ type Gtype struct {
 	fieldname      goidentifier                  // for struct field
 	offset         int                         // for struct field
 	padding        int                         // for struct field
-	length         int                         // for array, string(len without the terminating \0)
+	length         int                         // for array, string (len without the terminating \0)
 	elementType    *Gtype                      // for array, slice
 	imethods       map[identifier]*signature   // for interface
 	methods        map[identifier]*ExprFuncRef // for G_NAMED
