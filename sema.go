@@ -107,8 +107,8 @@ func uniqueDynamicTypes(dynamicTypes []*Gtype) []gostring {
 	return r
 }
 
-func composeMethodTable(funcs []*DeclFunc) map[int][]string {
-	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
+func composeMethodTable(funcs []*DeclFunc) map[int][]gostring {
+	var methodTable map[int][]gostring = map[int][]gostring{} // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
 		if funcdecl.receiver == nil {
@@ -125,7 +125,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 		typeId := gtype.relation.gtype.receiverTypeId
 		symbol := funcdecl.getSymbol()
 		methods := methodTable[typeId]
-		methods = append(methods, string(symbol))
+		methods = append(methods, symbol)
 		methodTable[typeId] = methods
 	}
 	debugf("set methodTable")

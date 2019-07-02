@@ -58,10 +58,10 @@ func (program *Program) emitMethodTable() {
 			continue
 		}
 		for _, methodNameFull := range methods {
-			if methodNameFull == "." {
+			if eq(methodNameFull, ".") {
 				panic("invalid method name")
 			}
-			splitted := strings.Split(methodNameFull, "$")
+			splitted := strings.Split(string(methodNameFull), "$")
 			gss := convertCstringsToGostrings(splitted)
 			var shortMethodName gostring = gss[1]
 			emit(".quad .S.S.%s # key", gostring(shortMethodName))

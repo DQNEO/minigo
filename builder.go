@@ -139,7 +139,7 @@ func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 
 type Program struct {
 	packages    []*AstPackage
-	methodTable map[int][]string
+	methodTable map[int][]gostring
 	importOS    bool
 }
 
