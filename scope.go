@@ -14,7 +14,7 @@ type IdentBody struct {
 
 func (sc *Scope) get(name goidentifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
-		v, ok := s.idents[identifier(name)]
+		v, ok := s.idents[toKey(name)]
 		if ok {
 			return v
 		}
@@ -50,7 +50,7 @@ func (sc *Scope) set(name goidentifier, elm *IdentBody) {
 	if elm == nil {
 		panic("nil cannot be set")
 	}
-	sc.idents[identifier(name)] = elm
+	sc.idents[toKey(name)] = elm
 }
 
 func (sc *Scope) getGtype(name identifier) *Gtype {

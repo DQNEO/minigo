@@ -50,21 +50,21 @@ type Gtype struct {
 }
 
 func imethodGet(imethods map[identifier]*signature, name goidentifier) (*signature, bool) {
-	ref, ok := imethods[identifier(name)]
+	ref, ok := imethods[toKey(name)]
 	return ref, ok
 }
 
 func imethodSet(imethods map[identifier]*signature, name goidentifier, sig *signature) {
-	imethods[identifier(name)] = sig
+	imethods[toKey(name)] = sig
 }
 
 func methodGet(methods map[identifier]*ExprFuncRef, name goidentifier) (*ExprFuncRef, bool) {
-	ref, ok := methods[identifier(name)]
+	ref, ok := methods[toKey(name)]
 	return ref, ok
 }
 
 func methodSet(methods map[identifier]*ExprFuncRef, name goidentifier, ref *ExprFuncRef) {
-	methods[identifier(name)] = ref
+	methods[toKey(name)] = ref
 }
 
 

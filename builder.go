@@ -87,6 +87,10 @@ func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 	return mainPkg
 }
 
+func toKey(gid goidentifier) identifier {
+	return identifier(gid)
+}
+
 // parse standard libraries
 func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{
@@ -97,7 +101,7 @@ func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 
 	for _, spkgName := range imported {
 		pkgName := goidentifier(spkgName)
-		pkgCode, ok := stdPkgs[identifier(pkgName)]
+		pkgCode, ok := stdPkgs[toKey(pkgName)]
 		if !ok {
 			errorf("package '" + string(spkgName) + "' is not a standard library.")
 		}
@@ -105,7 +109,7 @@ func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)
-		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
+		symbolTable.allScopes[toKey(pkgName)] = pkg.scope
 	}
 
 	return libs
@@ -120,14 +124,14 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(pkgName)]
+		compiledPkg := csl.compiledPackages[toKey(goidentifier(pkgName))]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	return importedPackages
 }
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
-	csl.compiledPackages[identifier(pkg.name)] = pkg
+	csl.compiledPackages[toKey(pkg.name)] = pkg
 	if !inArray2(gostring(pkg.name), csl.uniqImportedPackageNames) {
 		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, gostring(pkg.name))
 	}
