@@ -252,7 +252,7 @@ type ExprFuncRef struct {
 
 type DeclFunc struct {
 	tok       *Token
-	pkg       packageName
+	pkg       goidentifier
 	receiver  *ExprVariable
 	fname     identifier
 	rettypes  []*Gtype

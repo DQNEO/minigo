@@ -1616,7 +1616,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	r := &DeclFunc{
 		tok:      fnameToken,
-		pkg:      packageName(p.packageName),
+		pkg:      p.packageName,
 		receiver: receiver,
 		fname:    identifier(fname),
 		rettypes: rettypes,

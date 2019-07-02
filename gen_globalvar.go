@@ -84,7 +84,9 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_SLICE {
 		switch value.(type) {
 		case nil:
-			return
+			emit(".quad 0")
+			emit(".quad 0")
+			emit(".quad 0")
 		case *ExprNilLiteral:
 			emit(".quad 0")
 			emit(".quad 0")

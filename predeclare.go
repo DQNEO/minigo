@@ -110,6 +110,8 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	universe.setFunc(goidentifier("runtime_args"), &ExprFuncRef{
 		funcdef: builtinRunTimeArgs,
 	})
+
+
 }
 
 // Zero value:
@@ -150,7 +152,7 @@ func predeclareConsts(universe *Scope) {
 }
 
 func predeclareLibcFuncs(universe *Scope) {
-	libc := packageName("libc")
+	libc := goidentifier(S("libc"))
 	universe.setFunc(goidentifier("printf"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: libc,
