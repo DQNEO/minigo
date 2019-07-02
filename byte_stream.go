@@ -13,9 +13,9 @@ type ByteStream struct {
 	column    int
 }
 
-func NewByteStreamFromString(name string, contents string) *ByteStream {
+func NewByteStreamFromString(name gostring, contents gostring) *ByteStream {
 	return &ByteStream{
-		filename:  gostring(name),
+		filename:  name,
 		source:    []byte(contents),
 		nextIndex: 0,
 		line:      1,
@@ -23,10 +23,10 @@ func NewByteStreamFromString(name string, contents string) *ByteStream {
 	}
 }
 
-func NewByteStreamFromFile(path string) *ByteStream {
+func NewByteStreamFromFile(path gostring) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
-		filename:  gostring(path),
+		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,
@@ -34,8 +34,8 @@ func NewByteStreamFromFile(path string) *ByteStream {
 	}
 }
 
-func readFile(filename string) []byte {
-	bytes, err := ioutil.ReadFile(filename)
+func readFile(filename gostring) []byte {
+	bytes, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		panic(err)
 	}

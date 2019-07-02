@@ -1903,12 +1903,12 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
-func (p *parser) ParseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseString(filename gostring, code gostring, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
 	return p.Parse(bs, packageBlockScope, importOnly)
 }
 
-func (p *parser) ParseFile(filename string, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseFile(filename gostring, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromFile(filename)
 	return p.Parse(bs, packageBlockScope, importOnly)
 }
@@ -2002,10 +2002,10 @@ func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPac
 			packageName: goidentifier(pkgname),
 		}
 		if onMemory {
-			var filename string = string(pkgname) + ".memory"
-			astFile = p.ParseString(filename, string(source), pkgScope, false)
+			var filename gostring = concat(gostring(pkgname),  S(".memory"))
+			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
-			astFile = p.ParseFile(string(source), pkgScope, false)
+			astFile = p.ParseFile(source, pkgScope, false)
 		}
 		astFiles = append(astFiles, astFile)
 		for _, g := range astFile.uninferredGlobals {

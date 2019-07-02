@@ -3,7 +3,7 @@ package main
 func dumpTokenForFiles(sourceFiles []gostring) {
 	for _, sourceFile := range sourceFiles {
 		debugf("--- file:%s", sourceFile)
-		bs := NewByteStreamFromFile(string(sourceFile))
+		bs := NewByteStreamFromFile(sourceFile)
 		NewTokenStream(bs)
 	}
 }

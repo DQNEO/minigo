@@ -9,7 +9,7 @@ func parseImports(sourceFiles []gostring) []gostring {
 	var imported []gostring = []gostring{gostring("os")}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
-		astFile := p.ParseFile(string(sourceFile), nil, true)
+		astFile := p.ParseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
@@ -28,7 +28,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: goidentifier(""),
 	}
-	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
+	f := p.ParseString(S("internal_universe.go"), gostring(internalUniverseCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -45,7 +45,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: goidentifier("iruntime"),
 	}
-	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	f := p.ParseString(S("internal_runtime.go"), gostring(internalRuntimeCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
