@@ -50,13 +50,15 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 	if !cond {
 		s := Sprintf(gostring(format), v...)
 		msg := concat3(S("assertion failed: "), s,  tok.GoString())
-		panic(msg)
+		os.Stderr.Write(msg)
+		panic("")
 	}
 }
 
 func assertNotReached(tok *Token) {
 	msg := concat(S("assertNotReached "), tok.GoString())
-	panic(msg)
+	os.Stderr.Write(msg)
+	panic("")
 }
 
 func assertNotNil(cond bool, tok *Token) {
