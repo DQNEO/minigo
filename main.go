@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strings"
 )
 
 var GENERATION int = 1
@@ -54,7 +53,7 @@ func parseOpts(args []gostring) []gostring {
 		if eq(opt, "--resolve-only") {
 			resolveOnly = true
 		}
-		if strings.HasSuffix(string(opt), ".go") {
+		if strings_HasSuffix(opt, S(".go")) {
 			r = append(r, gostring(opt))
 		} else if eq(opt, "-") {
 			return []gostring{gostring("/dev/stdin")}
