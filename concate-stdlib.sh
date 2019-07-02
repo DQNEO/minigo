@@ -14,8 +14,8 @@ do
     echo ""
 done
 
-echo "func makeStdLib() map[packageName]string {"
-echo "    var mp map[packageName]string = map[packageName]string{"
+echo "func makeStdLib() map[identifier]string {"
+echo "    var mp map[identifier]string = map[identifier]string{"
 
 for dir in stdlib/*
 do

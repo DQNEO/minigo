@@ -1,7 +1,7 @@
 package main
 
 type AstPackage struct {
-	name              packageName
+	name              goidentifier
 	scope             *Scope
 	files             []*AstFile
 	namedTypes        []*DeclType
@@ -139,7 +139,7 @@ type ExprCap struct {
 // local or global
 type DeclVar struct {
 	tok      *Token
-	pkg      packageName
+	pkg      goidentifier
 	varname  *Relation
 	variable *ExprVariable
 	initval  Expr

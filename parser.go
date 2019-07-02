@@ -196,10 +196,10 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
-	var pkg packageName // ignored for now
+	var pkg identifier // ignored for now
 	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
 		ident := string(firstIdent)
-		pkg = packageName(ident)
+		pkg = identifier(ident)
 		p.expect(".")
 		// shift firstident
 		firstIdent = p.expectIdent()
@@ -890,7 +890,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
 		tok: ptok,
-		pkg: packageName(p.packageName),
+		pkg: p.packageName,
 		varname: &Relation{
 			expr: variable,
 			pkg:  p.packageName,
@@ -1802,7 +1802,7 @@ func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg packageName, rel *Relation) {
+func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
@@ -1985,7 +1985,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname packageName, sources []gostring, onMemory bool) *AstPackage {
+func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPackage {
 	pkgScope := newScope(nil, string(pkgname))
 
 	var astFiles []*AstFile

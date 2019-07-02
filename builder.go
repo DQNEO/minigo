@@ -33,7 +33,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           "",
+		name:           goidentifier(""),
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
@@ -50,7 +50,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           "",
+		name:           goidentifier(""),
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
@@ -68,7 +68,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 	// compile the main package
-	var pkgName packageName = "main"
+	var pkgName goidentifier = goidentifier("main")
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
@@ -90,14 +90,14 @@ func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 // parse standard libraries
 func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{
-		compiledPackages:         map[packageName]*AstPackage{},
+		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
 	}
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
-		pkgName := packageName(spkgName)
-		pkgCode, ok := stdPkgs[pkgName]
+		pkgName := goidentifier(spkgName)
+		pkgCode, ok := stdPkgs[identifier(pkgName)]
 		if !ok {
 			errorf("package '" + string(spkgName) + "' is not a standard library.")
 		}
@@ -105,31 +105,31 @@ func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)
-		symbolTable.allScopes[pkgName] = pkg.scope
+		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
 	}
 
 	return libs
 }
 
 type compiledStdlib struct {
-	compiledPackages         map[packageName]*AstPackage
-	uniqImportedPackageNames []string
+	compiledPackages         map[identifier]*AstPackage
+	uniqImportedPackageNames []gostring
 }
 
 func (csl *compiledStdlib) getPackages() []*AstPackage {
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[packageName(pkgName)]
+		compiledPkg := csl.compiledPackages[identifier(pkgName)]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	return importedPackages
 }
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
-	csl.compiledPackages[pkg.name] = pkg
-	if !in_array(string(pkg.name), csl.uniqImportedPackageNames) {
-		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
+	csl.compiledPackages[identifier(pkg.name)] = pkg
+	if !inArray2(gostring(pkg.name), csl.uniqImportedPackageNames) {
+		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, gostring(pkg.name))
 	}
 }
 
@@ -183,7 +183,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	program := &Program{}
 	program.packages = packages
-	program.importOS = in_array("os", csl.uniqImportedPackageNames)
+	program.importOS = inArray2(S("os"), csl.uniqImportedPackageNames)
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
