@@ -12,6 +12,8 @@ var keywords = []string{
 	"if", "range", "type", "continue", "for", "import", "return", "var",
 }
 
+var gokeywords []gostring
+
 type TokenType string
 
 const (
