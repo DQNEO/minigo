@@ -42,7 +42,8 @@ func errorft(tok *Token, format string, v ...interface{}) {
 
 func errorf(format string, v ...interface{}) {
 	s := Sprintf(gostring(format), v...)
-	panic(s)
+	os.Stderr.Write(concat(s, S("\n")))
+	panic("")
 }
 
 func assert(cond bool, tok *Token, format string, v ...interface{}) {
