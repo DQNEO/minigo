@@ -1,12 +1,10 @@
 package main
 
-import "strings"
-
 func getBaseNameFromImport(path gostring) gostring {
-	if strings.Contains(string(path), "/") {
-		words := strings.Split(string(path), "/")
+	if strings_Congtains(path, S("/")) {
+		words := strings_Split(path, S("/"))
 		r := words[len(words)-1]
-		return gostring(r)
+		return r
 	} else {
 		return path
 	}

@@ -23,3 +23,7 @@ func strconv_Atoi(gs gostring) (int, error) {
 	i, e := strconv.Atoi(string(gs))
 	return i,e
 }
+
+func strings_Congtains(s gostring, substr gostring) bool {
+	return strings.Contains(string(s), string(substr))
+}
