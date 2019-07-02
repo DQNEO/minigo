@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -ex
+make minigo2 --silent
+
+./minigo2 "$@" > /tmp/a.s
+cp /tmp/a.s a.s
+./as /tmp/a.s
