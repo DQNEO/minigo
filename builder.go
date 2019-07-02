@@ -13,7 +13,7 @@ func parseImports(sourceFiles []gostring) []gostring {
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				if !inArray2(baseName, imported) {
+				if !inArray(baseName, imported) {
 					imported = append(imported, baseName)
 				}
 			}
@@ -132,7 +132,7 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 	csl.compiledPackages[toKey(pkg.name)] = pkg
-	if !inArray2(gostring(pkg.name), csl.uniqImportedPackageNames) {
+	if !inArray(gostring(pkg.name), csl.uniqImportedPackageNames) {
 		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, gostring(pkg.name))
 	}
 }
@@ -187,7 +187,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	program := &Program{}
 	program.packages = packages
-	program.importOS = inArray2(S("os"), csl.uniqImportedPackageNames)
+	program.importOS = inArray(S("os"), csl.uniqImportedPackageNames)
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }

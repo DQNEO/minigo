@@ -13,7 +13,7 @@ func getBaseNameFromImport(path gostring) gostring {
 
 }
 
-func getIndex2(item gostring, list []gostring) int {
+func getIndex(item gostring, list []gostring) int {
 	for id, v := range list {
 		if eqGostrings(v, item) {
 			return id
@@ -22,7 +22,7 @@ func getIndex2(item gostring, list []gostring) int {
 	return -1
 }
 
-func inArray2(item gostring, list []gostring) bool {
+func inArray(item gostring, list []gostring) bool {
 	for _, v := range list {
 		if eqGostrings(v, item) {
 			return true

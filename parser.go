@@ -736,7 +736,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if inArray2(tok.sval, gobinops) {
+		if inArray(tok.sval, gobinops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
