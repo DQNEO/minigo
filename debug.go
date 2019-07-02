@@ -34,7 +34,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	var format2 gostring = gostring(format)
 	var tokString gostring
 	if tok != nil {
-		tokString = tok.GoString()
+		tokString = tok.String()
 	}
 	gs := concat3(format2,S("\n "), tokString)
 	errorf(string(gs), v...)
@@ -49,14 +49,14 @@ func errorf(format string, v ...interface{}) {
 func assert(cond bool, tok *Token, format string, v ...interface{}) {
 	if !cond {
 		s := Sprintf(gostring(format), v...)
-		msg := concat3(S("assertion failed: "), s,  tok.GoString())
+		msg := concat3(S("assertion failed: "), s,  tok.String())
 		os.Stderr.Write(msg)
 		panic("")
 	}
 }
 
 func assertNotReached(tok *Token) {
-	msg := concat(S("assertNotReached "), tok.GoString())
+	msg := concat(S("assertNotReached "), tok.String())
 	os.Stderr.Write(msg)
 	panic("")
 }

@@ -59,7 +59,7 @@ func (tok *Token) getSval() gostring {
 	return S("")
 }
 
-func (tok *Token) GoString() gostring {
+func (tok *Token) String() gostring {
 	sval := tok.getSval()
 	gs := Sprintf(S("(\"%s\" at %s:%d:%d)"),
 		sval, gostring(tok.filename), tok.line, tok.column)
