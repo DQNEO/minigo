@@ -990,7 +990,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 	return r
 }
 
-func (p *parser) enterNewScope(name string) {
+func (p *parser) enterNewScope(name gostring) {
 	p.currentScope = newScope(p.currentScope, name)
 }
 
@@ -1014,7 +1014,7 @@ func (p *parser) parseForStmt() *StmtFor {
 		labels: &LoopLabels{},
 	}
 	p.currentForStmt = r
-	p.enterNewScope("for")
+	p.enterNewScope(S("for"))
 	var cond Expr
 	if p.peekToken().isPunct("{") {
 		// inifinit loop : for { ___ }
@@ -1144,7 +1144,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	var r = &StmtIf{
 		tok: ptok,
 	}
-	p.enterNewScope("if")
+	p.enterNewScope(S("if"))
 	p.requireBlock = true
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
@@ -1591,7 +1591,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	p.localvars = nil
 	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
 	var isMethod bool
-	p.enterNewScope("func")
+	p.enterNewScope(S("func"))
 
 	var receiver *ExprVariable
 
@@ -1987,7 +1987,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 }
 
 func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPackage {
-	pkgScope := newScope(nil, string(pkgname))
+	pkgScope := newScope(nil, gostring(pkgname))
 
 	var astFiles []*AstFile
 

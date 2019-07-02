@@ -66,7 +66,7 @@ var builtinRunTimeArgs = &DeclFunc{
 }
 
 func newUniverse() *Scope {
-	universe := newScope(nil, "universe")
+	universe := newScope(nil, S("universe"))
 	setPredeclaredIdentifiers(universe)
 	return universe
 }
