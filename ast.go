@@ -254,7 +254,7 @@ type DeclFunc struct {
 	tok       *Token
 	pkg       goidentifier
 	receiver  *ExprVariable
-	fname     identifier
+	fname     goidentifier
 	rettypes  []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
