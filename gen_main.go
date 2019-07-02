@@ -48,7 +48,7 @@ func (program *Program) emitMethodTable() {
 		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 	}
 
-	var shortMethodNames []string
+	var shortMethodNames []gostring
 
 	for i = 1; i <= len(program.methodTable); i++ {
 		emitWithoutIndent("receiverType%d:", i)
@@ -62,7 +62,8 @@ func (program *Program) emitMethodTable() {
 				panic("invalid method name")
 			}
 			splitted := strings.Split(methodNameFull, "$")
-			var shortMethodName = splitted[1]
+			gss := convertCstringsToGostrings(splitted)
+			var shortMethodName gostring = gss[1]
 			emit(".quad .S.S.%s # key", gostring(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
@@ -74,7 +75,7 @@ func (program *Program) emitMethodTable() {
 			emit(".quad %s # func addr addr", label)
 
 
-			if !in_array(shortMethodName, shortMethodNames) {
+			if !inArray2(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
 		}
