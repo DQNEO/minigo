@@ -191,27 +191,27 @@ func (f *IrStmtForRangeList) emit() {
 	emit(S("# init index"))
 	f.init.emit()
 
-	emit(S("%s: # begin loop "), gostring(f.labels.labelBegin))
+	emit(S("%s: # begin loop "), f.labels.labelBegin)
 
 	f.cond.emit()
 	emit(S("TEST_IT"))
-	emit(S("je %s  # if false, go to loop end"), gostring(f.labels.labelEndLoop))
+	emit(S("je %s  # if false, go to loop end"), f.labels.labelEndLoop)
 
 	if f.assignVar != nil {
 		f.assignVar.emit()
 	}
 
 	f.block.emit()
-	emit(S("%s: # end block"), gostring(f.labels.labelEndBlock))
+	emit(S("%s: # end block"), f.labels.labelEndBlock)
 
 	f.cond2.emit()
 	emit(S("TEST_IT"))
-	emit(S("jne %s  # if this iteration is final, go to loop end"), gostring(f.labels.labelEndLoop))
+	emit(S("jne %s  # if this iteration is final, go to loop end"), f.labels.labelEndLoop)
 
 	f.incr.emit()
 
-	emit(S("jmp %s"), gostring(f.labels.labelBegin))
-	emit(S("%s: # end loop"), gostring(f.labels.labelEndLoop))
+	emit(S("jmp %s"), f.labels.labelBegin)
+	emit(S("%s: # end loop"), f.labels.labelEndLoop)
 }
 
 func (f *IrStmtClikeFor) emit() {
@@ -219,19 +219,19 @@ func (f *IrStmtClikeFor) emit() {
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit(S("%s: # begin loop "), gostring(f.labels.labelBegin))
+	emit(S("%s: # begin loop "), f.labels.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
 		emit(S("TEST_IT"))
-		emit(S("je %s  # jump if false"), gostring(f.labels.labelEndLoop))
+		emit(S("je %s  # jump if false"), f.labels.labelEndLoop)
 	}
 	f.block.emit()
-	emit(S("%s: # end block"), gostring(f.labels.labelEndBlock))
+	emit(S("%s: # end block"), f.labels.labelEndBlock)
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit(S("jmp %s"), gostring(f.labels.labelBegin))
-	emit(S("%s: # end loop"), gostring(f.labels.labelEndLoop))
+	emit(S("jmp %s"), f.labels.labelBegin)
+	emit(S("%s: # end loop"), f.labels.labelEndLoop)
 }
 
 func (f *StmtFor) emit() {
@@ -253,9 +253,12 @@ func (f *StmtFor) convert() Stmt {
 	l1 := makeLabel()
 	l2  := makeLabel()
 	l3 := makeLabel()
-	f.labels.labelBegin = string(l1)
-	f.labels.labelEndBlock = string(l2)
-	f.labels.labelEndLoop = string(l3)
+
+	lbls := f.labels
+	// @FIXME:  f.labels.labelBegin = l1  does not work!!!
+	lbls.labelBegin = l1
+	lbls.labelEndBlock = l2
+	lbls.labelEndLoop = l3
 
 	var em Stmt
 
@@ -406,10 +409,10 @@ func (ast *StmtDefer) emit() {
 
 func (ast *StmtContinue) emit() {
 	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), S("labelEndLoop should not be empty"))
-	emit(S("jmp %s # continue"), gostring(ast.labels.labelEndBlock))
+	emit(S("jmp %s # continue"), ast.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
 	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), S("labelEndLoop should not be empty"))
-	emit(S("jmp %s # break"), gostring(ast.labels.labelEndLoop))
+	emit(S("jmp %s # break"), ast.labels.labelEndLoop)
 }

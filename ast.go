@@ -184,9 +184,9 @@ const (
 )
 
 type LoopLabels struct {
-	labelBegin    string
-	labelEndBlock string
-	labelEndLoop  string
+	labelBegin    gostring
+	labelEndBlock gostring
+	labelEndLoop  gostring
 }
 
 type StmtFor struct {
