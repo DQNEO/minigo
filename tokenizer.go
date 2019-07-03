@@ -189,11 +189,11 @@ func (tn *Tokenizer) autoSemicolonInsert(last *Token) bool {
 	if last.typ == T_INT || last.typ == T_STRING || last.typ == T_CHAR {
 		return true
 	}
-	if last.isKeyword("break") || last.isKeyword("continue") || last.isKeyword("fallthrough") || last.isKeyword("return") {
+	if last.isKeyword(S("break")) || last.isKeyword(S("continue")) || last.isKeyword(S("fallthrough")) || last.isKeyword(S("return")) {
 		return true
 	}
 
-	if last.isPunct("++") || last.isPunct("--") || last.isPunct(")") || last.isPunct("]") || last.isPunct("}") {
+	if last.isPunct(S("++")) || last.isPunct(S("--")) || last.isPunct(S(")")) || last.isPunct(S("]")) || last.isPunct(S("}")) {
 		return true
 	}
 

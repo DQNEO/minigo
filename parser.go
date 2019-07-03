@@ -11,7 +11,7 @@ type parser struct {
 	// per function or block
 	currentFunc    *DeclFunc
 	localvars      []*ExprVariable
-	requireBlock   bool // workaround for parsing "{" as a block starter
+	requireBlock   bool // workaround for parsing S("{") as a block starter
 	inCase         int  // > 0  while in reading case compound stmts
 	constSpecIndex int
 	currentForStmt *StmtFor
@@ -90,7 +90,7 @@ func (p *parser) expectIdent() goidentifier {
 	return tok.getIdent()
 }
 
-func (p *parser) expectKeyword(name string) *Token {
+func (p *parser) expectKeyword(name gostring) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
 		errorft(tok, "Keyword %s expected but got %s", name, tok)
@@ -98,7 +98,7 @@ func (p *parser) expectKeyword(name string) *Token {
 	return tok
 }
 
-func (p *parser) expect(punct string) *Token {
+func (p *parser) expect(punct gostring) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
 		errorft(tok, "punct '%s' expected but got '%s'", punct, tok)
@@ -112,7 +112,7 @@ func getCallerName(n int) string {
 		errorf("Unable to get caller")
 	}
 	details := runtime.FuncForPC(pc)
-	//r := (strings.Split(details.Name(), "."))[2]
+	//r := (strings.Split(details.Name(), S(".")))[2]
 	return details.Name()
 }
 
@@ -148,27 +148,27 @@ func (p *parser) readFuncallArgs() []Expr {
 	var r []Expr
 	for {
 		tok := p.peekToken()
-		if tok.isPunct(")") {
+		if tok.isPunct(S(")")) {
 			p.skip()
 			return r
 		}
 		arg := p.parseExpr()
-		if p.peekToken().isPunct("...") {
-			ptok := p.expect("...")
+		if p.peekToken().isPunct(S("...")) {
+			ptok := p.expect(S("..."))
 			arg = &ExprVaArg{
 				tok:  ptok,
 				expr: arg,
 			}
 			r = append(r, arg)
-			p.expect(")")
+			p.expect(S(")"))
 			return r
 		}
 		r = append(r, arg)
 		tok = p.peekToken()
-		if tok.isPunct(")") {
+		if tok.isPunct(S(")")) {
 			p.skip()
 			return r
-		} else if tok.isPunct(",") {
+		} else if tok.isPunct(S(",")) {
 			p.skip()
 			continue
 		} else {
@@ -199,7 +199,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	var pkg goidentifier // ignored for now
 	if _, ok := p.importedNames[toKey(firstIdent)]; ok {
 		pkg = firstIdent
-		p.expect(".")
+		p.expect(S("."))
 		// shift firstident
 		firstIdent = p.expectIdent()
 	}
@@ -221,13 +221,13 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	next := p.peekToken()
 
 	var e Expr
-	if next.isPunct("{") {
+	if next.isPunct(S("{")) {
 		if p.requireBlock {
 			return rel
 		}
 		// struct literal
 		e = p.parseStructLiteral(rel)
-	} else if next.isPunct("(") {
+	} else if next.isPunct(S("(")) {
 		// funcall or method call
 		p.skip()
 		args := p.readFuncallArgs()
@@ -238,7 +238,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 			fname: fname,
 			args:  args,
 		}
-	} else if next.isPunct("[") {
+	} else if next.isPunct(S("[")) {
 		// index access
 		e = p.parseIndexOrSliceExpr(rel)
 	} else {
@@ -253,12 +253,12 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expect("[")
+	p.expect(S("["))
 
 	var r Expr
 	// assure operand is array, slice, or map
 	tok := p.peekToken()
-	if tok.isPunct(":") {
+	if tok.isPunct(S(":")) {
 		p.skip()
 		// A missing low index defaults to zero
 		lowIndex := &ExprNumberLiteral{
@@ -267,14 +267,14 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 		}
 		var highIndex Expr
 		tok := p.peekToken()
-		if tok.isPunct("]") {
+		if tok.isPunct(S("]")) {
 			p.skip()
 			// a missing high index defaults to the length of the sliced operand:
 			// this must be resolved after resolving types
 			highIndex = nil
 		} else {
 			highIndex = p.parseExpr()
-			p.expect("]")
+			p.expect(S("]"))
 		}
 		r = &ExprSlice{
 			tok:        tok,
@@ -285,18 +285,18 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 	} else {
 		index := p.parseExpr()
 		tok := p.peekToken()
-		if tok.isPunct("]") {
+		if tok.isPunct(S("]")) {
 			p.skip()
 			r = &ExprIndex{
 				tok:        tok,
 				collection: e,
 				index:      index,
 			}
-		} else if tok.isPunct(":") {
+		} else if tok.isPunct(S(":")) {
 			p.skip()
 			var highIndex Expr
 			tok := p.peekToken()
-			if tok.isPunct("]") {
+			if tok.isPunct(S("]")) {
 				p.skip()
 				// a missing high index defaults to the length of the sliced operand:
 				r = &ExprSlice{
@@ -308,7 +308,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 			} else {
 				highIndex = p.parseExpr()
 				tok := p.peekToken()
-				if tok.isPunct("]") {
+				if tok.isPunct(S("]")) {
 					p.skip()
 					r = &ExprSlice{
 						tok:        tok,
@@ -316,7 +316,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 						low:        index,
 						high:       highIndex,
 					}
-				} else if tok.isPunct(":") {
+				} else if tok.isPunct(S(":")) {
 					p.skip()
 					maxIndex := p.parseExpr()
 					r = &ExprSlice{
@@ -326,7 +326,7 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 						high:       highIndex,
 						max:        maxIndex,
 					}
-					p.expect("]")
+					p.expect(S("]"))
 				} else {
 					errorft(tok, "invalid token in index access")
 				}
@@ -345,18 +345,18 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 func (p *parser) parseTypeAssertionOrTypeSwitchGuad(e Expr) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expect("(")
+	p.expect(S("("))
 
-	if p.peekToken().isKeyword("type") {
+	if p.peekToken().isKeyword(S("type")) {
 		p.skip()
-		ptok := p.expect(")")
+		ptok := p.expect(S(")"))
 		return &ExprTypeSwitchGuard{
 			tok:  ptok,
 			expr: e,
 		}
 	} else {
 		gtype := p.parseType()
-		ptok := p.expect(")")
+		ptok := p.expect(S(")"))
 		e = &ExprTypeAssertion{
 			tok:   ptok,
 			expr:  e,
@@ -372,9 +372,9 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 
 	var r Expr
 	next := p.peekToken()
-	if next.isPunct(".") {
+	if next.isPunct(S(".")) {
 		p.skip()
-		if p.peekToken().isPunct("(") {
+		if p.peekToken().isPunct(S("(")) {
 			// type assertion
 			return p.parseTypeAssertionOrTypeSwitchGuad(e)
 		}
@@ -382,9 +382,9 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		// https://golang.org/ref/spec#Selectors
 		tok := p.readToken()
 		next = p.peekToken()
-		if next.isPunct("(") {
+		if next.isPunct(S("(")) {
 			// (expr).method()
-			p.expect("(")
+			p.expect(S("("))
 			args := p.readFuncallArgs()
 			r = &ExprMethodcall{
 				tok:      tok,
@@ -407,7 +407,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 			}
 			return p.succeedingExpr(r)
 		}
-	} else if next.isPunct("[") {
+	} else if next.isPunct(S("[")) {
 		// https://golang.org/ref/spec#Index_expressions
 		// (expr)[i]
 		e = p.parseIndexOrSliceExpr(e)
@@ -425,12 +425,12 @@ func (p *parser) parseMakeExpr() Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	tok := p.readToken()
-	p.assert(tok.isIdent("make"), "read make")
+	p.assert(tok.isIdent(S("make")), "read make")
 
-	p.expect("(")
+	p.expect(S("("))
 	mapType := p.parseMapType()
 	_ = mapType
-	p.expect(")")
+	p.expect(S(")"))
 	return &ExprNilLiteral{
 		tok: tok,
 	}
@@ -439,11 +439,11 @@ func (p *parser) parseMakeExpr() Expr {
 func (p *parser) parseMapType() *Gtype {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expectKeyword("map")
+	p.expectKeyword(S("map"))
 
-	p.expect("[")
+	p.expect(S("["))
 	mapKey := p.parseType()
-	p.expect("]")
+	p.expect(S("]"))
 	mapValue := p.parseType()
 	return &Gtype{
 		kind:     G_MAP,
@@ -457,9 +457,9 @@ func (p *parser) parseTypeConversion(gtype *Gtype) Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
-	ptok := p.expect("(")
+	ptok := p.expect(S("("))
 	e := p.parseExpr()
-	p.expect(")")
+	p.expect(S(")"))
 
 	return &IrExprConversion{
 		tok:     ptok,
@@ -500,20 +500,20 @@ func (p *parser) parsePrim() Expr {
 			tok: tok,
 			val: int(c),
 		}
-	case tok.isKeyword("map"): // map literal
+	case tok.isKeyword(S("map")): // map literal
 		ptok := tok
 		gtype := p.parseType()
-		p.expect("{")
+		p.expect(S("{"))
 		var elements []*MapElement
 		for {
-			if p.peekToken().isPunct("}") {
+			if p.peekToken().isPunct(S("}")) {
 				p.skip()
 				break
 			}
 			key := p.parseExpr()
-			p.expect(":")
+			p.expect(S(":"))
 			value := p.parseExpr()
-			p.expect(",")
+			p.expect(S(","))
 			element := &MapElement{
 				tok:   key.token(),
 				key:   key,
@@ -526,10 +526,10 @@ func (p *parser) parsePrim() Expr {
 			gtype:    gtype,
 			elements: elements,
 		}
-	case tok.isPunct("["): // array literal, slice literal or type casting
+	case tok.isPunct(S("[")): // array literal, slice literal or type casting
 		gtype := p.parseType()
 		tok = p.peekToken()
-		if tok.isPunct("(") {
+		if tok.isPunct(S("(")) {
 			// Conversion
 			return p.parseTypeConversion(gtype)
 		}
@@ -565,7 +565,7 @@ func (p *parser) parsePrim() Expr {
 		default:
 			errorft(tok, "internal error")
 		}
-	case tok.isIdent("make"):
+	case tok.isIdent(S("make")):
 		return p.parseMakeExpr()
 	case tok.isTypeIdent():
 		p.skip()
@@ -581,12 +581,12 @@ func (p *parser) parsePrim() Expr {
 func (p *parser) parseArrayLiteral() []Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expect("{")
+	p.expect(S("{"))
 
 	var values []Expr
 	for {
 		tok := p.peekToken()
-		if tok.isPunct("}") {
+		if tok.isPunct(S("}")) {
 			p.skip()
 			break
 		}
@@ -595,9 +595,9 @@ func (p *parser) parseArrayLiteral() []Expr {
 		p.assertNotNil(v)
 		values = append(values, v)
 		tok = p.readToken()
-		if tok.isPunct(",") {
+		if tok.isPunct(S(",")) {
 			continue
-		} else if tok.isPunct("}") {
+		} else if tok.isPunct(S("}")) {
 			break
 		} else {
 			errorft(tok, "unpexpected token")
@@ -610,7 +610,7 @@ func (p *parser) parseArrayLiteral() []Expr {
 func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expect("{")
+	ptok := p.expect(S("{"))
 
 	r := &ExprStructLiteral{
 		tok:       ptok,
@@ -619,10 +619,10 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 
 	for {
 		tok := p.readToken()
-		if tok.isPunct("}") {
+		if tok.isPunct(S("}")) {
 			break
 		}
-		p.expect(":")
+		p.expect(S(":"))
 		p.assert(tok.isTypeIdent(), "field name is ident")
 		value := p.parseExpr()
 		f := &KeyedElement{
@@ -631,11 +631,11 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 			value: value,
 		}
 		r.fields = append(r.fields, f)
-		if p.peekToken().isPunct("}") {
-			p.expect("}")
+		if p.peekToken().isPunct(S("}")) {
+			p.expect(S("}"))
 			break
 		}
-		p.expect(",")
+		p.expect(S(","))
 	}
 
 	return r
@@ -647,11 +647,11 @@ func (p *parser) parseUnaryExpr() Expr {
 
 	tok := p.readToken()
 	switch {
-	case tok.isPunct("("):
+	case tok.isPunct(S("(")):
 		e := p.parseExpr()
-		p.expect(")")
+		p.expect(S(")"))
 		return e
-	case tok.isPunct("&"):
+	case tok.isPunct(S("&")):
 		uop := &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
@@ -666,19 +666,19 @@ func (p *parser) parseUnaryExpr() Expr {
 			})
 		}
 		return uop
-	case tok.isPunct("*"):
+	case tok.isPunct(S("*")):
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
-	case tok.isPunct("!"):
+	case tok.isPunct(S("!")):
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
-	case tok.isPunct("-"):
+	case tok.isPunct(S("-")):
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
@@ -715,7 +715,7 @@ func (p *parser) parseExpr() Expr {
 }
 
 var binops = []string{
-	"+", "*", "-", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "/", "%",
+	"+","*","-", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "/", "%",
 }
 
 var gobinops []gostring
@@ -809,32 +809,32 @@ func (p *parser) parseType() *Gtype {
 				relation: rel,
 			}
 			return p.registerDynamicType(gtype)
-		} else if tok.isKeyword("interface") {
-			p.expect("{")
-			p.expect("}")
+		} else if tok.isKeyword(S("interface")) {
+			p.expect(S("{"))
+			p.expect(S("}"))
 			return gInterface
-		} else if tok.isPunct("*") {
+		} else if tok.isPunct(S("*")) {
 			// pointer
 			gtype = &Gtype{
 				kind:     G_POINTER,
 				origType: p.parseType(),
 			}
 			return p.registerDynamicType(gtype)
-		} else if tok.isKeyword("struct") {
+		} else if tok.isKeyword(S("struct")) {
 			p.unreadToken()
 			gtype = p.parseStructDef()
 			return p.registerDynamicType(gtype)
-		} else if tok.isKeyword("map") {
+		} else if tok.isKeyword(S("map")) {
 			p.unreadToken()
 			gtype = p.parseMapType()
 			return p.registerDynamicType(gtype)
-		} else if tok.isPunct("[") {
+		} else if tok.isPunct(S("[")) {
 			// array or slice
 			tok := p.readToken()
-			// @TODO consider "..." case in a composite literal.
+			// @TODO consider S("...") case in a composite literal.
 			// The notation ... specifies an array length
 			// equal to the maximum element index plus one.
-			if tok.isPunct("]") {
+			if tok.isPunct(S("]")) {
 				// slice
 				typ := p.parseType()
 				gtype = &Gtype{
@@ -844,7 +844,7 @@ func (p *parser) parseType() *Gtype {
 				return p.registerDynamicType(gtype)
 			} else {
 				// array
-				p.expect("]")
+				p.expect(S("]"))
 				typ := p.parseType()
 				gtype = &Gtype{
 					kind:        G_ARRAY,
@@ -853,9 +853,9 @@ func (p *parser) parseType() *Gtype {
 				}
 				return p.registerDynamicType(gtype)
 			}
-		} else if tok.isPunct("]") {
+		} else if tok.isPunct(S("]")) {
 
-		} else if tok.isPunct("...") {
+		} else if tok.isPunct(S("...")) {
 			// vaargs
 			TBI(tok, "VAARGS is not supported yet")
 		} else {
@@ -868,25 +868,25 @@ func (p *parser) parseType() *Gtype {
 func (p *parser) parseVarDecl() *DeclVar {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("var")
+	ptok := p.expectKeyword(S("var"))
 
 	// read newName
 	newName := p.expectIdent()
 	var typ *Gtype
 	var initval Expr
-	// "=" or Type
+	// S("=") or Type
 	tok := p.peekToken()
-	if tok.isPunct("=") {
+	if tok.isPunct(S("=")) {
 		p.skip()
 		initval = p.parseExpr()
 	} else {
 		typ = p.parseType()
 		tok := p.readToken()
-		if tok.isPunct("=") {
+		if tok.isPunct(S("=")) {
 			initval = p.parseExpr()
 		}
 	}
-	//p.expect(";")
+	//p.expect(S(";"))
 
 	variable := p.newVariable(newName, typ)
 	r := &DeclVar{
@@ -919,21 +919,21 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex
 	defer p.traceOut(__func__)
 	newName := p.expectIdent()
 
-	// Type or "=" or ";"
+	// Type or S("=") or S(";")
 	var val Expr
 	var gtype *Gtype
-	if !p.peekToken().isPunct("=") && !p.peekToken().isPunct(";") {
+	if !p.peekToken().isPunct(S("=")) && !p.peekToken().isPunct(S(";")) {
 		// expect Type
 		gtype = p.parseType()
 	}
 
-	if p.peekToken().isPunct(";") && lastExpr != nil {
+	if p.peekToken().isPunct(S(";")) && lastExpr != nil {
 		val = lastExpr
 	} else {
-		p.expect("=")
+		p.expect(S("="))
 		val = p.parseExpr()
 	}
-	p.expect(";")
+	p.expect(S(";"))
 
 	if gtype == nil {
 		gtype = lastGtype
@@ -953,15 +953,15 @@ func (p *parser) parseConstDeclSingle(lastExpr Expr, lastGtype *Gtype, iotaIndex
 func (p *parser) parseConstDecl() *DeclConst {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expectKeyword("const")
+	p.expectKeyword(S("const"))
 
-	// ident or "("
+	// ident or S("(")
 	var cnsts []*ExprConstVariable
 	var iotaIndex int
 	var lastExpr Expr
 	var lastGtype *Gtype
 
-	if p.peekToken().isPunct("(") {
+	if p.peekToken().isPunct(S("(")) {
 		p.readToken()
 		for {
 			// multi definitions
@@ -972,7 +972,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 			lastExpr = cnst.val
 			iotaIndex++
 			cnsts = append(cnsts, cnst)
-			if p.peekToken().isPunct(")") {
+			if p.peekToken().isPunct(S(")")) {
 				p.readToken()
 				break
 			}
@@ -1006,7 +1006,7 @@ func (p *parser) exitForBlock() {
 func (p *parser) parseForStmt() *StmtFor {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("for")
+	ptok := p.expectKeyword(S("for"))
 
 	var r = &StmtFor{
 		tok:    ptok,
@@ -1016,7 +1016,7 @@ func (p *parser) parseForStmt() *StmtFor {
 	p.currentForStmt = r
 	p.enterNewScope(S("for"))
 	var cond Expr
-	if p.peekToken().isPunct("{") {
+	if p.peekToken().isPunct(S("{")) {
 		// inifinit loop : for { ___ }
 	} else {
 		p.requireBlock = true
@@ -1028,17 +1028,17 @@ func (p *parser) parseForStmt() *StmtFor {
 			cls := &ForForClause{}
 			cls.init = nil
 			cls.cond = p.parseStmt()
-			p.expect(";")
+			p.expect(S(";"))
 			cls.post = p.parseStmt()
 			r.cls = cls
-			p.expect("{")
+			p.expect(S("{"))
 			r.block = p.parseCompoundStmt()
 			p.exitScope()
 			p.exitForBlock()
 			return r
 		}
 	}
-	if p.peekToken().isPunct("{") {
+	if p.peekToken().isPunct(S("{")) {
 		// single cond
 		r.cls = &ForForClause{
 			cond: cond,
@@ -1048,16 +1048,16 @@ func (p *parser) parseForStmt() *StmtFor {
 		var initstmt Stmt
 		lefts := p.parseExpressionList(cond)
 		tok2 := p.peekToken()
-		if tok2.isPunct("=") {
+		if tok2.isPunct(S("=")) {
 			p.skip()
-			if p.peekToken().isKeyword("range") {
+			if p.peekToken().isKeyword(S("range")) {
 				return p.parseForRange(lefts, false)
 			} else {
 				initstmt = p.parseAssignment(lefts)
 			}
-		} else if tok2.isPunct(":=") {
+		} else if tok2.isPunct(S(":=")) {
 			p.skip()
-			if p.peekToken().isKeyword("range") {
+			if p.peekToken().isKeyword(S("range")) {
 				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
 				p.shortVarDecl(lefts[0])
 
@@ -1076,14 +1076,14 @@ func (p *parser) parseForStmt() *StmtFor {
 		cls := &ForForClause{}
 		// regular for cond
 		cls.init = initstmt
-		p.expect(";")
+		p.expect(S(";"))
 		cls.cond = p.parseStmt()
-		p.expect(";")
+		p.expect(S(";"))
 		cls.post = p.parseStmt()
 		r.cls = cls
 	}
 
-	p.expect("{")
+	p.expect(S("{"))
 	r.block = p.parseCompoundStmt()
 	p.exitScope()
 	p.exitForBlock()
@@ -1093,7 +1093,7 @@ func (p *parser) parseForStmt() *StmtFor {
 func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	tokRange := p.expectKeyword("range")
+	tokRange := p.expectKeyword(S("range"))
 
 	if len(exprs) > 2 {
 		errorft(tokRange, "range values should be 1 or 2")
@@ -1113,7 +1113,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	p.requireBlock = true
 	rangeExpr := p.parseExpr()
 	p.requireBlock = false
-	p.expect("{")
+	p.expect(S("{"))
 	var r = &StmtFor{
 		tok:   tokRange,
 		outer: p.currentForStmt,
@@ -1139,7 +1139,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 func (p *parser) parseIfStmt() *StmtIf {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("if")
+	ptok := p.expectKeyword(S("if"))
 
 	var r = &StmtIf{
 		tok: ptok,
@@ -1147,7 +1147,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	p.enterNewScope(S("if"))
 	p.requireBlock = true
 	stmt := p.parseStmt()
-	if p.peekToken().isPunct(";") {
+	if p.peekToken().isPunct(S(";")) {
 		p.skip()
 		r.simplestmt = stmt
 		r.cond = p.parseExpr()
@@ -1158,18 +1158,18 @@ func (p *parser) parseIfStmt() *StmtIf {
 		}
 		r.cond = es.expr
 	}
-	p.expect("{")
+	p.expect(S("{"))
 	p.requireBlock = false
 	r.then = p.parseCompoundStmt()
 	tok := p.peekToken()
-	if tok.isKeyword("else") {
+	if tok.isKeyword(S("else")) {
 		p.skip()
 		tok2 := p.peekToken()
-		if tok2.isKeyword("if") {
+		if tok2.isKeyword(S("if")) {
 			// we regard "else if" as a kind of a nested if statement
 			// else if => else { if .. { } else {} }
 			r.els = p.parseIfStmt()
-		} else if tok2.isPunct("{") {
+		} else if tok2.isPunct(S("{")) {
 			p.skip()
 			r.els = p.parseCompoundStmt()
 		} else {
@@ -1183,7 +1183,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 func (p *parser) parseReturnStmt() *StmtReturn {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("return")
+	ptok := p.expectKeyword(S("return"))
 
 	exprs := p.parseExpressionList(nil)
 	// workaround for {nil}
@@ -1204,16 +1204,16 @@ func (p *parser) parseExpressionList(first Expr) []Expr {
 	var r []Expr
 	if first == nil {
 		first = p.parseExpr()
-		// should skip "," if exists
+		// should skip S(",") if exists
 	}
 	r = append(r, first)
 	for {
 		tok := p.peekToken()
 		if tok.isSemicolon() {
 			return r
-		} else if tok.isPunct("=") || tok.isPunct(":=") {
+		} else if tok.isPunct(S("=")) || tok.isPunct(S(":=")) {
 			return r
-		} else if tok.isPunct(",") {
+		} else if tok.isPunct(S(",")) {
 			p.skip()
 			expr := p.parseExpr()
 			r = append(r, expr)
@@ -1243,14 +1243,14 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAss
 	defer p.traceOut(__func__)
 	ptok := p.lastToken()
 
-	var op cstring
+	var op gostring
 	switch cstring(assignop) {
 	case "+=":
-		op = "+"
+		op = S("+")
 	case "-=":
-		op = "-"
+		op = S("-")
 	case "*=":
-		op = "*"
+		op = S("*")
 	default:
 		errorft(ptok, "internal error")
 	}
@@ -1284,7 +1284,7 @@ func (p *parser) shortVarDecl(e Expr) {
 func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	separator := p.expect(":=")
+	separator := p.expect(S(":="))
 
 	rights := p.parseExpressionList(nil)
 	for _, e := range lefts {
@@ -1303,10 +1303,10 @@ func (p *parser) parseShortAssignment(lefts []Expr) *StmtShortVarDecl {
 func (p *parser) parseSwitchStmt() Stmt {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("switch")
+	ptok := p.expectKeyword(S("switch"))
 
 	var cond Expr
-	if p.peekToken().isPunct("{") {
+	if p.peekToken().isPunct(S("{")) {
 
 	} else {
 		p.requireBlock = true
@@ -1314,7 +1314,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 		p.requireBlock = false
 	}
 
-	p.expect("{")
+	p.expect(S("{"))
 	r := &StmtSwitch{
 		tok:          ptok,
 		cond:         cond,
@@ -1322,7 +1322,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 
 	for {
 		tok := p.peekToken()
-		if tok.isKeyword("case") {
+		if tok.isKeyword(S("case")) {
 			p.skip()
 			var exprs []Expr
 			var gtypes []*Gtype
@@ -1331,11 +1331,11 @@ func (p *parser) parseSwitchStmt() Stmt {
 				gtypes = append(gtypes, gtype)
 				for {
 					tok := p.peekToken()
-					if tok.isPunct(",") {
+					if tok.isPunct(S(",")) {
 						p.skip()
 						gtype := p.parseType()
 						gtypes = append(gtypes, gtype)
-					} else if tok.isPunct(":") {
+					} else if tok.isPunct(S(":")) {
 						break
 					}
 				}
@@ -1344,16 +1344,16 @@ func (p *parser) parseSwitchStmt() Stmt {
 				exprs = append(exprs, expr)
 				for {
 					tok := p.peekToken()
-					if tok.isPunct(",") {
+					if tok.isPunct(S(",")) {
 						p.skip()
 						expr := p.parseExpr()
 						exprs = append(exprs, expr)
-					} else if tok.isPunct(":") {
+					} else if tok.isPunct(S(":")) {
 						break
 					}
 				}
 			}
-			ptok := p.expect(":")
+			ptok := p.expect(S(":"))
 			p.inCase++
 			compound := p.parseCompoundStmt()
 			casestmt := &ExprCaseClause{
@@ -1364,12 +1364,12 @@ func (p *parser) parseSwitchStmt() Stmt {
 			}
 			p.inCase--
 			r.cases = append(r.cases, casestmt)
-			if p.lastToken().isPunct("}") {
+			if p.lastToken().isPunct(S("}")) {
 				break
 			}
-		} else if tok.isKeyword("default") {
+		} else if tok.isKeyword(S("default")) {
 			p.skip()
-			p.expect(":")
+			p.expect(S(":"))
 			compound := p.parseCompoundStmt()
 			r.dflt = compound
 			break
@@ -1384,7 +1384,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 func (p *parser) parseDeferStmt() *StmtDefer {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("defer")
+	ptok := p.expectKeyword(S("defer"))
 
 	callExpr := p.parsePrim()
 	stmtDefer := &StmtDefer{
@@ -1401,66 +1401,66 @@ func (p *parser) parseStmt() Stmt {
 	defer p.traceOut(__func__)
 
 	tok := p.peekToken()
-	if tok.isKeyword("var") {
+	if tok.isKeyword(S("var")) {
 		return p.parseVarDecl()
-	} else if tok.isKeyword("const") {
+	} else if tok.isKeyword(S("const")) {
 		return p.parseConstDecl()
-	} else if tok.isKeyword("type") {
+	} else if tok.isKeyword(S("type")) {
 		return p.parseTypeDecl()
-	} else if tok.isKeyword("for") {
+	} else if tok.isKeyword(S("for")) {
 		return p.parseForStmt()
-	} else if tok.isKeyword("if") {
+	} else if tok.isKeyword(S("if")) {
 		return p.parseIfStmt()
-	} else if tok.isKeyword("return") {
+	} else if tok.isKeyword(S("return")) {
 		return p.parseReturnStmt()
-	} else if tok.isKeyword("switch") {
+	} else if tok.isKeyword(S("switch")) {
 		return p.parseSwitchStmt()
-	} else if tok.isKeyword("continue") {
-		ptok := p.expectKeyword("continue")
+	} else if tok.isKeyword(S("continue")) {
+		ptok := p.expectKeyword(S("continue"))
 		return &StmtContinue{
 			tok:    ptok,
 			labels: p.currentForStmt.labels,
 		}
-	} else if tok.isKeyword("break") {
-		ptok := p.expectKeyword("break")
+	} else if tok.isKeyword(S("break")) {
+		ptok := p.expectKeyword(S("break"))
 		return &StmtBreak{
 			tok:    ptok,
 			labels: p.currentForStmt.labels,
 		}
-	} else if tok.isKeyword("defer") {
+	} else if tok.isKeyword(S("defer")) {
 		return p.parseDeferStmt()
 	}
 
 	expr1 := p.parseExpr()
 	tok2 := p.peekToken()
-	if tok2.isPunct(",") {
+	if tok2.isPunct(S(",")) {
 		// Multi value assignment
 		lefts := p.parseExpressionList(expr1)
 		tok3 := p.peekToken()
-		if tok3.isPunct("=") {
+		if tok3.isPunct(S("=")) {
 			p.skip()
 			return p.parseAssignment(lefts)
-		} else if tok3.isPunct(":=") {
+		} else if tok3.isPunct(S(":=")) {
 			return p.parseShortAssignment(lefts)
 		} else {
 			TBI(tok3, "")
 		}
-	} else if tok2.isPunct("=") {
+	} else if tok2.isPunct(S("=")) {
 		p.skip()
 		return p.parseAssignment([]Expr{expr1})
-	} else if tok2.isPunct(":=") {
+	} else if tok2.isPunct(S(":=")) {
 		// Single value ShortVarDecl
 		return p.parseShortAssignment([]Expr{expr1})
-	} else if tok2.isPunct("+=") || tok2.isPunct("-=") || tok2.isPunct("*=") {
+	} else if tok2.isPunct(S("+=")) || tok2.isPunct(S("-=")) || tok2.isPunct(S("*=")) {
 		p.skip()
 		return p.parseAssignmentOperation(expr1, tok2.sval)
-	} else if tok2.isPunct("++") {
+	} else if tok2.isPunct(S("++")) {
 		p.skip()
 		return &StmtInc{
 			tok:     tok2,
 			operand: expr1,
 		}
-	} else if tok2.isPunct("--") {
+	} else if tok2.isPunct(S("--")) {
 		p.skip()
 		return &StmtDec{
 			tok:     tok2,
@@ -1484,11 +1484,11 @@ func (p *parser) parseCompoundStmt() *StmtSatementList {
 	}
 	for {
 		tok := p.peekToken()
-		if tok.isPunct("}") {
+		if tok.isPunct(S("}")) {
 			p.skip()
 			return r
 		}
-		if p.inCase > 0 && (tok.isKeyword("case") || tok.isKeyword("default")) {
+		if p.inCase > 0 && (tok.isKeyword(S("case")) || tok.isKeyword(S("default"))) {
 			return r
 		}
 		if tok.isSemicolon() {
@@ -1506,19 +1506,19 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 
 	tok := p.readToken()
 	fnameToken := tok
-	p.expect("(")
+	p.expect(S("("))
 
 	var params []*ExprVariable
 
 	tok = p.peekToken()
-	if tok.isPunct(")") {
+	if tok.isPunct(S(")")) {
 		p.skip()
 	} else {
 		for {
 			tok := p.readToken()
 			pname := tok.getIdent()
-			if p.peekToken().isPunct("...") {
-				p.expect("...")
+			if p.peekToken().isPunct(S("...")) {
+				p.expect(S("..."))
 				gtype := p.parseType()
 				sliceType := &Gtype{
 					kind:        G_SLICE,
@@ -1532,7 +1532,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 				}
 				params = append(params, variable)
 				p.currentScope.setVar(pname, variable)
-				p.expect(")")
+				p.expect(S(")"))
 				break
 			}
 			ptype := p.parseType()
@@ -1545,31 +1545,31 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 			params = append(params, variable)
 			p.currentScope.setVar(pname, variable)
 			tok = p.readToken()
-			if tok.isPunct(")") {
+			if tok.isPunct(S(")")) {
 				break
 			}
-			if !tok.isPunct(",") {
+			if !tok.isPunct(S(",")) {
 				errorft(tok, "Invalid token")
 			}
 		}
 	}
 
 	next := p.peekToken()
-	if next.isPunct("{") || next.isSemicolon() {
+	if next.isPunct(S("{")) || next.isSemicolon() {
 		return fnameToken, params, nil
 	}
 
 	var rettypes []*Gtype
-	if next.isPunct("(") {
+	if next.isPunct(S("(")) {
 		p.skip()
 		for {
 			rettype := p.parseType()
 			rettypes = append(rettypes, rettype)
 			next := p.peekToken()
-			if next.isPunct(")") {
+			if next.isPunct(S(")")) {
 				p.skip()
 				break
-			} else if next.isPunct(",") {
+			} else if next.isPunct(S(",")) {
 				p.skip()
 			} else {
 				errorft(next, "invalid token")
@@ -1586,7 +1586,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 func (p *parser) parseFuncDef() *DeclFunc {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("func")
+	ptok := p.expectKeyword(S("func"))
 
 	p.localvars = nil
 	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
@@ -1595,9 +1595,9 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	var receiver *ExprVariable
 
-	if p.peekToken().isPunct("(") {
+	if p.peekToken().isPunct(S("(")) {
 		isMethod = true
-		p.expect("(")
+		p.expect(S("("))
 		// method definition
 		tok := p.readToken()
 		pname := tok.getIdent()
@@ -1608,12 +1608,12 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			gtype:   ptype,
 		}
 		p.currentScope.setVar(pname, receiver)
-		p.expect(")")
+		p.expect(S(")"))
 	}
 
 	fnameToken, params, rettypes := p.parseFuncSignature()
 	fname := fnameToken.getIdent()
-	ptok2 := p.expect("{")
+	ptok2 := p.expect(S("{"))
 
 	r := &DeclFunc{
 		tok:      fnameToken,
@@ -1667,11 +1667,11 @@ func (p *parser) parseFuncDef() *DeclFunc {
 func (p *parser) parseImport() *ImportDecl {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	tokImport := p.expectKeyword("import")
+	tokImport := p.expectKeyword(S("import"))
 
 	tok := p.readToken()
 	var specs []*ImportSpec
-	if tok.isPunct("(") {
+	if tok.isPunct(S("(")) {
 		for {
 			tok := p.readToken()
 			if tok.isTypeString() {
@@ -1679,8 +1679,8 @@ func (p *parser) parseImport() *ImportDecl {
 					tok:  tok,
 					path: tok.sval,
 				})
-				p.expect(";")
-			} else if tok.isPunct(")") {
+				p.expect(S(";"))
+			} else if tok.isPunct(S(")")) {
 				break
 			} else {
 				errorft(tok, "invalid import path")
@@ -1696,7 +1696,7 @@ func (p *parser) parseImport() *ImportDecl {
 		},
 		}
 	}
-	p.expect(";")
+	p.expect(S(";"))
 	return &ImportDecl{
 		tok:   tokImport,
 		specs: specs,
@@ -1706,10 +1706,10 @@ func (p *parser) parseImport() *ImportDecl {
 func (p *parser) parsePackageClause() *PackageClause {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	tokPkg := p.expectKeyword("package")
+	tokPkg := p.expectKeyword(S("package"))
 
 	name := p.expectIdent()
-	p.expect(";")
+	p.expect(S(";"))
 	return &PackageClause{
 		tok:  tokPkg,
 		name: name,
@@ -1720,7 +1720,7 @@ func (p *parser) parseImportDecls() []*ImportDecl {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	var r []*ImportDecl
-	for p.peekToken().isKeyword("import") {
+	for p.peekToken().isKeyword(S("import")) {
 		r = append(r, p.parseImport())
 	}
 	return r
@@ -1731,13 +1731,13 @@ const MaxAlign = 16
 func (p *parser) parseStructDef() *Gtype {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expectKeyword("struct")
+	p.expectKeyword(S("struct"))
 
-	p.expect("{")
+	p.expect(S("{"))
 	var fields []*Gtype
 	for {
 		tok := p.peekToken()
-		if tok.isPunct("}") {
+		if tok.isPunct(S("}")) {
 			p.skip()
 			break
 		}
@@ -1749,10 +1749,10 @@ func (p *parser) parseStructDef() *Gtype {
 		fieldtype.fieldname = fieldname
 		fieldtype.offset = undefinedSize // will be calculated later
 		fields = append(fields, fieldtype)
-		p.expect(";")
+		p.expect(S(";"))
 	}
 	// calc offset
-	p.expect(";")
+	p.expect(S(";"))
 	return &Gtype{
 		kind:   G_STRUCT,
 		size:   undefinedSize, // will be calculated later
@@ -1763,19 +1763,19 @@ func (p *parser) parseStructDef() *Gtype {
 func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	p.expectKeyword("interface")
+	p.expectKeyword(S("interface"))
 
-	p.expect("{")
+	p.expect(S("{"))
 	var imethods map[identifier]*signature = map[identifier]*signature{}
 
 	for {
-		if p.peekToken().isPunct("}") {
+		if p.peekToken().isPunct(S("}")) {
 			break
 		}
 
 		fnameToken, params, rettypes := p.parseFuncSignature()
 		fname := fnameToken.getIdent()
-		p.expect(";")
+		p.expect(S(";"))
 
 		var paramTypes []*Gtype
 		for _, param := range params {
@@ -1788,7 +1788,7 @@ func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 		}
 		imethodSet(imethods, fname, method)
 	}
-	p.expect("}")
+	p.expect(S("}"))
 
 	gtype := &Gtype{
 		kind:     G_INTERFACE,
@@ -1833,10 +1833,10 @@ func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 func (p *parser) parseTypeDecl() *DeclType {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
-	ptok := p.expectKeyword("type")
+	ptok := p.expectKeyword(S("type"))
 
 	newName := p.expectIdent()
-	if p.peekToken().isKeyword("interface") {
+	if p.peekToken().isKeyword(S("interface")) {
 		return p.parseInterfaceDef(newName)
 	}
 
@@ -1892,7 +1892,7 @@ func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
 			return r
 		}
 
-		if tok.isPunct(";") {
+		if tok.isPunct(S(";")) {
 			p.skip()
 			continue
 		}
