@@ -13,17 +13,38 @@ var keywords = []string{
 
 var gokeywords []gostring
 
-type TokenType string
+type TokenType int
 
 const (
-	T_EOF      TokenType = "EOF"
-	T_INT      TokenType = "int"
-	T_STRING   TokenType = "string"
-	T_CHAR     TokenType = "char"
-	T_IDENT    TokenType = "ident"
-	T_PUNCT    TokenType = "punct"
-	T_KEYWORWD TokenType = "keyword"
-)
+	T_EOF      TokenType = iota
+	T_INT
+	T_STRING
+	T_CHAR
+	T_IDENT
+	T_PUNCT
+	T_KEYWORWD
+	)
+
+func typeToGostring (typ TokenType) gostring {
+	switch typ {
+	case T_EOF:
+			return S("EOF")
+	case T_INT:
+		return S("int")
+	case T_STRING:
+		return S("string")
+	case T_CHAR:
+		return S("char")
+	case T_IDENT:
+		return S("ident")
+	case T_PUNCT:
+		return S("punct")
+	case T_KEYWORWD:
+		return S("keyword")
+	}
+
+	return S("")
+}
 
 type Token struct {
 	typ      TokenType
@@ -142,7 +163,7 @@ func (tok *Token) isSemicolon() bool {
 func (tok *Token) dump() {
 	sval := tok.getSval()
 	s := Sprintf(S("tok: line=%d, type=%s, sval=\"%s\"\n"),
-		tok.line, gostring(tok.typ), sval)
+		tok.line, typeToGostring(tok.typ), sval)
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
 }

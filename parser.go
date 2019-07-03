@@ -53,7 +53,7 @@ func (p *parser) assertNotNil(x interface{}) {
 func (p *parser) peekToken() *Token {
 	if p.tokenStream.isEnd() {
 		return &Token{
-			typ: "EOF",
+			typ: T_EOF,
 		}
 	}
 	r := p.tokenStream.tokens[p.tokenStream.index]
