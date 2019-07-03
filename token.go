@@ -5,13 +5,33 @@ import (
 )
 
 // https://golang.org/ref/spec#Keywords
-var keywords = []string{
-	"break", "default", "func", "interface", "select", "case", "defer", "go", "map",
-	"struct", "chan", "else", "goto", "package", "switch", "const", "fallthrough",
-	"if", "range", "type", "continue", "for", "import", "return", "var",
+var keywords = []gostring{
+	gostring("break"),
+	gostring("default"),
+	gostring("func"),
+	gostring("interface"),
+	gostring("select"),
+	gostring("case"),
+	gostring("defer"),
+	gostring("go"),
+	gostring("map"),
+	gostring("struct"),
+	gostring("chan"),
+	gostring("else"),
+	gostring("goto"),
+	gostring("package"),
+	gostring("switch"),
+	gostring("const"),
+	gostring("fallthrough"),
+	gostring("if"),
+	gostring("range"),
+	gostring("type"),
+	gostring("continue"),
+	gostring("for"),
+	gostring("import"),
+	gostring("return"),
+	gostring("var"),
 }
-
-var gokeywords []gostring
 
 type TokenType int
 
