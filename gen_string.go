@@ -27,13 +27,13 @@ func (binop *IrExprStringComparison) emit() {
 	var equal bool
 	switch cstring(binop.op) {
 	case "<":
-		TBI(binop.token(), "")
+		TBI(binop.token(), S(""))
 	case ">":
-		TBI(binop.token(), "")
+		TBI(binop.token(), S(""))
 	case "<=":
-		TBI(binop.token(), "")
+		TBI(binop.token(), S(""))
 	case ">=":
-		TBI(binop.token(), "")
+		TBI(binop.token(), S(""))
 	case "!=":
 		equal = false
 	case "==":

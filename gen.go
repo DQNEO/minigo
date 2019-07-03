@@ -445,7 +445,7 @@ func (e ExprArrayLiteral) emit() {
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), S("expr must be an Interface type"))
 	if e.gtype.getKind() == G_INTERFACE {
-		TBI(e.token(), "")
+		TBI(e.token(), S(""))
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.

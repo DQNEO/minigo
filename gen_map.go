@@ -437,7 +437,7 @@ func (lit *ExprMapLiteral) emit() {
 			emit(S("PUSH_8"))
 			emit(S("STORE_24_INDIRECT_FROM_STACK"))
 		} else {
-			TBI(element.value.token(), "unable to handle %s", element.value.getGtype())
+			TBI(element.value.token(), S("unable to handle %s"), element.value.getGtype())
 
 		}
 
