@@ -52,7 +52,7 @@ func (e *ExprLen) emit() {
 		arg.emit()
 		emit(S("PUSH_8"))
 		eStrLen := &IrLowLevelCall{
-			symbol:        "strlen",
+			symbol:        S("strlen"),
 			argsFromStack: 1,
 		}
 		eStrLen.emit()
@@ -63,7 +63,7 @@ func (e *ExprLen) emit() {
 
 type IrLowLevelCall struct {
 	token         *Token
-	symbol        cstring
+	symbol        gostring
 	argsFromStack int // args are taken from the stack
 }
 

@@ -99,7 +99,7 @@ func emitGoStringsEqualFromStack() {
 	emit(S("PUSH_8"))
 
 	call := &IrLowLevelCall{
-		symbol:        "iruntime.eqGostrings",
+		symbol:        S("iruntime.eqGostrings"),
 		argsFromStack: 7,
 	}
 	call.emit()
@@ -124,7 +124,7 @@ func emitConvertCstringFromStackToSlice() {
 	// calc len
 	emit(S("PUSH_8"))
 	eStrLen := &IrLowLevelCall{
-		symbol:        "strlen",
+		symbol:        S("strlen"),
 		argsFromStack: 1,
 	}
 	eStrLen.emit()
@@ -158,7 +158,7 @@ func emitStringConcate(leftCstring Expr, rightCstring Expr) {
 	emit(S("PUSH_SLICE"))
 
 	eStrConCate := &IrLowLevelCall{
-		symbol:        "iruntime.strcat",
+		symbol:        S("iruntime.strcat"),
 		argsFromStack: 6,
 	}
 	eStrConCate.emit()
