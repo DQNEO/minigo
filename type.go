@@ -129,7 +129,7 @@ func (gtype *Gtype) isString() bool {
 }
 
 func (gtype *Gtype) getSize() int {
-	assertNotNil(gtype != nil, nil)
+	assert(gtype != nil, nil, S("gtype should not be nil"))
 	assert(gtype.kind != G_DEPENDENT, nil, S("type should be inferred"))
 	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
