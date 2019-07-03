@@ -130,7 +130,7 @@ func (gtype *Gtype) isString() bool {
 
 func (gtype *Gtype) getSize() int {
 	assertNotNil(gtype != nil, nil)
-	assert(gtype.kind != G_DEPENDENT, nil, "type should be inferred")
+	assert(gtype.kind != G_DEPENDENT, nil, S("type should be inferred"))
 	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
 			errorf(S("relation not resolved: %s"), gtype)
@@ -225,7 +225,7 @@ func (gtype *Gtype) String() gostring {
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {
 	assertNotNil(strct != nil, nil)
-	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type")
+	assert(strct.kind == G_STRUCT, nil, S("assume G_STRUCT type"))
 	for _, field := range strct.fields {
 		if eqGostrings(gostring(field.fieldname), gostring(name)) {
 			return field
@@ -236,13 +236,13 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got %s", strct.String())
+	assert(strct.getKind() == G_STRUCT, nil, S("assume G_STRUCT type, but got %s"), strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
-			assert(align > 0, nil, "field size should be > 0: filed=%s", fieldtype.String())
+			assert(align > 0, nil, S("field size should be > 0: filed=%s"), fieldtype.String())
 		} else {
 			align = MaxAlign
 		}
@@ -274,10 +274,10 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
-	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), "")
+	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), S(""))
 	if e.rel.expr != nil {
 		funcref, ok := e.rel.expr.(*ExprFuncRef)
-		assert(ok, e.token(), "it should be a ExprFuncRef")
+		assert(ok, e.token(), S("it should be a ExprFuncRef"))
 		firstRetType := funcref.funcdef.rettypes[0]
 		return firstRetType
 	} else if e.rel.gtype != nil {
@@ -343,7 +343,7 @@ func (e *ExprSlice) getGtype() *Gtype {
 }
 
 func (e *ExprIndex) getGtype() *Gtype {
-	assert(e.collection.getGtype() != nil, e.token(), "collection type should not be nil")
+	assert(e.collection.getGtype() != nil, e.token(), S("collection type should not be nil"))
 	gtype := e.collection.getGtype()
 	if gtype.kind == G_NAMED {
 		gtype = gtype.relation.gtype
@@ -377,7 +377,7 @@ func (e *ExprIndex) getSecondGtype() *Gtype {
 func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
 
-	assert(gstruct != gInt, e.tok, "struct should not be gInt")
+	assert(gstruct != gInt, e.tok, S("struct should not be gInt"))
 
 	var strctType *Gtype
 	if gstruct.kind == G_POINTER {

@@ -4,7 +4,7 @@ func (e *ExprLen) emit() {
 	emit(S("# emit len()"))
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
-	assert(gtype != nil, e.token(), "gtype should not be  nil:\n")
+	assert(gtype != nil, e.token(), S("gtype should not be  nil:\n"))
 
 	switch gtype.getKind() {
 	case G_ARRAY:

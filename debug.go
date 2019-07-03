@@ -46,7 +46,7 @@ func errorf(format gostring, v ...interface{}) {
 	panic("")
 }
 
-func assert(cond bool, tok *Token, format string, v ...interface{}) {
+func assert(cond bool, tok *Token, format gostring, v ...interface{}) {
 	if !cond {
 		s := Sprintf(gostring(format), v...)
 		msg := concat3(S("assertion failed: "), s,  tok.String())
@@ -62,5 +62,5 @@ func assertNotReached(tok *Token) {
 }
 
 func assertNotNil(cond bool, tok *Token) {
-	assert(cond, tok, "should not be nil")
+	assert(cond, tok, S("should not be nil"))
 }

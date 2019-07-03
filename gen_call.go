@@ -22,17 +22,17 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(methodCall.receiver != nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
-	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
+	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, S("method must be an interface or belong to a named type"))
 	var typeToBeloing *Gtype
 	if gtype.kind == G_POINTER {
 		typeToBeloing = gtype.origType
-		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:%s", gtype.String())
+		assert(typeToBeloing != nil, methodCall.token(), S("shoudl not be nil:%s"), gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, "method must belong to a named type")
+	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, S("method must belong to a named type"))
 	origType := typeToBeloing.relation.gtype
-	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), "origType should not be nil")
+	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), S("origType should not be nil"))
 	return origType
 }
 
@@ -109,7 +109,7 @@ func (methodCall *ExprMethodcall) emit() {
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
-	assert(relexpr != nil, funcall.token(), "relexpr should NOT be nil")
+	assert(relexpr != nil, funcall.token(), S("relexpr should NOT be nil"))
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
 		errorft(funcall.token(), S("Compiler error: funcref is not *ExprFuncRef (%s)"), funcall.fname)
@@ -120,8 +120,8 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 
 func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 
-	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
-	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")
+	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), S("this is conversion"))
+	assert(funcall.getFuncDef() != nil, funcall.token(), S("funcdef is nil"))
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function

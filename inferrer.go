@@ -53,9 +53,9 @@ func (clause *ForRangeClause) infer() {
 	collectionType := clause.rangeexpr.getGtype()
 	//debugf(S("collectionType = %s"), collectionType)
 	indexvarRel, ok := clause.indexvar.(*Relation)
-	assert(ok, nil, "ok")
+	assert(ok, nil, S("ok"))
 	indexvar, ok := indexvarRel.expr.(*ExprVariable)
-	assert(ok, nil, "ok")
+	assert(ok, nil, S("ok"))
 
 	var indexType *Gtype
 	switch collectionType.getKind() {
@@ -71,9 +71,9 @@ func (clause *ForRangeClause) infer() {
 
 	if clause.valuevar != nil {
 		valuevarRel, ok := clause.valuevar.(*Relation)
-		assert(ok, nil, "ok")
+		assert(ok, nil, S("ok"))
 		valuevar, ok := valuevarRel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
+		assert(ok, nil, S("ok"))
 
 		var elementType *Gtype
 		if collectionType.getKind() == G_ARRAY {

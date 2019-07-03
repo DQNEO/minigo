@@ -15,7 +15,7 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 		switch right.(type) {
 		case *ExprFuncallOrConversion, *ExprMethodcall:
 			rettypes := getRettypes(right)
-			assert(len(rettypes) == 1, ast.token(), "return values should be one")
+			assert(len(rettypes) == 1, ast.token(), S("return values should be one"))
 		}
 		emitAssignOne(left, right)
 	}
@@ -107,7 +107,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 					// what is this case ???
 					continue
 				}
-				assert(left.getGtype() != nil, left.token(), "should not be nil")
+				assert(left.getGtype() != nil, left.token(), S("should not be nil"))
 				emitPop(left.getGtype())
 				emitOffsetSave(left, 0)
 			}
@@ -170,8 +170,8 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 		}
 	}
 
-	assert(lhs.getGtype().getSize() <= 8, lhs.token(), "invalid type for lhs")
-	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(),"invalid type for rhs")
+	assert(lhs.getGtype().getSize() <= 8, lhs.token(), S("invalid type for lhs"))
+	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(),S("invalid type for rhs"))
 	rhs.emit()             //   expr => %rax
 	emitSavePrimitive(lhs) //   %rax => memory
 }
@@ -180,7 +180,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 	emit(S("# assignToStruct start"))
 	lhs = unwrapRel(lhs)
 	assert(rhs == nil || (rhs.getGtype().getKind() == G_STRUCT),
-		lhs.token(), "rhs should be struct type")
+		lhs.token(), S("rhs should be struct type"))
 	// initializes with zero values
 	emit(S("# initialize struct with zero values: start"))
 	for _, fieldtype := range lhs.getGtype().relation.gtype.fields {
@@ -202,7 +202,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				}
 				assignToArray(left, nil)
 			default:
-				assert(0 <= elmSize && elmSize <= 8, lhs.token(), "invalid size")
+				assert(0 <= elmSize && elmSize <= 8, lhs.token(), S("invalid size"))
 				for i := 0; i < arrayType.length; i++ {
 					emit(S("mov $0, %%rax"))
 					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
@@ -217,7 +217,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		default:
 			emit(S("mov $0, %%rax"))
 			regSize := fieldtype.getSize()
-			assert(0 < regSize && regSize <= 8, lhs.token(), "%s", fieldtype.String())
+			assert(0 < regSize && regSize <= 8, lhs.token(), S("%s"), fieldtype.String())
 			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)
 		}
 	}
@@ -251,7 +251,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		}
 	case *ExprStructLiteral:
 		structliteral, ok := rhs.(*ExprStructLiteral)
-		assert(ok || rhs == nil, rhs.token(), "invalid rhs")
+		assert(ok || rhs == nil, rhs.token(), S("invalid rhs"))
 
 		// do assignment for each field
 		for _, field := range structliteral.fields {
@@ -261,7 +261,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			switch fieldtype.getKind() {
 			case G_ARRAY:
 				initvalues, ok := field.value.(*ExprArrayLiteral)
-				assert(ok, nil, "ok")
+				assert(ok, nil, S("ok"))
 				arrayType := strcttyp.getField(field.key)
 				elementType := arrayType.elementType
 				elmSize := elementType.getSize()
@@ -306,7 +306,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 				field.value.emit()
 
 				regSize := fieldtype.getSize()
-				assert(0 < regSize && regSize <= 8, variable.token(), "%s", fieldtype.String())
+				assert(0 < regSize && regSize <= 8, variable.token(), S("%s"), fieldtype.String())
 				emitOffsetSavePrimitive(variable, regSize, fieldtype.offset)
 			}
 		}
@@ -325,7 +325,7 @@ func assignToInterface(lhs Expr, rhs Expr) {
 		return
 	}
 
-	assert(rhs.getGtype() != nil, rhs.token(), "rhs gtype is nil")
+	assert(rhs.getGtype() != nil, rhs.token(), S("rhs gtype is nil"))
 	if rhs.getGtype().getKind() == G_INTERFACE {
 		rhs.emit()
 		emitSave24(lhs, 0)
@@ -355,13 +355,13 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
 		fromExpr := unwrapRel(conversion.arg)
-		assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), "must be a slice of bytes")
+		assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), S("must be a slice of bytes"))
 		if fromExpr.getGtype().getKind() == G_SLICE {
 			fromExpr.emit()
 			emitSave24(lhs, 0)
 			return
 		}
-		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), "must be a string type, but got %s", conversion.arg.getGtype().String())
+		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), S("must be a string type, but got %s"), conversion.arg.getGtype().String())
 		fromExpr.emit()
 		emit(S("PUSH_8 # ptr"))
 		strlen := &ExprLen{
@@ -387,7 +387,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 	arrayType := lhs.getGtype()
 	elementType := arrayType.elementType
 	elmSize := elementType.getSize()
-	assert(rhs == nil || rhs.getGtype().getKind() == G_ARRAY, nil, "rhs should be array")
+	assert(rhs == nil || rhs.getGtype().getKind() == G_ARRAY, nil, S("rhs should be array"))
 	switch elementType.getKind() {
 	case G_STRUCT:
 		//TBI
@@ -401,7 +401,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 				continue
 			}
 			arrayLiteral, ok := rhs.(*ExprArrayLiteral)
-			assert(ok, nil, "ok")
+			assert(ok, nil, S("ok"))
 			assignToStruct(left, arrayLiteral.values[i])
 		}
 		return

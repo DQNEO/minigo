@@ -59,7 +59,7 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
 	emit(S("# *ExprUop.emitSavePrimitive()"))
-	assert(eqGostrings(uop.op , gostring("*")), uop.tok, "uop op should be *")
+	assert(eqGostrings(uop.op , gostring("*")), uop.tok, S("uop op should be *"))
 	emit(S("PUSH_8 # what"))
 	uop.operand.emit()
 	emit(S("PUSH_8 # where"))
@@ -68,9 +68,9 @@ func (uop *ExprUop) emitSavePrimitive() {
 
 // x = 1
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
-	assert(0 <= size && size <= 8, variable.token(), "invalid size")
+	assert(0 <= size && size <= 8, variable.token(), S("invalid size"))
 	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
-		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), "")
+		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), S(""))
 		emit(S("PUSH_8 # what"))
 		variable.emit()
 		emit(S("ADD_NUMBER %d"), offset)
@@ -99,7 +99,7 @@ func (e *ExprIndex) emitSave24() {
 		return
 	}
 
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, e.token(), "unexpected kind")
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, e.token(), S("unexpected kind"))
 	e.collection.emit()
 	emit(S("PUSH_8 # head address of collection"))
 	e.index.emit()
@@ -111,7 +111,7 @@ func (e *ExprIndex) emitSave24() {
 		elmType = collectionType.elementType
 	}
 	size := elmType.getSize()
-	assert(size > 0, nil, "size > 0")
+	assert(size > 0, nil, S("size > 0"))
 	emit(S("LOAD_NUMBER %d # elementSize"), size)
 	emit(S("PUSH_8"))
 	emit(S("IMUL_FROM_STACK # index * elementSize"))
@@ -189,7 +189,7 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	collection := e.collection
 	index := e.index
 	collectionType := collection.getGtype()
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), "should be collection")
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), S("should be collection"))
 
 	var elmType *Gtype
 	if collectionType.isString() {
@@ -198,7 +198,7 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 		elmType = collectionType.elementType
 	}
 	elmSize := elmType.getSize()
-	assert(elmSize > 0, nil, "elmSize > 0")
+	assert(elmSize > 0, nil, S("elmSize > 0"))
 
 	emit(S("PUSH_8 # rhs"))
 

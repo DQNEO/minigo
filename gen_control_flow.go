@@ -80,9 +80,9 @@ func (stmt *StmtSwitch) emit() {
 		emit(S("# the cond expression"))
 		if stmt.needStringToSliceConversion() {
 			irConversion, ok := stmt.cond.(*IrExprConversion)
-			assert(ok, nil, "should be IrExprConversion")
+			assert(ok, nil, S("should be IrExprConversion"))
 			origType := irConversion.arg.getGtype()
-			assert(origType.getKind() == G_SLICE, nil, "must be slice")
+			assert(origType.getKind() == G_SLICE, nil, S("must be slice"))
 			cond = irConversion.arg // set original slice
 		}
 		cond.emit()
@@ -129,7 +129,7 @@ func (stmt *StmtSwitch) emit() {
 				emit(S("# Duplicate the cond value in stack"))
 
 				if stmt.needStringToSliceConversion() {
-					assert(e.getGtype().isString(), e.token(), "caseClause should be string")
+					assert(e.getGtype().isString(), e.token(), S("caseClause should be string"))
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
 
@@ -274,7 +274,7 @@ func (f *StmtFor) convert() Stmt {
 	case FOR_KIND_RANGE_LIST:
 		emit(S("# for range list"))
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got ", f.rng.rangeexpr.getGtype().String())
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, S("rangeexpr should be G_ARRAY or G_SLICE, but got "), f.rng.rangeexpr.getGtype().String())
 
 		var init = &StmtAssignment{
 			lefts: []Expr{
@@ -405,11 +405,11 @@ func (ast *StmtDefer) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), "labelEndLoop should not be empty")
+	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), S("labelEndLoop should not be empty"))
 	emit(S("jmp %s # continue"), gostring(ast.labels.labelEndBlock))
 }
 
 func (ast *StmtBreak) emit() {
-	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), "labelEndLoop should not be empty")
+	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), S("labelEndLoop should not be empty"))
 	emit(S("jmp %s # break"), gostring(ast.labels.labelEndLoop))
 }

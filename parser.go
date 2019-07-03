@@ -42,7 +42,7 @@ func (p *parser) clearLocalState() {
 
 type methods map[identifier]*ExprFuncRef
 
-func (p *parser) assert(cond bool, msg string) {
+func (p *parser) assert(cond bool, msg gostring) {
 	assert(cond, p.lastToken(), msg)
 }
 
@@ -425,7 +425,7 @@ func (p *parser) parseMakeExpr() Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	tok := p.readToken()
-	p.assert(tok.isIdent(S("make")), "read make")
+	p.assert(tok.isIdent(S("make")), S("read make"))
 
 	p.expect(S("("))
 	mapType := p.parseMapType()
@@ -623,7 +623,7 @@ func (p *parser) parseStructLiteral(rel *Relation) *ExprStructLiteral {
 			break
 		}
 		p.expect(S(":"))
-		p.assert(tok.isTypeIdent(), "field name is ident")
+		p.assert(tok.isTypeIdent(), S("field name is ident"))
 		value := p.parseExpr()
 		f := &KeyedElement{
 			tok:   tok,
@@ -1058,7 +1058,7 @@ func (p *parser) parseForStmt() *StmtFor {
 		} else if tok2.isPunct(S(":=")) {
 			p.skip()
 			if p.peekToken().isKeyword(S("range")) {
-				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
+				p.assert(len(lefts) == 1 || len(lefts) == 2, S("lefts is not empty"))
 				p.shortVarDecl(lefts[0])
 
 				if len(lefts) == 2 {
@@ -1255,7 +1255,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAss
 		errorft(ptok, S("internal error"))
 	}
 	rights := p.parseExpressionList(nil)
-	p.assert(len(rights) == 1, "num of rights is 1")
+	p.assert(len(rights) == 1, S("num of rights is 1"))
 	binop := &ExprBinop{
 		tok:   ptok,
 		op:    gostring(op),
@@ -1274,7 +1274,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAss
 
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
-	assert(p.isGlobal() == false, e.token(), "should not be in global scope")
+	assert(p.isGlobal() == false, e.token(), S("should not be in global scope"))
 	var name goidentifier = goidentifier(rel.name)
 	variable := p.newVariable(name, nil)
 	p.currentScope.setVar(name, variable)
@@ -1589,7 +1589,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok := p.expectKeyword(S("func"))
 
 	p.localvars = nil
-	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
+	assert(len(p.localvars) == 0, ptok, S("localvars should be zero"))
 	var isMethod bool
 	p.enterNewScope(S("func"))
 
@@ -1637,7 +1637,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 			typeToBelong = receiver.gtype
 		}
 
-		p.assert(typeToBelong.kind == G_NAMED, "pmethods must belong to a named type")
+		p.assert(typeToBelong.kind == G_NAMED, S("pmethods must belong to a named type"))
 		var pmethods methods
 		var ok bool
 		typeName := typeToBelong.relation.name

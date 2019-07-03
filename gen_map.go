@@ -40,7 +40,7 @@ func (call *IrInterfaceMethodCall) emit() {
 
 	emit(S("mov $0, %%rax"))
 	receiverType := receiver.getGtype()
-	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
+	assert(receiverType.getKind() == G_INTERFACE, nil, S("should be interface"))
 
 	receiver.emit()
 	emit(S("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value"))
@@ -157,7 +157,7 @@ func emitMapGet(mapType *Gtype) {
 	emit(S("PUSH_8"))          // index address
 	emit(S("LOAD_8_BY_DEREF")) // emit index address
 
-	assert(mapKeyType != nil, nil, "key kind should not be nil:%s", mapType.String())
+	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
 	if mapKeyType.isString() {
 		emit(S("push %%r13"))

@@ -182,7 +182,7 @@ func walkExpr(expr Expr) Expr {
 		decl := funcall.getFuncDef()
 		switch decl {
 		case builtinLen:
-			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
+			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
 			arg := funcall.args[0]
 			return &ExprLen{
 				tok: arg.token(),
@@ -195,7 +195,7 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinMakeSlice:
-			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+			assert(len(funcall.args) == 3, funcall.token(), S("append() should take 3 argments"))
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
@@ -205,7 +205,7 @@ func walkExpr(expr Expr) Expr {
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
-			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
+			assert(len(funcall.args) == 2, funcall.token(), S("append() should take 2 argments"))
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
 			emit(S("# append(%s, %s)"), slice.getGtype().String(), valueToAppend.getGtype().String())
