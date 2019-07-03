@@ -129,7 +129,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]gostring {
 		methods = append(methods, symbol)
 		methodTable[typeId] = methods
 	}
-	debugf("set methodTable")
+	debugf(S("set methodTable"))
 	return methodTable
 }
 

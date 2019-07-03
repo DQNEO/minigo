@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func debugf(format string, v ...interface{}) {
+func debugf(format gostring, v ...interface{}) {
 	if !debugMode {
 		return
 	}
@@ -16,7 +16,7 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 	os.Stderr.Write(indents)
-	s2 := Sprintf(gostring(format), v...)
+	s2 := Sprintf(format, v...)
 	var b []byte = []byte(s2)
 	b = append(b, '\n')
 	os.Stderr.Write(b)

@@ -192,7 +192,7 @@ func (ast *ExprUop) emit() {
 	default:
 		errorft(ast.token(), "unable to handle uop %s", ast.op)
 	}
-	//debugf("end of emitting ExprUop")
+	//debugf(S("end of emitting ExprUop"))
 
 }
 
@@ -211,7 +211,7 @@ func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 func (e *ExprSliceLiteral) emit() {
 	emit(S("# (*ExprSliceLiteral).emit()"))
 	var length int = len(e.values)
-	//debugf("slice literal %s: underlyingarray size = %d (should be %d)", e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
+	//debugf(S("slice literal %s: underlyingarray size = %d (should be %d)"), e.getGtype(), e.gtype.getSize(),  e.gtype.elementType.getSize() * length)
 	emitCallMalloc(e.gtype.getSize() * length)
 	emit(S("PUSH_8 # ptr"))
 	for i, value := range e.values {

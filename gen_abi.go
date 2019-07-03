@@ -90,7 +90,7 @@ func (f *DeclFunc) prepare() Emitter {
 	var localarea int
 	for _, lvar := range f.localvars {
 		if lvar.gtype == nil {
-			debugf("%s has nil gtype ", lvar.varname)
+			debugf(S("%s has nil gtype "), lvar.varname)
 		}
 		size := lvar.gtype.getSize()
 		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String())
@@ -98,7 +98,7 @@ func (f *DeclFunc) prepare() Emitter {
 		localarea -= loff
 		offset -= loff
 		lvar.offset = offset
-		//debugf("set offset %d to lvar %s, type=%s", lvar.offset, lvar.varname, lvar.gtype)
+		//debugf(S("set offset %d to lvar %s, type=%s"), lvar.offset, lvar.varname, lvar.gtype)
 	}
 
 	return &funcPrologueEmitter{

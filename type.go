@@ -387,7 +387,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	}
 
 	fields := strctType.relation.gtype.fields
-	//debugf("fields=%v", fields)
+	//debugf(S("fields=%v"), fields)
 	for _, field := range fields {
 		if eqGostrings(gostring(e.fieldname),  gostring(field.fieldname)) {
 			//return field.origType
