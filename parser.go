@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-const __func__ string = "__func__"
+var __func__ gostring = gostring("__func__")
 
 type parser struct {
 	// per function or block
@@ -106,17 +106,17 @@ func (p *parser) expect(punct gostring) *Token {
 	return tok
 }
 
-func getCallerName(n int) string {
+func getCallerName(n int) gostring {
 	pc, _, _, ok := runtime.Caller(n)
 	if !ok {
 		errorf(S("Unable to get caller"))
 	}
 	details := runtime.FuncForPC(pc)
 	//r := (strings.Split(details.Name(), S(".")))[2]
-	return details.Name()
+	return gostring(details.Name())
 }
 
-func (p *parser) traceIn(funcname string) int {
+func (p *parser) traceIn(funcname gostring) int {
 	if !debugParser {
 		return 0
 	}
@@ -128,7 +128,7 @@ func (p *parser) traceIn(funcname string) int {
 	return 0
 }
 
-func (p *parser) traceOut(funcname string) {
+func (p *parser) traceOut(funcname gostring) {
 	if !debugParser {
 		return
 	}
