@@ -191,19 +191,19 @@ type builtinDumpSliceEmitter struct {
 }
 
 func (em *builtinDumpSliceEmitter) emit() {
-	emit("lea .%s, %%rax", gostring(builtinStringKey2))
-	emit("PUSH_8")
+	emit(S("lea .%s, %%rax"), gostring(builtinStringKey2))
+	emit(S("PUSH_8"))
 
 	em.arg.emit()
-	emit("PUSH_SLICE")
+	emit(S("PUSH_SLICE"))
 
 	numRegs := 4
 	var i int
 	for i = numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
+		emit(S("POP_TO_ARG_%d"), i)
 	}
 
-	emit("FUNCALL %s", S("printf"))
+	emit(S("FUNCALL %s"), S("printf"))
 	emitNewline()
 }
 
@@ -212,19 +212,19 @@ type builtinDumpInterfaceEmitter struct {
 }
 
 func (em *builtinDumpInterfaceEmitter) emit() {
-	emit("lea .%s, %%rax", gostring(builtinStringKey1))
-	emit("PUSH_8")
+	emit(S("lea .%s, %%rax"), gostring(builtinStringKey1))
+	emit(S("PUSH_8"))
 
 	em.arg.emit()
-	emit("PUSH_INTERFACE")
+	emit(S("PUSH_INTERFACE"))
 
 	numRegs := 4
 	var i int
 	for i = numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
+		emit(S("POP_TO_ARG_%d"), i)
 	}
 
-	emit("FUNCALL %s", S("printf"))
+	emit(S("FUNCALL %s"), S("printf"))
 	emitNewline()
 }
 
@@ -233,31 +233,31 @@ type builtinAssertInterfaceEmitter struct {
 }
 
 func (em *builtinAssertInterfaceEmitter) emit() {
-	emit("# builtinAssertInterface")
+	emit(S("# builtinAssertInterface"))
 	labelEnd := makeLabel()
 	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
 
 	// (ptr != nil && rcx == nil) => Error
 
-	emit("CMP_NE_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit(S("CMP_NE_ZERO"))
+	emit(S("TEST_IT"))
+	emit(S("je %s"), labelEnd)
 
-	emit("mov %%rcx, %%rax")
+	emit(S("mov %%rcx, %%rax"))
 
-	emit("CMP_EQ_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit(S("CMP_EQ_ZERO"))
+	emit(S("TEST_IT"))
+	emit(S("je %s"), labelEnd)
 
 	slabel := makeLabel()
-	emit(".data 0")
+	emit(S(".data 0"))
 	emitWithoutIndent(S("%s:"), slabel)
-	emit(".string \"%s\"", S("assertInterface failed"))
-	emit(".text")
-	emit("lea %s, %%rax", slabel)
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL %s", S(".panic"))
+	emit(S(".string \"%s\""), S("assertInterface failed"))
+	emit(S(".text"))
+	emit(S("lea %s, %%rax"), slabel)
+	emit(S("PUSH_8"))
+	emit(S("POP_TO_ARG_0"))
+	emit(S("FUNCALL %s"), S(".panic"))
 
 	emitWithoutIndent(S("%s:"), labelEnd)
 	emitNewline()

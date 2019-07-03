@@ -121,24 +121,24 @@ type funcPrologueEmitter struct {
 func (fe *funcPrologueEmitter) emit() {
 	setPos(fe.token)
 	emitWithoutIndent(S("%s:"), fe.symbol)
-	emit("FUNC_PROLOGUE")
+	emit(S("FUNC_PROLOGUE"))
 
 	if len(fe.argRegisters) > 0 {
-		emit("# set params")
+		emit(S("# set params"))
 	}
 
 	for _, regi := range fe.argRegisters {
-		emit("PUSH_ARG_%d", regi)
+		emit(S("PUSH_ARG_%d"), regi)
 	}
 
 	if len(fe.localvars) > 0 {
-		//emit("# Allocating stack for localvars len=%d", len(fe.localvars))
+		//emit(S("# Allocating stack for localvars len=%d"), len(fe.localvars))
 		for i := len(fe.localvars) - 1; i >= 0; i-- {
 			lvar := fe.localvars[i]
-			emit("# offset %d variable \"%s\" %s", lvar.offset, gostring(lvar.varname), lvar.gtype.String())
+			emit(S("# offset %d variable \"%s\" %s"), lvar.offset, gostring(lvar.varname), lvar.gtype.String())
 		}
 		var localarea int = -fe.localarea
-		emit("sub $%d, %%rsp # total stack size", localarea)
+		emit(S("sub $%d, %%rsp # total stack size"), localarea)
 	}
 
 	emitNewline()
@@ -146,7 +146,7 @@ func (fe *funcPrologueEmitter) emit() {
 
 func (ircall *IrStaticCall) emit() {
 	// nothing to do
-	emit("# emitCall %s", ircall.symbol)
+	emit(S("# emitCall %s"), ircall.symbol)
 
 	var numRegs int
 	var param *ExprVariable
@@ -157,10 +157,10 @@ func (ircall *IrStaticCall) emit() {
 	for argIndex, arg = range ircall.args {
 		var fromGtype gostring
 		if arg.getGtype() != nil {
-			emit("# get fromGtype")
+			emit(S("# get fromGtype"))
 			fromGtype = arg.getGtype().String()
 		}
-		emit("# from %s", gostring(fromGtype))
+		emit(S("# from %s"), gostring(fromGtype))
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
@@ -180,18 +180,18 @@ func (ircall *IrStaticCall) emit() {
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
 			if param != nil && !eq(ircall.symbol , "printf") {
-				emit("# has a corresponding param")
+				emit(S("# has a corresponding param"))
 
 				var fromGtype *Gtype
 				if arg.getGtype() != nil {
 					fromGtype = arg.getGtype()
-					emit("# fromGtype:%s", fromGtype.String())
+					emit(S("# fromGtype:%s"), fromGtype.String())
 				}
 
 				var toGtype *Gtype
 				if param.getGtype() != nil {
 					toGtype = param.getGtype()
-					emit("# toGtype:%s", toGtype.String())
+					emit(S("# toGtype:%s"), toGtype.String())
 				}
 
 				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
@@ -204,11 +204,11 @@ func (ircall *IrStaticCall) emit() {
 			doConvertToInterface = false
 		}
 
-		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
+		emit(S("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s"),
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
 		if doConvertToInterface {
-			emit("# doConvertToInterface !!!")
+			emit(S("# doConvertToInterface !!!"))
 			emitConversionToInterface(arg)
 		} else {
 			arg.emit()
@@ -216,10 +216,10 @@ func (ircall *IrStaticCall) emit() {
 
 		var width int
 		if doConvertToInterface || arg.getGtype().is24WidthType() {
-			emit("PUSH_24")
+			emit(S("PUSH_24"))
 			width = 3
 		} else {
-			emit("PUSH_8")
+			emit(S("PUSH_8"))
 			width = 1
 		}
 		numRegs += width
@@ -238,19 +238,19 @@ func (ircall *IrStaticCall) emit() {
 	}
 
 	if collectVariadicArgs {
-		emit("# collectVariadicArgs = true")
+		emit(S("# collectVariadicArgs = true"))
 		lenArgs := len(variadicArgs)
 		if lenArgs == 0 {
-			emit("LOAD_EMPTY_SLICE")
-			emit("PUSH_SLICE")
+			emit(S("LOAD_EMPTY_SLICE"))
+			emit(S("PUSH_SLICE"))
 		} else {
 			// var a []interface{}
 			for vargIndex, varg := range variadicArgs {
-				emit("# emit variadic arg")
+				emit(S("# emit variadic arg"))
 				if vargIndex == 0 {
-					emit("# make an empty slice to append")
-					emit("LOAD_EMPTY_SLICE")
-					emit("PUSH_SLICE")
+					emit(S("# make an empty slice to append"))
+					emit(S("LOAD_EMPTY_SLICE"))
+					emit(S("PUSH_SLICE"))
 				}
 				// conversion : var ifc = x
 				if varg.getGtype().getKind() == G_INTERFACE {
@@ -258,16 +258,16 @@ func (ircall *IrStaticCall) emit() {
 				} else {
 					emitConversionToInterface(varg)
 				}
-				emit("PUSH_INTERFACE")
-				emit("# calling append24")
-				emit("POP_TO_ARG_5 # ifc_c")
-				emit("POP_TO_ARG_4 # ifc_b")
-				emit("POP_TO_ARG_3 # ifc_a")
-				emit("POP_TO_ARG_2 # cap")
-				emit("POP_TO_ARG_1 # len")
-				emit("POP_TO_ARG_0 # ptr")
-				emit("FUNCALL iruntime.append24")
-				emit("PUSH_SLICE")
+				emit(S("PUSH_INTERFACE"))
+				emit(S("# calling append24"))
+				emit(S("POP_TO_ARG_5 # ifc_c"))
+				emit(S("POP_TO_ARG_4 # ifc_b"))
+				emit(S("POP_TO_ARG_3 # ifc_a"))
+				emit(S("POP_TO_ARG_2 # cap"))
+				emit(S("POP_TO_ARG_1 # len"))
+				emit(S("POP_TO_ARG_0 # ptr"))
+				emit(S("FUNCALL iruntime.append24"))
+				emit(S("PUSH_SLICE"))
 			}
 		}
 		numRegs += 3
@@ -278,10 +278,10 @@ func (ircall *IrStaticCall) emit() {
 			errorft(ircall.args[0].token(), "too many arguments")
 		}
 		var j int = i
-		emit("POP_TO_ARG_%d", j)
+		emit(S("POP_TO_ARG_%d"), j)
 	}
 
-	emit("FUNCALL %s", ircall.symbol)
+	emit(S("FUNCALL %s"), ircall.symbol)
 	emitNewline()
 }
 
@@ -290,31 +290,31 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	for i, arg := range call.args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
-			emit("mov $0, %%rax")
+			emit(S("mov $0, %%rax"))
 		} else {
 			arg.emit()
 		}
 		var no int = i + 2
-		emit("PUSH_8 # argument no %d", no)
+		emit(S("PUSH_8 # argument no %d"), no)
 	}
 
 	var ln int = len(call.args)
-	emit("POP_TO_ARG_%d", ln)
+	emit(S("POP_TO_ARG_%d"), ln)
 
 	for i := range call.args {
 		j := len(call.args) - 1 - i
 		var n int = j
-		emit("POP_TO_ARG_%d", n)
+		emit(S("POP_TO_ARG_%d"), n)
 	}
 
-	emit("POP_8 # funcref")
-	emit("call *%%rax")
+	emit(S("POP_8 # funcref"))
+	emit(S("call *%%rax"))
 }
 
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		// return void
-		emit("mov $0, %%rax")
+		emit(S("mov $0, %%rax"))
 		stmt.emitDeferAndReturn()
 		return
 	}
@@ -329,14 +329,14 @@ func (stmt *StmtReturn) emit() {
 		rettype := stmt.rettypes[0]
 		if rettype.getKind() == G_INTERFACE && expr.getGtype().getKind() != G_INTERFACE {
 			if expr.getGtype() == nil {
-				emit("LOAD_EMPTY_INTERFACE")
+				emit(S("LOAD_EMPTY_INTERFACE"))
 			} else {
 				emitConversionToInterface(expr)
 			}
 		} else {
 			expr.emit()
 			if expr.getGtype() == nil && stmt.rettypes[0].getKind() == G_SLICE {
-				emit("LOAD_EMPTY_SLICE")
+				emit(S("LOAD_EMPTY_SLICE"))
 			}
 		}
 		stmt.emitDeferAndReturn()
@@ -347,7 +347,7 @@ func (stmt *StmtReturn) emit() {
 		expr.emit()
 		//		rettype := stmt.rettypes[i]
 		if expr.getGtype() == nil && rettype.getKind() == G_SLICE {
-			emit("LOAD_EMPTY_SLICE")
+			emit(S("LOAD_EMPTY_SLICE"))
 		}
 		size := rettype.getSize()
 		if size < 8 {
@@ -356,13 +356,13 @@ func (stmt *StmtReturn) emit() {
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
 			var reg gostring = gostring(retRegi[num64bit-1-j])
-			emit("push %%%s", reg)
+			emit(S("push %%%s"), reg)
 			retRegiIndex++
 		}
 	}
 	for i := 0; i < retRegiIndex; i++ {
 		var reg gostring = gostring(retRegi[retRegiIndex-1-i])
-		emit("pop %%%s", reg)
+		emit(S("pop %%%s"), reg)
 	}
 
 	stmt.emitDeferAndReturn()

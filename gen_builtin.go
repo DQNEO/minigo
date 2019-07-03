@@ -1,24 +1,24 @@
 package main
 
 func (e *ExprLen) emit() {
-	emit("# emit len()")
+	emit(S("# emit len()"))
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), "gtype should not be  nil:\n")
 
 	switch gtype.getKind() {
 	case G_ARRAY:
-		emit("LOAD_NUMBER %d", gtype.length)
+		emit(S("LOAD_NUMBER %d"), gtype.length)
 	case G_SLICE:
-		emit("# len(slice)")
+		emit(S("# len(slice)"))
 		switch arg.(type) {
 		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
-			emit("# ExprSliceLiteral")
+			emit(S("# ExprSliceLiteral"))
 			_arg := arg.(*ExprSliceLiteral)
 			var length int = len(_arg.values)
-			emit("LOAD_NUMBER %d", length)
+			emit(S("LOAD_NUMBER %d"), length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			uop := &ExprBinop{
@@ -31,7 +31,7 @@ func (e *ExprLen) emit() {
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case G_MAP:
-		emit("# emit len(map)")
+		emit(S("# emit len(map)"))
 		arg.emit()
 
 		// if not nil
@@ -39,18 +39,18 @@ func (e *ExprLen) emit() {
 		// else len
 		labelNil := makeLabel()
 		labelEnd := makeLabel()
-		emit("TEST_IT # map && map (check if map is nil)")
-		emit("je %s # jump if map is nil", labelNil)
+		emit(S("TEST_IT # map && map (check if map is nil)"))
+		emit(S("je %s # jump if map is nil"), labelNil)
 		// not nil case
-		emit("mov 8(%%rax), %%rax # load map len")
-		emit("jmp %s", labelEnd)
+		emit(S("mov 8(%%rax), %%rax # load map len"))
+		emit(S("jmp %s"), labelEnd)
 		// nil case
-		emit("%s:", labelNil)
-		emit("LOAD_NUMBER 0")
-		emit("%s:", labelEnd)
+		emit(S("%s:"), labelNil)
+		emit(S("LOAD_NUMBER 0"))
+		emit(S("%s:"), labelEnd)
 	case G_STRING:
 		arg.emit()
-		emit("PUSH_8")
+		emit(S("PUSH_8"))
 		eStrLen := &IrLowLevelCall{
 			symbol:        "strlen",
 			argsFromStack: 1,
@@ -70,28 +70,28 @@ type IrLowLevelCall struct {
 func (e *IrLowLevelCall) emit() {
 	var i int
 	for i=e.argsFromStack - 1;i>=0;i-- {
-		emit("POP_TO_ARG_%d", i)
+		emit(S("POP_TO_ARG_%d"), i)
 	}
-	emit("FUNCALL %s", gostring(e.symbol))
+	emit(S("FUNCALL %s"), gostring(e.symbol))
 }
 
 
 func (e *ExprCap) emit() {
-	emit("# emit cap()")
+	emit(S("# emit cap()"))
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	switch gtype.getKind() {
 	case G_ARRAY:
-		emit("LOAD_NUMBER %d", gtype.length)
+		emit(S("LOAD_NUMBER %d"), gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
 		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
-			emit("# ExprSliceLiteral")
+			emit(S("# ExprSliceLiteral"))
 			_arg := arg.(*ExprSliceLiteral)
 			var length int = len(_arg.values)
-			emit("LOAD_NUMBER %d", length)
+			emit(S("LOAD_NUMBER %d"), length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
@@ -123,27 +123,27 @@ func (e *ExprCap) emit() {
 func emitMakeSliceFunc() {
 	// makeSlice
 	emitWithoutIndent(S("%s:"), gostring("iruntime.makeSlice"))
-	emit("FUNC_PROLOGUE")
+	emit(S("FUNC_PROLOGUE"))
 	emitNewline()
 
-	emit("PUSH_ARG_2") // -8
-	emit("PUSH_ARG_1") // -16
-	emit("PUSH_ARG_0") // -24
+	emit(S("PUSH_ARG_2")) // -8
+	emit(S("PUSH_ARG_1")) // -16
+	emit(S("PUSH_ARG_0")) // -24
 
-	emit("LOAD_8_FROM_LOCAL -16 # newcap")
-	emit("PUSH_8")
-	emit("LOAD_8_FROM_LOCAL -8 # unit")
-	emit("PUSH_8")
-	emit("IMUL_FROM_STACK")
-	emit("ADD_NUMBER 1 # 1 byte buffer")
+	emit(S("LOAD_8_FROM_LOCAL -16 # newcap"))
+	emit(S("PUSH_8"))
+	emit(S("LOAD_8_FROM_LOCAL -8 # unit"))
+	emit(S("PUSH_8"))
+	emit(S("IMUL_FROM_STACK"))
+	emit(S("ADD_NUMBER 1 # 1 byte buffer"))
 
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit(S("PUSH_8"))
+	emit(S("POP_TO_ARG_0"))
+	emit(S("FUNCALL iruntime.malloc"))
 
-	emit("mov -24(%%rbp), %%rbx # newlen")
-	emit("mov -16(%%rbp), %%rcx # newcap")
+	emit(S("mov -24(%%rbp), %%rbx # newlen"))
+	emit(S("mov -16(%%rbp), %%rcx # newcap"))
 
-	emit("LEAVE_AND_RET")
+	emit(S("LEAVE_AND_RET"))
 	emitNewline()
 }
