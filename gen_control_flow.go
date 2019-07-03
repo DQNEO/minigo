@@ -384,21 +384,21 @@ func (ast *StmtDefer) emit() {
 			errorft(ast.token(), S("defer should be a funcall"))
 		}
 	*/
-	labelStart := concat(gostring(makeLabel()) , S("_defer"))
-	labelEnd := concat(gostring(makeLabel()) , S("_defer"))
-	ast.label = (labelStart)
+	labelStart := concat(makeLabel() , S("_defer"))
+	labelEnd := concat(makeLabel() , S("_defer"))
+	ast.label = labelStart
 
 	emit(S("jmp %s"), labelEnd)
 	emit(S("%s: # defer start"), labelStart)
 
 	for i := 0; i < len(retRegi); i++ {
-		emit(S("push %%%s"), gostring(retRegi[i]))
+		emit(S("push %%%s"), retRegi[i])
 	}
 
 	ast.expr.emit()
 
 	for i := len(retRegi) - 1; i >= 0; i-- {
-		emit(S("pop %%%s"), gostring(retRegi[i]))
+		emit(S("pop %%%s"), retRegi[i])
 	}
 
 	emit(S("leave"))
