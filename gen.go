@@ -45,15 +45,14 @@ func writePos() {
 
 var gasIndentLevel int = 1
 
-func emit(format string, v ...interface{}) {
-	var frmt gostring = gostring(format)
+func emit(format gostring, v ...interface{}) {
 	writePos()
 
 	for i := 0; i < gasIndentLevel; i++ {
 		write(gostring("  "))
 	}
 
-	s := Sprintf(frmt, v...)
+	s := Sprintf(format, v...)
 	writeln(s)
 }
 
