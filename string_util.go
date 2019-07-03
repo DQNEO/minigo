@@ -152,11 +152,6 @@ func eqGostrings(a gostring, b gostring) bool {
 	return true
 }
 
-func eqCstring(a cstring, b cstring) bool {
-	return a == b
-}
-
-
 func Itoa(i int) []byte {
 	var r []byte
 	var tmp []byte
