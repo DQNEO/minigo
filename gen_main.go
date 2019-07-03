@@ -12,14 +12,14 @@ func (program *Program) emitSpecialStrings() {
 	emit("# special strings")
 
 	// emit builtin string
-	emitWithoutIndent(".%s:", gostring(builtinStringKey1))
+	emitWithoutIndent(S(".%s:"), gostring(builtinStringKey1))
 	emit(".string \"%s\"", gostring(builtinStringValue1))
-	emitWithoutIndent(".%s:", gostring(builtinStringKey2))
+	emitWithoutIndent(S(".%s:"), gostring(builtinStringKey2))
 	emit(".string \"%s\"", gostring(builtinStringValue2))
 
 	// empty string
 	eEmptyString.slabel = S("empty")
-	emitWithoutIndent(".empty:")
+	emitWithoutIndent(S(".empty:"))
 	emit(".string \"%s\"", eEmptyString.val)
 }
 
@@ -28,16 +28,16 @@ func (program *Program) emitDynamicTypes() {
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitWithoutIndent(".%s:", gostring(label))
+		emitWithoutIndent(S(".%s:"), gostring(label))
 		emit(".string \"%s\"", gostring(gs))
 	}
 }
 
 func (program *Program) emitMethodTable() {
-	emitWithoutIndent("#--------------------------------------------------------")
+	emitWithoutIndent(S("#--------------------------------------------------------"))
 	emit("# Method table")
 	emit(".data 0")
-	emitWithoutIndent("%s:", S("receiverTypes"))
+	emitWithoutIndent(S("%s:"), S("receiverTypes"))
 	emit(".quad 0 # receiverTypeId:0")
 	var i int
 	for i = 1; i <= len(program.methodTable); i++ {
@@ -47,7 +47,7 @@ func (program *Program) emitMethodTable() {
 	var shortMethodNames []gostring
 
 	for i = 1; i <= len(program.methodTable); i++ {
-		emitWithoutIndent("receiverType%d:", i)
+		emitWithoutIndent(S("receiverType%d:"), i)
 		methods, ok := program.methodTable[i]
 		if !ok {
 			// This seems not to be harmful? I'm not 100% sure.
@@ -76,8 +76,8 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	emitWithoutIndent("#--------------------------------------------------------")
-	emitWithoutIndent("# Short method names")
+	emitWithoutIndent(S("#--------------------------------------------------------"))
+	emitWithoutIndent(S("# Short method names"))
 	for _, shortMethodName := range shortMethodNames {
 		emit(".data 0")
 		emit(".S.S.%s:", gostring(shortMethodName))
@@ -102,19 +102,19 @@ func (program *Program) emit() {
 	program.emitDynamicTypes()
 	program.emitMethodTable()
 
-	emitWithoutIndent(".text")
+	emitWithoutIndent(S(".text"))
 	emitRuntimeArgs()
 	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
 
 	// emit packages
 	for _, pkg := range program.packages {
-		emitWithoutIndent("#--------------------------------------------------------")
-		emitWithoutIndent("# package %s", gostring(pkg.name))
-		emitWithoutIndent("# string literals")
-		emitWithoutIndent(".data 0")
+		emitWithoutIndent(S("#--------------------------------------------------------"))
+		emitWithoutIndent(S("# package %s"), gostring(pkg.name))
+		emitWithoutIndent(S("# string literals"))
+		emitWithoutIndent(S(".data 0"))
 		for _, ast := range pkg.stringLiterals {
-			emitWithoutIndent(".%s:", ast.slabel)
+			emitWithoutIndent(S(".%s:"), ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
 			emit(".string \"%s\"", ast.val)
@@ -126,7 +126,7 @@ func (program *Program) emit() {
 		}
 		emitNewline()
 
-		emitWithoutIndent(".text")
+		emitWithoutIndent(S(".text"))
 		for _, funcdecl := range pkg.funcs {
 			funcdecl.emit()
 			emitNewline()
@@ -137,7 +137,7 @@ func (program *Program) emit() {
 }
 
 func emitRuntimeArgs() {
-	emitWithoutIndent(".runtime_args:")
+	emitWithoutIndent(S(".runtime_args:"))
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
@@ -152,7 +152,7 @@ func emitRuntimeArgs() {
 func emitMainFunc(importOS bool) {
 	fname := S("main")
 	emit(".global	%s", fname)
-	emitWithoutIndent("%s:", fname)
+	emitWithoutIndent(S("%s:"), fname)
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 

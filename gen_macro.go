@@ -1,7 +1,7 @@
 package main
 
 func emitMacroDefinitions() {
-	emitWithoutIndent("// MACROS")
+	emitWithoutIndent(S("// MACROS"))
 
 	macroStart(S("FUNC_PROLOGUE"), S(""))
 	emit("push %%rbp")
@@ -272,10 +272,10 @@ func emitMacroDefinitions() {
 }
 
 func macroStart(name gostring, args gostring) {
-	emitWithoutIndent(".macro %s %s", name, args)
+	emitWithoutIndent(S(".macro %s %s"), name, args)
 }
 
 func macroEnd() {
-	emitWithoutIndent(".endm")
+	emitWithoutIndent(S(".endm"))
 	emitNewline()
 }

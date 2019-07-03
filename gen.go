@@ -57,7 +57,7 @@ func emit(format string, v ...interface{}) {
 	writeln(s)
 }
 
-func emitWithoutIndent(format string, v ...interface{}) {
+func emitWithoutIndent(format gostring, v ...interface{}) {
 	writePos()
 	s := Sprintf(gostring(format), v...)
 	writeln(s)
@@ -473,7 +473,7 @@ func (e *ExprTypeAssertion) emit() {
 		} else {
 			emit("LOAD_8_BY_DEREF")
 		}
-		emitWithoutIndent("%s:", labelEnd)
+		emitWithoutIndent(S("%s:"), labelEnd)
 	}
 }
 
