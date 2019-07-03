@@ -1,5 +1,7 @@
 package main
 
+type mapToIdentToMethods map[identifier]methods
+
 type AstPackage struct {
 	name              goidentifier
 	scope             *Scope
@@ -11,7 +13,7 @@ type AstPackage struct {
 	stringLiterals    []*ExprStringLiteral
 	vars              []*DeclVar
 	funcs             []*DeclFunc
-	methods           map[identifier]methods
+	methods           mapToIdentToMethods
 }
 
 type AstFile struct {
@@ -26,7 +28,7 @@ type AstFile struct {
 	stringLiterals    []*ExprStringLiteral
 	dynamicTypes      []*Gtype
 	namedTypes        []*DeclType
-	methods           map[identifier]methods
+	methods           mapToIdentToMethods
 }
 
 type Expr interface {
