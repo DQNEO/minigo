@@ -714,8 +714,20 @@ func (p *parser) parseExpr() Expr {
 	return p.parseExprInt(-1)
 }
 
-var binops = []string{
-	"+","*","-", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "/", "%",
+var binops = []gostring{
+	gostring("+"),
+	gostring("*"),
+	gostring("-"),
+	gostring("=="),
+	gostring("!="),
+	gostring("<"),
+	gostring(">"),
+	gostring("<="),
+	gostring(">="),
+	gostring("&&"),
+	gostring("||"),
+	gostring("/"),
+	gostring("%"),
 }
 
 var gobinops []gostring
@@ -736,7 +748,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if inArray(tok.sval, gobinops) {
+		if inArray(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
