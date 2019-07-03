@@ -9,18 +9,18 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	var i int
-	var regi cstring
+	var regi gostring
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf(S("POP_TO_ARG_%d"), i)
 		macroStart(string(macroName), "")
-		emit("pop %%%s", gostring(regi))
+		emit("pop %%%s", regi)
 		macroEnd()
 	}
 
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf(S("PUSH_ARG_%d"), i)
 		macroStart(string(macroName), "")
-		emit("push %%%s", gostring(regi))
+		emit("push %%%s", regi)
 		macroEnd()
 	}
 

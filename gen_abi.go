@@ -15,36 +15,36 @@ package main
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
 */
 
-var retRegi [14]cstring = [14]cstring{
-	"rax",
-	"rbx",
-	"rcx",
-	"rdx",
-	"rdi",
-	"rsi",
-	"r8",
-	"r9",
-	"r10",
-	"r11",
-	"r12",
-	"r13",
-	"r14",
-	"r15",
+var retRegi [14]gostring = [14]gostring{
+	gostring("rax"),
+	gostring("rbx"),
+	gostring("rcx"),
+	gostring("rdx"),
+	gostring("rdi"),
+	gostring("rsi"),
+	gostring("r8"),
+	gostring("r9"),
+	gostring("r10"),
+	gostring("r11"),
+	gostring("r12"),
+	gostring("r13"),
+	gostring("r14"),
+	gostring("r15"),
 }
 
-var RegsForArguments [12]cstring = [12]cstring{
-	"rdi",
-	"rsi",
-	"rdx",
-	"rcx",
-	"r8",
-	"r9",
-	"r10",
-	"r11",
-	"r12",
-	"r13",
-	"r14",
-	"r15",
+var RegsForArguments [12]gostring = [12]gostring{
+	gostring("rdi"),
+	gostring("rsi"),
+	gostring("rdx"),
+	gostring("rcx"),
+	gostring("r8"),
+	gostring("r9"),
+	gostring("r10"),
+	gostring("r11"),
+	gostring("r12"),
+	gostring("r13"),
+	gostring("r14"),
+	gostring("r15"),
 }
 
 func (f *DeclFunc) prepare() Emitter {
