@@ -54,7 +54,7 @@ func (program *Program) emitMethodTable() {
 			continue
 		}
 		for _, methodNameFull := range methods {
-			if eq(methodNameFull, ".") {
+			if eq(methodNameFull, S(".")) {
 				panic("invalid method name")
 			}
 			splitted := strings_Split(methodNameFull, S("$"))

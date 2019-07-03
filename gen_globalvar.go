@@ -21,7 +21,7 @@ func (decl *DeclVar) emitData() {
 
 func (e *ExprStructLiteral) lookup(fieldname goidentifier) Expr {
 	for _, field := range e.fields {
-		if eqGostrings(gostring(field.key) , gostring(fieldname)) {
+		if eq(gostring(field.key) , gostring(fieldname)) {
 			return field.value
 		}
 	}
@@ -181,7 +181,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(S(".quad .%s"), stringLiteral.slabel)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(eqGostrings(uop.op, gostring("&")), ptok, S("only uop & is allowed"))
+			assert(eq(uop.op, gostring("&")), ptok, S("only uop & is allowed"))
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {

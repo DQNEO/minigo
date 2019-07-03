@@ -85,6 +85,7 @@ func (stmt *StmtSwitch) emit() {
 			assert(origType.getKind() == G_SLICE, nil, S("must be slice"))
 			cond = irConversion.arg // set original slice
 		}
+
 		cond.emit()
 		if cond.getGtype().is24WidthType() {
 			emit(S("PUSH_24 # the cond value"))

@@ -135,11 +135,7 @@ func concat3(a gostring, b gostring, c gostring) gostring {
 	return r
 }
 
-func eq(a gostring, b cstring) bool {
-	return eqGostrings(a, gostring(b))
-}
-
-func eqGostrings(a gostring, b gostring) bool {
+func eq(a gostring, b gostring) bool {
 	if len(a) != len(b) {
 		return false
 	}

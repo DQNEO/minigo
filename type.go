@@ -227,7 +227,7 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 	assertNotNil(strct != nil, nil)
 	assert(strct.kind == G_STRUCT, nil, S("assume G_STRUCT type"))
 	for _, field := range strct.fields {
-		if eqGostrings(gostring(field.fieldname), gostring(name)) {
+		if eq(gostring(field.fieldname), gostring(name)) {
 			return field
 		}
 	}
@@ -389,7 +389,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	fields := strctType.relation.gtype.fields
 	//debugf(S("fields=%v"), fields)
 	for _, field := range fields {
-		if eqGostrings(gostring(e.fieldname),  gostring(field.fieldname)) {
+		if eq(gostring(e.fieldname),  gostring(field.fieldname)) {
 			//return field.origType
 			return field
 		}

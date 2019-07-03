@@ -25,37 +25,37 @@ func parseOpts(args []gostring) []gostring {
 	var r []gostring
 
 	for _, opt := range args {
-		if eq(opt,"--version") {
+		if eq(opt,S("--version")) {
 			printVersion()
 			return nil
 		}
-		if eq(opt, "-t") {
+		if eq(opt, S("-t")) {
 			debugToken = true
 		}
-		if eq(opt, "-a") {
+		if eq(opt, S("-a")) {
 			debugAst = true
 		}
-		if eq(opt, "-p") {
+		if eq(opt, S("-p")) {
 			debugParser = true
 		}
-		if eq(opt, "--position") {
+		if eq(opt, S("--position")) {
 			emitPosition = true
 		}
-		if eq(opt, "-d") {
+		if eq(opt, S("-d")) {
 			debugMode = true
 		}
-		if eq(opt, "--tokenize-only") {
+		if eq(opt, S("--tokenize-only")) {
 			tokenizeOnly = true
 		}
-		if eq(opt, "--parse-only") {
+		if eq(opt, S("--parse-only")) {
 			parseOnly = true
 		}
-		if eq(opt, "--resolve-only") {
+		if eq(opt, S("--resolve-only")) {
 			resolveOnly = true
 		}
 		if strings_HasSuffix(opt, S(".go")) {
 			r = append(r, gostring(opt))
-		} else if eq(opt, "-") {
+		} else if eq(opt, S("-")) {
 			return []gostring{gostring("/dev/stdin")}
 		}
 	}
