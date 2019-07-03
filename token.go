@@ -87,7 +87,7 @@ func (tok *Token) isIdent(s gostring) bool {
 
 func (tok *Token) getIdent() goidentifier {
 	if !tok.isTypeIdent() {
-		errorft(tok, "ident expeced, but got %v", tok)
+		errorft(tok, S("ident expeced, but got %v"), tok)
 	}
 	return goidentifier(tok.sval)
 }

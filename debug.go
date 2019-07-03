@@ -26,11 +26,11 @@ var debugNest int
 
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
-	errorft(tok, "(To Be Implemented) "+format, v...)
+	errorft(tok, concat(S("(To Be Implemented) "), gostring(format)), v...)
 }
 
 // errorf with a position token
-func errorft(tok *Token, format string, v ...interface{}) {
+func errorft(tok *Token, format gostring, v ...interface{}) {
 	var format2 gostring = gostring(format)
 	var tokString gostring
 	if tok != nil {

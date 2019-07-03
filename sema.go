@@ -15,7 +15,7 @@ func makeDynamicTypeLabel(id int) gostring {
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) gostring {
 	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
-		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
+		errorft(nil, S("type %s not found in uniquedDTypes"), gtype.String())
 	}
 	return makeDynamicTypeLabel(dynamicTypeId)
 }
@@ -37,7 +37,7 @@ func resolve(sc *Scope, rel *Relation) *IdentBody {
 		} else if relbody.expr != nil {
 			rel.expr = relbody.expr
 		} else {
-			errorft(rel.token(), "Bad type relbody %v", relbody)
+			errorft(rel.token(), S("Bad type relbody %v"), relbody)
 		}
 	}
 	return relbody
@@ -50,7 +50,7 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 		for _, rel := range file.unresolved {
 			relbody := resolve(packageScope, rel)
 			if relbody == nil {
-				errorft(rel.token(), "unresolved identifier %s", rel.name)
+				errorft(rel.token(), S("unresolved identifier %s"), rel.name)
 			}
 		}
 	}

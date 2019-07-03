@@ -270,7 +270,7 @@ func (ast *ExprBinop) emit() {
 		emit(S("mov $0, %%rdx # init %%rdx"))
 		emit(S("div %%rcx"))
 	default:
-		errorft(ast.token(), "Unknown binop: %s", op)
+		errorft(ast.token(), S("Unknown binop: %s"), op)
 	}
 }
 
@@ -438,7 +438,7 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e ExprArrayLiteral) emit() {
-	errorft(e.token(), "DO NOT EMIT")
+	errorft(e.token(), S("DO NOT EMIT"))
 }
 
 // https://golang.org/ref/spec#Type_assertions
@@ -507,7 +507,7 @@ func (e *IrExprConversion) emit() {
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorft(e.token(), "This cannot be emitted alone")
+	errorft(e.token(), S("This cannot be emitted alone"))
 }
 
 func (e *ExprTypeSwitchGuard) emit() {
@@ -538,7 +538,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
+		errorft(e.token(), S("variable cannot be inteppreted at compile time :%#v"), e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
 		switch cstring(binop.op) {
@@ -557,7 +557,7 @@ func evalIntExpr(e Expr) int {
 		}
 		return evalIntExpr(cnst.val)
 	default:
-		errorft(e.token(), "unkown type %T", e)
+		errorft(e.token(), S("unkown type %T"), e)
 	}
 	return 0
 }

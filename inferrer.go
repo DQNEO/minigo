@@ -32,7 +32,7 @@ func (variable *ExprVariable) infer() {
 
 	rel, ok := e.(*Relation)
 	if !ok {
-		errorft(e.token(), "unexpected type %T", e)
+		errorft(e.token(), S("unexpected type %T"), e)
 	}
 	vr, ok := rel.expr.(*ExprVariable)
 	vr.infer() // recursive call
@@ -83,7 +83,7 @@ func (clause *ForRangeClause) infer() {
 		} else if collectionType.getKind() == G_MAP {
 			elementType = collectionType.mapValue
 		} else {
-			errorft(clause.token(), "internal error")
+			errorft(clause.token(), S("internal error"))
 		}
 		//debugf(S("for i, v %s := rannge %v"), elementType, collectionType)
 		valuevar.gtype = elementType
@@ -104,7 +104,7 @@ func (ast *StmtShortVarDecl) infer() {
 				fcall := fcallOrConversion
 				funcdef := fcall.getFuncDef()
 				if funcdef == nil {
-					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
+					errorft(fcall.token(), S("funcdef of %s is not found"), fcall.fname)
 				}
 				if funcdef == builtinLen {
 					rightTypes = append(rightTypes, gInt)
@@ -136,11 +136,11 @@ func (ast *StmtShortVarDecl) infer() {
 			}
 		default:
 			if rightExpr == nil {
-				errorft(ast.token(), "rightExpr is nil")
+				errorft(ast.token(), S("rightExpr is nil"))
 			}
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
-				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
+				errorft(ast.token(), S("rightExpr %T gtype is nil"), rightExpr)
 			}
 			//debugf(S("infered type %s"), gtype)
 			rightTypes = append(rightTypes, gtype)
@@ -149,7 +149,7 @@ func (ast *StmtShortVarDecl) infer() {
 
 	if len(ast.lefts) > len(rightTypes) {
 		// @TODO this check is too loose.
-		errorft(ast.tok, "number of lhs and rhs does not match (%d <=> %d)", len(ast.lefts), len(rightTypes))
+		errorft(ast.tok, S("number of lhs and rhs does not match (%d <=> %d)"), len(ast.lefts), len(rightTypes))
 	}
 	for i, e := range ast.lefts {
 		rel := e.(*Relation) // a brand new rel

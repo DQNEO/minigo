@@ -32,7 +32,7 @@ func emitSavePrimitive(lhs Expr) {
 		lhs.(*ExprUop).emitSavePrimitive()
 	default:
 		lhs.dump()
-		errorft(lhs.token(), "Unknown case %T", lhs)
+		errorft(lhs.token(), S("Unknown case %T"), lhs)
 	}
 }
 
@@ -50,9 +50,9 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
 	case *ExprUop:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
+		errorft(lhs.token(), S("unkonwn type %T"), lhs)
 	default:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
+		errorft(lhs.token(), S("unkonwn type %T"), lhs)
 	}
 }
 
@@ -170,7 +170,7 @@ func emitSave24(lhs Expr, offset int) {
 		indexExpr := lhs.(*ExprIndex)
 		indexExpr.emitSave24()
 	default:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
+		errorft(lhs.token(), S("unkonwn type %T"), lhs)
 	}
 }
 

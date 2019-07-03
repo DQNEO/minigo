@@ -112,7 +112,7 @@ func (e *ExprCap) emit() {
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case G_MAP:
-		errorft(arg.token(), "invalid argument for cap")
+		errorft(arg.token(), S("invalid argument for cap"))
 	case G_STRING:
 		TBI(arg.token(), "unable to handle %T", arg)
 	default:

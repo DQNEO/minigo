@@ -5,7 +5,7 @@ func emitAssignMultiToMulti(ast *StmtAssignment) {
 	emit(S("# emitAssignMultiToMulti"))
 	// The number of operands on the left hand side must match the number of values.
 	if len(ast.lefts) != len(ast.rights) {
-		errorft(ast.token(), "number of exprs does not match")
+		errorft(ast.token(), S("number of exprs does not match"))
 	}
 
 	length := len(ast.lefts)
@@ -70,11 +70,11 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 
 	if leftsMayBeTwo {
 		if numLeft > 2 {
-			errorft(ast.token(), "number of exprs does not match. numLeft=%d", numLeft)
+			errorft(ast.token(), S("number of exprs does not match. numLeft=%d"), numLeft)
 		}
 	} else {
 		if numLeft != numRight {
-			errorft(ast.token(), "number of exprs does not match: %d <=> %d", numLeft, numRight)
+			errorft(ast.token(), S("number of exprs does not match: %d <=> %d"), numLeft, numRight)
 		}
 	}
 

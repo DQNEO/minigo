@@ -275,7 +275,7 @@ func (ircall *IrStaticCall) emit() {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(ircall.args[0].token(), "too many arguments")
+			errorft(ircall.args[0].token(), S("too many arguments"))
 		}
 		var j int = i
 		emit(S("POP_TO_ARG_%d"), j)

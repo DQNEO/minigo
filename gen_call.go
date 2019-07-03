@@ -39,7 +39,7 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
 	if origType == nil {
-		errorft(methodCall.token(), "origType should not be nil")
+		errorft(methodCall.token(), S("origType should not be nil"))
 	}
 
 	if origType.getKind() == G_INTERFACE {
@@ -48,7 +48,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	} else {
 		funcref, ok := methodGet(origType.methods, methodCall.fname)
 		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
+			errorft(methodCall.token(), S("method %s is not found in type %s"), methodCall.fname, methodCall.receiver.getGtype().String())
 		}
 		return funcref.funcdef.rettypes
 	}
@@ -74,7 +74,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
 	funcref, ok := methodGet(origType.methods, methodCall.fname)
 	if !ok {
-		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
+		errorft(methodCall.token(), S("method %s is not found in type %s"), methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
 	args := []Expr{methodCall.receiver}
@@ -112,7 +112,7 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	assert(relexpr != nil, funcall.token(), "relexpr should NOT be nil")
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
-		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef (%s)", funcall.fname)
+		errorft(funcall.token(), S("Compiler error: funcref is not *ExprFuncRef (%s)"), funcall.fname)
 	}
 	assertNotNil(funcref.funcdef != nil, nil)
 	return funcref.funcdef

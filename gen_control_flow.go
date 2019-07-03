@@ -378,7 +378,7 @@ func (ast *StmtDefer) emit() {
 			call := ast.expr.(*ExprFuncallOrConversion)
 			args = call.args
 		default:
-			errorft(ast.token(), "defer should be a funcall")
+			errorft(ast.token(), S("defer should be a funcall"))
 		}
 	*/
 	labelStart := concat(gostring(makeLabel()) , S("_defer"))

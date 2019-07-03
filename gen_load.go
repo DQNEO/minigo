@@ -68,7 +68,7 @@ func (a *ExprStructField) emit() {
 		field := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field, 0)
 	default:
-		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String())
+		errorft(a.token(), S("internal error: bad gtype %s"), a.strct.getGtype().String())
 	}
 }
 
@@ -97,7 +97,7 @@ func (ast *ExprVariable) emit() {
 
 	} else {
 		if ast.offset == 0 {
-			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
+			errorft(ast.token(), S("offset should not be zero for localvar %s"), ast.varname)
 		}
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
@@ -116,7 +116,7 @@ func (variable *ExprVariable) emitAddress(offset int) {
 		emit(S("LOAD_GLOBAL_ADDR %s, %d"), gostring(variable.varname), offset)
 	} else {
 		if variable.offset == 0 {
-			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
+			errorft(variable.token(), S("offset should not be zero for localvar %s"), variable.varname)
 		}
 		emit(S("LOAD_LOCAL_ADDR %d+%d"), variable.offset, offset)
 	}
@@ -171,7 +171,7 @@ func (ast *ExprUop) emit() {
 			e := ast.operand.(*ExprStructField)
 			e.emitAddress()
 		default:
-			errorft(ast.token(), "Unknown type: %T", ast.operand)
+			errorft(ast.token(), S("Unknown type: %T"), ast.operand)
 		}
 	case "*":
 		ast.operand.emit()
@@ -190,7 +190,7 @@ func (ast *ExprUop) emit() {
 		}
 		binop.emit()
 	default:
-		errorft(ast.token(), "unable to handle uop %s", ast.op)
+		errorft(ast.token(), S("unable to handle uop %s"), ast.op)
 	}
 	//debugf(S("end of emitting ExprUop"))
 
@@ -287,7 +287,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		emit(S("ADD_NUMBER %d"), offset)
 		emit(S("LOAD_8_BY_DEREF"))
 	default:
-		errorft(lhs.token(), "unkonwn type %T", lhs)
+		errorft(lhs.token(), S("unkonwn type %T"), lhs)
 	}
 }
 
