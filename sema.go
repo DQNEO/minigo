@@ -98,7 +98,7 @@ func calcStructSize(gtypes []*Gtype) {
 }
 
 func uniqueDynamicTypes(dynamicTypes []*Gtype) []gostring {
-	var r []gostring = convertCstringsToGostrings(builtinTypesAsString)
+	var r []gostring = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
 		if !inArray(gs, r) {

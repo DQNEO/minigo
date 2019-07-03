@@ -13,7 +13,13 @@ var gString = &Gtype{
 	kind: G_STRING,
 }
 
-var builtinTypesAsString []string = []string{"bool", "byte", "int", "string", "func"}
+var builtinTypesAsString []gostring = []gostring{
+	gostring("bool"),
+	gostring("byte"),
+	gostring("int"),
+	gostring("string"),
+	gostring("func"),
+}
 
 var eIota = &ExprConstVariable{
 	name: goidentifier("iota"),
