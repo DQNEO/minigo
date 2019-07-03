@@ -88,9 +88,11 @@ func (f *DeclFunc) prepare() Emitter {
 	}
 
 	var localarea int
-	for _, lvar := range f.localvars {
+	var i int
+	var lvar *ExprVariable
+	for i, lvar = range f.localvars {
 		if lvar.gtype == nil {
-			debugf(S("%s has nil gtype "), lvar.varname)
+			errorft(lvar.token(), S("i=%d %s has nil gtype"),i, lvar.varname )
 		}
 		size := lvar.gtype.getSize()
 		assert(size != 0, lvar.token(), S("size should  not be zero:%s"), lvar.gtype.String())
