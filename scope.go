@@ -55,7 +55,7 @@ func (sc *Scope) set(name goidentifier, elm *IdentBody) {
 
 func (sc *Scope) getGtype(name goidentifier) *Gtype {
 	if sc == nil {
-		errorf("sc is nil")
+		errorf(S("sc is nil"))
 	}
 	idents := sc.idents
 	elm, ok := idents[identifier(name)]
@@ -63,7 +63,7 @@ func (sc *Scope) getGtype(name goidentifier) *Gtype {
 		return nil
 	}
 	if elm.gtype == nil {
-		errorf("type %s is not defined", name)
+		errorf(S("type %s is not defined"), name)
 	}
 	return elm.gtype
 }

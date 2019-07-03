@@ -62,7 +62,7 @@ func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) 
 		var gTypeName goidentifier = goidentifier(typeName)
 		gtype := packageScope.getGtype(gTypeName)
 		if gtype == nil {
-			errorf("typaneme %s is not found in the package scope %s", typeName, packageScope.name)
+			errorf(S("typaneme %s is not found in the package scope %s"), typeName, packageScope.name)
 		}
 		gtype.methods = methods
 	}
@@ -121,7 +121,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]gostring {
 			gtype = gtype.origType
 		}
 		if gtype.relation == nil {
-			errorf("no relation for %#v", funcdecl.receiver.getGtype())
+			errorf(S("no relation for %#v"), funcdecl.receiver.getGtype())
 		}
 		typeId := gtype.relation.gtype.receiverTypeId
 		symbol := funcdecl.getSymbol()

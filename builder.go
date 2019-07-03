@@ -103,7 +103,7 @@ func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 		pkgName := goidentifier(spkgName)
 		pkgCode, ok := stdPkgs[toKey(pkgName)]
 		if !ok {
-			errorf("package '%s' is not a standard library.", spkgName)
+			errorf(S("package '%s' is not a standard library."), spkgName)
 		}
 		var codes []gostring = []gostring{gostring(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)

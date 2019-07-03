@@ -136,18 +136,18 @@ func (tn *Tokenizer) read_char() gostring {
 		case '\'':
 			sval = gostring("'")
 		default:
-			errorf("unexpected char 1:%c", c)
+			errorf(S("unexpected char 1:%c"), c)
 		}
 
 		end, _ := tn.bs.get()
 		if end != '\'' {
-			errorf("unexpected char 2:%c", end)
+			errorf(S("unexpected char 2:%c"), end)
 		}
 		return sval
 	}
 	end, _ := tn.bs.get()
 	if end != '\'' {
-		errorf("unexpected char:%c", end)
+		errorf(S("unexpected char:%c"), end)
 	}
 	return []byte{c}
 }
@@ -216,7 +216,7 @@ func (tn *Tokenizer) skipBlockComment() {
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			errorf("premature end of block comment")
+			errorf(S("premature end of block comment"))
 		}
 		if c == '*' {
 			hasReadAsterisk = true

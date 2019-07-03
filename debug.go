@@ -37,11 +37,11 @@ func errorft(tok *Token, format string, v ...interface{}) {
 		tokString = tok.String()
 	}
 	gs := concat3(format2,S("\n "), tokString)
-	errorf(string(gs), v...)
+	errorf(gs, v...)
 }
 
-func errorf(format string, v ...interface{}) {
-	s := Sprintf(gostring(format), v...)
+func errorf(format gostring, v ...interface{}) {
+	s := Sprintf(format, v...)
 	os.Stderr.Write(concat(s, S("\n")))
 	panic("")
 }

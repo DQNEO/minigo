@@ -133,7 +133,7 @@ func (gtype *Gtype) getSize() int {
 	assert(gtype.kind != G_DEPENDENT, nil, "type should be inferred")
 	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
-			errorf("relation not resolved: %s", gtype)
+			errorf(S("relation not resolved: %s"), gtype)
 		}
 		return gtype.relation.gtype.getSize()
 	} else {
@@ -173,7 +173,7 @@ func (gtype *Gtype) String() gostring {
 		return S("dependent")
 	case G_NAMED:
 		if len(gtype.relation.pkg) == 0 {
-			//errorf("pkg is empty: %s", gtype.relation.name)
+			//errorf(S("pkg is empty: %s"), gtype.relation.name)
 		}
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
 			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
@@ -218,7 +218,7 @@ func (gtype *Gtype) String() gostring {
 	case G_MAP:
 		return S("map")
 	default:
-		errorf("gtype.String() error: invalid gtype.type=%d", gtype.kind)
+		errorf(S("gtype.String() error: invalid gtype.type=%d"), gtype.kind)
 	}
 	return S("")
 }
@@ -231,7 +231,7 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 			return field
 		}
 	}
-	errorf("field %s not found in the struct", name)
+	errorf(S("field %s not found in the struct"), name)
 	return nil
 }
 
@@ -325,7 +325,7 @@ func (e *ExprUop) getGtype() *Gtype {
 	case "-":
 		return gInt
 	}
-	errorf("internal error")
+	errorf(S("internal error"))
 	return nil
 }
 
@@ -437,7 +437,7 @@ func (e *ExprBinop) getGtype() *Gtype {
 	case "-", "*", "%", "/":
 		return gInt
 	}
-	errorf("internal error")
+	errorf(S("internal error"))
 	return nil
 }
 
