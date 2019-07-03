@@ -1,10 +1,10 @@
 package main
 
 // builtin string
-var builtinStringKey1 string = "SfmtDumpInterface"
-var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\\n"
-var builtinStringKey2 string = "SfmtDumpSlice"
-var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
+var builtinStringKey1 gostring = gostring("SfmtDumpInterface")
+var builtinStringValue1 gostring = gostring("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
+var builtinStringKey2 gostring = gostring("SfmtDumpSlice")
+var builtinStringValue2 gostring = gostring("# slice = {underlying:%p,len:%d,cap:%d}")
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
@@ -12,10 +12,10 @@ func (program *Program) emitSpecialStrings() {
 	emit(S("# special strings"))
 
 	// emit builtin string
-	emitWithoutIndent(S(".%s:"), gostring(builtinStringKey1))
-	emit(S(".string \"%s\""), gostring(builtinStringValue1))
-	emitWithoutIndent(S(".%s:"), gostring(builtinStringKey2))
-	emit(S(".string \"%s\""), gostring(builtinStringValue2))
+	emitWithoutIndent(S(".%s:"), builtinStringKey1)
+	emit(S(".string \"%s\""), builtinStringValue1)
+	emitWithoutIndent(S(".%s:"), builtinStringKey2)
+	emit(S(".string \"%s\""), builtinStringValue2)
 
 	// empty string
 	eEmptyString.slabel = S("empty")
