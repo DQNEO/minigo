@@ -129,7 +129,7 @@ func (stmt *StmtSwitch) emit() {
 			for _, e := range caseClause.exprs {
 				emit(S("# Duplicate the cond value in stack"))
 
-				if stmt.needStringToSliceConversion() {
+				if e.getGtype().isString() {
 					assert(e.getGtype().isString(), e.token(), S("caseClause should be string"))
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
