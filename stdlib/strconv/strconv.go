@@ -6,7 +6,7 @@ func Atoi(s string) (int , error) {
 	return i, nil
 }
 
-func Itoa(i int) string {
+func Itoa(i int) []byte {
 	var r []byte
 	var tmp []byte
 	var isMinus bool
@@ -29,7 +29,7 @@ func Itoa(i int) string {
 	}
 
 	if len(r) == 0 {
-		r = []byte{'0'}
+		return []byte{'0'}
 	}
-	return string(r)
+	return r
 }
