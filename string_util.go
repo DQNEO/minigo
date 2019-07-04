@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 )
 
 type gostring []byte
@@ -68,7 +69,7 @@ func Sprintf(format gostring, a... interface{}) gostring {
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
-				b := Itoa(_argInt)
+				b := gostring(strconv.Itoa(_argInt))
 				blocks = append(blocks, b)
 			}
 			argIndex++
@@ -146,32 +147,4 @@ func eq(a gostring, b gostring) bool {
 		}
 	}
 	return true
-}
-
-func Itoa(i int) []byte {
-	var r []byte
-	var tmp []byte
-	var isMinus bool
-	if i < 0 {
-		i = i * -1
-		isMinus = true
-	}
-	for i>0 {
-		mod := i % 10
-		tmp = append(tmp, byte('0') + byte(mod))
-		i = i /10
-	}
-
-	if isMinus {
-		r = append(r, '-')
-	}
-
-	for j:=len(tmp)-1;j>=0;j--{
-		r = append(r, tmp[j])
-	}
-
-	if len(r) == 0 {
-		return []byte{'0'}
-	}
-	return r
 }
