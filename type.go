@@ -175,6 +175,21 @@ func (gtype *Gtype) String() gostring {
 		if len(gtype.relation.pkg) == 0 {
 			//errorf(S("pkg is empty: %s"), gtype.relation.name)
 		}
+		child := gtype.relation.gtype
+		if child != nil  {
+			switch child.kind {
+			case G_INT:
+				return S("int")
+			case G_BOOL:
+				return S("bool")
+			case G_BYTE:
+				return S("byte")
+			case G_STRING:
+				return S("string")
+			case G_FUNC:
+				return S("func")
+			}
+		}
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
 			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
 		return gs
