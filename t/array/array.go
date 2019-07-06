@@ -30,19 +30,6 @@ func f2() {
 	fmt.Printf("%d\n", larray[3])
 }
 
-func f3() {
-	var lbytes = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
-	lbytes[0] = 'H'
-	fmt.Printf("%c", lbytes[0])
-	fmt.Printf("%c", lbytes[1])
-	fmt.Printf("%c", lbytes[2])
-	fmt.Printf("%c", lbytes[3])
-	fmt.Printf("%c", lbytes[4])
-	fmt.Printf("%c", lbytes[5])
-
-	fmt.Printf("%s", lbytes)
-}
-
 func assign() {
 	var a [3]int = [3]int{10, 11, 12}
 	var b [3]int = a
@@ -65,6 +52,19 @@ func assignStrctField() {
 	dishes = bilbo.dishes
 	bilbo.dishes[2] = 0
 	fmt.Printf("%d\n", dishes[2]+13) // 16
+}
+
+func f3() {
+	var lbytes = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
+	lbytes[0] = 'H'
+	fmt.Printf("%c", lbytes[0])
+	fmt.Printf("%c", lbytes[1])
+	fmt.Printf("%c", lbytes[2])
+	fmt.Printf("%c", lbytes[3])
+	fmt.Printf("%c", lbytes[4])
+	fmt.Printf("%c", lbytes[5])
+
+	fmt.Printf("%s", lbytes)
 }
 
 func main() {
