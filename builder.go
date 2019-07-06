@@ -6,7 +6,7 @@ func parseImports(sourceFiles []gostring) []gostring {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
-	var imported []gostring = []gostring{gostring("os")}
+	var imported []gostring = []gostring{gostring("os"),gostring("strconv")}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
