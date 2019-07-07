@@ -26,7 +26,8 @@ func lworld() {
 	fmt.Printf("%c", world[4])
 	fmt.Printf("%s", "\n")
 
-	fmt.Printf("%s\n", world)
+	b := world[:]
+	fmt.Printf("%s\n", b)
 }
 
 func fappend() {

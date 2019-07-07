@@ -64,8 +64,8 @@ func f3() {
 	fmt.Printf("%c", lbytes[4])
 	fmt.Printf("%c", lbytes[5])
 
-	// This is a bit difficult for My Sprintf. skip it.
-	// fmt.Printf("%s", lbytes)
+	s := lbytes[:]
+	fmt.Printf("%s", s)
 }
 
 func main() {
