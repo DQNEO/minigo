@@ -42,7 +42,10 @@ func primitives() {
 	var i int
 	fmt.Printf("%d\n", i+15) // 0
 	var b byte
-	fmt.Printf("%d\n", b+16) // 0
+
+	var c int = b+16
+	fmt.Printf("%d\n", c) // 0
+
 	var bol bool
 	if !bol {
 		fmt.Printf("%d\n", 17)
