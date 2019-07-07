@@ -22,6 +22,8 @@ func emitOffsetSave(lhs Expr, offset int) {
 func emitSavePrimitive(lhs Expr) {
 	lhs = unwrapRel(lhs)
 	switch lhs.(type) {
+	case nil:
+		return
 	case *ExprVariable:
 		emitOffsetSavePrimitive(lhs, lhs.getGtype().getSize(), 0)
 	case *ExprIndex:

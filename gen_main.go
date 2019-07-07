@@ -39,20 +39,28 @@ func (program *Program) emitMethodTable() {
 	emit(S(".data 0"))
 	emitWithoutIndent(S("%s:"), S("receiverTypes"))
 	emit(S(".quad 0 # receiverTypeId:0"))
+	var maxId int
 	var i int
-	for i = 1; i <= len(program.methodTable); i++ {
-		emit(S(".quad receiverType%d # receiverTypeId:%d"), i, i)
+	var id int
+	for id,_ = range program.methodTable {
+		if maxId < id {
+			maxId = id
+		}
+	}
+	for i=1;i<=maxId;i++ {
+		_,ok := program.methodTable[i]
+		if ok {
+			emit(S(".quad receiverType%d # receiverTypeId:%d"), i, i)
+		} else {
+			emit(S(".quad 0"))
+		}
 	}
 
 	var shortMethodNames []gostring
 
-	for i = 1; i <= len(program.methodTable); i++ {
+	for i,v := range program.methodTable {
 		emitWithoutIndent(S("receiverType%d:"), i)
-		methods, ok := program.methodTable[i]
-		if !ok {
-			// This seems not to be harmful? I'm not 100% sure.
-			continue
-		}
+		methods := v
 		for _, methodNameFull := range methods {
 			if eq(methodNameFull, S(".")) {
 				panic("invalid method name")
