@@ -20,26 +20,35 @@ stdlib.go: stdlib/*/*.go
 minigo: *.go internal_runtime.go internal_universe.go stdlib.go /tmp/tmpfs
 	go build -o minigo *.go
 
-# 2nd gen assembly
+# assembly for 2gen
 minigo.s: minigo
 	./minigo --position [a-z]*.go > /tmp/tmpfs/minigo.s
 	cp /tmp/tmpfs/minigo.s minigo.s
 
-# 2nd gen compiler
+# 2gen compiler
 minigo2: minigo.s
 	gcc -g -no-pie -o minigo2 minigo.s
 
+# assembly for 3gen
 minigo2.s: minigo2 minigo *.go
 	./minigo2 [a-z]*.go > /tmp/tmpfs/minigo2.s
 	cp /tmp/tmpfs/minigo2.s minigo2.s
 
-selfhost: minigo2.s
-	sed -e 's|^/\*.*)\*/||' minigo.s > /tmp/tmpfs/stripped.minigo.s
-	sed -e '/^# memory-usage/d' minigo2.s > /tmp/tmpfs/stripped.minigo2.s
-	diff /tmp/tmpfs/stripped.minigo2.s /tmp/tmpfs/stripped.minigo.s && echo ok
+# 3gen compiler
+minigo3: minigo2.s
+	gcc -g -no-pie -o minigo3 minigo2.s
+
+# assembly for 4gen
+minigo3.s: minigo3 minigo *.go
+	./minigo3 [a-z]*.go > /tmp/tmpfs/minigo3.s
+	cp /tmp/tmpfs/minigo3.s minigo3.s
+
+
+selfhost: minigo3.s
+	diff /tmp/tmpfs/minigo2.s /tmp/tmpfs/minigo3.s && echo ok
 
 test: minigo minigo2
-	make vet
+	make vet selfhost
 	./test1gen.sh
 	./test2gen.sh
 	./comparison-test.sh
