@@ -164,12 +164,6 @@ func predeclareLibcFuncs(universe *Scope) {
 			pkg: libc,
 		},
 	})
-	universe.setFunc(goidentifier("sprintf"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg: libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
 	universe.setFunc(goidentifier("exit"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: libc,
