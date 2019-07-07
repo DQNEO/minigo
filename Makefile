@@ -30,7 +30,7 @@ minigo2: minigo.s
 	gcc -g -no-pie -o minigo2 minigo.s
 
 # assembly for 3gen
-minigo2.s: minigo2 minigo *.go
+minigo2.s: minigo2
 	./minigo2 [a-z]*.go > /tmp/tmpfs/minigo2.s
 	cp /tmp/tmpfs/minigo2.s minigo2.s
 
@@ -39,7 +39,7 @@ minigo3: minigo2.s
 	gcc -g -no-pie -o minigo3 minigo2.s
 
 # assembly for 4gen
-minigo3.s: minigo3 minigo *.go
+minigo3.s: minigo3
 	./minigo3 [a-z]*.go > /tmp/tmpfs/minigo3.s
 	cp /tmp/tmpfs/minigo3.s minigo3.s
 
@@ -47,7 +47,7 @@ minigo3.s: minigo3 minigo *.go
 selfhost: minigo3.s
 	diff /tmp/tmpfs/minigo2.s /tmp/tmpfs/minigo3.s && echo ok
 
-test: minigo minigo2
+test: minigo3.s
 	make vet selfhost
 	./test1gen.sh
 	./test2gen.sh
