@@ -85,6 +85,7 @@ func Sprintf(format gostring, a... interface{}) []byte {
 				}
 				blocks = append(blocks, b)
 			default:
+				dumpInterface(arg)
 				panic("Unkown type to format")
 			}
 			argIndex++
