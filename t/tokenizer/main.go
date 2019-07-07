@@ -19,7 +19,7 @@ func f3() {
 		bs: bs,
 	}
 	ident := tn.readIdentifier(c)
-	fmt.Printf("%s\n", ident)
+	fmt.Printf("%s\n", []byte(ident))
 }
 
 func f4() {
@@ -43,7 +43,7 @@ func f5() {
 	tokens := Tokenize(bs)
 	tok := tokens[0]
 	fmt.Printf("----------\n")
-	fmt.Printf("[%s]\n", tok.sval)
+	fmt.Printf("[%s]\n", []byte(tok.sval))
 }
 
 func main() {
