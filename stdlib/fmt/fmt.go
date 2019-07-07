@@ -74,6 +74,16 @@ func Sprintf(format gostring, a... interface{}) []byte {
 				_argInt = arg.(int)
 				b := gostring(strconv.Itoa(_argInt))
 				blocks = append(blocks, b)
+			case bool: // "%v"
+				var _argBool bool
+				_argBool = arg.(bool)
+				var b []byte
+				if _argBool {
+					b = []byte("true")
+				} else{
+					b = []byte("false")
+				}
+				blocks = append(blocks, b)
 			}
 			argIndex++
 			inPercent = false

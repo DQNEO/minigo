@@ -1,5 +1,5 @@
 --- f0 ---
-ok=1
+ok=true
 b=abc,len=3,cap=3
 --- f1 ---
 hello
