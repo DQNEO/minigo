@@ -64,7 +64,7 @@ func fe() {
 }
 
 func ff() {
-	fmt.Printf("%d%d\n", true, false)
+	fmt.Printf("%v%v\n", true, false)
 }
 
 func fg(a int, b int) {
