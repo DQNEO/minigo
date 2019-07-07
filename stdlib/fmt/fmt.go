@@ -84,6 +84,8 @@ func Sprintf(format gostring, a... interface{}) []byte {
 					b = []byte("false")
 				}
 				blocks = append(blocks, b)
+			default:
+				panic("Unkown type to format")
 			}
 			argIndex++
 			inPercent = false
