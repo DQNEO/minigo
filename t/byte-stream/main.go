@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func f1() {
-	path := "t/min/min.go"
+	path := S("t/min/min.go")
 	s := readFile(path)
 	_bs := ByteStream{
 		filename:  gostring(path),
@@ -15,7 +15,8 @@ func f1() {
 	bs := &_bs
 	len1 := len(bs.source)
 
-	fmt.Printf("%d\n", len1-64) // 1
+	fmt.Printf("%d\n", len1-116) // 1
+
 	var c byte
 	c, _ = bs.get()
 	fmt.Printf("%d\n", c-'p'+2)        // 2

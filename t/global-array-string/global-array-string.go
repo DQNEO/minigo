@@ -1,7 +1,9 @@
 package main
 
+import "fmt"
+
 var messages = [2]string{"hello", "world"}
 
 func main() {
-	println(messages[1])
+	fmt.Println(messages[1])
 }

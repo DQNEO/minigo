@@ -76,7 +76,7 @@ func f7() {
 func f8() {
 	s := "dummy"
 	if s == "" {
-		println("ERROR")
+		fmt.Println("ERROR")
 	}
 }
 
@@ -84,7 +84,7 @@ func f9() {
 	var s2 string
 	fmt.Printf("%s", s2)
 	if s2 == "" {
-		println("13")
+		fmt.Println("13")
 	}
 }
 

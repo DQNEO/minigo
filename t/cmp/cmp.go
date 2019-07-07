@@ -35,15 +35,15 @@ func f1() {
 
 func f2() {
 	if 1 == 0 || 1 == 1 {
-		println("7")
+		fmt.Println("7")
 	} else {
-		println("ERROR")
+		fmt.Println("ERROR")
 	}
 
 	if 1 == 1 && 1 == 0 {
-		println("ERROR")
+		fmt.Println("ERROR")
 	} else {
-		println("8")
+		fmt.Println("8")
 	}
 }
 
@@ -51,22 +51,22 @@ func f3() {
 	var flg bool
 	flg = true
 	if flg {
-		println("9")
+		fmt.Println("9")
 	}
 	if !flg {
-		println("ERROR")
+		fmt.Println("ERROR")
 	}
 	flg = false
 	if !flg {
-		println("10")
+		fmt.Println("10")
 	}
 }
 
 func f4() {
 	if 0 > 20-1 {
-		println("ERROR")
+		fmt.Println("ERROR")
 	} else {
-		println("11")
+		fmt.Println("11")
 	}
 }
 func main() {

@@ -8,7 +8,7 @@ func f1() {
 	if x == '\n' {
 		fmt.Printf("%d\n", 1)
 	} else {
-		println("error")
+		fmt.Println("error")
 	}
 }
 

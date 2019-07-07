@@ -8,6 +8,13 @@ import (
 type gostring []byte
 
 // used only in tests
+func Println(format string) {
+	b := gostring(format)
+	b = append(b, '\n')
+	os.Stdout.Write(b)
+}
+
+// used only in tests
 func Printf(format string, a ...interface{}) {
 	b := Sprintf(gostring(format), a...)
 	os.Stdout.Write(b)

@@ -122,5 +122,5 @@ func main() {
 	fi()
 	f14()
 	f15()
-	println("hello world")
+	fmt.Println("hello world")
 }

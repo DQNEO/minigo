@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var GENERATION int = 2
 
 var debugMode = true
@@ -11,7 +13,7 @@ func f1() {
 	tokens := Tokenize(bs)
 	expectedLen := 17977
 	if len(tokens) == expectedLen {
-		println("1")
+		fmt.Println("1")
 	} else {
 		panic("ERROR")
 	}

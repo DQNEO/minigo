@@ -1,13 +1,15 @@
 package main
 
+import "fmt"
+
 func f1() {
 	var x byte = 'a'
 	var e byte = 'e'
 
 	if e <= 'z' {
-		println("1")
+		fmt.Println("1")
 	} else {
-		println(x)
+		fmt.Println(x)
 	}
 }
 
@@ -16,11 +18,11 @@ func f2() {
 	var c2 byte = 'a'
 
 	if 'a' <= c1 && c1 <= 'z' {
-		println("2")
+		fmt.Println("2")
 	}
 
 	if 'a' <= c2 && c2 <= 'z' {
-		println("3")
+		fmt.Println("3")
 	}
 }
 

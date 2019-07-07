@@ -1,54 +1,56 @@
 package main
 
+import "fmt"
+
 func main() {
 	var t bool = true
 	if t {
-		println("1")
+		fmt.Println("1")
 	}
 	t = false
 	if t {
-		println("Error")
+		fmt.Println("Error")
 	}
-	println("2")
+	fmt.Println("2")
 
 	t = true
 	if t {
-		println("3")
+		fmt.Println("3")
 	} else {
-		println("Error")
+		fmt.Println("Error")
 	}
 
 	t = false
 	if t {
-		println("Error")
+		fmt.Println("Error")
 	} else {
-		println("4")
+		fmt.Println("4")
 	}
 
 	var i int
 	i = 1
 	if i == 1 {
-		println("5")
+		fmt.Println("5")
 	} else if i == 2 {
-		println("Error")
+		fmt.Println("Error")
 	} else {
-		println("Error")
+		fmt.Println("Error")
 	}
 
 	i = 2
 	if i == 1 {
-		println("Error")
+		fmt.Println("Error")
 	} else if i == 2 {
-		println("6")
+		fmt.Println("6")
 	} else {
-		println("Error")
+		fmt.Println("Error")
 	}
 
 	if i = 3; i == 1 {
-		println("Error")
+		fmt.Println("Error")
 	} else if i == 2 {
-		println("Error")
+		fmt.Println("Error")
 	} else {
-		println("7")
+		fmt.Println("7")
 	}
 }

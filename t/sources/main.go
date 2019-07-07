@@ -13,5 +13,5 @@ func main() {
 }
 
 func func5sub() {
-	println("5")
+	fmt.Println("5")
 }

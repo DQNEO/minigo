@@ -1,7 +1,12 @@
 package main
 
+import (
+	"os"
+)
+
 func f1() {
-	println("0")
+	bytes := []byte("0\n")
+	os.Stdout.Write(bytes)
 }
 
 func main() {
