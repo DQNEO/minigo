@@ -30,7 +30,7 @@ func eval() {
 func evalnested() {
 	// nested data
 	fmt.Printf("%d\n", gstruct.inner.gint)        // 12
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 13
+	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // A
 	if gstruct.inner.inner.gtrue == true {
 		fmt.Printf("14\n")
 	}
@@ -49,13 +49,13 @@ func evalnestedarary() {
 
 func assign1() {
 	gint = 19
-	gchar = 20
+	gchar = 66 // B
 	gtrue = false
 	gfalse = true
 	garray = [3]int{23, 24}
 
 	fmt.Printf("%d\n", gint)  // 19
-	fmt.Printf("%d\n", gchar) // 20
+	fmt.Printf("%d\n", gchar) // B
 	if !gtrue {
 		fmt.Printf("21\n") //21
 	}
@@ -99,11 +99,11 @@ func assign4() {
 			gtrue: true,
 			inner: MyInnerInnerStruct{
 				gtrue: true,
-				gchar: 30,
+				gchar: 67,
 			},
 		},
 	}
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // 30
+	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // C
 }
 
 func assign5() {
@@ -177,7 +177,7 @@ var gstruct = MyStruct{
 		gtrue: true,
 		inner: MyInnerInnerStruct{
 			gtrue: true,
-			gchar: 13,
+			gchar: 65,
 		},
 	},
 }
