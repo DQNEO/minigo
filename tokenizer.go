@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Tokenizer struct {
 	bs *ByteStream
 }
@@ -432,7 +434,10 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tok = tn.makeToken(T_PUNCT, gostring("<"))
 			}
 		default:
-			panic("unknown char:") // c
+			var i int = int(c)
+			fmt.Printf("[%d]\n", i)
+			msg := Sprintf(S("unknown char:%d\n"), c)
+			panic(msg)
 		}
 		if debugToken {
 			tok.dump()
