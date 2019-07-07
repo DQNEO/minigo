@@ -13,7 +13,7 @@ func Printf(format string, a ...interface{}) {
 	os.Stdout.Write(b)
 }
 
-var trash int
+var _fmt_trash int
 func Sprintf(format gostring, a... interface{}) []byte {
 	var r []byte
 	var blocks []gostring
@@ -89,7 +89,7 @@ func Sprintf(format gostring, a... interface{}) []byte {
 			r = append(r, c)
 		}
 	}
-	trash = i
-	trash = j
+	_fmt_trash = i
+	_fmt_trash = j
 	return r
 }
