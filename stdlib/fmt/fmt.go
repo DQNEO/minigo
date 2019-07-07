@@ -26,11 +26,9 @@ func Sprintf(format gostring, a... interface{}) []byte {
 	var inPercent bool
 	var argIndex int
 	//var sign byte
-	for i,c = range f {
-		//fmt.Printf("# c=%c\n", c)
-		if !inPercent && c == '%' {
+	for i, c = range f {
+		if ! inPercent && c == '%' {
 			inPercent = true
-			//fmt.Printf("# in Percent \n")
 			blocks = append(blocks, str)
 			str = nil
 			numPercent++
@@ -40,12 +38,9 @@ func Sprintf(format gostring, a... interface{}) []byte {
 			if c == '%' {
 				str = append(str,c)
 				inPercent = false
-				//fmt.Printf("# outof Percent \n")
 				continue
 			}
-			//fmt.Printf("# check arg for c=%c\n", c)
 			arg := a[argIndex]
-			//dumpInterface(arg)
 			switch arg.(type) {
 			case string:
 				var s string
@@ -54,12 +49,10 @@ func Sprintf(format gostring, a... interface{}) []byte {
 				bytes = []byte(s)
 				blocks = append(blocks, bytes)
 			case []byte:
-				//fmt.Printf("# byte\n")
 				var _arg []byte
 				_arg = arg.([]byte)
 				blocks = append(blocks, _arg)
 			case gostring:  // This case is not reached by 2nd gen compiler
-				// fmt.Printf("# gostring\n")
 				var _arg []byte
 				_arg = arg.(gostring)
 				blocks = append(blocks, _arg)
@@ -95,7 +88,6 @@ func Sprintf(format gostring, a... interface{}) []byte {
 		}
 		str = append(str,c)
 	}
-	//fmt.Printf("# blocks:%v", blocks)
 	blocks = append(blocks, str)
 	for i, str = range blocks {
 		for j, c = range str {
