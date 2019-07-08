@@ -15,10 +15,6 @@ func panic(s string) {
 	exit(1)
 }
 
-func println(s interface{}) {
-	printf("%s\n", s)
-}
-
 func print(x interface{}) {
 	printf(x)
 }

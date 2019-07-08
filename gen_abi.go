@@ -202,10 +202,6 @@ func (ircall *IrStaticCall) emit() {
 			}
 		}
 
-		if eq(ircall.symbol, S(".println")) {
-			doConvertToInterface = false
-		}
-
 		emit(S("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s"),
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
