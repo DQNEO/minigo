@@ -80,10 +80,10 @@ func collectDecls(pkg *AstPackage) {
 	}
 }
 
-func setStringLables(pkg *AstPackage, prefix string) {
+func setStringLables(pkg *AstPackage, prefix gostring) {
 	for id, sl := range pkg.stringLiterals {
 		var no int = id + 1
-		sl.slabel = Sprintf(S("%s.S%d"), gostring(prefix), no)
+		sl.slabel = Sprintf(S("%s.S%d"), prefix, no)
 	}
 }
 

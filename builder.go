@@ -163,9 +163,9 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 	for _, pkg := range packages {
 		collectDecls(pkg)
 		if pkg == universe {
-			setStringLables(pkg, "universe")
+			setStringLables(pkg, S("universe"))
 		} else {
-			setStringLables(pkg, string(pkg.name))
+			setStringLables(pkg, gostring(pkg.name))
 		}
 		for _, dt := range pkg.dynamicTypes {
 			dynamicTypes = append(dynamicTypes, dt)
