@@ -1,7 +1,9 @@
 package main
 
+type mapToIdentToMethods map[identifier]methods
+
 type AstPackage struct {
-	name              identifier
+	name              goidentifier
 	scope             *Scope
 	files             []*AstFile
 	namedTypes        []*DeclType
@@ -11,12 +13,12 @@ type AstPackage struct {
 	stringLiterals    []*ExprStringLiteral
 	vars              []*DeclVar
 	funcs             []*DeclFunc
-	methods           map[identifier]methods
+	methods           mapToIdentToMethods
 }
 
 type AstFile struct {
 	tok               *Token
-	name              string
+	name              gostring
 	packageClause     *PackageClause
 	importDecls       []*ImportDecl
 	DeclList          []*TopLevelDecl
@@ -26,7 +28,7 @@ type AstFile struct {
 	stringLiterals    []*ExprStringLiteral
 	dynamicTypes      []*Gtype
 	namedTypes        []*DeclType
-	methods           map[identifier]methods
+	methods           mapToIdentToMethods
 }
 
 type Expr interface {
@@ -47,8 +49,8 @@ type Node interface {
 }
 
 type Relation struct {
-	pkg  identifier
-	name identifier
+	pkg  goidentifier
+	name goidentifier
 	tok  *Token
 
 	// either of expr(var, const, funcref) or gtype
@@ -67,14 +69,14 @@ type ExprNumberLiteral struct {
 
 type ExprStringLiteral struct {
 	tok    *Token
-	val    string
-	slabel string
+	val    gostring
+	slabel gostring
 }
 
 // local or global variable
 type ExprVariable struct {
 	tok        *Token
-	varname    identifier
+	varname    goidentifier
 	gtype      *Gtype
 	offset     int // for local variable
 	isGlobal   bool
@@ -83,7 +85,7 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	tok       *Token
-	name      identifier
+	name      goidentifier
 	gtype     *Gtype
 	val       Expr // like ExprConstExpr ?
 	iotaIndex int  // for iota
@@ -93,27 +95,34 @@ type ExprConstVariable struct {
 type ExprFuncallOrConversion struct {
 	tok   *Token
 	rel   *Relation
-	fname string
+	fname goidentifier
 	args  []Expr
 }
 
 type ExprMethodcall struct {
 	tok      *Token
 	receiver Expr
-	fname    identifier
+	fname    goidentifier
 	args     []Expr
 }
 
 type ExprBinop struct {
 	tok   *Token
-	op    string
+	op    gostring
 	left  Expr
 	right Expr
 }
 
+type IrExprStringComparison struct {
+	tok *Token
+	op gostring
+	cstringLeft  Expr
+	cstringRight Expr
+}
+
 type ExprUop struct {
 	tok     *Token
-	op      string
+	op      gostring
 	operand Expr
 }
 
@@ -132,7 +141,7 @@ type ExprCap struct {
 // local or global
 type DeclVar struct {
 	tok      *Token
-	pkg      identifier
+	pkg      goidentifier
 	varname  *Relation
 	variable *ExprVariable
 	initval  Expr
@@ -177,9 +186,9 @@ const (
 )
 
 type LoopLabels struct {
-	labelBegin    string
-	labelEndBlock string
-	labelEndLoop  string
+	labelBegin    gostring
+	labelEndBlock gostring
+	labelEndLoop  gostring
 }
 
 type StmtFor struct {
@@ -205,7 +214,7 @@ type StmtReturn struct {
 	tok               *Token
 	exprs             []Expr
 	rettypes          []*Gtype
-	labelDeferHandler string
+	labelDeferHandler gostring
 }
 
 type StmtInc struct {
@@ -220,12 +229,12 @@ type StmtDec struct {
 
 type PackageClause struct {
 	tok  *Token
-	name identifier
+	name goidentifier
 }
 
 type ImportSpec struct {
 	tok  *Token
-	path string
+	path gostring
 }
 
 type ImportDecl struct {
@@ -245,16 +254,16 @@ type ExprFuncRef struct {
 
 type DeclFunc struct {
 	tok       *Token
-	pkg       identifier
+	pkg       goidentifier
 	receiver  *ExprVariable
-	fname     identifier
+	fname     goidentifier
 	rettypes  []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
 	body      *StmtSatementList
 	stmtDefer *StmtDefer
 	// every function has a defer handler
-	labelDeferHandler string
+	labelDeferHandler gostring
 	prologue          Emitter
 }
 
@@ -269,7 +278,7 @@ type TopLevelDecl struct {
 
 type DeclType struct {
 	tok   *Token
-	name  identifier
+	name  goidentifier
 	gtype *Gtype
 }
 
@@ -335,7 +344,7 @@ type StmtExpr struct {
 type StmtDefer struct {
 	tok   *Token
 	expr  Expr
-	label string // start of defer
+	label gostring // start of defer
 }
 
 // f( ,...slice)
@@ -366,7 +375,6 @@ type ExprCaseClause struct {
 // https://golang.org/ref/spec#Switch_statements
 type StmtSwitch struct {
 	tok          *Token
-	isTypeSwitch bool
 	cond         Expr
 	cases        []*ExprCaseClause
 	dflt         *StmtSatementList
@@ -374,7 +382,7 @@ type StmtSwitch struct {
 
 type KeyedElement struct {
 	tok   *Token
-	key   identifier // should be Expr ?
+	key   goidentifier // should be Expr ?
 	value Expr
 }
 
@@ -388,7 +396,7 @@ type ExprStructLiteral struct {
 type ExprStructField struct {
 	tok       *Token
 	strct     Expr
-	fieldname identifier
+	fieldname goidentifier
 }
 
 type MapElement struct {

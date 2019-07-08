@@ -1,49 +1,48 @@
 package main
 
-import "fmt"
 
 func f1() {
 	var l = 1
 	var g = 2
 
 	if 1 != 1 {
-		fmt.Printf("Error\n")
+		fmtPrintf(S("Error\n"))
 	}
 	if l < g {
-		fmt.Printf("%d\n", 1)
+		fmtPrintf(S("%d\n"), 1)
 	}
 	if l > g {
-		fmt.Printf("Error\n")
+		fmtPrintf(S("Error\n"))
 	}
-	fmt.Printf("%d\n", 2)
+	fmtPrintf(S("%d\n"), 2)
 	if 1 == l {
-		fmt.Printf("%d\n", 3)
+		fmtPrintf(S("%d\n"), 3)
 	}
 
 	if g == 2 {
-		fmt.Printf("%d\n", 4)
+		fmtPrintf(S("%d\n"), 4)
 	}
 
 	if 1 <= l {
-		fmt.Printf("%d\n", 5)
+		fmtPrintf(S("%d\n"), 5)
 	}
 
 	if g >= 2 {
-		fmt.Printf("%d\n", 6)
+		fmtPrintf(S("%d\n"), 6)
 	}
 }
 
 func f2() {
 	if 1 == 0 || 1 == 1 {
-		println("7")
+		fmtPrintf(S("7\n"))
 	} else {
-		println("ERROR")
+		fmtPrintf(S("ERROR\n"))
 	}
 
 	if 1 == 1 && 1 == 0 {
-		println("ERROR")
+		fmtPrintf(S("ERROR\n"))
 	} else {
-		println("8")
+		fmtPrintf(S("8\n"))
 	}
 }
 
@@ -51,22 +50,22 @@ func f3() {
 	var flg bool
 	flg = true
 	if flg {
-		println("9")
+		fmtPrintf(S("9\n"))
 	}
 	if !flg {
-		println("ERROR")
+		fmtPrintf(S("ERROR\n"))
 	}
 	flg = false
 	if !flg {
-		println("10")
+		fmtPrintf(S("10\n"))
 	}
 }
 
 func f4() {
 	if 0 > 20-1 {
-		println("ERROR")
+		fmtPrintf(S("ERROR\n"))
 	} else {
-		println("11")
+		fmtPrintf(S("11\n"))
 	}
 }
 func main() {

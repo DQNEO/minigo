@@ -2,19 +2,17 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"io/ioutil"
 )
 
 type ByteStream struct {
-	filename  string
+	filename  gostring
 	source    []byte
 	nextIndex int
 	line      int
 	column    int
 }
 
-func NewByteStreamFromString(name string, contents string) *ByteStream {
+func NewByteStreamFromString(name gostring, contents gostring) *ByteStream {
 	return &ByteStream{
 		filename:  name,
 		source:    []byte(contents),
@@ -24,7 +22,7 @@ func NewByteStreamFromString(name string, contents string) *ByteStream {
 	}
 }
 
-func NewByteStreamFromFile(path string) *ByteStream {
+func NewByteStreamFromFile(path gostring) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
 		filename:  path,
@@ -35,16 +33,12 @@ func NewByteStreamFromFile(path string) *ByteStream {
 	}
 }
 
-func readFile(filename string) []byte {
-	bytes, err := ioutil.ReadFile(filename)
+func readFile(filename gostring) []byte {
+	bytes, err := ioutil_ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
 	return bytes
-}
-
-func (bs *ByteStream) location() string {
-	return fmt.Sprintf("%s:%d:%d", bs.filename, bs.line, bs.column)
 }
 
 func (bs *ByteStream) get() (byte, error) {

@@ -1,11 +1,10 @@
 package main
 
-import "fmt"
 
 var message = "hello"
 
 func f1() {
-	fmt.Printf("%s\n", message)
+	fmtPrintf(S("%s\n"), message)
 }
 
 func f2() {
@@ -13,12 +12,12 @@ func f2() {
 	var mybytes []byte
 	mybytes = []byte(message)
 
-	fmt.Printf("%c", mybytes[0])
-	fmt.Printf("%c", mybytes[1])
-	fmt.Printf("%c", mybytes[2])
-	fmt.Printf("%c", mybytes[3])
-	fmt.Printf("%c", mybytes[4])
-	fmt.Printf("\n")
+	fmtPrintf(S("%c"), mybytes[0])
+	fmtPrintf(S("%c"), mybytes[1])
+	fmtPrintf(S("%c"), mybytes[2])
+	fmtPrintf(S("%c"), mybytes[3])
+	fmtPrintf(S("%c"), mybytes[4])
+	fmtPrintf(S("\n"))
 }
 
 var gfoo = "foo"
@@ -26,30 +25,30 @@ var gfoo = "foo"
 func f3() {
 	foo := "foo"
 	if "foo" == "foo" {
-		fmt.Printf("1\n")
+		fmtPrintf(S("1\n"))
 	}
 	if foo == foo {
-		fmt.Printf("2\n")
+		fmtPrintf(S("2\n"))
 	}
 	if "foo" == foo {
-		fmt.Printf("3\n")
+		fmtPrintf(S("3\n"))
 	}
 	if foo == "foo" {
-		fmt.Printf("4\n")
+		fmtPrintf(S("4\n"))
 	}
 	if foo == gfoo {
-		fmt.Printf("5\n")
+		fmtPrintf(S("5\n"))
 	}
 }
 
 func f4() {
 	s1 := "aaa"
 	if s1 != "bbb" {
-		fmt.Printf("6\n")
+		fmtPrintf(S("6\n"))
 	}
 
 	if s1 != "" {
-		fmt.Printf("7\n")
+		fmtPrintf(S("7\n"))
 	}
 }
 
@@ -58,33 +57,33 @@ type mystring string
 func f5() {
 	s := "8"
 	ms := mystring(s)
-	fmt.Printf("%s\n", ms) // 8
+	fmtPrintf(S("%s\n"), ms) // 8
 }
 
 func f6() {
-	fmt.Printf("%d\n", len("123456789")) // 9
+	fmtPrintf(S("%d\n"), len("123456789")) // 9
 	s := "0123456789"
-	fmt.Printf("%d\n", len(s)) // 10
+	fmtPrintf(S("%d\n"), len(s)) // 10
 }
 
 func f7() {
 	s := `11
 12`
-	fmt.Printf("%s\n", s) // 11 12
+	fmtPrintf(S("%s\n"), s) // 11 12
 }
 
 func f8() {
 	s := "dummy"
 	if s == "" {
-		println("ERROR")
+		fmtPrintf(S("ERROR\n"))
 	}
 }
 
 func f9() {
 	var s2 string
-	fmt.Printf("%s", s2)
+	fmtPrintf(S("%s"), s2)
 	if s2 == "" {
-		println("13")
+		fmtPrintf(S("13\n"))
 	}
 }
 

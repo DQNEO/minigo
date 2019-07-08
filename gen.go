@@ -6,10 +6,9 @@
 
 package main
 
-import (
-	"fmt"
-	"os"
-)
+var offset0 int = 0
+var offset8 int = 8
+var offset16 int = 16
 
 const IntSize int = 8 // 64-bit (8 bytes)
 const ptrSize int = 8
@@ -20,8 +19,7 @@ const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
 	writePos()
-	var b []byte = []byte{'\n'}
-	os.Stdout.Write(b)
+	write(S("\n"))
 }
 
 var pos *Token // current source position
@@ -34,44 +32,34 @@ func writePos() {
 	if !emitPosition {
 		return
 	}
-	var spos string
+	var spos gostring
 	if pos == nil {
-		spos = "()"
+		spos = S("()")
 	} else {
 		spos = pos.String()
 	}
-	writef("/*%s*/", spos)
-}
-
-func write(s string) {
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
-}
-
-func writef(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v...)
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
+	var b []byte
+	b = concat3(S("/*"), spos, S("*/"))
+	write(b)
 }
 
 var gasIndentLevel int = 1
 
-func emit(format string, v ...interface{}) {
+func emit(format gostring, v ...interface{}) {
 	writePos()
-
-	var format2 string = format
 
 	for i := 0; i < gasIndentLevel; i++ {
-		write("  ")
+		write(gostring("  "))
 	}
 
-	frmt := format2 + "\n"
-	writef(frmt, v...)
+	s := Sprintf(format, v...)
+	writeln(s)
 }
 
-func emitWithoutIndent(format string, v ...interface{}) {
+func emitWithoutIndent(format gostring, v ...interface{}) {
 	writePos()
-	writef(format+"\n", v...)
+	s := Sprintf(gostring(format), v...)
+	writeln(s)
 }
 
 func unwrapRel(e Expr) Expr {
@@ -82,36 +70,37 @@ func unwrapRel(e Expr) Expr {
 }
 
 // Mytype.method -> Mytype#method
-func getMethodUniqueName(gtype *Gtype, fname identifier) string {
+func getMethodUniqueName(gtype *Gtype, fname goidentifier) gostring {
 	assertNotNil(gtype != nil, nil)
-	var typename identifier
+	var typename goidentifier
 	if gtype.kind == G_POINTER {
 		typename = gtype.origType.relation.name
 	} else {
 		typename = gtype.relation.name
 	}
-	return string(typename) + "$" + string(fname)
+	return Sprintf(S("%s$%s"), gostring(typename), gostring(fname))
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg identifier, fname string) string {
-	if pkg == "libc" {
+func getFuncSymbol(pkg gostring, fname gostring) gostring {
+	if eq(pkg, S("libc")) {
 		return fname
 	}
-	if pkg == "" {
-		pkg = ""
+	if len(pkg) == 0 {
+		pkg = gostring("")
 	}
-	return fmt.Sprintf("%s.%s", pkg, fname)
+	return Sprintf(S("%s.%s"), pkg, fname)
 }
 
-func (f *DeclFunc) getSymbol() string {
+func (f *DeclFunc) getSymbol() gostring {
 	if f.receiver != nil {
 		// method
-		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, f.fname))
+		fname := goidentifier(f.fname)
+		return getFuncSymbol(gostring(f.pkg), getMethodUniqueName(f.receiver.gtype, fname))
 	}
 
 	// other functions
-	return getFuncSymbol(f.pkg, string(f.fname))
+	return getFuncSymbol(gostring(f.pkg), gostring(f.fname))
 }
 
 func align(n int, m int) int {
@@ -123,60 +112,60 @@ func align(n int, m int) int {
 	}
 }
 
-func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
+func emitFuncEpilogue(labelDeferHandler gostring, stmtDefer *StmtDefer) {
 	emitNewline()
-	emit("# func epilogue")
+	emit(S("# func epilogue"))
 	// every function has a defer handler
-	emit("%s: # defer handler", labelDeferHandler)
+	emit(S("%s: # defer handler"), labelDeferHandler)
 
 	// if the function has a defer statement, jump to there
 	if stmtDefer != nil {
-		emit("jmp %s", stmtDefer.label)
+		emit(S("jmp %s"), stmtDefer.label)
 	}
 
-	emit("LEAVE_AND_RET")
+	emit(S("LEAVE_AND_RET"))
 }
 
 func emit_intcast(gtype *Gtype) {
 	if gtype.getKind() == G_BYTE {
-		emit("CAST_BYTE_TO_INT")
+		emit(S("CAST_BYTE_TO_INT"))
 	}
 }
 
-func emit_comp_primitive(inst string, binop *ExprBinop) {
-	emit("# emit_comp_primitive")
-	assert(inst != "", binop.token(), "inst shoud not be empty")
+func emit_comp_primitive(inst gostring, binop *ExprBinop) {
+	emit(S("# emit_comp_primitive"))
+	assert(len(inst) > 0 , binop.token(), S("inst shoud not be empty"))
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
 	}
-	emit("PUSH_8 # left") // left
+	emit(S("PUSH_8 # left")) // left
 	binop.right.emit()
 	if binop.right.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.right.getGtype())
 	}
-	emit("PUSH_8 # right") // right
-	emit("CMP_FROM_STACK %s", inst)
+	emit(S("PUSH_8 # right")) // right
+	emit(S("CMP_FROM_STACK %s"), inst)
 }
 
-var labelSeq = 0
+var labelSeq int = 0
 
-func makeLabel() string {
-	r := fmt.Sprintf(".L%d", labelSeq)
+func makeLabel() gostring {
+	r := Sprintf(S(".L%d"), labelSeq)
 	labelSeq++
 	return r
 }
 
 func (ast *StmtInc) emit() {
-	emitIncrDecl("ADD_NUMBER 1", ast.operand)
+	emitIncrDecl(S("ADD_NUMBER 1"), ast.operand)
 }
 func (ast *StmtDec) emit() {
-	emitIncrDecl("SUB_NUMBER 1", ast.operand)
+	emitIncrDecl(S("SUB_NUMBER 1"), ast.operand)
 }
 
 // https://golang.org/ref/spec#IncDecStmt
 // As with an assignment, the operand must be addressable or a map index expression.
-func emitIncrDecl(inst string, operand Expr) {
+func emitIncrDecl(inst gostring, operand Expr) {
 	operand.emit()
 	emit(inst)
 
@@ -184,94 +173,106 @@ func emitIncrDecl(inst string, operand Expr) {
 	emitSavePrimitive(left)
 }
 
+
 func (binop *ExprBinop) emitComp() {
-	emit("# emitComp")
+	emit(S("# emitComp"))
+	assert(binop.left != nil, binop.token(), S("should not be nil"))
+
 	if binop.left.getGtype().isString() {
-		binop.emitCompareStrings()
+		e := &IrExprStringComparison{
+			tok: binop.token(),
+			op: binop.op,
+			cstringLeft: binop.left,
+			cstringRight: binop.right,
+		}
+		e.emit()
 		return
 	}
 
-	var instruction string
-	switch binop.op {
+	var instruction gostring
+	op := binop.op
+	switch cstring(op) {
 	case "<":
-		instruction = "setl"
+		instruction = S("setl")
 	case ">":
-		instruction = "setg"
+		instruction = S("setg")
 	case "<=":
-		instruction = "setle"
+		instruction = S("setle")
 	case ">=":
-		instruction = "setge"
+		instruction = S("setge")
 	case "!=":
-		instruction = "setne"
+		instruction = S("setne")
 	case "==":
-		instruction = "sete"
+		instruction = S("sete")
+	default:
+		assertNotReached(binop.token())
 	}
 
 	emit_comp_primitive(instruction, binop)
 }
 
 func (ast *ExprBinop) emit() {
-	if ast.op == "+" && ast.left.getGtype().isString() {
+	if eq(ast.op , gostring("+")) && ast.left.getGtype().isString() {
 		emitStringConcate(ast.left, ast.right)
 		return
 	}
-	switch ast.op {
+	switch cstring(ast.op) {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
 	case "&&":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("TEST_IT")
-		emit("LOAD_NUMBER 0")
-		emit("je %s", labelEnd)
+		emit(S("TEST_IT"))
+		emit(S("LOAD_NUMBER 0"))
+		emit(S("je %s"), labelEnd)
 		ast.right.emit()
-		emit("TEST_IT")
-		emit("LOAD_NUMBER 0")
-		emit("je %s", labelEnd)
-		emit("LOAD_NUMBER 1")
-		emit("%s:", labelEnd)
+		emit(S("TEST_IT"))
+		emit(S("LOAD_NUMBER 0"))
+		emit(S("je %s"), labelEnd)
+		emit(S("LOAD_NUMBER 1"))
+		emit(S("%s:"), labelEnd)
 		return
 	case "||":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("TEST_IT")
-		emit("LOAD_NUMBER 1")
-		emit("jne %s", labelEnd)
+		emit(S("TEST_IT"))
+		emit(S("LOAD_NUMBER 1"))
+		emit(S("jne %s"), labelEnd)
 		ast.right.emit()
-		emit("TEST_IT")
-		emit("LOAD_NUMBER 1")
-		emit("jne %s", labelEnd)
-		emit("LOAD_NUMBER 0")
-		emit("%s:", labelEnd)
+		emit(S("TEST_IT"))
+		emit(S("LOAD_NUMBER 1"))
+		emit(S("jne %s"), labelEnd)
+		emit(S("LOAD_NUMBER 0"))
+		emit(S("%s:"), labelEnd)
 		return
 	}
 	ast.left.emit()
-	emit("PUSH_8")
+	emit(S("PUSH_8"))
 	ast.right.emit()
-	emit("PUSH_8")
+	emit(S("PUSH_8"))
 
 	op := ast.op
-	switch op {
+	switch cstring(op) {
 	case "+":
-		emit("SUM_FROM_STACK")
+		emit(S("SUM_FROM_STACK"))
 	case "-":
-		emit("SUB_FROM_STACK")
+		emit(S("SUB_FROM_STACK"))
 	case "*":
-		emit("IMUL_FROM_STACK")
+		emit(S("IMUL_FROM_STACK"))
 	case "%":
-		emit("pop %%rcx")
-		emit("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
-		emit("mov %%rdx, %%rax")
+		emit(S("pop %%rcx"))
+		emit(S("pop %%rax"))
+		emit(S("mov $0, %%rdx # init %%rdx"))
+		emit(S("div %%rcx"))
+		emit(S("mov %%rdx, %%rax"))
 	case"/":
-		emit("pop %%rcx")
-		emit("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
+		emit(S("pop %%rcx"))
+		emit(S("pop %%rax"))
+		emit(S("mov $0, %%rdx # init %%rdx"))
+		emit(S("div %%rcx"))
 	default:
-		errorft(ast.token(), "Unknown binop: %s", op)
+		errorft(ast.token(), S("Unknown binop: %s"), op)
 	}
 }
 
@@ -280,26 +281,26 @@ func isUnderScore(e Expr) bool {
 	if !ok {
 		return false
 	}
-	return rel.name == "_"
+	return eq(gostring(rel.name), gostring("_"))
 }
 
 // expect rhs address is in the stack top, lhs is in the second top
 func emitCopyStructFromStack(size int) {
-	emit("pop %%rbx") // to
-	emit("pop %%rax") // from
+	emit(S("pop %%rbx")) // to
+	emit(S("pop %%rax")) // from
 
 	var i int
 	for ; i < size; i += 8 {
-		emit("movq %d(%%rbx), %%rcx", i)
-		emit("movq %%rcx, %d(%%rax)", i)
+		emit(S("movq %d(%%rbx), %%rcx"), i)
+		emit(S("movq %%rcx, %d(%%rax)"), i)
 	}
 	for ; i < size; i += 4 {
-		emit("movl %d(%%rbx), %%rcx", i)
-		emit("movl %%rcx, %d(%%rax)", i)
+		emit(S("movl %d(%%rbx), %%rcx"), i)
+		emit(S("movl %%rcx, %d(%%rax)"), i)
 	}
 	for ; i < size; i++ {
-		emit("movb %d(%%rbx), %%rcx", i)
-		emit("movb %%rcx, %d(%%rax)", i)
+		emit(S("movb %d(%%rbx), %%rcx"), i)
+		emit(S("movb %%rcx, %d(%%rax)"), i)
 	}
 }
 
@@ -307,9 +308,9 @@ const sliceOffsetForLen = 8
 
 func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit(S("PUSH_8"))
+	emit(S("POP_TO_ARG_0"))
+	emit(S("FUNCALL iruntime.malloc"))
 }
 
 func emitCallMalloc(size int) {
@@ -320,39 +321,47 @@ func emitCallMalloc(size int) {
 }
 
 func (e *IrExprConversionToInterface) emit() {
-	emit("# IrExprConversionToInterface")
+	emit(S("# IrExprConversionToInterface"))
 	emitConversionToInterface(e.arg)
 }
 
 func emitConversionToInterface(dynamicValue Expr) {
 	receiverType := dynamicValue.getGtype()
 	if receiverType == nil {
-		emit("# receiverType is nil. emit nil for interface")
-		emit("LOAD_EMPTY_INTERFACE")
+		emit(S("# receiverType is nil. emit nil for interface"))
+		emit(S("LOAD_EMPTY_INTERFACE"))
 		return
 	}
 
-	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
+	emit(S("# emitConversionToInterface from %s"), dynamicValue.getGtype().String())
 	dynamicValue.emit()
-	emit("PUSH_8")
-	emitCallMalloc(8)
-	emit("PUSH_8")
-	emit("STORE_8_INDIRECT_FROM_STACK")
-	emit("PUSH_8 # addr of dynamicValue") // address
+	if dynamicValue.getGtype().is24WidthType() {
+		emit(S("PUSH_24"))
+		emitCallMalloc(24)
+		emit(S("PUSH_8"))
+		emit(S("STORE_24_INDIRECT_FROM_STACK"))
+	} else {
+		emit(S("PUSH_8"))
+		emitCallMalloc(8)
+		emit(S("PUSH_8"))
+		emit(S("STORE_8_INDIRECT_FROM_STACK"))
+	}
+
+	emit(S("PUSH_8 # addr of dynamicValue")) // address
 
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
-	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
-	emit("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
-	emit("PUSH_8 # receiverTypeId")
+	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), S("no receiverTypeId"))
+	emit(S("LOAD_NUMBER %d # receiverTypeId"), receiverType.receiverTypeId)
+	emit(S("PUSH_8 # receiverTypeId"))
 
 	gtype := dynamicValue.getGtype()
 	label := symbolTable.getTypeLabel(gtype)
-	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
-	emit("PUSH_8 # dynamicType")
+	emit(S("lea .%s, %%rax# dynamicType %s"), label, gtype.String())
+	emit(S("PUSH_8 # dynamicType"))
 
-	emit("POP_INTERFACE")
+	emit(S("POP_INTERFACE"))
 	emitNewline()
 }
 
@@ -371,7 +380,7 @@ func (decl *DeclVar) emit() {
 }
 
 func (decl *DeclVar) emitLocal() {
-	emit("# DeclVar \"%s\"", decl.variable.varname)
+	emit(S("# DeclVar \"%s\""), decl.variable.varname)
 	gtype := decl.variable.gtype
 	variable := decl.variable
 	rhs := decl.initval
@@ -400,7 +409,7 @@ func (decl *DeclConst) emit() {
 func (ast *StmtSatementList) emit() {
 	for _, stmt := range ast.stmts {
 		setPos(ast.token())
-		emit("# Statement")
+		emit(S("# Statement"))
 		gasIndentLevel++
 		stmt.emit()
 		gasIndentLevel--
@@ -408,12 +417,12 @@ func (ast *StmtSatementList) emit() {
 }
 
 func (e *ExprIndex) emit() {
-	emit("# emit *ExprIndex")
+	emit(S("# emit *ExprIndex"))
 	e.emitOffsetLoad(0)
 }
 
 func (e *ExprNilLiteral) emit() {
-	emit("LOAD_NUMBER 0 # nil literal")
+	emit(S("LOAD_NUMBER 0 # nil literal"))
 }
 
 func (s *StmtShortVarDecl) emit() {
@@ -427,41 +436,45 @@ func (s *StmtShortVarDecl) emit() {
 }
 
 func (f *ExprFuncRef) emit() {
-	emit("LOAD_NUMBER 1 # funcref") // emit 1 for now.  @FIXME
+	emit(S("LOAD_NUMBER 1 # funcref")) // emit 1 for now.  @FIXME
 }
 
 func (e ExprArrayLiteral) emit() {
-	errorft(e.token(), "DO NOT EMIT")
+	errorft(e.token(), S("DO NOT EMIT"))
 }
 
 // https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
-	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), "expr must be an Interface type")
+	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), S("expr must be an Interface type"))
 	if e.gtype.getKind() == G_INTERFACE {
-		TBI(e.token(), "")
+		TBI(e.token(), S(""))
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.
 
 		e.expr.emit() // emit interface
-		// rax(ptr), rbx(receiverTypeId of method table), rcx(hashed receiverTypeId)
-		emit("PUSH_8")
-		// @TODO DRY with type switch statement
-		typeLabel := symbolTable.getTypeLabel(e.gtype)
-		emit("lea .%s(%%rip), %%rax # type: %s", typeLabel, e.gtype.String())
+		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
+		emit(S("PUSH_8 # push dynamic data"))
 
-		emit("push %%rcx") // @TODO ????
-		emit("PUSH_8")
-		emitStringsEqualFromStack(true)
+		emit(S("push %%rcx # push dynamic type addr"))
+		emitCompareDynamicTypeFromStack(e.gtype)
 
-		emit("mov %%rax, %%rbx") // move flag @TODO: this is BUG in slice,map cases
-		// @TODO consider big data like slice, struct, etd
-		emit("pop %%rax # load ptr")
-		emit("TEST_IT")
+		// move ok value
+		if e.gtype.is24WidthType() {
+			emit(S("mov %%rax, %%rdx"))
+		} else {
+			emit(S("mov %%rax, %%rbx"))
+		}
+		emit(S("pop %%rax # load dynamic data"))
+		emit(S("TEST_IT"))
 		labelEnd := makeLabel()
-		emit("je %s # jmp if nil", labelEnd)
-		emit("LOAD_8_BY_DEREF")
-		emitWithoutIndent("%s:", labelEnd)
+		emit(S("je %s # exit if nil"), labelEnd)
+		if e.gtype.is24WidthType() {
+			emit(S("LOAD_24_BY_DEREF"))
+		} else {
+			emit(S("LOAD_8_BY_DEREF"))
+		}
+		emitWithoutIndent(S("%s:"), labelEnd)
 	}
 }
 
@@ -475,41 +488,46 @@ func (e *ExprVaArg) emit() {
 }
 
 func (e *IrExprConversion) emit() {
-	emit("# IrExprConversion.emit()")
-	if e.toGtype.isString() {
-		// s = string(bytes)
+	emit(S("# IrExprConversion.emit()"))
+	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isString() {
+		emit(S("# convert slice to string"))
+		// string(bytes)
 		labelEnd := makeLabel()
-		e.arg.emit()
-		emit("TEST_IT")
-		emit("jne %s", labelEnd)
+		e.arg.emit()    // load slice
+		emit(S("TEST_IT")) // check if ptr is nil
+		emit(S("jne %s # exit if not nil"), labelEnd)
+		emit(S("# if nil then"))
 		emitEmptyString()
-		emit("%s:", labelEnd)
+		emit(S("%s:"), labelEnd)
+	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
+		//  []byte(cstring)
+		cstring := e.arg
+		emitConvertCstringToSlice(cstring)
 	} else {
 		e.arg.emit()
 	}
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorft(e.token(), "This cannot be emitted alone")
+	errorft(e.token(), S("This cannot be emitted alone"))
 }
 
 func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
-	emit("mov %%rcx, %%rax # copy type id")
 }
 
-func bool2string(bol bool) string {
+func bool2string(bol bool) gostring {
 	if bol {
-		return "true"
+		return S("true")
 	} else {
-		return "false"
+		return S("false")
 	}
 }
 
 func (f *DeclFunc) emit() {
 	f.prologue.emit()
 	f.body.emit()
-	emit("mov $0, %%rax")
+	emit(S("mov $0, %%rax"))
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
 
@@ -518,14 +536,14 @@ func evalIntExpr(e Expr) int {
 
 	switch e.(type) {
 	case nil:
-		errorf("e is nil")
+		errorf(S("e is nil"))
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
+		errorft(e.token(), S("variable cannot be inteppreted at compile time :%#v"), e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
-		switch binop.op {
+		switch cstring(binop.op) {
 		case "+":
 			return evalIntExpr(binop.left) + evalIntExpr(binop.right)
 		case "-":
@@ -541,7 +559,7 @@ func evalIntExpr(e Expr) int {
 		}
 		return evalIntExpr(cnst.val)
 	default:
-		errorft(e.token(), "unkown type %T", e)
+		errorft(e.token(), S("unkown type %T"), e)
 	}
 	return 0
 }

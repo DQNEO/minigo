@@ -1,75 +1,101 @@
 package main
 
-import (
-	"strings"
-)
-
 // builtin string
-var builtinStringKey1 string = "SfmtDumpInterface"
-var builtinStringValue1 string = "# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}\\n"
-var builtinStringKey2 string = "SfmtDumpSlice"
-var builtinStringValue2 string = "# slice = {underlying:%p,len:%d,cap:%d}\\n"
+var builtinStringKey1 gostring = gostring("SfmtDumpInterface")
+var builtinStringValue1 gostring = gostring("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
+var builtinStringKey2 gostring = gostring("SfmtDumpSlice")
+var builtinStringValue2 gostring = gostring("# slice = {underlying:%p,len:%d,cap:%d}")
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
-	emit(".data 0")
-	emit("# special strings")
+	emit(S(".data 0"))
+	emit(S("# special strings"))
 
 	// emit builtin string
-	emitWithoutIndent(".%s:", builtinStringKey1)
-	emit(".string \"%s\"", builtinStringValue1)
-	emitWithoutIndent(".%s:", builtinStringKey2)
-	emit(".string \"%s\"", builtinStringValue2)
+	emitWithoutIndent(S(".%s:"), builtinStringKey1)
+	emit(S(".string \"%s\""), builtinStringValue1)
+	emitWithoutIndent(S(".%s:"), builtinStringKey2)
+	emit(S(".string \"%s\""), builtinStringValue2)
 
 	// empty string
-	eEmptyString.slabel = "empty"
-	emitWithoutIndent(".%s:", eEmptyString.slabel)
-	emit(".string \"%s\"", eEmptyString.val)
+	eEmptyString.slabel = S("empty")
+	emitWithoutIndent(S(".empty:"))
+	emit(S(".string \"%s\""), eEmptyString.val)
 }
 
 func (program *Program) emitDynamicTypes() {
 	emitNewline()
-	emit("# Dynamic Types")
+	emit(S("# Dynamic Types"))
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitWithoutIndent(".%s:", label)
-		emit(".string \"%s\"", gs)
+		emitWithoutIndent(S(".%s:"), gostring(label))
+		emit(S(".string \"%s\""), gostring(gs))
 	}
 }
 
 func (program *Program) emitMethodTable() {
-	emit("# Method table")
-
-	emitWithoutIndent("%s:", "receiverTypes")
-	emit(".quad 0 # receiverTypeId:0")
-	for i := 1; i <= len(program.methodTable); i++ {
-		emit(".quad receiverType%d # receiverTypeId:%d", i, i)
+	emitWithoutIndent(S("#--------------------------------------------------------"))
+	emit(S("# Method table"))
+	emit(S(".data 0"))
+	emitWithoutIndent(S("%s:"), S("receiverTypes"))
+	emit(S(".quad 0 # receiverTypeId:0"))
+	var maxId int
+	var i int
+	var id int
+	for id,_ = range program.methodTable {
+		if maxId < id {
+			maxId = id
+		}
+	}
+	for i=1;i<=maxId;i++ {
+		_,ok := program.methodTable[i]
+		if ok {
+			emit(S(".quad receiverType%d # receiverTypeId:%d"), i, i)
+		} else {
+			emit(S(".quad 0"))
+		}
 	}
 
-	var shortMethodNames []string
+	var shortMethodNames []gostring
 
-	for i := 1; i <= len(program.methodTable); i++ {
-		emitWithoutIndent("receiverType%d:", i)
-		methods, ok := program.methodTable[i]
-		if !ok {
-			// This seems not to be harmful? I'm not 100% sure.
-			continue
-		}
+	for i,v := range program.methodTable {
+		emitWithoutIndent(S("receiverType%d:"), i)
+		methods := v
 		for _, methodNameFull := range methods {
-			splitted := strings.Split(methodNameFull, "$")
-			shortMethodName := splitted[1]
-			emit(".quad .M%s # key", shortMethodName)
-			emit(".quad %s # method", methodNameFull)
-			if !in_array(shortMethodName, shortMethodNames) {
+			if eq(methodNameFull, S(".")) {
+				panic("invalid method name")
+			}
+			splitted := strings_Split(methodNameFull, S("$"))
+			var shortMethodName gostring = splitted[1]
+			emit(S(".quad .S.S.%s # key"), gostring(shortMethodName))
+			label := makeLabel()
+			gasIndentLevel++
+			emit(S(".data 1"))
+			emit(S("%s:"), label)
+			emit(S(".quad %s # func addr"), gostring(methodNameFull))
+			gasIndentLevel--
+			emit(S(".data 0"))
+			emit(S(".quad %s # func addr addr"), label)
+
+
+			if !inArray(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
 		}
 	}
 
-	emit("# METHOD NAMES")
+	emitWithoutIndent(S("#--------------------------------------------------------"))
+	emitWithoutIndent(S("# Short method names"))
 	for _, shortMethodName := range shortMethodNames {
-		emitWithoutIndent(".M%s:", shortMethodName)
-		emit(".string \"%s\"", shortMethodName)
+		emit(S(".data 0"))
+		emit(S(".S.S.%s:"), gostring(shortMethodName))
+		gasIndentLevel++
+		emit(S(".data 1"))
+		emit(S(".S.%s:"), gostring(shortMethodName))
+		emit(S(".quad 0")) // Any value is ok. This is not referred to.
+		gasIndentLevel--
+		emit(S(".data 0"))
+		emit(S(".quad .S.%s"), gostring(shortMethodName))
 	}
 
 }
@@ -79,27 +105,27 @@ func (program *Program) emit() {
 
 	emitMacroDefinitions()
 
-	emit(".data 0")
+	emit(S(".data 0"))
 	program.emitSpecialStrings()
 	program.emitDynamicTypes()
 	program.emitMethodTable()
 
-	emitWithoutIndent(".text")
+	emitWithoutIndent(S(".text"))
 	emitRuntimeArgs()
 	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
 
 	// emit packages
 	for _, pkg := range program.packages {
-		emitWithoutIndent("#--------------------------------------------------------")
-		emitWithoutIndent("# package %s", pkg.name)
-		emitWithoutIndent("# string literals")
-		emitWithoutIndent(".data 0")
+		emitWithoutIndent(S("#--------------------------------------------------------"))
+		emitWithoutIndent(S("# package %s"), gostring(pkg.name))
+		emitWithoutIndent(S("# string literals"))
+		emitWithoutIndent(S(".data 0"))
 		for _, ast := range pkg.stringLiterals {
-			emitWithoutIndent(".%s:", ast.slabel)
+			emitWithoutIndent(S(".%s:"), ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
-			emit(".string \"%s\"", ast.val)
+			emit(S(".string \"%s\""), ast.val)
 		}
 
 		for _, vardecl := range pkg.vars {
@@ -108,7 +134,7 @@ func (program *Program) emit() {
 		}
 		emitNewline()
 
-		emitWithoutIndent(".text")
+		emitWithoutIndent(S(".text"))
 		for _, funcdecl := range pkg.funcs {
 			funcdecl.emit()
 			emitNewline()
@@ -119,42 +145,42 @@ func (program *Program) emit() {
 }
 
 func emitRuntimeArgs() {
-	emitWithoutIndent(".runtime_args:")
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	emitWithoutIndent(S(".runtime_args:"))
+	emit(S("push %%rbp"))
+	emit(S("mov %%rsp, %%rbp"))
 
-	emit("# set argv, argc, argc")
-	emit("mov runtimeArgv(%%rip), %%rax # ptr")
-	emit("mov runtimeArgc(%%rip), %%rbx # len")
-	emit("mov runtimeArgc(%%rip), %%rcx # cap")
+	emit(S("# set argv, argc, argc"))
+	emit(S("mov runtimeArgv(%%rip), %%rax # ptr"))
+	emit(S("mov runtimeArgc(%%rip), %%rbx # len"))
+	emit(S("mov runtimeArgc(%%rip), %%rcx # cap"))
 
-	emitFuncEpilogue(".runtime_args_noop_handler", nil)
+	emitFuncEpilogue(S(".runtime_args_noop_handler"), nil)
 }
 
 func emitMainFunc(importOS bool) {
-	fname := "main"
-	emit(".global	%s", fname)
-	emitWithoutIndent("%s:", fname)
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
+	fname := S("main")
+	emit(S(".global	%s"), fname)
+	emitWithoutIndent(S("%s:"), fname)
+	emit(S("push %%rbp"))
+	emit(S("mov %%rsp, %%rbp"))
 
-	emit("mov %%rsi, runtimeArgv(%%rip)")
-	emit("mov %%rdi, runtimeArgc(%%rip)")
-	emit("mov $0, %%rsi")
-	emit("mov $0, %%rdi")
+	emit(S("mov %%rsi, runtimeArgv(%%rip)"))
+	emit(S("mov %%rdi, runtimeArgc(%%rip)"))
+	emit(S("mov $0, %%rsi"))
+	emit(S("mov $0, %%rdi"))
 
 	// init runtime
-	emit("# init runtime")
-	emit("FUNCALL iruntime.init")
+	emit(S("# init runtime"))
+	emit(S("FUNCALL iruntime.init"))
 
 	// init imported packages
 	if importOS {
-		emit("# init os")
-		emit("FUNCALL os.init")
+		emit(S("# init os"))
+		emit(S("FUNCALL os.init"))
 	}
 
 	emitNewline()
-	emit("FUNCALL main.main")
-	//emit("FUNCALL iruntime.reportMemoryUsage")
-	emitFuncEpilogue("noop_handler", nil)
+	emit(S("FUNCALL main.main"))
+	//emit(S("FUNCALL iruntime.reportMemoryUsage"))
+	emitFuncEpilogue(S("noop_handler"), nil)
 }

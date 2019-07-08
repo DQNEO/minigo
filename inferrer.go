@@ -6,11 +6,11 @@ type Inferrer interface {
 }
 
 func inferTypes(globals []*ExprVariable, locals []Inferrer) {
-	//debugf("infering globals")
+	//debugf(S("infering globals"))
 	for _, variable := range globals {
 		variable.infer()
 	}
-	//debugf("infering locals")
+	//debugf(S("infering locals"))
 	for _, ast := range locals {
 		ast.infer()
 	}
@@ -18,7 +18,7 @@ func inferTypes(globals []*ExprVariable, locals []Inferrer) {
 
 //  infer recursively all the types of global variables
 func (variable *ExprVariable) infer() {
-	//debugf("infering ExprVariable")
+	//debugf(S("infering ExprVariable"))
 	if variable.gtype.kind != G_DEPENDENT {
 		// done
 		return
@@ -32,66 +32,66 @@ func (variable *ExprVariable) infer() {
 
 	rel, ok := e.(*Relation)
 	if !ok {
-		errorft(e.token(), "unexpected type %T", e)
+		errorft(e.token(), S("unexpected type %T"), e)
 	}
 	vr, ok := rel.expr.(*ExprVariable)
 	vr.infer() // recursive call
 	variable.gtype = e.getGtype()
-	//debugf("infered type=%s", variable.gtype)
+	//debugf(S("infered type=%s"), variable.gtype)
 }
 
 // local decl infer
 func (decl *DeclVar) infer() {
-	//debugf("infering DeclVar")
+	//debugf(S("infering DeclVar"))
 	gtype := decl.initval.getGtype()
 	assertNotNil(gtype != nil, decl.initval.token())
 	decl.variable.gtype = gtype
 }
 
 func (clause *ForRangeClause) infer() {
-	//debugf("infering ForRangeClause")
+	//debugf(S("infering ForRangeClause"))
 	collectionType := clause.rangeexpr.getGtype()
-	//debugf("collectionType = %s", collectionType)
+	//debugf(S("collectionType = %s"), collectionType)
 	indexvarRel, ok := clause.indexvar.(*Relation)
-	assert(ok, nil, "ok")
+	assert(ok, nil, S("ok"))
 	indexvar, ok := indexvarRel.expr.(*ExprVariable)
-	assert(ok, nil, "ok")
+	assert(ok, nil, S("ok"))
 
 	var indexType *Gtype
 	switch collectionType.getKind() {
 	case G_ARRAY, G_SLICE:
 		indexType = gInt
 	case G_MAP:
-		indexType = collectionType.mapKey
+		indexType = collectionType.Underlying().mapKey
 	default:
 		// @TODO consider map etc.
-		TBI(clause.tok, "unable to handle %d ", collectionType.getKind())
+		TBI(clause.tok, S("unable to handle %d "), collectionType.getKind())
 	}
 	indexvar.gtype = indexType
 
 	if clause.valuevar != nil {
 		valuevarRel, ok := clause.valuevar.(*Relation)
-		assert(ok, nil, "ok")
+		assert(ok, nil, S("ok"))
 		valuevar, ok := valuevarRel.expr.(*ExprVariable)
-		assert(ok, nil, "ok")
+		assert(ok, nil, S("ok"))
 
 		var elementType *Gtype
 		if collectionType.getKind() == G_ARRAY {
-			elementType = collectionType.elementType
+			elementType = collectionType.Underlying().elementType
 		} else if collectionType.getKind() == G_SLICE {
-			elementType = collectionType.elementType
+			elementType = collectionType.Underlying().elementType
 		} else if collectionType.getKind() == G_MAP {
-			elementType = collectionType.mapValue
+			elementType = collectionType.Underlying().mapValue
 		} else {
-			errorft(clause.token(), "internal error")
+			errorft(clause.token(), S("internal error"))
 		}
-		//debugf("for i, v %s := rannge %v", elementType, collectionType)
+		//debugf(S("for i, v %s := rannge %v"), elementType, collectionType)
 		valuevar.gtype = elementType
 	}
 }
 
 func (ast *StmtShortVarDecl) infer() {
-	//debugf("infering StmtShortVarDecl")
+	//debugf(S("infering StmtShortVarDecl"))
 	var rightTypes []*Gtype
 	for _, rightExpr := range ast.rights {
 		switch rightExpr.(type) {
@@ -104,7 +104,7 @@ func (ast *StmtShortVarDecl) infer() {
 				fcall := fcallOrConversion
 				funcdef := fcall.getFuncDef()
 				if funcdef == nil {
-					errorft(fcall.token(), "funcdef of %s is not found", fcall.fname)
+					errorft(fcall.token(), S("funcdef of %s is not found"), fcall.fname)
 				}
 				if funcdef == builtinLen {
 					rightTypes = append(rightTypes, gInt)
@@ -129,27 +129,27 @@ func (ast *StmtShortVarDecl) infer() {
 			gtype := e.getGtype()
 			assertNotNil(gtype != nil, e.tok)
 			rightTypes = append(rightTypes, gtype)
-			//debugf("rightExpr.gtype=%s", gtype)
+			//debugf(S("rightExpr.gtype=%s"), gtype)
 			secondGtype := rightExpr.(*ExprIndex).getSecondGtype()
 			if secondGtype != nil {
 				rightTypes = append(rightTypes, secondGtype)
 			}
 		default:
 			if rightExpr == nil {
-				errorft(ast.token(), "rightExpr is nil")
+				errorft(ast.token(), S("rightExpr is nil"))
 			}
 			gtype := rightExpr.getGtype()
 			if gtype == nil {
-				errorft(ast.token(), "rightExpr %T gtype is nil", rightExpr)
+				errorft(ast.token(), S("rightExpr %T gtype is nil"), rightExpr)
 			}
-			//debugf("infered type %s", gtype)
+			//debugf(S("infered type %s"), gtype)
 			rightTypes = append(rightTypes, gtype)
 		}
 	}
 
 	if len(ast.lefts) > len(rightTypes) {
 		// @TODO this check is too loose.
-		errorft(ast.tok, "number of lhs and rhs does not match (%d <=> %d)", len(ast.lefts), len(rightTypes))
+		errorft(ast.tok, S("number of lhs and rhs does not match (%d <=> %d)"), len(ast.lefts), len(rightTypes))
 	}
 	for i, e := range ast.lefts {
 		rel := e.(*Relation) // a brand new rel

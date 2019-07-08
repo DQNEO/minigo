@@ -1,46 +1,46 @@
 package main
 
-import "fmt"
 
 var hello = [5]byte{'h', 'e', 'l', 'l', 'o'}
 
 func ghello() {
-	fmt.Printf("%c", hello[0])
-	fmt.Printf("%c", hello[1])
-	fmt.Printf("%c", hello[2])
-	fmt.Printf("%c", hello[3])
-	fmt.Printf("%c", hello[4])
-	fmt.Printf("%s", "\n")
+	fmtPrintf(S("%c"), hello[0])
+	fmtPrintf(S("%c"), hello[1])
+	fmtPrintf(S("%c"), hello[2])
+	fmtPrintf(S("%c"), hello[3])
+	fmtPrintf(S("%c"), hello[4])
+	fmtPrintf(S("%s"), "\n")
 
 	s := string(hello[:])
-	fmt.Printf("%s\n", s)
+	fmtPrintf(S("%s\n"), s)
 
 }
 
 func lworld() {
 	var world = [5]byte{'w', 'o', 'r', 'l', 'd'}
-	fmt.Printf("%c", world[0])
-	fmt.Printf("%c", world[1])
-	fmt.Printf("%c", world[2])
-	fmt.Printf("%c", world[3])
-	fmt.Printf("%c", world[4])
-	fmt.Printf("%s", "\n")
+	fmtPrintf(S("%c"), world[0])
+	fmtPrintf(S("%c"), world[1])
+	fmtPrintf(S("%c"), world[2])
+	fmtPrintf(S("%c"), world[3])
+	fmtPrintf(S("%c"), world[4])
+	fmtPrintf(S("%s"), "\n")
 
-	fmt.Printf("%s\n", world)
+	b := world[:]
+	fmtPrintf(S("%s\n"), b)
 }
 
 func fappend() {
 	var chars []byte
 	chars = append(chars, '7')
 	chars = append(chars, '8')
-	fmt.Printf("%d\n", len(chars)+4) // 6
-	fmt.Printf("%c\n", chars[0])     // 7
-	fmt.Printf("%c\n", chars[1])     // 8
-	fmt.Printf("9\n")                // 9
+	fmtPrintf(S("%d\n"), len(chars)+4) // 6
+	fmtPrintf(S("%c\n"), chars[0])     // 7
+	fmtPrintf(S("%c\n"), chars[1])     // 8
+	fmtPrintf(S("9\n"))                // 9
 
 	chars[0] = '1'
 	chars[1] = '0'
-	fmt.Printf("%s\n", chars) // 10
+	fmtPrintf(S("%s\n"), chars) // 10
 }
 
 func main() {

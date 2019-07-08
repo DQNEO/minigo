@@ -1,11 +1,10 @@
 package main
 
-import "fmt"
 
 func main() {
 	f, g := getIntInt()
 	a := 1
-	b := '2'
+	b := 2 // should be '2'
 	c := "3"
 	d := User{
 		id:  4,
@@ -15,13 +14,13 @@ func main() {
 		id:  5,
 		age: 0,
 	}
-	fmt.Printf("%d\n", a)
-	fmt.Printf("%c\n", b)
-	fmt.Printf("%s\n", c)
-	fmt.Printf("%d\n", d.id)
-	fmt.Printf("%d\n", e.id)
-	fmt.Printf("%d\n", f)
-	fmt.Printf("%d\n", g)
+	fmtPrintf(S("%d\n"), a)
+	fmtPrintf(S("%c\n"), b)
+	fmtPrintf(S("%s\n"), c)
+	fmtPrintf(S("%d\n"), d.id)
+	fmtPrintf(S("%d\n"), e.id)
+	fmtPrintf(S("%d\n"), f)
+	fmtPrintf(S("%d\n"), g)
 }
 
 type User struct {

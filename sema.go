@@ -1,23 +1,21 @@
 // Semantic Analyzer to produce IR struct
 package main
 
-import "fmt"
-
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
 	allScopes     map[identifier]*Scope
-	uniquedDTypes []string
+	uniquedDTypes []gostring
 }
 
-func makeDynamicTypeLabel(id int) string {
-	return fmt.Sprintf("DynamicTypeId%d", id)
+func makeDynamicTypeLabel(id int) gostring {
+	return Sprintf(S("DynamicTypeId%d"), id)
 }
 
-func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
-	dynamicTypeId := get_index(gtype.String(), symbolTable.uniquedDTypes)
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) gostring {
+	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
-		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
+		errorft(nil, S("type %s not found in uniquedDTypes"), gtype.String())
 	}
 	return makeDynamicTypeLabel(dynamicTypeId)
 }
@@ -39,7 +37,7 @@ func resolve(sc *Scope, rel *Relation) *IdentBody {
 		} else if relbody.expr != nil {
 			rel.expr = relbody.expr
 		} else {
-			errorft(rel.token(), "Bad type relbody %v", relbody)
+			errorft(rel.token(), S("Bad type relbody %v"), relbody)
 		}
 	}
 	return relbody
@@ -52,7 +50,7 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 		for _, rel := range file.unresolved {
 			relbody := resolve(packageScope, rel)
 			if relbody == nil {
-				errorft(rel.token(), "unresolved identifier %s", rel.name)
+				errorft(rel.token(), S("unresolved identifier %s"), rel.name)
 			}
 		}
 	}
@@ -61,10 +59,10 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 // copy methods from p.nameTypes to gtype.methods of each type
 func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) {
 	for typeName, methods := range pmethods {
-		gtype := packageScope.getGtype(typeName)
+		var gTypeName goidentifier = goidentifier(typeName)
+		gtype := packageScope.getGtype(gTypeName)
 		if gtype == nil {
-			debugf("%#v", packageScope.idents)
-			errorf("typaneme %s is not found in the package scope %s", typeName, packageScope.name)
+			errorf(S("typaneme %s is not found in the package scope %s"), typeName, packageScope.name)
 		}
 		gtype.methods = methods
 	}
@@ -82,9 +80,10 @@ func collectDecls(pkg *AstPackage) {
 	}
 }
 
-func setStringLables(pkg *AstPackage, prefix string) {
+func setStringLables(pkg *AstPackage, prefix gostring) {
 	for id, sl := range pkg.stringLiterals {
-		sl.slabel = fmt.Sprintf("%s.S%d", prefix, id+1)
+		var no int = id + 1
+		sl.slabel = Sprintf(S("%s.S%d"), prefix, no)
 	}
 }
 
@@ -98,19 +97,19 @@ func calcStructSize(gtypes []*Gtype) {
 	}
 }
 
-func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
-	var r []string = builtinTypesAsString
+func uniqueDynamicTypes(dynamicTypes []*Gtype) []gostring {
+	var r []gostring = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
-		if !in_array(gs, r) {
+		if !inArray(gs, r) {
 			r = append(r, gs)
 		}
 	}
 	return r
 }
 
-func composeMethodTable(funcs []*DeclFunc) map[int][]string {
-	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
+func composeMethodTable(funcs []*DeclFunc) map[int][]gostring {
+	var methodTable map[int][]gostring = map[int][]gostring{} // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
 		if funcdecl.receiver == nil {
@@ -122,7 +121,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 			gtype = gtype.origType
 		}
 		if gtype.relation == nil {
-			errorf("no relation for %#v", funcdecl.receiver.getGtype())
+			errorf(S("no relation for %#v"), funcdecl.receiver.getGtype())
 		}
 		typeId := gtype.relation.gtype.receiverTypeId
 		symbol := funcdecl.getSymbol()
@@ -130,7 +129,7 @@ func composeMethodTable(funcs []*DeclFunc) map[int][]string {
 		methods = append(methods, symbol)
 		methodTable[typeId] = methods
 	}
-	debugf("set methodTable")
+	debugf(S("set methodTable"))
 	return methodTable
 }
 
@@ -182,8 +181,36 @@ func walkExpr(expr Expr) Expr {
 		}
 		decl := funcall.getFuncDef()
 		switch decl {
+		case builtinPrintstring:
+			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			argStr := funcall.args[0]
+			arg0 := &ExprNumberLiteral{
+				val: 1,
+			}
+			arg1 := argStr
+			arg2 := &ExprLen{
+				arg: argStr,
+			}
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
+			}
+			staticCall.symbol = getFuncSymbol(S("libc"), S("write"))
+			staticCall.args = []Expr{arg0, arg1,arg2}
+			return staticCall
+		case builtinPanic:
+			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
+			}
+			staticCall.symbol = getFuncSymbol(S("iruntime"), S("panic"))
+			staticCall.args = funcall.args
+			return staticCall
 		case builtinLen:
-			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
+			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
 			arg := funcall.args[0]
 			return &ExprLen{
 				tok: arg.token(),
@@ -196,20 +223,20 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinMakeSlice:
-			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+			assert(len(funcall.args) == 3, funcall.token(), S("append() should take 3 argments"))
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol("iruntime", "makeSlice")
+			staticCall.symbol = getFuncSymbol(S("iruntime"), S("makeSlice"))
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
-			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
+			assert(len(funcall.args) == 2, funcall.token(), S("append() should take 2 argments"))
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
-			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
+			emit(S("# append(%s, %s)"), slice.getGtype().String(), valueToAppend.getGtype().String())
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
@@ -217,9 +244,9 @@ func walkExpr(expr Expr) Expr {
 			}
 			switch slice.getGtype().elementType.getSize() {
 			case 1:
-				staticCall.symbol = getFuncSymbol("iruntime", "append1")
+				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append1"))
 			case 8:
-				staticCall.symbol = getFuncSymbol("iruntime", "append8")
+				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append8"))
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
@@ -228,9 +255,9 @@ func walkExpr(expr Expr) Expr {
 					}
 					funcall.args[1] = eConvertion
 				}
-				staticCall.symbol = getFuncSymbol("iruntime", "append24")
+				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append24"))
 			default:
-				TBI(slice.token(), "")
+				TBI(slice.token(), S(""))
 			}
 			staticCall.args = funcall.args
 			return staticCall
@@ -270,6 +297,12 @@ func walkExpr(expr Expr) Expr {
 		return e
 	case *ExprArrayLiteral:
 	case *ExprSliceLiteral:
+		e := expr.(*ExprSliceLiteral)
+		for i, v := range e.values {
+			v2 := walkExpr(v)
+			e.values[i] = v2
+		}
+		return e
 	case *ExprTypeAssertion:
 	case *ExprVaArg:
 		e := expr.(*ExprVaArg)

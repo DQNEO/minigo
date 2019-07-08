@@ -1,10 +1,9 @@
 package main
 
-import "fmt"
 
 func f1() {
 	var x map[int]map[int]int = map[int]map[int]int{}
-	fmt.Printf("%d\n", x[0][0])
+	fmtPrintf(S("%d\n"), x[0][0])
 }
 
 func f2() {
@@ -12,7 +11,7 @@ func f2() {
 		5: 1,
 	}
 
-	fmt.Printf("%d\n", mi[5])
+	fmtPrintf(S("%d\n"), mi[5])
 
 	var x map[int]map[int]int = map[int]map[int]int{
 		111: map[int]int{
@@ -25,11 +24,11 @@ func f2() {
 
 	y := x[111]
 	z := y[11]
-	fmt.Printf("%d\n", z)
+	fmtPrintf(S("%d\n"), z)
 
 	y = x[112]
 	z = y[12]
-	fmt.Printf("%d\n", z)
+	fmtPrintf(S("%d\n"), z)
 }
 
 type MapIntInt map[int]int

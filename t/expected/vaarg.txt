@@ -1,4 +1,3 @@
-hello debug with vaargs
 -
 2
 hello

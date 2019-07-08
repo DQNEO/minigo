@@ -11,7 +11,7 @@ const intSize = 8
 
 func init() {
 	// set head address of heap
-	heapTail = heap + 0
+	heapTail = heap
 }
 
 func malloc(size int) *int {
@@ -24,9 +24,56 @@ func malloc(size int) *int {
 	return r
 }
 
+// This is a copy from stconv
+func itoa(i int) []byte {
+	var r []byte
+	var tmp []byte
+	var isMinus bool
+
+	// open(2) returs  0xffffffff 4294967295 on error.
+	// I don't understand this yet.
+	if i > 2147483648 {
+		i = i - 2147483648*2
+	}
+
+
+	if i < 0 {
+		i = i * -1
+		isMinus = true
+	}
+	for i>0 {
+		mod := i % 10
+		tmp = append(tmp, byte('0') + byte(mod))
+		i = i /10
+	}
+
+	if isMinus {
+		r = append(r, '-')
+	}
+
+	for j:=len(tmp)-1;j>=0;j--{
+		r = append(r, tmp[j])
+	}
+
+	if len(r) == 0 {
+		return []byte{'0'}
+	}
+	return r
+}
+
+func panic(msg string) {
+	printstring("panic: ")
+	printstring(msg)
+	printstring("\n")
+	exit(1)
+}
 
 func reportMemoryUsage() {
-	printf("# memory-usage %d\n", getMemoryUsage())
+	printstring("# memory-usage: ")
+	i := getMemoryUsage()
+	s := itoa(i)
+	printstring(s)
+	printstring("\n")
 }
 
 func getMemoryUsage() int {
@@ -113,6 +160,40 @@ func strcopy(src string, dest string, slen int) string {
 	}
 	dest[slen] = 0
 	return dest
+}
+
+func eqGostringInternal(a []byte, b []byte) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i:=0;i<len(a);i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func eqGostrings(a []byte, b []byte, eq bool) bool {
+	var ret bool
+	ret = eqGostringInternal(a,b)
+	if eq {
+		return ret
+	} else {
+		return !ret
+	}
+}
+
+func strcat(a []byte, b []byte) string {
+	var c []byte
+	for i:=0;i<len(a);i++ {
+		c = append(c, a[i])
+	}
+	for i:=0;i<len(b);i++ {
+		c = append(c, b[i])
+	}
+	return string(c)
 }
 
 const MiniGo int = 1

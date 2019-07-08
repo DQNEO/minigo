@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func multi(a int, b int, c int, d int) (int, int, int, int) {
 	return a, b, c, d
@@ -16,16 +15,16 @@ func getMulti() {
 	var k int = 0
 	var l int = 0
 	i, j, k, l = multi(1, 2, 3, 4)
-	fmt.Printf("%d\n", i)
-	fmt.Printf("%d\n", j)
-	fmt.Printf("%d\n", k)
-	fmt.Printf("%d\n", l)
+	fmtPrintf(S("%d\n"), i)
+	fmtPrintf(S("%d\n"), j)
+	fmtPrintf(S("%d\n"), k)
+	fmtPrintf(S("%d\n"), l)
 
 	a, b, c, d := multireverse(8, 7, 6, 5)
-	fmt.Printf("%d\n", a)
-	fmt.Printf("%d\n", b)
-	fmt.Printf("%d\n", c)
-	fmt.Printf("%d\n", d)
+	fmtPrintf(S("%d\n"), a)
+	fmtPrintf(S("%d\n"), b)
+	fmtPrintf(S("%d\n"), c)
+	fmtPrintf(S("%d\n"), d)
 }
 
 var bytes = [3]byte{'a', 'b', 'c'}
@@ -36,10 +35,10 @@ func ReadFile() ([]byte, int) {
 
 func getReadFile() {
 	b, i := ReadFile()
-	fmt.Printf("%d\n", i)
-	fmt.Printf("%c\n", b[0])
-	fmt.Printf("%c\n", b[1])
-	fmt.Printf("%c\n", b[2])
+	fmtPrintf(S("%d\n"), i)
+	fmtPrintf(S("%c\n"), b[0])
+	fmtPrintf(S("%c\n"), b[1])
+	fmtPrintf(S("%c\n"), b[2])
 }
 
 func main() {

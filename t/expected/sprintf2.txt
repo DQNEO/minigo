@@ -1,0 +1,15 @@
+--- f0 ---
+ok=true
+b=abc,len=3,cap=3
+--- f1 ---
+hello
+world
+world
+left center right
+left center right
+left center right
+left center right
+123=123
+4567=4567
+--- f2 ---
+push %rax

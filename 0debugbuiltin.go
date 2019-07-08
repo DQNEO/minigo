@@ -12,5 +12,5 @@ func assertInterface(x interface{}) {
 func dumpSlice(x interface{}) {
 }
 
-func asComment(s string) {
+func asComment(s gostring) {
 }

@@ -1,54 +1,55 @@
 package main
 
+
 func main() {
 	var t bool = true
 	if t {
-		println("1")
+		fmtPrintf(S("1\n"))
 	}
 	t = false
 	if t {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	}
-	println("2")
+	fmtPrintf(S("2\n"))
 
 	t = true
 	if t {
-		println("3")
+		fmtPrintf(S("3\n"))
 	} else {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	}
 
 	t = false
 	if t {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	} else {
-		println("4")
+		fmtPrintf(S("4\n"))
 	}
 
 	var i int
 	i = 1
 	if i == 1 {
-		println("5")
+		fmtPrintf(S("5\n"))
 	} else if i == 2 {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	} else {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	}
 
 	i = 2
 	if i == 1 {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	} else if i == 2 {
-		println("6")
+		fmtPrintf(S("6\n"))
 	} else {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	}
 
 	if i = 3; i == 1 {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	} else if i == 2 {
-		println("Error")
+		fmtPrintf(S("Error\n"))
 	} else {
-		println("7")
+		fmtPrintf(S("7\n"))
 	}
 }

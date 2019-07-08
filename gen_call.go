@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Emitter interface {
 	emit()
 }
@@ -15,7 +13,7 @@ func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 	return funcall.getFuncDef().rettypes
 }
 
-func (ast *ExprMethodcall) getUniqueName() string {
+func (ast *ExprMethodcall) getUniqueName() gostring {
 	gtype := ast.receiver.getGtype()
 	return getMethodUniqueName(gtype, ast.fname)
 }
@@ -24,31 +22,33 @@ func (methodCall *ExprMethodcall) getOrigType() *Gtype {
 	gtype := methodCall.receiver.getGtype()
 	assertNotNil(methodCall.receiver != nil, methodCall.token())
 	assertNotNil(gtype != nil, methodCall.tok)
-	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, "method must be an interface or belong to a named type")
+	assert(gtype.kind == G_NAMED || gtype.kind == G_POINTER || gtype.kind == G_INTERFACE, methodCall.tok, S("method must be an interface or belong to a named type"))
 	var typeToBeloing *Gtype
 	if gtype.kind == G_POINTER {
 		typeToBeloing = gtype.origType
-		assert(typeToBeloing != nil, methodCall.token(), "shoudl not be nil:"+gtype.String())
+		assert(typeToBeloing != nil, methodCall.token(), S("shoudl not be nil:%s"), gtype.String())
 	} else {
 		typeToBeloing = gtype
 	}
-	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, "method must belong to a named type")
+	assert(typeToBeloing.kind == G_NAMED, methodCall.tok, S("method must belong to a named type"))
 	origType := typeToBeloing.relation.gtype
-	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), fmt.Sprintf("origType should not be nil:%#v", typeToBeloing.relation))
+	assert(typeToBeloing.relation.gtype != nil, methodCall.token(), S("origType should not be nil"))
 	return origType
 }
 
 func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 	origType := methodCall.getOrigType()
 	if origType == nil {
-		errorft(methodCall.token(), "origType should not be nil")
+		errorft(methodCall.token(), S("origType should not be nil"))
 	}
+
 	if origType.getKind() == G_INTERFACE {
-		return origType.imethods[methodCall.fname].rettypes
+		imethod, _ := imethodGet(origType.imethods, methodCall.fname)
+		return imethod.rettypes
 	} else {
-		funcref, ok := origType.methods[methodCall.fname]
+		funcref, ok := methodGet(origType.methods, methodCall.fname)
 		if !ok {
-			errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
+			errorft(methodCall.token(), S("method %s is not found in type %s"), methodCall.fname, methodCall.receiver.getGtype().String())
 		}
 		return funcref.funcdef.rettypes
 	}
@@ -56,7 +56,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 
 type IrInterfaceMethodCall struct {
 	receiver   Expr
-	methodName identifier
+	methodName goidentifier
 	args       []Expr
 }
 
@@ -69,11 +69,12 @@ func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	return call
 }
 
+
 func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
-	funcref, ok := origType.methods[methodCall.fname]
+	funcref, ok := methodGet(origType.methods, methodCall.fname)
 	if !ok {
-		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
+		errorft(methodCall.token(), S("method %s is not found in type %s"), methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
 	args := []Expr{methodCall.receiver}
@@ -85,7 +86,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
 		tok:          methodCall.token(),
-		symbol:       getFuncSymbol(pkgname, name),
+		symbol:       getFuncSymbol(gostring(pkgname), name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:         args,
@@ -108,10 +109,10 @@ func (methodCall *ExprMethodcall) emit() {
 
 func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	relexpr := funcall.rel.expr
-	assert(relexpr != nil, funcall.token(), fmt.Sprintf("relexpr should NOT be nil for %s", funcall.fname))
+	assert(relexpr != nil, funcall.token(), S("relexpr should NOT be nil"))
 	funcref, ok := relexpr.(*ExprFuncRef)
 	if !ok {
-		errorft(funcall.token(), "Compiler error: funcref is not *ExprFuncRef (%s)", funcall.fname)
+		errorft(funcall.token(), S("Compiler error: funcref is not *ExprFuncRef (%s)"), funcall.fname)
 	}
 	assertNotNil(funcref.funcdef != nil, nil)
 	return funcref.funcdef
@@ -119,8 +120,8 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 
 func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 
-	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
-	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")
+	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), S("this is conversion"))
+	assert(funcall.getFuncDef() != nil, funcall.token(), S("funcdef is nil"))
 	decl := funcall.getFuncDef()
 
 	// check if it's a builtin function
@@ -148,7 +149,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrStaticCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(decl.pkg, funcall.fname),
+			symbol:   getFuncSymbol(gostring(decl.pkg), gostring(funcall.fname)),
 			callee:   decl,
 			args:     funcall.args,
 			origExpr: funcall,
@@ -166,7 +167,7 @@ type IrStaticCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	tok          *Token
-	symbol       string
+	symbol       gostring
 	callee       *DeclFunc
 	isMethodCall bool
 	args         []Expr
@@ -190,19 +191,8 @@ type builtinDumpSliceEmitter struct {
 }
 
 func (em *builtinDumpSliceEmitter) emit() {
-	emit("lea .%s, %%rax", builtinStringKey2)
-	emit("PUSH_8")
-
-	em.arg.emit()
-	emit("PUSH_SLICE")
-
-	numRegs := 4
-	for i := numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
-	}
-
-	emit("FUNCALL %s", "printf")
-	emitNewline()
+	// @TODO Implement me
+	emit(S("# builtinDumpSliceEmitter is not implemented"))
 }
 
 type builtinDumpInterfaceEmitter struct {
@@ -210,19 +200,8 @@ type builtinDumpInterfaceEmitter struct {
 }
 
 func (em *builtinDumpInterfaceEmitter) emit() {
-	emit("lea .%s, %%rax", builtinStringKey1)
-	emit("PUSH_8")
-
-	em.arg.emit()
-	emit("PUSH_INTERFACE")
-
-	numRegs := 4
-	for i := numRegs - 1; i >= 0; i-- {
-		emit("POP_TO_ARG_%d", i)
-	}
-
-	emit("FUNCALL %s", "printf")
-	emitNewline()
+	// @TODO Implement me
+	emit(S("# builtinDumpInterfaceEmitter is not implemented"))
 }
 
 type builtinAssertInterfaceEmitter struct {
@@ -230,33 +209,33 @@ type builtinAssertInterfaceEmitter struct {
 }
 
 func (em *builtinAssertInterfaceEmitter) emit() {
-	emit("# builtinAssertInterface")
+	emit(S("# builtinAssertInterface"))
 	labelEnd := makeLabel()
 	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
 
 	// (ptr != nil && rcx == nil) => Error
 
-	emit("CMP_NE_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit(S("CMP_NE_ZERO"))
+	emit(S("TEST_IT"))
+	emit(S("je %s"), labelEnd)
 
-	emit("mov %%rcx, %%rax")
+	emit(S("mov %%rcx, %%rax"))
 
-	emit("CMP_EQ_ZERO")
-	emit("TEST_IT")
-	emit("je %s", labelEnd)
+	emit(S("CMP_EQ_ZERO"))
+	emit(S("TEST_IT"))
+	emit(S("je %s"), labelEnd)
 
 	slabel := makeLabel()
-	emit(".data 0")
-	emitWithoutIndent("%s:", slabel)
-	emit(".string \"%s\"", "assertInterface failed")
-	emit(".text")
-	emit("lea %s, %%rax", slabel)
-	emit("PUSH_8")
-	emit("POP_TO_ARG_0")
-	emit("FUNCALL %s", ".panic")
+	emit(S(".data 0"))
+	emitWithoutIndent(S("%s:"), slabel)
+	emit(S(".string \"%s\""), S("assertInterface failed"))
+	emit(S(".text"))
+	emit(S("lea %s, %%rax"), slabel)
+	emit(S("PUSH_8"))
+	emit(S("POP_TO_ARG_0"))
+	emit(S("FUNCALL %s"), S("iruntime.panic"))
 
-	emitWithoutIndent("%s:", labelEnd)
+	emitWithoutIndent(S("%s:"), labelEnd)
 	emitNewline()
 }
 
@@ -266,6 +245,6 @@ type builtinAsCommentEmitter struct {
 
 func (em *builtinAsCommentEmitter) emit() {
 	if stringLiteral, ok := em.arg.(*ExprStringLiteral); ok {
-		emitWithoutIndent("# %s", stringLiteral.val)
+		emitWithoutIndent(S("# %s"), stringLiteral.val)
 	}
 }

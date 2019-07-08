@@ -1,14 +1,13 @@
 package main
 
-import "fmt"
 
 var garray = [...]int{1, 2, 0}
 
 func f1() {
 	garray[2] = 3
-	fmt.Printf("%d\n", garray[0])
-	fmt.Printf("%d\n", garray[1])
-	fmt.Printf("%d\n", garray[2])
+	fmtPrintf(S("%d\n"), garray[0])
+	fmtPrintf(S("%d\n"), garray[1])
+	fmtPrintf(S("%d\n"), garray[2])
 }
 
 func f2() {
@@ -19,42 +18,29 @@ func f2() {
 
 	var larray = [...]int{i4, i5, i0, i7}
 	larray[2] = 6
-	fmt.Printf("%d\n", larray[0])
-	fmt.Printf("%d\n", larray[1])
-	fmt.Printf("%d\n", larray[2])
-	fmt.Printf("%d\n", larray[3])
+	fmtPrintf(S("%d\n"), larray[0])
+	fmtPrintf(S("%d\n"), larray[1])
+	fmtPrintf(S("%d\n"), larray[2])
+	fmtPrintf(S("%d\n"), larray[3])
 	larray[3]++
-	fmt.Printf("%d\n", larray[3])
+	fmtPrintf(S("%d\n"), larray[3])
 	larray[3] = 10
 	larray[3]--
-	fmt.Printf("%d\n", larray[3])
-}
-
-func f3() {
-	var lbytes = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
-	lbytes[0] = 'H'
-	fmt.Printf("%c", lbytes[0])
-	fmt.Printf("%c", lbytes[1])
-	fmt.Printf("%c", lbytes[2])
-	fmt.Printf("%c", lbytes[3])
-	fmt.Printf("%c", lbytes[4])
-	fmt.Printf("%c", lbytes[5])
-
-	fmt.Printf("%s", lbytes)
+	fmtPrintf(S("%d\n"), larray[3])
 }
 
 func assign() {
 	var a [3]int = [3]int{10, 11, 12}
 	var b [3]int = a
 	a[1] = 99
-	fmt.Printf("%d\n", b[0])
-	fmt.Printf("%d\n", b[1])
-	fmt.Printf("%d\n", b[2])
+	fmtPrintf(S("%d\n"), b[0])
+	fmtPrintf(S("%d\n"), b[1])
+	fmtPrintf(S("%d\n"), b[2])
 	var c [3]int
 	c = b
-	fmt.Printf("%d\n", c[0]+3)
-	fmt.Printf("%d\n", c[1]+3)
-	fmt.Printf("%d\n", c[2]+3)
+	fmtPrintf(S("%d\n"), c[0]+3)
+	fmtPrintf(S("%d\n"), c[1]+3)
+	fmtPrintf(S("%d\n"), c[2]+3)
 }
 
 func assignStrctField() {
@@ -64,7 +50,21 @@ func assignStrctField() {
 	var dishes [3]int
 	dishes = bilbo.dishes
 	bilbo.dishes[2] = 0
-	fmt.Printf("%d\n", dishes[2]+13) // 16
+	fmtPrintf(S("%d\n"), dishes[2]+13) // 16
+}
+
+func f3() {
+	var lbytes = [6]byte{'?', 'e', 'l', 'l', 'o', 10}
+	lbytes[0] = 'H'
+	fmtPrintf(S("%c"), lbytes[0])
+	fmtPrintf(S("%c"), lbytes[1])
+	fmtPrintf(S("%c"), lbytes[2])
+	fmtPrintf(S("%c"), lbytes[3])
+	fmtPrintf(S("%c"), lbytes[4])
+	fmtPrintf(S("%c"), lbytes[5])
+
+	s := lbytes[:]
+	fmtPrintf(S("%s"), s)
 }
 
 func main() {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 )
 
@@ -22,7 +21,7 @@ func f2() {
 	if err != nil {
 		panic("err")
 	}
-	fmt.Printf("%s", bytes)
+	fmtPrintf(S("%s"), bytes)
 	if len(bytes) != 83801 { // This is the size of the target file
 		panic("Error: size does not match")
 	}

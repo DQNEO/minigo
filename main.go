@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strings"
 )
 
 var GENERATION int = 1
@@ -18,46 +17,46 @@ var resolveOnly = false
 var emitPosition = false
 
 func printVersion() {
-	println("minigo 0.1.0")
-	println("Copyright (C) 2019 @DQNEO")
+	fmtPrintln(S("minigo 0.1.0"))
+	fmtPrintln(S("Copyright (C) 2019 @DQNEO"))
 }
 
-func parseOpts(args []string) []string {
-	var r []string
+func parseOpts(args []gostring) []gostring {
+	var r []gostring
 
 	for _, opt := range args {
-		if opt == "--version" {
+		if eq(opt,S("--version")) {
 			printVersion()
 			return nil
 		}
-		if opt == "-t" {
+		if eq(opt, S("-t")) {
 			debugToken = true
 		}
-		if opt == "-a" {
+		if eq(opt, S("-a")) {
 			debugAst = true
 		}
-		if opt == "-p" {
+		if eq(opt, S("-p")) {
 			debugParser = true
 		}
-		if opt == "--position" {
+		if eq(opt, S("--position")) {
 			emitPosition = true
 		}
-		if opt == "-d" {
+		if eq(opt, S("-d")) {
 			debugMode = true
 		}
-		if opt == "--tokenize-only" {
+		if eq(opt, S("--tokenize-only")) {
 			tokenizeOnly = true
 		}
-		if opt == "--parse-only" {
+		if eq(opt, S("--parse-only")) {
 			parseOnly = true
 		}
-		if opt == "--resolve-only" {
+		if eq(opt, S("--resolve-only")) {
 			resolveOnly = true
 		}
-		if strings.HasSuffix(opt, ".go") {
-			r = append(r, opt)
-		} else if opt == "-" {
-			return []string{"/dev/stdin"}
+		if strings_HasSuffix(opt, S(".go")) {
+			r = append(r, gostring(opt))
+		} else if eq(opt, S("-")) {
+			return []gostring{gostring("/dev/stdin")}
 		}
 	}
 
@@ -66,15 +65,15 @@ func parseOpts(args []string) []string {
 
 func main() {
 	// parsing arguments
-	var sourceFiles []string
-
-	assert(len(os.Args) > 0, nil, "os.Args should not be empty")
+	var sourceFiles []gostring
+	osArgs := convertCstringsToGostrings(os.Args)
+	assert(len(osArgs) > 0, nil, S("os.Args should not be empty"))
 	if len(os.Args) > 1 {
-		sourceFiles = parseOpts(os.Args[1:len(os.Args)])
+		sourceFiles = parseOpts(osArgs[1:len(osArgs)])
 	}
 
 	if len(sourceFiles) == 0 {
-		println("No input files.")
+		fmtPrintln(S("No input files."))
 		return
 	}
 

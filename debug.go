@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
-func debugf(format string, v ...interface{}) {
+func debugf(format gostring, v ...interface{}) {
 	if !debugMode {
 		return
 	}
@@ -16,44 +15,57 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 		indents = append(indents, ' ')
 	}
-
-	var format2 string = string(indents) + format + "\n"
-	s2 := fmt.Sprintf(format2, v...)
+	os.Stderr.Write(indents)
+	s2 := Sprintf(format, v...)
 	var b []byte = []byte(s2)
+	b = append(b, '\n')
 	os.Stderr.Write(b)
 }
 
 var debugNest int
 
 // States "To Be Implemented"
-func TBI(tok *Token, format string, v ...interface{}) {
-	errorft(tok, "(To Be Implemented) "+format, v...)
+func TBI(tok *Token, format gostring, v ...interface{}) {
+	errorft(tok, concat(S("(To Be Implemented) "), gostring(format)), v...)
 }
 
 // errorf with a position token
-func errorft(tok *Token, format string, v ...interface{}) {
-	var tokString string
+func errorft(tok *Token, format gostring, v ...interface{}) {
+
+	var tokString gostring
 	if tok != nil {
 		tokString = tok.String()
 	}
-	errorf(format+"\n "+tokString, v...)
+	gs := concat3(format,S("\n "), tokString)
+	errorf(gs, v...)
 }
 
-func errorf(format string, v ...interface{}) {
-	s := fmt.Sprintf(format, v...)
-	panic(s)
+func errorf(format gostring, v ...interface{}) {
+	s := Sprintf(format, v...)
+	os.Stderr.Write(concat(s, S("\n")))
+	panic("")
 }
 
-func assert(cond bool, tok *Token, msg string) {
+func assert(cond bool, tok *Token, format gostring, v ...interface{}) {
 	if !cond {
-		panic(fmt.Sprintf("assertion failed: %s %s", msg, tok.String()))
+		s := Sprintf(format, v...)
+		var toks gostring = S("")
+		if tok != nil {
+			toks = tok.String()
+		}
+		msg := concat3(S("assertion failed: "), s,  toks)
+		os.Stderr.Write(msg)
+		os.Stderr.Write(S("\n"))
+		panic("")
 	}
 }
 
 func assertNotReached(tok *Token) {
-	panic(fmt.Sprintf("assertNotReached %s", tok.String()))
+	msg := concat(S("assertNotReached "), tok.String())
+	os.Stderr.Write(msg)
+	panic("")
 }
 
 func assertNotNil(cond bool, tok *Token) {
-	assert(cond, tok, "should not be nil")
+	assert(cond, tok, S("should not be nil"))
 }

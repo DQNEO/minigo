@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func literal() {
 	var u *User
@@ -8,15 +7,15 @@ func literal() {
 		id:  1,
 		age: 2,
 	}
-	fmt.Printf("%d\n", u.id)
-	fmt.Printf("%d\n", u.age)
+	fmtPrintf(S("%d\n"), u.id)
+	fmtPrintf(S("%d\n"), u.age)
 
 	u = &User{
 		id:  3,
 		age: 4,
 	}
-	fmt.Printf("%d\n", u.id)
-	fmt.Printf("%d\n", u.age)
+	fmtPrintf(S("%d\n"), u.id)
+	fmtPrintf(S("%d\n"), u.age)
 }
 
 func assign() {
@@ -26,12 +25,12 @@ func assign() {
 		age: 4,
 	}
 	u.age = 5
-	fmt.Printf("%d\n", u.age)
+	fmtPrintf(S("%d\n"), u.age)
 	u.age++
-	fmt.Printf("%d\n", u.age)
+	fmtPrintf(S("%d\n"), u.age)
 	u.age = 8
 	u.age--
-	fmt.Printf("%d\n", u.age)
+	fmtPrintf(S("%d\n"), u.age)
 }
 
 type S struct {
@@ -45,15 +44,16 @@ func f1() {
 		id: 123,
 	}
 
-	fmt.Printf("%d\n", p.id-115) // 8
+	fmtPrintf(S("%d\n"), p.id-115) // 8
 
 	p.dummy = nil
-	fmt.Printf("%d\n", p.id-114) // 9
+	fmtPrintf(S("%d\n"), p.id-114) // 9
 }
 
 func main() {
 	literal()
 	assign()
+	return
 	f1()
 }
 

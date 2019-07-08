@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 type Relation struct {
 	gtype *Gtype
@@ -38,17 +37,17 @@ func ff1() int {
 
 	g := lhs.getGtype()
 	fields := g.relation.gtype.fields
-	fmt.Printf("%d\n", len(fields)+1) // 0
+	fmtPrintf(S("%d\n"), len(fields)+1) // 0
 
 	for _, fieldtype := range fields {
-		fmt.Printf("Error %s\n", fieldtype.fieldname)
+		fmtPrintf(S("Error %s\n"), fieldtype.fieldname)
 	}
 	return lhs.getGtype().typeId
 }
 
 func f1() {
 	id := ff1()
-	fmt.Printf("%d\n", id-10) // 1
+	fmtPrintf(S("%d\n"), id-10) // 1
 }
 
 func main() {

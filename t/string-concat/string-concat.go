@@ -1,13 +1,12 @@
 package main
 
-import "fmt"
 
 func f1() {
 	var a = "abc"
 	var b = "defg"
 	var x string
 	x = a + b
-	fmt.Printf("%s\n", x)
+	fmtPrintf(S("%s\n"), x)
 }
 
 func f2() {
@@ -15,7 +14,7 @@ func f2() {
 	for i := 0; i < 3; i++ {
 		spaces += "xx"
 	}
-	fmt.Printf("%s\n", spaces)
+	fmtPrintf(S("%s\n"), spaces)
 }
 
 var seq int = 0
@@ -27,8 +26,8 @@ func foo() string {
 
 func f3() {
 	label := foo() + foo() + "bar"
-	fmt.Printf("%s\n", label) // "foofoobar"
-	fmt.Printf("%d\n", seq)   // 2
+	fmtPrintf(S("%s\n"), label) // "foofoobar"
+	fmtPrintf(S("%d\n"), seq)   // 2
 }
 
 func main() {

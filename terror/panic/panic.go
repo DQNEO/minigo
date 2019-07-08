@@ -1,7 +1,7 @@
 package main
 
 func f1() {
-	panic("panic")
+	panic("Help me!")
 }
 
 func main() {

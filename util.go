@@ -1,31 +1,28 @@
 package main
 
-import "strings"
-
-func getBaseNameFromImport(path string) string {
-	var r string
-	if strings.Contains(path, "/") {
-		words := strings.Split(path, "/")
-		r = words[len(words)-1]
+func getBaseNameFromImport(path gostring) gostring {
+	if strings_Congtains(path, S("/")) {
+		words := strings_Split(path, S("/"))
+		r := words[len(words)-1]
+		return r
 	} else {
-		r = path
+		return path
 	}
 
-	return r
 }
 
-func get_index(item string, list []string) int {
+func getIndex(item gostring, list []gostring) int {
 	for id, v := range list {
-		if v == item {
+		if eq(v, item) {
 			return id
 		}
 	}
 	return -1
 }
 
-func in_array(item string, list []string) bool {
+func inArray(item gostring, list []gostring) bool {
 	for _, v := range list {
-		if v == item {
+		if eq(v, item) {
 			return true
 		}
 	}

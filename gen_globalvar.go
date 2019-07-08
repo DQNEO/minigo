@@ -1,13 +1,11 @@
 package main
 
-import "fmt"
-
 // gloabal var which should be initialized with zeros
 // https://en.wikipedia.org/wiki/.bss
 func (decl *DeclVar) emitBss() {
-	emit(".data")
+	emit(S(".data"))
 	// https://sourceware.org/binutils/docs-2.30/as/Lcomm.html#Lcomm
-	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
+	emit(S(".lcomm %s, %d"), gostring(decl.variable.varname), decl.variable.getGtype().getSize())
 }
 
 func (decl *DeclVar) emitData() {
@@ -15,15 +13,15 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emitWithoutIndent("%s: # gtype=%s", decl.variable.varname, gtype.String())
-	emitWithoutIndent("# right.gtype = %s", right.getGtype().String())
-	emitWithoutIndent(".data 0")
-	doEmitData(ptok, right.getGtype(), right, "", 0)
+	emitWithoutIndent(S("%s: # gtype=%s"), gostring(decl.variable.varname), gtype.String())
+	emitWithoutIndent(S("# right.gtype = %s"), right.getGtype().String())
+	emitWithoutIndent(S(".data 0"))
+	doEmitData(ptok, right.getGtype(), right, S(""), 0)
 }
 
-func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
+func (e *ExprStructLiteral) lookup(fieldname goidentifier) Expr {
 	for _, field := range e.fields {
-		if field.key == fieldname {
+		if eq(gostring(field.key) , gostring(fieldname)) {
 			return field.value
 		}
 	}
@@ -31,9 +29,9 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
+func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName gostring, depth int) {
 	value = unwrapRel(value)
-	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
+	emit(S("# doEmitData: containerName=%s, depth=%d"), gostring(containerName), depth)
 	primType := gtype.getKind()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
@@ -41,14 +39,14 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		if ok {
 			values = arrayliteral.values
 		}
-		assert(ok || arrayliteral == nil, ptok, fmt.Sprintf("*ExprArrayLiteral expected, but got %T", value))
+		assert(ok || arrayliteral == nil, ptok, S("*ExprArrayLiteral expected, but got "))
 		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
-			selector := fmt.Sprintf("%s[%d]", containerName, i)
+			var selector gostring
 			if i >= len(values) {
 				// zero value
-				doEmitData(ptok, elmType, nil, selector, depth)
+				doEmitData(ptok, elmType, nil, S(""), depth)
 			} else {
 				value := arrayliteral.values[i]
 				assertNotNil(value != nil, nil)
@@ -56,35 +54,41 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				if size == 8 {
 					if value.getGtype().getKind() == G_STRING {
 						stringLiteral, ok := value.(*ExprStringLiteral)
-						assert(ok, nil, "ok")
-						emit(".quad .%s", stringLiteral.slabel)
+						assert(ok, nil, S("ok"))
+						emit(S(".quad .%s"), gostring(stringLiteral.slabel))
 					} else {
 						switch value.(type) {
 						case *ExprUop:
 							uop := value.(*ExprUop)
 							operand := unwrapRel(uop.operand)
 							vr, ok := operand.(*ExprVariable)
-							assert(ok, uop.token(), "only variable is allowed")
-							emit(".quad %s # %s %s", vr.varname, value.getGtype().String(), selector)
+							assert(ok, uop.token(), S("only variable is allowed"))
+							emit(S(".quad %s # %s %s"), gostring(vr.varname), value.getGtype().String(), gostring(selector))
 						case *ExprVariable:
-							assert(false, value.token(), "variable here is not allowed")
+							assert(false, value.token(), S("variable here is not allowed"))
 						default:
-							emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
+							emit(S(".quad %d # %s %s"), evalIntExpr(value), value.getGtype().String(), gostring(selector))
 						}
 					}
 				} else if size == 1 {
-					emit(".byte %d", evalIntExpr(value))
+					emit(S(".byte %d"), evalIntExpr(value))
 				} else {
 					doEmitData(ptok, gtype.elementType, value, selector, depth)
 				}
 			}
 		}
-		emit(".quad 0 # nil terminator")
+		emit(S(".quad 0 # nil terminator"))
 
 	} else if primType == G_SLICE {
 		switch value.(type) {
 		case nil:
-			return
+			emit(S(".quad 0"))
+			emit(S(".quad 0"))
+			emit(S(".quad 0"))
+		case *ExprNilLiteral:
+			emit(S(".quad 0"))
+			emit(S(".quad 0"))
+			emit(S(".quad 0"))
 		case *ExprSliceLiteral:
 			// initialize a hidden array
 			lit := value.(*ExprSliceLiteral)
@@ -94,104 +98,115 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			}
 
 			emitDataAddr(arrayLiteral, depth)               // emit underlying array
-			emit(".quad %d", lit.invisiblevar.gtype.length) // len
-			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
+			emit(S(".quad %d"), lit.invisiblevar.gtype.length) // len
+			emit(S(".quad %d"), lit.invisiblevar.gtype.length) // cap
+		case *ExprFuncallOrConversion:
+			call := value.(*ExprFuncallOrConversion)
+			assert(call.rel.gtype != nil, value.token(), S("should be Conversion"))
+			toGtype := call.rel.gtype
+			assert(toGtype.getKind() == G_SLICE && call.args[0].getGtype().isString(), call.token(), S("should be string to slice conversion"))
+			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
+			assert(ok, call.token(), S("arg0 should be stringliteral"))
+			emit(S(".quad .%s"), stringLiteral.slabel)
+			var length int = len(stringLiteral.val)
+			emit(S(".quad %d"), length)
+			emit(S(".quad %d"), length)
 		default:
-			TBI(ptok, "unable to handle gtype %s", gtype.String())
+			TBI(ptok, S("unable to handle gtype %s"), gtype.String())
 		}
-	} else if primType == G_MAP || primType == G_INTERFACE {
-		// @TODO
-		emit(".quad 0")
-		emit(".quad 0")
-		emit(".quad 0")
+	} else if primType == G_INTERFACE {
+		emit(S(".quad 0"))
+		emit(S(".quad 0"))
+		emit(S(".quad 0"))
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad %d # %s %s", 0, gtype.String(), containerName)
+			emit(S(".quad 0 # %s %s"),  gtype.String(), gostring(containerName))
 			return
 		}
-		val := evalIntExpr(value)
-		emit(".quad %d # %s %s", val, gtype.String(), containerName)
+		var val int = evalIntExpr(value)
+		emit(S(".quad %d # %s %s"), val, gtype.String(), gostring(containerName))
 	} else if primType == G_STRUCT {
-		containerName = containerName + "." + string(gtype.relation.name)
+		containerName = concat3(containerName, S(".") , gostring(gtype.relation.name))
 		for _, field := range gtype.relation.gtype.fields {
-			emit("# padding=%d", field.padding)
+			emit(S("# padding=%d"), field.padding)
 			switch field.padding {
 			case 1:
-				emit(".byte 0 # padding")
+				emit(S(".byte 0 # padding"))
 			case 4:
-				emit(".double 0 # padding")
+				emit(S(".double 0 # padding"))
 			case 8:
-				emit(".quad 0 # padding")
+				emit(S(".quad 0 # padding"))
 			default:
 			}
-			emit("# field:offesr=%d, fieldname=%s", field.offset, field.fieldname)
+			emit(S("# field:offesr=%d, fieldname=%s"), field.offset, gostring(field.fieldname))
 			if value == nil {
-				doEmitData(ptok, field, nil, containerName+"."+string(field.fieldname), depth)
+				doEmitData(ptok, field, nil, concat3(containerName,S("."), gostring(field.fieldname)), depth)
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
-			assert(ok, nil, "ok:"+containerName)
+			assert(ok, nil, S("ok"))
 			value := structLiteral.lookup(field.fieldname)
 			if value == nil {
 				// zero value
 				//continue
 			}
 			gtype := field
-			doEmitData(ptok, gtype, value, containerName+"."+string(field.fieldname), depth)
+			doEmitData(ptok, gtype, value, concat3(containerName, S("."), gostring(field.fieldname)), depth)
 		}
 	} else {
 		var val int
+		var gtypeString gostring = gtype.String()
 		switch value.(type) {
 		case nil:
-			emit(".quad %d # %s %s zero value", 0, gtype.String(), containerName)
+			emit(S(".quad %d # %s %s zero value"), val, gtypeString, gostring(containerName))
 		case *ExprNumberLiteral:
 			val = value.(*ExprNumberLiteral).val
-			emit(".quad %d # %s %s", val, gtype.String(), containerName)
+			emit(S(".quad %d # %s %s"), val, gtypeString, gostring(containerName))
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
 			val = evalIntExpr(cnst)
-			emit(".quad %d # %s ", val, gtype.String())
+			emit(S(".quad %d # %s "), val, gtypeString)
 		case *ExprVariable:
 			vr := value.(*ExprVariable)
 			val = evalIntExpr(vr)
-			emit(".quad %d # %s ", val, gtype.String())
+			emit(S(".quad %d # %s "), val, gtypeString)
 		case *ExprBinop:
 			val = evalIntExpr(value)
-			emit(".quad %d # %s ", val, gtype.String())
+			emit(S(".quad %d # %s "), val, gtypeString)
 		case *ExprStringLiteral:
 			stringLiteral := value.(*ExprStringLiteral)
-			emit(".quad .%s", stringLiteral.slabel)
+			emit(S(".quad .%s"), stringLiteral.slabel)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(uop.op == "&", ptok, "only uop & is allowed")
+			assert(eq(uop.op, gostring("&")), ptok, S("only uop & is allowed"))
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {
-				assert(vr.isGlobal, value.token(), "operand should be a global variable")
-				emit(".quad %s", vr.varname)
+				assert(vr.isGlobal, value.token(), S("operand should be a global variable"))
+				emit(S(".quad %s"), gostring(vr.varname))
 			} else {
 				// var gv = &Struct{_}
 				emitDataAddr(operand, depth)
 			}
 		default:
-			TBI(ptok, "unable to handle %d", primType)
+			TBI(ptok, S("unable to handle %d"), primType)
 		}
 	}
 }
 
 // this logic is stolen from 8cc.
 func emitDataAddr(operand Expr, depth int) {
-	emit(".data %d", depth+1)
+	emit(S(".data %d"), depth+1)
 	label := makeLabel()
-	emit("%s:", label)
-	doEmitData(nil, operand.getGtype(), operand, "", depth+1)
-	emit(".data %d", depth)
-	emit(".quad %s", label)
+	emit(S("%s:"), label)
+	doEmitData(nil, operand.getGtype(), operand, S(""), depth+1)
+	emit(S(".data %d"), depth)
+	emit(S(".quad %s"), label)
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitWithoutIndent("# emitGlobal for %s", decl.variable.varname)
+	emitWithoutIndent(S("# emitGlobal for %s"), gostring(decl.variable.varname))
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {

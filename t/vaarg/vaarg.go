@@ -1,24 +1,18 @@
 package main
 
-import "fmt"
-import "os"
-
-func f0() {
-	debugf("hello debug with vaargs")
-}
 
 func receiveVarg(s string, a ...interface{}) {
-	fmt.Printf("-\n")
-	fmt.Printf("%d\n", len(a))
-	fmt.Printf("%s\n", a[0])
-	fmt.Printf("%d\n", a[1])
+	fmtPrintf(S("-\n"))
+	fmtPrintf(S("%d\n"), len(a))
+	fmtPrintf(S("%s\n"), a[0])
+	fmtPrintf(S("%d\n"), a[1])
 }
 
 func receiveIfcSlice(s string, a []interface{}) {
-	fmt.Printf("-\n")
-	fmt.Printf("%d\n", len(a))
-	fmt.Printf("%s\n", a[0])
-	fmt.Printf("%d\n", a[1])
+	fmtPrintf(S("-\n"))
+	fmtPrintf(S("%d\n"), len(a))
+	fmtPrintf(S("%s\n"), a[0])
+	fmtPrintf(S("%d\n"), a[1])
 }
 
 var format string = "format-%s-%d\n"
@@ -41,17 +35,7 @@ func f3() {
 	receiveVarg(format, a...)
 }
 
-func debugf(format string, v ...interface{}) {
-	var indents []byte
-
-	var format2 string = string(indents) + format + "\n"
-	s2 := fmt.Sprintf(format2, v)
-	var b []byte = []byte(s2)
-	os.Stdout.Write(b)
-}
-
 func main() {
-	f0()
 	f1()
 	f2()
 	f3()

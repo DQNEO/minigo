@@ -1,51 +1,100 @@
 package main
 
 func (stmt *StmtIf) emit() {
-	emit("# if")
+	emit(S("# if"))
 	if stmt.simplestmt != nil {
 		stmt.simplestmt.emit()
 	}
 	stmt.cond.emit()
-	emit("TEST_IT")
+	emit(S("TEST_IT"))
 	if stmt.els != nil {
 		labelElse := makeLabel()
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelElse)
-		emit("# then block")
+		emit(S("je %s  # jump if 0"), labelElse)
+		emit(S("# then block"))
 		stmt.then.emit()
-		emit("jmp %s # jump to endif", labelEndif)
-		emit("# else block")
-		emit("%s:", labelElse)
+		emit(S("jmp %s # jump to endif"), labelEndif)
+		emit(S("# else block"))
+		emit(S("%s:"), labelElse)
 		stmt.els.emit()
-		emit("# endif")
-		emit("%s:", labelEndif)
+		emit(S("# endif"))
+		emit(S("%s:"), labelEndif)
 	} else {
 		// no else block
 		labelEndif := makeLabel()
-		emit("je %s  # jump if 0", labelEndif)
-		emit("# then block")
+		emit(S("je %s  # jump if 0"), labelEndif)
+		emit(S("# then block"))
 		stmt.then.emit()
-		emit("# endif")
-		emit("%s:", labelEndif)
+		emit(S("# endif"))
+		emit(S("%s:"), labelEndif)
 	}
+}
+
+func (stmt *StmtSwitch) isTypeSwitch() bool {
+	_, isTypeSwitch := stmt.cond.(*ExprTypeSwitchGuard)
+	return isTypeSwitch
+}
+
+func emitConvertNilToEmptyString() {
+	emit(S("# emitConvertNilToEmptyString"))
+	emit(S("POP_8"))
+	emit(S("PUSH_8"))
+	emit(S("# convert nil to an empty string"))
+	emit(S("TEST_IT"))
+	emit(S("pop %%rax"))
+	labelEnd := makeLabel()
+	emit(S("jne %s # jump if not nil"), labelEnd)
+	emit(S("# if nil then"))
+	emitEmptyString()
+	emit(S("%s:"), labelEnd)
+}
+
+func emitCompareDynamicTypeFromStack(gtype *Gtype) {
+	emitConvertNilToEmptyString()
+	emit(S("PUSH_8"))
+
+	if gtype.isNil() {
+		emitEmptyString()
+	} else {
+		typeLabel := symbolTable.getTypeLabel(gtype)
+		emit(S("LOAD_STRING_LITERAL .%s # type: %s"), typeLabel, gtype.String())
+	}
+
+	emit(S("PUSH_8"))
+	emit(S("CMP_FROM_STACK sete")) // compare addresses
+}
+
+func (stmt *StmtSwitch) needStringToSliceConversion() bool {
+	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType()
 }
 
 func (stmt *StmtSwitch) emit() {
 
-	emit("#")
-	emit("# switch statement")
+	emit(S("# switch statement"))
 	labelEnd := makeLabel()
-	var labels []string
-
+	var labels []gostring
 	// switch (expr) {
+	var cond Expr
 	if stmt.cond != nil {
-		emit("# the subject expression")
-		stmt.cond.emit()
-		emit("PUSH_8 # the subject value")
-		emit("#")
+		cond = stmt.cond
+		emit(S("# the cond expression"))
+		if stmt.needStringToSliceConversion() {
+			irConversion, ok := stmt.cond.(*IrExprConversion)
+			assert(ok, nil, S("should be IrExprConversion"))
+			origType := irConversion.arg.getGtype()
+			assert(origType.getKind() == G_SLICE, nil, S("must be slice"))
+			cond = irConversion.arg // set original slice
+		}
+
+		cond.emit()
+		if cond.getGtype().is24WidthType() {
+			emit(S("PUSH_24 # the cond value"))
+		} else {
+			emit(S("PUSH_8 # the cond value"))
+		}
 	} else {
 		// switch {
-		emit("# no condition")
+		emit(S("# no condition"))
 	}
 
 	// case exp1,exp2,..:
@@ -53,128 +102,137 @@ func (stmt *StmtSwitch) emit() {
 	//     stmt2;
 	//     ...
 	for i, caseClause := range stmt.cases {
-		emit("# case %d", i)
+		var j int = i
+		emit(S("# case %d"), j)
 		myCaseLabel := makeLabel()
 		labels = append(labels, myCaseLabel)
 		if stmt.cond == nil {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit(S("TEST_IT"))
+				emit(S("jne %s # jump if matches"), myCaseLabel)
 			}
-		} else if stmt.isTypeSwitch {
+		} else if stmt.isTypeSwitch() {
 			// compare type
 			for _, gtype := range caseClause.gtypes {
-				emit("# Duplicate the subject value in stack")
-				emit("POP_8")
-				emit("PUSH_8")
-				emit("PUSH_8")
+				emit(S("# Duplicate the cond value in stack"))
+				emit(S("POP_24"))
+				emit(S("PUSH_24"))
 
-				if gtype.isNil() {
-					emit("mov $0, %%rax # nil")
-				} else {
-					typeLabel := symbolTable.getTypeLabel(gtype)
-					emit("LOAD_STRING_LITERAL .%s # type: %s", typeLabel, gtype.String())
-				}
-				emit("PUSH_8")
-				emitStringsEqualFromStack(true)
+				emit(S("push %%rcx # push dynamic type addr"))
+				emitCompareDynamicTypeFromStack(gtype)
 
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit(S("TEST_IT"))
+				emit(S("jne %s # jump if matches"), myCaseLabel)
 			}
 		} else {
 			for _, e := range caseClause.exprs {
-				emit("# Duplicate the subject value in stack")
-				emit("POP_8")
-				emit("PUSH_8")
-				emit("PUSH_8")
+				emit(S("# Duplicate the cond value in stack"))
 
-				e.emit()
-				emit("PUSH_8")
 				if e.getGtype().isString() {
-					emitStringsEqualFromStack(true)
+					assert(e.getGtype().isString(), e.token(), S("caseClause should be string"))
+					emit(S("POP_SLICE # the cond value"))
+					emit(S("PUSH_SLICE # the cond value"))
+
+					emit(S("PUSH_SLICE # the cond valiue"))
+
+					emitConvertCstringToSlice(e)
+					emit(S("PUSH_SLICE"))
+
+					emitGoStringsEqualFromStack()
 				} else {
-					emit("CMP_FROM_STACK sete")
+					emit(S("POP_8 # the cond value"))
+					emit(S("PUSH_8 # the cond value"))
+
+					emit(S("PUSH_8 # arg1: the cond value"))
+					e.emit()
+					emit(S("PUSH_8 # arg2: case value"))
+					emit(S("CMP_FROM_STACK sete"))
 				}
 
-				emit("TEST_IT")
-				emit("jne %s # jump if matches", myCaseLabel)
+				emit(S("TEST_IT"))
+				emit(S("jne %s # jump if matches"), myCaseLabel)
 			}
 		}
 	}
 
-	var defaultLabel string
+	var defaultLabel gostring
 	if stmt.dflt == nil {
-		emit("jmp %s", labelEnd)
+		emit(S("jmp %s"), labelEnd)
 	} else {
-		emit("# default")
+		emit(S("# default"))
 		defaultLabel = makeLabel()
-		emit("jmp %s", defaultLabel)
+		emit(S("jmp %s"), defaultLabel)
 	}
 
-	emit("POP_8 # destroy the subject value")
-	emit("#")
+	if cond != nil && cond.getGtype().is24WidthType() {
+		emit(S("POP_24 # destroy the cond value"))
+	} else {
+		emit(S("POP_8 # destroy the cond value"))
+
+	}
+	emit(S("#"))
 	for i, caseClause := range stmt.cases {
-		emit("# case stmts")
-		emit("%s:", labels[i])
+		emit(S("# case stmts"))
+		emit(S("%s:"), labels[i])
 		caseClause.compound.emit()
-		emit("jmp %s", labelEnd)
+		emit(S("jmp %s"), labelEnd)
 	}
 
 	if stmt.dflt != nil {
-		emit("%s:", defaultLabel)
+		emit(S("%s:"), defaultLabel)
 		stmt.dflt.emit()
 	}
 
-	emit("%s: # end of switch", labelEnd)
+	emit(S("%s: # end of switch"), labelEnd)
 }
 
 func (f *IrStmtForRangeList) emit() {
 	// i = 0
-	emit("# init index")
+	emit(S("# init index"))
 	f.init.emit()
 
-	emit("%s: # begin loop ", f.labels.labelBegin)
+	emit(S("%s: # begin loop "), f.labels.labelBegin)
 
 	f.cond.emit()
-	emit("TEST_IT")
-	emit("je %s  # if false, go to loop end", f.labels.labelEndLoop)
+	emit(S("TEST_IT"))
+	emit(S("je %s  # if false, go to loop end"), f.labels.labelEndLoop)
 
 	if f.assignVar != nil {
 		f.assignVar.emit()
 	}
 
 	f.block.emit()
-	emit("%s: # end block", f.labels.labelEndBlock)
+	emit(S("%s: # end block"), f.labels.labelEndBlock)
 
 	f.cond2.emit()
-	emit("TEST_IT")
-	emit("jne %s  # if this iteration is final, go to loop end", f.labels.labelEndLoop)
+	emit(S("TEST_IT"))
+	emit(S("jne %s  # if this iteration is final, go to loop end"), f.labels.labelEndLoop)
 
 	f.incr.emit()
 
-	emit("jmp %s", f.labels.labelBegin)
-	emit("%s: # end loop", f.labels.labelEndLoop)
+	emit(S("jmp %s"), f.labels.labelBegin)
+	emit(S("%s: # end loop"), f.labels.labelEndLoop)
 }
 
 func (f *IrStmtClikeFor) emit() {
-	emit("# emit IrStmtClikeFor")
+	emit(S("# emit IrStmtClikeFor"))
 	if f.cls.init != nil {
 		f.cls.init.emit()
 	}
-	emit("%s: # begin loop ", f.labels.labelBegin)
+	emit(S("%s: # begin loop "), f.labels.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
-		emit("TEST_IT")
-		emit("je %s  # jump if false", f.labels.labelEndLoop)
+		emit(S("TEST_IT"))
+		emit(S("je %s  # jump if false"), f.labels.labelEndLoop)
 	}
 	f.block.emit()
-	emit("%s: # end block", f.labels.labelEndBlock)
+	emit(S("%s: # end block"), f.labels.labelEndBlock)
 	if f.cls.post != nil {
 		f.cls.post.emit()
 	}
-	emit("jmp %s", f.labels.labelBegin)
-	emit("%s: # end loop", f.labels.labelEndLoop)
+	emit(S("jmp %s"), f.labels.labelBegin)
+	emit(S("%s: # end loop"), f.labels.labelEndLoop)
 }
 
 func (f *StmtFor) emit() {
@@ -193,9 +251,15 @@ func (f *StmtFor) convert() Stmt {
 		f.kind = FOR_KIND_CLIKE
 	}
 
-	f.labels.labelBegin = makeLabel()
-	f.labels.labelEndBlock = makeLabel()
-	f.labels.labelEndLoop = makeLabel()
+	l1 := makeLabel()
+	l2  := makeLabel()
+	l3 := makeLabel()
+
+	lbls := f.labels
+	// @FIXME:  f.labels.labelBegin = l1  does not work!!!
+	lbls.labelBegin = l1
+	lbls.labelEndBlock = l2
+	lbls.labelEndLoop = l3
 
 	var em Stmt
 
@@ -212,9 +276,9 @@ func (f *StmtFor) convert() Stmt {
 			mapCounter: f.rng.invisibleMapCounter,
 		}
 	case FOR_KIND_RANGE_LIST:
-		emit("# for range %s", f.rng.rangeexpr.getGtype().String())
+		emit(S("# for range list"))
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got "+f.rng.rangeexpr.getGtype().String())
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, S("rangeexpr should be G_ARRAY or G_SLICE, but got "), f.rng.rangeexpr.getGtype().String())
 
 		var init = &StmtAssignment{
 			lefts: []Expr{
@@ -228,7 +292,7 @@ func (f *StmtFor) convert() Stmt {
 		}
 		// i < len(list)
 		var cond = &ExprBinop{
-			op:   "<",
+			op:   gostring("<"),
 			left: f.rng.indexvar, // i
 			// @TODO
 			// The range expression x is evaluated once before beginning the loop
@@ -255,12 +319,12 @@ func (f *StmtFor) convert() Stmt {
 
 		// break if i == len(list) - 1
 		var cond2 = &ExprBinop{
-			op:   "==",
+			op:   gostring("=="),
 			left: f.rng.indexvar, // i
 			// @TODO2
 			// The range expression x is evaluated once before beginning the loop
 			right: &ExprBinop{
-				op: "-",
+				op: gostring("-"),
 				left: &ExprLen{
 					arg: f.rng.rangeexpr, // len(expr)
 				},
@@ -299,14 +363,14 @@ func (f *StmtFor) convert() Stmt {
 }
 
 func (stmt *StmtReturn) emitDeferAndReturn() {
-	if stmt.labelDeferHandler != "" {
-		emit("# defer and return")
-		emit("jmp %s", stmt.labelDeferHandler)
+	if len(stmt.labelDeferHandler) != 0 {
+		emit(S("# defer and return"))
+		emit(S("jmp %s"), stmt.labelDeferHandler)
 	}
 }
 
 func (ast *StmtDefer) emit() {
-	emit("# defer")
+	emit(S("# defer"))
 	/*
 		// arguments should be evaluated immediately
 		var args []Expr
@@ -318,38 +382,38 @@ func (ast *StmtDefer) emit() {
 			call := ast.expr.(*ExprFuncallOrConversion)
 			args = call.args
 		default:
-			errorft(ast.token(), "defer should be a funcall")
+			errorft(ast.token(), S("defer should be a funcall"))
 		}
 	*/
-	labelStart := makeLabel() + "_defer"
-	labelEnd := makeLabel() + "_defer"
+	labelStart := concat(makeLabel() , S("_defer"))
+	labelEnd := concat(makeLabel() , S("_defer"))
 	ast.label = labelStart
 
-	emit("jmp %s", labelEnd)
-	emit("%s: # defer start", labelStart)
+	emit(S("jmp %s"), labelEnd)
+	emit(S("%s: # defer start"), labelStart)
 
 	for i := 0; i < len(retRegi); i++ {
-		emit("push %%%s", retRegi[i])
+		emit(S("push %%%s"), retRegi[i])
 	}
 
 	ast.expr.emit()
 
 	for i := len(retRegi) - 1; i >= 0; i-- {
-		emit("pop %%%s", retRegi[i])
+		emit(S("pop %%%s"), retRegi[i])
 	}
 
-	emit("leave")
-	emit("ret")
-	emit("%s: # defer end", labelEnd)
+	emit(S("leave"))
+	emit(S("ret"))
+	emit(S("%s: # defer end"), labelEnd)
 
 }
 
 func (ast *StmtContinue) emit() {
-	assert(ast.labels.labelEndBlock != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # continue", ast.labels.labelEndBlock)
+	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), S("labelEndLoop should not be empty"))
+	emit(S("jmp %s # continue"), ast.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(ast.labels.labelEndLoop != "", ast.token(), "labelEndLoop should not be empty")
-	emit("jmp %s # break", ast.labels.labelEndLoop)
+	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), S("labelEndLoop should not be empty"))
+	emit(S("jmp %s # break"), ast.labels.labelEndLoop)
 }

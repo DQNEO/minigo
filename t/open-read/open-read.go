@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -15,6 +14,7 @@ func main() {
 
 	fname := os.Args[1]
 	fd = open(fname, O_RDONLY)
-	read(fd, buf, MYBUFSIZ)
-	fmt.Printf("%s", buf)
+	ln := read(fd, buf, MYBUFSIZ)
+	s := buf[0:ln]
+	fmtPrintf(S("%s"), s)
 }
