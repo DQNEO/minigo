@@ -26,5 +26,5 @@ func strings_HasSuffix(s gostring, suffix gostring) bool {
 }
 
 func strings_Congtains(s gostring, substr gostring) bool {
-	return strings.Contains(string(s), string(substr))
+	return Contains(s, substr)
 }

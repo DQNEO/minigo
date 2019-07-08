@@ -13,7 +13,7 @@ func f1() {
 }
 
 func f2() {
-	if strings.Contains("foo/bar", "/") {
+	if Contains(S("foo/bar"), S("/")) {
 		fmtPrintf(S("2\n"))
 	} else {
 		fmtPrintf(S("ERROR"))
