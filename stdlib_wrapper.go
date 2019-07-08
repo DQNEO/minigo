@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"strings"
 	"strconv"
 )
 
@@ -22,7 +21,7 @@ func strings_Split(s gostring, sep gostring) []gostring {
 }
 
 func strings_HasSuffix(s gostring, suffix gostring) bool {
-	return strings.HasSuffix(string(s), string(suffix))
+	return HasSuffix(s, suffix)
 }
 
 func strings_Congtains(s gostring, substr gostring) bool {

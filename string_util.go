@@ -238,3 +238,15 @@ func Index(s gostring, substr gostring) int {
 
 	return -1
 }
+
+func HasSuffix(s gostring, suffix gostring) bool {
+	if len(s) >= len(suffix) {
+		var low int =  len(s)-len(suffix)
+		var lensb int = len(s)
+		var suf []byte
+		sb := []byte(s)
+		suf = sb[low:lensb]  // lensb is required
+		return eq(gostring(suf) ,suffix)
+	}
+	return false
+}

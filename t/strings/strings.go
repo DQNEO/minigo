@@ -1,14 +1,12 @@
 package main
 
-import (
-	"strings"
-)
-
 func f1() {
 	s := "main.go"
 	suffix := ".go"
-	if strings.HasSuffix(s, suffix) {
+	if HasSuffix(S(s), S(suffix)) {
 		fmtPrintf(S("1\n"))
+	} else {
+		fmtPrintf(S("ERROR\n"))
 	}
 }
 
