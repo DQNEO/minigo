@@ -25,6 +25,10 @@ var eIota = &ExprConstVariable{
 	name: goidentifier("iota"),
 }
 
+var builtinPanic = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 var builtinLen = &DeclFunc{
 	rettypes: []*Gtype{&sInt},
 }
@@ -84,6 +88,9 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
 
+	universe.setFunc(goidentifier("panic"), &ExprFuncRef{
+		funcdef: builtinPanic,
+	})
 	universe.setFunc(goidentifier("len"), &ExprFuncRef{
 		funcdef: builtinLen,
 	})

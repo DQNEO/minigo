@@ -181,6 +181,16 @@ func walkExpr(expr Expr) Expr {
 		}
 		decl := funcall.getFuncDef()
 		switch decl {
+		case builtinPanic:
+			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
+			}
+			staticCall.symbol = getFuncSymbol(S("iruntime"), S("panic"))
+			staticCall.args = funcall.args
+			return staticCall
 		case builtinLen:
 			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
 			arg := funcall.args[0]

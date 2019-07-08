@@ -257,7 +257,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	emit(S("lea %s, %%rax"), slabel)
 	emit(S("PUSH_8"))
 	emit(S("POP_TO_ARG_0"))
-	emit(S("FUNCALL %s"), S(".panic"))
+	emit(S("FUNCALL %s"), S("iruntime.panic"))
 
 	emitWithoutIndent(S("%s:"), labelEnd)
 	emitNewline()
