@@ -181,3 +181,26 @@ func eq(a gostring, b gostring) bool {
 	}
 	return true
 }
+
+// "foo/bar", "/" => []gostring{"foo", "bar"}
+func Split(s gostring, sep gostring) []gostring {
+	if len(sep) > 1  {
+		panic("no supported")
+	}
+	seps := []byte(sep)
+	sepchar := seps[0]
+	bytes := []byte(s)
+	var buf []byte
+	var r []gostring
+	for _, b := range bytes {
+		if b == sepchar {
+			r = append(r, gostring(buf))
+			buf = nil
+		} else {
+			buf = append(buf, b)
+		}
+	}
+	r = append(r, gostring(buf))
+
+	return r
+}

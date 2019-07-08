@@ -18,8 +18,7 @@ func strconv_Atoi(gs gostring) (int, error) {
 }
 
 func strings_Split(s gostring, sep gostring) []gostring {
-	css := strings.Split(string(s), string(sep))
-	return convertCstringsToGostrings(css)
+	return Split(s, sep)
 }
 
 func strings_HasSuffix(s gostring, suffix gostring) bool {

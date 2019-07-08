@@ -42,26 +42,3 @@ func Index(s string, substr string) int {
 
 	return -1
 }
-
-// "foo/bar", "/" => []string{"foo", "bar"}
-func Split(s string, sep string) []string {
-	if len(sep) > 1  {
-		panic("no supported")
-	}
-	seps := []byte(sep)
-	sepchar := seps[0]
-	bytes := []byte(s)
-	var buf []byte
-	var r []string
-	for _, b := range bytes {
-		if b == sepchar {
-			r = append(r, string(buf))
-			buf = nil
-		} else {
-			buf = append(buf, b)
-		}
-	}
-	r = append(r, string(buf))
-
-	return r
-}
