@@ -18,6 +18,25 @@ func S(s string) gostring {
 
 var _trash int
 func Sprintf(format []byte, a... interface{}) []byte {
+	var args []interface{}
+	for _, x := range a {
+		var y interface{}
+		switch x.(type) {
+		case gostring:      // This case is not reached by 2nd gen compiler
+			var tmpgostring gostring = x.(gostring)
+			var tmpbytes []byte = []byte(tmpgostring)
+			y = tmpbytes
+		case goidentifier:   // This case is not reached by 2nd gen compiler
+			var tmpgoident goidentifier = x.(goidentifier)
+			var tmpbytes2 []byte = []byte(tmpgoident)
+			y = tmpbytes2
+		default:
+			y = x
+		}
+		args = append(args, y)
+	}
+	a = nil // unset
+
 	var r []byte
 	var blocks []gostring
 	var str []byte
@@ -43,7 +62,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 				inPercent = false
 				continue
 			}
-			arg := a[argIndex]
+			arg := args[argIndex]
 			switch arg.(type) {
 			case string:
 				var s string
@@ -54,14 +73,6 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
-				blocks = append(blocks, _arg)
-			case gostring:  // This case is not reached by 2nd gen compiler
-				var _arg []byte
-				_arg = arg.(gostring)
-				blocks = append(blocks, _arg)
-			case goidentifier:  // This case is not reached by 2nd gen compiler
-				var _arg []byte
-				_arg = arg.(goidentifier)
 				blocks = append(blocks, _arg)
 			case byte:
 				var _argByte byte
