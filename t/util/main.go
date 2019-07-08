@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 type gostring []byte
 
 func f1() {
