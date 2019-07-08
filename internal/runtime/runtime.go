@@ -25,12 +25,16 @@ func malloc(size int) *int {
 }
 
 func panic(msg string) {
-	printf("panic: %s\n", msg)
+	printf("panic: ")
+	printf(msg)
+	printf("\n")
 	exit(1)
 }
 
 func reportMemoryUsage() {
-	printf("# memory-usage %d\n", getMemoryUsage())
+	printf("# memory-usage")
+	printf("%d", getMemoryUsage())
+	printf("\n")
 }
 
 func getMemoryUsage() int {
