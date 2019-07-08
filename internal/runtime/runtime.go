@@ -11,7 +11,7 @@ const intSize = 8
 
 func init() {
 	// set head address of heap
-	heapTail = heap + 0
+	heapTail = heap
 }
 
 func malloc(size int) *int {
