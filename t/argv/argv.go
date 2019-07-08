@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	fmt.Printf("%d\n", len(os.Args))
-	fmt.Printf("%s\n", os.Args[1])
+	fmtPrintf(S("%d\n"), len(os.Args))
+	fmtPrintf(S("%s\n"), os.Args[1])
 }

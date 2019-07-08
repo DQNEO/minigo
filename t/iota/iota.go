@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 const (
 	a0 int = iota
@@ -28,29 +27,29 @@ const (
 )
 
 func f0() {
-	fmt.Printf("%d\n", a0)
+	fmtPrintf(S("%d\n"), a0)
 }
 
 func f1() {
-	fmt.Printf("%d\n", a1)
-	fmt.Printf("%d\n", a2)
+	fmtPrintf(S("%d\n"), a1)
+	fmtPrintf(S("%d\n"), a2)
 }
 
 func f3() {
-	fmt.Printf("%d\n", b0)
-	fmt.Printf("%d\n", b1)
-	fmt.Printf("%d\n", b2)
+	fmtPrintf(S("%d\n"), b0)
+	fmtPrintf(S("%d\n"), b1)
+	fmtPrintf(S("%d\n"), b2)
 }
 
 func main() {
 	f0()
 	f1()
 	f3()
-	fmt.Printf("%d\n", c0)
-	fmt.Printf("%d\n", c1)
-	fmt.Printf("%d\n", c2)
-	fmt.Printf("%d\n", d0)
-	fmt.Printf("%d\n", d1)
-	fmt.Printf("%d\n", d2)
-	fmt.Printf("%d\n", d3)
+	fmtPrintf(S("%d\n"), c0)
+	fmtPrintf(S("%d\n"), c1)
+	fmtPrintf(S("%d\n"), c2)
+	fmtPrintf(S("%d\n"), d0)
+	fmtPrintf(S("%d\n"), d1)
+	fmtPrintf(S("%d\n"), d2)
+	fmtPrintf(S("%d\n"), d3)
 }

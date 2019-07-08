@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func fibonacci(n int) int {
 	if n == 0 {
@@ -16,5 +15,5 @@ func fibonacci(n int) int {
 func main() {
 	var r int
 	r = fibonacci(12)
-	fmt.Printf("%d\n", r)
+	fmtPrintf(S("%d\n"), r)
 }

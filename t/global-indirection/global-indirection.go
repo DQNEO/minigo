@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 var GlobalInt int = 1
 var GlobalPtr *int = &GlobalInt
@@ -14,12 +13,12 @@ type Point struct {
 }
 
 func f1() {
-	fmt.Printf("%d\n", *GlobalPtr) // 1
+	fmtPrintf(S("%d\n"), *GlobalPtr) // 1
 }
 
 func f2() {
-	fmt.Printf("%d\n", pp1.y) // 2
-	fmt.Printf("%d\n", pp2.x) // 3
+	fmtPrintf(S("%d\n"), pp1.y) // 2
+	fmtPrintf(S("%d\n"), pp2.x) // 3
 }
 
 type Gtype struct {
@@ -42,9 +41,9 @@ var builtinLenGlobal = &DeclFunc{
 
 func f3() {
 	retTypes := builtinLenGlobal.rettypes
-	fmt.Printf("%d\n", len(retTypes)+2) // 4
+	fmtPrintf(S("%d\n"), len(retTypes)+2) // 4
 	var gi *Gtype = retTypes[0]
-	fmt.Printf("%d\n", gi.typ-2) // 5
+	fmtPrintf(S("%d\n"), gi.typ-2) // 5
 }
 
 /*
@@ -55,9 +54,9 @@ func f4() {
 	}
 
 	retTypes := builtinLenLocal.rettypes
-	fmt.Printf("%d\n", len(retTypes) + 4) // 6
+	fmtPrintf(S("%d\n"), len(retTypes) + 4) // 6
 	var gi *Gtype = retTypes[0]
-	fmt.Printf("%d\n", gi.size - 1) // 7
+	fmtPrintf(S("%d\n"), gi.size - 1) // 7
 }
 */
 

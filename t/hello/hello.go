@@ -1,7 +1,6 @@
 package main
 
-import "fmt"
 
 func main() {
-	fmt.Printf("%s\n", "hello world")
+	fmtPrintf(S("%s\n"), "hello world")
 }

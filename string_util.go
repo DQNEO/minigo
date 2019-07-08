@@ -16,6 +16,10 @@ func S(s string) gostring {
 	return gostring(s)
 }
 
+func fmtPrintf(gos gostring, a... interface{}) {
+	r := Sprintf(gos, a...)
+	write(r)
+}
 var _trash int
 func Sprintf(format []byte, a... interface{}) []byte {
 	var args []interface{}

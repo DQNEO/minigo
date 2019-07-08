@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 const a int = b
 const b int = 1
@@ -16,16 +15,16 @@ const (
 )
 
 func f1() {
-	fmt.Printf("%d\n", 0)
+	fmtPrintf(S("%d\n"), 0)
 }
 
 func f2() {
-	fmt.Printf("%d\n", a)
+	fmtPrintf(S("%d\n"), a)
 }
 
 func main() {
 	f1()
 	f2()
-	fmt.Printf("%d\n", x)
-	fmt.Printf("%d\n", sum)
+	fmtPrintf(S("%d\n"), x)
+	fmtPrintf(S("%d\n"), sum)
 }

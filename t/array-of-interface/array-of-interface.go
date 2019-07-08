@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func f1() int {
 	a := &A{}
@@ -27,10 +26,10 @@ func (a *A) emit() {
 func test_array_literal() {
 	var l int
 	l = f1()
-	fmt.Printf("%d\n", l) // 1
+	fmtPrintf(S("%d\n"), l) // 1
 
 	l = f2()
-	fmt.Printf("%d\n", l+1) // 2
+	fmtPrintf(S("%d\n"), l+1) // 2
 }
 
 type Number struct {
@@ -54,7 +53,7 @@ func f3() {
 
 	var j int
 	j = ifc.(int)
-	fmt.Printf("%d\n", j) // 3
+	fmtPrintf(S("%d\n"), j) // 3
 }
 
 func f4() {
@@ -68,13 +67,13 @@ func f4() {
 		id: 4,
 	}
 	ifc = n
-	fmt.Printf("%d\n", ifc.getId()) // 4
+	fmtPrintf(S("%d\n"), ifc.getId()) // 4
 
 	array[1] = ifc
-	fmt.Printf("%d\n", array[1].getId()+1) // 5
+	fmtPrintf(S("%d\n"), array[1].getId()+1) // 5
 
 	ifc2 = array[1]
-	fmt.Printf("%d\n", ifc2.getId()+2) // 6
+	fmtPrintf(S("%d\n"), ifc2.getId()+2) // 6
 }
 
 func f5() {
@@ -87,13 +86,13 @@ func f5() {
 		id: 7,
 	}
 	s = n
-	fmt.Printf("%d\n", s.getId()) // 7
+	fmtPrintf(S("%d\n"), s.getId()) // 7
 	stmts = append(stmts, s)
-	fmt.Printf("%d\n", len(stmts)+7) // 8
+	fmtPrintf(S("%d\n"), len(stmts)+7) // 8
 	s2 = stmts[0]
 	id = s2.getId()
-	fmt.Printf("%d\n", id+2)               // 9
-	fmt.Printf("%d\n", stmts[0].getId()+3) // 10
+	fmtPrintf(S("%d\n"), id+2)               // 9
+	fmtPrintf(S("%d\n"), stmts[0].getId()+3) // 10
 }
 
 func main() {

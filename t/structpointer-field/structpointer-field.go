@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 type IrRoot struct {
 	vars           []int
@@ -16,9 +15,9 @@ func f1() {
 
 	root.vars = vars
 
-	fmt.Printf("%d\n", len(vars))        // 1
-	fmt.Printf("%d\n", len(root.vars)+1) // 2
-	fmt.Printf("%d\n", root.vars[0])     // 3
+	fmtPrintf(S("%d\n"), len(vars))        // 1
+	fmtPrintf(S("%d\n"), len(root.vars)+1) // 2
+	fmtPrintf(S("%d\n"), root.vars[0])     // 3
 }
 
 type IrRoot2 struct {
@@ -37,9 +36,9 @@ func f2() {
 	var ok bool
 	i2, ok = x.(int)
 	if !ok {
-		fmt.Printf("ERROR\n")
+		fmtPrintf(S("ERROR\n"))
 	}
-	fmt.Printf("%d\n", i2) // 4
+	fmtPrintf(S("%d\n"), i2) // 4
 }
 
 func main() {

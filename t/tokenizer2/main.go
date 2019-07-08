@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 var GENERATION int = 2
 
@@ -13,13 +12,13 @@ func f1() {
 	tokens := Tokenize(bs)
 	expectedLen := 17977
 	if len(tokens) == expectedLen {
-		fmt.Println("1")
+		fmtPrintf(S("1\n"))
 	} else {
 		panic("ERROR")
 	}
 	/*
 		for _, tok := range tokens {
-			fmt.Printf("%s:%s\n", string(tok.typ), tok.sval)
+			fmtPrintf(S("%s:%s\n", string(tok.typ)), tok.sval)
 		}
 	*/
 }

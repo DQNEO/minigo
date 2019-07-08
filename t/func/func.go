@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 func plus(a int, b int) int {
 	return a + b
 }
@@ -21,16 +17,16 @@ func fvoidreturn() {
 }
 
 func f1() {
-	fmt.Printf("%d\n", plus(0, 1))
-	fmt.Printf("%d\n", plus(1, 1))
-	fmt.Printf("%d\n", plus(2, 1))
-	fmt.Printf("%d\n", plus(2, 2))
+	fmtPrintf(S("%d\n"), plus(0, 1))
+	fmtPrintf(S("%d\n"), plus(1, 1))
+	fmtPrintf(S("%d\n"), plus(2, 1))
+	fmtPrintf(S("%d\n"), plus(2, 2))
 }
 
 func f2() {
 	var sum int
 	sum = plus(2, 3)
-	fmt.Printf("%d\n", sum)
+	fmtPrintf(S("%d\n"), sum)
 }
 
 func returnNil() []int {
@@ -46,13 +42,13 @@ func returnSlice() []int {
 
 func receiveNilSlice() {
 	nilSlice := returnNil()
-	fmt.Printf("%d\n", len(nilSlice)+6) // 6
+	fmtPrintf(S("%d\n"), len(nilSlice)+6) // 6
 }
 
 func receiveIntSlice() {
 	intSlice := returnSlice()
-	fmt.Printf("%d\n", len(intSlice)+5) // 7
-	fmt.Printf("%d\n", intSlice[0])     // 8
+	fmtPrintf(S("%d\n"), len(intSlice)+5) // 7
+	fmtPrintf(S("%d\n"), intSlice[0])     // 8
 }
 
 func returnSliceLiteral() []int {
@@ -61,8 +57,8 @@ func returnSliceLiteral() []int {
 
 func receiveSliceLiteral() {
 	intSlice := returnSliceLiteral()
-	fmt.Printf("%d\n", len(intSlice)+8) // 9
-	fmt.Printf("%d\n", intSlice[0])     // 10
+	fmtPrintf(S("%d\n"), len(intSlice)+8) // 9
+	fmtPrintf(S("%d\n"), intSlice[0])     // 10
 }
 
 func returnStringSliceLiteral() []string {
@@ -71,7 +67,7 @@ func returnStringSliceLiteral() []string {
 
 func receiveStringSliceLiteral() {
 	slice := returnStringSliceLiteral()
-	fmt.Printf("%s\n", slice[0])
+	fmtPrintf(S("%s\n"), slice[0])
 }
 
 func main() {

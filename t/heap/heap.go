@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func main() {
 	var heapHead *int
@@ -10,16 +9,16 @@ func main() {
 
 	address = malloc(8)
 	*address = 1
-	fmt.Printf("%d\n", *address)
+	fmtPrintf(S("%d\n"), *address)
 	address = malloc(8)
 	*address = 2
-	fmt.Printf("%d\n", *address)
+	fmtPrintf(S("%d\n"), *address)
 	address = malloc(8)
 	*address = 3
-	fmt.Printf("%d\n", *address)
+	fmtPrintf(S("%d\n"), *address)
 
 	heapA := malloc(8)
 	heapB := malloc(0)
 
-	fmt.Printf("%d\n", (heapB-heapA)-4) // 4
+	fmtPrintf(S("%d\n"), (heapB-heapA)-4) // 4
 }

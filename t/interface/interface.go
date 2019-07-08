@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func f1() {
 	var p *Point
@@ -9,7 +8,7 @@ func f1() {
 		y: 2,
 	}
 	sum := p.sum()
-	fmt.Printf("%d\n", sum-2) // 1
+	fmtPrintf(S("%d\n"), sum-2) // 1
 }
 
 func f2() {
@@ -20,12 +19,12 @@ func f2() {
 	}
 	myInterface = ptr
 	sum := myInterface.sum()
-	fmt.Printf("%d\n", sum-3) // 2
+	fmtPrintf(S("%d\n"), sum-3) // 2
 
 	var myInterface2 MyInterface
 	myInterface2 = myInterface
 	diff := myInterface2.diff()
-	fmt.Printf("%d\n", diff+2) // 3
+	fmtPrintf(S("%d\n"), diff+2) // 3
 }
 
 func f3() {
@@ -36,10 +35,10 @@ func f3() {
 	}
 	myInterface = ptr
 	sum := myInterface.sum()
-	fmt.Printf("%d\n", sum-1) // 4
+	fmtPrintf(S("%d\n"), sum-1) // 4
 
 	diff := myInterface.diff()
-	fmt.Printf("%d\n", diff+4) // 5
+	fmtPrintf(S("%d\n"), diff+4) // 5
 }
 
 func f4(bol bool) {
@@ -62,10 +61,10 @@ func f4(bol bool) {
 
 	sum := myInterface.sum()
 
-	fmt.Printf("%d\n", sum) // 6, 8
+	fmtPrintf(S("%d\n"), sum) // 6, 8
 
 	diff := myInterface.diff()
-	fmt.Printf("%d\n", diff+5) // 7, 9
+	fmtPrintf(S("%d\n"), diff+5) // 7, 9
 }
 
 var gpoint = Point{
@@ -81,13 +80,13 @@ func return_interface() MyInterface {
 	myInterface = gptr
 	sum := myInterface.sum()
 
-	fmt.Printf("%d\n", sum) // 10
+	fmtPrintf(S("%d\n"), sum) // 10
 	return myInterface
 }
 
 func f5() {
 	var myif MyInterface = return_interface()
-	fmt.Printf("%d\n", myif.sum()+1) // 11
+	fmtPrintf(S("%d\n"), myif.sum()+1) // 11
 }
 
 func main() {

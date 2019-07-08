@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func swtch(x int) int {
 	var y int
@@ -22,13 +21,13 @@ func swtch(x int) int {
 func f1() {
 	var i int
 	i = swtch(1)
-	fmt.Printf("%d\n", i) // 1
+	fmtPrintf(S("%d\n"), i) // 1
 	i = swtch(2)
-	fmt.Printf("%d\n", i) // 2
+	fmtPrintf(S("%d\n"), i) // 2
 	i = swtch(3)
-	fmt.Printf("%d\n", i+1) // 3
+	fmtPrintf(S("%d\n"), i+1) // 3
 	i = swtch(999)
-	fmt.Printf("%d\n", i-3) // 4
+	fmtPrintf(S("%d\n"), i-3) // 4
 }
 
 func swtch2(x int) int {
@@ -43,17 +42,17 @@ func swtch2(x int) int {
 
 func f2() {
 	i := swtch2(3)
-	fmt.Printf("%d\n", i+5) // 5
+	fmtPrintf(S("%d\n"), i+5) // 5
 }
 
 func f3() {
 	switch {
 	case 1+1 == 3:
-		fmt.Printf("Error\n")
+		fmtPrintf(S("Error\n"))
 	case 1+1 == 2:
-		fmt.Printf("%d\n", 6)
+		fmtPrintf(S("%d\n"), 6)
 	default:
-		fmt.Printf("Error\n")
+		fmtPrintf(S("Error\n"))
 	}
 }
 

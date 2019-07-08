@@ -1,38 +1,37 @@
 package main
 
-import "fmt"
 
 func eval() {
-	fmt.Printf("%d\n", gint)
-	fmt.Printf("%c\n", gchar)
+	fmtPrintf(S("%d\n"), gint)
+	fmtPrintf(S("%c\n"), gchar)
 	if gtrue {
-		fmt.Printf("3\n")
+		fmtPrintf(S("3\n"))
 	}
 	if !gfalse {
-		fmt.Printf("4\n")
+		fmtPrintf(S("4\n"))
 	}
 
-	fmt.Printf("%d\n", gstruct.gint)  // 5
-	fmt.Printf("%c\n", gstruct.gchar) // 6
+	fmtPrintf(S("%d\n"), gstruct.gint)  // 5
+	fmtPrintf(S("%c\n"), gstruct.gchar) // 6
 	if gstruct.gtrue {
-		fmt.Printf("7\n")
+		fmtPrintf(S("7\n"))
 	}
 	if !gstruct.gfalse {
-		fmt.Printf("8\n")
+		fmtPrintf(S("8\n"))
 	}
 
-	fmt.Printf("%d\n", garray[0]) // 9
-	fmt.Printf("%d\n", garray[1]) // 10
-	fmt.Printf("%d\n", garray[2]) // 11
+	fmtPrintf(S("%d\n"), garray[0]) // 9
+	fmtPrintf(S("%d\n"), garray[1]) // 10
+	fmtPrintf(S("%d\n"), garray[2]) // 11
 
 }
 
 func evalnested() {
 	// nested data
-	fmt.Printf("%d\n", gstruct.inner.gint)        // 12
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // A
+	fmtPrintf(S("%d\n"), gstruct.inner.gint)        // 12
+	fmtPrintf(S("%d\n"), gstruct.inner.inner.gchar) // A
 	if gstruct.inner.inner.gtrue == true {
-		fmt.Printf("14\n")
+		fmtPrintf(S("14\n"))
 	}
 }
 
@@ -40,11 +39,11 @@ var garrayommittied [16]int = [16]int{3}
 
 func evalnestedarary() {
 	var i int = gpoints[2].Y
-	fmt.Printf("%d\n", i+9) //15
+	fmtPrintf(S("%d\n"), i+9) //15
 
-	fmt.Printf("%d\n", len(garrayommittied))   // 16
-	fmt.Printf("%d\n", garrayommittied[0]+14)  // 17
-	fmt.Printf("%d\n", garrayommittied[15]+18) // 18
+	fmtPrintf(S("%d\n"), len(garrayommittied))   // 16
+	fmtPrintf(S("%d\n"), garrayommittied[0]+14)  // 17
+	fmtPrintf(S("%d\n"), garrayommittied[15]+18) // 18
 }
 
 func assign1() {
@@ -54,38 +53,38 @@ func assign1() {
 	gfalse = true
 	garray = [3]int{23, 24}
 
-	fmt.Printf("%d\n", gint)  // 19
-	fmt.Printf("%d\n", gchar) // B
+	fmtPrintf(S("%d\n"), gint)  // 19
+	fmtPrintf(S("%d\n"), gchar) // B
 	if !gtrue {
-		fmt.Printf("21\n") //21
+		fmtPrintf(S("21\n")) //21
 	}
 	if gfalse {
-		fmt.Printf("22\n") // 22
+		fmtPrintf(S("22\n")) // 22
 	}
 
-	fmt.Printf("%d\n", garray[0])    // 23
-	fmt.Printf("%d\n", garray[1])    // 24
-	fmt.Printf("%d\n", garray[2]+25) // 25
+	fmtPrintf(S("%d\n"), garray[0])    // 23
+	fmtPrintf(S("%d\n"), garray[1])    // 24
+	fmtPrintf(S("%d\n"), garray[2]+25) // 25
 	gpoint = Point{
 		X: 26,
 		Y: 27,
 	}
 
-	fmt.Printf("%d\n", gpoint.X) // 26
-	fmt.Printf("%d\n", gpoint.Y) // 27
+	fmtPrintf(S("%d\n"), gpoint.X) // 26
+	fmtPrintf(S("%d\n"), gpoint.Y) // 27
 
 }
 
 func assign2() {
 	gstructhasslice = StructHasSlice{}
-	fmt.Printf("%d\n", len(gstructhasslice.slice)+28) // 28
+	fmtPrintf(S("%d\n"), len(gstructhasslice.slice)+28) // 28
 }
 
 func assign3() {
 	gstructhasarray = StructHasArray{
 		array: [2]int{28, 29},
 	}
-	fmt.Printf("%d\n", gstructhasarray.array[1]) // 29
+	fmtPrintf(S("%d\n"), gstructhasarray.array[1]) // 29
 }
 
 func assign4() {
@@ -103,7 +102,7 @@ func assign4() {
 			},
 		},
 	}
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // C
+	fmtPrintf(S("%d\n"), gstruct.inner.inner.gchar) // C
 }
 
 func assign5() {
@@ -122,8 +121,8 @@ func assign5() {
 		},
 	}
 
-	fmt.Printf("%d\n", gpoints[2].Y)   // 31
-	fmt.Printf("%d\n", gpoints[1].X+4) // 32
+	fmtPrintf(S("%d\n"), gpoints[2].Y)   // 31
+	fmtPrintf(S("%d\n"), gpoints[1].X+4) // 32
 }
 
 /*
@@ -145,7 +144,7 @@ func assign6() {
 		},
 	}
 
-	fmt.Printf("%d\n", gpolygon.line2[1].Y) // 33
+	fmtPrintf(S("%d\n"), gpolygon.line2[1].Y) // 33
 }
 
 */

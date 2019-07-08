@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 type Expr interface {
 	emit() int
@@ -21,7 +20,7 @@ func return_ifc() Expr {
 
 func f1() {
 	x := return_ifc()
-	fmt.Printf("%d\n", x.emit()-6)
+	fmtPrintf(S("%d\n"), x.emit()-6)
 }
 
 /*
@@ -51,7 +50,7 @@ func f3() {
 
 	var j int
 	j = ifc.(int)
-	fmt.Printf("%d\n", j) // 3
+	fmtPrintf(S("%d\n"), j) // 3
 }
 */
 

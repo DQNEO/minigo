@@ -17,5 +17,5 @@ func main() {
 	fd = open(fname, O_RDONLY)
 	ln := read(fd, buf, MYBUFSIZ)
 	s := buf[0:ln]
-	fmt.Printf("%s", s)
+	fmtPrintf(S("%s"), s)
 }

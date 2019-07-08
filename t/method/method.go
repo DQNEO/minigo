@@ -1,16 +1,15 @@
 package main
 
-import "fmt"
 
 func f0() {
-	fmt.Printf("%d\n", add(1, 1))
+	fmtPrintf(S("%d\n", add(1), 1))
 }
 
 func f1() {
 	var a myint = 1
 	var b myint
 	b = a.add(2)
-	fmt.Printf("%d\n", b)
+	fmtPrintf(S("%d\n"), b)
 }
 
 func f2() {
@@ -20,7 +19,7 @@ func f2() {
 		age: 4,
 	}
 
-	fmt.Printf("%d\n", u.getAge())
+	fmtPrintf(S("%d\n"), u.getAge())
 }
 
 func f3() {
@@ -28,7 +27,7 @@ func f3() {
 		x: 2,
 		y: 3,
 	}
-	fmt.Printf("%d\n", p.sum())
+	fmtPrintf(S("%d\n"), p.sum())
 }
 
 func main() {

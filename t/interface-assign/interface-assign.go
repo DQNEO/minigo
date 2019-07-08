@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 func f0() *int {
 	p := &Point{
@@ -28,9 +27,9 @@ func f1() string {
 
 func main() {
 	p := f0()
-	fmt.Printf("%d\n", *p)
+	fmtPrintf(S("%d\n"), *p)
 	s := f1()
-	fmt.Printf("%s\n", s)
+	fmtPrintf(S("%s\n"), s)
 }
 
 type Point struct {
