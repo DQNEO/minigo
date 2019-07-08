@@ -96,7 +96,6 @@ func Sprintf(format []byte, a... interface{}) []byte {
 				}
 				blocks = append(blocks, b)
 			default:
-				dumpInterface(arg)
 				panic("Unkown type to format")
 			}
 			argIndex++
