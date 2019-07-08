@@ -16,7 +16,7 @@ func S(s string) gostring {
 	return gostring(s)
 }
 
-var trash int
+var _trash int
 func Sprintf(format []byte, a... interface{}) []byte {
 	var r []byte
 	var blocks []gostring
@@ -29,11 +29,9 @@ func Sprintf(format []byte, a... interface{}) []byte {
 	var inPercent bool
 	var argIndex int
 	//var sign byte
-	for i,c = range f {
-		//fmt.Printf("# c=%c\n", c)
-		if !inPercent && c == '%' {
+	for i, c = range f {
+		if ! inPercent && c == '%' {
 			inPercent = true
-			//fmt.Printf("# in Percent \n")
 			blocks = append(blocks, str)
 			str = nil
 			numPercent++
@@ -43,12 +41,9 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			if c == '%' {
 				str = append(str,c)
 				inPercent = false
-				//fmt.Printf("# outof Percent \n")
 				continue
 			}
-			//fmt.Printf("# check arg for c=%c\n", c)
 			arg := a[argIndex]
-			//dumpInterface(arg)
 			switch arg.(type) {
 			case string:
 				var s string
@@ -57,20 +52,41 @@ func Sprintf(format []byte, a... interface{}) []byte {
 				bytes = []byte(s)
 				blocks = append(blocks, bytes)
 			case []byte:
-				//fmt.Printf("# byte\n")
 				var _arg []byte
 				_arg = arg.([]byte)
 				blocks = append(blocks, _arg)
 			case gostring:  // This case is not reached by 2nd gen compiler
-				// fmt.Printf("# gostring\n")
 				var _arg []byte
 				_arg = arg.(gostring)
 				blocks = append(blocks, _arg)
+			case goidentifier:  // This case is not reached by 2nd gen compiler
+				var _arg []byte
+				_arg = arg.(goidentifier)
+				blocks = append(blocks, _arg)
+			case byte:
+				var _argByte byte
+				_argByte = arg.(byte)
+				bts := []byte{_argByte}
+				g := gostring(bts)
+				blocks = append(blocks, g)
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
 				b := gostring(strconv.Itoa(_argInt))
 				blocks = append(blocks, b)
+			case bool: // "%v"
+				var _argBool bool
+				_argBool = arg.(bool)
+				var b []byte
+				if _argBool {
+					b = []byte("true")
+				} else{
+					b = []byte("false")
+				}
+				blocks = append(blocks, b)
+			default:
+				dumpInterface(arg)
+				panic("Unkown type to format")
 			}
 			argIndex++
 			inPercent = false
@@ -79,15 +95,14 @@ func Sprintf(format []byte, a... interface{}) []byte {
 		}
 		str = append(str,c)
 	}
-	//fmt.Printf("# blocks:%v", blocks)
 	blocks = append(blocks, str)
 	for i, str = range blocks {
 		for j, c = range str {
 			r = append(r, c)
 		}
 	}
-	trash = i
-	trash = j
+	_trash = i
+	_trash = j
 	return r
 }
 

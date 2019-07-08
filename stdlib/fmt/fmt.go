@@ -68,7 +68,7 @@ func Sprintf(format gostring, a... interface{}) []byte {
 				_argByte = arg.(byte)
 				bts := []byte{_argByte}
 				g := gostring(bts)
-				blocks = append(blocks, bts)
+				blocks = append(blocks, g)
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
