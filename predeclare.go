@@ -75,6 +75,10 @@ var builtinRunTimeArgs = &DeclFunc{
 	},
 }
 
+var builtinPrintstring = &DeclFunc{
+	rettypes: []*Gtype{},
+}
+
 func newUniverse() *Scope {
 	universe := newScope(nil, S("universe"))
 	setPredeclaredIdentifiers(universe)
@@ -124,6 +128,9 @@ func setPredeclaredIdentifiers(universe *Scope) {
 		funcdef: builtinRunTimeArgs,
 	})
 
+	universe.setFunc(goidentifier("printstring"), &ExprFuncRef{
+		funcdef: builtinPrintstring,
+	})
 
 }
 
