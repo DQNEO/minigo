@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 )
 
 type gostring []byte
@@ -87,7 +86,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
-				b := gostring(strconv.Itoa(_argInt))
+				b := gostring(Itoa(_argInt))
 				blocks = append(blocks, b)
 			case bool: // "%v"
 				var _argBool bool
@@ -249,4 +248,40 @@ func HasSuffix(s gostring, suffix gostring) bool {
 		return eq(gostring(suf) ,suffix)
 	}
 	return false
+}
+
+func Itoa(i int) []byte {
+	var r []byte
+	var tmp []byte
+	var isMinus bool
+
+	// open(2) returs  0xffffffff 4294967295 on error.
+	// I don't understand this yet.
+	if i > 2147483648 {
+		i = i - 2147483648*2
+	}
+
+
+	if i < 0 {
+		i = i * -1
+		isMinus = true
+	}
+	for i>0 {
+		mod := i % 10
+		tmp = append(tmp, byte('0') + byte(mod))
+		i = i /10
+	}
+
+	if isMinus {
+		r = append(r, '-')
+	}
+
+	for j:=len(tmp)-1;j>=0;j--{
+		r = append(r, tmp[j])
+	}
+
+	if len(r) == 0 {
+		return []byte{'0'}
+	}
+	return r
 }
