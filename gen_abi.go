@@ -181,7 +181,7 @@ func (ircall *IrStaticCall) emit() {
 
 		// do not convert receiver
 		if !ircall.isMethodCall || argIndex != 0 {
-			if param != nil && !eq(ircall.symbol , S("printf")) {
+			if param != nil {
 				emit(S("# has a corresponding param"))
 
 				var fromGtype *Gtype

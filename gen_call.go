@@ -191,20 +191,8 @@ type builtinDumpSliceEmitter struct {
 }
 
 func (em *builtinDumpSliceEmitter) emit() {
-	emit(S("lea .%s, %%rax"), gostring(builtinStringKey2))
-	emit(S("PUSH_8"))
-
-	em.arg.emit()
-	emit(S("PUSH_SLICE"))
-
-	numRegs := 4
-	var i int
-	for i = numRegs - 1; i >= 0; i-- {
-		emit(S("POP_TO_ARG_%d"), i)
-	}
-
-	emit(S("FUNCALL %s"), S("printf"))
-	emitNewline()
+	// @TODO Implement me
+	emit(S("# builtinDumpSliceEmitter is not implemented"))
 }
 
 type builtinDumpInterfaceEmitter struct {
@@ -212,20 +200,8 @@ type builtinDumpInterfaceEmitter struct {
 }
 
 func (em *builtinDumpInterfaceEmitter) emit() {
-	emit(S("lea .%s, %%rax"), gostring(builtinStringKey1))
-	emit(S("PUSH_8"))
-
-	em.arg.emit()
-	emit(S("PUSH_INTERFACE"))
-
-	numRegs := 4
-	var i int
-	for i = numRegs - 1; i >= 0; i-- {
-		emit(S("POP_TO_ARG_%d"), i)
-	}
-
-	emit(S("FUNCALL %s"), S("printf"))
-	emitNewline()
+	// @TODO Implement me
+	emit(S("# builtinDumpInterfaceEmitter is not implemented"))
 }
 
 type builtinAssertInterfaceEmitter struct {
