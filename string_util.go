@@ -121,6 +121,10 @@ func write(s gostring) {
 	os.Stdout.Write(b)
 }
 
+func fmtPrintln(s gostring) {
+	writeln(s)
+}
+
 func writeln(s gostring) {
 	var b []byte = []byte(s)
 	b = append(b, '\n')

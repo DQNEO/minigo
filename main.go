@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -18,8 +17,8 @@ var resolveOnly = false
 var emitPosition = false
 
 func printVersion() {
-	fmt.Println("minigo 0.1.0")
-	fmt.Println("Copyright (C) 2019 @DQNEO")
+	fmtPrintln(S("minigo 0.1.0"))
+	fmtPrintln(S("Copyright (C) 2019 @DQNEO"))
 }
 
 func parseOpts(args []gostring) []gostring {
@@ -74,7 +73,7 @@ func main() {
 	}
 
 	if len(sourceFiles) == 0 {
-		fmt.Println("No input files.")
+		fmtPrintln(S("No input files."))
 		return
 	}
 
