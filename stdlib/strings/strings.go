@@ -1,4 +1,4 @@
-package strngs
+package strings
 
 func HasSuffix(s string, suffix string) bool {
 	if len(s) >= len(suffix) {
