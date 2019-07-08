@@ -285,3 +285,30 @@ func Itoa(i int) []byte {
 	}
 	return r
 }
+
+func Atoi(gs gostring) (int, error) {
+	if len(gs) == 0 {
+		return 0,nil
+	}
+	var b byte
+	var n int
+	var i int
+	var isMinus bool
+	for i, b = range gs {
+		if b == '.' {
+			return 0,nil // @FIXME all no number should return error
+		}
+		if b == '-' {
+			isMinus = true
+			continue
+		}
+		var x byte = b - byte('0')
+		n  = n * 10
+		n = n + int(x)
+	}
+	if isMinus {
+		n = -n
+	}
+	_trash = i
+	return n, nil
+}

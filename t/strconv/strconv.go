@@ -1,18 +1,20 @@
 package main
 
-import (
-	"strconv"
-)
 
 func f1() {
-	var a string = "10485760"
+	var a gostring = S("10485760")
 	var i int
-	i, _ = strconv.Atoi(a)
+	var e error
+	i, e = Atoi(a)
 	fmtPrintf(S("%d\n"), i-10485760) // 0
 
-	a = "1"
-	i, _ = strconv.Atoi(a)
+	a = S("1")
+	i ,e  = Atoi(a)
 	fmtPrintf(S("%d\n"), i) // 1
+
+	a = S("-2")
+	i ,e  = Atoi(a)
+	fmtPrintf(S("%d\n"), i+4) // 1
 }
 
 func f2() {

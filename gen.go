@@ -176,6 +176,8 @@ func emitIncrDecl(inst gostring, operand Expr) {
 
 func (binop *ExprBinop) emitComp() {
 	emit(S("# emitComp"))
+	assert(binop.left != nil, binop.token(), S("should not be nil"))
+
 	if binop.left.getGtype().isString() {
 		e := &IrExprStringComparison{
 			tok: binop.token(),

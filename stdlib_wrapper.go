@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"strconv"
 )
 
 // depends on libc
@@ -12,7 +11,7 @@ func ioutil_ReadFile(filename gostring) ([]byte, error) {
 
 // depends on libc
 func strconv_Atoi(gs gostring) (int, error) {
-	i, e := strconv.Atoi(string(gs))
+	i, e := Atoi((gs))
 	return i,e
 }
 
