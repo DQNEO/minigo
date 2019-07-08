@@ -15,10 +15,6 @@ func panic(s string) {
 	exit(1)
 }
 
-func print(x interface{}) {
-	printf(x)
-}
-
 func recover() interface{} {
 	return nil
 }
