@@ -12,7 +12,7 @@ func f1() {
 		z = -1
 	case int:
 		z = 1
-	case string:
+	case gostring:
 		z = 2
 	default:
 		z = 5
@@ -20,14 +20,14 @@ func f1() {
 
 	fmtPrintf(S("%d\n"), z)
 
-	var s string = "hello"
+	var s gostring = S("hello")
 	x = s
 	switch x.(type) {
 	case nil:
 		z = -1
 	case int:
 		z = 1
-	case string:
+	case gostring:
 		z = 2
 	default:
 		z = 5
