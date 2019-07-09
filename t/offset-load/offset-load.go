@@ -11,7 +11,7 @@ type Gtype struct {
 	size        int       // for scalar type like int, bool, byte, for struct
 	origType    *Gtype    // for pointer
 	fields      []*Gtype  // for struct
-	fieldname   string
+	fieldname   gostring
 	offset      int    // for struct field
 	length      int    // for array, string(len without the terminating \0)
 	elementType *Gtype // for array, slice
