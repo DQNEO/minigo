@@ -13,7 +13,7 @@ internal_runtime.go: internal/runtime/*.go
 internal_universe.go: internal/universe/*.go
 	./cp-internalcode.sh
 
-stdlib.go: stdlib/*/*.go
+stdlib.go: stdlib/*/*.go  concate-stdlib.sh
 	./concate-stdlib.sh > stdlib.go
 
 # 1st gen compiler
