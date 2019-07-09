@@ -61,9 +61,9 @@ func itoa(i int) []byte {
 	return r
 }
 
-func panic(msg string) {
+func panic(msg []byte) {
 	printstring([]byte("panic: "))
-	printstring([]byte(msg))
+	printstring(msg)
 	printstring([]byte("\n"))
 	exit(1)
 }

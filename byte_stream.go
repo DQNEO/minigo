@@ -36,7 +36,7 @@ func NewByteStreamFromFile(path gostring) *ByteStream {
 func readFile(filename gostring) []byte {
 	bytes, err := ioutil_ReadFile(filename)
 	if err != nil {
-		panic(err)
+		panic(gostring(err.Error()))
 	}
 	return bytes
 }
