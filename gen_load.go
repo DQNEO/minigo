@@ -170,6 +170,9 @@ func (ast *ExprUop) emit() {
 		case *ExprStructField:
 			e := ast.operand.(*ExprStructField)
 			e.emitAddress()
+		case *ExprIndex:
+			e := ast.operand.(*ExprIndex)
+			emitAddress(e)
 		default:
 			errorft(ast.token(), S("Unknown type: %T"), ast.operand)
 		}
@@ -247,6 +250,8 @@ func emitAddress(e Expr) {
 	switch e.(type) {
 	case *ExprVariable:
 		e.(*ExprVariable).emitAddress(0)
+	case *ExprIndex:
+		e.(*ExprIndex).emitAddress()
 	default:
 		TBI(e.token(), S(""))
 	}

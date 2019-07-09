@@ -16,7 +16,8 @@ type File struct {
 func (f *File) Write(b []byte) (int, error) {
 	var fid int = f.id
 	var n int
-	n = write(fid, string(b), len(b))
+	var addr *byte = &b[0]
+	n = write(fid, addr, len(b))
 	return n,nil
 }
 
