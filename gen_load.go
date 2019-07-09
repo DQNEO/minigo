@@ -381,7 +381,8 @@ func (e *ExprSlice) emit() {
 }
 
 func (e *ExprSlice) emitSlice() {
-	elmType := e.collection.getGtype().elementType
+	elmType := e.collection.getGtype().Underlying().elementType
+	assert(elmType != nil, e.token(),S("type should not be nil:T %s"), e.collection.getGtype().String())
 	size := elmType.getSize()
 	assert(size > 0, nil, S("size > 0"))
 
@@ -401,8 +402,9 @@ func (e *ExprSlice) emitSlice() {
 	emit(S("#   calc and set len"))
 
 	if e.high == nil {
-		e.high = &ExprNumberLiteral{
-			val: e.collection.getGtype().length,
+		e.high = &ExprLen{
+			tok:e.token(),
+			arg: e.collection,
 		}
 	}
 	calcLen := &ExprBinop{
