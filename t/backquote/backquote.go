@@ -2,15 +2,15 @@ package main
 
 
 func f1() {
-	var s string = `hello
-`
-	fmtPrintf(S(s))
+	var s gostring = S(`hello
+`)
+	fmtPrintf(s)
 }
 
 func f2() {
-	var s string = `h"e"llo
-`
-	fmtPrintf(S(s))
+	var s gostring = S(`h"e"llo
+`)
+	fmtPrintf(s)
 }
 
 func main() {
