@@ -148,18 +148,5 @@ func emitConvertCstringToSlice(cstring Expr) {
 }
 
 func emitStringConcate(leftCstring Expr, rightCstring Expr) {
-	emit(S("# emitStringConcate"))
-
-
-	emitConvertCstringToSlice(leftCstring)
-	emit(S("PUSH_SLICE"))
-
-	emitConvertCstringToSlice(rightCstring)
-	emit(S("PUSH_SLICE"))
-
-	eStrConCate := &IrLowLevelCall{
-		symbol:        S("iruntime.strcat"),
-		argsFromStack: 6,
-	}
-	eStrConCate.emit()
+	TBI(leftCstring.token(), S(""))
 }

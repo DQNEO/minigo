@@ -185,15 +185,4 @@ func eqGostrings(a []byte, b []byte, eq bool) bool {
 	}
 }
 
-func strcat(a []byte, b []byte) string {
-	var c []byte
-	for i:=0;i<len(a);i++ {
-		c = append(c, a[i])
-	}
-	for i:=0;i<len(b);i++ {
-		c = append(c, b[i])
-	}
-	return string(c)
-}
-
 const MiniGo int = 1
