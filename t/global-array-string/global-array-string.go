@@ -1,8 +1,8 @@
 package main
 
 
-var messages = [2]string{"hello", "world"}
+var messages = [2]gostring{gostring("hello"), gostring("world")}
 
 func main() {
-	fmtPrintln(S(messages[1]))
+	fmtPrintln(messages[1])
 }
