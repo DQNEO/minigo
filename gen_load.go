@@ -291,7 +291,9 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
-func loadArrayOrSliceIndex(collection Expr, index Expr, offset int) {
+func (e *ExprIndex) loadArrayOrSliceIndex(offset int) {
+	collection := e.collection
+	index := e.index
 	elmType := collection.getGtype().Underlying().elementType
 	assert(elmType != nil, collection.token(), S("elmType should not be nil"))
 	elmSize := elmType.getSize()
@@ -323,7 +325,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	index := e.index
 	switch collection.getGtype().getKind() {
 	case G_ARRAY, G_SLICE:
-		loadArrayOrSliceIndex(collection, index, offset)
+		e.loadArrayOrSliceIndex(offset)
 		return
 	case G_MAP:
 		loadMapIndexExpr(e)
