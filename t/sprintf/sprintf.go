@@ -4,14 +4,14 @@ import (
 	"os"
 )
 
-func myPrintf(format string, a []interface{}) {
+func myPrintf(format gostring, a []interface{}) {
 	var s gostring = Sprintf(gostring(format), a...)
 	os.Stdout.Write(s)
 }
 
 func f0() {
 	var a []interface{}
-	myPrintf("hello\n", a)
+	myPrintf(S("hello\n"), a)
 }
 
 func f1() {
@@ -20,7 +20,7 @@ func f1() {
 	var ifc interface{}
 	ifc = i
 	a = append(a, ifc)
-	myPrintf("%d\n", a)
+	myPrintf(S("%d\n"), a)
 }
 
 func f2() {
@@ -34,7 +34,7 @@ func f2() {
 	a = nil
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	myPrintf("%d %d\n", a)
+	myPrintf(S("%d %d\n"), a)
 }
 
 func f3() {
@@ -47,7 +47,7 @@ func f3() {
 	ifc2 = s2
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	myPrintf("%s %s\n", a)
+	myPrintf(S("%s %s\n"), a)
 }
 
 func f4() {
@@ -60,7 +60,7 @@ func f4() {
 	ifc2 = i
 	a = append(a, ifc)
 	a = append(a, ifc2)
-	myPrintf("%s %d\n", a)
+	myPrintf(S("%s %d\n"), a)
 }
 
 func f5() {
@@ -77,7 +77,7 @@ func f5() {
 	a = append(a, ifc)
 	a = append(a, ifc2)
 	a = append(a, ifc3)
-	myPrintf("%s %d %d\n", a)
+	myPrintf(S("%s %d %d\n"), a)
 }
 
 func test_dumpToken() {
