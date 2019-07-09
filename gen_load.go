@@ -372,58 +372,9 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	}
 }
 
-func (e *ExprSlice) emitSubString() {
-	// s[n:m]
-	// new strlen: m - n
-	var high Expr
-	if e.high == nil {
-		high = &ExprLen{
-			tok: e.token(),
-			arg: e.collection,
-		}
-	} else {
-		high = e.high
-	}
-	eNewStrlen := &ExprBinop{
-		tok:   e.token(),
-		op:    gostring("-"),
-		left:  high,
-		right: e.low,
-	}
-	// mem size = strlen + 1
-	eMemSize := &ExprBinop{
-		tok:  e.token(),
-		op:   gostring("+"),
-		left: eNewStrlen,
-		right: &ExprNumberLiteral{
-			val: 1,
-		},
-	}
-
-	// src address + low
-	e.collection.emit()
-	emit(S("PUSH_8"))
-	e.low.emit()
-	emit(S("PUSH_8"))
-	emit(S("SUM_FROM_STACK"))
-	emit(S("PUSH_8"))
-
-	emitCallMallocDinamicSize(eMemSize)
-	emit(S("PUSH_8"))
-
-	eNewStrlen.emit()
-	emit(S("PUSH_8"))
-
-	emit(S("POP_TO_ARG_2"))
-	emit(S("POP_TO_ARG_1"))
-	emit(S("POP_TO_ARG_0"))
-
-	emit(S("FUNCALL iruntime.strcopy"))
-}
-
 func (e *ExprSlice) emit() {
 	if e.collection.getGtype().isString() {
-		e.emitSubString()
+		TBI(e.token(), S(""))
 	} else {
 		e.emitSlice()
 	}

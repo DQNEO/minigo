@@ -154,14 +154,6 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 	return z
 }
 
-func strcopy(src string, dest string, slen int) string {
-	for i:=0; i < slen ; i++ {
-		dest[i] = src[i]
-	}
-	dest[slen] = 0
-	return dest
-}
-
 func eqGostringInternal(a []byte, b []byte) bool {
 	if len(a) != len(b) {
 		return false
