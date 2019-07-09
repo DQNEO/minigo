@@ -9,9 +9,9 @@ func ghello() {
 	fmtPrintf(S("%c"), hello[2])
 	fmtPrintf(S("%c"), hello[3])
 	fmtPrintf(S("%c"), hello[4])
-	fmtPrintf(S("%s"), "\n")
+	fmtPrintf(S("%s"), S("\n"))
 
-	s := string(hello[:])
+	s := gostring(hello[:])
 	fmtPrintf(S("%s\n"), s)
 
 }
@@ -23,10 +23,10 @@ func lworld() {
 	fmtPrintf(S("%c"), world[2])
 	fmtPrintf(S("%c"), world[3])
 	fmtPrintf(S("%c"), world[4])
-	fmtPrintf(S("%s"), "\n")
+	fmtPrintf(S("%s"), S("\n"))
 
 	b := world[:]
-	fmtPrintf(S("%s\n"), b)
+	fmtPrintf(S("%s\n"), gostring(b))
 }
 
 func fappend() {

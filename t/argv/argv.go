@@ -6,5 +6,5 @@ import (
 
 func main() {
 	fmtPrintf(S("%d\n"), len(os.Args))
-	fmtPrintf(S("%s\n"), os.Args[1])
+	fmtPrintf(S("%s\n"), gostring(os.Args[1]))
 }
