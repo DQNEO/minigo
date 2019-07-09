@@ -183,21 +183,17 @@ func walkExpr(expr Expr) Expr {
 		switch decl {
 		case builtinPrintstring:
 			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
-			argStr := funcall.args[0]
 			arg0 := &ExprNumberLiteral{
-				val: 1,
+				val: 1, // stdout
 			}
-			arg1 := argStr
-			arg2 := &ExprLen{
-				arg: argStr,
-			}
+			arg1 := funcall.args[0] // []byte
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
 			}
 			staticCall.symbol = getFuncSymbol(S("libc"), S("write"))
-			staticCall.args = []Expr{arg0, arg1,arg2}
+			staticCall.args = []Expr{arg0, arg1}
 			return staticCall
 		case builtinPanic:
 			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))

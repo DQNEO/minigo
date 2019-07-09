@@ -62,18 +62,18 @@ func itoa(i int) []byte {
 }
 
 func panic(msg string) {
-	printstring("panic: ")
-	printstring(msg)
-	printstring("\n")
+	printstring([]byte("panic: "))
+	printstring([]byte(msg))
+	printstring([]byte("\n"))
 	exit(1)
 }
 
 func reportMemoryUsage() {
-	printstring("# memory-usage: ")
+	printstring([]byte("# memory-usage: "))
 	i := getMemoryUsage()
 	s := itoa(i)
-	printstring(s)
-	printstring("\n")
+	printstring([]byte(s))
+	printstring([]byte("\n"))
 }
 
 func getMemoryUsage() int {
