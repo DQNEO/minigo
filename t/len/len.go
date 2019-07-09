@@ -52,7 +52,7 @@ func receive_strings(a gostring, b gostring) {
 }
 
 func f4() {
-	var hello string = S("01234567890")
+	var hello gostring = S("01234567890")
 	fmtPrintf(S("%d\n"), len(hello))
 	s1 := S("012345678901")
 	s2 := S("0123456789012")
