@@ -10,7 +10,7 @@ func f0() *int {
 	return x
 }
 
-func f1() string {
+func f1() gostring {
 	f := &StmtFor{
 		rng: &ForRangeClause{
 			invisibleMapCounter: &ExprVariable{
@@ -19,7 +19,7 @@ func f1() string {
 		},
 	}
 	mapCounter := &Relation{
-		name: "2",
+		name: S("2"),
 		expr: f.rng.invisibleMapCounter,
 	}
 	return mapCounter.name
@@ -53,7 +53,7 @@ func (e *ExprVariable) f() {
 }
 
 type Relation struct {
-	name string
+	name gostring
 	expr Expr
 }
 

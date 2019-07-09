@@ -22,9 +22,9 @@ func f1() {
 
 func f2() {
 	keyFoo := "15"
-	var lmap map[string]string = map[string]string{
-		keyFoo: "10",
-		"17":   "11",
+	var lmap map[string]gostring = map[string]gostring{
+		keyFoo: S("10"),
+		"17":   S("11"),
 	}
 
 	fmtPrintf(S("9%s\n"), lmap["noexists"])
@@ -35,18 +35,18 @@ func f2() {
 
 	var lenmap int
 
-	lmap["19"] = "13"
+	lmap["19"] = S("13")
 	lenmap = len(lmap) // 3
 
 	fmtPrintf(S("%s\n"), lmap["19"]) // 13
 
 	fmtPrintf(S("%d\n"), lenmap+11) // 14
 
-	lmap["15"] = "16"
-	lmap["17"] = "18"
-	lmap["19"] = "20"
+	lmap["15"] = S("16")
+	lmap["17"] = S("18")
+	lmap["19"] = S("20")
 	for k, v := range lmap {
-		fmtPrintf(S("%s\n%s\n"), k, v) // 15,16,17,18,19,20
+		fmtPrintf(S("%s\n%s\n"), S(k), v) // 15,16,17,18,19,20
 	}
 }
 
@@ -74,13 +74,13 @@ var keyFoo2 string = "keyfoo"
 
 func f4() {
 	keyFoo := "keyfoo"
-	var lmap map[string]string = map[string]string{
-		keyFoo:   "26",
-		"keybar": "valuebar",
+	var lmap map[string]gostring = map[string]gostring{
+		keyFoo:   S("26"),
+		"keybar": S("valuebar"),
 	}
 
 	var ok bool
-	var v string
+	var v gostring
 	v, ok = lmap[keyFoo2]
 	if ok {
 		fmtPrintf(S("%d\n"), 25)
