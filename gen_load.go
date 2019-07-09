@@ -291,7 +291,8 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 	}
 }
 
-func (e *ExprIndex) loadArrayOrSliceIndex(offset int) {
+
+func (e *ExprIndex) emitAddressOfArrayOrSliceIndex() {
 	collection := e.collection
 	index := e.index
 	elmType := collection.getGtype().Underlying().elementType
@@ -307,6 +308,13 @@ func (e *ExprIndex) loadArrayOrSliceIndex(offset int) {
 	emit(S("PUSH_8 # index * elmSize"))
 
 	emit(S("SUM_FROM_STACK # (index * elmSize) + head"))
+}
+
+func (e *ExprIndex) loadArrayOrSliceIndex(offset int) {
+	elmType := e.collection.getGtype().Underlying().elementType
+	elmSize := elmType.getSize()
+
+	e.emitAddressOfArrayOrSliceIndex()
 	emit(S("ADD_NUMBER %d"), offset)
 
 	// dereference the content of an emelment
@@ -319,11 +327,20 @@ func (e *ExprIndex) loadArrayOrSliceIndex(offset int) {
 	}
 }
 
+func (e *ExprIndex) emitAddress() {
+	switch e.collection.getGtype().getKind() {
+	case G_ARRAY, G_SLICE:
+		e.emitAddressOfArrayOrSliceIndex()
+	default:
+		TBI(e.collection.token(), S(""))
+	}
+}
+
 func (e *ExprIndex) emitOffsetLoad(offset int) {
 	emit(S("# ExprIndex.emitOffsetLoad"))
 	collection := e.collection
 	index := e.index
-	switch collection.getGtype().getKind() {
+	switch e.collection.getGtype().getKind() {
 	case G_ARRAY, G_SLICE:
 		e.loadArrayOrSliceIndex(offset)
 		return
