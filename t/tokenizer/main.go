@@ -6,7 +6,7 @@ var debugMode = true
 var debugToken = false
 
 func f3() {
-	path := "t/min/min.go"
+	path := S("t/min/min.go")
 	bs := NewByteStreamFromFile(path)
 
 	var c byte
@@ -19,21 +19,21 @@ func f3() {
 }
 
 func f4() {
-	path := "t/min/min.go"
+	path := S("t/min/min.go")
 	bs := NewByteStreamFromFile(path)
 	tokens := Tokenize(bs)
 	fmtPrintf(S("%d\n"), len(tokens)) // 26
 	fmtPrintf(S("----------\n"))
-	return
 	// disable befow for now
+	return
 	for _, tok := range tokens {
-		fmtPrintf(S("%s:%s\n", string(tok.typ)), tok.getSval())
+		fmtPrintf(S("%d:%s\n"), int(tok.typ), tok.getSval())
 	}
 }
 
 func f5() {
 	debugToken = false
-	path := "t/data/string.txt"
+	path := S("t/data/string.txt")
 	bs := NewByteStreamFromFile(path)
 
 	tokens := Tokenize(bs)
