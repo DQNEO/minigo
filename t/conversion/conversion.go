@@ -11,19 +11,19 @@ func f1() {
 }
 
 func f2() {
-	var s string
+	var s gostring
 	fmtPrintf(S("%s3\n"), gostring(s))       // 3
 	fmtPrintf(S("%d\n"), len(s)+4) // 4
 }
 
 func f3() {
-	var s string = ""
-	fmtPrintf(S("%s5\n"), gostring(s))       // 5
+	var s gostring = S("")
+	fmtPrintf(S("%s5\n"), s)       // 5
 	fmtPrintf(S("%d\n"), len(s)+6) // 6
 }
 
 func f4() {
-	var s string
+	var s gostring
 	var bytes []byte
 	bytes = []byte(s)
 	fmtPrintf(S("%s7\n"), gostring(bytes)) // 7
@@ -31,13 +31,13 @@ func f4() {
 }
 
 func f5() {
-	var s string
+	var s gostring
 	var bytes []byte
 	bytes = []byte(s)
 	if bytes == nil {
-		fmtPrintf(S("ERROR"))
-	} else {
 		fmtPrintf(S("9\n"))
+	} else {
+		fmtPrintf(S("ERROR"))
 	}
 }
 
