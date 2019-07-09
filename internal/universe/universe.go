@@ -12,7 +12,7 @@ func recover() interface{} {
 }
 
 type error interface {
-	Error() string
+	Error() []byte
 }
 
 
