@@ -367,9 +367,6 @@ func (e *ExprIndex) getGtype() *Gtype {
 	if gtype.kind == G_MAP {
 		// map value
 		return gtype.mapValue
-	} else if gtype.kind == G_CLIKE_STRING {
-		// "hello"[i]
-		return gByte
 	} else if gtype.kind == G_SLICE {
 		return gtype.elementType
 	} else {
