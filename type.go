@@ -122,10 +122,7 @@ func (gtype *Gtype) isBytesSlice() bool {
 }
 
 func (gtype *Gtype) isClikeString() bool {
-	if gtype.getKind() == G_CLIKE_STRING {
-		return true
-	}
-	return false
+	return gtype.getKind() == G_CLIKE_STRING
 }
 
 func (gtype *Gtype) getSize() int {
