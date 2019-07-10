@@ -62,7 +62,7 @@ func attachMethodsToTypes(pmethods map[identifier]methods, packageScope *Scope) 
 		var gTypeName goidentifier = goidentifier(typeName)
 		gtype := packageScope.getGtype(gTypeName)
 		if gtype == nil {
-			errorf(S("typaneme %s is not found in the package scope %s"), typeName, packageScope.name)
+			errorf(S("typaneme %s is not found in the package scope %s"), gTypeName, packageScope.name)
 		}
 		gtype.methods = methods
 	}
