@@ -1889,7 +1889,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	TBI(nextToken, S(""))
+	TBI(nextToken, S("top level decl"))
 	return nil
 }
 

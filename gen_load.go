@@ -235,7 +235,7 @@ func (e *ExprSliceLiteral) emit() {
 			var offset int = IntSize*i
 			emit(S("mov %%rax, %d(%%r10)"), offset)
 		} else {
-			TBI(e.token(), S(""))
+			TBI(e.token(), S("ExprSliceLiteral emit"))
 		}
 		emit(S("push %%r10 # ptr"))
 	}

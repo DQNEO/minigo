@@ -179,7 +179,7 @@ func (binop *ExprBinop) emitComp() {
 	assert(binop.left != nil, binop.token(), S("should not be nil"))
 
 	if binop.left.getGtype().isClikeString() {
-		TBI(binop.token(),S(""))
+		TBI(binop.token(),S("emitComp"))
 		return
 	}
 
@@ -207,7 +207,7 @@ func (binop *ExprBinop) emitComp() {
 
 func (ast *ExprBinop) emit() {
 	if eq(ast.op , gostring("+")) && ast.left.getGtype().isClikeString() {
-		TBI(ast.token(), S(""))
+		TBI(ast.token(), S("concat strings"))
 		return
 	}
 	switch cstring(ast.op) {
@@ -441,7 +441,7 @@ func (e ExprArrayLiteral) emit() {
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), S("expr must be an Interface type"))
 	if e.gtype.getKind() == G_INTERFACE {
-		TBI(e.token(), S(""))
+		TBI(e.token(), S("type assertion"))
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.

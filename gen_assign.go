@@ -247,7 +247,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit(S("PUSH_8"))
 			emitCopyStructFromStack(lhs.getGtype().getSize())
 		} else {
-			TBI(rhs.token(), S(""))
+			TBI(rhs.token(), S("assign to struct"))
 		}
 	case *ExprStructLiteral:
 		structliteral, ok := rhs.(*ExprStructLiteral)
@@ -311,7 +311,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 		}
 	default:
-		TBI(rhs.token(), S(""))
+		TBI(rhs.token(), S("assign to struct"))
 	}
 
 	emit(S("# assignToStruct end"))
