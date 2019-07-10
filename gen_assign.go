@@ -361,7 +361,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			emitSave24(lhs, 0)
 			return
 		}
-		assert(fromExpr.getGtype().getKind() == G_STRING, rhs.token(), S("must be a string type, but got %s"), conversion.arg.getGtype().String())
+		assert(fromExpr.getGtype().getKind() == G_CLIKE_STRING, rhs.token(), S("must be a string type, but got %s"), conversion.arg.getGtype().String())
 		fromExpr.emit()
 		emit(S("PUSH_8 # ptr"))
 		strlen := &ExprLen{

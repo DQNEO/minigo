@@ -351,7 +351,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 		return
 	case G_MAP:
 		loadMapIndexExpr(e)
-	case G_STRING:
+	case G_CLIKE_STRING:
 		// https://golang.org/ref/spec#Index_expressions
 		// For a of string type:
 		//

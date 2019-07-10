@@ -101,7 +101,7 @@ func (e *ExprIndex) emitSave24() {
 		return
 	}
 
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, e.token(), S("unexpected kind"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_CLIKE_STRING, e.token(), S("unexpected kind"))
 	e.collection.emit()
 	emit(S("PUSH_8 # head address of collection"))
 	e.index.emit()
@@ -126,7 +126,7 @@ func (e *ExprIndex) emitSave24() {
 func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_STRING:
+	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_CLIKE_STRING:
 		e.emitArrayOrSliceSavePrimitive(offset)
 	case collectionType.getKind() == G_MAP:
 		emit(S("PUSH_8")) // push RHS value
@@ -191,7 +191,7 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	collection := e.collection
 	index := e.index
 	collectionType := collection.getGtype()
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_STRING, collection.token(), S("should be collection"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_CLIKE_STRING, collection.token(), S("should be collection"))
 
 	var elmType *Gtype
 	if collectionType.isString() {

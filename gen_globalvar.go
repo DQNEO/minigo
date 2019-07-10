@@ -52,7 +52,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				assertNotNil(value != nil, nil)
 				size := elmType.getSize()
 				if size == 8 {
-					if value.getGtype().getKind() == G_STRING {
+					if value.getGtype().getKind() == G_CLIKE_STRING {
 						stringLiteral, ok := value.(*ExprStringLiteral)
 						assert(ok, nil, S("ok"))
 						emit(S(".quad .%s"), gostring(stringLiteral.slabel))
