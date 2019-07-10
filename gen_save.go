@@ -121,7 +121,7 @@ func (e *ExprIndex) emitSave24() {
 func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 	collectionType := e.collection.getGtype()
 	switch {
-	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE, collectionType.getKind() == G_CLIKE_STRING:
+	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE:
 		e.emitArrayOrSliceSavePrimitive(offset)
 	case collectionType.getKind() == G_MAP:
 		emit(S("PUSH_8")) // push RHS value
