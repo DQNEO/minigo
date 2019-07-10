@@ -68,7 +68,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			arg := args[argIndex]
 			switch arg.(type) {
 			case string:
-				panic("Do not pass string to Sprintf")
+				panic(S("Do not pass string to Sprintf"))
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
@@ -95,7 +95,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 				}
 				blocks = append(blocks, b)
 			default:
-				panic("Unkown type to format")
+				panic(S("Unkown type to format"))
 			}
 			argIndex++
 			inPercent = false
@@ -180,7 +180,7 @@ func eq(a gostring, b gostring) bool {
 // "foo/bar", "/" => []gostring{"foo", "bar"}
 func Split(s gostring, sep gostring) []gostring {
 	if len(sep) > 1  {
-		panic("no supported")
+		panic(S("no supported"))
 	}
 	seps := []byte(sep)
 	sepchar := seps[0]

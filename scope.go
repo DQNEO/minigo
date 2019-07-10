@@ -48,7 +48,7 @@ func (sc *Scope) setGtype(name goidentifier, gtype *Gtype) {
 
 func (sc *Scope) set(name goidentifier, elm *IdentBody) {
 	if elm == nil {
-		panic("nil cannot be set")
+		panic(S("nil cannot be set"))
 	}
 	sc.idents[toKey(name)] = elm
 }

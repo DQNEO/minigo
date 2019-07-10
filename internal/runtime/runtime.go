@@ -16,7 +16,7 @@ func init() {
 
 func malloc(size int) *int {
 	if heapTail+ size > len(heap) + heap  {
-		panic("malloc exceeds heap capacity")
+		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
 	r := heapTail

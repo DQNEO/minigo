@@ -63,7 +63,7 @@ func (program *Program) emitMethodTable() {
 		methods := v
 		for _, methodNameFull := range methods {
 			if eq(methodNameFull, S(".")) {
-				panic("invalid method name")
+				panic(S("invalid method name"))
 			}
 			splitted := strings_Split(methodNameFull, S("$"))
 			var shortMethodName gostring = splitted[1]

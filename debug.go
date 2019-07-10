@@ -43,7 +43,7 @@ func errorft(tok *Token, format gostring, v ...interface{}) {
 func errorf(format gostring, v ...interface{}) {
 	s := Sprintf(format, v...)
 	os.Stderr.Write(concat(s, S("\n")))
-	panic("")
+	panic(S(""))
 }
 
 func assert(cond bool, tok *Token, format gostring, v ...interface{}) {
@@ -56,14 +56,14 @@ func assert(cond bool, tok *Token, format gostring, v ...interface{}) {
 		msg := concat3(S("assertion failed: "), s,  toks)
 		os.Stderr.Write(msg)
 		os.Stderr.Write(S("\n"))
-		panic("")
+		panic(S(""))
 	}
 }
 
 func assertNotReached(tok *Token) {
 	msg := concat(S("assertNotReached "), tok.String())
 	os.Stderr.Write(msg)
-	panic("")
+	panic(S(""))
 }
 
 func assertNotNil(cond bool, tok *Token) {

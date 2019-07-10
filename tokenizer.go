@@ -61,7 +61,7 @@ func (tn *Tokenizer) read_string() gostring {
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			panic("invalid string literal")
+			panic(S("invalid string literal"))
 		}
 		if c == '\\' {
 			chars = append(chars, c)
@@ -88,7 +88,7 @@ func (tn *Tokenizer) read_raw_string() []byte {
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			panic("invalid string literal")
+			panic(S("invalid string literal"))
 		}
 		if c == '\\' {
 			// @FIXME
@@ -119,7 +119,7 @@ func (tn *Tokenizer) read_raw_string() []byte {
 func (tn *Tokenizer) read_char() gostring {
 	c, err := tn.bs.get()
 	if err != nil {
-		panic("invalid char literal")
+		panic(S("invalid char literal"))
 	}
 	if c == '\\' {
 		var sval gostring
@@ -391,7 +391,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 				if c == '.' {
 					tok = tn.makeToken(T_PUNCT, gostring("..."))
 				} else {
-					panic("invalid token '..'")
+					panic(S("invalid token '..'"))
 				}
 			} else {
 				tn.bs.unget()

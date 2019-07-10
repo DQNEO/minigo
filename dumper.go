@@ -424,5 +424,5 @@ func (e *ExprMapLiteral) dump() {
 }
 
 func (e *IrExprConversionToInterface) dump() {
-	panic("implement me: IrExprConversionToInterface")
+	panic(S("implement me: IrExprConversionToInterface"))
 }

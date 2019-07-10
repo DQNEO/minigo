@@ -1,7 +1,7 @@
 package main
 
 func f1() {
-	panic("Help me!")
+	panic([]byte("Help me!"))
 }
 
 func main() {
