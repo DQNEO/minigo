@@ -355,11 +355,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 }
 
 func (e *ExprSlice) emit() {
-	if e.collection.getGtype().isString() {
-		TBI(e.token(), S(""))
-	} else {
-		e.emitSlice()
-	}
+	e.emitSlice()
 }
 
 func (e *ExprSlice) emitSlice() {
