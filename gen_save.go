@@ -186,14 +186,9 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	collection := e.collection
 	index := e.index
 	collectionType := collection.getGtype()
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_CLIKE_STRING, collection.token(), S("should be collection"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, collection.token(), S("should be collection"))
 
-	var elmType *Gtype
-	if collectionType.isString() {
-		elmType = gByte
-	} else {
-		elmType = collectionType.elementType
-	}
+	elmType := collectionType.elementType
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, S("elmSize > 0"))
 
