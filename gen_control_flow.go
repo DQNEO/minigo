@@ -130,7 +130,7 @@ func (stmt *StmtSwitch) emit() {
 				emit(S("# Duplicate the cond value in stack"))
 
 				if e.getGtype().isClikeString() {
-					assert(e.getGtype().isClikeString(), e.token(), S("caseClause should be string"))
+					assert(e.getGtype().isClikeString(), e.token(), S("caseClause should be clikestring"))
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
 
