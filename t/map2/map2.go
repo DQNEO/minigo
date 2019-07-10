@@ -70,18 +70,19 @@ func f3() {
 	fmtPrintf(S("%d\n"), val+24) //24
 }
 
-var keyFoo2 string = "keyfoo"
+var gkeyFoo2 gostring = gostring("keyfoo")
 
 func f4() {
-	keyFoo := "keyfoo"
+	gkeyFoo := gostring("keyfoo")
+	ckeyFoo := string(gkeyFoo)
 	var lmap map[string]gostring = map[string]gostring{
-		keyFoo:   S("26"),
+		ckeyFoo:   S("26"),
 		"keybar": S("valuebar"),
 	}
 
 	var ok bool
 	var v gostring
-	v, ok = lmap[keyFoo2]
+	v, ok = lmap[string(gkeyFoo2)]
 	if ok {
 		fmtPrintf(S("%d\n"), 25)
 	}
