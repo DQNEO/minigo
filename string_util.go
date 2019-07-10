@@ -67,8 +67,6 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			}
 			arg := args[argIndex]
 			switch arg.(type) {
-			case string:
-				panic(S("Do not pass string to Sprintf"))
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
