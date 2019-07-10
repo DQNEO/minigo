@@ -101,17 +101,12 @@ func (e *ExprIndex) emitSave24() {
 		return
 	}
 
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE || collectionType.getKind() == G_CLIKE_STRING, e.token(), S("unexpected kind"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, e.token(), S("unexpected kind"))
 	e.collection.emit()
 	emit(S("PUSH_8 # head address of collection"))
 	e.index.emit()
 	emit(S("PUSH_8 # index"))
-	var elmType *Gtype
-	if collectionType.isString() {
-		elmType = gByte
-	} else {
-		elmType = collectionType.elementType
-	}
+	elmType := collectionType.elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, S("size > 0"))
 	emit(S("LOAD_NUMBER %d # elementSize"), size)
