@@ -52,23 +52,17 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				assertNotNil(value != nil, nil)
 				size := elmType.getSize()
 				if size == 8 {
-					if value.getGtype().getKind() == G_CLIKE_STRING {
-						stringLiteral, ok := value.(*ExprStringLiteral)
-						assert(ok, nil, S("ok"))
-						emit(S(".quad .%s"), gostring(stringLiteral.slabel))
-					} else {
-						switch value.(type) {
-						case *ExprUop:
-							uop := value.(*ExprUop)
-							operand := unwrapRel(uop.operand)
-							vr, ok := operand.(*ExprVariable)
-							assert(ok, uop.token(), S("only variable is allowed"))
-							emit(S(".quad %s # %s %s"), gostring(vr.varname), value.getGtype().String(), gostring(selector))
-						case *ExprVariable:
-							assert(false, value.token(), S("variable here is not allowed"))
-						default:
-							emit(S(".quad %d # %s %s"), evalIntExpr(value), value.getGtype().String(), gostring(selector))
-						}
+					switch value.(type) {
+					case *ExprUop:
+						uop := value.(*ExprUop)
+						operand := unwrapRel(uop.operand)
+						vr, ok := operand.(*ExprVariable)
+						assert(ok, uop.token(), S("only variable is allowed"))
+						emit(S(".quad %s # %s %s"), gostring(vr.varname), value.getGtype().String(), gostring(selector))
+					case *ExprVariable:
+						assert(false, value.token(), S("variable here is not allowed"))
+					default:
+						emit(S(".quad %d # %s %s"), evalIntExpr(value), value.getGtype().String(), gostring(selector))
 					}
 				} else if size == 1 {
 					emit(S(".byte %d"), evalIntExpr(value))
