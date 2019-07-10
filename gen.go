@@ -207,7 +207,7 @@ func (binop *ExprBinop) emitComp() {
 
 func (ast *ExprBinop) emit() {
 	if eq(ast.op , gostring("+")) && ast.left.getGtype().isString() {
-		emitStringConcate(ast.left, ast.right)
+		TBI(ast.token(), S(""))
 		return
 	}
 	switch cstring(ast.op) {

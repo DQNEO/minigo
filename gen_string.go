@@ -146,7 +146,3 @@ func emitConvertCstringToSlice(cstring Expr) {
 
 	emitConvertCstringFromStackToSlice()
 }
-
-func emitStringConcate(leftCstring Expr, rightCstring Expr) {
-	TBI(leftCstring.token(), S(""))
-}
