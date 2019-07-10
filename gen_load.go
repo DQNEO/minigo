@@ -343,32 +343,14 @@ func (e *ExprIndex) emitAddress() {
 
 func (e *ExprIndex) emitOffsetLoad(offset int) {
 	emit(S("# ExprIndex.emitOffsetLoad"))
-	collection := e.collection
-	index := e.index
 	switch e.collection.getGtype().getKind() {
 	case G_ARRAY, G_SLICE:
 		e.loadArrayOrSliceIndex(offset)
 		return
 	case G_MAP:
 		loadMapIndexExpr(e)
-	case G_CLIKE_STRING:
-		// https://golang.org/ref/spec#Index_expressions
-		// For a of string type:
-		//
-		// a constant index must be in range if the string a is also constant
-		// if x is out of range at run time, a run-time panic occurs
-		// a[x] is the non-constant byte value at index x and the type of a[x] is byte
-		// a[x] may not be assigned to
-		emit(S("# load head address of the string"))
-		collection.emit() // emit address
-		emit(S("PUSH_8"))
-		index.emit()
-		emit(S("PUSH_8"))
-		emit(S("SUM_FROM_STACK"))
-		emit(S("ADD_NUMBER %d"), offset)
-		emit(S("LOAD_8_BY_DEREF"))
 	default:
-		TBI(collection.token(), S("unable to handle %s"), collection.getGtype())
+		TBI(e.collection.token(), S("unable to handle %s"), e.collection.getGtype())
 	}
 }
 
