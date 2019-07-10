@@ -182,7 +182,7 @@ func (gtype *Gtype) String() gostring {
 			case G_BYTE:
 				return S("byte")
 			case G_CLIKE_STRING:
-				return S("string")
+				return S("clikestring")
 			case G_FUNC:
 				return S("func")
 			}
@@ -218,7 +218,7 @@ func (gtype *Gtype) String() gostring {
 		gs = Sprintf(S("[]%s"), gtype.elementType.String())
 		return gs
 	case G_CLIKE_STRING:
-		return S("string")
+		return S("clikestring")
 	case G_FUNC:
 		return S("func")
 	case G_INTERFACE:
