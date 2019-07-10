@@ -179,13 +179,7 @@ func (binop *ExprBinop) emitComp() {
 	assert(binop.left != nil, binop.token(), S("should not be nil"))
 
 	if binop.left.getGtype().isString() {
-		e := &IrExprStringComparison{
-			tok: binop.token(),
-			op: binop.op,
-			cstringLeft: binop.left,
-			cstringRight: binop.right,
-		}
-		e.emit()
+		TBI(binop.token(),S(""))
 		return
 	}
 
