@@ -98,7 +98,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			call := value.(*ExprFuncallOrConversion)
 			assert(call.rel.gtype != nil, value.token(), S("should be Conversion"))
 			toGtype := call.rel.gtype
-			assert(toGtype.getKind() == G_SLICE && call.args[0].getGtype().isString(), call.token(), S("should be string to slice conversion"))
+			assert(toGtype.getKind() == G_SLICE && call.args[0].getGtype().isClikeString(), call.token(), S("should be string to slice conversion"))
 			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
 			assert(ok, call.token(), S("arg0 should be stringliteral"))
 			emit(S(".quad .%s"), stringLiteral.slabel)

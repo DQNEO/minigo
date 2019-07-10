@@ -121,7 +121,7 @@ func (gtype *Gtype) isBytesSlice() bool {
 	return false
 }
 
-func (gtype *Gtype) isString() bool {
+func (gtype *Gtype) isClikeString() bool {
 	if gtype.getKind() == G_CLIKE_STRING {
 		return true
 	}

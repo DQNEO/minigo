@@ -65,7 +65,7 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
-	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isString() && !gString.is24WidthType()
+	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isClikeString() && !gString.is24WidthType()
 }
 
 func (stmt *StmtSwitch) emit() {
@@ -129,8 +129,8 @@ func (stmt *StmtSwitch) emit() {
 			for _, e := range caseClause.exprs {
 				emit(S("# Duplicate the cond value in stack"))
 
-				if e.getGtype().isString() {
-					assert(e.getGtype().isString(), e.token(), S("caseClause should be string"))
+				if e.getGtype().isClikeString() {
+					assert(e.getGtype().isClikeString(), e.token(), S("caseClause should be string"))
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
 

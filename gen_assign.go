@@ -162,7 +162,7 @@ func (ast *StmtAssignment) emit() {
 
 func emitAssignPrimitive(lhs Expr, rhs Expr) {
 	if rhs == nil {
-		if lhs.getGtype().isString() {
+		if lhs.getGtype().isClikeString() {
 			rhs = &eEmptyString
 		} else {
 			// assign zero value

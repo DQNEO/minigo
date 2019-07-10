@@ -133,7 +133,7 @@ func emitMapGet(mapType *Gtype) {
 	emit(S("TEST_IT"))
 	if is24Width {
 		emit(S("LOAD_EMPTY_SLICE # NOT FOUND"))
-	} else if mapValueType.isString() {
+	} else if mapValueType.isClikeString() {
 		emitEmptyString()
 	} else {
 		emit(S("mov $0, %%rax # key not found"))
@@ -159,7 +159,7 @@ func emitMapGet(mapType *Gtype) {
 
 	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
-	if mapKeyType.isString() {
+	if mapKeyType.isClikeString() {
 		emit(S("push %%r13"))
 		emit(S("push %%r11"))
 		emit(S("push %%r10"))
