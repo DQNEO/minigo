@@ -11,9 +11,19 @@ func emitEmptyString() {
 	emit(S("mov $0, %%rcx"))
 }
 
+func countStrlen(chars gostring) int {
+	var length int
+	for _, c := range chars {
+		if c != '\\' {
+			length++
+		}
+	}
+	return length
+}
+
 func (ast *ExprStringLiteral) emit() {
 	emit(S("LOAD_STRING_LITERAL .%s"), ast.slabel)
-	var length int = len(ast.val)
+	var length int = countStrlen(ast.val)
 	emit(S("mov $%d, %%rbx"), length)
 	emit(S("mov $%d, %%rcx"), length)
 }
