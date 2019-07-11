@@ -6,7 +6,7 @@ var eEmptyString = ExprStringLiteral{
 
 func emitEmptyString() {
 	eEmpty := &eEmptyString
-	eEmpty.emit()
+	emit(S("LOAD_STRING_LITERAL .%s"), eEmpty.slabel)
 	emit(S("mov $0, %%rbx"))
 	emit(S("mov $0, %%rcx"))
 }
