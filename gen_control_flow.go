@@ -64,10 +64,6 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emit(S("CMP_FROM_STACK sete")) // compare addresses
 }
 
-func (stmt *StmtSwitch) needStringToSliceConversion() bool {
-	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isClikeString()
-}
-
 func (stmt *StmtSwitch) emit() {
 
 	emit(S("# switch statement"))
@@ -78,12 +74,11 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		cond = stmt.cond
 		emit(S("# the cond expression"))
-		if stmt.needStringToSliceConversion() {
-			irConversion, ok := stmt.cond.(*IrExprConversion)
-			assert(ok, nil, S("should be IrExprConversion"))
+		irConversion, ok := cond.(*IrExprConversion)
+		if ! stmt.isTypeSwitch() && ok {
 			origType := irConversion.arg.getGtype()
 			assert(origType.getKind() == G_SLICE, nil, S("must be slice"))
-			cond = irConversion.arg // set original slice
+			cond = irConversion.arg // unwrap conversion. get inner slice
 		}
 
 		cond.emit()
