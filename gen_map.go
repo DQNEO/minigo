@@ -275,18 +275,17 @@ func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 	emit(S("PUSH_8")) // index value
 
 	emitCallMalloc(8)
+	emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
 
 	// stack :
 	//   indexvalue
-	//   tailaddress
-	emit(S("pop %%rcx")) // indexvalue
+	//   tailaddr
+	emit(S("POP_8")) // indexvalue
+	emit(S("mov %%rax, (%%rdx)")) // save indexvalue to mallocedaddr
 
-	emit(S("mov %%rcx, (%%rax)")) // save indexvalue to mallocedaddr
-	emit(S("mov %%rax, %%rcx"))   // copy mallocedaddr
-
-	emit(S("POP_8"))              // map tail
-	emit(S("mov %%rcx, (%%rax)")) // save mallocedaddr to map tail
-	emit(S("PUSH_8"))             // push map tail
+	emit(S("POP_8"))              // tailaddr
+	emit(S("mov %%rdx, (%%rax)")) // save mallocedaddr to tailaddr
+	emit(S("PUSH_8"))             // push tailaddr
 
 	// save value
 
