@@ -25,7 +25,7 @@ func (e *IrExprStringComparison) token() *Token {
 func (binop *IrExprStringComparison) emit() {
 	emit(S("# emitCompareStrings"))
 	var equal bool
-	switch cstring(binop.op) {
+	switch switchexpr(binop.op) {
 	case "<":
 		TBI(binop.token(), S(""))
 	case ">":
@@ -105,7 +105,7 @@ func emitGoStringsEqualFromStack() {
 	call.emit()
 }
 
-// emit []byte(cstring)
+// emit []byte(switchexpr)
 func emitConvertCstringFromStackToSlice() {
 	labelEnd := makeLabel()
 	labelThen := makeLabel()
@@ -135,8 +135,8 @@ func emitConvertCstringFromStackToSlice() {
 	emit(S("%s:"), labelEnd)
 }
 // emit []byte(cstring)
-func emitConvertCstringToSlice(cstring Expr) {
-	cstring.emit()
+func emitConvertCstringToSlice(eCstring Expr) {
+	eCstring.emit()
 
 	if gString.is24WidthType() {
 		return

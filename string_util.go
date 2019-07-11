@@ -5,7 +5,8 @@ import (
 )
 
 type gostring []byte
-type cstring string
+type switchexpr string
+type osarg string
 
 type identifier string
 

@@ -185,7 +185,7 @@ func (binop *ExprBinop) emitComp() {
 
 	var instruction gostring
 	op := binop.op
-	switch cstring(op) {
+	switch switchexpr(op) {
 	case "<":
 		instruction = S("setl")
 	case ">":
@@ -210,7 +210,7 @@ func (ast *ExprBinop) emit() {
 		TBI(ast.token(), S("concat strings"))
 		return
 	}
-	switch cstring(ast.op) {
+	switch switchexpr(ast.op) {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
@@ -247,7 +247,7 @@ func (ast *ExprBinop) emit() {
 	emit(S("PUSH_8"))
 
 	op := ast.op
-	switch cstring(op) {
+	switch switchexpr(op) {
 	case "+":
 		emit(S("SUM_FROM_STACK"))
 	case "-":
@@ -495,8 +495,8 @@ func (e *IrExprConversion) emit() {
 		emit(S("%s:"), labelEnd)
 	} else if e.arg.getGtype().isClikeString() && e.toGtype.isBytesSlice() {
 		//  []byte(cstring)
-		cstring := e.arg
-		emitConvertCstringToSlice(cstring)
+		eCstring := e.arg
+		emitConvertCstringToSlice(eCstring)
 	} else {
 		e.arg.emit()
 	}
@@ -537,7 +537,7 @@ func evalIntExpr(e Expr) int {
 		errorft(e.token(), S("variable cannot be inteppreted at compile time :%#v"), e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
-		switch cstring(binop.op) {
+		switch switchexpr(binop.op) {
 		case "+":
 			return evalIntExpr(binop.left) + evalIntExpr(binop.right)
 		case "-":
