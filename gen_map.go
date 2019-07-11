@@ -270,16 +270,19 @@ func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 	// Save key and value
 	emit(S("%s: # end loop"), labelSave)
 	e.index.emit()
+
+	// save key
 	emit(S("PUSH_8")) // index value
 
-	// malloc(8)
 	emitCallMalloc(8)
-	// %%rax : malloced address
-	// stack : [map tail address, index value]
-	emit(S("pop %%rcx")) // index value
 
-	emit(S("mov %%rcx, (%%rax)")) // save indexvalue to malloced area
-	emit(S("mov %%rax, %%rcx"))   // malloced area
+	// stack :
+	//   indexvalue
+	//   tailaddress
+	emit(S("pop %%rcx")) // indexvalue
+
+	emit(S("mov %%rcx, (%%rax)")) // save indexvalue to malloced addr
+	emit(S("mov %%rax, %%rcx"))   // copy malloced addr
 
 	emit(S("POP_8"))              // map tail
 	emit(S("mov %%rcx, (%%rax)")) // save indexvalue to map tail
