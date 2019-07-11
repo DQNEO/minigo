@@ -129,9 +129,8 @@ func (stmt *StmtSwitch) emit() {
 			for _, e := range caseClause.exprs {
 				emit(S("# Duplicate the cond value in stack"))
 
-				if e.getGtype().isClikeString() {
-					sLiteral ,ok := e.(*ExprStringLiteral)
-					assert(ok, e.token(), S("must be a string literal"))
+				sLiteral ,ok := e.(*ExprStringLiteral)
+				if ok {
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
 
