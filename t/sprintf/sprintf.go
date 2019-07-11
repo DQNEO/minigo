@@ -81,7 +81,7 @@ func f5() {
 }
 
 func test_dumpToken() {
-	format := "string=%s,int=%d\n" // "string=abcdefg,int=12345"
+	format := S("string=%s,int=%d\n") // "string=abcdefg,int=12345"
 	var s1 gostring = S("abcdefg")
 	var s2 int = 12345
 	var ifcs []interface{}
