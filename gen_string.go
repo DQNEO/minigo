@@ -105,7 +105,7 @@ func emitGoStringsEqualFromStack() {
 	call.emit()
 }
 
-// emit []byte(switchexpr)
+// emit []byte(cString)
 func emitConvertCstringFromStackToSlice() {
 	labelEnd := makeLabel()
 	labelThen := makeLabel()
@@ -134,7 +134,8 @@ func emitConvertCstringFromStackToSlice() {
 	emit(S("POP_8 # string addr"))
 	emit(S("%s:"), labelEnd)
 }
-// emit []byte(cstring)
+
+// emit []byte(cString)
 func emitConvertCstringToSlice(eCstring Expr) {
 	eCstring.emit()
 
