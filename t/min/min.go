@@ -5,7 +5,7 @@ import (
 )
 
 func f1() {
-	bytes := []byte("0\n")
+	bytes := gostring("0\n")
 	os.Stdout.Write(bytes)
 }
 
