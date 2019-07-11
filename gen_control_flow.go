@@ -65,7 +65,7 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 }
 
 func (stmt *StmtSwitch) needStringToSliceConversion() bool {
-	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isClikeString() && !gString.is24WidthType()
+	return ! stmt.isTypeSwitch() && stmt.cond.getGtype().isClikeString()
 }
 
 func (stmt *StmtSwitch) emit() {
@@ -130,12 +130,14 @@ func (stmt *StmtSwitch) emit() {
 				emit(S("# Duplicate the cond value in stack"))
 
 				if e.getGtype().isClikeString() {
+					sLiteral ,ok := e.(*ExprStringLiteral)
+					assert(ok, e.token(), S("must be a string literal"))
 					emit(S("POP_SLICE # the cond value"))
 					emit(S("PUSH_SLICE # the cond value"))
 
 					emit(S("PUSH_SLICE # the cond valiue"))
 
-					emitConvertCstringToSlice(e)
+					sLiteral.emit()
 					emit(S("PUSH_SLICE"))
 
 					emitGoStringsEqualFromStack()
