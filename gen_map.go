@@ -213,8 +213,18 @@ func emitMapGet(mapType *Gtype) {
 }
 
 // m[k] = v
+func (e *ExprIndex) emitMapSetFromStack8() {
+	e.emitMapSetFromStack(false)
+}
+
+// m[k] = v
+func (e *ExprIndex) emitMapSetFromStack24() {
+	e.emitMapSetFromStack(true)
+}
+
+// m[k] = v
 // append key and value to the tail of map data, and increment its length
-func (e *ExprIndex) emitMapSet(isWidth24 bool) {
+func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 
 	labelAppend := makeLabel()
 	labelSave := makeLabel()

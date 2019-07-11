@@ -97,7 +97,7 @@ func (e *ExprIndex) emitSave24() {
 	emit(S("PUSH_24"))
 	collectionType := e.collection.getGtype()
 	if collectionType.getKind() == G_MAP {
-		e.emitMapSet(true)
+		e.emitMapSetFromStack24()
 		return
 	}
 
@@ -125,7 +125,7 @@ func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 		e.emitArrayOrSliceSavePrimitive(offset)
 	case collectionType.getKind() == G_MAP:
 		emit(S("PUSH_8")) // push RHS value
-		e.emitMapSet(false)
+		e.emitMapSetFromStack8()
 		return
 	default:
 		TBI(e.token(), S("unable to handle %s"), collectionType)
