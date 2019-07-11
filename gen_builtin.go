@@ -12,6 +12,10 @@ func (e *ExprLen) emit() {
 	case G_SLICE:
 		emit(S("# len(slice)"))
 		switch arg.(type) {
+		case *ExprStringLiteral:
+			sLiteral := arg.(*ExprStringLiteral)
+			length := countStrlen(sLiteral.val)
+			emit(S("LOAD_NUMBER %d"), length)
 		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
@@ -28,7 +32,7 @@ func (e *ExprLen) emit() {
 			}
 			uop.emit()
 		default:
-			TBI(arg.token(), S("unable to handle %T"), arg)
+			TBI(arg.token(), Sprintf(S("unable to handle %T"), arg))
 		}
 	case G_MAP:
 		emit(S("# emit len(map)"))

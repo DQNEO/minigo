@@ -416,8 +416,8 @@ func (e *ExprNumberLiteral) getGtype() *Gtype {
 
 func (e *ExprStringLiteral) getGtype() *Gtype {
 	return &Gtype{
-		kind:   G_CLIKE_STRING,
-		length: len(e.val),
+		kind:   G_SLICE,
+		elementType:gByte,
 	}
 }
 
