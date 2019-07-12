@@ -272,11 +272,8 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit(S("# save key"))
 
 	if e.index.getGtype().isClikeString() {
-		e.index.emit()
-		emit(S("PUSH_8")) // index value
-		emitConvertCstringFromStackToSlice()
+		emitConvertCstringToSlice(e.index)
 		emit(S("PUSH_SLICE"))
-
 		emitCallMalloc(24)
 		emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
 
@@ -441,17 +438,14 @@ func (lit *ExprMapLiteral) emit() {
 		if false {
 		//	element.key.emit()
 		} else {
-			element.key.emit()
 			if element.key.getGtype().isClikeString() {
-				emit(S("PUSH_8"))
-				emitConvertCstringFromStackToSlice()
-				emit(S("PUSH_24")) // value of key
-				// call malloc for key
+				emitConvertCstringToSlice(element.key)
+				emit(S("PUSH_SLICE"))
 				emitCallMalloc(24)
 				emit(S("PUSH_8"))
 				emit(S("STORE_24_INDIRECT_FROM_STACK")) // save key to heap
-
 			} else {
+				element.key.emit()
 				emit(S("PUSH_8")) // value of key
 				// call malloc for key
 				emitCallMalloc(8)
