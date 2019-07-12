@@ -164,9 +164,7 @@ func emitMapGet(mapType *Gtype) {
 		emit(S("push %%r11"))
 		emit(S("push %%r10"))
 
-		emit(S("LOAD_8_BY_DEREF")) // dereference
-		emit(S("PUSH_8"))
-		emitConvertCstringFromStackToSlice()
+		emit(S("LOAD_24_BY_DEREF")) // dereference
 		emit(S("PUSH_SLICE"))
 
 		emit(S("push %%r12"))
@@ -225,7 +223,7 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 // m[k] = v
 // append key and value to the tail of map data, and increment its length
 func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
-
+	emit(S("# emitMapSetFromStack"))
 	labelAppend := makeLabel()
 	labelSave := makeLabel()
 
@@ -269,23 +267,46 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 
 	// Save key and value
 	emit(S("%s: # end loop"), labelSave)
-	e.index.emit()
 
 	// save key
-	emit(S("PUSH_8")) // index value
+	emit(S("# save key"))
 
-	emitCallMalloc(8)
-	emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
+	if e.index.getGtype().isClikeString() {
+		e.index.emit()
+		emit(S("PUSH_8")) // index value
+		emitConvertCstringFromStackToSlice()
+		emit(S("PUSH_SLICE"))
 
-	// stack :
-	//   indexvalue
-	//   tailaddr
-	emit(S("POP_8")) // indexvalue
-	emit(S("mov %%rax, (%%rdx)")) // save indexvalue to mallocedaddr
+		emitCallMalloc(24)
+		emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
+
+		// stack :
+		//   indexvalue
+		//   tailaddr
+		emit(S("POP_24")) // indexvalue
+		emit(S("mov %%rax, (%%rdx)")) // save indexvalue to mallocedaddr
+		emit(S("mov %%rbx, 8(%%rdx)")) // save indexvalue to mallocedaddr
+		emit(S("mov %%rcx, 16(%%rdx)")) // save indexvalue to mallocedaddr
+
+	} else {
+		e.index.emit()
+		emit(S("PUSH_8")) // index value
+
+		emitCallMalloc(8)
+		emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
+
+		// stack :
+		//   indexvalue
+		//   tailaddr
+		emit(S("POP_8")) // indexvalue
+		emit(S("mov %%rax, (%%rdx)")) // save indexvalue to mallocedaddr
+
+	}
 
 	emit(S("POP_8"))              // tailaddr
 	emit(S("mov %%rdx, (%%rax)")) // save mallocedaddr to tailaddr
 	emit(S("PUSH_8"))             // push tailaddr
+
 
 	// save value
 
@@ -421,12 +442,23 @@ func (lit *ExprMapLiteral) emit() {
 		//	element.key.emit()
 		} else {
 			element.key.emit()
-			emit(S("PUSH_8")) // value of key
-			// call malloc for key
-			emitCallMalloc(8)
-			emit(S("PUSH_8"))
+			if element.key.getGtype().isClikeString() {
+				emit(S("PUSH_8"))
+				emitConvertCstringFromStackToSlice()
+				emit(S("PUSH_24")) // value of key
+				// call malloc for key
+				emitCallMalloc(24)
+				emit(S("PUSH_8"))
+				emit(S("STORE_24_INDIRECT_FROM_STACK")) // save key to heap
 
-			emit(S("STORE_8_INDIRECT_FROM_STACK")) // save key to heap
+			} else {
+				emit(S("PUSH_8")) // value of key
+				// call malloc for key
+				emitCallMalloc(8)
+				emit(S("PUSH_8"))
+
+				emit(S("STORE_8_INDIRECT_FROM_STACK")) // save key to heap
+			}
 		}
 
 		var offsetKey int = i*2*8
