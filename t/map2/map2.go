@@ -36,10 +36,14 @@ func f2() {
 	var lenmap int
 
 	lmap["19"] = S("13")
+	v19, ok := lmap["19"]
+	if ok {
+		fmtPrintf(S("%s\n"), v19) // 13
+	} else {
+		fmtPrintf(S("ERROR\n"))
+	}
+
 	lenmap = len(lmap) // 3
-
-	fmtPrintf(S("%s\n"), lmap["19"]) // 13
-
 	fmtPrintf(S("%d\n"), lenmap+11) // 14
 
 	lmap["15"] = S("16")
@@ -85,8 +89,10 @@ func f4() {
 	v, ok = lmap[string(gkeyFoo2)]
 	if ok {
 		fmtPrintf(S("%d\n"), 25)
+		fmtPrintf(S("%s\n"), v) // 26
+	} else {
+		fmtPrintf(S("ERROR\n"))
 	}
-	fmtPrintf(S("%s\n"), v) // 26
 
 	v, ok = lmap["noexits"]
 	if !ok {
