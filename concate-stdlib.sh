@@ -20,7 +20,7 @@ echo "    var mp map[identifier]gostring = map[identifier]gostring{"
 for dir in stdlib/*
 do
     basename=${dir##*/}
-    echo -e "        \"$basename\": ${basename}Code,"
+    echo -e "        identifier(\"$basename\"): ${basename}Code,"
 done
 
 
