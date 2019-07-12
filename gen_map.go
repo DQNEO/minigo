@@ -289,10 +289,10 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit(S("# save key"))
 
 	emitSaveMapKey(e.index)
-	emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
+	emit(S("mov %%rax, %%rcx"))   // copy mallocedaddr
 	// append key to tail
 	emit(S("POP_8"))              // tailaddr
-	emit(S("mov %%rdx, (%%rax)")) // save mallocedaddr to tailaddr
+	emit(S("mov %%rcx, (%%rax)")) // save mallocedaddr to tailaddr
 	emit(S("PUSH_8"))             // push tailaddr
 
 
@@ -432,10 +432,10 @@ func (lit *ExprMapLiteral) emit() {
 
 		// save key
 		emitSaveMapKey(element.key)
-		emit(S("mov %%rax, %%rdx"))   // copy mallocedaddr
+		emit(S("mov %%rax, %%rcx"))   // copy mallocedaddr
 		// append key to tail
 		emit(S("POP_8"))                         // map head
-		emit(S("mov %%rdx, %d(%%rax) #"), offsetKey) // save key address
+		emit(S("mov %%rcx, %d(%%rax) #"), offsetKey) // save key address
 		emit(S("PUSH_8"))                        // map head
 
 		if element.value.getGtype().getSize() <= 8 {
