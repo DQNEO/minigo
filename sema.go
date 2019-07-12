@@ -316,6 +316,11 @@ func walkExpr(expr Expr) Expr {
 		return e
 	case *ExprTypeSwitchGuard:
 	case *ExprMapLiteral:
+		e := expr.(*ExprMapLiteral)
+		for _, elm := range e.elements {
+			elm.key  = walkExpr(elm.key)
+			elm.value = walkExpr(elm.value)
+		}
 	case *ExprLen:
 
 	case *ExprCap:
