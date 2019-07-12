@@ -269,8 +269,7 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 		arg: e.collection,
 	}
 	elen.emit()
-	var unitSize int = 2*8
-	emit(S("IMUL_NUMBER %d"), unitSize) // distance from head to tail
+	emit(S("IMUL_NUMBER %d"), mapUnitSize) // distance from head to tail
 	emit(S("PUSH_8"))
 	emit(S("SUM_FROM_STACK"))
 	emit(S("PUSH_8")) // tail addr
@@ -407,6 +406,8 @@ func (em *IrStmtRangeMap) emit() {
 	emit(S("%s: # end loop"), em.labels.labelEndLoop)
 }
 
+var mapUnitSize int = 2*8
+
 // push addr, len, cap
 func (lit *ExprMapLiteral) emit() {
 	var length int = len(lit.elements)
@@ -426,8 +427,8 @@ func (lit *ExprMapLiteral) emit() {
 	//mapKeyType := mapType.mapKey
 
 	for i, element := range lit.elements {
-		var offsetKey int = i*2*8
-		var offsetValue int = i*2*8+8
+		var offsetKey int = i*mapUnitSize
+		var offsetValue int = i*mapUnitSize+8
 
 		// save key
 		emitSaveMapKey(element.key)
