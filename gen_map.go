@@ -224,7 +224,7 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 
 // m[k] = v
 // append key and value to the tail of map data, and increment its length
-func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
+func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 
 	labelAppend := makeLabel()
 	labelSave := makeLabel()
@@ -232,7 +232,7 @@ func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit(S("cmp $1, %%%s # ok == true"), mapOkRegister(isWidth24))
+	emit(S("cmp $1, %%%s # ok == true"), mapOkRegister(isValueWidth24))
 	emit(S("sete %%al"))
 	emit(S("movzb %%al, %%eax"))
 	emit(S("TEST_IT"))
@@ -291,7 +291,7 @@ func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 
 	// malloc(8)
 	var size int = 8
-	if isWidth24 {
+	if isValueWidth24 {
 		size = 24
 	}
 	emitCallMalloc(size)
@@ -299,7 +299,7 @@ func (e *ExprIndex) emitMapSetFromStack(isWidth24 bool) {
 	emit(S("pop %%rcx"))           // map tail address
 	emit(S("mov %%rax, 8(%%rcx)")) // set malloced address to tail+8
 	emit(S("PUSH_8"))
-	if isWidth24 {
+	if isValueWidth24 {
 		emit(S("STORE_24_INDIRECT_FROM_STACK"))
 	} else {
 		emit(S("STORE_8_INDIRECT_FROM_STACK"))
