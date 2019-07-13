@@ -355,7 +355,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
 		fromExpr := unwrapRel(conversion.arg)
-		//assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), S("must be a slice of bytes"))
 		if fromExpr.getGtype().getKind() == G_SLICE {
 			// emit as it is
 			fromExpr.emit()
