@@ -23,6 +23,7 @@ func countStrlen(chars gostring) int {
 			isInBackSlash = false
 			length++
 		} else {
+			isInBackSlash = false
 			length++
 		}
 	}
