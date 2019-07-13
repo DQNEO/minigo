@@ -69,12 +69,6 @@ var sBuiltinRunTimeArgsRettypes1 Gtype = Gtype{
 	},
 }
 
-var builtinRunTimeArgs = &DeclFunc{
-	rettypes: []*Gtype{
-		&sBuiltinRunTimeArgsRettypes1,
-	},
-}
-
 var builtinPrintstring = &DeclFunc{
 	rettypes: []*Gtype{},
 }
@@ -122,10 +116,6 @@ func setPredeclaredIdentifiers(universe *Scope) {
 
 	universe.setFunc(goidentifier("asComment"), &ExprFuncRef{
 		funcdef: builtinAsComment,
-	})
-
-	universe.setFunc(goidentifier("runtime_args"), &ExprFuncRef{
-		funcdef: builtinRunTimeArgs,
 	})
 
 	universe.setFunc(goidentifier("printstring"), &ExprFuncRef{
