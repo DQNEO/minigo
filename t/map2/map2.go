@@ -21,9 +21,9 @@ func f1() {
 }
 
 func f2() {
-	keyFoo := string("15")
+
 	var lmap map[string]gostring = map[string]gostring{
-		keyFoo: S("10"),
+		string("15"): S("10"),
 		string("17"):   S("11"),
 	}
 
@@ -78,9 +78,9 @@ var gkeyFoo2 gostring = gostring("keyfoo")
 
 func f4() {
 	gkeyFoo := gostring("keyfoo")
-	ckeyFoo := string(gkeyFoo)
+
 	var lmap map[string]gostring = map[string]gostring{
-		ckeyFoo:   S("26"),
+		string(gkeyFoo):   S("26"),
 		string("keybar"): S("valuebar"),
 	}
 

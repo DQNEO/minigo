@@ -95,14 +95,13 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit(S("mov 8(%%rax), %%rax"))
 	emit(S("PUSH_8 # len"))
 	var isKeyString bool = e.index.getGtype().isClikeString()
+	emitLoadMapKey(e.index)
 	if isKeyString {
-		emitLoadMapKey(e.index)
 		emit(S("PUSH_SLICE"))
 		emit(S("pop %%rdi # index value"))
 		emit(S("pop %%rdx # index value"))
 		emit(S("pop %%rcx # index value"))
 	} else {
-		emitLoadMapKey(e.index)
 		emit(S("PUSH_8 # index value"))
 		emit(S("pop %%rcx # index value"))
 	}
@@ -267,14 +266,13 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 }
 
 func emitSaveMapKey(eMapKey Expr) {
+	emitLoadMapKey(eMapKey)
 	if eMapKey.getGtype().isClikeString() {
-		emitConvertCstringToSlice(eMapKey)
 		emit(S("PUSH_SLICE"))
 		emitCallMalloc(24)
 		emit(S("PUSH_8"))
 		emit(S("STORE_24_INDIRECT_FROM_STACK")) // save key to mallocedaddr
 	} else {
-		eMapKey.emit()
 		emit(S("PUSH_8")) // index value
 		emitCallMalloc(8)
 		emit(S("PUSH_8"))
