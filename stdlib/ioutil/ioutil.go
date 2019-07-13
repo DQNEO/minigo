@@ -3,7 +3,8 @@ package ioutil
 const MYBUFSIZ = 65536 * 2
 const O_RDONLY = 0
 
-func ReadFile(filename *byte) ([]byte, error) {
+func ReadFile(filenameAsString string) ([]byte, error) {
+	var filename *byte = filenameAsString
 	var fd int
 	var buf []byte
 	buf = makeSlice(MYBUFSIZ, MYBUFSIZ, 24)
