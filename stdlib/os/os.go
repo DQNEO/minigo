@@ -27,9 +27,6 @@ func Exit(i int) {
 var Args []string
 
 func init() {
-
-	// runtime_args is written in assembly code
-	Args = runtime_args()
+	Args = libcArgs
 }
 
-//func runtime_args() []string
