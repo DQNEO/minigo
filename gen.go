@@ -491,10 +491,6 @@ func (e *IrExprConversion) emit() {
 		emit(S("# if nil then"))
 		emitEmptyString()
 		emit(S("%s:"), labelEnd)
-	} else if e.arg.getGtype().isString() && e.toGtype.isBytesSlice() {
-		//  []byte(cstring)
-		eCstring := e.arg
-		__emitConvertCstringToSlice(eCstring)
 	} else {
 		e.arg.emit()
 	}
