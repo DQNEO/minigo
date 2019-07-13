@@ -116,7 +116,15 @@ func emitGoStringsEqualFromStack() {
 }
 
 // emit []byte(cString)
-func __emitConvertCstringFromStackToSlice() {
+func emitConvertCstringToSlice(eCstring Expr) {
+	eCstring.emit()
+
+	if gString.is24WidthType() {
+		return
+	}
+
+	emit(S("PUSH_8"))
+
 	labelEnd := makeLabel()
 	labelThen := makeLabel()
 
@@ -145,18 +153,6 @@ func __emitConvertCstringFromStackToSlice() {
 	emit(S("%s:"), labelEnd)
 }
 
-// emit []byte(cString)
-func emitConvertCstringToSlice(eCstring Expr) {
-	eCstring.emit()
-
-	if gString.is24WidthType() {
-		return
-	}
-
-	emit(S("PUSH_8"))
-
-	__emitConvertCstringFromStackToSlice()
-}
 
 func emitStrlen(arg Expr) {
 	arg.emit()
