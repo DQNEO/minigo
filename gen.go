@@ -178,7 +178,7 @@ func (binop *ExprBinop) emitComp() {
 	emit(S("# emitComp"))
 	assert(binop.left != nil, binop.token(), S("should not be nil"))
 
-	assert(!binop.left.getGtype().isClikeString(), binop.token(), S("should not be clike string"))
+	assert(!binop.left.getGtype().isString(), binop.token(), S("should not be clike string"))
 
 
 	var instruction gostring
@@ -204,7 +204,7 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if eq(ast.op , gostring("+")) && ast.left.getGtype().isClikeString() {
+	if eq(ast.op , gostring("+")) && ast.left.getGtype().isString() {
 		TBI(ast.token(), S("concat strings"))
 		return
 	}
@@ -379,7 +379,7 @@ func (decl *DeclVar) emitLocal() {
 	switch gtype.getKind() {
 	case G_ARRAY:
 		assignToArray(variable, rhs)
-	case G_SLICE:
+	case G_SLICE, G_STRING:
 		assignToSlice(variable, rhs)
 	case G_STRUCT:
 		assignToStruct(variable, rhs)
@@ -481,7 +481,7 @@ func (e *ExprVaArg) emit() {
 
 func (e *IrExprConversion) emit() {
 	emit(S("# IrExprConversion.emit()"))
-	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isClikeString() {
+	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isString() {
 		// cstring(bytes)
 		emit(S("# convert slice to string"))
 		labelEnd := makeLabel()
@@ -491,10 +491,6 @@ func (e *IrExprConversion) emit() {
 		emit(S("# if nil then"))
 		emitEmptyString()
 		emit(S("%s:"), labelEnd)
-	} else if e.arg.getGtype().isClikeString() && e.toGtype.isBytesSlice() {
-		//  []byte(cstring)
-		eCstring := e.arg
-		__emitConvertCstringToSlice(eCstring)
 	} else {
 		e.arg.emit()
 	}

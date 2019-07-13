@@ -124,45 +124,6 @@ func emitGoStringsEqualFromStack() {
 	call.emit()
 }
 
-// emit []byte(cString)
-func __emitConvertCstringToSlice(eCstring Expr) {
-	eCstring.emit()
-
-	if gString.is24WidthType() {
-		return
-	}
-
-	emit(S("PUSH_8"))
-
-	labelEnd := makeLabel()
-	labelThen := makeLabel()
-
-	emit(S("POP_8 # restore string"))
-	emit(S("TEST_IT")) // check if string is nil
-	emit(S("jne %s # go to then if not nil"), labelThen)
-	emit(S("# if nil "))
-	emit(S("LOAD_EMPTY_SLICE")) // emit 0,0,0
-	emitEmptyString()        // emit ""
-	emit(S("jmp %s"), labelEnd)
-	emit(S("%s:"), labelThen)
-
-	emit(S("PUSH_8 # string addr"))
-
-	// calc len
-	emit(S("PUSH_8"))
-	eStrLen := &IrLowLevelCall{
-		symbol:        S("strlen"),
-		argsFromStack: 1,
-	}
-	eStrLen.emit()
-	emit(S("mov %%rax, %%rbx # len"))
-	emit(S("mov %%rax, %%rcx # cap"))
-
-	emit(S("POP_8 # string addr"))
-	emit(S("%s:"), labelEnd)
-}
-
-
 func emitStrlen(arg Expr) {
 	arg.emit()
 	emit(S("PUSH_8"))

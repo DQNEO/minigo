@@ -51,7 +51,7 @@ func (call *IrInterfaceMethodCall) emit() {
 }
 
 func emitLoadMapKey(eMapKey Expr) {
-	var isKeyString bool = eMapKey.getGtype().isClikeString()
+	var isKeyString bool = eMapKey.getGtype().isString()
 	if isKeyString {
 		var arg0 Expr
 		switch eMapKey.(type) {
@@ -94,7 +94,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	_map.emit()
 	emit(S("mov 8(%%rax), %%rax"))
 	emit(S("PUSH_8 # len"))
-	var isKeyString bool = e.index.getGtype().isClikeString()
+	var isKeyString bool = e.index.getGtype().isString()
 	emitLoadMapKey(e.index)
 	if isKeyString {
 		emit(S("PUSH_SLICE"))
@@ -267,7 +267,7 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 
 func emitSaveMapKey(eMapKey Expr) {
 	emitLoadMapKey(eMapKey)
-	if eMapKey.getGtype().isClikeString() {
+	if eMapKey.getGtype().isString() {
 		emit(S("PUSH_SLICE"))
 		emitCallMalloc(24)
 		emit(S("PUSH_8"))
@@ -410,12 +410,13 @@ func (em *IrStmtRangeMap) emit() {
 	emit(S("SUM_FROM_STACK # x + y"))
 	emit(S("LOAD_8_BY_DEREF"))
 
-	if em.indexvar.getGtype().isClikeString() {
+	if em.indexvar.getGtype().isString() {
 		emit(S("LOAD_24_BY_DEREF"))
+		emitSave24(em.indexvar,0)
 	} else {
 		emit(S("LOAD_8_BY_DEREF"))
+		emitSavePrimitive(em.indexvar)
 	}
-	emitSavePrimitive(em.indexvar)
 
 	if em.valuevar != nil {
 		emit(S("# Setting valuevar"))
