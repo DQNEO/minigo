@@ -1,7 +1,7 @@
 package iruntime
 
-var runtimeArgc int
-var runtimeArgv *int
+var libcArgc int
+var libcArgv *int
 
 var heap [640485760]byte
 var heapTail *int
