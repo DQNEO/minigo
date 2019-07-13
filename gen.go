@@ -178,10 +178,8 @@ func (binop *ExprBinop) emitComp() {
 	emit(S("# emitComp"))
 	assert(binop.left != nil, binop.token(), S("should not be nil"))
 
-	if binop.left.getGtype().isClikeString() {
-		TBI(binop.token(),S("emitComp"))
-		return
-	}
+	assert(!binop.left.getGtype().isClikeString(), binop.token(), S("should not be clike string"))
+
 
 	var instruction gostring
 	op := binop.op
