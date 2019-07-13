@@ -151,8 +151,8 @@ func emitMapGet(mapType *Gtype) {
 
 	emit(S("SUM_FROM_STACK")) // head + i * 16
 
-	emit(S("PUSH_8"))          // index address
-	emit(S("LOAD_8_BY_DEREF")) // emit index address
+	emit(S("PUSH_8"))          // addr of key addr
+	emit(S("LOAD_8_BY_DEREF")) // emit key addr
 
 	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
