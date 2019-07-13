@@ -53,16 +53,21 @@ func (e *ExprLen) emit() {
 		emit(S("LOAD_NUMBER 0"))
 		emit(S("%s:"), labelEnd)
 	case G_CLIKE_STRING:
-		arg.emit()
-		emit(S("PUSH_8"))
-		eStrLen := &IrLowLevelCall{
-			symbol:        S("strlen"),
-			argsFromStack: 1,
-		}
-		eStrLen.emit()
+		emitStrlen(arg)
 	default:
 		TBI(arg.token(), S("unable to handle %s"), gtype)
 	}
+}
+
+
+func emitStrlen(arg Expr) {
+	arg.emit()
+	emit(S("PUSH_8"))
+	eStrLen := &IrLowLevelCall{
+		symbol:        S("strlen"),
+		argsFromStack: 1,
+	}
+	eStrLen.emit()
 }
 
 type IrLowLevelCall struct {
