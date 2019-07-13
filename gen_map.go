@@ -34,7 +34,7 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit(S("lea .S.%s, %%rax"), methodName) // index value (addr)
 	emit(S("PUSH_8 # map index value"))
 
-	emitMapGet(mapType)
+	emitMapGet(mapType, false)
 
 	emit(S("PUSH_8 # funcref"))
 
@@ -74,10 +74,19 @@ func loadMapIndexExpr(e *ExprIndex) {
 	_map.emit()
 	emit(S("mov 8(%%rax), %%rax"))
 	emit(S("PUSH_8 # len"))
-	e.index.emit()
-	emit(S("PUSH_8 # index value"))
+	var isKeyString bool = e.index.getGtype().isClikeString()
+	if isKeyString {
+		emitConvertCstringToSlice(e.index)
+		emit(S("PUSH_SLICE"))
+		emit(S("pop %%rdi # index value"))
+		emit(S("pop %%rdx # index value"))
+		emit(S("pop %%rcx # index value"))
+	} else {
+		e.index.emit()
+		emit(S("PUSH_8 # index value"))
+		emit(S("pop %%rcx # index value"))
+	}
 
-	emit(S("pop %%rcx # index value"))
 	emit(S("pop %%rbx # len"))
 	emit(S("pop %%rax # heap"))
 
@@ -87,10 +96,20 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit(S("mov $0, %%rax"))
 	emit(S("mov $0, %%rbx"))
 	emit(S("mov $0, %%rcx"))
+	emit(S("mov $0, %%rdx"))
+	emit(S("mov $0, %%rdi"))
 	emit(S("%s:"), labelEnd)
 
-	emit(S("PUSH_24"))
-	emitMapGet(_map.getGtype())
+	emit(S("push %%rax"))
+	emit(S("push %%rbx"))
+	if isKeyString {
+		emit(S("push %%rcx"))
+		emit(S("push %%rdx"))
+		emit(S("push %%rdi"))
+	} else {
+		emit(S("push %%rcx"))
+	}
+	emitMapGet(_map.getGtype(), isKeyString)
 }
 
 func mapOkRegister(is24Width bool) gostring {
@@ -105,8 +124,10 @@ func mapOkRegister(is24Width bool) gostring {
 // r10: map header address")
 // r11: map len")
 // r12: loop counter")
-// r13: specified index value")
-func emitMapGet(mapType *Gtype) {
+// r13: k value in m[k]
+// r14: k value in m[k]
+// r15: k value in m[k]
+func emitMapGet(mapType *Gtype, cmpGoString bool) {
 
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
@@ -118,7 +139,14 @@ func emitMapGet(mapType *Gtype) {
 
 	emit(S("# emitMapGet"))
 
-	emit(S("pop %%r13")) // index value
+	if cmpGoString {
+		emit(S("pop %%r15")) // index value a
+		emit(S("pop %%r14")) // index value b
+		emit(S("pop %%r13")) // index value c
+	} else {
+		emit(S("pop %%r13")) // index value
+	}
+
 	emit(S("pop %%r11")) // len
 	emit(S("pop %%r10")) // head addr
 
@@ -156,7 +184,7 @@ func emitMapGet(mapType *Gtype) {
 
 	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
-	if mapKeyType.isClikeString() {
+	if cmpGoString {
 		emit(S("push %%r12"))
 		emit(S("push %%r11"))
 		emit(S("push %%r10"))
@@ -164,9 +192,10 @@ func emitMapGet(mapType *Gtype) {
 		emit(S("LOAD_24_BY_DEREF")) // dereference
 		emit(S("PUSH_SLICE"))
 
+		// push index value
 		emit(S("push %%r13"))
-		emitConvertCstringFromStackToSlice()
-		emit(S("PUSH_SLICE"))
+		emit(S("push %%r14"))
+		emit(S("push %%r15"))
 
 		emitGoStringsEqualFromStack()
 
