@@ -133,15 +133,6 @@ func writeln(s gostring) {
 	os.Stdout.Write(b)
 }
 
-func convertCstringsToGostrings(cstrings []string) []gostring {
-	var r []gostring
-	for _, cs := range cstrings {
-		r = append(r, gostring(cs))
-	}
-
-	return r
-}
-
 func concat(a gostring, b gostring) gostring {
 	var r []byte
 	for i:=0;i<len(a);i++ {

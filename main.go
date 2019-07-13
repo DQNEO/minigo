@@ -21,10 +21,11 @@ func printVersion() {
 	fmtPrintln(S("Copyright (C) 2019 @DQNEO"))
 }
 
-func parseOpts(args []gostring) []gostring {
+func parseOpts(args []string) []gostring {
 	var r []gostring
 
-	for _, opt := range args {
+	for _, _opt := range args {
+		opt := gostring(_opt)
 		if eq(opt,S("--version")) {
 			printVersion()
 			return nil
@@ -54,9 +55,9 @@ func parseOpts(args []gostring) []gostring {
 			resolveOnly = true
 		}
 		if strings_HasSuffix(opt, S(".go")) {
-			r = append(r, gostring(opt))
+			r = append(r, opt)
 		} else if eq(opt, S("-")) {
-			return []gostring{gostring("/dev/stdin")}
+			return []gostring{S("/dev/stdin")}
 		}
 	}
 
@@ -66,7 +67,7 @@ func parseOpts(args []gostring) []gostring {
 func main() {
 	// parsing arguments
 	var sourceFiles []gostring
-	osArgs := convertCstringsToGostrings(os.Args)
+	osArgs := os.Args
 	assert(len(osArgs) > 0, nil, S("os.Args should not be empty"))
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(osArgs[1:len(osArgs)])
