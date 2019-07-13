@@ -137,7 +137,7 @@ func emitAssignOne(lhs Expr, rhs Expr) {
 		rhs.emit()
 	case gtype.getKind() == G_ARRAY:
 		assignToArray(lhs, rhs)
-	case gtype.getKind() == G_SLICE:
+	case gtype.getKind() == G_SLICE || gtype.getKind() == G_CLIKE_STRING:
 		assignToSlice(lhs, rhs)
 	case gtype.getKind() == G_STRUCT:
 		assignToStruct(lhs, rhs)
@@ -355,7 +355,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
 		fromExpr := unwrapRel(conversion.arg)
-		assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), S("must be a slice of bytes"))
+		//assert(conversion.toGtype.getKind() == G_SLICE, rhs.token(), S("must be a slice of bytes"))
 		if fromExpr.getGtype().getKind() == G_SLICE {
 			// emit as it is
 			fromExpr.emit()

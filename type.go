@@ -106,7 +106,7 @@ func (gtype *Gtype) isArrayLike() bool {
 
 func (gtype *Gtype) is24WidthType() bool {
 	switch gtype.getKind() {
-	case G_INTERFACE, G_SLICE:
+	case G_INTERFACE, G_SLICE, G_CLIKE_STRING:
 		return true
 	default:
 		return false
@@ -153,7 +153,7 @@ func (gtype *Gtype) getSize() int {
 		case G_MAP:
 			return ptrSize
 		case G_CLIKE_STRING:
-			return ptrSize
+			return ptrSize * 3
 		default:
 			return gtype.size
 		}

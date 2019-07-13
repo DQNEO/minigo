@@ -10,11 +10,7 @@ var gInt = &sInt
 var gByte = &Gtype{kind: G_BYTE, size: 1}
 var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
-	kind: G_SLICE,
-	elementType: &Gtype{
-		kind: G_BYTE,
-		size: 1,
-	},
+	kind: G_CLIKE_STRING,
 }
 
 var builtinTypesAsString []gostring = []gostring{

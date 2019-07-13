@@ -379,7 +379,7 @@ func (decl *DeclVar) emitLocal() {
 	switch gtype.getKind() {
 	case G_ARRAY:
 		assignToArray(variable, rhs)
-	case G_SLICE:
+	case G_SLICE,G_CLIKE_STRING:
 		assignToSlice(variable, rhs)
 	case G_STRUCT:
 		assignToStruct(variable, rhs)
