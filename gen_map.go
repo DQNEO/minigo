@@ -366,7 +366,11 @@ func (em *IrStmtRangeMap) emit() {
 	emit(S("SUM_FROM_STACK # x + y"))
 	emit(S("LOAD_8_BY_DEREF"))
 
-	emit(S("LOAD_8_BY_DEREF"))
+	if em.indexvar.getGtype().isClikeString() {
+		emit(S("LOAD_24_BY_DEREF"))
+	} else {
+		emit(S("LOAD_8_BY_DEREF"))
+	}
 	emitSavePrimitive(em.indexvar)
 
 	if em.valuevar != nil {
