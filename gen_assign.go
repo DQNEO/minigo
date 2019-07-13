@@ -362,13 +362,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			// This is required to convert libcArgs to os.Args
 			fromExpr.emit()
 			emit(S("PUSH_8 # string addr"))
-
-			emit(S("PUSH_8"))
-			eStrLen := &IrLowLevelCall{
-				symbol:        S("strlen"),
-				argsFromStack: 1,
-			}
-			eStrLen.emit()
+			emitStrlen(fromExpr)
 			emit(S("mov %%rax, %%rbx # len"))
 			emit(S("mov %%rax, %%rcx # cap"))
 			emit(S("POP_8 # string addr"))
