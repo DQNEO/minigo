@@ -111,7 +111,7 @@ func (program *Program) emit() {
 	program.emitMethodTable()
 
 	emitWithoutIndent(S(".text"))
-	emitRuntimeArgs()
+
 	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
 
@@ -144,19 +144,6 @@ func (program *Program) emit() {
 
 }
 
-func emitRuntimeArgs() {
-	emitWithoutIndent(S(".runtime_args:"))
-	emit(S("push %%rbp"))
-	emit(S("mov %%rsp, %%rbp"))
-
-	emit(S("# set argv, argc, argc"))
-	emit(S("mov libcArgv(%%rip), %%rax # ptr"))
-	emit(S("mov libcArgc(%%rip), %%rbx # len"))
-	emit(S("mov libcArgc(%%rip), %%rcx # cap"))
-
-	emitFuncEpilogue(S(".runtime_args_noop_handler"), nil)
-}
-
 func emitMainFunc(importOS bool) {
 	fname := S("main")
 	emit(S(".global	%s"), fname)
@@ -164,8 +151,9 @@ func emitMainFunc(importOS bool) {
 	emit(S("push %%rbp"))
 	emit(S("mov %%rsp, %%rbp"))
 
-	emit(S("mov %%rsi, libcArgv(%%rip)"))
-	emit(S("mov %%rdi, libcArgc(%%rip)"))
+	emit(S("mov %%rsi, libcArgs(%%rip)"))
+	emit(S("mov %%rdi, libcArgs+8(%%rip)"))
+	emit(S("mov %%rdi, libcArgs+16(%%rip)"))
 	emit(S("mov $0, %%rsi"))
 	emit(S("mov $0, %%rdi"))
 

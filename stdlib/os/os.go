@@ -26,10 +26,17 @@ func Exit(i int) {
 
 var Args []string
 
-func init() {
+func runtime_args() []string {
+	var r []string
+	for _, a := range libcArgs {
+		// we can regard *byte as string
+		var s string = string(a)
+		r = append(r, s)
+	}
+	return r
+}
 
-	// runtime_args is written in assembly code
+func init() {
 	Args = runtime_args()
 }
 
-//func runtime_args() []string
