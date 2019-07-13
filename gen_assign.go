@@ -362,10 +362,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		} else if fromExpr.getGtype().getKind() == G_CLIKE_STRING {
 			fromExpr.emit()
 			emit(S("PUSH_8 # ptr"))
-			strlen := &ExprLen{
-				arg: fromExpr,
-			}
-			strlen.emit()
+			emitStrlen(fromExpr)
 			emit(S("PUSH_8 # len"))
 			emit(S("PUSH_8 # cap"))
 			emit(S("POP_SLICE"))
