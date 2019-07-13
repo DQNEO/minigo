@@ -1,0 +1,1 @@
+lea \varname+\offset(%rip), %rax

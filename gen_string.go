@@ -13,8 +13,17 @@ func emitEmptyString() {
 
 func countStrlen(chars gostring) int {
 	var length int
+	var isInBackSlash bool
+
 	for _, c := range chars {
-		if c != '\\' {
+		if !isInBackSlash && c == '\\' {
+			isInBackSlash = true
+			continue
+		} else if isInBackSlash && c == '\\' {
+			isInBackSlash = false
+			length++
+		} else {
+			isInBackSlash = false
 			length++
 		}
 	}
