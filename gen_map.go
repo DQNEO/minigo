@@ -412,10 +412,11 @@ func (em *IrStmtRangeMap) emit() {
 
 	if em.indexvar.getGtype().isClikeString() {
 		emit(S("LOAD_24_BY_DEREF"))
+		emitSave24(em.indexvar,0)
 	} else {
 		emit(S("LOAD_8_BY_DEREF"))
+		emitSavePrimitive(em.indexvar)
 	}
-	emitSave24(em.indexvar,0)
 
 	if em.valuevar != nil {
 		emit(S("# Setting valuevar"))
