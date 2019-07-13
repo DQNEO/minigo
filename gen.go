@@ -482,8 +482,8 @@ func (e *ExprVaArg) emit() {
 func (e *IrExprConversion) emit() {
 	emit(S("# IrExprConversion.emit()"))
 	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isClikeString() {
+		// cstring(bytes)
 		emit(S("# convert slice to string"))
-		// string(bytes)
 		labelEnd := makeLabel()
 		e.arg.emit()    // load slice
 		emit(S("TEST_IT")) // check if ptr is nil
