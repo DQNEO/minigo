@@ -26,7 +26,16 @@ func Exit(i int) {
 
 var Args []string
 
+func runtime_args() []string {
+	var r []string
+	for _, a := range libcArgs {
+		// we can regard *byte as string
+		r = append(r, a)
+	}
+	return r
+}
+
 func init() {
-	Args = libcArgs
+	Args = runtime_args()
 }
 
