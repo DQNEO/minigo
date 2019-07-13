@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -u
 
 differ=0
 
