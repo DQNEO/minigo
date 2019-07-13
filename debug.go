@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func debugf(format gostring, v ...interface{}) {
+func debugf(format bytes, v ...interface{}) {
 	if !debugMode {
 		return
 	}
@@ -25,14 +25,14 @@ func debugf(format gostring, v ...interface{}) {
 var debugNest int
 
 // States "To Be Implemented"
-func TBI(tok *Token, format gostring, v ...interface{}) {
-	errorft(tok, concat(S("(To Be Implemented) "), gostring(format)), v...)
+func TBI(tok *Token, format bytes, v ...interface{}) {
+	errorft(tok, concat(S("(To Be Implemented) "), bytes(format)), v...)
 }
 
 // errorf with a position token
-func errorft(tok *Token, format gostring, v ...interface{}) {
+func errorft(tok *Token, format bytes, v ...interface{}) {
 
-	var tokString gostring
+	var tokString bytes
 	if tok != nil {
 		tokString = tok.String()
 	}
@@ -40,16 +40,16 @@ func errorft(tok *Token, format gostring, v ...interface{}) {
 	errorf(gs, v...)
 }
 
-func errorf(format gostring, v ...interface{}) {
+func errorf(format bytes, v ...interface{}) {
 	s := Sprintf(format, v...)
 	os.Stderr.Write(concat(s, S("\n")))
 	panic(S(""))
 }
 
-func assert(cond bool, tok *Token, format gostring, v ...interface{}) {
+func assert(cond bool, tok *Token, format bytes, v ...interface{}) {
 	if !cond {
 		s := Sprintf(format, v...)
-		var toks gostring = S("")
+		var toks bytes = S("")
 		if tok != nil {
 			toks = tok.String()
 		}

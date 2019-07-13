@@ -97,7 +97,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 			emit(S("# retRegiLen=%d\n"), retRegiLen)
 			var i int
 			for i = retRegiLen - 1; i >= 0; i-- {
-				emit(S("push %%%s # %d"), gostring(retRegi[i]), i)
+				emit(S("push %%%s # %d"), bytes(retRegi[i]), i)
 			}
 			for _, left := range ast.lefts {
 				if isUnderScore(left) {
@@ -239,7 +239,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
-		if eq(re.op, gostring("*")) {
+		if eq(re.op, bytes("*")) {
 			// copy struct
 			emitAddress(lhs)
 			emit(S("PUSH_8"))
@@ -255,7 +255,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 		// do assignment for each field
 		for _, field := range structliteral.fields {
-			emit(S("# .%s"), gostring(field.key))
+			emit(S("# .%s"), bytes(field.key))
 			fieldtype := strcttyp.getField(field.key)
 
 			switch fieldtype.getKind() {

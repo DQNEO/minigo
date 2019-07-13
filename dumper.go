@@ -1,6 +1,6 @@
 package main
 
-func dumpTokenForFiles(sourceFiles []gostring) {
+func dumpTokenForFiles(sourceFiles []bytes) {
 	for _, sourceFile := range sourceFiles {
 		debugf(S("--- file:%s"), sourceFile)
 		bs := NewByteStreamFromFile(sourceFile)
@@ -123,7 +123,7 @@ func (a *AstFile) dump() {
 }
 
 func (ast *ExprFuncallOrConversion) dump() {
-	debugf(gostring(ast.fname))
+	debugf(bytes(ast.fname))
 	debugNest++
 	for _, arg := range ast.args {
 		arg.dump()
@@ -132,7 +132,7 @@ func (ast *ExprFuncallOrConversion) dump() {
 }
 
 func (ast *ExprMethodcall) dump() {
-	debugf(gostring(ast.fname))
+	debugf(bytes(ast.fname))
 	debugNest++
 	for _, arg := range ast.args {
 		arg.dump()
@@ -141,7 +141,7 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf(S("var %s T %s"), gostring(ast.varname), ast.getGtype().String())
+	debugf(S("var %s T %s"), bytes(ast.varname), ast.getGtype().String())
 }
 
 func (ast *ExprConstVariable) dump() {

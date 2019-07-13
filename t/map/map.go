@@ -73,7 +73,7 @@ func f4() {
 }
 
 func f5() {
-	var lmap map[int]gostring = map[int]gostring{
+	var lmap map[int]bytes = map[int]bytes{
 		27: S("twenty seven"),
 		26: S("twenty six"),
 	}

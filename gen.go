@@ -32,7 +32,7 @@ func writePos() {
 	if !emitPosition {
 		return
 	}
-	var spos gostring
+	var spos bytes
 	if pos == nil {
 		spos = S("()")
 	} else {
@@ -45,20 +45,20 @@ func writePos() {
 
 var gasIndentLevel int = 1
 
-func emit(format gostring, v ...interface{}) {
+func emit(format bytes, v ...interface{}) {
 	writePos()
 
 	for i := 0; i < gasIndentLevel; i++ {
-		write(gostring("  "))
+		write(bytes("  "))
 	}
 
 	s := Sprintf(format, v...)
 	writeln(s)
 }
 
-func emitWithoutIndent(format gostring, v ...interface{}) {
+func emitWithoutIndent(format bytes, v ...interface{}) {
 	writePos()
-	s := Sprintf(gostring(format), v...)
+	s := Sprintf(bytes(format), v...)
 	writeln(s)
 }
 
@@ -70,7 +70,7 @@ func unwrapRel(e Expr) Expr {
 }
 
 // Mytype.method -> Mytype#method
-func getMethodUniqueName(gtype *Gtype, fname goidentifier) gostring {
+func getMethodUniqueName(gtype *Gtype, fname goidentifier) bytes {
 	assertNotNil(gtype != nil, nil)
 	var typename goidentifier
 	if gtype.kind == G_POINTER {
@@ -78,29 +78,29 @@ func getMethodUniqueName(gtype *Gtype, fname goidentifier) gostring {
 	} else {
 		typename = gtype.relation.name
 	}
-	return Sprintf(S("%s$%s"), gostring(typename), gostring(fname))
+	return Sprintf(S("%s$%s"), bytes(typename), bytes(fname))
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg gostring, fname gostring) gostring {
+func getFuncSymbol(pkg bytes, fname bytes) bytes {
 	if eq(pkg, S("libc")) {
 		return fname
 	}
 	if len(pkg) == 0 {
-		pkg = gostring("")
+		pkg = bytes("")
 	}
 	return Sprintf(S("%s.%s"), pkg, fname)
 }
 
-func (f *DeclFunc) getSymbol() gostring {
+func (f *DeclFunc) getSymbol() bytes {
 	if f.receiver != nil {
 		// method
 		fname := goidentifier(f.fname)
-		return getFuncSymbol(gostring(f.pkg), getMethodUniqueName(f.receiver.gtype, fname))
+		return getFuncSymbol(bytes(f.pkg), getMethodUniqueName(f.receiver.gtype, fname))
 	}
 
 	// other functions
-	return getFuncSymbol(gostring(f.pkg), gostring(f.fname))
+	return getFuncSymbol(bytes(f.pkg), bytes(f.fname))
 }
 
 func align(n int, m int) int {
@@ -112,7 +112,7 @@ func align(n int, m int) int {
 	}
 }
 
-func emitFuncEpilogue(labelDeferHandler gostring, stmtDefer *StmtDefer) {
+func emitFuncEpilogue(labelDeferHandler bytes, stmtDefer *StmtDefer) {
 	emitNewline()
 	emit(S("# func epilogue"))
 	// every function has a defer handler
@@ -132,7 +132,7 @@ func emit_intcast(gtype *Gtype) {
 	}
 }
 
-func emit_comp_primitive(inst gostring, binop *ExprBinop) {
+func emit_comp_primitive(inst bytes, binop *ExprBinop) {
 	emit(S("# emit_comp_primitive"))
 	assert(len(inst) > 0 , binop.token(), S("inst shoud not be empty"))
 	binop.left.emit()
@@ -150,7 +150,7 @@ func emit_comp_primitive(inst gostring, binop *ExprBinop) {
 
 var labelSeq int = 0
 
-func makeLabel() gostring {
+func makeLabel() bytes {
 	r := Sprintf(S(".L%d"), labelSeq)
 	labelSeq++
 	return r
@@ -165,7 +165,7 @@ func (ast *StmtDec) emit() {
 
 // https://golang.org/ref/spec#IncDecStmt
 // As with an assignment, the operand must be addressable or a map index expression.
-func emitIncrDecl(inst gostring, operand Expr) {
+func emitIncrDecl(inst bytes, operand Expr) {
 	operand.emit()
 	emit(inst)
 
@@ -181,7 +181,7 @@ func (binop *ExprBinop) emitComp() {
 	assert(!binop.left.getGtype().isString(), binop.token(), S("should not be clike string"))
 
 
-	var instruction gostring
+	var instruction bytes
 	op := binop.op
 	switch switchexpr(op) {
 	case "<":
@@ -204,7 +204,7 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if eq(ast.op , gostring("+")) && ast.left.getGtype().isString() {
+	if eq(ast.op , bytes("+")) && ast.left.getGtype().isString() {
 		TBI(ast.token(), S("concat strings"))
 		return
 	}
@@ -273,7 +273,7 @@ func isUnderScore(e Expr) bool {
 	if !ok {
 		return false
 	}
-	return eq(gostring(rel.name), gostring("_"))
+	return eq(bytes(rel.name), bytes("_"))
 }
 
 // expect rhs address is in the stack top, lhs is in the second top
@@ -504,7 +504,7 @@ func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
 }
 
-func bool2string(bol bool) gostring {
+func bool2string(bol bool) bytes {
 	if bol {
 		return S("true")
 	} else {

@@ -5,14 +5,14 @@ var symbolTable *SymbolTable
 
 type SymbolTable struct {
 	allScopes     map[identifier]*Scope
-	uniquedDTypes []gostring
+	uniquedDTypes []bytes
 }
 
-func makeDynamicTypeLabel(id int) gostring {
+func makeDynamicTypeLabel(id int) bytes {
 	return Sprintf(S("DynamicTypeId%d"), id)
 }
 
-func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) gostring {
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
 	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, S("type %s not found in uniquedDTypes"), gtype.String())
@@ -80,7 +80,7 @@ func collectDecls(pkg *AstPackage) {
 	}
 }
 
-func setStringLables(pkg *AstPackage, prefix gostring) {
+func setStringLables(pkg *AstPackage, prefix bytes) {
 	for id, sl := range pkg.stringLiterals {
 		var no int = id + 1
 		sl.slabel = Sprintf(S("%s.S%d"), prefix, no)
@@ -97,8 +97,8 @@ func calcStructSize(gtypes []*Gtype) {
 	}
 }
 
-func uniqueDynamicTypes(dynamicTypes []*Gtype) []gostring {
-	var r []gostring = builtinTypesAsString
+func uniqueDynamicTypes(dynamicTypes []*Gtype) []bytes {
+	var r []bytes = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
 		if !inArray(gs, r) {
@@ -108,8 +108,8 @@ func uniqueDynamicTypes(dynamicTypes []*Gtype) []gostring {
 	return r
 }
 
-func composeMethodTable(funcs []*DeclFunc) map[int][]gostring {
-	var methodTable map[int][]gostring = map[int][]gostring{} // receiverTypeId : []methodTable
+func composeMethodTable(funcs []*DeclFunc) map[int][]bytes {
+	var methodTable map[int][]bytes = map[int][]bytes{} // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
 		if funcdecl.receiver == nil {

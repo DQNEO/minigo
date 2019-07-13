@@ -10,7 +10,7 @@ func f0() *int {
 	return x
 }
 
-func f1() gostring {
+func f1() bytes {
 	f := &StmtFor{
 		rng: &ForRangeClause{
 			invisibleMapCounter: &ExprVariable{
@@ -53,7 +53,7 @@ func (e *ExprVariable) f() {
 }
 
 type Relation struct {
-	name gostring
+	name bytes
 	expr Expr
 }
 

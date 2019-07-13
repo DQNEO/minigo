@@ -15,36 +15,36 @@ package main
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
 */
 
-var retRegi [14]gostring = [14]gostring{
-	gostring("rax"),
-	gostring("rbx"),
-	gostring("rcx"),
-	gostring("rdx"),
-	gostring("rdi"),
-	gostring("rsi"),
-	gostring("r8"),
-	gostring("r9"),
-	gostring("r10"),
-	gostring("r11"),
-	gostring("r12"),
-	gostring("r13"),
-	gostring("r14"),
-	gostring("r15"),
+var retRegi [14]bytes = [14]bytes{
+	bytes("rax"),
+	bytes("rbx"),
+	bytes("rcx"),
+	bytes("rdx"),
+	bytes("rdi"),
+	bytes("rsi"),
+	bytes("r8"),
+	bytes("r9"),
+	bytes("r10"),
+	bytes("r11"),
+	bytes("r12"),
+	bytes("r13"),
+	bytes("r14"),
+	bytes("r15"),
 }
 
-var RegsForArguments [12]gostring = [12]gostring{
-	gostring("rdi"),
-	gostring("rsi"),
-	gostring("rdx"),
-	gostring("rcx"),
-	gostring("r8"),
-	gostring("r9"),
-	gostring("r10"),
-	gostring("r11"),
-	gostring("r12"),
-	gostring("r13"),
-	gostring("r14"),
-	gostring("r15"),
+var RegsForArguments [12]bytes = [12]bytes{
+	bytes("rdi"),
+	bytes("rsi"),
+	bytes("rdx"),
+	bytes("rcx"),
+	bytes("r8"),
+	bytes("r9"),
+	bytes("r10"),
+	bytes("r11"),
+	bytes("r12"),
+	bytes("r13"),
+	bytes("r14"),
+	bytes("r15"),
 }
 
 func (f *DeclFunc) prepare() Emitter {
@@ -114,7 +114,7 @@ func (f *DeclFunc) prepare() Emitter {
 
 type funcPrologueEmitter struct {
 	token        *Token
-	symbol       gostring
+	symbol       bytes
 	argRegisters []int
 	localvars    []*ExprVariable
 	localarea    int
@@ -137,7 +137,7 @@ func (fe *funcPrologueEmitter) emit() {
 		//emit(S("# Allocating stack for localvars len=%d"), len(fe.localvars))
 		for i := len(fe.localvars) - 1; i >= 0; i-- {
 			lvar := fe.localvars[i]
-			emit(S("# offset %d variable \"%s\" %s"), lvar.offset, gostring(lvar.varname), lvar.gtype.String())
+			emit(S("# offset %d variable \"%s\" %s"), lvar.offset, bytes(lvar.varname), lvar.gtype.String())
 		}
 		var localarea int = -fe.localarea
 		emit(S("sub $%d, %%rsp # total stack size"), localarea)
@@ -157,12 +157,12 @@ func (ircall *IrStaticCall) emit() {
 	var arg Expr
 	var argIndex int
 	for argIndex, arg = range ircall.args {
-		var fromGtype gostring
+		var fromGtype bytes
 		if arg.getGtype() != nil {
 			emit(S("# get fromGtype"))
 			fromGtype = arg.getGtype().String()
 		}
-		emit(S("# from %s"), gostring(fromGtype))
+		emit(S("# from %s"), bytes(fromGtype))
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
@@ -353,13 +353,13 @@ func (stmt *StmtReturn) emit() {
 		}
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
-			var reg gostring = gostring(retRegi[num64bit-1-j])
+			var reg bytes = bytes(retRegi[num64bit-1-j])
 			emit(S("push %%%s"), reg)
 			retRegiIndex++
 		}
 	}
 	for i := 0; i < retRegiIndex; i++ {
-		var reg gostring = gostring(retRegi[retRegiIndex-1-i])
+		var reg bytes = bytes(retRegi[retRegiIndex-1-i])
 		emit(S("pop %%%s"), reg)
 	}
 

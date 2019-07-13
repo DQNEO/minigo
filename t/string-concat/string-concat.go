@@ -4,7 +4,7 @@ package main
 func f1() {
 	var a = S("abc")
 	var b = S("defg")
-	var x gostring
+	var x bytes
 	x = concat(a , b)
 	fmtPrintf(S("%s\n"), x)
 }
@@ -19,7 +19,7 @@ func f2() {
 
 var seq int = 0
 
-func foo() gostring {
+func foo() bytes {
 	seq++
 	return S("foo")
 }

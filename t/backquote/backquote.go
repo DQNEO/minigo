@@ -2,13 +2,13 @@ package main
 
 
 func f1() {
-	var s gostring = S(`hello
+	var s bytes = S(`hello
 `)
 	fmtPrintf(s)
 }
 
 func f2() {
-	var s gostring = S(`h"e"llo
+	var s bytes = S(`h"e"llo
 `)
 	fmtPrintf(s)
 }

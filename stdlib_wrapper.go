@@ -5,24 +5,24 @@ import (
 )
 
 // depends on libc
-func ioutil_ReadFile(filename gostring) ([]byte, error) {
+func ioutil_ReadFile(filename bytes) ([]byte, error) {
 	return ioutil.ReadFile(string(filename))
 }
 
 // depends on libc
-func strconv_Atoi(gs gostring) (int, error) {
+func strconv_Atoi(gs bytes) (int, error) {
 	i, e := Atoi((gs))
 	return i,e
 }
 
-func strings_Split(s gostring, sep gostring) []gostring {
+func strings_Split(s bytes, sep bytes) []bytes {
 	return Split(s, sep)
 }
 
-func strings_HasSuffix(s gostring, suffix gostring) bool {
+func strings_HasSuffix(s bytes, suffix bytes) bool {
 	return HasSuffix(s, suffix)
 }
 
-func strings_Congtains(s gostring, substr gostring) bool {
+func strings_Congtains(s bytes, substr bytes) bool {
 	return Contains(s, substr)
 }

@@ -1,21 +1,21 @@
 package main
 
 
-func receiveVarg(s gostring, a ...interface{}) {
+func receiveVarg(s bytes, a ...interface{}) {
 	fmtPrintf(S("-\n"))
 	fmtPrintf(S("%d\n"), len(a))
 	fmtPrintf(S("%s\n"), a[0])
 	fmtPrintf(S("%d\n"), a[1])
 }
 
-func receiveIfcSlice(s gostring, a []interface{}) {
+func receiveIfcSlice(s bytes, a []interface{}) {
 	fmtPrintf(S("-\n"))
 	fmtPrintf(S("%d\n"), len(a))
 	fmtPrintf(S("%s\n"), a[0])
 	fmtPrintf(S("%d\n"), a[1])
 }
 
-var format gostring = gostring("format-%s-%d\n")
+var format bytes = bytes("format-%s-%d\n")
 
 func f1() {
 	receiveVarg(format, S("hello"), 123)

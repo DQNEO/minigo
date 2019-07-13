@@ -5,7 +5,7 @@ func f1() {
 	path := S("t/min/min.go")
 	s := readFile(path)
 	_bs := ByteStream{
-		filename:  gostring(path),
+		filename:  bytes(path),
 		source:    s,
 		nextIndex: 0,
 		line:      1,
@@ -14,7 +14,7 @@ func f1() {
 	bs := &_bs
 	len1 := len(bs.source)
 
-	fmtPrintf(S("%d\n"), len1-118) // 1
+	fmtPrintf(S("%d\n"), len1-115) // 1
 
 	var c byte
 	c, _ = bs.get()

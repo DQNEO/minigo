@@ -22,7 +22,7 @@ func f1() {
 
 func f2() {
 
-	var lmap map[string]gostring = map[string]gostring{
+	var lmap map[string]bytes = map[string]bytes{
 		string("15"): S("10"),
 		string("17"):   S("11"),
 	}
@@ -74,18 +74,18 @@ func f3() {
 	fmtPrintf(S("%d\n"), val+24) //24
 }
 
-var gkeyFoo2 gostring = gostring("keyfoo")
+var gkeyFoo2 bytes = bytes("keyfoo")
 
 func f4() {
-	gkeyFoo := gostring("keyfoo")
+	gkeyFoo := bytes("keyfoo")
 
-	var lmap map[string]gostring = map[string]gostring{
+	var lmap map[string]bytes = map[string]bytes{
 		string(gkeyFoo):   S("26"),
 		string("keybar"): S("valuebar"),
 	}
 
 	var ok bool
-	var v gostring
+	var v bytes
 	v, ok = lmap[string(gkeyFoo2)]
 	if ok {
 		fmtPrintf(S("%d\n"), 25)

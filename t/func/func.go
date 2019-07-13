@@ -61,8 +61,8 @@ func receiveSliceLiteral() {
 	fmtPrintf(S("%d\n"), intSlice[0])     // 10
 }
 
-func returnStringSliceLiteral() []gostring {
-	return []gostring{S("11")}
+func returnStringSliceLiteral() []bytes {
+	return []bytes{S("11")}
 }
 
 func receiveStringSliceLiteral() {

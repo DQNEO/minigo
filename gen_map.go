@@ -4,7 +4,7 @@ const MAX_METHODS_PER_TYPE int = 128
 
 func (call *IrInterfaceMethodCall) emit() {
 	receiver := call.receiver
-	var methodName gostring = gostring(call.methodName)
+	var methodName bytes = bytes(call.methodName)
 	emit(S("# emit interface method call \"%s\""), methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
@@ -131,7 +131,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emitMapGet(_map.getGtype(), isKeyString)
 }
 
-func mapOkRegister(is24Width bool) gostring {
+func mapOkRegister(is24Width bool) bytes {
 	if is24Width {
 		return S("rdx")
 	} else {
@@ -376,7 +376,7 @@ func (em *IrStmtRangeMap) emit() {
 	}
 	// counter < len(list)
 	em.condition = &ExprBinop{
-		op:   gostring("<"),
+		op:   bytes("<"),
 		left: em.mapCounter, // i
 		// @TODO
 		// The range expression x is evaluated once before beginning the loop

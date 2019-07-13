@@ -8,14 +8,14 @@ echo ""
 for dir in stdlib/*
 do
     basename=${dir##*/}
-    echo "var ${basename}Code gostring = gostring(\`"
+    echo "var ${basename}Code bytes = bytes(\`"
     cat stdlib/$basename/$basename.go
     echo "\`)"
     echo ""
 done
 
-echo "func makeStdLib() map[identifier]gostring {"
-echo "    var mp map[identifier]gostring = map[identifier]gostring{"
+echo "func makeStdLib() map[identifier]bytes {"
+echo "    var mp map[identifier]bytes = map[identifier]bytes{"
 
 for dir in stdlib/*
 do

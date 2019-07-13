@@ -160,8 +160,8 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
-func (gtype *Gtype) String() gostring {
-	var gs gostring
+func (gtype *Gtype) String() bytes {
+	var gs bytes
 	if gtype == nil {
 		return S("NO_TYPE")
 	}
@@ -188,7 +188,7 @@ func (gtype *Gtype) String() gostring {
 			}
 		}
 		 gs = Sprintf(S("G_NAMED(%s.%s)"),
-			gostring(gtype.relation.pkg), gostring(gtype.relation.name))
+			bytes(gtype.relation.pkg), bytes(gtype.relation.name))
 		return gs
 	case G_INT:
 		return S("int")
@@ -201,9 +201,9 @@ func (gtype *Gtype) String() gostring {
 		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String())
 		return gs
 	case G_STRUCT:
-		var r gostring = S("struct{")
+		var r bytes = S("struct{")
 		for _, field := range gtype.fields {
-			var tmp gostring = concat(field.String(), S(","))
+			var tmp bytes = concat(field.String(), S(","))
 			r = concat(r, tmp)
 		}
 		r = concat(r, S("}"))
@@ -239,7 +239,7 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 	assertNotNil(strct != nil, nil)
 	assert(strct.kind == G_STRUCT, nil, S("assume G_STRUCT type"))
 	for _, field := range strct.fields {
-		if eq(gostring(field.fieldname), gostring(name)) {
+		if eq(bytes(field.fieldname), bytes(name)) {
 			return field
 		}
 	}
@@ -398,7 +398,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	fields := strctType.relation.gtype.fields
 	//debugf(S("fields=%v"), fields)
 	for _, field := range fields {
-		if eq(gostring(e.fieldname),  gostring(field.fieldname)) {
+		if eq(bytes(e.fieldname),  bytes(field.fieldname)) {
 			//return field.origType
 			return field
 		}

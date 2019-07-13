@@ -1,7 +1,7 @@
 package main
 
 var eEmptyString = ExprStringLiteral{
-	val: gostring(""),
+	val: bytes(""),
 }
 
 func emitEmptyString() {
@@ -11,7 +11,7 @@ func emitEmptyString() {
 	emit(S("mov $0, %%rcx"))
 }
 
-func countStrlen(chars gostring) int {
+func countStrlen(chars bytes) int {
 	var length int
 	var isInBackSlash bool
 

@@ -1,7 +1,7 @@
 package main
 
 func f1() {
-	baseName := getBaseNameFromImport(gostring("foo/bar"))
+	baseName := getBaseNameFromImport(bytes("foo/bar"))
 	fmtPrintf(S("%s\n"), baseName) // bar
 }
 

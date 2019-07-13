@@ -20,42 +20,42 @@ func f0() {
 }
 
 func f1() {
-	var b gostring
-	b = Sprintf(gostring("hello\n"))
+	var b bytes
+	b = Sprintf(bytes("hello\n"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("%s\n"), []byte("world"))
+	b = Sprintf(bytes("%s\n"), []byte("world"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("%s\n"), gostring("world"))
+	b = Sprintf(bytes("%s\n"), bytes("world"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("left %s right\n"), gostring("center"))
+	b = Sprintf(bytes("left %s right\n"), bytes("center"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("%s center right\n"), gostring("left"))
+	b = Sprintf(bytes("%s center right\n"), bytes("left"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("left center %s"), gostring("right\n"))
+	b = Sprintf(bytes("left center %s"), bytes("right\n"))
 	os.Stdout.Write(b)
 
-	b = Sprintf(gostring("%s center %s\n"), gostring("left"), gostring("right"))
+	b = Sprintf(bytes("%s center %s\n"), bytes("left"), bytes("right"))
 	os.Stdout.Write(b)
 
 	var i int
 
 	i = 123
-	b = Sprintf(gostring("123=%d\n"), i)
+	b = Sprintf(bytes("123=%d\n"), i)
 	os.Stdout.Write(b)
 
 	i = 4567
-	b = Sprintf(gostring("%s=%d\n"), gostring("4567"), i)
+	b = Sprintf(bytes("%s=%d\n"), bytes("4567"), i)
 	os.Stdout.Write(b)
 }
 
 func f2() {
-	var b gostring
-	b = Sprintf(gostring("push %%rax\n"))
+	var b bytes
+	b = Sprintf(bytes("push %%rax\n"))
 	os.Stdout.Write(b)
 }
 

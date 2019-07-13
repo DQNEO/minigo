@@ -4,19 +4,19 @@ import (
 	"os"
 )
 
-type gostring []byte
+type bytes []byte
 type switchexpr string
 type osarg string
 
 type identifier string
 
-type goidentifier gostring
+type goidentifier bytes
 
-func S(s string) gostring {
-	return gostring(s)
+func S(s string) bytes {
+	return bytes(s)
 }
 
-func fmtPrintf(gos gostring, a... interface{}) {
+func fmtPrintf(gos bytes, a... interface{}) {
 	r := Sprintf(gos, a...)
 	write(r)
 }
@@ -26,8 +26,8 @@ func Sprintf(format []byte, a... interface{}) []byte {
 	for _, x := range a {
 		var y interface{}
 		switch x.(type) {
-		case gostring:      // This case is not reached by 2nd gen compiler
-			var tmpgostring gostring = x.(gostring)
+		case bytes: // This case is not reached by 2nd gen compiler
+			var tmpgostring bytes = x.(bytes)
 			var tmpbytes []byte = []byte(tmpgostring)
 			y = tmpbytes
 		case goidentifier:   // This case is not reached by 2nd gen compiler
@@ -42,7 +42,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 	a = nil // unset
 
 	var r []byte
-	var blocks []gostring
+	var blocks []bytes
 	var str []byte
 	var f []byte = []byte(format)
 	var c byte
@@ -71,7 +71,7 @@ func Sprintf(format []byte, a... interface{}) []byte {
 			case string:
 				var _args string
 				_args = arg.(string)
-				blocks = append(blocks, gostring(_args))
+				blocks = append(blocks, bytes(_args))
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
@@ -80,12 +80,12 @@ func Sprintf(format []byte, a... interface{}) []byte {
 				var _argByte byte
 				_argByte = arg.(byte)
 				bts := []byte{_argByte}
-				g := gostring(bts)
+				g := bytes(bts)
 				blocks = append(blocks, g)
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
-				b := gostring(Itoa(_argInt))
+				b := bytes(Itoa(_argInt))
 				blocks = append(blocks, b)
 			case bool: // "%v"
 				var _argBool bool
@@ -118,22 +118,22 @@ func Sprintf(format []byte, a... interface{}) []byte {
 	return r
 }
 
-func write(s gostring) {
+func write(s bytes) {
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
 
-func fmtPrintln(s gostring) {
+func fmtPrintln(s bytes) {
 	writeln(s)
 }
 
-func writeln(s gostring) {
+func writeln(s bytes) {
 	var b []byte = []byte(s)
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
 
-func concat(a gostring, b gostring) gostring {
+func concat(a bytes, b bytes) bytes {
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
@@ -144,7 +144,7 @@ func concat(a gostring, b gostring) gostring {
 	return r
 }
 
-func concat3(a gostring, b gostring, c gostring) gostring {
+func concat3(a bytes, b bytes, c bytes) bytes {
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
@@ -158,7 +158,7 @@ func concat3(a gostring, b gostring, c gostring) gostring {
 	return r
 }
 
-func eq(a gostring, b gostring) bool {
+func eq(a bytes, b bytes) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -171,35 +171,35 @@ func eq(a gostring, b gostring) bool {
 	return true
 }
 
-// "foo/bar", "/" => []gostring{"foo", "bar"}
-func Split(s gostring, sep gostring) []gostring {
+// "foo/bar", "/" => []bytes{"foo", "bar"}
+func Split(s bytes, sep bytes) []bytes {
 	if len(sep) > 1  {
 		panic(S("no supported"))
 	}
 	seps := []byte(sep)
 	sepchar := seps[0]
-	bytes := []byte(s)
+	vbytes := []byte(s)
 	var buf []byte
-	var r []gostring
-	for _, b := range bytes {
+	var r []bytes
+	for _, b := range vbytes {
 		if b == sepchar {
-			r = append(r, gostring(buf))
+			r = append(r, bytes(buf))
 			buf = nil
 		} else {
 			buf = append(buf, b)
 		}
 	}
-	r = append(r, gostring(buf))
+	r = append(r, bytes(buf))
 
 	return r
 }
 
 // Contains reports whether substr is within s.
-func Contains(s gostring, substr gostring) bool {
+func Contains(s bytes, substr bytes) bool {
 	return Index(s, substr) >= 0
 }
 
-func Index(s gostring, substr gostring) int {
+func Index(s bytes, substr bytes) int {
 	bytes := []byte(s)
 	bsub := []byte(substr)
 	var in bool
@@ -228,14 +228,14 @@ func Index(s gostring, substr gostring) int {
 	return -1
 }
 
-func HasSuffix(s gostring, suffix gostring) bool {
+func HasSuffix(s bytes, suffix bytes) bool {
 	if len(s) >= len(suffix) {
 		var low int =  len(s)-len(suffix)
 		var lensb int = len(s)
 		var suf []byte
 		sb := []byte(s)
 		suf = sb[low:lensb]  // lensb is required
-		return eq(gostring(suf) ,suffix)
+		return eq(bytes(suf) ,suffix)
 	}
 	return false
 }
@@ -276,7 +276,7 @@ func Itoa(i int) []byte {
 	return r
 }
 
-func Atoi(gs gostring) (int, error) {
+func Atoi(gs bytes) (int, error) {
 	if len(gs) == 0 {
 		return 0,nil
 	}

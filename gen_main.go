@@ -1,10 +1,10 @@
 package main
 
 // builtin string
-var builtinStringKey1 gostring = gostring("SfmtDumpInterface")
-var builtinStringValue1 gostring = gostring("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
-var builtinStringKey2 gostring = gostring("SfmtDumpSlice")
-var builtinStringValue2 gostring = gostring("# slice = {underlying:%p,len:%d,cap:%d}")
+var builtinStringKey1 bytes = bytes("SfmtDumpInterface")
+var builtinStringValue1 bytes = bytes("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
+var builtinStringKey2 bytes = bytes("SfmtDumpSlice")
+var builtinStringValue2 bytes = bytes("# slice = {underlying:%p,len:%d,cap:%d}")
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
@@ -28,8 +28,8 @@ func (program *Program) emitDynamicTypes() {
 	emit(S("# Dynamic Types"))
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitWithoutIndent(S(".%s:"), gostring(label))
-		emit(S(".string \"%s\""), gostring(gs))
+		emitWithoutIndent(S(".%s:"), bytes(label))
+		emit(S(".string \"%s\""), bytes(gs))
 	}
 }
 
@@ -56,7 +56,7 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	var shortMethodNames []gostring
+	var shortMethodNames []bytes
 
 	for i,v := range program.methodTable {
 		emitWithoutIndent(S("receiverType%d:"), i)
@@ -66,13 +66,13 @@ func (program *Program) emitMethodTable() {
 				panic(S("invalid method name"))
 			}
 			splitted := strings_Split(methodNameFull, S("$"))
-			var shortMethodName gostring = splitted[1]
-			emit(S(".quad .S.S.%s # key"), gostring(shortMethodName))
+			var shortMethodName bytes = splitted[1]
+			emit(S(".quad .S.S.%s # key"), bytes(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
 			emit(S(".data 1"))
 			emit(S("%s:"), label)
-			emit(S(".quad %s # func addr"), gostring(methodNameFull))
+			emit(S(".quad %s # func addr"), bytes(methodNameFull))
 			gasIndentLevel--
 			emit(S(".data 0"))
 			emit(S(".quad %s # func addr addr"), label)
@@ -88,14 +88,14 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent(S("# Short method names"))
 	for _, shortMethodName := range shortMethodNames {
 		emit(S(".data 0"))
-		emit(S(".S.S.%s:"), gostring(shortMethodName))
+		emit(S(".S.S.%s:"), bytes(shortMethodName))
 		gasIndentLevel++
 		emit(S(".data 1"))
-		emit(S(".S.%s:"), gostring(shortMethodName))
+		emit(S(".S.%s:"), bytes(shortMethodName))
 		emit(S(".quad 0")) // Any value is ok. This is not referred to.
 		gasIndentLevel--
 		emit(S(".data 0"))
-		emit(S(".quad .S.%s"), gostring(shortMethodName))
+		emit(S(".quad .S.%s"), bytes(shortMethodName))
 	}
 
 }
@@ -118,7 +118,7 @@ func (program *Program) emit() {
 	// emit packages
 	for _, pkg := range program.packages {
 		emitWithoutIndent(S("#--------------------------------------------------------"))
-		emitWithoutIndent(S("# package %s"), gostring(pkg.name))
+		emitWithoutIndent(S("# package %s"), bytes(pkg.name))
 		emitWithoutIndent(S("# string literals"))
 		emitWithoutIndent(S(".data 0"))
 		for _, ast := range pkg.stringLiterals {

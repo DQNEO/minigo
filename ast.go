@@ -18,7 +18,7 @@ type AstPackage struct {
 
 type AstFile struct {
 	tok               *Token
-	name              gostring
+	name              bytes
 	packageClause     *PackageClause
 	importDecls       []*ImportDecl
 	DeclList          []*TopLevelDecl
@@ -69,8 +69,8 @@ type ExprNumberLiteral struct {
 
 type ExprStringLiteral struct {
 	tok    *Token
-	val    gostring
-	slabel gostring
+	val    bytes
+	slabel bytes
 }
 
 // local or global variable
@@ -108,21 +108,21 @@ type ExprMethodcall struct {
 
 type ExprBinop struct {
 	tok   *Token
-	op    gostring
+	op    bytes
 	left  Expr
 	right Expr
 }
 
 type IrExprStringComparison struct {
-	tok *Token
-	op gostring
+	tok          *Token
+	op           bytes
 	cstringLeft  Expr
 	cstringRight Expr
 }
 
 type ExprUop struct {
 	tok     *Token
-	op      gostring
+	op      bytes
 	operand Expr
 }
 
@@ -186,9 +186,9 @@ const (
 )
 
 type LoopLabels struct {
-	labelBegin    gostring
-	labelEndBlock gostring
-	labelEndLoop  gostring
+	labelBegin    bytes
+	labelEndBlock bytes
+	labelEndLoop  bytes
 }
 
 type StmtFor struct {
@@ -214,7 +214,7 @@ type StmtReturn struct {
 	tok               *Token
 	exprs             []Expr
 	rettypes          []*Gtype
-	labelDeferHandler gostring
+	labelDeferHandler bytes
 }
 
 type StmtInc struct {
@@ -234,7 +234,7 @@ type PackageClause struct {
 
 type ImportSpec struct {
 	tok  *Token
-	path gostring
+	path bytes
 }
 
 type ImportDecl struct {
@@ -263,7 +263,7 @@ type DeclFunc struct {
 	body      *StmtSatementList
 	stmtDefer *StmtDefer
 	// every function has a defer handler
-	labelDeferHandler gostring
+	labelDeferHandler bytes
 	prologue          Emitter
 }
 
@@ -344,7 +344,7 @@ type StmtExpr struct {
 type StmtDefer struct {
 	tok   *Token
 	expr  Expr
-	label gostring // start of defer
+	label bytes // start of defer
 }
 
 // f( ,...slice)

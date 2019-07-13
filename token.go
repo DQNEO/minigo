@@ -5,32 +5,32 @@ import (
 )
 
 // https://golang.org/ref/spec#Keywords
-var keywords = []gostring{
-	gostring("break"),
-	gostring("default"),
-	gostring("func"),
-	gostring("interface"),
-	gostring("select"),
-	gostring("case"),
-	gostring("defer"),
-	gostring("go"),
-	gostring("map"),
-	gostring("struct"),
-	gostring("chan"),
-	gostring("else"),
-	gostring("goto"),
-	gostring("package"),
-	gostring("switch"),
-	gostring("const"),
-	gostring("fallthrough"),
-	gostring("if"),
-	gostring("range"),
-	gostring("type"),
-	gostring("continue"),
-	gostring("for"),
-	gostring("import"),
-	gostring("return"),
-	gostring("var"),
+var keywords = []bytes{
+	bytes("break"),
+	bytes("default"),
+	bytes("func"),
+	bytes("interface"),
+	bytes("select"),
+	bytes("case"),
+	bytes("defer"),
+	bytes("go"),
+	bytes("map"),
+	bytes("struct"),
+	bytes("chan"),
+	bytes("else"),
+	bytes("goto"),
+	bytes("package"),
+	bytes("switch"),
+	bytes("const"),
+	bytes("fallthrough"),
+	bytes("if"),
+	bytes("range"),
+	bytes("type"),
+	bytes("continue"),
+	bytes("for"),
+	bytes("import"),
+	bytes("return"),
+	bytes("var"),
 }
 
 type TokenType int
@@ -45,7 +45,7 @@ const (
 	T_KEYWORWD
 	)
 
-func typeToGostring (typ TokenType) gostring {
+func typeToGostring (typ TokenType) bytes {
 	switch typ {
 	case T_EOF:
 			return S("EOF")
@@ -68,8 +68,8 @@ func typeToGostring (typ TokenType) gostring {
 
 type Token struct {
 	typ      TokenType
-	sval     gostring
-	filename gostring
+	sval     bytes
+	filename bytes
 	line     int
 	column   int
 }
@@ -93,17 +93,17 @@ func (ts *TokenStream) isEnd() bool {
 	return ts.index > len(ts.tokens)-1
 }
 
-func (tok *Token) getSval() gostring {
+func (tok *Token) getSval() bytes {
 	if len(tok.sval) > 0 {
 		return tok.sval
 	}
 	return S("")
 }
 
-func (tok *Token) String() gostring {
+func (tok *Token) String() bytes {
 	sval := tok.getSval()
 	gs := Sprintf(S("(\"%s\" at %s:%d:%d)"),
-		sval, gostring(tok.filename), tok.line, tok.column)
+		sval, bytes(tok.filename), tok.line, tok.column)
 	return gs
 }
 
@@ -111,18 +111,18 @@ func (tok *Token) isEOF() bool {
 	return tok != nil && tok.typ == T_EOF
 }
 
-func (tok *Token) isPunct(s gostring) bool {
-	gs := gostring(s)
+func (tok *Token) isPunct(s bytes) bool {
+	gs := bytes(s)
 	return tok != nil && tok.typ == T_PUNCT && eq(tok.sval, gs)
 }
 
-func (tok *Token) isKeyword(s gostring) bool {
-	gs := gostring(s)
+func (tok *Token) isKeyword(s bytes) bool {
+	gs := bytes(s)
 	return tok != nil && tok.typ == T_KEYWORWD && eq(tok.sval,gs)
 }
 
-func (tok *Token) isIdent(s gostring) bool {
-	gs := gostring(s)
+func (tok *Token) isIdent(s bytes) bool {
+	gs := bytes(s)
 	return tok != nil && tok.typ == T_IDENT && eq(tok.sval,gs)
 }
 

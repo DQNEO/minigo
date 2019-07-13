@@ -7,10 +7,10 @@ all: minigo /tmp/tmpfs
 /tmp/tmpfs:
 	mkdir -p /tmp/tmpfs
 
-internal_runtime.go: internal/runtime/*.go
+internal_runtime.go: internal/runtime/*.go cp-internalcode.sh
 	./cp-internalcode.sh
 
-internal_universe.go: internal/universe/*.go
+internal_universe.go: internal/universe/*.go cp-internalcode.sh
 	./cp-internalcode.sh
 
 stdlib.go: stdlib/*/*.go  concate-stdlib.sh

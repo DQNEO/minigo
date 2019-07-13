@@ -1,7 +1,7 @@
 package main
 
 
-var message gostring = gostring("hello")
+var message bytes = bytes("hello")
 
 func f1() {
 	fmtPrintf(S("%s\n"), message)
@@ -20,7 +20,7 @@ func f2() {
 	fmtPrintf(S("\n"))
 }
 
-var gfoo gostring = gostring("foo")
+var gfoo bytes = bytes("foo")
 
 func f3() {
 	foo := S("foo")
@@ -52,7 +52,7 @@ func f4() {
 	}
 }
 
-type mystring gostring
+type mystring bytes
 
 func f5() {
 	s := S("8")
@@ -80,7 +80,7 @@ func f8() {
 }
 
 func f9() {
-	var s2 gostring
+	var s2 bytes
 	fmtPrintf(S("%s"), s2)
 	if eq(s2, S("")) {
 		fmtPrintf(S("13\n"))

@@ -68,7 +68,7 @@ func (stmt *StmtSwitch) emit() {
 
 	emit(S("# switch statement"))
 	labelEnd := makeLabel()
-	var labels []gostring
+	var labels []bytes
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
@@ -151,7 +151,7 @@ func (stmt *StmtSwitch) emit() {
 		}
 	}
 
-	var defaultLabel gostring
+	var defaultLabel bytes
 	if stmt.dflt == nil {
 		emit(S("jmp %s"), labelEnd)
 	} else {
@@ -287,7 +287,7 @@ func (f *StmtFor) convert() Stmt {
 		}
 		// i < len(list)
 		var cond = &ExprBinop{
-			op:   gostring("<"),
+			op:   bytes("<"),
 			left: f.rng.indexvar, // i
 			// @TODO
 			// The range expression x is evaluated once before beginning the loop
@@ -314,12 +314,12 @@ func (f *StmtFor) convert() Stmt {
 
 		// break if i == len(list) - 1
 		var cond2 = &ExprBinop{
-			op:   gostring("=="),
+			op:   bytes("=="),
 			left: f.rng.indexvar, // i
 			// @TODO2
 			// The range expression x is evaluated once before beginning the loop
 			right: &ExprBinop{
-				op: gostring("-"),
+				op: bytes("-"),
 				left: &ExprLen{
 					arg: f.rng.rangeexpr, // len(expr)
 				},

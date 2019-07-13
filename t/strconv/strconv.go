@@ -2,7 +2,7 @@ package main
 
 
 func f1() {
-	var a gostring = S("10485760")
+	var a bytes = S("10485760")
 	var i int
 	var e error
 	i, e = Atoi(a)

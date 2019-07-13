@@ -15,7 +15,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit(S("LOAD_8_FROM_GLOBAL %s, %d+%d"), gostring(variable.varname), field.offset, offset)
+				emit(S("LOAD_8_FROM_GLOBAL %s, %d+%d"), bytes(variable.varname), field.offset, offset)
 			} else {
 				emit(S("LOAD_8_FROM_LOCAL %d+%d+%d"), variable.offset, field.offset, offset)
 			}
@@ -83,16 +83,16 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 }
 
 func (ast *ExprVariable) emit() {
-	emit(S("# load variable \"%s\" %s"), gostring(ast.varname), ast.getGtype().String())
+	emit(S("# load variable \"%s\" %s"), bytes(ast.varname), ast.getGtype().String())
 	if ast.isGlobal {
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.getGtype().is24WidthType() {
-			emit(S("LOAD_24_FROM_GLOBAL %s"), gostring(ast.varname))
+			emit(S("LOAD_24_FROM_GLOBAL %s"), bytes(ast.varname))
 		} else if ast.getGtype().getSize() == 1 {
-			emit(S("LOAD_1_FROM_GLOBAL_CAST %s"), gostring(ast.varname))
+			emit(S("LOAD_1_FROM_GLOBAL_CAST %s"), bytes(ast.varname))
 		} else {
-			emit(S("LOAD_8_FROM_GLOBAL %s"), gostring(ast.varname))
+			emit(S("LOAD_8_FROM_GLOBAL %s"), bytes(ast.varname))
 		}
 
 	} else {
@@ -113,7 +113,7 @@ func (ast *ExprVariable) emit() {
 
 func (variable *ExprVariable) emitAddress(offset int) {
 	if variable.isGlobal {
-		emit(S("LOAD_GLOBAL_ADDR %s, %d"), gostring(variable.varname), offset)
+		emit(S("LOAD_GLOBAL_ADDR %s, %d"), bytes(variable.varname), offset)
 	} else {
 		if variable.offset == 0 {
 			errorft(variable.token(), S("offset should not be zero for localvar %s"), variable.varname)
@@ -128,9 +128,9 @@ func (rel *Relation) emit() {
 }
 
 func (ast *ExprConstVariable) emit() {
-	emit(S("# *ExprConstVariable.emit() name=%s iotaindex=%d"), gostring(ast.name), ast.iotaIndex)
+	emit(S("# *ExprConstVariable.emit() name=%s iotaindex=%d"), bytes(ast.name), ast.iotaIndex)
 	assert(ast.iotaIndex < 10000, ast.token(), S("iotaindex is too large"))
-	assert(ast.val != nil, ast.token(), S("const.val for should not be nil:%s"), gostring(ast.name))
+	assert(ast.val != nil, ast.token(), S("const.val for should not be nil:%s"), bytes(ast.name))
 	if ast.hasIotaValue() {
 		emit(S("# const is iota"))
 		val := &ExprNumberLiteral{
@@ -187,7 +187,7 @@ func (ast *ExprUop) emit() {
 		// -(x) -> (-1) * (x)
 		left := &ExprNumberLiteral{val: -1}
 		binop := &ExprBinop{
-			op:    gostring("*"),
+			op:    bytes("*"),
 			left:  left,
 			right: ast.operand,
 		}
@@ -202,7 +202,7 @@ func (ast *ExprUop) emit() {
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	assert(0 <= size && size <= 8, variable.token(), S("invalid size"))
 	if variable.isGlobal {
-		emit(S("LOAD_%d_FROM_GLOBAL %s %d"), size, gostring(variable.varname), offset)
+		emit(S("LOAD_%d_FROM_GLOBAL %s %d"), size, bytes(variable.varname), offset)
 	} else {
 		emit(S("LOAD_%d_FROM_LOCAL %d+%d"), size, variable.offset, offset)
 	}
@@ -386,7 +386,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcLen := &ExprBinop{
-		op:    gostring("-"),
+		op:    bytes("-"),
 		left:  e.high,
 		right: e.low,
 	}
@@ -404,7 +404,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcCap := &ExprBinop{
-		op:    gostring("-"),
+		op:    bytes("-"),
 		left:  max,
 		right: e.low,
 	}

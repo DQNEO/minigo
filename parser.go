@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-var __func__ gostring = gostring("__func__")
+var __func__ bytes = bytes("__func__")
 
 type parser struct {
 	// per function or block
@@ -42,7 +42,7 @@ func (p *parser) clearLocalState() {
 
 type methods map[identifier]*ExprFuncRef
 
-func (p *parser) assert(cond bool, msg gostring) {
+func (p *parser) assert(cond bool, msg bytes) {
 	assert(cond, p.lastToken(), msg)
 }
 
@@ -90,7 +90,7 @@ func (p *parser) expectIdent() goidentifier {
 	return tok.getIdent()
 }
 
-func (p *parser) expectKeyword(name gostring) *Token {
+func (p *parser) expectKeyword(name bytes) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
 		errorft(tok, S("Keyword %s expected but got %s"), name, tok)
@@ -98,7 +98,7 @@ func (p *parser) expectKeyword(name gostring) *Token {
 	return tok
 }
 
-func (p *parser) expect(punct gostring) *Token {
+func (p *parser) expect(punct bytes) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
 		errorft(tok, S("punct '%s' expected but got '%s'"), punct, tok)
@@ -106,17 +106,17 @@ func (p *parser) expect(punct gostring) *Token {
 	return tok
 }
 
-func getCallerName(n int) gostring {
+func getCallerName(n int) bytes {
 	pc, _, _, ok := runtime.Caller(n)
 	if !ok {
 		errorf(S("Unable to get caller"))
 	}
 	details := runtime.FuncForPC(pc)
 	//r := (strings.Split(details.Name(), S(".")))[2]
-	return gostring(details.Name())
+	return bytes(details.Name())
 }
 
-func (p *parser) traceIn(funcname gostring) int {
+func (p *parser) traceIn(funcname bytes) int {
 	if !debugParser {
 		return 0
 	}
@@ -128,7 +128,7 @@ func (p *parser) traceIn(funcname gostring) int {
 	return 0
 }
 
-func (p *parser) traceOut(funcname gostring) {
+func (p *parser) traceOut(funcname bytes) {
 	if !debugParser {
 		return
 	}
@@ -182,7 +182,7 @@ func (p *parser) readFuncallArgs() []Expr {
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
 	// avoid emitting '(null')
 	if len(ast.val) == 0 {
-		ast.val = gostring("")
+		ast.val = bytes("")
 	}
 	p.stringLiterals = append(p.stringLiterals, ast)
 }
@@ -209,9 +209,9 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		name: firstIdent,
 		pkg:  p.packageName, // @TODO is this right?
 	}
-	if eq(gostring(rel.name), S("__func__")) {
+	if eq(bytes(rel.name), S("__func__")) {
 		sliteral := &ExprStringLiteral{
-			val: gostring(p.currentFunc.fname),
+			val: bytes(p.currentFunc.fname),
 		}
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)
@@ -690,7 +690,7 @@ func (p *parser) parseUnaryExpr() Expr {
 	return p.parsePrim()
 }
 
-func priority(op gostring) int {
+func priority(op bytes) int {
 	switch switchexpr(op) {
 	case "&&", "||":
 		return 5
@@ -714,23 +714,23 @@ func (p *parser) parseExpr() Expr {
 	return p.parseExprInt(-1)
 }
 
-var binops = []gostring{
-	gostring("+"),
-	gostring("*"),
-	gostring("-"),
-	gostring("=="),
-	gostring("!="),
-	gostring("<"),
-	gostring(">"),
-	gostring("<="),
-	gostring(">="),
-	gostring("&&"),
-	gostring("||"),
-	gostring("/"),
-	gostring("%"),
+var binops = []bytes{
+	bytes("+"),
+	bytes("*"),
+	bytes("-"),
+	bytes("=="),
+	bytes("!="),
+	bytes("<"),
+	bytes(">"),
+	bytes("<="),
+	bytes(">="),
+	bytes("&&"),
+	bytes("||"),
+	bytes("/"),
+	bytes("%"),
 }
 
-var gobinops []gostring
+var gobinops []bytes
 
 func (p *parser) parseExprInt(prior int) Expr {
 	p.traceIn(__func__)
@@ -1002,7 +1002,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 	return r
 }
 
-func (p *parser) enterNewScope(name gostring) {
+func (p *parser) enterNewScope(name bytes) {
 	p.currentScope = newScope(p.currentScope, name)
 }
 
@@ -1250,12 +1250,12 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	}
 }
 
-func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAssignment {
+func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssignment {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.lastToken()
 
-	var op gostring
+	var op bytes
 	switch switchexpr(assignop) {
 	case "+=":
 		op = S("+")
@@ -1270,7 +1270,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop gostring) *StmtAss
 	p.assert(len(rights) == 1, S("num of rights is 1"))
 	binop := &ExprBinop{
 		tok:   ptok,
-		op:    gostring(op),
+		op:    bytes(op),
 		left:  left,
 		right: rights[0],
 	}
@@ -1822,7 +1822,7 @@ func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 
 	if len(pkg) == 0 {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
-		if relbody == nil && !eq(gostring(rel.name) ,S("_")) {
+		if relbody == nil && !eq(bytes(rel.name) ,S("_")) {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {
@@ -1917,12 +1917,12 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
-func (p *parser) ParseString(filename gostring, code gostring, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseString(filename bytes, code bytes, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
 	return p.Parse(bs, packageBlockScope, importOnly)
 }
 
-func (p *parser) ParseFile(filename gostring, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseFile(filename bytes, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromFile(filename)
 	return p.Parse(bs, packageBlockScope, importOnly)
 }
@@ -1998,8 +1998,8 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPackage {
-	pkgScope := newScope(nil, gostring(pkgname))
+func ParseFiles(pkgname goidentifier, sources []bytes, onMemory bool) *AstPackage {
+	pkgScope := newScope(nil, bytes(pkgname))
 
 	var astFiles []*AstFile
 
@@ -2016,7 +2016,7 @@ func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPac
 			packageName: goidentifier(pkgname),
 		}
 		if onMemory {
-			var filename gostring = concat(gostring(pkgname),  S(".memory"))
+			var filename bytes = concat(bytes(pkgname),  S(".memory"))
 			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
 			astFile = p.ParseFile(source, pkgScope, false)

@@ -26,7 +26,7 @@ func (e *ExprLen) emit() {
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			uop := &ExprBinop{
-				op:    gostring("-"),
+				op:    bytes("-"),
 				left:  sliceExpr.high,
 				right: sliceExpr.low,
 			}
@@ -59,7 +59,7 @@ func (e *ExprLen) emit() {
 
 type IrLowLevelCall struct {
 	token         *Token
-	symbol        gostring
+	symbol        bytes
 	argsFromStack int // args are taken from the stack
 }
 
@@ -68,7 +68,7 @@ func (e *IrLowLevelCall) emit() {
 	for i=e.argsFromStack - 1;i>=0;i-- {
 		emit(S("POP_TO_ARG_%d"), i)
 	}
-	emit(S("FUNCALL %s"), gostring(e.symbol))
+	emit(S("FUNCALL %s"), bytes(e.symbol))
 }
 
 
@@ -93,7 +93,7 @@ func (e *ExprCap) emit() {
 			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
-					op:  gostring("-"),
+					op:  bytes("-"),
 					left: &ExprLen{
 						tok: e.tok,
 						arg: sliceExpr.collection,
@@ -116,7 +116,7 @@ func (e *ExprCap) emit() {
 
 func emitMakeSliceFunc() {
 	// makeSlice
-	emitWithoutIndent(S("%s:"), gostring("iruntime.makeSlice"))
+	emitWithoutIndent(S("%s:"), bytes("iruntime.makeSlice"))
 	emit(S("FUNC_PROLOGUE"))
 	emitNewline()
 

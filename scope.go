@@ -2,7 +2,7 @@ package main
 
 type Scope struct {
 	idents map[identifier]*IdentBody
-	name   gostring
+	name   bytes
 	outer  *Scope
 }
 
@@ -68,7 +68,7 @@ func (sc *Scope) getGtype(name goidentifier) *Gtype {
 	return elm.gtype
 }
 
-func newScope(outer *Scope, name gostring) *Scope {
+func newScope(outer *Scope, name bytes) *Scope {
 	return &Scope{
 		outer:  outer,
 		name:   name,

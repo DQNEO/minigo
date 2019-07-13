@@ -13,7 +13,7 @@ func (funcall *ExprFuncallOrConversion) getRettypes() []*Gtype {
 	return funcall.getFuncDef().rettypes
 }
 
-func (ast *ExprMethodcall) getUniqueName() gostring {
+func (ast *ExprMethodcall) getUniqueName() bytes {
 	gtype := ast.receiver.getGtype()
 	return getMethodUniqueName(gtype, ast.fname)
 }
@@ -86,7 +86,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
 		tok:          methodCall.token(),
-		symbol:       getFuncSymbol(gostring(pkgname), name),
+		symbol:       getFuncSymbol(bytes(pkgname), name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:         args,
@@ -149,7 +149,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrStaticCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(gostring(decl.pkg), gostring(funcall.fname)),
+			symbol:   getFuncSymbol(bytes(decl.pkg), bytes(funcall.fname)),
 			callee:   decl,
 			args:     funcall.args,
 			origExpr: funcall,
@@ -167,7 +167,7 @@ type IrStaticCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	tok          *Token
-	symbol       gostring
+	symbol       bytes
 	callee       *DeclFunc
 	isMethodCall bool
 	args         []Expr

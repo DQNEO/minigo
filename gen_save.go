@@ -61,7 +61,7 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
 	emit(S("# *ExprUop.emitSavePrimitive()"))
-	assert(eq(uop.op , gostring("*")), uop.tok, S("uop op should be *"))
+	assert(eq(uop.op , bytes("*")), uop.tok, S("uop op should be *"))
 	emit(S("PUSH_8 # what"))
 	uop.operand.emit()
 	emit(S("PUSH_8 # where"))
@@ -77,13 +77,13 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 		variable.emit()
 		emit(S("ADD_NUMBER %d"), offset)
 		emit(S("PUSH_8 # where"))
-		emit(S("STORE_8_INDIRECT_FROM_STACK # %s"), gostring(variable.varname))
+		emit(S("STORE_8_INDIRECT_FROM_STACK # %s"), bytes(variable.varname))
 		return
 	}
 	if variable.isGlobal {
-		emit(S("STORE_%d_TO_GLOBAL %s %d # %s "), size, gostring(variable.varname), offset, gostring(variable.varname))
+		emit(S("STORE_%d_TO_GLOBAL %s %d # %s "), size, bytes(variable.varname), offset, bytes(variable.varname))
 	} else {
-		emit(S("STORE_%d_TO_LOCAL %d+%d # %s"), size, variable.offset, offset, gostring(variable.varname))
+		emit(S("STORE_%d_TO_LOCAL %d+%d # %s"), size, variable.offset, offset, bytes(variable.varname))
 	}
 }
 
@@ -161,7 +161,7 @@ func emitSave24(lhs Expr, offset int) {
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
 		fieldOffset := fieldType.offset
-		emit(S("# fieldOffset=%d (%s)"), fieldOffset, gostring(fieldType.fieldname))
+		emit(S("# fieldOffset=%d (%s)"), fieldOffset, bytes(fieldType.fieldname))
 		emitSave24(structfield.strct, fieldOffset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)

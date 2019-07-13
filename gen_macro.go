@@ -9,7 +9,7 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	var i int
-	var regi gostring
+	var regi bytes
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf(S("POP_TO_ARG_%d"), i)
 		macroStart(macroName, S(""))
@@ -271,7 +271,7 @@ func emitMacroDefinitions() {
 	macroEnd()
 }
 
-func macroStart(name gostring, args gostring) {
+func macroStart(name bytes, args bytes) {
 	emitWithoutIndent(S(".macro %s %s"), name, args)
 }
 

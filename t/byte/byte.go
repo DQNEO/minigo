@@ -11,7 +11,7 @@ func ghello() {
 	fmtPrintf(S("%c"), hello[4])
 	fmtPrintf(S("%s"), S("\n"))
 
-	s := gostring(hello[:])
+	s := bytes(hello[:])
 	fmtPrintf(S("%s\n"), s)
 
 }
@@ -26,7 +26,7 @@ func lworld() {
 	fmtPrintf(S("%s"), S("\n"))
 
 	b := world[:]
-	fmtPrintf(S("%s\n"), gostring(b))
+	fmtPrintf(S("%s\n"), bytes(b))
 }
 
 func fappend() {
