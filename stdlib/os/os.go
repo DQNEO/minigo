@@ -24,6 +24,8 @@ func (f *File) Write(b []byte) (int, error) {
 func Exit(i int) {
 }
 
+var Args []string
+
 func init() {
 
 	// runtime_args is written in assembly code

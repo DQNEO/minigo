@@ -2,7 +2,6 @@ package iruntime
 
 var runtimeArgc int
 var runtimeArgv *int
-var Args []string //  Do not remove this. Actually this is real os.Args.
 
 var heap [640485760]byte
 var heapTail *int
