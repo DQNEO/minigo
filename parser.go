@@ -197,7 +197,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg goidentifier // ignored for now
-	if _, ok := p.importedNames[toKey(firstIdent)]; ok {
+	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
 		pkg = firstIdent
 		p.expect(S("."))
 		// shift firstident
@@ -1653,10 +1653,10 @@ func (p *parser) parseFuncDef() *DeclFunc {
 		var pmethods methods
 		var ok bool
 		typeName := typeToBelong.relation.name
-		pmethods, ok = p.methods[toKey(typeName)]
+		pmethods, ok = p.methods[identifier(typeName)]
 		if !ok {
 			pmethods = map[identifier]*ExprFuncRef{}
-			p.methods[toKey(typeName)] = pmethods
+			p.methods[identifier(typeName)] = pmethods
 		}
 
 		methodSet(pmethods, fname, ref)
@@ -1827,7 +1827,7 @@ func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 		}
 	} else {
 		// foreign package
-		relbody := symbolTable.allScopes[toKey(pkg)].get(rel.name)
+		relbody := symbolTable.allScopes[identifier(pkg)].get(rel.name)
 		if relbody == nil {
 			errorft(rel.token(), S("name %s is not found in %s package"), rel.name, pkg)
 		}
@@ -1954,7 +1954,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			pkgName := getBaseNameFromImport(spec.path)
-			p.importedNames[toKey(goidentifier(pkgName))] = true
+			p.importedNames[identifier(goidentifier(pkgName))] = true
 		}
 	}
 
@@ -2042,12 +2042,12 @@ func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPac
 			gtypeName := goidentifier(typeName)
 			for mname, ref := range _methods {
 				gmname := goidentifier(mname)
-				almthds, ok := allmethods[toKey(gtypeName)]
+				almthds, ok := allmethods[identifier(gtypeName)]
 				if !ok {
 					almthds = map[identifier]*ExprFuncRef{}
-					allmethods[toKey(gtypeName)] = almthds
+					allmethods[identifier(gtypeName)] = almthds
 				}
-				almthds[toKey(gmname)] = ref
+				almthds[identifier(gmname)] = ref
 			}
 		}
 	}

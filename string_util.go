@@ -9,10 +9,6 @@ type switchexpr string
 type osarg string
 
 type identifier string
-func toKey(gid goidentifier) identifier {
-	return identifier(gid)
-}
-
 
 type goidentifier gostring
 
