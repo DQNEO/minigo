@@ -30,7 +30,8 @@ func runtime_args() []string {
 	var r []string
 	for _, a := range libcArgs {
 		// we can regard *byte as string
-		r = append(r, a)
+		var s string = string(a)
+		r = append(r, s)
 	}
 	return r
 }
