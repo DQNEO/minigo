@@ -104,8 +104,8 @@ func mapOkRegister(is24Width bool) gostring {
 // get map from stack
 // r10: map header address")
 // r11: map len")
-// r12: specified index value")
-// r13: loop counter")
+// r12: loop counter")
+// r13: specified index value")
 func emitMapGet(mapType *Gtype) {
 
 	mapType = mapType.Underlying()
@@ -118,15 +118,15 @@ func emitMapGet(mapType *Gtype) {
 
 	emit(S("# emitMapGet"))
 
-	emit(S("pop %%r12")) // index value
+	emit(S("pop %%r13")) // index value
 	emit(S("pop %%r11")) // len
 	emit(S("pop %%r10")) // head addr
 
-	emit(S("mov $0, %%r13 # init loop counter")) // i = 0
+	emit(S("mov $0, %%r12 # init loop counter")) // i = 0
 
 	emit(S("%s: # begin loop "), labelBegin)
 
-	emit(S("push %%r13 # loop counter"))
+	emit(S("push %%r12 # loop counter"))
 	emit(S("push %%r11 # map len"))
 	emit(S("CMP_FROM_STACK setl"))
 	emit(S("TEST_IT"))
@@ -142,7 +142,7 @@ func emitMapGet(mapType *Gtype) {
 	emit(S("je %s  # Exit. NOT FOUND IN ALL KEYS."), labelEnd)
 
 	emit(S("# check if key matches"))
-	emit(S("mov %%r13, %%rax")) // i
+	emit(S("mov %%r12, %%rax")) // i
 	emit(S("IMUL_NUMBER 16"))   // i * 16
 	emit(S("PUSH_8"))
 
@@ -157,14 +157,14 @@ func emitMapGet(mapType *Gtype) {
 	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
 	if mapKeyType.isClikeString() {
-		emit(S("push %%r13"))
+		emit(S("push %%r12"))
 		emit(S("push %%r11"))
 		emit(S("push %%r10"))
 
 		emit(S("LOAD_24_BY_DEREF")) // dereference
 		emit(S("PUSH_SLICE"))
 
-		emit(S("push %%r12"))
+		emit(S("push %%r13"))
 		emitConvertCstringFromStackToSlice()
 		emit(S("PUSH_SLICE"))
 
@@ -172,11 +172,11 @@ func emitMapGet(mapType *Gtype) {
 
 		emit(S("pop %%r10"))
 		emit(S("pop %%r11"))
-		emit(S("pop %%r13"))
+		emit(S("pop %%r12"))
 	} else {
 		emit(S("LOAD_8_BY_DEREF")) // dereference
 		// primitive comparison
-		emit(S("cmp %%r12, %%rax # compare specifiedvalue vs indexvalue"))
+		emit(S("cmp %%r13, %%rax # compare specifiedvalue vs indexvalue"))
 		emit(S("sete %%al"))
 		emit(S("movzb %%al, %%eax"))
 	}
@@ -196,11 +196,11 @@ func emitMapGet(mapType *Gtype) {
 	}
 
 	emit(S("mov $1, %%%s # ok = true"), okRegister)
-	emit(S("pop %%r12 # key address. will be in map set"))
+	emit(S("pop %%r13 # key address. will be in map set"))
 	emit(S("jmp %s # exit loop"), labelEnd)
 
 	emit(S("%s: # incr"), labelIncr)
-	emit(S("add $1, %%r13")) // i++
+	emit(S("add $1, %%r12")) // i++
 	emit(S("jmp %s"), labelBegin)
 
 	emit(S("%s: # end loop"), labelEnd)
@@ -252,7 +252,7 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit(S("je %s  # jump to append if not found"), labelAppend)
 
 	// update
-	emit(S("push %%r12")) // push address of the key
+	emit(S("push %%r13")) // push address of the key
 	emit(S("jmp %s"), labelSave)
 
 	// append
