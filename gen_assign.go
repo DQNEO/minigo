@@ -355,10 +355,8 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
 		fromExpr := unwrapRel(conversion.arg)
-		if fromExpr.getGtype().getKind() == G_SLICE {
+		if fromExpr.getGtype().getKind() == G_SLICE || fromExpr.getGtype().getKind() == G_CLIKE_STRING  {
 			// emit as it is
-			fromExpr.emit()
-		} else if fromExpr.getGtype().getKind() == G_CLIKE_STRING {
 			fromExpr.emit()
 		} else if fromExpr.getGtype().getKind() == G_POINTER {
 			// This is required to convert libcArgs to os.Args
