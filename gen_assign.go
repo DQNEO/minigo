@@ -366,6 +366,20 @@ func assignToSlice(lhs Expr, rhs Expr) {
 			emit(S("PUSH_8 # len"))
 			emit(S("PUSH_8 # cap"))
 			emit(S("POP_SLICE"))
+		} else if fromExpr.getGtype().getKind() == G_POINTER {
+			fromExpr.emit()
+			emit(S("PUSH_8 # string addr"))
+
+			emit(S("PUSH_8"))
+			eStrLen := &IrLowLevelCall{
+				symbol:        S("strlen"),
+				argsFromStack: 1,
+			}
+			eStrLen.emit()
+			emit(S("mov %%rax, %%rbx # len"))
+			emit(S("mov %%rax, %%rcx # cap"))
+			emit(S("POP_8 # string addr"))
+
 		} else {
 			assertNotReached(lhs.token())
 		}
