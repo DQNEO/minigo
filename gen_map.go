@@ -112,16 +112,15 @@ func emitMapGet(mapType *Gtype) {
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
 	is24Width := mapValueType.is24WidthType()
-
-	emit(S("# emitMapGet"))
-
-	emit(S("pop %%r12"))
-	emit(S("pop %%r11"))
-	emit(S("pop %%r10"))
-
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 	labelIncr := makeLabel()
+
+	emit(S("# emitMapGet"))
+
+	emit(S("pop %%r12")) // index value
+	emit(S("pop %%r11")) // len
+	emit(S("pop %%r10")) // head addr
 
 	emit(S("mov $0, %%r13 # init loop counter")) // i = 0
 
