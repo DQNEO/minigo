@@ -163,7 +163,7 @@ func (ast *StmtAssignment) emit() {
 func emitAssignPrimitive(lhs Expr, rhs Expr) {
 	if rhs == nil {
 		if lhs.getGtype().isClikeString() {
-			rhs = &eEmptyString
+			assertNotReached(lhs.token())
 		} else {
 			// assign zero value
 			rhs = &ExprNumberLiteral{}
