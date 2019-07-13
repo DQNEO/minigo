@@ -415,7 +415,7 @@ func (em *IrStmtRangeMap) emit() {
 	} else {
 		emit(S("LOAD_8_BY_DEREF"))
 	}
-	emitSavePrimitive(em.indexvar)
+	emitSave24(em.indexvar,0)
 
 	if em.valuevar != nil {
 		emit(S("# Setting valuevar"))
