@@ -103,6 +103,7 @@ func (program *Program) emitMethodTable() {
 // generate code
 func (program *Program) emit() {
 
+	emit(S("# lea \\varname+\\offset(%%rip), %%rax"))
 	emitMacroDefinitions()
 
 	emit(S(".data 0"))
