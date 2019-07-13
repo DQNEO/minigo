@@ -137,7 +137,7 @@ func emitAssignOne(lhs Expr, rhs Expr) {
 		rhs.emit()
 	case gtype.getKind() == G_ARRAY:
 		assignToArray(lhs, rhs)
-	case gtype.getKind() == G_SLICE || gtype.getKind() == G_CLIKE_STRING:
+	case gtype.getKind() == G_SLICE || gtype.getKind() == G_STRING:
 		assignToSlice(lhs, rhs)
 	case gtype.getKind() == G_STRUCT:
 		assignToStruct(lhs, rhs)
@@ -162,7 +162,7 @@ func (ast *StmtAssignment) emit() {
 
 func emitAssignPrimitive(lhs Expr, rhs Expr) {
 	if rhs == nil {
-		if lhs.getGtype().isClikeString() {
+		if lhs.getGtype().isString() {
 			assertNotReached(lhs.token())
 		} else {
 			// assign zero value
@@ -355,7 +355,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		// see also https://blog.golang.org/strings
 		conversion := rhs.(*IrExprConversion)
 		fromExpr := unwrapRel(conversion.arg)
-		if fromExpr.getGtype().getKind() == G_SLICE || fromExpr.getGtype().getKind() == G_CLIKE_STRING  {
+		if fromExpr.getGtype().getKind() == G_SLICE || fromExpr.getGtype().getKind() == G_STRING {
 			// emit as it is
 			fromExpr.emit()
 		} else if fromExpr.getGtype().getKind() == G_POINTER {

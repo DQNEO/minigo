@@ -17,7 +17,7 @@ const (
 	G_STRUCT_FIELD
 	G_ARRAY
 	G_SLICE
-	G_CLIKE_STRING
+	G_STRING
 	G_MAP
 	G_POINTER
 	G_FUNC
@@ -106,7 +106,7 @@ func (gtype *Gtype) isArrayLike() bool {
 
 func (gtype *Gtype) is24WidthType() bool {
 	switch gtype.getKind() {
-	case G_INTERFACE, G_SLICE, G_CLIKE_STRING:
+	case G_INTERFACE, G_SLICE, G_STRING:
 		return true
 	default:
 		return false
@@ -121,8 +121,8 @@ func (gtype *Gtype) isBytesSlice() bool {
 	return false
 }
 
-func (gtype *Gtype) isClikeString() bool {
-	return gtype.getKind() == G_CLIKE_STRING
+func (gtype *Gtype) isString() bool {
+	return gtype.getKind() == G_STRING
 }
 
 func (gtype *Gtype) getSize() int {
@@ -152,7 +152,7 @@ func (gtype *Gtype) getSize() int {
 			return ptrSize + IntSize + IntSize
 		case G_MAP:
 			return ptrSize
-		case G_CLIKE_STRING:
+		case G_STRING:
 			return ptrSize * 3
 		default:
 			return gtype.size
@@ -181,7 +181,7 @@ func (gtype *Gtype) String() gostring {
 				return S("bool")
 			case G_BYTE:
 				return S("byte")
-			case G_CLIKE_STRING:
+			case G_STRING:
 				return S("clikestring")
 			case G_FUNC:
 				return S("func")
@@ -217,7 +217,7 @@ func (gtype *Gtype) String() gostring {
 	case G_SLICE:
 		gs = Sprintf(S("[]%s"), gtype.elementType.String())
 		return gs
-	case G_CLIKE_STRING:
+	case G_STRING:
 		return S("clikestring")
 	case G_FUNC:
 		return S("func")
