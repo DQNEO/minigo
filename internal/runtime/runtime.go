@@ -12,6 +12,16 @@ func init() {
 	heapTail = heap
 }
 
+func runtime_args() []string {
+	var r []string
+	for _, a := range libcArgs {
+		// Convert *byte to string
+		var s string = string(a)
+		r = append(r, s)
+	}
+	return r
+}
+
 func malloc(size int) *int {
 	if heapTail+ size > len(heap) + heap  {
 		panic([]byte("malloc exceeds heap capacity"))
