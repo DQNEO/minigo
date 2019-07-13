@@ -12,11 +12,28 @@ func init() {
 	heapTail = heap
 }
 
+func cstring2string(b *byte) string {
+	var bytes []byte
+	if b == nil {
+		return string(bytes)
+	}
+
+	var i int
+	for {
+		if b == nil || *b == 0 {
+			break
+		}
+		bytes = append(bytes, *b)
+		b++
+	}
+	return string(bytes)
+}
+
 func runtime_args() []string {
 	var r []string
 	for _, a := range libcArgs {
 		// Convert *byte to string
-		var s string = string(a)
+		var s string = cstring2string(a)
 		r = append(r, s)
 	}
 	return r

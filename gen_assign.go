@@ -358,15 +358,6 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		if fromExpr.getGtype().getKind() == G_SLICE || fromExpr.getGtype().getKind() == G_STRING {
 			// emit as it is
 			fromExpr.emit()
-		} else if fromExpr.getGtype().getKind() == G_POINTER {
-			// This is required to convert libcArgs to os.Args
-			fromExpr.emit()
-			emit(S("PUSH_8 # string addr"))
-			emitStrlen(fromExpr)
-			emit(S("mov %%rax, %%rbx # len"))
-			emit(S("mov %%rax, %%rcx # cap"))
-			emit(S("POP_8 # string addr"))
-
 		} else {
 			assertNotReached(lhs.token())
 		}

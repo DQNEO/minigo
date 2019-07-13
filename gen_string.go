@@ -123,13 +123,3 @@ func emitGoStringsEqualFromStack() {
 	}
 	call.emit()
 }
-
-func emitStrlen(arg Expr) {
-	arg.emit()
-	emit(S("PUSH_8"))
-	eStrLen := &IrLowLevelCall{
-		symbol:        S("strlen"),
-		argsFromStack: 1,
-	}
-	eStrLen.emit()
-}
