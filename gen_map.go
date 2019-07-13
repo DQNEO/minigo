@@ -50,6 +50,26 @@ func (call *IrInterfaceMethodCall) emit() {
 	call.emitMethodCall()
 }
 
+func emitLoadMapKey(eMapKey Expr) {
+	var isKeyString bool = eMapKey.getGtype().isClikeString()
+	if isKeyString {
+		var arg0 Expr
+		switch eMapKey.(type) {
+		case *ExprFuncallOrConversion:
+			funcallOrConversion := eMapKey.(*ExprFuncallOrConversion)
+			arg0 = funcallOrConversion.args[0]
+		case *IrExprConversion:
+			conversion := eMapKey.(*IrExprConversion)
+			arg0 = conversion.arg
+		default:
+			assertNotReached(eMapKey.token())
+		}
+		arg0.emit()
+	} else {
+		eMapKey.emit()
+	}
+}
+
 // emit map index expr
 func loadMapIndexExpr(e *ExprIndex) {
 	// e.g. x[key]
@@ -76,24 +96,13 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit(S("PUSH_8 # len"))
 	var isKeyString bool = e.index.getGtype().isClikeString()
 	if isKeyString {
-		var arg0 Expr
-		switch e.index.(type) {
-		case *ExprFuncallOrConversion:
-			funcallOrConversion := e.index.(*ExprFuncallOrConversion)
-			arg0 = funcallOrConversion.args[0]
-		case *IrExprConversion:
-			conversion := e.index.(*IrExprConversion)
-			arg0 = conversion.arg
-		default:
-			assertNotReached(e.index.token())
-		}
-		arg0.emit()
+		emitLoadMapKey(e.index)
 		emit(S("PUSH_SLICE"))
 		emit(S("pop %%rdi # index value"))
 		emit(S("pop %%rdx # index value"))
 		emit(S("pop %%rcx # index value"))
 	} else {
-		e.index.emit()
+		emitLoadMapKey(e.index)
 		emit(S("PUSH_8 # index value"))
 		emit(S("pop %%rcx # index value"))
 	}
