@@ -362,6 +362,7 @@ func assignToSlice(lhs Expr, rhs Expr) {
 		} else if fromExpr.getGtype().getKind() == G_CLIKE_STRING {
 			fromExpr.emit()
 		} else if fromExpr.getGtype().getKind() == G_POINTER {
+			// This is required to convert libcArgs to os.Args
 			fromExpr.emit()
 			emit(S("PUSH_8 # string addr"))
 
