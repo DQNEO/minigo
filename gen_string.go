@@ -116,7 +116,7 @@ func emitGoStringsEqualFromStack() {
 }
 
 // emit []byte(cString)
-func emitConvertCstringToSlice(eCstring Expr) {
+func __emitConvertCstringToSlice(eCstring Expr) {
 	eCstring.emit()
 
 	if gString.is24WidthType() {
