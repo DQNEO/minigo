@@ -87,10 +87,6 @@ func compileFiles(universe *Scope, sourceFiles []gostring) *AstPackage {
 	return mainPkg
 }
 
-func toKey(gid goidentifier) identifier {
-	return identifier(gid)
-}
-
 // parse standard libraries
 func compileStdLibs(universe *Scope, imported []gostring) *compiledStdlib {
 	var libs *compiledStdlib = &compiledStdlib{

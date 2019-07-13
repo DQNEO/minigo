@@ -58,7 +58,7 @@ func (sc *Scope) getGtype(name goidentifier) *Gtype {
 		errorf(S("sc is nil"))
 	}
 	idents := sc.idents
-	elm, ok := idents[identifier(name)]
+	elm, ok := idents[toKey(name)]
 	if !ok {
 		return nil
 	}

@@ -2039,13 +2039,15 @@ func ParseFiles(pkgname goidentifier, sources []gostring, onMemory bool) *AstPac
 		}
 
 		for typeName, _methods := range astFile.methods {
+			gtypeName := goidentifier(typeName)
 			for mname, ref := range _methods {
-				almthds, ok := allmethods[typeName]
+				gmname := goidentifier(mname)
+				almthds, ok := allmethods[toKey(gtypeName)]
 				if !ok {
 					almthds = map[identifier]*ExprFuncRef{}
-					allmethods[typeName] = almthds
+					allmethods[toKey(gtypeName)] = almthds
 				}
-				almthds[mname] = ref
+				almthds[toKey(gmname)] = ref
 			}
 		}
 	}

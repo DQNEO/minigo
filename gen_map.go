@@ -76,7 +76,18 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit(S("PUSH_8 # len"))
 	var isKeyString bool = e.index.getGtype().isClikeString()
 	if isKeyString {
-		emitConvertCstringToSlice(e.index)
+		var arg0 Expr
+		switch e.index.(type) {
+		case *ExprFuncallOrConversion:
+			funcallOrConversion := e.index.(*ExprFuncallOrConversion)
+			arg0 = funcallOrConversion.args[0]
+		case *IrExprConversion:
+			conversion := e.index.(*IrExprConversion)
+			arg0 = conversion.arg
+		default:
+			assertNotReached(e.index.token())
+		}
+		arg0.emit()
 		emit(S("PUSH_SLICE"))
 		emit(S("pop %%rdi # index value"))
 		emit(S("pop %%rdx # index value"))
