@@ -111,7 +111,7 @@ func emitMapGet(mapType *Gtype) {
 	mapType = mapType.Underlying()
 	mapKeyType := mapType.mapKey
 	mapValueType := mapType.mapValue
-	is24Width := mapValueType.is24WidthType()
+	isValue24Width := mapValueType.is24WidthType()
 	labelBegin := makeLabel()
 	labelEnd := makeLabel()
 	labelIncr := makeLabel()
@@ -130,13 +130,13 @@ func emitMapGet(mapType *Gtype) {
 	emit(S("push %%r11 # map len"))
 	emit(S("CMP_FROM_STACK setl"))
 	emit(S("TEST_IT"))
-	if is24Width {
+	if isValue24Width {
 		emit(S("LOAD_EMPTY_SLICE # NOT FOUND"))
 	} else {
 		emit(S("mov $0, %%rax # key not found"))
 	}
 
-	okRegister := mapOkRegister(is24Width)
+	okRegister := mapOkRegister(isValue24Width)
 	emit(S("mov $0, %%%s # ok = false"), okRegister)
 
 	emit(S("je %s  # Exit. NOT FOUND IN ALL KEYS."), labelEnd)
