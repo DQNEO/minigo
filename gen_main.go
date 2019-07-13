@@ -145,7 +145,7 @@ func (program *Program) emit() {
 }
 
 func emitMainFunc(importOS bool) {
-	fname := S("main")
+	fname := "main"
 	emit(S(".global	%s"), fname)
 	emitWithoutIndent(S("%s:"), fname)
 	emit(S("push %%rbp"))
