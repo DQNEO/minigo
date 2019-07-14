@@ -11,7 +11,7 @@ func ioutil_ReadFile(filename bytes) ([]byte, error) {
 
 // depends on libc
 func strconv_Atoi(gs bytes) (int, error) {
-	i, e := Atoi((gs))
+	i, e := Atoi(gs)
 	return i,e
 }
 
