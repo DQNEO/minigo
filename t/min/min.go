@@ -5,8 +5,8 @@ import (
 )
 
 func f1() {
-	bytes := bytes("0\n")
-	os.Stdout.Write(bytes)
+	s := "0\n"
+	os.Stdout.Write([]byte(s))
 }
 
 func main() {

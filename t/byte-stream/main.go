@@ -14,7 +14,7 @@ func f1() {
 	bs := &_bs
 	len1 := len(bs.source)
 
-	fmtPrintf("%d\n", len1-115) // 1
+	fmtPrintf("%d\n", len1-108) // 1
 
 	var c byte
 	c, _ = bs.get()
