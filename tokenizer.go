@@ -4,19 +4,19 @@ type Tokenizer struct {
 	bs *ByteStream
 }
 
-func (tn *Tokenizer) read_number(c0 byte) []byte {
+func (tn *Tokenizer) read_number(c0 byte) string {
 	var chars = []byte{c0}
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			return chars
+			return string(chars)
 		}
 		if tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
 			tn.bs.unget()
-			return chars
+			return string(chars)
 		}
 	}
 }
@@ -39,24 +39,24 @@ func (tn *Tokenizer) isLetter(b byte) bool {
 }
 
 // https://golang.org/ref/spec#Identifiers
-func (tn *Tokenizer) readIdentifier(c0 byte) bytes {
+func (tn *Tokenizer) readIdentifier(c0 byte) string {
 	var chars = []byte{c0}
 	for {
 		c, err := tn.bs.get()
 		if err != nil {
-			return bytes(chars)
+			return string(chars)
 		}
 		if tn.isLetter(c) || tn.isUnicodeDigit(c) {
 			chars = append(chars, c)
 			continue
 		} else {
 			tn.bs.unget()
-			return bytes(chars)
+			return string(chars)
 		}
 	}
 }
 
-func (tn *Tokenizer) read_string() bytes {
+func (tn *Tokenizer) read_string() string {
 	var chars []byte
 	for {
 		c, err := tn.bs.get()
@@ -78,12 +78,12 @@ func (tn *Tokenizer) read_string() bytes {
 			chars = append(chars, c)
 			continue
 		} else {
-			return bytes(chars)
+			return string(chars)
 		}
 	}
 }
 
-func (tn *Tokenizer) read_raw_string() []byte {
+func (tn *Tokenizer) read_raw_string() string {
 	var chars []byte
 	for {
 		c, err := tn.bs.get()
@@ -111,30 +111,30 @@ func (tn *Tokenizer) read_raw_string() []byte {
 			}
 			continue
 		} else {
-			return chars
+			return string(chars)
 		}
 	}
 }
 
-func (tn *Tokenizer) read_char() bytes {
+func (tn *Tokenizer) read_char() string {
 	c, err := tn.bs.get()
 	if err != nil {
 		panic("invalid char literal")
 	}
 	if c == '\\' {
-		var sval bytes
+		var sval string
 		c, err = tn.bs.get()
 		switch c {
 		case 'n':
-			sval = bytes("\n")
+			sval = "\n"
 		case 't':
-			sval = bytes("\t")
+			sval = "\t"
 		case 'r':
-			sval = bytes("\r")
+			sval = "\r"
 		case '\\':
-			sval = bytes("\\")
+			sval = "\\"
 		case '\'':
-			sval = bytes("'")
+			sval = "'"
 		default:
 			errorf("unexpected char 1:%c", c)
 		}
@@ -149,7 +149,7 @@ func (tn *Tokenizer) read_char() bytes {
 	if end != '\'' {
 		errorf("unexpected char:%c", end)
 	}
-	return []byte{c}
+	return string([]byte{c})
 }
 
 func (tn *Tokenizer) isSpace(c byte) bool {
@@ -171,10 +171,10 @@ func (tn *Tokenizer) skipSpace() {
 	}
 }
 
-func (tn *Tokenizer) makeToken(typ TokenType, sval bytes) *Token {
+func (tn *Tokenizer) makeToken(typ TokenType, sval string) *Token {
 	return &Token{
 		typ:      typ,
-		sval:     string(sval),
+		sval:     sval,
 		filename: tn.bs.filename,
 		line:     tn.bs.line,
 		column:   tn.bs.column,
@@ -244,7 +244,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 			if len(r) > 0 {
 				last := r[len(r)-1]
 				if tn.autoSemicolonInsert(last) {
-					semicolon := tn.makeToken(T_PUNCT, bytes(";"))
+					semicolon := tn.makeToken(T_PUNCT, ";")
 					r = append(r, semicolon)
 				}
 			}
@@ -281,155 +281,155 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tn.skipBlockComment()
 				continue
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("/="))
+				tok = tn.makeToken(T_PUNCT, "/=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("/"))
+				tok = tn.makeToken(T_PUNCT, "/")
 			}
 		case '(', ')', '[', ']', '{', '}', ',', ';':
-			tok = tn.makeToken(T_PUNCT, []byte{c})
+			tok = tn.makeToken(T_PUNCT, string([]byte{c}))
 		case '!':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("!="))
+				tok = tn.makeToken(T_PUNCT, "!=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("!"))
+				tok = tn.makeToken(T_PUNCT, "!")
 			}
 		case '%':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("%="))
+				tok = tn.makeToken(T_PUNCT, "%=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("%"))
+				tok = tn.makeToken(T_PUNCT, "%")
 			}
 		case '*':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("*="))
+				tok = tn.makeToken(T_PUNCT, "*=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("*"))
+				tok = tn.makeToken(T_PUNCT, "*")
 			}
 		case ':':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes(":="))
+				tok = tn.makeToken(T_PUNCT, ":=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes(":"))
+				tok = tn.makeToken(T_PUNCT, ":")
 			}
 		case '=':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("=="))
+				tok = tn.makeToken(T_PUNCT, "==")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("="))
+				tok = tn.makeToken(T_PUNCT, "=")
 			}
 		case '^':
 			c, _ := tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("^="))
+				tok = tn.makeToken(T_PUNCT, "^=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("^"))
+				tok = tn.makeToken(T_PUNCT, "^")
 			}
 		case '&':
 			c, _ := tn.bs.get()
 			if c == '&' {
-				tok = tn.makeToken(T_PUNCT, bytes("&&"))
+				tok = tn.makeToken(T_PUNCT, "&&")
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("&="))
+				tok = tn.makeToken(T_PUNCT, "&=")
 			} else if c == '^' {
 				c, _ := tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, bytes("&^="))
+					tok = tn.makeToken(T_PUNCT, "&^=")
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, bytes("&^"))
+					tok = tn.makeToken(T_PUNCT, "&^")
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("&"))
+				tok = tn.makeToken(T_PUNCT, "&")
 			}
 		case '+':
 			c, _ = tn.bs.get()
 			if c == '+' {
-				tok = tn.makeToken(T_PUNCT, bytes("++"))
+				tok = tn.makeToken(T_PUNCT, "++")
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("+="))
+				tok = tn.makeToken(T_PUNCT, "+=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("+"))
+				tok = tn.makeToken(T_PUNCT, "+")
 			}
 		case '-':
 			c, _ = tn.bs.get()
 			if c == '-' {
-				tok = tn.makeToken(T_PUNCT, bytes("--"))
+				tok = tn.makeToken(T_PUNCT, "--")
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("-="))
+				tok = tn.makeToken(T_PUNCT, "-=")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("-"))
+				tok = tn.makeToken(T_PUNCT, "-")
 			}
 		case '|':
 			c, _ = tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("|="))
+				tok = tn.makeToken(T_PUNCT, "|=")
 			} else if c == '|' {
-				tok = tn.makeToken(T_PUNCT, bytes("||"))
+				tok = tn.makeToken(T_PUNCT, "||")
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("|"))
+				tok = tn.makeToken(T_PUNCT, "|")
 			}
 		case '.':
 			c, _ = tn.bs.get()
 			if c == '.' {
 				c, _ = tn.bs.get()
 				if c == '.' {
-					tok = tn.makeToken(T_PUNCT, bytes("..."))
+					tok = tn.makeToken(T_PUNCT, "...")
 				} else {
 					panic("invalid token '..'")
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("."))
+				tok = tn.makeToken(T_PUNCT, ".")
 			}
 		case '>':
 			c, _ = tn.bs.get()
 			if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes(">="))
+				tok = tn.makeToken(T_PUNCT, ">=")
 			} else if c == '>' {
 				c, _ = tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, bytes(">>="))
+					tok = tn.makeToken(T_PUNCT, ">>=")
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, bytes(">>"))
+					tok = tn.makeToken(T_PUNCT, ">>")
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes(">"))
+				tok = tn.makeToken(T_PUNCT, ">")
 			}
 		case '<':
 			c, _ = tn.bs.get()
 			if c == '-' {
-				tok = tn.makeToken(T_PUNCT, bytes("<-"))
+				tok = tn.makeToken(T_PUNCT, "<-")
 			} else if c == '=' {
-				tok = tn.makeToken(T_PUNCT, bytes("<="))
+				tok = tn.makeToken(T_PUNCT, "<=")
 			} else if c == '<' {
 				c, _ = tn.bs.get()
 				if c == '=' {
-					tok = tn.makeToken(T_PUNCT, bytes("<<="))
+					tok = tn.makeToken(T_PUNCT, "<<=")
 				} else {
 					tn.bs.unget()
-					tok = tn.makeToken(T_PUNCT, bytes("<<"))
+					tok = tn.makeToken(T_PUNCT, "<<")
 				}
 			} else {
 				tn.bs.unget()
-				tok = tn.makeToken(T_PUNCT, bytes("<"))
+				tok = tn.makeToken(T_PUNCT, "<")
 			}
 		default:
 			//var i int = int(c)
