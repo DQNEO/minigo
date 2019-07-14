@@ -373,7 +373,7 @@ func (ast *StmtDefer) emit() {
 	*/
 	labelStart := concat(string(makeLabel()) , "_defer")
 	labelEnd := concat(string(makeLabel()) , "_defer")
-	ast.label = []byte(labelStart)
+	ast.label = labelStart
 
 	emit("jmp %s", labelEnd)
 	emit("%s: # defer start", labelStart)
