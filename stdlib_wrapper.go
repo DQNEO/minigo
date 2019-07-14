@@ -6,6 +6,6 @@ func strconv_Atoi(gs bytes) (int, error) {
 	return i,e
 }
 
-func strings_Congtains(s bytes, substr bytes) bool {
+func strings_Congtains(s string, substr string) bool {
 	return Contains(string(s), string(substr))
 }
