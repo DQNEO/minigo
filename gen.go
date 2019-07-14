@@ -52,7 +52,7 @@ func emit(format bytes, v ...interface{}) {
 		write(bytes("  "))
 	}
 
-	s := Sprintf(format, v...)
+	s := Sprintf(bytes(format), v...)
 	writeln(s)
 }
 
