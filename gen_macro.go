@@ -3,7 +3,7 @@ package main
 func emitMacroDefinitions() {
 	emitWithoutIndent("// MACROS")
 
-	macroStart(S("FUNC_PROLOGUE"), S(""))
+	macroStart("FUNC_PROLOGUE", "")
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 	macroEnd()
@@ -12,190 +12,190 @@ func emitMacroDefinitions() {
 	var regi string
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf("POP_TO_ARG_%d", i)
-		macroStart(bytes(macroName), S(""))
+		macroStart(macroName, "")
 		emit("pop %%%s", regi)
 		macroEnd()
 	}
 
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf("PUSH_ARG_%d", i)
-		macroStart(bytes(macroName), S(""))
+		macroStart(macroName, "")
 		emit("push %%%s", regi)
 		macroEnd()
 	}
 
-	macroStart(S("PUSH_8"), S(""))
+	macroStart("PUSH_8", "")
 	emit("push %%rax # primitive")
 	macroEnd()
 
-	macroStart(S("PUSH_24"), S(""))
+	macroStart("PUSH_24", "")
 	emit("push %%rax # 1st")
 	emit("push %%rbx # 2nd")
 	emit("push %%rcx # 3rd")
 	macroEnd()
 
-	macroStart(S("PUSH_SLICE"), S(""))
+	macroStart("PUSH_SLICE", "")
 	emit("push %%rax # slice.ptr")
 	emit("push %%rbx # slice.len")
 	emit("push %%rcx # slice.cap")
 	macroEnd()
-	macroStart(S("PUSH_INTERFACE"), S(""))
+	macroStart("PUSH_INTERFACE", "")
 	emit("push %%rax # ifc.1st")
 	emit("push %%rbx # ifc.2nd")
 	emit("push %%rcx # ifc.3rd")
 	macroEnd()
 
-	macroStart(S("POP_8"), S(""))
+	macroStart("POP_8", "")
 	emit("pop %%rax # primitive")
 	macroEnd()
 
-	macroStart(S("POP_24"), S(""))
+	macroStart("POP_24", "")
 	emit("pop %%rcx # 3rd")
 	emit("pop %%rbx # 2nd")
 	emit("pop %%rax # 1st")
 	macroEnd()
 
-	macroStart(S("POP_SLICE"), S(""))
+	macroStart("POP_SLICE", "")
 	emit("pop %%rcx # slice.cap")
 	emit("pop %%rbx # slice.len")
 	emit("pop %%rax # slice.ptr")
 	macroEnd()
 
-	macroStart(S("POP_MAP"), S(""))
+	macroStart("POP_MAP", "")
 	emit("pop %%rcx # map.cap")
 	emit("pop %%rbx # map.len")
 	emit("pop %%rax # map.ptr")
 	macroEnd()
 
-	macroStart(S("POP_INTERFACE"), S(""))
+	macroStart("POP_INTERFACE", "")
 	emit("pop %%rcx # ifc.3rd")
 	emit("pop %%rbx # ifc.2nd")
 	emit("pop %%rax # ifc.1st")
 	macroEnd()
 
-	macroStart(S("LOAD_EMPTY_24"), S(""))
+	macroStart("LOAD_EMPTY_24", "")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("mov $0, %%rcx")
 	macroEnd()
 
-	macroStart(S("LOAD_EMPTY_SLICE"), S(""))
+	macroStart("LOAD_EMPTY_SLICE", "")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("mov $0, %%rcx")
 	macroEnd()
 
-	macroStart(S("LOAD_EMPTY_MAP"), S(""))
+	macroStart("LOAD_EMPTY_MAP", "")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("mov $0, %%rcx")
 	macroEnd()
 
-	macroStart(S("LOAD_EMPTY_INTERFACE"), S(""))
+	macroStart("LOAD_EMPTY_INTERFACE", "")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("mov $0, %%rcx")
 	macroEnd()
 
-	macroStart(S("LOAD_STRING_LITERAL"), S("slabel"))
+	macroStart("LOAD_STRING_LITERAL", "slabel")
 	emit("lea \\slabel(%%rip), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_NUMBER"), S("n"))
+	macroStart("LOAD_NUMBER", "n")
 	emit("mov $\\n, %%rax")
 	macroEnd()
 
-	macroStart(S("STORE_1_TO_LOCAL"), S("offset"))
+	macroStart("STORE_1_TO_LOCAL", "offset")
 	emit("mov %%al, \\offset(%%rbp)")
 	macroEnd()
 
-	macroStart(S("STORE_8_TO_LOCAL"), S("offset"))
+	macroStart("STORE_8_TO_LOCAL", "offset")
 	emit("mov %%rax, \\offset(%%rbp)")
 	macroEnd()
 
-	macroStart(S("LOAD_GLOBAL_ADDR"), S("varname, offset"))
+	macroStart("LOAD_GLOBAL_ADDR", "varname, offset")
 	emit("lea \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_LOCAL_ADDR"), S("offset"))
+	macroStart("LOAD_LOCAL_ADDR", "offset")
 	emit("lea \\offset(%%rbp), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_1_FROM_LOCAL_CAST"), S("offset"))
+	macroStart("LOAD_1_FROM_LOCAL_CAST", "offset")
 	emit("movsbq \\offset(%%rbp), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_1_FROM_LOCAL"), S("offset"))
+	macroStart("LOAD_1_FROM_LOCAL", "offset")
 	emit("mov \\offset(%%rbp), %%al")
 	macroEnd()
 
-	macroStart(S("LOAD_8_FROM_LOCAL"), S("offset"))
+	macroStart("LOAD_8_FROM_LOCAL", "offset")
 	emit("mov \\offset(%%rbp), %%rax")
 	macroEnd()
 
-	macroStart(S("STORE_1_TO_GLOBAL"), S("varname, offset"))
+	macroStart("STORE_1_TO_GLOBAL", "varname, offset")
 	emit("mov %%al, \\varname+\\offset(%%rip)")
 	macroEnd()
 
-	macroStart(S("STORE_8_TO_GLOBAL"), S("varname, offset"))
+	macroStart("STORE_8_TO_GLOBAL", "varname, offset")
 	emit("mov %%rax, \\varname+\\offset(%%rip)")
 	macroEnd()
 
-	macroStart(S("LOAD_1_FROM_GLOBAL_CAST"), S("varname, offset=0"))
+	macroStart("LOAD_1_FROM_GLOBAL_CAST", "varname, offset=0")
 	emit("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_1_FROM_GLOBAL"), S("varname, offset=0"))
+	macroStart("LOAD_1_FROM_GLOBAL", "varname, offset=0")
 	emit("mov \\varname+\\offset(%%rip), %%al")
 	macroEnd()
 
-	macroStart(S("LOAD_8_FROM_GLOBAL"), S("varname, offset=0"))
+	macroStart("LOAD_8_FROM_GLOBAL", "varname, offset=0")
 	emit("mov \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_24_BY_DEREF"), S(""))
+	macroStart("LOAD_24_BY_DEREF", "")
 	emit("mov %d(%%rax), %%rcx", offset16)
 	emit("mov %d(%%rax), %%rbx", offset8)
 	emit("mov %d(%%rax), %%rax", offset0)
 	macroEnd()
 
-	macroStart(S("LOAD_8_BY_DEREF"), S(""))
+	macroStart("LOAD_8_BY_DEREF", "")
 	emit("mov (%%rax), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_1_BY_DEREF"), S(""))
+	macroStart("LOAD_1_BY_DEREF", "")
 	emit("movsbq (%%rax), %%rax")
 	macroEnd()
 
-	macroStart(S("LOAD_24_FROM_GLOBAL"), S("varname"))
+	macroStart("LOAD_24_FROM_GLOBAL", "varname")
 	emit("mov \\varname+%d(%%rip), %%rax # 1st", offset0)
 	emit("mov \\varname+%d(%%rip), %%rbx # 2nd", offset8)
 	emit("mov \\varname+%d(%%rip), %%rcx # 3rd", offset16)
 	macroEnd()
 
-	macroStart(S("LOAD_24_FROM_LOCAL"), S("offset"))
+	macroStart("LOAD_24_FROM_LOCAL", "offset")
 	emit("mov \\offset+%d(%%rbp), %%rax # 1st", offset0)
 	emit("mov \\offset+%d(%%rbp), %%rbx # 2nd", offset8)
 	emit("mov \\offset+%d(%%rbp), %%rcx # 3rd", offset16)
 	macroEnd()
 
-	macroStart(S("CAST_BYTE_TO_INT"), S(""))
+	macroStart("CAST_BYTE_TO_INT", "")
 	emit("movzbq %%al, %%rax")
 	macroEnd()
 
-	macroStart(S("CMP_EQ_ZERO"), S(""))
+	macroStart("CMP_EQ_ZERO", "")
 	emit("cmp $0, %%rax")
 	emit("sete %%al")
 	emit("movzb %%al, %%eax")
 	macroEnd()
 
-	macroStart(S("CMP_NE_ZERO"), S(""))
+	macroStart("CMP_NE_ZERO", "")
 	emit("cmp $0, %%rax")
 	emit("setne %%al")
 	emit("movzb %%al, %%eax")
 	macroEnd()
 
-	macroStart(S("CMP_FROM_STACK"), S("inst"))
+	macroStart("CMP_FROM_STACK", "inst")
 	emit("pop %%rax # right")
 	emit("pop %%rcx # left")
 	emit("cmp %%rax, %%rcx") // right, left
@@ -203,41 +203,41 @@ func emitMacroDefinitions() {
 	emit("movzb %%al, %%eax")
 	macroEnd()
 
-	macroStart(S("SUM_FROM_STACK"), S(""))
+	macroStart("SUM_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")
 	emit("add %%rcx , %%rax")
 	macroEnd()
 
-	macroStart(S("SUB_FROM_STACK"), S(""))
+	macroStart("SUB_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")
 	emit("sub %%rcx , %%rax")
 	macroEnd()
 
-	macroStart(S("IMUL_FROM_STACK"), S(""))
+	macroStart("IMUL_FROM_STACK", "")
 	emit("pop %%rcx")
 	emit("pop %%rax")
 	emit("imul %%rcx , %%rax")
 	macroEnd()
 
-	macroStart(S("IMUL_NUMBER"), S("n"))
+	macroStart("IMUL_NUMBER", "n")
 	emit("imul $\\n , %%rax")
 	macroEnd()
 
-	macroStart(S("STORE_1_INDIRECT_FROM_STACK"), S(""))
+	macroStart("STORE_1_INDIRECT_FROM_STACK", "")
 	emit("pop %%rax # where")
 	emit("pop %%rcx # what")
 	emit("mov %%cl, (%%rax)")
 	macroEnd()
 
-	macroStart(S("STORE_8_INDIRECT_FROM_STACK"), S(""))
+	macroStart("STORE_8_INDIRECT_FROM_STACK", "")
 	emit("pop %%rax # where")
 	emit("pop %%rcx # what")
 	emit("mov %%rcx, (%%rax)")
 	macroEnd()
 
-	macroStart(S("STORE_24_INDIRECT_FROM_STACK"), S(""))
+	macroStart("STORE_24_INDIRECT_FROM_STACK", "")
 	emit("pop %%rax # target addr")
 	emit("pop %%rcx # load RHS value(c)")
 	emit("mov %%rcx, 16(%%rax)")
@@ -247,31 +247,31 @@ func emitMacroDefinitions() {
 	emit("mov %%rcx, 0(%%rax)")
 	macroEnd()
 
-	macroStart(S("ADD_NUMBER"), S("n"))
+	macroStart("ADD_NUMBER", "n")
 	emit("add $\\n , %%rax")
 	macroEnd()
 
-	macroStart(S("SUB_NUMBER"), S("n"))
+	macroStart("SUB_NUMBER", "n")
 	emit("sub $\\n , %%rax")
 	macroEnd()
 
-	macroStart(S("FUNCALL"), S("fname"))
+	macroStart("FUNCALL", "fname")
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 	emit("call \\fname")
 	macroEnd()
 
-	macroStart(S("TEST_IT"), S(""))
+	macroStart("TEST_IT", "")
 	emit("test %%rax, %%rax")
 	macroEnd()
 
-	macroStart(S("LEAVE_AND_RET"), S(""))
+	macroStart("LEAVE_AND_RET", "")
 	emit("leave")
 	emit("ret")
 	macroEnd()
 }
 
-func macroStart(name bytes, args bytes) {
+func macroStart(name string, args string) {
 	emitWithoutIndent(".macro %s %s", name, args)
 }
 
