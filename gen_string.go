@@ -1,14 +1,7 @@
 package main
 
-var eEmptyString = ExprStringLiteral{
-	val: bytes(""),
-}
-
 func emitEmptyString() {
-	eEmpty := &eEmptyString
-	emit("LOAD_STRING_LITERAL .%s", eEmpty.slabel)
-	emit("mov $0, %%rbx")
-	emit("mov $0, %%rcx")
+	emit("LOAD_EMPTY_SLICE")
 }
 
 func countStrlen(chars bytes) int {
@@ -31,10 +24,14 @@ func countStrlen(chars bytes) int {
 }
 
 func (ast *ExprStringLiteral) emit() {
-	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
 	var length int = countStrlen(ast.val)
-	emit("mov $%d, %%rbx", length)
-	emit("mov $%d, %%rcx", length)
+	if length == 0 {
+		emitEmptyString()
+	} else {
+		emit("LOAD_STRING_LITERAL .%s", ast.slabel)
+		emit("mov $%d, %%rbx", length)
+		emit("mov $%d, %%rcx", length)
+	}
 }
 
 func (e *IrExprStringComparison) token() *Token {

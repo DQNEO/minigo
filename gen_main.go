@@ -16,11 +16,6 @@ func (program *Program) emitSpecialStrings() {
 	emit(".string \"%s\"", builtinStringValue1)
 	emitWithoutIndent(".%s:", builtinStringKey2)
 	emit(".string \"%s\"", builtinStringValue2)
-
-	// empty string
-	eEmptyString.slabel = S("empty")
-	emitWithoutIndent(".empty:")
-	emit(".string \"%s\"", eEmptyString.val)
 }
 
 func (program *Program) emitDynamicTypes() {
