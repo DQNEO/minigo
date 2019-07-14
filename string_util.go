@@ -36,8 +36,8 @@ func Sprintf(format string, a... interface{}) string {
 	a = nil // unset
 
 	var r []byte
-	var blocks []bytes
-	var str []byte
+	var blocks []string
+	var bs []byte
 	var f []byte = []byte(format)
 	var c byte
 	var i int
@@ -49,14 +49,14 @@ func Sprintf(format string, a... interface{}) string {
 	for i, c = range f {
 		if ! inPercent && c == '%' {
 			inPercent = true
-			blocks = append(blocks, str)
-			str = nil
+			blocks = append(blocks, string(bs))
+			bs = nil
 			numPercent++
 			continue
 		}
 		if inPercent {
 			if c == '%' {
-				str = append(str,c)
+				bs = append(bs,c)
 				inPercent = false
 				continue
 			}
@@ -65,30 +65,30 @@ func Sprintf(format string, a... interface{}) string {
 			case string:
 				var _args string
 				_args = arg.(string)
-				blocks = append(blocks, bytes(_args))
+				blocks = append(blocks, _args)
 			case []byte:
 				var _arg []byte
 				_arg = arg.([]byte)
-				blocks = append(blocks, _arg)
+				blocks = append(blocks, string(_arg))
 			case byte:
 				var _argByte byte
 				_argByte = arg.(byte)
 				bts := []byte{_argByte}
-				g := bytes(bts)
+				g := string(bts)
 				blocks = append(blocks, g)
 			case int:
 				var _argInt int
 				_argInt = arg.(int)
-				b := bytes(strconv.Itoa(_argInt))
+				b := string(strconv.Itoa(_argInt))
 				blocks = append(blocks, b)
 			case bool: // "%v"
 				var _argBool bool
 				_argBool = arg.(bool)
-				var b []byte
+				var b string
 				if _argBool {
-					b = []byte("true")
+					b = "true"
 				} else{
-					b = []byte("false")
+					b = "false"
 				}
 				blocks = append(blocks, b)
 			default:
@@ -96,14 +96,16 @@ func Sprintf(format string, a... interface{}) string {
 			}
 			argIndex++
 			inPercent = false
-			str = nil
+			bs = nil
 			continue
 		}
-		str = append(str,c)
+		bs = append(bs,c)
 	}
-	blocks = append(blocks, str)
-	for i, str = range blocks {
-		for j, c = range str {
+	blocks = append(blocks, string(bs))
+	var ss string
+	for i, ss = range blocks {
+		var bb []byte = []byte(ss)
+		for j, c = range bb {
 			r = append(r, c)
 		}
 	}
