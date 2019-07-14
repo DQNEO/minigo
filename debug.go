@@ -57,8 +57,9 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 			toks = tok.String()
 		}
 		msg := concat3("assertion failed: ", s,  toks)
-		os.Stderr.Write([]byte(msg))
-		os.Stderr.Write(S("\n"))
+		b := []byte(msg)
+		b = append(b, '\n')
+		os.Stderr.Write(b)
 		panic("")
 	}
 }

@@ -34,7 +34,7 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent("#--------------------------------------------------------")
 	emit("# Method table")
 	emit(".data 0")
-	emitWithoutIndent("%s:", S("receiverTypes"))
+	emitWithoutIndent("%s:", "receiverTypes")
 	emit(".quad 0 # receiverTypeId:0")
 	var maxId int
 	var i int
