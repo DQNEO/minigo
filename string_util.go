@@ -5,8 +5,6 @@ import (
 	"strconv"
 )
 
-type bytes []byte
-
 type identifier string
 
 func fmtPrintf(format string, a... interface{}) {
@@ -20,10 +18,6 @@ func Sprintf(format string, a... interface{}) string {
 	for _, x := range a {
 		var y interface{}
 		switch x.(type) {
-		case bytes: // This case is not reached by 2nd gen compiler
-			var tmpb bytes = x.(bytes)
-			var tmpbytes []byte = []byte(tmpb)
-			y = tmpbytes
 		case identifier:   // This case is not reached by 2nd gen compiler
 			var tmpgoident identifier = x.(identifier)
 			var tmpbytes2 []byte = []byte(tmpgoident)

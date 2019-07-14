@@ -30,12 +30,12 @@ var gIntE = Gtype{typ: 7, size: 8}
 var gInt = &gIntE
 
 type DeclFunc struct {
-	tok      bytes
+	tok      string
 	rettypes []*Gtype
 }
 
 var builtinLenGlobal = &DeclFunc{
-	tok:      bytes("tok"),
+	tok:      "tok",
 	rettypes: []*Gtype{&gIntE, &gIntE},
 }
 
