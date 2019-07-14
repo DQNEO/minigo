@@ -16,7 +16,7 @@ func (decl *DeclVar) emitData() {
 	emitWithoutIndent("%s: # gtype=%s", bytes(decl.variable.varname), gtype.String())
 	emitWithoutIndent("# right.gtype = %s", right.getGtype().String())
 	emitWithoutIndent(".data 0")
-	doEmitData(ptok, right.getGtype(), right, S(""), 0)
+	doEmitData(ptok, right.getGtype(), right, "", 0)
 }
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
@@ -29,9 +29,9 @@ func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	return nil
 }
 
-func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName bytes, depth int) {
+func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ Expr, containerName string, depth int) {
 	value = unwrapRel(value)
-	emit("# doEmitData: containerName=%s, depth=%d", bytes(containerName), depth)
+	emit("# doEmitData: containerName=%s, depth=%d", containerName, depth)
 	primType := gtype.getKind()
 	if primType == G_ARRAY {
 		arrayliteral, ok := value.(*ExprArrayLiteral)
@@ -43,10 +43,10 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
-			var selector bytes
+			var selector string
 			if i >= len(values) {
 				// zero value
-				doEmitData(ptok, elmType, nil, S(""), depth)
+				doEmitData(ptok, elmType, nil, "", depth)
 			} else {
 				value := arrayliteral.values[i]
 				assertNotNil(value != nil, nil)
@@ -126,7 +126,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		emit(".quad %d # %s %s", val, gtype.String(), bytes(containerName))
 	} else if primType == G_STRUCT {
 		s := concat3(string(containerName), "." , string(gtype.relation.name))
-		containerName = bytes(s)
+		containerName = s
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# padding=%d", field.padding)
 			switch field.padding {
@@ -141,7 +141,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit("# field:offesr=%d, fieldname=%s", field.offset, bytes(field.fieldname))
 			if value == nil {
 				s2 :=  concat3(string(containerName),".", string(field.fieldname))
-				doEmitData(ptok, field, nil,[]byte(s2), depth)
+				doEmitData(ptok, field, nil,s2, depth)
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
@@ -153,7 +153,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			}
 			gtype := field
 			s3 :=  concat3(string(containerName),".", string(field.fieldname))
-			doEmitData(ptok, gtype, value, []byte(s3), depth)
+			doEmitData(ptok, gtype, value, s3, depth)
 		}
 	} else {
 		var val int
@@ -198,7 +198,7 @@ func emitDataAddr(operand Expr, depth int) {
 	emit(".data %d", depth+1)
 	label := makeLabel()
 	emit("%s:", label)
-	doEmitData(nil, operand.getGtype(), operand, S(""), depth+1)
+	doEmitData(nil, operand.getGtype(), operand, "", depth+1)
 	emit(".data %d", depth)
 	emit(".quad %s", label)
 }
