@@ -2,7 +2,7 @@ package main
 
 func dumpTokenForFiles(sourceFiles []bytes) {
 	for _, sourceFile := range sourceFiles {
-		debugf(S("--- file:%s"), sourceFile)
+		debugf("--- file:%s", sourceFile)
 		bs := NewByteStreamFromFile(sourceFile)
 		NewTokenStream(bs)
 	}
@@ -15,11 +15,11 @@ func (pkg *AstPackage) dump() {
 }
 
 func (a *PackageClause) dump() {
-	debugf(S("package %s"), a.name)
+	debugf("package %s", a.name)
 }
 
 func (a *DeclFunc) dump() {
-	debugf(S("funcdef %s"), a.fname)
+	debugf("funcdef %s", a.fname)
 	debugNest++
 	for _, stmt := range a.body.stmts {
 		stmt.dump()
@@ -28,15 +28,15 @@ func (a *DeclFunc) dump() {
 }
 
 func (a *StmtShortVarDecl) dump() {
-	debugf(S("shot var decl"))
-	debugf(S("left"))
+	debugf("shot var decl")
+	debugf("left")
 	debugNest++
 	for _, left := range a.lefts {
 		left.dump()
 	}
 	debugNest--
-	debugf(S("="))
-	debugf(S("right"))
+	debugf("=")
+	debugf("right")
 	debugNest++
 	for _, right := range a.rights {
 		right.dump()
@@ -44,7 +44,7 @@ func (a *StmtShortVarDecl) dump() {
 	debugNest--
 }
 func (ast *StmtAssignment) dump() {
-	debugf(S("assign"))
+	debugf("assign")
 	debugNest++
 	for _, e := range ast.lefts {
 		e.dump()
@@ -57,10 +57,10 @@ func (ast *StmtAssignment) dump() {
 
 func (a *DeclVar) dump() {
 	if a.initval == nil {
-		debugf(S("decl var %s %s"),
+		debugf("decl var %s %s",
 			a.variable.varname, a.variable.gtype.String())
 	} else {
-		debugf(S("decl var"))
+		debugf("decl var")
 		debugNest++
 		a.variable.dump()
 		a.initval.dump()
@@ -69,22 +69,22 @@ func (a *DeclVar) dump() {
 }
 
 func (a *DeclConst) dump() {
-	debugf(S("decl consts"))
+	debugf("decl consts")
 	debugNest++
 	for _, cnst := range a.consts {
-		debugf(S("const %s"), cnst.name)
+		debugf("const %s", cnst.name)
 		cnst.val.dump()
 	}
 	debugNest--
 }
 
 func (a *DeclType) dump() {
-	debugf(S("decl type def %s %s"),
+	debugf("decl type def %s %s",
 		a.name, a.gtype.String())
 }
 
 func (stmt *StmtIf) dump() {
-	debugf(S("if"))
+	debugf("if")
 	debugNest++
 	stmt.cond.dump()
 	//stmt.then.dump()
@@ -101,11 +101,11 @@ func (s *StmtSatementList) dump() {
 */
 
 func (a *AstFile) dump() {
-	debugf(S("=== AST File %s ==="), a.name)
+	debugf("=== AST File %s ===", a.name)
 	a.packageClause.dump()
 	for _, imprt := range a.importDecls {
 		for _, spec := range imprt.specs {
-			debugf(S("import \"%s\""), spec.path)
+			debugf("import \"%s\"", spec.path)
 		}
 	}
 	for _, decl := range a.DeclList {
@@ -119,11 +119,11 @@ func (a *AstFile) dump() {
 			decl.constdecl.dump()
 		}
 	}
-	debugf(S("==="))
+	debugf("===")
 }
 
 func (ast *ExprFuncallOrConversion) dump() {
-	debugf(bytes(ast.fname))
+	debugf(string(ast.fname))
 	debugNest++
 	for _, arg := range ast.args {
 		arg.dump()
@@ -132,7 +132,7 @@ func (ast *ExprFuncallOrConversion) dump() {
 }
 
 func (ast *ExprMethodcall) dump() {
-	debugf(bytes(ast.fname))
+	debugf(string(ast.fname))
 	debugNest++
 	for _, arg := range ast.args {
 		arg.dump()
@@ -141,11 +141,11 @@ func (ast *ExprMethodcall) dump() {
 }
 
 func (ast *ExprVariable) dump() {
-	debugf(S("var %s T %s"), bytes(ast.varname), ast.getGtype().String())
+	debugf("var %s T %s", bytes(ast.varname), ast.getGtype().String())
 }
 
 func (ast *ExprConstVariable) dump() {
-	debugf(S("var %s"), ast.name)
+	debugf("var %s", ast.name)
 }
 
 func (e *ExprArrayLiteral) dump() {
@@ -157,25 +157,25 @@ func (e *ExprArrayLiteral) dump() {
 }
 
 func (ast *ExprNumberLiteral) dump() {
-	debugf(S("int %d"), ast.val)
+	debugf("int %d", ast.val)
 }
 
 func (ast *ExprStringLiteral) dump() {
-	debugf(S("\"%s\""), ast.val)
+	debugf("\"%s\"", ast.val)
 }
 
 func (a *Relation) dump() {
 	assert(a != nil, nil, "ident shoud not be nil ")
 	//assert(a.expr != nil, nil, "ident.expr shoud not be nil for " + string(a.name))
 	if a.expr == nil && a.gtype == nil {
-		debugf(S("rel %s (UNRESOLVED)"), a.name)
+		debugf("rel %s (UNRESOLVED)", a.name)
 		return
 	}
 	a.expr.dump()
 }
 
 func (ast *ExprBinop) dump() {
-	debugf(S("binop %s"), ast.op)
+	debugf("binop %s", ast.op)
 	debugNest++
 	ast.left.dump()
 	ast.right.dump()
@@ -183,7 +183,7 @@ func (ast *ExprBinop) dump() {
 }
 
 func (ast *ExprUop) dump() {
-	debugf(S("unop %s"), ast.op)
+	debugf("unop %s", ast.op)
 	debugNest++
 	ast.operand.dump()
 	debugNest--
@@ -191,24 +191,24 @@ func (ast *ExprUop) dump() {
 
 func (a *ExprStructField) dump() {
 	a.strct.dump()
-	debugf(S("  .%s"), a.fieldname)
+	debugf("  .%s", a.fieldname)
 }
 
 func (stmt *ExprCaseClause) dump() {
-	debugf(S("case"))
+	debugf("case")
 	debugNest++
 	for _, expr := range stmt.exprs {
 		expr.dump()
 	}
 	for _, gtype := range stmt.gtypes {
-		debugf(S("%s"), gtype.String())
+		debugf("%s", gtype.String())
 	}
 	stmt.compound.dump()
 	debugNest--
 }
 
 func (stmt *StmtSwitch) dump() {
-	debugf(S("switch"))
+	debugf("switch")
 	if stmt.cond != nil {
 		stmt.cond.dump()
 	}
@@ -216,13 +216,13 @@ func (stmt *StmtSwitch) dump() {
 		_case.dump()
 	}
 	if stmt.dflt != nil {
-		debugf(S("default"))
+		debugf("default")
 		stmt.dflt.dump()
 	}
 }
 
 func (e *ExprNilLiteral) dump() {
-	debugf(S("nil"))
+	debugf("nil")
 }
 
 func (f *ExprFuncRef) dump() {
@@ -230,7 +230,7 @@ func (f *ExprFuncRef) dump() {
 }
 
 func (e *ExprSlice) dump() {
-	debugf(S("ExprSlice:"))
+	debugf("ExprSlice:")
 	debugNest++
 	e.collection.dump()
 	if e.low != nil {
@@ -246,7 +246,7 @@ func (e *ExprSlice) dump() {
 }
 
 func (e *ExprIndex) dump() {
-	debugf(S("ExprIndex;"))
+	debugf("ExprIndex;")
 	debugNest++
 	e.collection.dump()
 	e.index.dump()
@@ -254,56 +254,56 @@ func (e *ExprIndex) dump() {
 }
 
 func (e *ExprTypeAssertion) dump() {
-	debugf(S("type assertion"))
+	debugf("type assertion")
 	e.expr.dump()
-	debugf(S(".(%s)"), e.gtype.String())
+	debugf(".(%s)", e.gtype.String())
 }
 
 func (e *ExprVaArg) dump() {
-	debugf(S("..."))
+	debugf("...")
 	e.expr.dump()
 }
 
 func (e *IrExprConversion) dump() {
-	debugf(S("conversion"))
+	debugf("conversion")
 	debugNest++
-	debugf(S("toType:%s"), e.toGtype.String())
+	debugf("toType:%s", e.toGtype.String())
 	e.arg.dump()
 	debugNest--
 }
 
 func (e *ExprStructLiteral) dump() {
-	debugf(S("%s{"), e.strctname.name)
+	debugf("%s{", e.strctname.name)
 	for _, field := range e.fields {
-		debugf(S("  field %s:"), field.key)
+		debugf("  field %s:", field.key)
 		debugNest++
 		field.value.dump()
 		debugNest--
 	}
-	debugf(S("}"))
+	debugf("}")
 }
 
 func (e *ExprTypeSwitchGuard) dump() {
-	debugf(S("switch"))
+	debugf("switch")
 	e.expr.dump()
 }
 
 func (f *IrStmtForRangeList) dump() {
-	debugf(S("for range list"))
+	debugf("for range list")
 	debugNest++
 	f.block.dump()
 	debugNest--
 }
 
 func (f *IrStmtRangeMap) dump() {
-	debugf(S("for range map"))
+	debugf("for range map")
 	debugNest++
 	f.block.dump()
 	debugNest--
 }
 
 func (f *IrStmtClikeFor) dump() {
-	debugf(S("for clause"))
+	debugf("for clause")
 	if f.cls.init != nil {
 		f.cls.init.dump()
 	}
@@ -320,17 +320,17 @@ func (f *IrStmtClikeFor) dump() {
 
 func (f *StmtFor) dump() {
 	if f.rng != nil {
-		debugf(S("for range"))
+		debugf("for range")
 		debugNest++
 		f.rng.indexvar.dump()
 		if f.rng.valuevar != nil {
 			f.rng.valuevar.dump()
 		}
-		debugf(S("range"))
+		debugf("range")
 		f.rng.rangeexpr.dump()
 		debugNest--
 	} else if f.cls != nil {
-		debugf(S("for clause"))
+		debugf("for clause")
 		if f.cls.init != nil {
 			f.cls.init.dump()
 		}
@@ -355,7 +355,7 @@ func (e *ExprCap) dump() {
 }
 
 func (e *ExprSliceLiteral) dump() {
-	debugf(S("slice %s"), e.gtype.String())
+	debugf("slice %s", e.gtype.String())
 	debugNest++
 	for _, v := range e.values {
 		v.dump()
@@ -364,7 +364,7 @@ func (e *ExprSliceLiteral) dump() {
 }
 
 func (stmt *StmtReturn) dump() {
-	debugf(S("return"))
+	debugf("return")
 	debugNest++
 	for _, e := range stmt.exprs {
 		e.dump()
@@ -373,12 +373,12 @@ func (stmt *StmtReturn) dump() {
 }
 
 func (ast *StmtInc) dump() {
-	debugf(S("++"))
+	debugf("++")
 	ast.operand.dump()
 }
 
 func (ast *StmtDec) dump() {
-	debugf(S("--"))
+	debugf("--")
 	ast.operand.dump()
 }
 
@@ -389,11 +389,11 @@ func (ast *StmtSatementList) dump() {
 }
 
 func (ast *StmtContinue) dump() {
-	debugf(S("continue"))
+	debugf("continue")
 }
 
 func (ast *StmtBreak) dump() {
-	debugf(S("break"))
+	debugf("break")
 }
 
 func (ast *StmtExpr) dump() {
@@ -401,21 +401,21 @@ func (ast *StmtExpr) dump() {
 }
 
 func (ast *StmtDefer) dump() {
-	debugf(S("defer"))
+	debugf("defer")
 	debugNest++
 	ast.expr.dump()
 	debugNest--
 }
 
 func (e *ExprMapLiteral) dump() {
-	debugf(S("map literal T %s"), e.gtype.String())
+	debugf("map literal T %s", e.gtype.String())
 	debugNest++
 	for _, element := range e.elements {
-		debugf(S("element key:"))
+		debugf("element key:")
 		debugNest++
 		element.key.dump()
 		debugNest--
-		debugf(S("element value:"))
+		debugf("element value:")
 		debugNest++
 		element.value.dump()
 		debugNest--
@@ -424,5 +424,5 @@ func (e *ExprMapLiteral) dump() {
 }
 
 func (e *IrExprConversionToInterface) dump() {
-	panic(S("implement me: IrExprConversionToInterface"))
+	panic("implement me: IrExprConversionToInterface")
 }

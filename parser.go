@@ -123,7 +123,7 @@ func (p *parser) traceIn(funcname bytes) int {
 	if GENERATION == 1 {
 		funcname = getCallerName(2)
 	}
-	debugf(S("func %s is gonna read %s"), funcname, p.peekToken().sval)
+	debugf("func %s is gonna read %s", funcname, p.peekToken().sval)
 	debugNest++
 	return 0
 }
@@ -139,7 +139,7 @@ func (p *parser) traceOut(funcname bytes) {
 		funcname = getCallerName(2)
 	}
 	debugNest--
-	debugf(S("func %s end after %s"), funcname, p.lastToken().sval)
+	debugf("func %s end after %s", funcname, p.lastToken().sval)
 }
 
 func (p *parser) readFuncallArgs() []Expr {

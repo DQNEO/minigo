@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func debugf(format bytes, v ...interface{}) {
+func debugf(format string, v ...interface{}) {
 	if !debugMode {
 		return
 	}
