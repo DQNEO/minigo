@@ -11,7 +11,7 @@ type identifier string
 
 func fmtPrintf(format string, a... interface{}) {
 	s := Sprintf(string(format), a...)
-	os.Stdout.Write(bytes(s))
+	os.Stdout.Write([]byte(s))
 }
 
 var _trash int
@@ -112,7 +112,7 @@ func Sprintf(format string, a... interface{}) string {
 	return string(r)
 }
 
-func write(s bytes) {
+func write(s []byte) {
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
@@ -121,15 +121,15 @@ func fmtPrintln(s string) {
 	writeln([]byte(s))
 }
 
-func writeln(s bytes) {
+func writeln(s []byte) {
 	var b []byte = []byte(s)
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
 
 func concat(as string, bs string) string {
-	a := bytes(as)
-	b := bytes(bs)
+	a := []byte(as)
+	b := []byte(bs)
 
 	var r []byte
 	for i:=0;i<len(a);i++ {
@@ -142,9 +142,9 @@ func concat(as string, bs string) string {
 }
 
 func concat3(as string, bs string, cs string) string {
-	a := bytes(as)
-	b := bytes(bs)
-	c := bytes(cs)
+	a := []byte(as)
+	b := []byte(bs)
+	c := []byte(cs)
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
