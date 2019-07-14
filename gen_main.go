@@ -60,7 +60,7 @@ func (program *Program) emitMethodTable() {
 		methods := v
 		for _, methodNameFull := range methods {
 			if eq(bytes(methodNameFull), bytes(".")) {
-				panic(S("invalid method name"))
+				panic("invalid method name")
 			}
 			splitted := strings.Split(methodNameFull, "$")
 			var shortMethodName string = splitted[1]
