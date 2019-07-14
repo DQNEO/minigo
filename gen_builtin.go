@@ -69,7 +69,7 @@ func (e *IrLowLevelCall) emit() {
 	for i=e.argsFromStack - 1;i>=0;i-- {
 		emit("POP_TO_ARG_%d", i)
 	}
-	emit("FUNCALL %s", bytes(e.symbol))
+	emit("FUNCALL %s", e.symbol)
 }
 
 
@@ -117,7 +117,7 @@ func (e *ExprCap) emit() {
 
 func emitMakeSliceFunc() {
 	// makeSlice
-	emitWithoutIndent("%s:", bytes("iruntime.makeSlice"))
+	emitWithoutIndent("%s:", "iruntime.makeSlice")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 

@@ -137,7 +137,7 @@ func (fe *funcPrologueEmitter) emit() {
 		//emit("# Allocating stack for localvars len=%d", len(fe.localvars))
 		for i := len(fe.localvars) - 1; i >= 0; i-- {
 			lvar := fe.localvars[i]
-			emit("# offset %d variable \"%s\" %s", lvar.offset, bytes(lvar.varname), lvar.gtype.String())
+			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 		}
 		var localarea int = -fe.localarea
 		emit("sub $%d, %%rsp # total stack size", localarea)
@@ -162,7 +162,7 @@ func (ircall *IrStaticCall) emit() {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
-		emit("# from %s", bytes(fromGtype))
+		emit("# from %s", fromGtype)
 		if argIndex < len(ircall.callee.params) {
 			param = ircall.callee.params[argIndex]
 			if param.isVariadic {
