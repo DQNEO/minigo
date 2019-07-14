@@ -1,14 +1,5 @@
 package main
 
-import (
-	"io/ioutil"
-)
-
-// depends on libc
-func ioutil_ReadFile(filename bytes) ([]byte, error) {
-	return ioutil.ReadFile(string(filename))
-}
-
 // depends on libc
 func strconv_Atoi(gs bytes) (int, error) {
 	i, e := Atoi(gs)

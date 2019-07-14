@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
 )
 
 type ByteStream struct {
@@ -34,7 +35,7 @@ func NewByteStreamFromFile(path bytes) *ByteStream {
 }
 
 func readFile(filename bytes) []byte {
-	bytes, err := ioutil_ReadFile(filename)
+	bytes, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		panic(S("Unable to read file"))
 	}
