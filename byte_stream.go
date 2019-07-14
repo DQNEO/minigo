@@ -6,14 +6,14 @@ import (
 )
 
 type ByteStream struct {
-	filename  bytes
+	filename  string
 	source    []byte
 	nextIndex int
 	line      int
 	column    int
 }
 
-func NewByteStreamFromString(name bytes, contents bytes) *ByteStream {
+func NewByteStreamFromString(name string, contents bytes) *ByteStream {
 	return &ByteStream{
 		filename:  name,
 		source:    []byte(contents),
@@ -23,7 +23,7 @@ func NewByteStreamFromString(name bytes, contents bytes) *ByteStream {
 	}
 }
 
-func NewByteStreamFromFile(path bytes) *ByteStream {
+func NewByteStreamFromFile(path string) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
 		filename:  path,
@@ -34,8 +34,8 @@ func NewByteStreamFromFile(path bytes) *ByteStream {
 	}
 }
 
-func readFile(filename bytes) []byte {
-	bytes, err := ioutil.ReadFile(string(filename))
+func readFile(filename string) []byte {
+	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(S("Unable to read file"))
 	}

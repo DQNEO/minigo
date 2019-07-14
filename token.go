@@ -46,31 +46,31 @@ const (
 	T_KEYWORWD
 	)
 
-func typeToGostring (typ TokenType) bytes {
+func typeToGostring (typ TokenType) string {
 	switch typ {
 	case T_EOF:
-			return S("EOF")
+			return "EOF"
 	case T_INT:
-		return S("int")
+		return "int"
 	case T_STRING:
-		return S("string")
+		return "string"
 	case T_CHAR:
-		return S("char")
+		return "char"
 	case T_IDENT:
-		return S("ident")
+		return "ident"
 	case T_PUNCT:
-		return S("punct")
+		return "punct"
 	case T_KEYWORWD:
-		return S("keyword")
+		return "keyword"
 	}
 
-	return S("")
+	return ""
 }
 
 type Token struct {
 	typ      TokenType
 	sval     bytes
-	filename bytes
+	filename string
 	line     int
 	column   int
 }

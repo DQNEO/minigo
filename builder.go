@@ -2,7 +2,7 @@
 package main
 
 // analyze imports of given go files
-func parseImports(sourceFiles []bytes) []bytes {
+func parseImports(sourceFiles []string) []bytes {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
@@ -28,7 +28,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier(""),
 	}
-	f := p.ParseString(S("internal_universe.go"), bytes(internalUniverseCode), universe, false)
+	f := p.ParseString("internal_universe.go", bytes(internalUniverseCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -45,7 +45,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier("iruntime"),
 	}
-	f := p.ParseString(S("internal_runtime.go"), bytes(internalRuntimeCode), universe, false)
+	f := p.ParseString("internal_runtime.go", bytes(internalRuntimeCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -66,7 +66,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 }
 
 // compileFiles parses files into *AstPackage
-func compileFiles(universe *Scope, sourceFiles []bytes) *AstPackage {
+func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
@@ -101,7 +101,7 @@ func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}
-		codes := []bytes{pkgCode}
+		codes := []string{string(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)

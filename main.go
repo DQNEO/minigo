@@ -22,8 +22,8 @@ func printVersion() {
 	fmtPrintln("Copyright (C) 2019 @DQNEO")
 }
 
-func parseOpts(args []string) []bytes {
-	var r []bytes
+func parseOpts(args []string) []string {
+	var r []string
 
 	for _, _opt := range args {
 		opt := bytes(_opt)
@@ -56,9 +56,9 @@ func parseOpts(args []string) []bytes {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(string(opt), ".go") {
-			r = append(r, opt)
+			r = append(r, string(opt))
 		} else if eq(opt, S("-")) {
-			return []bytes{S("/dev/stdin")}
+			return []string{"/dev/stdin"}
 		}
 	}
 
@@ -67,7 +67,7 @@ func parseOpts(args []string) []bytes {
 
 func main() {
 	// parsing arguments
-	var sourceFiles []bytes
+	var sourceFiles []string
 	osArgs := os.Args
 	assert(len(osArgs) > 0, nil, "os.Args should not be empty")
 	if len(os.Args) > 1 {
