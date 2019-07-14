@@ -22,7 +22,7 @@ var builtinTypesAsString []string = []string{
 }
 
 var eIota = &ExprConstVariable{
-	name: goidentifier("iota"),
+	name: identifier("iota"),
 }
 
 var builtinPanic = &DeclFunc{
@@ -86,39 +86,39 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 	predeclareLibcFuncs(universe)
 
-	universe.setFunc(goidentifier("panic"), &ExprFuncRef{
+	universe.setFunc(identifier("panic"), &ExprFuncRef{
 		funcdef: builtinPanic,
 	})
-	universe.setFunc(goidentifier("len"), &ExprFuncRef{
+	universe.setFunc(identifier("len"), &ExprFuncRef{
 		funcdef: builtinLen,
 	})
-	universe.setFunc(goidentifier("cap"), &ExprFuncRef{
+	universe.setFunc(identifier("cap"), &ExprFuncRef{
 		funcdef: builtinCap,
 	})
-	universe.setFunc(goidentifier("append"), &ExprFuncRef{
+	universe.setFunc(identifier("append"), &ExprFuncRef{
 		funcdef: builtinAppend,
 	})
-	universe.setFunc(goidentifier("makeSlice"), &ExprFuncRef{
+	universe.setFunc(identifier("makeSlice"), &ExprFuncRef{
 		funcdef: builtinMakeSlice,
 	})
 
-	universe.setFunc(goidentifier("dumpSlice"), &ExprFuncRef{
+	universe.setFunc(identifier("dumpSlice"), &ExprFuncRef{
 		funcdef: builtinDumpSlice,
 	})
 
-	universe.setFunc(goidentifier("dumpInterface"), &ExprFuncRef{
+	universe.setFunc(identifier("dumpInterface"), &ExprFuncRef{
 		funcdef: builtinDumpInterface,
 	})
 
-	universe.setFunc(goidentifier("assertInterface"), &ExprFuncRef{
+	universe.setFunc(identifier("assertInterface"), &ExprFuncRef{
 		funcdef: builtinAssertInterface,
 	})
 
-	universe.setFunc(goidentifier("asComment"), &ExprFuncRef{
+	universe.setFunc(identifier("asComment"), &ExprFuncRef{
 		funcdef: builtinAsComment,
 	})
 
-	universe.setFunc(goidentifier("printstring"), &ExprFuncRef{
+	universe.setFunc(identifier("printstring"), &ExprFuncRef{
 		funcdef: builtinPrintstring,
 	})
 
@@ -127,7 +127,7 @@ func setPredeclaredIdentifiers(universe *Scope) {
 // Zero value:
 // nil
 func predeclareNil(universe *Scope) {
-	universe.set(goidentifier("nil"), &IdentBody{
+	universe.set(identifier("nil"), &IdentBody{
 		expr: &ExprNilLiteral{},
 	})
 }
@@ -137,53 +137,53 @@ func predeclareNil(universe *Scope) {
 // int int8 int16 int32 int64 rune string
 // uint uint8 uint16 uint32 uint64 uintptr
 func predeclareTypes(universe *Scope) {
-	universe.setGtype(goidentifier("bool"), gBool)
-	universe.setGtype(goidentifier("byte"), gByte)
-	universe.setGtype(goidentifier("int"), gInt)
-	universe.setGtype(goidentifier("string"), gString)
-	universe.setGtype(goidentifier("uint8"), gByte)
+	universe.setGtype(identifier("bool"), gBool)
+	universe.setGtype(identifier("byte"), gByte)
+	universe.setGtype(identifier("int"), gInt)
+	universe.setGtype(identifier("string"), gString)
+	universe.setGtype(identifier("uint8"), gByte)
 }
 
 // Constants:
 // true false iota
 func predeclareConsts(universe *Scope) {
-	universe.setConst(goidentifier("true"), &ExprConstVariable{
-		name:  goidentifier("true"),
+	universe.setConst(identifier("true"), &ExprConstVariable{
+		name:  identifier("true"),
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 1},
 	})
-	universe.setConst(goidentifier("false"), &ExprConstVariable{
-		name:  goidentifier("false"),
+	universe.setConst(identifier("false"), &ExprConstVariable{
+		name:  identifier("false"),
 		gtype: gBool,
 		val:   &ExprNumberLiteral{val: 0},
 	})
 
-	universe.setConst(goidentifier("iota"), eIota)
+	universe.setConst(identifier("iota"), eIota)
 }
 
 func predeclareLibcFuncs(universe *Scope) {
 	libc := identifier(S("libc"))
 
-	universe.setFunc(goidentifier("exit"), &ExprFuncRef{
+	universe.setFunc(identifier("exit"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: libc,
 		},
 	})
-	universe.setFunc(goidentifier("open"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg: libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
-
-	universe.setFunc(goidentifier("read"), &ExprFuncRef{
+	universe.setFunc(identifier("open"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
-	universe.setFunc(goidentifier("write"), &ExprFuncRef{
+	universe.setFunc(identifier("read"), &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg: libc,
+			rettypes: []*Gtype{gInt},
+		},
+	})
+
+	universe.setFunc(identifier("write"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			pkg: libc,
 			rettypes: []*Gtype{gInt},

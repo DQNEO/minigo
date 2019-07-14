@@ -127,11 +127,11 @@ func (tok *Token) isIdent(s bytes) bool {
 	return tok != nil && tok.typ == T_IDENT && eq(tok.sval,gs)
 }
 
-func (tok *Token) getIdent() goidentifier {
+func (tok *Token) getIdent() identifier {
 	if !tok.isTypeIdent() {
 		errorft(tok, "ident expeced, but got %v", tok)
 	}
-	return goidentifier(tok.sval)
+	return identifier(tok.sval)
 }
 
 func (tok *Token) getIntval() int {

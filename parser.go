@@ -82,7 +82,7 @@ func (p *parser) unreadToken() {
 	p.tokenStream.index--
 }
 
-func (p *parser) expectIdent() goidentifier {
+func (p *parser) expectIdent() identifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
 		errorft(tok, "Identifier expected, but got %s", tok)
@@ -196,7 +196,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	firstIdent := firstIdentToken.getIdent()
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
-	var pkg goidentifier // ignored for now
+	var pkg identifier // ignored for now
 	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
 		pkg = firstIdent
 		p.expect(S("."))
@@ -556,7 +556,7 @@ func (p *parser) parsePrim() Expr {
 				tok:    tok,
 				gtype:  gtype,
 				values: values,
-				invisiblevar: p.newVariable(goidentifier(""), &Gtype{
+				invisiblevar: p.newVariable(identifier(""), &Gtype{
 					kind:        G_ARRAY,
 					elementType: gtype.elementType,
 					length:      len(values),
@@ -660,7 +660,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		// when &T{}, allocate stack memory
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
-			strctliteral.invisiblevar = p.newVariable(goidentifier(""), &Gtype{
+			strctliteral.invisiblevar = p.newVariable(identifier(""), &Gtype{
 				kind:     G_NAMED,
 				relation: strctliteral.strctname,
 			})
@@ -774,7 +774,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 	}
 }
 
-func (p *parser) newVariable(varname goidentifier, gtype *Gtype) *ExprVariable {
+func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	var variable *ExprVariable
 	if p.isGlobal() {
 		variable = &ExprVariable{
@@ -816,7 +816,7 @@ func (p *parser) parseType() *Gtype {
 				pkg:  p.packageName,
 				name: ident,
 			}
-			p.tryResolve(goidentifier(""), rel)
+			p.tryResolve(identifier(""), rel)
 			gtype = &Gtype{
 				kind:     G_NAMED,
 				relation: rel,
@@ -1132,7 +1132,7 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 		outer: p.currentForStmt,
 		rng: &ForRangeClause{
 			tok:                 tokRange,
-			invisibleMapCounter: p.newVariable(goidentifier(""), gInt),
+			invisibleMapCounter: p.newVariable(identifier(""), gInt),
 			indexvar:            eIndexvar,
 			valuevar:            eValuevar,
 			rangeexpr:           rangeExpr,
@@ -1289,7 +1289,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
 	assert(p.isGlobal() == false, e.token(), "should not be in global scope")
-	var name goidentifier = goidentifier(rel.name)
+	var name identifier = identifier(rel.name)
 	variable := p.newVariable(name, nil)
 	p.currentScope.setVar(name, variable)
 	rel.expr = variable
@@ -1775,7 +1775,7 @@ func (p *parser) parseStructDef() *Gtype {
 	}
 }
 
-func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
+func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	p.expectKeyword(S("interface"))
@@ -1818,7 +1818,7 @@ func (p *parser) parseInterfaceDef(newName goidentifier) *DeclType {
 	return r
 }
 
-func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
+func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 	if rel.gtype != nil || rel.expr != nil {
 		return
 	}
@@ -2043,15 +2043,13 @@ func ParseFiles(pkgname identifier, sources []bytes, onMemory bool) *AstPackage 
 		}
 
 		for typeName, _methods := range astFile.methods {
-			gtypeName := goidentifier(typeName)
 			for mname, ref := range _methods {
-				gmname := goidentifier(mname)
-				almthds, ok := allmethods[identifier(gtypeName)]
+				almthds, ok := allmethods[typeName]
 				if !ok {
 					almthds = map[identifier]*ExprFuncRef{}
-					allmethods[identifier(gtypeName)] = almthds
+					allmethods[typeName] = almthds
 				}
-				almthds[identifier(gmname)] = ref
+				almthds[mname] = ref
 			}
 		}
 	}

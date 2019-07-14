@@ -25,7 +25,7 @@ const (
 )
 
 type signature struct {
-	fname      goidentifier
+	fname      identifier
 	paramTypes []*Gtype
 	rettypes   []*Gtype
 }
@@ -38,7 +38,7 @@ type Gtype struct {
 	size           int                         // for scalar type like int, bool, byte, for struct
 	origType       *Gtype                      // for pointer
 	fields         []*Gtype                    // for struct
-	fieldname      goidentifier                  // for struct field
+	fieldname      identifier                  // for struct field
 	offset         int                         // for struct field
 	padding        int                         // for struct field
 	length         int                         // for array, string (len without the terminating \0)
@@ -49,21 +49,21 @@ type Gtype struct {
 	mapValue       *Gtype                      // for map
 }
 
-func imethodGet(imethods map[identifier]*signature, name goidentifier) (*signature, bool) {
+func imethodGet(imethods map[identifier]*signature, name identifier) (*signature, bool) {
 	ref, ok := imethods[identifier(name)]
 	return ref, ok
 }
 
-func imethodSet(imethods map[identifier]*signature, name goidentifier, sig *signature) {
+func imethodSet(imethods map[identifier]*signature, name identifier, sig *signature) {
 	imethods[identifier(name)] = sig
 }
 
-func methodGet(methods map[identifier]*ExprFuncRef, name goidentifier) (*ExprFuncRef, bool) {
+func methodGet(methods map[identifier]*ExprFuncRef, name identifier) (*ExprFuncRef, bool) {
 	ref, ok := methods[identifier(name)]
 	return ref, ok
 }
 
-func methodSet(methods map[identifier]*ExprFuncRef, name goidentifier, ref *ExprFuncRef) {
+func methodSet(methods map[identifier]*ExprFuncRef, name identifier, ref *ExprFuncRef) {
 	methods[identifier(name)] = ref
 }
 
@@ -234,7 +234,7 @@ func (gtype *Gtype) String() string {
 	return ""
 }
 
-func (strct *Gtype) getField(name goidentifier) *Gtype {
+func (strct *Gtype) getField(name identifier) *Gtype {
 	assertNotNil(strct != nil, nil)
 	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type")
 	for _, field := range strct.fields {

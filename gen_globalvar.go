@@ -19,7 +19,7 @@ func (decl *DeclVar) emitData() {
 	doEmitData(ptok, right.getGtype(), right, S(""), 0)
 }
 
-func (e *ExprStructLiteral) lookup(fieldname goidentifier) Expr {
+func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	for _, field := range e.fields {
 		if eq(bytes(field.key) , bytes(fieldname)) {
 			return field.value
@@ -103,8 +103,6 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprFuncallOrConversion:
 			call := value.(*ExprFuncallOrConversion)
 			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
-			toGtype := call.rel.gtype
-			assert(toGtype.getKind() == G_SLICE, call.token(), "should be string to slice conversion")
 			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
 			assert(ok, call.token(), "arg0 should be stringliteral")
 			emit(".quad .%s", stringLiteral.slabel)

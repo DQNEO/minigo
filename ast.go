@@ -50,7 +50,7 @@ type Node interface {
 
 type Relation struct {
 	pkg  identifier
-	name goidentifier
+	name identifier
 	tok  *Token
 
 	// either of expr(var, const, funcref) or gtype
@@ -76,7 +76,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	tok        *Token
-	varname    goidentifier
+	varname    identifier
 	gtype      *Gtype
 	offset     int // for local variable
 	isGlobal   bool
@@ -85,7 +85,7 @@ type ExprVariable struct {
 
 type ExprConstVariable struct {
 	tok       *Token
-	name      goidentifier
+	name      identifier
 	gtype     *Gtype
 	val       Expr // like ExprConstExpr ?
 	iotaIndex int  // for iota
@@ -95,14 +95,14 @@ type ExprConstVariable struct {
 type ExprFuncallOrConversion struct {
 	tok   *Token
 	rel   *Relation
-	fname goidentifier
+	fname identifier
 	args  []Expr
 }
 
 type ExprMethodcall struct {
 	tok      *Token
 	receiver Expr
-	fname    goidentifier
+	fname    identifier
 	args     []Expr
 }
 
@@ -229,7 +229,7 @@ type StmtDec struct {
 
 type PackageClause struct {
 	tok  *Token
-	name goidentifier
+	name identifier
 }
 
 type ImportSpec struct {
@@ -256,7 +256,7 @@ type DeclFunc struct {
 	tok       *Token
 	pkg       identifier
 	receiver  *ExprVariable
-	fname     goidentifier
+	fname     identifier
 	rettypes  []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
@@ -278,7 +278,7 @@ type TopLevelDecl struct {
 
 type DeclType struct {
 	tok   *Token
-	name  goidentifier
+	name  identifier
 	gtype *Gtype
 }
 
@@ -382,7 +382,7 @@ type StmtSwitch struct {
 
 type KeyedElement struct {
 	tok   *Token
-	key   goidentifier // should be Expr ?
+	key   identifier // should be Expr ?
 	value Expr
 }
 
@@ -396,7 +396,7 @@ type ExprStructLiteral struct {
 type ExprStructField struct {
 	tok       *Token
 	strct     Expr
-	fieldname goidentifier
+	fieldname identifier
 }
 
 type MapElement struct {

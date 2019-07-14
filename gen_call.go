@@ -56,7 +56,7 @@ func (methodCall *ExprMethodcall) getRettypes() []*Gtype {
 
 type IrInterfaceMethodCall struct {
 	receiver   Expr
-	methodName goidentifier
+	methodName identifier
 	args       []Expr
 }
 

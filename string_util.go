@@ -9,8 +9,6 @@ type bytes []byte
 
 type identifier string
 
-type goidentifier []byte
-
 func S(s string) bytes {
 	return bytes(s)
 }
@@ -27,11 +25,11 @@ func Sprintf(format string, a... interface{}) string {
 		var y interface{}
 		switch x.(type) {
 		case bytes: // This case is not reached by 2nd gen compiler
-			var tmpgostring bytes = x.(bytes)
-			var tmpbytes []byte = []byte(tmpgostring)
+			var tmpb bytes = x.(bytes)
+			var tmpbytes []byte = []byte(tmpb)
 			y = tmpbytes
-		case goidentifier:   // This case is not reached by 2nd gen compiler
-			var tmpgoident goidentifier = x.(goidentifier)
+		case identifier:   // This case is not reached by 2nd gen compiler
+			var tmpgoident identifier = x.(identifier)
 			var tmpbytes2 []byte = []byte(tmpgoident)
 			y = tmpbytes2
 		default:

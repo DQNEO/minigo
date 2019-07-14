@@ -12,9 +12,9 @@ type IdentBody struct {
 	expr  Expr
 }
 
-func (sc *Scope) get(name goidentifier) *IdentBody {
+func (sc *Scope) get(name identifier) *IdentBody {
 	for s := sc; s != nil; s = s.outer {
-		v, ok := s.idents[identifier(name)]
+		v, ok := s.idents[name]
 		if ok {
 			return v
 		}
@@ -22,38 +22,38 @@ func (sc *Scope) get(name goidentifier) *IdentBody {
 	return nil
 }
 
-func (sc *Scope) setFunc(name goidentifier, funcref *ExprFuncRef) {
+func (sc *Scope) setFunc(name identifier, funcref *ExprFuncRef) {
 	sc.set(name, &IdentBody{
 		expr: funcref,
 	})
 }
 
-func (sc *Scope) setConst(name goidentifier, cnst *ExprConstVariable) {
+func (sc *Scope) setConst(name identifier, cnst *ExprConstVariable) {
 	sc.set(name, &IdentBody{
 		expr: cnst,
 	})
 }
 
-func (sc *Scope) setVar(name goidentifier, variable *ExprVariable) {
+func (sc *Scope) setVar(name identifier, variable *ExprVariable) {
 	sc.set(name, &IdentBody{
 		expr: variable,
 	})
 }
 
-func (sc *Scope) setGtype(name goidentifier, gtype *Gtype) {
+func (sc *Scope) setGtype(name identifier, gtype *Gtype) {
 	sc.set(name, &IdentBody{
 		gtype: gtype,
 	})
 }
 
-func (sc *Scope) set(name goidentifier, elm *IdentBody) {
+func (sc *Scope) set(name identifier, elm *IdentBody) {
 	if elm == nil {
 		panic(S("nil cannot be set"))
 	}
 	sc.idents[identifier(name)] = elm
 }
 
-func (sc *Scope) getGtype(name goidentifier) *Gtype {
+func (sc *Scope) getGtype(name identifier) *Gtype {
 	if sc == nil {
 		errorf("sc is nil")
 	}
