@@ -1,5 +1,7 @@
 package main
 
+import "strings"
+
 func f1() {
 	s := "main.go"
 	suffix := ".go"
@@ -19,7 +21,7 @@ func f2() {
 }
 
 func f3() {
-	s := Split(S("foo/bar"), S("/"))
+	s := strings.Split("foo/bar", "/")
 	fmtPrintf(S("%d\n"), len(s)+1) // 3
 	fmtPrintf(S("%s\n"), s[0])     // foo
 	fmtPrintf(S("%s\n"), s[1])     // bar
