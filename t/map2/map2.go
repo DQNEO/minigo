@@ -22,9 +22,9 @@ func f1() {
 
 func f2() {
 
-	var lmap map[string]bytes = map[string]bytes{
-		"15": S("10"),
-		"17":   S("11"),
+	var lmap map[string]string = map[string]string{
+		"15": "10",
+		"17": "11",
 	}
 
 	fmtPrintf("9%s\n", lmap["noexists"])
@@ -35,7 +35,7 @@ func f2() {
 
 	var lenmap int
 
-	lmap["19"] = S("13")
+	lmap["19"] = "13"
 	v19, ok := lmap["19"]
 	if ok {
 		fmtPrintf("%s\n", v19) // 13
@@ -46,11 +46,11 @@ func f2() {
 	lenmap = len(lmap) // 3
 	fmtPrintf("%d\n", lenmap+11) // 14
 
-	lmap["15"] = S("16")
-	lmap["17"] = S("18")
-	lmap["19"] = S("20")
+	lmap["15"] = "16"
+	lmap["17"] = "18"
+	lmap["19"] = "20"
 	for k, v := range lmap {
-		fmtPrintf("%s\n%s\n", S(k), v) // 15,16,17,18,19,20
+		fmtPrintf("%s\n%s\n", k, v) // 15,16,17,18,19,20
 	}
 }
 
@@ -77,11 +77,11 @@ func f3() {
 var gkeyFoo2 bytes = bytes("keyfoo")
 
 func f4() {
-	gkeyFoo := bytes("keyfoo")
+	gkeyFoo := "keyfoo"
 
-	var lmap map[string]bytes = map[string]bytes{
-		string(gkeyFoo):   S("26"),
-		"keybar": S("valuebar"),
+	var lmap map[string]string = map[string]string{
+		gkeyFoo:   "26",
+		"keybar": "valuebar",
 	}
 
 	var ok bool

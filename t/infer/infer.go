@@ -5,7 +5,7 @@ func main() {
 	f, g := getIntInt()
 	a := 1
 	b := 2 // should be '2'
-	c := S("3")
+	c := "3"
 	d := User{
 		id:  4,
 		age: 0,

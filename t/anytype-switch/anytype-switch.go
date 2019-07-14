@@ -20,7 +20,7 @@ func f1() {
 
 	fmtPrintf("%d\n", z)
 
-	var s bytes = S("hello")
+	var s bytes = bytes("hello")
 	x = s
 	switch x.(type) {
 	case nil:

@@ -46,7 +46,7 @@ func f4() {
 func f5() {
 	var slice []int = nil
 	for i, v := range slice {
-		fmtPrintf(S("error %d,%d\n", i), v)
+		fmtPrintf("error %d,%d\n", i, v)
 	}
 
 }

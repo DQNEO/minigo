@@ -46,16 +46,16 @@ func f3() {
 	fmtPrintf("%d\n", len(array))
 }
 
-func receive_strings(a bytes, b bytes) {
+func receive_strings(a string, b string) {
 	fmtPrintf("%d\n", len(a))
 	fmtPrintf("%d\n", len(b))
 }
 
 func f4() {
-	var hello bytes = S("01234567890")
+	var hello string = "01234567890"
 	fmtPrintf("%d\n", len(hello))
-	s1 := S("012345678901")
-	s2 := S("0123456789012")
+	s1 := "012345678901"
+	s2 := "0123456789012"
 	receive_strings(s1, s2)
 }
 

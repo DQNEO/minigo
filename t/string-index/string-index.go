@@ -2,7 +2,7 @@ package main
 
 
 func f1() {
-	var s bytes = S("543210")
+	var s []byte = []byte("543210")
 	var c byte = s[5]
 	fmtPrintf("%c\n", c)
 	fmtPrintf("%c\n", s[4])

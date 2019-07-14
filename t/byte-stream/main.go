@@ -2,10 +2,10 @@ package main
 
 
 func f1() {
-	path := S("t/min/min.go")
+	path := "t/min/min.go"
 	s := readFile(path)
 	_bs := ByteStream{
-		filename:  bytes(path),
+		filename:  path,
 		source:    s,
 		nextIndex: 0,
 		line:      1,

@@ -9,7 +9,7 @@ func ghello() {
 	fmtPrintf("%c", hello[2])
 	fmtPrintf("%c", hello[3])
 	fmtPrintf("%c", hello[4])
-	fmtPrintf("%s", S("\n"))
+	fmtPrintf("%s", "\n")
 
 	s := bytes(hello[:])
 	fmtPrintf("%s\n", s)
@@ -23,7 +23,7 @@ func lworld() {
 	fmtPrintf("%c", world[2])
 	fmtPrintf("%c", world[3])
 	fmtPrintf("%c", world[4])
-	fmtPrintf("%s", S("\n"))
+	fmtPrintf("%s", "\n")
 
 	b := world[:]
 	fmtPrintf("%s\n", bytes(b))

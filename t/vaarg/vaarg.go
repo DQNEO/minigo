@@ -18,19 +18,19 @@ func receiveIfcSlice(s bytes, a []interface{}) {
 var format bytes = bytes("format-%s-%d\n")
 
 func f1() {
-	receiveVarg(format, S("hello"), 123)
+	receiveVarg(format, "hello", 123)
 }
 
 func f2() {
 	var a []interface{}
-	a = append(a, S("hello"))
+	a = append(a, "hello")
 	a = append(a, 123)
 	receiveIfcSlice(format, a)
 }
 
 func f3() {
 	var a []interface{}
-	a = append(a, S("hello"))
+	a = append(a, "hello")
 	a = append(a, 123)
 	receiveVarg(format, a...)
 }

@@ -17,7 +17,7 @@ func f2() {
 }
 
 func f3() {
-	var s bytes = S("")
+	var s string = ""
 	fmtPrintf("%s5\n", s)       // 5
 	fmtPrintf("%d\n", len(s)+6) // 6
 }

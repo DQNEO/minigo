@@ -20,20 +20,20 @@ func f2() {
 	fmtPrintf("\n")
 }
 
-var gfoo bytes = bytes("foo")
+var gfoo string = string("foo")
 
 func f3() {
-	foo := S("foo")
-	if eq(S("foo"), S("foo")) {
+	foo := "foo"
+	if eq("foo", "foo") {
 		fmtPrintf("1\n")
 	}
 	if eq(foo ,foo) {
 		fmtPrintf("2\n")
 	}
-	if eq(S("foo") , foo) {
+	if eq("foo" , foo) {
 		fmtPrintf("3\n")
 	}
-	if eq(foo, S("foo")) {
+	if eq(foo, "foo") {
 		fmtPrintf("4\n")
 	}
 	if eq(foo, gfoo) {
@@ -42,12 +42,12 @@ func f3() {
 }
 
 func f4() {
-	s1 := S("aaa")
-	if !eq(s1, S("bbb")) {
+	s1 := "aaa"
+	if !eq(s1, "bbb") {
 		fmtPrintf("6\n")
 	}
 
-	if !eq(s1, S("")) {
+	if !eq(s1, "") {
 		fmtPrintf("7\n")
 	}
 }
@@ -55,26 +55,26 @@ func f4() {
 type mystring bytes
 
 func f5() {
-	s := S("8")
+	s := "8"
 	ms := mystring(s)
 	fmtPrintf("%s\n", ms) // 8
 }
 
 func f6() {
 	fmtPrintf("%d\n", len("123456789")) // 9
-	s := S("0123456789")
+	s := "0123456789"
 	fmtPrintf("%d\n", len(s)) // 10
 }
 
 func f7() {
-	s := S(`11
-12`)
+	s := `11
+12`
 	fmtPrintf("%s\n", s) // 11 12
 }
 
 func f8() {
-	s := S("dummy")
-	if eq(s, S("")) {
+	s := "dummy"
+	if eq(s, "") {
 		fmtPrintf("ERROR\n")
 	}
 }
@@ -82,7 +82,7 @@ func f8() {
 func f9() {
 	var s2 bytes
 	fmtPrintf("%s", s2)
-	if eq(s2, S("")) {
+	if eq(s2, "") {
 		fmtPrintf("13\n")
 	}
 }

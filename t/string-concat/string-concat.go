@@ -2,30 +2,30 @@ package main
 
 
 func f1() {
-	var a = S("abc")
-	var b = S("defg")
-	var x bytes
+	var a = "abc"
+	var b = "defg"
+	var x string
 	x = concat(a , b)
 	fmtPrintf("%s\n", x)
 }
 
 func f2() {
-	spaces := S("> ")
+	spaces := "> "
 	for i := 0; i < 3; i++ {
-		spaces = concat(spaces, S("xx"))
+		spaces = concat(spaces, "xx")
 	}
 	fmtPrintf("%s\n", spaces)
 }
 
 var seq int = 0
 
-func foo() bytes {
+func foo() string {
 	seq++
-	return S("foo")
+	return "foo"
 }
 
 func f3() {
-	label := concat3(foo() , foo() , S("bar"))
+	label := concat3(foo() , foo() , "bar")
 	fmtPrintf("%s\n", label) // "foofoobar"
 	fmtPrintf("%d\n", seq)   // 2
 }

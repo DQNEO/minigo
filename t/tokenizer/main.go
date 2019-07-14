@@ -6,7 +6,7 @@ var debugMode = true
 var debugToken = false
 
 func f3() {
-	path := S("t/min/min.go")
+	path := "t/min/min.go"
 	bs := NewByteStreamFromFile(path)
 
 	var c byte
@@ -19,7 +19,7 @@ func f3() {
 }
 
 func f4() {
-	path := S("t/min/min.go")
+	path := "t/min/min.go"
 	bs := NewByteStreamFromFile(path)
 	tokens := Tokenize(bs)
 	fmtPrintf("%d\n", len(tokens)) // 26
@@ -33,7 +33,7 @@ func f4() {
 
 func f5() {
 	debugToken = false
-	path := S("t/data/string.txt")
+	path := "t/data/string.txt"
 	bs := NewByteStreamFromFile(path)
 
 	tokens := Tokenize(bs)

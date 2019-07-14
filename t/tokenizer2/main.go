@@ -14,11 +14,11 @@ func f1() {
 	if len(tokens) == expectedLen {
 		fmtPrintf("1\n")
 	} else {
-		panic(S("ERROR"))
+		panic("ERROR")
 	}
 	/*
 		for _, tok := range tokens {
-			fmtPrintf(S("%s:%s\n", string(tok.typ)), tok.sval)
+			fmtPrintf("%s:%s\n", string(tok.typ), tok.sval)
 		}
 	*/
 }

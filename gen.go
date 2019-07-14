@@ -82,7 +82,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 
 // "main","f1" -> "main.f1"
 func getFuncSymbol(pkg identifier, fname string) string {
-	if eq(string(pkg), S("libc")) {
+	if eq(string(pkg), "libc") {
 		return fname
 	}
 	if len(pkg) == 0 {

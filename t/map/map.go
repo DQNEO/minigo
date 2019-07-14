@@ -73,15 +73,15 @@ func f4() {
 }
 
 func f5() {
-	var lmap map[int]bytes = map[int]bytes{
-		27: S("twenty seven"),
-		26: S("twenty six"),
+	var lmap map[int]string = map[int]string{
+		27: "twenty seven",
+		26: "twenty six",
 	}
 
 	fmtPrintf("%s\n", lmap[27])
 	fmtPrintf("%s\n", lmap[26])
 
-	lmap[1] = S("one")
+	lmap[1] = "one"
 	fmtPrintf("%s\n", lmap[1])
 
 	for _, v := range lmap {

@@ -9,10 +9,6 @@ type bytes []byte
 
 type identifier string
 
-func S(s string) string {
-	return s
-}
-
 func fmtPrintf(format string, a... interface{}) {
 	s := Sprintf(string(format), a...)
 	os.Stdout.Write(bytes(s))
