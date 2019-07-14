@@ -170,7 +170,9 @@ func eq(a bytes, b bytes) bool {
 }
 
 // "foo/bar", "/" => []bytes{"foo", "bar"}
-func Split(s bytes, sep bytes) []bytes {
+func Split(ss string, ssep string) []string {
+	s := []byte(ss)
+	sep := []byte(ssep)
 	if len(sep) > 1  {
 		panic(S("no supported"))
 	}
@@ -178,16 +180,16 @@ func Split(s bytes, sep bytes) []bytes {
 	sepchar := seps[0]
 	vbytes := []byte(s)
 	var buf []byte
-	var r []bytes
+	var r []string
 	for _, b := range vbytes {
 		if b == sepchar {
-			r = append(r, bytes(buf))
+			r = append(r, string(buf))
 			buf = nil
 		} else {
 			buf = append(buf, b)
 		}
 	}
-	r = append(r, bytes(buf))
+	r = append(r, string(buf))
 
 	return r
 }

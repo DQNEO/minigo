@@ -6,8 +6,8 @@ func strconv_Atoi(gs bytes) (int, error) {
 	return i,e
 }
 
-func strings_Split(s bytes, sep bytes) []bytes {
-	return Split(s, sep)
+func strings_Split(s bytes, sep bytes) []string {
+	return Split(string(s), string(sep))
 }
 
 func strings_HasSuffix(s bytes, suffix bytes) bool {

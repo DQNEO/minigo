@@ -61,20 +61,20 @@ func (program *Program) emitMethodTable() {
 				panic(S("invalid method name"))
 			}
 			splitted := strings_Split(methodNameFull, S("$"))
-			var shortMethodName bytes = splitted[1]
-			emit(".quad .S.S.%s # key", bytes(shortMethodName))
+			var shortMethodName string = splitted[1]
+			emit(".quad .S.S.%s # key", shortMethodName)
 			label := makeLabel()
 			gasIndentLevel++
 			emit(".data 1")
 			emit("%s:", label)
-			emit(".quad %s # func addr", bytes(methodNameFull))
+			emit(".quad %s # func addr", methodNameFull)
 			gasIndentLevel--
 			emit(".data 0")
 			emit(".quad %s # func addr addr", label)
 
 
-			if !inArray(shortMethodName, shortMethodNames) {
-				shortMethodNames = append(shortMethodNames, shortMethodName)
+			if !inArray(bytes(shortMethodName), shortMethodNames) {
+				shortMethodNames = append(shortMethodNames, bytes(shortMethodName))
 			}
 		}
 	}

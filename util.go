@@ -4,7 +4,7 @@ func getBaseNameFromImport(path bytes) bytes {
 	if strings_Congtains(path, S("/")) {
 		words := strings_Split(path, S("/"))
 		r := words[len(words)-1]
-		return r
+		return bytes(r)
 	} else {
 		return path
 	}
