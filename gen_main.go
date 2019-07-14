@@ -1,5 +1,7 @@
 package main
 
+import "strings"
+
 // builtin string
 var builtinStringKey1 bytes = bytes("SfmtDumpInterface")
 var builtinStringValue1 bytes = bytes("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
@@ -60,7 +62,7 @@ func (program *Program) emitMethodTable() {
 			if eq(methodNameFull, S(".")) {
 				panic(S("invalid method name"))
 			}
-			splitted := strings_Split(methodNameFull, S("$"))
+			splitted := strings.Split(string(methodNameFull), "$")
 			var shortMethodName string = splitted[1]
 			emit(".quad .S.S.%s # key", shortMethodName)
 			label := makeLabel()
