@@ -50,26 +50,6 @@ func (call *IrInterfaceMethodCall) emit() {
 	call.emitMethodCall()
 }
 
-func emitLoadMapKey(eMapKey Expr) {
-	var isKeyString bool = eMapKey.getGtype().isString()
-	if isKeyString {
-		var arg0 Expr
-		switch eMapKey.(type) {
-		case *ExprFuncallOrConversion:
-			funcallOrConversion := eMapKey.(*ExprFuncallOrConversion)
-			arg0 = funcallOrConversion.args[0]
-		case *IrExprConversion:
-			conversion := eMapKey.(*IrExprConversion)
-			arg0 = conversion.arg
-		default:
-			assertNotReached(eMapKey.token())
-		}
-		arg0.emit()
-	} else {
-		eMapKey.emit()
-	}
-}
-
 // emit map index expr
 func loadMapIndexExpr(e *ExprIndex) {
 	// e.g. x[key]
@@ -95,7 +75,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("mov 8(%%rax), %%rax")
 	emit("PUSH_8 # len")
 	var isKeyString bool = e.index.getGtype().isString()
-	emitLoadMapKey(e.index)
+	e.index.emit()
 	if isKeyString {
 		emit("PUSH_SLICE")
 		emit("pop %%rdi # index value")
@@ -266,7 +246,7 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 }
 
 func emitSaveMapKey(eMapKey Expr) {
-	emitLoadMapKey(eMapKey)
+	eMapKey.emit()
 	if eMapKey.getGtype().isString() {
 		emit("PUSH_SLICE")
 		emitCallMalloc(24)
