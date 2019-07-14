@@ -39,7 +39,7 @@ func writePos() {
 		spos = pos.String()
 	}
 	var s string
-	s = concat3(S("/*"), spos, S("*/"))
+	s = concat3("/*", string(spos), "*/")
 	write([]byte(s))
 }
 

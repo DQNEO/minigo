@@ -121,8 +121,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		var val int = evalIntExpr(value)
 		emit(".quad %d # %s %s", val, gtype.String(), bytes(containerName))
 	} else if primType == G_STRUCT {
-		s := concat3(containerName, S(".") , bytes(gtype.relation.name))
-		containerName = []byte(s)
+		s := concat3(string(containerName), "." , string(gtype.relation.name))
+		containerName = bytes(s)
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# padding=%d", field.padding)
 			switch field.padding {
@@ -136,7 +136,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			}
 			emit("# field:offesr=%d, fieldname=%s", field.offset, bytes(field.fieldname))
 			if value == nil {
-				s2 :=  concat3(containerName,S("."), bytes(field.fieldname))
+				s2 :=  concat3(string(containerName),".", string(field.fieldname))
 				doEmitData(ptok, field, nil,[]byte(s2), depth)
 				continue
 			}
@@ -148,7 +148,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				//continue
 			}
 			gtype := field
-			s3 := concat3(containerName,S("."), bytes(field.fieldname))
+			s3 :=  concat3(string(containerName),".", string(field.fieldname))
 			doEmitData(ptok, gtype, value, []byte(s3), depth)
 		}
 	} else {

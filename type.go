@@ -200,13 +200,13 @@ func (gtype *Gtype) String() bytes {
 		s := Sprintf("[%d]%s", gtype.length, elm.String())
 		return bytes(s)
 	case G_STRUCT:
-		var r bytes = S("struct{")
+		var r string = "struct{"
 		for _, field := range gtype.fields {
-			tmp := concat(field.String(), S(","))
-			r = []byte(concat(r, []byte(tmp)))
+			tmp := concat(string(field.String()), ",")
+			r = concat(r, tmp)
 		}
-		r = []byte(concat(r, S("}")))
-		return r
+		r = concat(r, "}")
+		return []byte(r)
 	case G_STRUCT_FIELD:
 		return S("structfield")
 	case G_POINTER:

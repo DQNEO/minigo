@@ -26,7 +26,7 @@ var debugNest int
 
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
-	format2 := concat(S("(To Be Implemented) "), bytes(format))
+	format2 := concat("(To Be Implemented) ", format)
 	errorft(tok, format2, v...)
 }
 
@@ -37,7 +37,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	if tok != nil {
 		tokString = tok.String()
 	}
-	gs := concat3(bytes(format),S("\n "), tokString)
+	gs := concat3(format,"\n ", string(tokString))
 	errorf(gs, v...)
 }
 
@@ -56,7 +56,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 		if tok != nil {
 			toks = tok.String()
 		}
-		msg := concat3(S("assertion failed: "), bytes(s),  toks)
+		msg := concat3("assertion failed: ", s,  string(toks))
 		os.Stderr.Write([]byte(msg))
 		os.Stderr.Write(S("\n"))
 		panic(S(""))
@@ -64,7 +64,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 }
 
 func assertNotReached(tok *Token) {
-	msg := concat(S("assertNotReached "), tok.String())
+	msg := concat("assertNotReached ", string(tok.String()))
 	os.Stderr.Write([]byte(msg))
 	panic(S(""))
 }

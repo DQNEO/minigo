@@ -133,7 +133,10 @@ func writeln(s bytes) {
 	os.Stdout.Write(b)
 }
 
-func concat(a bytes, b bytes) string {
+func concat(as string, bs string) string {
+	a := bytes(as)
+	b := bytes(bs)
+
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
@@ -144,7 +147,10 @@ func concat(a bytes, b bytes) string {
 	return string(r)
 }
 
-func concat3(a bytes, b bytes, c bytes) string {
+func concat3(as string, bs string, cs string) string {
+	a := bytes(as)
+	b := bytes(bs)
+	c := bytes(cs)
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
