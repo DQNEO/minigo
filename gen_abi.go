@@ -15,36 +15,36 @@ package main
   REX prefixes are used to generate 64-bit operand sizes or to reference registers R8-R15.
 */
 
-var retRegi [14]bytes = [14]bytes{
-	bytes("rax"),
-	bytes("rbx"),
-	bytes("rcx"),
-	bytes("rdx"),
-	bytes("rdi"),
-	bytes("rsi"),
-	bytes("r8"),
-	bytes("r9"),
-	bytes("r10"),
-	bytes("r11"),
-	bytes("r12"),
-	bytes("r13"),
-	bytes("r14"),
-	bytes("r15"),
+var retRegi [14]string = [14]string{
+	"rax",
+	"rbx",
+	"rcx",
+	"rdx",
+	"rdi",
+	"rsi",
+	"r8",
+	"r9",
+	"r10",
+	"r11",
+	"r12",
+	"r13",
+	"r14",
+	"r15",
 }
 
-var RegsForArguments [12]bytes = [12]bytes{
-	bytes("rdi"),
-	bytes("rsi"),
-	bytes("rdx"),
-	bytes("rcx"),
-	bytes("r8"),
-	bytes("r9"),
-	bytes("r10"),
-	bytes("r11"),
-	bytes("r12"),
-	bytes("r13"),
-	bytes("r14"),
-	bytes("r15"),
+var RegsForArguments [12]string = [12]string{
+	"rdi",
+	"rsi",
+	"rdx",
+	"rcx",
+	"r8",
+	"r9",
+	"r10",
+	"r11",
+	"r12",
+	"r13",
+	"r14",
+	"r15",
 }
 
 func (f *DeclFunc) prepare() Emitter {
@@ -353,13 +353,13 @@ func (stmt *StmtReturn) emit() {
 		}
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
-			var reg bytes = bytes(retRegi[num64bit-1-j])
+			reg  := retRegi[num64bit-1-j]
 			emit("push %%%s", reg)
 			retRegiIndex++
 		}
 	}
 	for i := 0; i < retRegiIndex; i++ {
-		var reg bytes = bytes(retRegi[retRegiIndex-1-i])
+		reg := retRegi[retRegiIndex-1-i]
 		emit("pop %%%s", reg)
 	}
 

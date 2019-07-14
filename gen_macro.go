@@ -9,7 +9,7 @@ func emitMacroDefinitions() {
 	macroEnd()
 
 	var i int
-	var regi bytes
+	var regi string
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf("POP_TO_ARG_%d", i)
 		macroStart(bytes(macroName), S(""))

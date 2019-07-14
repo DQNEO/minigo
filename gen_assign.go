@@ -97,7 +97,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 			emit("# retRegiLen=%d\n", retRegiLen)
 			var i int
 			for i = retRegiLen - 1; i >= 0; i-- {
-				emit("push %%%s # %d", bytes(retRegi[i]), i)
+				emit("push %%%s # %d", retRegi[i], i)
 			}
 			for _, left := range ast.lefts {
 				if isUnderScore(left) {
