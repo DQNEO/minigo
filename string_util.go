@@ -144,7 +144,7 @@ func concat(a bytes, b bytes) bytes {
 	return r
 }
 
-func concat3(a bytes, b bytes, c bytes) bytes {
+func concat3(a bytes, b bytes, c bytes) string {
 	var r []byte
 	for i:=0;i<len(a);i++ {
 		r = append(r, a[i])
@@ -155,7 +155,7 @@ func concat3(a bytes, b bytes, c bytes) bytes {
 	for i:=0;i<len(c);i++ {
 		r = append(r, c[i])
 	}
-	return r
+	return string(r)
 }
 
 func eq(a bytes, b bytes) bool {

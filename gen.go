@@ -38,9 +38,9 @@ func writePos() {
 	} else {
 		spos = pos.String()
 	}
-	var b []byte
-	b = concat3(S("/*"), spos, S("*/"))
-	write(b)
+	var s string
+	s = concat3(S("/*"), spos, S("*/"))
+	write([]byte(s))
 }
 
 var gasIndentLevel int = 1
