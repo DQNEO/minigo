@@ -243,9 +243,9 @@ func (f *StmtFor) convert() Stmt {
 
 	lbls := f.labels
 	// @FIXME:  f.labels.labelBegin = l1  does not work!!!
-	lbls.labelBegin = l1
-	lbls.labelEndBlock = l2
-	lbls.labelEndLoop = l3
+	lbls.labelBegin = string(l1)
+	lbls.labelEndBlock = string(l2)
+	lbls.labelEndLoop = string(l3)
 
 	var em Stmt
 
