@@ -253,7 +253,7 @@ func walkExpr(expr Expr) Expr {
 				}
 				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append24"))
 			default:
-				TBI(slice.token(), S(""))
+				TBI(slice.token(), "")
 			}
 			staticCall.args = funcall.args
 			return staticCall

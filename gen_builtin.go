@@ -32,7 +32,8 @@ func (e *ExprLen) emit() {
 			}
 			uop.emit()
 		default:
-			TBI(arg.token(), Sprintf("unable to handle %T", arg))
+			bs := Sprintf("unable to handle %T", arg)
+			TBI(arg.token(), string(bs))
 		}
 	case G_MAP:
 		emit("# emit len(map)")
@@ -53,7 +54,7 @@ func (e *ExprLen) emit() {
 		emit("LOAD_NUMBER 0")
 		emit("%s:", labelEnd)
 	default:
-		TBI(arg.token(), S("unable to handle %s"), gtype)
+		TBI(arg.token(), "unable to handle %s", gtype)
 	}
 }
 
@@ -102,15 +103,15 @@ func (e *ExprCap) emit() {
 				}
 				cp.emit()
 			} else {
-				TBI(arg.token(), S("unable to handle %T"), arg)
+				TBI(arg.token(), "unable to handle %T", arg)
 			}
 		default:
-			TBI(arg.token(), S("unable to handle %T"), arg)
+			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case G_MAP:
 		errorft(arg.token(), S("invalid argument for cap"))
 	default:
-		TBI(arg.token(), S("unable to handle %s"), gtype)
+		TBI(arg.token(), "unable to handle %s", gtype)
 	}
 }
 

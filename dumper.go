@@ -347,11 +347,11 @@ func (f *StmtFor) dump() {
 }
 
 func (e *ExprLen) dump() {
-	TBI(e.token(), S(""))
+	TBI(e.token(), "")
 }
 
 func (e *ExprCap) dump() {
-	TBI(e.token(), S(""))
+	TBI(e.token(), "")
 }
 
 func (e *ExprSliceLiteral) dump() {

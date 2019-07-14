@@ -247,7 +247,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			emit("PUSH_8")
 			emitCopyStructFromStack(lhs.getGtype().getSize())
 		} else {
-			TBI(rhs.token(), S("assign to struct"))
+			TBI(rhs.token(), "assign to struct")
 		}
 	case *ExprStructLiteral:
 		structliteral, ok := rhs.(*ExprStructLiteral)
@@ -311,7 +311,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 		}
 	default:
-		TBI(rhs.token(), S("assign to struct"))
+		TBI(rhs.token(), "assign to struct")
 	}
 
 	emit("# assignToStruct end")
@@ -444,7 +444,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 				strctField := rhs.(*ExprStructField)
 				strctField.emitOffsetLoad(elmSize, offsetByIndex)
 			default:
-				TBI(rhs.token(), S("no supporetd %T"), rhs)
+				TBI(rhs.token(), "no supporetd %T", rhs)
 			}
 
 			emitOffsetSavePrimitive(lhs, elmSize, offsetByIndex)

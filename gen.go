@@ -205,7 +205,7 @@ func (binop *ExprBinop) emitComp() {
 
 func (ast *ExprBinop) emit() {
 	if eq(ast.op , bytes("+")) && ast.left.getGtype().isString() {
-		TBI(ast.token(), S("concat strings"))
+		TBI(ast.token(), "concat strings")
 		return
 	}
 	op := string(ast.op)
@@ -440,7 +440,7 @@ func (e ExprArrayLiteral) emit() {
 func (e *ExprTypeAssertion) emit() {
 	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), S("expr must be an Interface type"))
 	if e.gtype.getKind() == G_INTERFACE {
-		TBI(e.token(), S("type assertion"))
+		TBI(e.token(), "type assertion")
 	} else {
 		// if T is not an interface type,
 		// x.(T) asserts that the dynamic type of x is identical to the type T.

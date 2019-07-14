@@ -106,7 +106,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d", length)
 			emit(".quad %d", length)
 		default:
-			TBI(ptok, S("unable to handle gtype %s"), gtype.String())
+			TBI(ptok, "unable to handle gtype %s", gtype.String())
 		}
 	} else if primType == G_INTERFACE {
 		emit(".quad 0")
@@ -184,7 +184,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				emitDataAddr(operand, depth)
 			}
 		default:
-			TBI(ptok, S("unable to handle %d"), primType)
+			TBI(ptok, "unable to handle %d", primType)
 		}
 	}
 }

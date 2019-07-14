@@ -65,7 +65,7 @@ func (clause *ForRangeClause) infer() {
 		indexType = collectionType.Underlying().mapKey
 	default:
 		// @TODO consider map etc.
-		TBI(clause.tok, S("unable to handle %d "), collectionType.getKind())
+		TBI(clause.tok, "unable to handle %d ", collectionType.getKind())
 	}
 	indexvar.gtype = indexType
 

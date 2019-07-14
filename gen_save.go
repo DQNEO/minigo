@@ -128,7 +128,7 @@ func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 		e.emitMapSetFromStack8()
 		return
 	default:
-		TBI(e.token(), S("unable to handle %s"), collectionType)
+		TBI(e.token(), "unable to handle %s", collectionType)
 	}
 }
 

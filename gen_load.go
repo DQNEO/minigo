@@ -35,7 +35,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 		// *ptr.field
 		// (MyStruct{}).field
 		// (&MyStruct{}).field
-		TBI(strct.token(), S("unable to handle %T"), strct)
+		TBI(strct.token(), "unable to handle %T", strct)
 	}
 
 }
@@ -235,7 +235,7 @@ func (e *ExprSliceLiteral) emit() {
 			var offset int = IntSize*i
 			emit("mov %%rax, %d(%%r10)", offset)
 		} else {
-			TBI(e.token(), S("ExprSliceLiteral emit"))
+			TBI(e.token(), "ExprSliceLiteral emit")
 		}
 		emit("push %%r10 # ptr")
 	}
@@ -253,7 +253,7 @@ func emitAddress(e Expr) {
 	case *ExprIndex:
 		e.(*ExprIndex).emitAddress()
 	default:
-		TBI(e.token(), S(""))
+		TBI(e.token(), "")
 	}
 }
 
@@ -337,7 +337,7 @@ func (e *ExprIndex) emitAddress() {
 	case G_ARRAY, G_SLICE:
 		e.emitAddressOfArrayOrSliceIndex()
 	default:
-		TBI(e.collection.token(), S(""))
+		TBI(e.collection.token(), "")
 	}
 }
 
@@ -350,7 +350,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	case G_MAP:
 		loadMapIndexExpr(e)
 	default:
-		TBI(e.collection.token(), S("unable to handle %s"), e.collection.getGtype())
+		TBI(e.collection.token(), "unable to handle %s", e.collection.getGtype())
 	}
 }
 

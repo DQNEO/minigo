@@ -870,7 +870,7 @@ func (p *parser) parseType() *Gtype {
 
 		} else if tok.isPunct(S("...")) {
 			// vaargs
-			TBI(tok, S("VAARGS is not supported yet"))
+			TBI(tok, "VAARGS is not supported yet")
 		} else {
 			errorft(tok, S("Unkonwn token"))
 		}
@@ -1457,7 +1457,7 @@ func (p *parser) parseStmt() Stmt {
 		} else if tok3.isPunct(S(":=")) {
 			return p.parseShortAssignment(lefts)
 		} else {
-			TBI(tok3, S(""))
+			TBI(tok3, "")
 		}
 	} else if tok2.isPunct(S("=")) {
 		p.skip()
@@ -1892,7 +1892,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		return &TopLevelDecl{typedecl: typedecl}
 	}
 
-	TBI(nextToken, S("top level decl"))
+	TBI(nextToken, "top level decl")
 	return nil
 }
 
