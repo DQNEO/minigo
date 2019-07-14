@@ -109,7 +109,7 @@ func (p *parser) expect(punct bytes) *Token {
 func getCallerName(n int) bytes {
 	pc, _, _, ok := runtime.Caller(n)
 	if !ok {
-		errorf(S("Unable to get caller"))
+		errorf("Unable to get caller")
 	}
 	details := runtime.FuncForPC(pc)
 	//r := (strings.Split(details.Name(), S(".")))[2]
@@ -704,7 +704,7 @@ func priority(op bytes) int {
 	case "*":
 		return 20
 	default:
-		errorf(S("unkown operator %s"), op)
+		errorf("unkown operator %s", op)
 	}
 	return 0
 }

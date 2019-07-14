@@ -525,7 +525,7 @@ func evalIntExpr(e Expr) int {
 
 	switch e.(type) {
 	case nil:
-		errorf(S("e is nil"))
+		errorf("e is nil")
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:

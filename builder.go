@@ -99,7 +99,7 @@ func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
 		pkgName := goidentifier(spkgName)
 		pkgCode, ok := stdPkgs[identifier(pkgName)]
 		if !ok {
-			errorf(S("package '%s' is not a standard library."), spkgName)
+			errorf("package '%s' is not a standard library.", spkgName)
 		}
 		var codes []bytes = []bytes{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
