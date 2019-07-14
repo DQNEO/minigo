@@ -234,7 +234,7 @@ type PackageClause struct {
 
 type ImportSpec struct {
 	tok  *Token
-	path bytes
+	path string
 }
 
 type ImportDecl struct {
