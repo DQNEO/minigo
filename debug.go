@@ -33,11 +33,11 @@ func TBI(tok *Token, format string, v ...interface{}) {
 // errorf with a position token
 func errorft(tok *Token, format string, v ...interface{}) {
 
-	var tokString bytes
+	var tokString string
 	if tok != nil {
 		tokString = tok.String()
 	}
-	gs := concat3(format,"\n ", string(tokString))
+	gs := concat3(format,"\n ", tokString)
 	errorf(gs, v...)
 }
 
@@ -52,11 +52,11 @@ func errorf(format string, v ...interface{}) {
 func assert(cond bool, tok *Token, format string, v ...interface{}) {
 	if !cond {
 		s := Sprintf(string(format), v...)
-		var toks bytes = S("")
+		var toks string
 		if tok != nil {
 			toks = tok.String()
 		}
-		msg := concat3("assertion failed: ", s,  string(toks))
+		msg := concat3("assertion failed: ", s,  toks)
 		os.Stderr.Write([]byte(msg))
 		os.Stderr.Write(S("\n"))
 		panic(S(""))

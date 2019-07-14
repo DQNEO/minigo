@@ -32,14 +32,12 @@ func writePos() {
 	if !emitPosition {
 		return
 	}
-	var spos bytes
-	if pos == nil {
-		spos = S("()")
-	} else {
+	var spos string
+	if pos != nil {
 		spos = pos.String()
 	}
 	var s string
-	s = concat3("/*", string(spos), "*/")
+	s = concat3("/*", spos, "*/")
 	write([]byte(s))
 }
 
