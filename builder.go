@@ -26,14 +26,14 @@ func parseImports(sourceFiles []bytes) []bytes {
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: goidentifier(""),
+		packageName: identifier(""),
 	}
 	f := p.ParseString(S("internal_universe.go"), bytes(internalUniverseCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           goidentifier(""),
+		name:           identifier(""),
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
@@ -43,14 +43,14 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: goidentifier("iruntime"),
+		packageName: identifier("iruntime"),
 	}
 	f := p.ParseString(S("internal_runtime.go"), bytes(internalRuntimeCode), universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           goidentifier(""),
+		name:           identifier(""),
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
@@ -68,7 +68,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []bytes) *AstPackage {
 	// compile the main package
-	pkgName := goidentifier("main")
+	pkgName := identifier("main")
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
@@ -96,8 +96,8 @@ func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range imported {
-		pkgName := goidentifier(spkgName)
-		pkgCode, ok := stdPkgs[identifier(pkgName)]
+		pkgName := identifier(spkgName)
+		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}

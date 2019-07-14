@@ -17,7 +17,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	packageName         goidentifier
+	packageName         identifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
@@ -2002,7 +2002,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname goidentifier, sources []bytes, onMemory bool) *AstPackage {
+func ParseFiles(pkgname identifier, sources []bytes, onMemory bool) *AstPackage {
 	pkgScope := newScope(nil, bytes(pkgname))
 
 	var astFiles []*AstFile
@@ -2017,7 +2017,7 @@ func ParseFiles(pkgname goidentifier, sources []bytes, onMemory bool) *AstPackag
 	for _, source := range sources {
 		var astFile *AstFile
 		p := &parser{
-			packageName: goidentifier(pkgname),
+			packageName: identifier(pkgname),
 		}
 		if onMemory {
 			var filename string = concat(string(pkgname),  ".memory")
