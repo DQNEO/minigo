@@ -60,7 +60,7 @@ func (e *ExprLen) emit() {
 
 type IrLowLevelCall struct {
 	token         *Token
-	symbol        bytes
+	symbol        string
 	argsFromStack int // args are taken from the stack
 }
 

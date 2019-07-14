@@ -116,7 +116,7 @@ func emitGoStringsEqualFromStack() {
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
-		symbol:        S("iruntime.eqGostrings"),
+		symbol:        "iruntime.eqGostrings",
 		argsFromStack: 7,
 	}
 	call.emit()
