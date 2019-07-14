@@ -85,9 +85,6 @@ func getFuncSymbol(pkg identifier, fname string) string {
 	if eq(string(pkg), "libc") {
 		return fname
 	}
-	if len(pkg) == 0 {
-		pkg = ""
-	}
 	s := Sprintf("%s.%s", pkg, fname)
 	return s
 }
