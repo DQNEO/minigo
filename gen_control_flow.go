@@ -68,7 +68,7 @@ func (stmt *StmtSwitch) emit() {
 
 	emit("# switch statement")
 	labelEnd := makeLabel()
-	var labels []bytes
+	var labels []string
 	// switch (expr) {
 	var cond Expr
 	if stmt.cond != nil {
@@ -142,7 +142,7 @@ func (stmt *StmtSwitch) emit() {
 		}
 	}
 
-	var defaultLabel bytes
+	var defaultLabel string
 	if stmt.dflt == nil {
 		emit("jmp %s", labelEnd)
 	} else {
