@@ -204,7 +204,9 @@ func Index(s bytes, substr bytes) int {
 	return -1
 }
 
-func HasSuffix(s bytes, suffix bytes) bool {
+func HasSuffix(ss string, ssuffix string) bool {
+	s := bytes(ss)
+	suffix := bytes(ssuffix)
 	if len(s) >= len(suffix) {
 		var low int =  len(s)-len(suffix)
 		var lensb int = len(s)
