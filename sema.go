@@ -81,7 +81,7 @@ func collectDecls(pkg *AstPackage) {
 	}
 }
 
-func setStringLables(pkg *AstPackage, prefix bytes) {
+func setStringLables(pkg *AstPackage, prefix identifier) {
 	for id, sl := range pkg.stringLiterals {
 		var no int = id + 1
 		sl.slabel = Sprintf("%s.S%d", prefix, no)
