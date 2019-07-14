@@ -2,19 +2,19 @@
 package main
 
 // analyze imports of given go files
-func parseImports(sourceFiles []string) []bytes {
+func parseImports(sourceFiles []string) []string {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
-	imported := []bytes{bytes("os")}
+	imported := []string{"os"}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
-				baseName := getBaseNameFromImport(string(spec.path))
-				if !inArray([]byte(baseName), imported) {
-					imported = append(imported, []byte(baseName))
+				baseName := getBaseNameFromImport(spec.path)
+				if !inArray2(baseName, imported) {
+					imported = append(imported, baseName)
 				}
 			}
 		}
@@ -88,7 +88,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 }
 
 // parse standard libraries
-func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
+func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 	libs := &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
