@@ -9,8 +9,8 @@ func (e *ExprLen) emit() {
 	switch gtype.getKind() {
 	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case G_SLICE:
-		emit("# len(slice)")
+	case G_SLICE,G_STRING:
+		emit("# len(slice|string)")
 		switch arg.(type) {
 		case *ExprStringLiteral:
 			sLiteral := arg.(*ExprStringLiteral)

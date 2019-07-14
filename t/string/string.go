@@ -87,6 +87,23 @@ func f9() {
 	}
 }
 
+func f10() {
+	var str0 string
+	fmtPrintf(S("1%s4\n"), str0)
+
+	var str1 string = ""
+	fmtPrintf(S("1%s5\n"), str1)
+
+	str2 := ""
+	fmtPrintf(S("1%s6\n"), str2)
+
+	fmtPrintf(S("%d\n"), len(str0) + len(str1) + 17) // 17
+
+	str3 := "abc\n"
+
+	fmtPrintf(S("%d\n"), len(str3) + 14) // 18
+}
+
 func main() {
 	f1()
 	f2()
@@ -97,4 +114,5 @@ func main() {
 	f7()
 	f8()
 	f9()
+	f10()
 }
