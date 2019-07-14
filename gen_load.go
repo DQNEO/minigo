@@ -350,7 +350,7 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	case G_MAP:
 		loadMapIndexExpr(e)
 	default:
-		TBI(e.collection.token(), "unable to handle %s", e.collection.getGtype())
+		TBI(e.collection.token(), "unable to handle %s", e.collection.getGtype().String())
 	}
 }
 

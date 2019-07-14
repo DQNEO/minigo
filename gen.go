@@ -82,7 +82,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 
 // "main","f1" -> "main.f1"
 func getFuncSymbol(pkg identifier, fname string) string {
-	if eq(bytes(pkg), S("libc")) {
+	if eq(string(pkg), S("libc")) {
 		return fname
 	}
 	if len(pkg) == 0 {
@@ -204,7 +204,7 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if eq(bytes(ast.op) , bytes("+")) && ast.left.getGtype().isString() {
+	if eq(ast.op , "+") && ast.left.getGtype().isString() {
 		TBI(ast.token(), "concat strings")
 		return
 	}
@@ -274,7 +274,7 @@ func isUnderScore(e Expr) bool {
 	if !ok {
 		return false
 	}
-	return eq(bytes(rel.name), bytes("_"))
+	return eq(string(rel.name), "_")
 }
 
 // expect rhs address is in the stack top, lhs is in the second top

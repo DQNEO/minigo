@@ -26,38 +26,38 @@ func parseOpts(args []string) []string {
 	var r []string
 
 	for _, _opt := range args {
-		opt := bytes(_opt)
-		if eq(opt,S("--version")) {
+		opt := _opt
+		if eq(opt,"--version") {
 			printVersion()
 			return nil
 		}
-		if eq(opt, S("-t")) {
+		if eq(opt, "-t") {
 			debugToken = true
 		}
-		if eq(opt, S("-a")) {
+		if eq(opt, "-a") {
 			debugAst = true
 		}
-		if eq(opt, S("-p")) {
+		if eq(opt, "-p") {
 			debugParser = true
 		}
-		if eq(opt, S("--position")) {
+		if eq(opt, "--position") {
 			emitPosition = true
 		}
-		if eq(opt, S("-d")) {
+		if eq(opt, "-d") {
 			debugMode = true
 		}
-		if eq(opt, S("--tokenize-only")) {
+		if eq(opt, "--tokenize-only") {
 			tokenizeOnly = true
 		}
-		if eq(opt, S("--parse-only")) {
+		if eq(opt, "--parse-only") {
 			parseOnly = true
 		}
-		if eq(opt, S("--resolve-only")) {
+		if eq(opt, "--resolve-only") {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(string(opt), ".go") {
 			r = append(r, string(opt))
-		} else if eq(opt, S("-")) {
+		} else if eq(opt, "-") {
 			return []string{"/dev/stdin"}
 		}
 	}

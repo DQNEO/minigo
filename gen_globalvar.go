@@ -5,7 +5,7 @@ package main
 func (decl *DeclVar) emitBss() {
 	emit(".data")
 	// https://sourceware.org/binutils/docs-2.30/as/Lcomm.html#Lcomm
-	emit(".lcomm %s, %d", bytes(decl.variable.varname), decl.variable.getGtype().getSize())
+	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
 }
 
 func (decl *DeclVar) emitData() {
@@ -13,7 +13,7 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emitWithoutIndent("%s: # gtype=%s", bytes(decl.variable.varname), gtype.String())
+	emitWithoutIndent("%s: # gtype=%s", decl.variable.varname, gtype.String())
 	emitWithoutIndent("# right.gtype = %s", right.getGtype().String())
 	emitWithoutIndent(".data 0")
 	doEmitData(ptok, right.getGtype(), right, "", 0)
@@ -21,7 +21,7 @@ func (decl *DeclVar) emitData() {
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	for _, field := range e.fields {
-		if eq(bytes(field.key) , bytes(fieldname)) {
+		if eq(string(field.key) , string(fieldname)) {
 			return field.value
 		}
 	}
@@ -58,11 +58,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						operand := unwrapRel(uop.operand)
 						vr, ok := operand.(*ExprVariable)
 						assert(ok, uop.token(), "only variable is allowed")
-						emit(".quad %s # %s %s", bytes(vr.varname), value.getGtype().String(), bytes(selector))
+						emit(".quad %s # %s %s", vr.varname, value.getGtype().String(), selector)
 					case *ExprVariable:
 						assert(false, value.token(), "variable here is not allowed")
 					default:
-						emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), bytes(selector))
+						emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), selector)
 					}
 				} else if size == 1 {
 					emit(".byte %d", evalIntExpr(value))
@@ -119,11 +119,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad 0 # %s %s",  gtype.String(), bytes(containerName))
+			emit(".quad 0 # %s %s",  gtype.String(), containerName)
 			return
 		}
 		var val int = evalIntExpr(value)
-		emit(".quad %d # %s %s", val, gtype.String(), bytes(containerName))
+		emit(".quad %d # %s %s", val, gtype.String(), containerName)
 	} else if primType == G_STRUCT {
 		s := concat3(string(containerName), "." , string(gtype.relation.name))
 		containerName = s
@@ -138,7 +138,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				emit(".quad 0 # padding")
 			default:
 			}
-			emit("# field:offesr=%d, fieldname=%s", field.offset, bytes(field.fieldname))
+			emit("# field:offesr=%d, fieldname=%s", field.offset, field.fieldname)
 			if value == nil {
 				s2 :=  concat3(string(containerName),".", string(field.fieldname))
 				doEmitData(ptok, field, nil,s2, depth)
@@ -160,10 +160,10 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		var gtypeString string = gtype.String()
 		switch value.(type) {
 		case nil:
-			emit(".quad %d # %s %s zero value", val, gtypeString, bytes(containerName))
+			emit(".quad %d # %s %s zero value", val, gtypeString, containerName)
 		case *ExprNumberLiteral:
 			val = value.(*ExprNumberLiteral).val
-			emit(".quad %d # %s %s", val, gtypeString, bytes(containerName))
+			emit(".quad %d # %s %s", val, gtypeString, containerName)
 		case *ExprConstVariable:
 			cnst := value.(*ExprConstVariable)
 			val = evalIntExpr(cnst)
@@ -177,12 +177,12 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(eq(bytes(uop.op), bytes("&")), ptok, "only uop & is allowed")
+			assert(eq(uop.op, "&"), ptok, "only uop & is allowed")
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {
 				assert(vr.isGlobal, value.token(), "operand should be a global variable")
-				emit(".quad %s", bytes(vr.varname))
+				emit(".quad %s", vr.varname)
 			} else {
 				// var gv = &Struct{_}
 				emitDataAddr(operand, depth)
@@ -204,7 +204,7 @@ func emitDataAddr(operand Expr, depth int) {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitWithoutIndent("# emitGlobal for %s", bytes(decl.variable.varname))
+	emitWithoutIndent("# emitGlobal for %s", decl.variable.varname)
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {

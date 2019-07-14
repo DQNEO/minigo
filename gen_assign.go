@@ -239,7 +239,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
-		if eq(bytes(re.op), bytes("*")) {
+		if eq(re.op, "*") {
 			// copy struct
 			emitAddress(lhs)
 			emit("PUSH_8")
@@ -255,7 +255,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 
 		// do assignment for each field
 		for _, field := range structliteral.fields {
-			emit("# .%s", bytes(field.key))
+			emit("# .%s", field.key)
 			fieldtype := strcttyp.getField(field.key)
 
 			switch fieldtype.getKind() {

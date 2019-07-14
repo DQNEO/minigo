@@ -59,7 +59,7 @@ func (program *Program) emitMethodTable() {
 		emitWithoutIndent("receiverType%d:", i)
 		methods := v
 		for _, methodNameFull := range methods {
-			if eq(bytes(methodNameFull), bytes(".")) {
+			if eq(methodNameFull, ".") {
 				panic("invalid method name")
 			}
 			splitted := strings.Split(methodNameFull, "$")
@@ -85,14 +85,14 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent("# Short method names")
 	for _, shortMethodName := range shortMethodNames {
 		emit(".data 0")
-		emit(".S.S.%s:", bytes(shortMethodName))
+		emit(".S.S.%s:", shortMethodName)
 		gasIndentLevel++
 		emit(".data 1")
-		emit(".S.%s:", bytes(shortMethodName))
+		emit(".S.%s:", shortMethodName)
 		emit(".quad 0") // Any value is ok. This is not referred to.
 		gasIndentLevel--
 		emit(".data 0")
-		emit(".quad .S.%s", bytes(shortMethodName))
+		emit(".quad .S.%s", shortMethodName)
 	}
 
 }
@@ -115,7 +115,7 @@ func (program *Program) emit() {
 	// emit packages
 	for _, pkg := range program.packages {
 		emitWithoutIndent("#--------------------------------------------------------")
-		emitWithoutIndent("# package %s", bytes(pkg.name))
+		emitWithoutIndent("# package %s", pkg.name)
 		emitWithoutIndent("# string literals")
 		emitWithoutIndent(".data 0")
 		for _, ast := range pkg.stringLiterals {

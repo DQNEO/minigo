@@ -9,8 +9,8 @@ type bytes []byte
 
 type identifier string
 
-func S(s string) bytes {
-	return bytes(s)
+func S(s string) string {
+	return s
 }
 
 func fmtPrintf(format string, a... interface{}) {
@@ -96,7 +96,7 @@ func Sprintf(format string, a... interface{}) string {
 				}
 				blocks = append(blocks, b)
 			default:
-				panic("Unkown type to format")
+				panic("Unkown type to format:")
 			}
 			argIndex++
 			inPercent = false
@@ -162,11 +162,13 @@ func concat3(as string, bs string, cs string) string {
 	return string(r)
 }
 
-func eq(a bytes, b bytes) bool {
-	if len(a) != len(b) {
+func eq(as string, bs string) bool {
+	if len(as) != len(bs) {
 		return false
 	}
 
+	a := []byte(as)
+	b := []byte(bs)
 	for i:=0;i<len(a);i++ {
 		if a[i] != b[i] {
 			return false
