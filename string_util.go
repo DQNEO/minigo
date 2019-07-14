@@ -8,7 +8,7 @@ type bytes []byte
 
 type identifier string
 
-type goidentifier bytes
+type goidentifier []byte
 
 func S(s string) bytes {
 	return bytes(s)
