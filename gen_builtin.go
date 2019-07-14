@@ -116,7 +116,7 @@ func (e *ExprCap) emit() {
 
 func emitMakeSliceFunc() {
 	// makeSlice
-	emitWithoutIndent(S("%s:"), bytes("iruntime.makeSlice"))
+	emitWithoutIndent("%s:", bytes("iruntime.makeSlice"))
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 

@@ -122,7 +122,7 @@ type funcPrologueEmitter struct {
 
 func (fe *funcPrologueEmitter) emit() {
 	setPos(fe.token)
-	emitWithoutIndent(S("%s:"), fe.symbol)
+	emitWithoutIndent("%s:", fe.symbol)
 	emit("FUNC_PROLOGUE")
 
 	if len(fe.argRegisters) > 0 {
