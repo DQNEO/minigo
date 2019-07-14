@@ -4,7 +4,7 @@ const MAX_METHODS_PER_TYPE int = 128
 
 func (call *IrInterfaceMethodCall) emit() {
 	receiver := call.receiver
-	var methodName bytes = bytes(call.methodName)
+	methodName := call.methodName
 	emit("# emit interface method call \"%s\"", methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
