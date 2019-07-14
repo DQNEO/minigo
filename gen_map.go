@@ -5,7 +5,7 @@ const MAX_METHODS_PER_TYPE int = 128
 func (call *IrInterfaceMethodCall) emit() {
 	receiver := call.receiver
 	var methodName bytes = bytes(call.methodName)
-	emit(S("# emit interface method call \"%s\""), methodName)
+	emit("# emit interface method call \"%s\"", methodName)
 	mapType := &Gtype{
 		kind: G_MAP,
 		mapKey: &Gtype{
@@ -15,37 +15,37 @@ func (call *IrInterfaceMethodCall) emit() {
 			kind: G_POINTER,
 		},
 	}
-	emit(S("# emit receiverTypeId of %s"), receiver.getGtype().String())
+	emit("# emit receiverTypeId of %s", receiver.getGtype().String())
 	emitOffsetLoad(receiver, ptrSize, ptrSize)
-	emit(S("IMUL_NUMBER 8"))
-	emit(S("PUSH_8"))
+	emit("IMUL_NUMBER 8")
+	emit("PUSH_8")
 
-	emit(S("lea receiverTypes(%%rip), %%rax"))
-	emit(S("PUSH_8"))
-	emit(S("SUM_FROM_STACK"))
+	emit("lea receiverTypes(%%rip), %%rax")
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
 
-	emit(S("# find method %s"), methodName)
-	emit(S("mov (%%rax), %%rax")) // address of receiverType
-	emit(S("PUSH_8 # map head"))
+	emit("# find method %s", methodName)
+	emit("mov (%%rax), %%rax") // address of receiverType
+	emit("PUSH_8 # map head")
 
-	emit(S("LOAD_NUMBER %d"), MAX_METHODS_PER_TYPE) // max methods for a type
-	emit(S("PUSH_8 # len"))
+	emit("LOAD_NUMBER %d", MAX_METHODS_PER_TYPE) // max methods for a type
+	emit("PUSH_8 # len")
 
-	emit(S("lea .S.%s, %%rax"), methodName) // index value (addr)
-	emit(S("PUSH_8 # map index value"))
+	emit("lea .S.%s, %%rax", methodName) // index value (addr)
+	emit("PUSH_8 # map index value")
 
 	emitMapGet(mapType, false)
 
-	emit(S("PUSH_8 # funcref"))
+	emit("PUSH_8 # funcref")
 
-	emit(S("mov $0, %%rax"))
+	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, S("should be interface"))
 
 	receiver.emit()
-	emit(S("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value"))
+	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 
-	emit(S("PUSH_8 # receiver"))
+	emit("PUSH_8 # receiver")
 
 	call.emitMethodCall()
 }
@@ -77,7 +77,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	_map := e.collection
 	// rax: found value (zero if not found)
 	// rcx: ok (found: address of the index,  not found:0)
-	emit(S("# emit mapData head address"))
+	emit("# emit mapData head address")
 	_map.emit()
 
 	// if not nil
@@ -85,48 +85,48 @@ func loadMapIndexExpr(e *ExprIndex) {
 	// else emit 24width 0
 	labelNil := makeLabel()
 	labelEnd := makeLabel()
-	emit(S("TEST_IT # map && map (check if map is nil)"))
-	emit(S("je %s # jump if map is nil"), labelNil)
+	emit("TEST_IT # map && map (check if map is nil)")
+	emit("je %s # jump if map is nil", labelNil)
 	// not nil case
-	emit(S("# not nil"))
-	emit(S("LOAD_8_BY_DEREF"))
-	emit(S("PUSH_8 # map head"))
+	emit("# not nil")
+	emit("LOAD_8_BY_DEREF")
+	emit("PUSH_8 # map head")
 	_map.emit()
-	emit(S("mov 8(%%rax), %%rax"))
-	emit(S("PUSH_8 # len"))
+	emit("mov 8(%%rax), %%rax")
+	emit("PUSH_8 # len")
 	var isKeyString bool = e.index.getGtype().isString()
 	emitLoadMapKey(e.index)
 	if isKeyString {
-		emit(S("PUSH_SLICE"))
-		emit(S("pop %%rdi # index value"))
-		emit(S("pop %%rdx # index value"))
-		emit(S("pop %%rcx # index value"))
+		emit("PUSH_SLICE")
+		emit("pop %%rdi # index value")
+		emit("pop %%rdx # index value")
+		emit("pop %%rcx # index value")
 	} else {
-		emit(S("PUSH_8 # index value"))
-		emit(S("pop %%rcx # index value"))
+		emit("PUSH_8 # index value")
+		emit("pop %%rcx # index value")
 	}
 
-	emit(S("pop %%rbx # len"))
-	emit(S("pop %%rax # heap"))
+	emit("pop %%rbx # len")
+	emit("pop %%rax # heap")
 
-	emit(S("jmp %s"), labelEnd)
+	emit("jmp %s", labelEnd)
 	// nil case
-	emit(S("%s:"), labelNil)
-	emit(S("mov $0, %%rax"))
-	emit(S("mov $0, %%rbx"))
-	emit(S("mov $0, %%rcx"))
-	emit(S("mov $0, %%rdx"))
-	emit(S("mov $0, %%rdi"))
-	emit(S("%s:"), labelEnd)
+	emit("%s:", labelNil)
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
+	emit("mov $0, %%rdx")
+	emit("mov $0, %%rdi")
+	emit("%s:", labelEnd)
 
-	emit(S("push %%rax"))
-	emit(S("push %%rbx"))
+	emit("push %%rax")
+	emit("push %%rbx")
 	if isKeyString {
-		emit(S("push %%rcx"))
-		emit(S("push %%rdx"))
-		emit(S("push %%rdi"))
+		emit("push %%rcx")
+		emit("push %%rdx")
+		emit("push %%rdi")
 	} else {
-		emit(S("push %%rcx"))
+		emit("push %%rcx")
 	}
 	emitMapGet(_map.getGtype(), isKeyString)
 }
@@ -156,102 +156,102 @@ func emitMapGet(mapType *Gtype, cmpGoString bool) {
 	labelEnd := makeLabel()
 	labelIncr := makeLabel()
 
-	emit(S("# emitMapGet"))
+	emit("# emitMapGet")
 
 	if cmpGoString {
-		emit(S("pop %%r15")) // index value a
-		emit(S("pop %%r14")) // index value b
-		emit(S("pop %%r13")) // index value c
+		emit("pop %%r15") // index value a
+		emit("pop %%r14") // index value b
+		emit("pop %%r13") // index value c
 	} else {
-		emit(S("pop %%r13")) // index value
+		emit("pop %%r13") // index value
 	}
 
-	emit(S("pop %%r11")) // len
-	emit(S("pop %%r10")) // head addr
+	emit("pop %%r11") // len
+	emit("pop %%r10") // head addr
 
-	emit(S("mov $0, %%r12 # init loop counter")) // i = 0
+	emit("mov $0, %%r12 # init loop counter") // i = 0
 
-	emit(S("%s: # begin loop "), labelBegin)
+	emit("%s: # begin loop ", labelBegin)
 
-	emit(S("push %%r12 # loop counter"))
-	emit(S("push %%r11 # map len"))
-	emit(S("CMP_FROM_STACK setl"))
-	emit(S("TEST_IT"))
+	emit("push %%r12 # loop counter")
+	emit("push %%r11 # map len")
+	emit("CMP_FROM_STACK setl")
+	emit("TEST_IT")
 	if isValue24Width {
-		emit(S("LOAD_EMPTY_SLICE # NOT FOUND"))
+		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else {
-		emit(S("mov $0, %%rax # key not found"))
+		emit("mov $0, %%rax # key not found")
 	}
 
 	okRegister := mapOkRegister(isValue24Width)
-	emit(S("mov $0, %%%s # ok = false"), okRegister)
+	emit("mov $0, %%%s # ok = false", okRegister)
 
-	emit(S("je %s  # Exit. NOT FOUND IN ALL KEYS."), labelEnd)
+	emit("je %s  # Exit. NOT FOUND IN ALL KEYS.", labelEnd)
 
-	emit(S("# check if key matches"))
-	emit(S("mov %%r12, %%rax")) // i
-	emit(S("IMUL_NUMBER 16"))   // i * 16
-	emit(S("PUSH_8"))
+	emit("# check if key matches")
+	emit("mov %%r12, %%rax") // i
+	emit("IMUL_NUMBER 16")   // i * 16
+	emit("PUSH_8")
 
-	emit(S("mov %%r10, %%rax")) // head
-	emit(S("PUSH_8"))
+	emit("mov %%r10, %%rax") // head
+	emit("PUSH_8")
 
-	emit(S("SUM_FROM_STACK")) // head + i * 16
+	emit("SUM_FROM_STACK") // head + i * 16
 
-	emit(S("PUSH_8"))          // addr of key addr
-	emit(S("LOAD_8_BY_DEREF")) // emit key addr
+	emit("PUSH_8")          // addr of key addr
+	emit("LOAD_8_BY_DEREF") // emit key addr
 
 	assert(mapKeyType != nil, nil, S("key kind should not be nil:%s"), mapType.String())
 
 	if cmpGoString {
-		emit(S("push %%r12"))
-		emit(S("push %%r11"))
-		emit(S("push %%r10"))
+		emit("push %%r12")
+		emit("push %%r11")
+		emit("push %%r10")
 
-		emit(S("LOAD_24_BY_DEREF")) // dereference
-		emit(S("PUSH_SLICE"))
+		emit("LOAD_24_BY_DEREF") // dereference
+		emit("PUSH_SLICE")
 
 		// push index value
-		emit(S("push %%r13"))
-		emit(S("push %%r14"))
-		emit(S("push %%r15"))
+		emit("push %%r13")
+		emit("push %%r14")
+		emit("push %%r15")
 
 		emitGoStringsEqualFromStack()
 
-		emit(S("pop %%r10"))
-		emit(S("pop %%r11"))
-		emit(S("pop %%r12"))
+		emit("pop %%r10")
+		emit("pop %%r11")
+		emit("pop %%r12")
 	} else {
-		emit(S("LOAD_8_BY_DEREF")) // dereference
+		emit("LOAD_8_BY_DEREF") // dereference
 		// primitive comparison
-		emit(S("cmp %%r13, %%rax # compare specifiedvalue vs indexvalue"))
-		emit(S("sete %%al"))
-		emit(S("movzb %%al, %%eax"))
+		emit("cmp %%r13, %%rax # compare specifiedvalue vs indexvalue")
+		emit("sete %%al")
+		emit("movzb %%al, %%eax")
 	}
 
-	emit(S("TEST_IT"))
-	emit(S("pop %%rax")) // index address
-	emit(S("je %s  # Not match. go to next iteration"), labelIncr)
+	emit("TEST_IT")
+	emit("pop %%rax") // index address
+	emit("je %s  # Not match. go to next iteration", labelIncr)
 
-	emit(S("# Value found!"))
-	emit(S("push %%rax # stash key address"))
-	emit(S("ADD_NUMBER 8 # value address"))
-	emit(S("LOAD_8_BY_DEREF # set the found value address"))
+	emit("# Value found!")
+	emit("push %%rax # stash key address")
+	emit("ADD_NUMBER 8 # value address")
+	emit("LOAD_8_BY_DEREF # set the found value address")
 	if mapValueType.is24WidthType() {
-		emit(S("LOAD_24_BY_DEREF"))
+		emit("LOAD_24_BY_DEREF")
 	} else {
-		emit(S("LOAD_8_BY_DEREF"))
+		emit("LOAD_8_BY_DEREF")
 	}
 
-	emit(S("mov $1, %%%s # ok = true"), okRegister)
-	emit(S("pop %%r13 # key address. will be in map set"))
-	emit(S("jmp %s # exit loop"), labelEnd)
+	emit("mov $1, %%%s # ok = true", okRegister)
+	emit("pop %%r13 # key address. will be in map set")
+	emit("jmp %s # exit loop", labelEnd)
 
-	emit(S("%s: # incr"), labelIncr)
-	emit(S("add $1, %%r12")) // i++
-	emit(S("jmp %s"), labelBegin)
+	emit("%s: # incr", labelIncr)
+	emit("add $1, %%r12") // i++
+	emit("jmp %s", labelBegin)
 
-	emit(S("%s: # end loop"), labelEnd)
+	emit("%s: # end loop", labelEnd)
 
 }
 
@@ -268,15 +268,15 @@ func (e *ExprIndex) emitMapSetFromStack24() {
 func emitSaveMapKey(eMapKey Expr) {
 	emitLoadMapKey(eMapKey)
 	if eMapKey.getGtype().isString() {
-		emit(S("PUSH_SLICE"))
+		emit("PUSH_SLICE")
 		emitCallMalloc(24)
-		emit(S("PUSH_8"))
-		emit(S("STORE_24_INDIRECT_FROM_STACK")) // save key to mallocedaddr
+		emit("PUSH_8")
+		emit("STORE_24_INDIRECT_FROM_STACK") // save key to mallocedaddr
 	} else {
-		emit(S("PUSH_8")) // index value
+		emit("PUSH_8") // index value
 		emitCallMalloc(8)
-		emit(S("PUSH_8"))
-		emit(S("STORE_8_INDIRECT_FROM_STACK")) // save key to mallocedaddr
+		emit("PUSH_8")
+		emit("STORE_8_INDIRECT_FROM_STACK") // save key to mallocedaddr
 	}
 
 	// %rax is mappedaddr
@@ -285,59 +285,59 @@ func emitSaveMapKey(eMapKey Expr) {
 // m[k] = v
 // append key and value to the tail of map data, and increment its length
 func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
-	emit(S("# emitMapSetFromStack"))
+	emit("# emitMapSetFromStack")
 	labelAppend := makeLabel()
 	labelSave := makeLabel()
 
 	// map get to check if exists
 	e.emit()
 	// jusdge update or append
-	emit(S("cmp $1, %%%s # ok == true"), mapOkRegister(isValueWidth24))
-	emit(S("sete %%al"))
-	emit(S("movzb %%al, %%eax"))
-	emit(S("TEST_IT"))
-	emit(S("je %s  # jump to append if not found"), labelAppend)
+	emit("cmp $1, %%%s # ok == true", mapOkRegister(isValueWidth24))
+	emit("sete %%al")
+	emit("movzb %%al, %%eax")
+	emit("TEST_IT")
+	emit("je %s  # jump to append if not found", labelAppend)
 
 	// update
-	emit(S("push %%r13")) // push address of the key
-	emit(S("jmp %s"), labelSave)
+	emit("push %%r13") // push address of the key
+	emit("jmp %s", labelSave)
 
 	// append
-	emit(S("%s: # append to a map "), labelAppend)
+	emit("%s: # append to a map ", labelAppend)
 	e.collection.emit() // emit pointer address to %rax
-	emit(S("LOAD_8_BY_DEREF"))
-	emit(S("PUSH_8"))
+	emit("LOAD_8_BY_DEREF")
+	emit("PUSH_8")
 
 	// emit len of the map
 	elen := &ExprLen{
 		arg: e.collection,
 	}
 	elen.emit()
-	emit(S("IMUL_NUMBER %d"), mapUnitSize) // distance from head to tail
-	emit(S("PUSH_8"))
-	emit(S("SUM_FROM_STACK"))
-	emit(S("PUSH_8")) // tail addr
+	emit("IMUL_NUMBER %d", mapUnitSize) // distance from head to tail
+	emit("PUSH_8")
+	emit("SUM_FROM_STACK")
+	emit("PUSH_8") // tail addr
 
 	// map len++
 	elen.emit()
-	emit(S("ADD_NUMBER 1"))
-	emit(S("PUSH_8"))
+	emit("ADD_NUMBER 1")
+	emit("PUSH_8")
 	e.collection.emit()
-	emit(S("pop %%rbx # new len"))
-	emit(S("mov %%rbx, 8(%%rax) # update map len"))
+	emit("pop %%rbx # new len")
+	emit("mov %%rbx, 8(%%rax) # update map len")
 
 	// Save key and value
-	emit(S("%s: # end loop"), labelSave)
+	emit("%s: # end loop", labelSave)
 
 	// save key
-	emit(S("# save key"))
+	emit("# save key")
 
 	emitSaveMapKey(e.index)
-	emit(S("mov %%rax, %%rcx"))   // copy mallocedaddr
+	emit("mov %%rax, %%rcx")   // copy mallocedaddr
 	// append key to tail
-	emit(S("POP_8"))              // tailaddr
-	emit(S("mov %%rcx, (%%rax)")) // save mallocedaddr to tailaddr
-	emit(S("PUSH_8"))             // push tailaddr
+	emit("POP_8")              // tailaddr
+	emit("mov %%rcx, (%%rax)") // save mallocedaddr to tailaddr
+	emit("PUSH_8")             // push tailaddr
 
 
 	// save value
@@ -349,13 +349,13 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	}
 	emitCallMalloc(size)
 
-	emit(S("pop %%rcx"))           // map tail address
-	emit(S("mov %%rax, 8(%%rcx)")) // set malloced address to tail+8
-	emit(S("PUSH_8"))
+	emit("pop %%rcx")           // map tail address
+	emit("mov %%rax, 8(%%rcx)") // set malloced address to tail+8
+	emit("PUSH_8")
 	if isValueWidth24 {
-		emit(S("STORE_24_INDIRECT_FROM_STACK"))
+		emit("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit(S("STORE_8_INDIRECT_FROM_STACK"))
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
 }
 
@@ -390,69 +390,69 @@ func (em *IrStmtRangeMap) emit() {
 		operand: em.mapCounter,
 	}
 
-	emit(S("# init index"))
+	emit("# init index")
 	em.initstmt.emit()
 
-	emit(S("%s: # begin loop "), em.labels.labelBegin)
+	emit("%s: # begin loop ", em.labels.labelBegin)
 
 	em.condition.emit()
-	emit(S("TEST_IT"))
-	emit(S("je %s  # if false, exit loop"), em.labels.labelEndLoop)
+	emit("TEST_IT")
+	emit("je %s  # if false, exit loop", em.labels.labelEndLoop)
 
 	// set key and value
 	em.mapCounter.emit()
-	emit(S("IMUL_NUMBER 16"))
-	emit(S("PUSH_8 # x"))
+	emit("IMUL_NUMBER 16")
+	emit("PUSH_8 # x")
 	em.rangeexpr.emit() // emit address of map data head
-	emit(S("LOAD_8_BY_DEREF"))
-	emit(S("PUSH_8 # y"))
+	emit("LOAD_8_BY_DEREF")
+	emit("PUSH_8 # y")
 
-	emit(S("SUM_FROM_STACK # x + y"))
-	emit(S("LOAD_8_BY_DEREF"))
+	emit("SUM_FROM_STACK # x + y")
+	emit("LOAD_8_BY_DEREF")
 
 	if em.indexvar.getGtype().isString() {
-		emit(S("LOAD_24_BY_DEREF"))
+		emit("LOAD_24_BY_DEREF")
 		emitSave24(em.indexvar,0)
 	} else {
-		emit(S("LOAD_8_BY_DEREF"))
+		emit("LOAD_8_BY_DEREF")
 		emitSavePrimitive(em.indexvar)
 	}
 
 	if em.valuevar != nil {
-		emit(S("# Setting valuevar"))
-		emit(S("## rangeexpr.emit()"))
+		emit("# Setting valuevar")
+		emit("## rangeexpr.emit()")
 		em.rangeexpr.emit()
-		emit(S("LOAD_8_BY_DEREF# map head"))
-		emit(S("PUSH_8"))
+		emit("LOAD_8_BY_DEREF# map head")
+		emit("PUSH_8")
 
-		emit(S("## mapCounter.emit()"))
+		emit("## mapCounter.emit()")
 		em.mapCounter.emit()
-		emit(S("## eval value"))
-		emit(S("IMUL_NUMBER 16  # counter * 16"))
-		emit(S("ADD_NUMBER 8 # counter * 16 + 8"))
-		emit(S("PUSH_8"))
+		emit("## eval value")
+		emit("IMUL_NUMBER 16  # counter * 16")
+		emit("ADD_NUMBER 8 # counter * 16 + 8")
+		emit("PUSH_8")
 
-		emit(S("SUM_FROM_STACK"))
+		emit("SUM_FROM_STACK")
 
-		emit(S("LOAD_8_BY_DEREF"))
+		emit("LOAD_8_BY_DEREF")
 
 		if em.valuevar.getGtype().is24WidthType() {
-			emit(S("LOAD_24_BY_DEREF"))
+			emit("LOAD_24_BY_DEREF")
 			emitSave24(em.valuevar, 0)
 		} else {
-			emit(S("LOAD_8_BY_DEREF"))
+			emit("LOAD_8_BY_DEREF")
 			emitSavePrimitive(em.valuevar)
 		}
 
 	}
 
 	em.block.emit()
-	emit(S("%s: # end block"), em.labels.labelEndBlock)
+	emit("%s: # end block", em.labels.labelEndBlock)
 
 	em.indexIncr.emit()
 
-	emit(S("jmp %s"), em.labels.labelBegin)
-	emit(S("%s: # end loop"), em.labels.labelEndLoop)
+	emit("jmp %s", em.labels.labelBegin)
+	emit("%s: # end loop", em.labels.labelEndLoop)
 }
 
 var mapUnitSize int = 2*8
@@ -470,7 +470,7 @@ func (lit *ExprMapLiteral) emit() {
 		size = length * ptrSize * 1024
 	}
 	emitCallMalloc(size)
-	emit(S("PUSH_8")) // map head
+	emit("PUSH_8") // map head
 
 	//mapType := lit.getGtype()
 	//mapKeyType := mapType.mapKey
@@ -481,38 +481,38 @@ func (lit *ExprMapLiteral) emit() {
 
 		// save key
 		emitSaveMapKey(element.key)
-		emit(S("mov %%rax, %%rcx"))   // copy mallocedaddr
+		emit("mov %%rax, %%rcx")   // copy mallocedaddr
 		// append key to tail
-		emit(S("POP_8"))                         // map head
-		emit(S("mov %%rcx, %d(%%rax) #"), offsetKey) // save key address
-		emit(S("PUSH_8"))                        // map head
+		emit("POP_8")                         // map head
+		emit("mov %%rcx, %d(%%rax) #", offsetKey) // save key address
+		emit("PUSH_8")                        // map head
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()
-			emit(S("PUSH_8")) // value of value
+			emit("PUSH_8") // value of value
 			emitCallMalloc(8)
-			emit(S("PUSH_8"))
-			emit(S("STORE_8_INDIRECT_FROM_STACK")) // save value to heap
+			emit("PUSH_8")
+			emit("STORE_8_INDIRECT_FROM_STACK") // save value to heap
 		} else if element.value.getGtype().is24WidthType() {
 			// rax,rbx,rcx
 			element.value.emit()
-			emit(S("PUSH_24")) // ptr
+			emit("PUSH_24") // ptr
 			emitCallMalloc(8 * 3)
-			emit(S("PUSH_8"))
-			emit(S("STORE_24_INDIRECT_FROM_STACK"))
+			emit("PUSH_8")
+			emit("STORE_24_INDIRECT_FROM_STACK")
 		} else {
 			TBI(element.value.token(), S("unable to handle %s"), element.value.getGtype())
 
 		}
 
-		emit(S("pop %%rbx")) // map head
-		emit(S("mov %%rax, %d(%%rbx) #"), offsetValue)
-		emit(S("push %%rbx"))
+		emit("pop %%rbx") // map head
+		emit("mov %%rax, %d(%%rbx) #", offsetValue)
+		emit("push %%rbx")
 	}
 
 	emitCallMalloc(16)
-	emit(S("pop %%rbx")) // address (head of the heap)
-	emit(S("mov %%rbx, (%%rax)"))
-	emit(S("mov $%d, %%rcx"), length) // len
-	emit(S("mov %%rcx, 8(%%rax)"))
+	emit("pop %%rbx") // address (head of the heap)
+	emit("mov %%rbx, (%%rax)")
+	emit("mov $%d, %%rcx", length) // len
+	emit("mov %%rcx, 8(%%rax)")
 }

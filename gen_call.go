@@ -192,7 +192,7 @@ type builtinDumpSliceEmitter struct {
 
 func (em *builtinDumpSliceEmitter) emit() {
 	// @TODO Implement me
-	emit(S("# builtinDumpSliceEmitter is not implemented"))
+	emit("# builtinDumpSliceEmitter is not implemented")
 }
 
 type builtinDumpInterfaceEmitter struct {
@@ -201,7 +201,7 @@ type builtinDumpInterfaceEmitter struct {
 
 func (em *builtinDumpInterfaceEmitter) emit() {
 	// @TODO Implement me
-	emit(S("# builtinDumpInterfaceEmitter is not implemented"))
+	emit("# builtinDumpInterfaceEmitter is not implemented")
 }
 
 type builtinAssertInterfaceEmitter struct {
@@ -209,31 +209,31 @@ type builtinAssertInterfaceEmitter struct {
 }
 
 func (em *builtinAssertInterfaceEmitter) emit() {
-	emit(S("# builtinAssertInterface"))
+	emit("# builtinAssertInterface")
 	labelEnd := makeLabel()
 	em.arg.emit() // rax=ptr, rbx=receverTypeId, rcx=dynamicTypeId
 
 	// (ptr != nil && rcx == nil) => Error
 
-	emit(S("CMP_NE_ZERO"))
-	emit(S("TEST_IT"))
-	emit(S("je %s"), labelEnd)
+	emit("CMP_NE_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
 
-	emit(S("mov %%rcx, %%rax"))
+	emit("mov %%rcx, %%rax")
 
-	emit(S("CMP_EQ_ZERO"))
-	emit(S("TEST_IT"))
-	emit(S("je %s"), labelEnd)
+	emit("CMP_EQ_ZERO")
+	emit("TEST_IT")
+	emit("je %s", labelEnd)
 
 	slabel := makeLabel()
-	emit(S(".data 0"))
+	emit(".data 0")
 	emitWithoutIndent(S("%s:"), slabel)
-	emit(S(".string \"%s\""), S("assertInterface failed"))
-	emit(S(".text"))
-	emit(S("lea %s, %%rax"), slabel)
-	emit(S("PUSH_8"))
-	emit(S("POP_TO_ARG_0"))
-	emit(S("FUNCALL %s"), S("iruntime.panic"))
+	emit(".string \"%s\"", S("assertInterface failed"))
+	emit(".text")
+	emit("lea %s, %%rax", slabel)
+	emit("PUSH_8")
+	emit("POP_TO_ARG_0")
+	emit("FUNCALL %s", S("iruntime.panic"))
 
 	emitWithoutIndent(S("%s:"), labelEnd)
 	emitNewline()

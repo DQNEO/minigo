@@ -8,37 +8,37 @@ var builtinStringValue2 bytes = bytes("# slice = {underlying:%p,len:%d,cap:%d}")
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
-	emit(S(".data 0"))
-	emit(S("# special strings"))
+	emit(".data 0")
+	emit("# special strings")
 
 	// emit builtin string
 	emitWithoutIndent(S(".%s:"), builtinStringKey1)
-	emit(S(".string \"%s\""), builtinStringValue1)
+	emit(".string \"%s\"", builtinStringValue1)
 	emitWithoutIndent(S(".%s:"), builtinStringKey2)
-	emit(S(".string \"%s\""), builtinStringValue2)
+	emit(".string \"%s\"", builtinStringValue2)
 
 	// empty string
 	eEmptyString.slabel = S("empty")
 	emitWithoutIndent(S(".empty:"))
-	emit(S(".string \"%s\""), eEmptyString.val)
+	emit(".string \"%s\"", eEmptyString.val)
 }
 
 func (program *Program) emitDynamicTypes() {
 	emitNewline()
-	emit(S("# Dynamic Types"))
+	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
 		emitWithoutIndent(S(".%s:"), bytes(label))
-		emit(S(".string \"%s\""), bytes(gs))
+		emit(".string \"%s\"", bytes(gs))
 	}
 }
 
 func (program *Program) emitMethodTable() {
 	emitWithoutIndent(S("#--------------------------------------------------------"))
-	emit(S("# Method table"))
-	emit(S(".data 0"))
+	emit("# Method table")
+	emit(".data 0")
 	emitWithoutIndent(S("%s:"), S("receiverTypes"))
-	emit(S(".quad 0 # receiverTypeId:0"))
+	emit(".quad 0 # receiverTypeId:0")
 	var maxId int
 	var i int
 	var id int
@@ -50,9 +50,9 @@ func (program *Program) emitMethodTable() {
 	for i=1;i<=maxId;i++ {
 		_,ok := program.methodTable[i]
 		if ok {
-			emit(S(".quad receiverType%d # receiverTypeId:%d"), i, i)
+			emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 		} else {
-			emit(S(".quad 0"))
+			emit(".quad 0")
 		}
 	}
 
@@ -67,15 +67,15 @@ func (program *Program) emitMethodTable() {
 			}
 			splitted := strings_Split(methodNameFull, S("$"))
 			var shortMethodName bytes = splitted[1]
-			emit(S(".quad .S.S.%s # key"), bytes(shortMethodName))
+			emit(".quad .S.S.%s # key", bytes(shortMethodName))
 			label := makeLabel()
 			gasIndentLevel++
-			emit(S(".data 1"))
-			emit(S("%s:"), label)
-			emit(S(".quad %s # func addr"), bytes(methodNameFull))
+			emit(".data 1")
+			emit("%s:", label)
+			emit(".quad %s # func addr", bytes(methodNameFull))
 			gasIndentLevel--
-			emit(S(".data 0"))
-			emit(S(".quad %s # func addr addr"), label)
+			emit(".data 0")
+			emit(".quad %s # func addr addr", label)
 
 
 			if !inArray(shortMethodName, shortMethodNames) {
@@ -87,15 +87,15 @@ func (program *Program) emitMethodTable() {
 	emitWithoutIndent(S("#--------------------------------------------------------"))
 	emitWithoutIndent(S("# Short method names"))
 	for _, shortMethodName := range shortMethodNames {
-		emit(S(".data 0"))
-		emit(S(".S.S.%s:"), bytes(shortMethodName))
+		emit(".data 0")
+		emit(".S.S.%s:", bytes(shortMethodName))
 		gasIndentLevel++
-		emit(S(".data 1"))
-		emit(S(".S.%s:"), bytes(shortMethodName))
-		emit(S(".quad 0")) // Any value is ok. This is not referred to.
+		emit(".data 1")
+		emit(".S.%s:", bytes(shortMethodName))
+		emit(".quad 0") // Any value is ok. This is not referred to.
 		gasIndentLevel--
-		emit(S(".data 0"))
-		emit(S(".quad .S.%s"), bytes(shortMethodName))
+		emit(".data 0")
+		emit(".quad .S.%s", bytes(shortMethodName))
 	}
 
 }
@@ -105,7 +105,7 @@ func (program *Program) emit() {
 
 	emitMacroDefinitions()
 
-	emit(S(".data 0"))
+	emit(".data 0")
 	program.emitSpecialStrings()
 	program.emitDynamicTypes()
 	program.emitMethodTable()
@@ -125,7 +125,7 @@ func (program *Program) emit() {
 			emitWithoutIndent(S(".%s:"), ast.slabel)
 			// https://sourceware.org/binutils/docs-2.30/as/String.html#String
 			// the assembler marks the end of each string with a 0 byte.
-			emit(S(".string \"%s\""), ast.val)
+			emit(".string \"%s\"", ast.val)
 		}
 
 		for _, vardecl := range pkg.vars {
@@ -146,29 +146,29 @@ func (program *Program) emit() {
 
 func emitMainFunc(importOS bool) {
 	fname := "main"
-	emit(S(".global	%s"), fname)
+	emit(".global	%s", fname)
 	emitWithoutIndent(S("%s:"), fname)
-	emit(S("push %%rbp"))
-	emit(S("mov %%rsp, %%rbp"))
+	emit("push %%rbp")
+	emit("mov %%rsp, %%rbp")
 
-	emit(S("mov %%rsi, libcArgs(%%rip)"))
-	emit(S("mov %%rdi, libcArgs+8(%%rip)"))
-	emit(S("mov %%rdi, libcArgs+16(%%rip)"))
-	emit(S("mov $0, %%rsi"))
-	emit(S("mov $0, %%rdi"))
+	emit("mov %%rsi, libcArgs(%%rip)")
+	emit("mov %%rdi, libcArgs+8(%%rip)")
+	emit("mov %%rdi, libcArgs+16(%%rip)")
+	emit("mov $0, %%rsi")
+	emit("mov $0, %%rdi")
 
 	// init runtime
-	emit(S("# init runtime"))
-	emit(S("FUNCALL iruntime.init"))
+	emit("# init runtime")
+	emit("FUNCALL iruntime.init")
 
 	// init imported packages
 	if importOS {
-		emit(S("# init os"))
-		emit(S("FUNCALL os.init"))
+		emit("# init os")
+		emit("FUNCALL os.init")
 	}
 
 	emitNewline()
-	emit(S("FUNCALL main.main"))
-	//emit(S("FUNCALL iruntime.reportMemoryUsage"))
+	emit("FUNCALL main.main")
+	//emit("FUNCALL iruntime.reportMemoryUsage")
 	emitFuncEpilogue(S("noop_handler"), nil)
 }

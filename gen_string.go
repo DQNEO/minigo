@@ -6,9 +6,9 @@ var eEmptyString = ExprStringLiteral{
 
 func emitEmptyString() {
 	eEmpty := &eEmptyString
-	emit(S("LOAD_STRING_LITERAL .%s"), eEmpty.slabel)
-	emit(S("mov $0, %%rbx"))
-	emit(S("mov $0, %%rcx"))
+	emit("LOAD_STRING_LITERAL .%s", eEmpty.slabel)
+	emit("mov $0, %%rbx")
+	emit("mov $0, %%rcx")
 }
 
 func countStrlen(chars bytes) int {
@@ -31,10 +31,10 @@ func countStrlen(chars bytes) int {
 }
 
 func (ast *ExprStringLiteral) emit() {
-	emit(S("LOAD_STRING_LITERAL .%s"), ast.slabel)
+	emit("LOAD_STRING_LITERAL .%s", ast.slabel)
 	var length int = countStrlen(ast.val)
-	emit(S("mov $%d, %%rbx"), length)
-	emit(S("mov $%d, %%rcx"), length)
+	emit("mov $%d, %%rbx", length)
+	emit("mov $%d, %%rcx", length)
 }
 
 func (e *IrExprStringComparison) token() *Token {
@@ -42,7 +42,7 @@ func (e *IrExprStringComparison) token() *Token {
 }
 
 func (binop *IrExprStringComparison) emit() {
-	emit(S("# emitCompareStrings"))
+	emit("# emitCompareStrings")
 	var equal bool
 	op := string(binop.op)
 	switch op {
@@ -115,8 +115,8 @@ func (binop *IrExprStringComparison) emit() {
 }
 
 func emitGoStringsEqualFromStack() {
-	emit(S("LOAD_NUMBER 1"))
-	emit(S("PUSH_8"))
+	emit("LOAD_NUMBER 1")
+	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
 		symbol:        S("iruntime.eqGostrings"),

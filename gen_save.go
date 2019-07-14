@@ -2,9 +2,9 @@ package main
 
 func emitPop(gtype *Gtype) {
 	if gtype.is24WidthType() {
-		emit(S("POP_24"))
+		emit("POP_24")
 	} else {
-		emit(S("POP_8"))
+		emit("POP_8")
 	}
 }
 
@@ -60,12 +60,12 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
-	emit(S("# *ExprUop.emitSavePrimitive()"))
+	emit("# *ExprUop.emitSavePrimitive()")
 	assert(eq(uop.op , bytes("*")), uop.tok, S("uop op should be *"))
-	emit(S("PUSH_8 # what"))
+	emit("PUSH_8 # what")
 	uop.operand.emit()
-	emit(S("PUSH_8 # where"))
-	emit(S("STORE_8_INDIRECT_FROM_STACK"))
+	emit("PUSH_8 # where")
+	emit("STORE_8_INDIRECT_FROM_STACK")
 }
 
 // x = 1
@@ -73,17 +73,17 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 	assert(0 <= size && size <= 8, variable.token(), S("invalid size"))
 	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
 		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), S(""))
-		emit(S("PUSH_8 # what"))
+		emit("PUSH_8 # what")
 		variable.emit()
-		emit(S("ADD_NUMBER %d"), offset)
-		emit(S("PUSH_8 # where"))
-		emit(S("STORE_8_INDIRECT_FROM_STACK # %s"), bytes(variable.varname))
+		emit("ADD_NUMBER %d", offset)
+		emit("PUSH_8 # where")
+		emit("STORE_8_INDIRECT_FROM_STACK # %s", bytes(variable.varname))
 		return
 	}
 	if variable.isGlobal {
-		emit(S("STORE_%d_TO_GLOBAL %s %d # %s "), size, bytes(variable.varname), offset, bytes(variable.varname))
+		emit("STORE_%d_TO_GLOBAL %s %d # %s ", size, bytes(variable.varname), offset, bytes(variable.varname))
 	} else {
-		emit(S("STORE_%d_TO_LOCAL %d+%d # %s"), size, variable.offset, offset, bytes(variable.varname))
+		emit("STORE_%d_TO_LOCAL %d+%d # %s", size, variable.offset, offset, bytes(variable.varname))
 	}
 }
 
@@ -94,7 +94,7 @@ func (e *ExprIndex) emitSave24() {
 	// multi index * size
 	// calc address = head address + offset
 	// copy value to the address
-	emit(S("PUSH_24"))
+	emit("PUSH_24")
 	collectionType := e.collection.getGtype()
 	if collectionType.getKind() == G_MAP {
 		e.emitMapSetFromStack24()
@@ -103,19 +103,19 @@ func (e *ExprIndex) emitSave24() {
 
 	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, e.token(), S("unexpected kind"))
 	e.collection.emit()
-	emit(S("PUSH_8 # head address of collection"))
+	emit("PUSH_8 # head address of collection")
 	e.index.emit()
-	emit(S("PUSH_8 # index"))
+	emit("PUSH_8 # index")
 	elmType := collectionType.elementType
 	size := elmType.getSize()
 	assert(size > 0, nil, S("size > 0"))
-	emit(S("LOAD_NUMBER %d # elementSize"), size)
-	emit(S("PUSH_8"))
-	emit(S("IMUL_FROM_STACK # index * elementSize"))
-	emit(S("PUSH_8 # index * elementSize"))
-	emit(S("SUM_FROM_STACK # (index * size) + address"))
-	emit(S("PUSH_8"))
-	emit(S("STORE_24_INDIRECT_FROM_STACK"))
+	emit("LOAD_NUMBER %d # elementSize", size)
+	emit("PUSH_8")
+	emit("IMUL_FROM_STACK # index * elementSize")
+	emit("PUSH_8 # index * elementSize")
+	emit("SUM_FROM_STACK # (index * size) + address")
+	emit("PUSH_8")
+	emit("STORE_24_INDIRECT_FROM_STACK")
 }
 
 func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
@@ -124,7 +124,7 @@ func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 	case collectionType.getKind() == G_ARRAY, collectionType.getKind() == G_SLICE:
 		e.emitArrayOrSliceSavePrimitive(offset)
 	case collectionType.getKind() == G_MAP:
-		emit(S("PUSH_8")) // push RHS value
+		emit("PUSH_8") // push RHS value
 		e.emitMapSetFromStack8()
 		return
 	default:
@@ -135,13 +135,13 @@ func (e *ExprIndex) emitOffsetSavePrimitive(offset int) {
 func (e *ExprStructField) emitSavePrimitive() {
 	fieldType := e.getGtype()
 	if e.strct.getGtype().getKind() == G_POINTER {
-		emit(S("PUSH_8 # rhs"))
+		emit("PUSH_8 # rhs")
 
 		e.strct.emit()
-		emit(S("ADD_NUMBER %d"), fieldType.offset)
-		emit(S("PUSH_8"))
+		emit("ADD_NUMBER %d", fieldType.offset)
+		emit("PUSH_8")
 
-		emit(S("STORE_8_INDIRECT_FROM_STACK"))
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	} else {
 		emitOffsetSavePrimitive(e.strct, 8, fieldType.offset)
 	}
@@ -151,8 +151,8 @@ func (e *ExprStructField) emitSavePrimitive() {
 func emitSave24(lhs Expr, offset int) {
 	assertInterface(lhs)
 	lhs = unwrapRel(lhs)
-	//emit(S("# emitSave24(%T, offset %d)"), lhs, offset)
-	emit(S("# emitSave24(?, offset %d)"), offset)
+	//emit("# emitSave24(%T, offset %d)", lhs, offset)
+	emit("# emitSave24(?, offset %d)", offset)
 	switch lhs.(type) {
 	case *ExprVariable:
 		variable := lhs.(*ExprVariable)
@@ -161,7 +161,7 @@ func emitSave24(lhs Expr, offset int) {
 		structfield := lhs.(*ExprStructField)
 		fieldType := structfield.getGtype()
 		fieldOffset := fieldType.offset
-		emit(S("# fieldOffset=%d (%s)"), fieldOffset, bytes(fieldType.fieldname))
+		emit("# fieldOffset=%d (%s)", fieldOffset, bytes(fieldType.fieldname))
 		emitSave24(structfield.strct, fieldOffset+offset)
 	case *ExprIndex:
 		indexExpr := lhs.(*ExprIndex)
@@ -172,13 +172,13 @@ func emitSave24(lhs Expr, offset int) {
 }
 
 func (variable *ExprVariable) emitSave24(offset int) {
-	emit(S("PUSH_24"))
-	emit(S("# *ExprVariable.emitSave24()"))
-	emit(S("pop %%rax # 3rd"))
+	emit("PUSH_24")
+	emit("# *ExprVariable.emitSave24()")
+	emit("pop %%rax # 3rd")
 	variable.emitOffsetSavePrimitive(8, offset+16, false)
-	emit(S("pop %%rax # 2nd"))
+	emit("pop %%rax # 2nd")
 	variable.emitOffsetSavePrimitive(8, offset+8, false)
-	emit(S("pop %%rax # 1st"))
+	emit("pop %%rax # 1st")
 	variable.emitOffsetSavePrimitive(8, offset+0, true)
 }
 
@@ -192,23 +192,23 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	elmSize := elmType.getSize()
 	assert(elmSize > 0, nil, S("elmSize > 0"))
 
-	emit(S("PUSH_8 # rhs"))
+	emit("PUSH_8 # rhs")
 
 	collection.emit()
-	emit(S("PUSH_8 # addr"))
+	emit("PUSH_8 # addr")
 
 	index.emit()
-	emit(S("IMUL_NUMBER %d # index * elmSize"), elmSize)
-	emit(S("PUSH_8"))
+	emit("IMUL_NUMBER %d # index * elmSize", elmSize)
+	emit("PUSH_8")
 
-	emit(S("SUM_FROM_STACK # (index * elmSize) + addr"))
-	emit(S("ADD_NUMBER %d # offset"), offset)
-	emit(S("PUSH_8"))
+	emit("SUM_FROM_STACK # (index * elmSize) + addr")
+	emit("ADD_NUMBER %d # offset", offset)
+	emit("PUSH_8")
 
 	if elmSize == 1 {
-		emit(S("STORE_1_INDIRECT_FROM_STACK"))
+		emit("STORE_1_INDIRECT_FROM_STACK")
 	} else {
-		emit(S("STORE_8_INDIRECT_FROM_STACK"))
+		emit("STORE_8_INDIRECT_FROM_STACK")
 	}
 	emitNewline()
 }

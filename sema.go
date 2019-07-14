@@ -232,7 +232,7 @@ func walkExpr(expr Expr) Expr {
 			assert(len(funcall.args) == 2, funcall.token(), S("append() should take 2 argments"))
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
-			emit(S("# append(%s, %s)"), slice.getGtype().String(), valueToAppend.getGtype().String())
+			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,

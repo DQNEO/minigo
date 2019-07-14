@@ -1,28 +1,28 @@
 package main
 
 func (e *ExprLen) emit() {
-	emit(S("# emit len()"))
+	emit("# emit len()")
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	assert(gtype != nil, e.token(), S("gtype should not be  nil:\n"))
 
 	switch gtype.getKind() {
 	case G_ARRAY:
-		emit(S("LOAD_NUMBER %d"), gtype.length)
+		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
-		emit(S("# len(slice)"))
+		emit("# len(slice)")
 		switch arg.(type) {
 		case *ExprStringLiteral:
 			sLiteral := arg.(*ExprStringLiteral)
 			length := countStrlen(sLiteral.val)
-			emit(S("LOAD_NUMBER %d"), length)
+			emit("LOAD_NUMBER %d", length)
 		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize)
 		case *ExprSliceLiteral:
-			emit(S("# ExprSliceLiteral"))
+			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
 			var length int = len(_arg.values)
-			emit(S("LOAD_NUMBER %d"), length)
+			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			uop := &ExprBinop{
@@ -35,7 +35,7 @@ func (e *ExprLen) emit() {
 			TBI(arg.token(), Sprintf(S("unable to handle %T"), arg))
 		}
 	case G_MAP:
-		emit(S("# emit len(map)"))
+		emit("# emit len(map)")
 		arg.emit()
 
 		// if not nil
@@ -43,15 +43,15 @@ func (e *ExprLen) emit() {
 		// else len
 		labelNil := makeLabel()
 		labelEnd := makeLabel()
-		emit(S("TEST_IT # map && map (check if map is nil)"))
-		emit(S("je %s # jump if map is nil"), labelNil)
+		emit("TEST_IT # map && map (check if map is nil)")
+		emit("je %s # jump if map is nil", labelNil)
 		// not nil case
-		emit(S("mov 8(%%rax), %%rax # load map len"))
-		emit(S("jmp %s"), labelEnd)
+		emit("mov 8(%%rax), %%rax # load map len")
+		emit("jmp %s", labelEnd)
 		// nil case
-		emit(S("%s:"), labelNil)
-		emit(S("LOAD_NUMBER 0"))
-		emit(S("%s:"), labelEnd)
+		emit("%s:", labelNil)
+		emit("LOAD_NUMBER 0")
+		emit("%s:", labelEnd)
 	default:
 		TBI(arg.token(), S("unable to handle %s"), gtype)
 	}
@@ -66,28 +66,28 @@ type IrLowLevelCall struct {
 func (e *IrLowLevelCall) emit() {
 	var i int
 	for i=e.argsFromStack - 1;i>=0;i-- {
-		emit(S("POP_TO_ARG_%d"), i)
+		emit("POP_TO_ARG_%d", i)
 	}
-	emit(S("FUNCALL %s"), bytes(e.symbol))
+	emit("FUNCALL %s", bytes(e.symbol))
 }
 
 
 func (e *ExprCap) emit() {
-	emit(S("# emit cap()"))
+	emit("# emit cap()")
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
 	switch gtype.getKind() {
 	case G_ARRAY:
-		emit(S("LOAD_NUMBER %d"), gtype.length)
+		emit("LOAD_NUMBER %d", gtype.length)
 	case G_SLICE:
 		switch arg.(type) {
 		case *ExprVariable, *ExprStructField, *ExprIndex:
 			emitOffsetLoad(arg, 8, ptrSize*2)
 		case *ExprSliceLiteral:
-			emit(S("# ExprSliceLiteral"))
+			emit("# ExprSliceLiteral")
 			_arg := arg.(*ExprSliceLiteral)
 			var length int = len(_arg.values)
-			emit(S("LOAD_NUMBER %d"), length)
+			emit("LOAD_NUMBER %d", length)
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
@@ -117,27 +117,27 @@ func (e *ExprCap) emit() {
 func emitMakeSliceFunc() {
 	// makeSlice
 	emitWithoutIndent(S("%s:"), bytes("iruntime.makeSlice"))
-	emit(S("FUNC_PROLOGUE"))
+	emit("FUNC_PROLOGUE")
 	emitNewline()
 
-	emit(S("PUSH_ARG_2")) // -8
-	emit(S("PUSH_ARG_1")) // -16
-	emit(S("PUSH_ARG_0")) // -24
+	emit("PUSH_ARG_2") // -8
+	emit("PUSH_ARG_1") // -16
+	emit("PUSH_ARG_0") // -24
 
-	emit(S("LOAD_8_FROM_LOCAL -16 # newcap"))
-	emit(S("PUSH_8"))
-	emit(S("LOAD_8_FROM_LOCAL -8 # unit"))
-	emit(S("PUSH_8"))
-	emit(S("IMUL_FROM_STACK"))
-	emit(S("ADD_NUMBER 1 # 1 byte buffer"))
+	emit("LOAD_8_FROM_LOCAL -16 # newcap")
+	emit("PUSH_8")
+	emit("LOAD_8_FROM_LOCAL -8 # unit")
+	emit("PUSH_8")
+	emit("IMUL_FROM_STACK")
+	emit("ADD_NUMBER 1 # 1 byte buffer")
 
-	emit(S("PUSH_8"))
-	emit(S("POP_TO_ARG_0"))
-	emit(S("FUNCALL iruntime.malloc"))
+	emit("PUSH_8")
+	emit("POP_TO_ARG_0")
+	emit("FUNCALL iruntime.malloc")
 
-	emit(S("mov -24(%%rbp), %%rbx # newlen"))
-	emit(S("mov -16(%%rbp), %%rcx # newcap"))
+	emit("mov -24(%%rbp), %%rbx # newlen")
+	emit("mov -16(%%rbp), %%rcx # newcap")
 
-	emit(S("LEAVE_AND_RET"))
+	emit("LEAVE_AND_RET")
 	emitNewline()
 }
