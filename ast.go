@@ -214,7 +214,7 @@ type StmtReturn struct {
 	tok               *Token
 	exprs             []Expr
 	rettypes          []*Gtype
-	labelDeferHandler bytes
+	labelDeferHandler string
 }
 
 type StmtInc struct {
@@ -263,7 +263,7 @@ type DeclFunc struct {
 	body      *StmtSatementList
 	stmtDefer *StmtDefer
 	// every function has a defer handler
-	labelDeferHandler bytes
+	labelDeferHandler string
 	prologue          Emitter
 }
 

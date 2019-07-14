@@ -1668,7 +1668,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	// every function has a defer_handler
 	l := concat(string(makeLabel()) , "_defer_handler")
-	r.labelDeferHandler = []byte(l)
+	r.labelDeferHandler = l
 	p.currentFunc = r
 	body := p.parseCompoundStmt()
 	r.body = body

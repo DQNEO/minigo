@@ -112,7 +112,7 @@ func align(n int, m int) int {
 	}
 }
 
-func emitFuncEpilogue(labelDeferHandler bytes, stmtDefer *StmtDefer) {
+func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 	emitNewline()
 	emit("# func epilogue")
 	// every function has a defer handler
