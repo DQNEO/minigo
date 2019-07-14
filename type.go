@@ -160,13 +160,13 @@ func (gtype *Gtype) getSize() int {
 	}
 }
 
-func (gtype *Gtype) String() bytes {
+func (gtype *Gtype) String() string {
 	if gtype == nil {
-		return S("NO_TYPE")
+		return "NO_TYPE"
 	}
 	switch gtype.kind {
 	case G_DEPENDENT:
-		return S("dependent")
+		return "dependent"
 	case G_NAMED:
 		if len(gtype.relation.pkg) == 0 {
 			//errorf("pkg is empty: %s", gtype.relation.name)
@@ -175,30 +175,30 @@ func (gtype *Gtype) String() bytes {
 		if child != nil  {
 			switch child.kind {
 			case G_INT:
-				return S("int")
+				return "int"
 			case G_BOOL:
-				return S("bool")
+				return "bool"
 			case G_BYTE:
-				return S("byte")
+				return "byte"
 			case G_STRING:
-				return S("string")
+				return "string"
 			case G_FUNC:
-				return S("func")
+				return "func"
 			}
 		}
 		 s := Sprintf("G_NAMED(%s.%s)",
 			bytes(gtype.relation.pkg), bytes(gtype.relation.name))
-		return bytes(s)
+		return s
 	case G_INT:
-		return S("int")
+		return "int"
 	case G_BOOL:
-		return S("bool")
+		return "bool"
 	case G_BYTE:
-		return S("byte")
+		return "byte"
 	case G_ARRAY:
 		elm := gtype.elementType
 		s := Sprintf("[%d]%s", gtype.length, elm.String())
-		return bytes(s)
+		return s
 	case G_STRUCT:
 		var r string = "struct{"
 		for _, field := range gtype.fields {
@@ -206,32 +206,32 @@ func (gtype *Gtype) String() bytes {
 			r = concat(r, tmp)
 		}
 		r = concat(r, "}")
-		return []byte(r)
+		return r
 	case G_STRUCT_FIELD:
-		return S("structfield")
+		return "structfield"
 	case G_POINTER:
 		origType := gtype.origType
 		s := Sprintf("*%s", origType.String())
-		return bytes(s)
+		return s
 	case G_SLICE:
 		s := Sprintf("[]%s", gtype.elementType.String())
-		return bytes(s)
+		return s
 	case G_STRING:
-		return S("string")
+		return "string"
 	case G_FUNC:
-		return S("func")
+		return "func"
 	case G_INTERFACE:
 		if len(gtype.imethods) == 0 {
-			return S("interface{}")
+			return "interface{}"
 		} else {
-			return S("interface {...}")
+			return "interface {...}"
 		}
 	case G_MAP:
-		return S("map")
+		return "map"
 	default:
 		errorf("gtype.String() error: invalid gtype.type=%d", gtype.kind)
 	}
-	return S("")
+	return ""
 }
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {

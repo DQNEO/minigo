@@ -153,7 +153,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		}
 	} else {
 		var val int
-		var gtypeString bytes = gtype.String()
+		var gtypeString string = gtype.String()
 		switch value.(type) {
 		case nil:
 			emit(".quad %d # %s %s zero value", val, gtypeString, bytes(containerName))

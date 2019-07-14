@@ -157,7 +157,7 @@ func (ircall *IrStaticCall) emit() {
 	var arg Expr
 	var argIndex int
 	for argIndex, arg = range ircall.args {
-		var fromGtype bytes
+		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
