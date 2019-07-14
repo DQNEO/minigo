@@ -3,16 +3,16 @@ package main
 
 func f1() {
 	var vbytes []byte
-	var s bytes
-	s = bytes(vbytes)
+	var s []byte
+	s = []byte(vbytes)
 	fmtPrintf("%s0\n", s)           // 0
 	fmtPrintf("%d\n", len(vbytes)+1) // 1
 	fmtPrintf("%d\n", len(s)+2)     // 2
 }
 
 func f2() {
-	var s bytes
-	fmtPrintf("%s3\n", bytes(s))       // 3
+	var s []byte
+	fmtPrintf("%s3\n", []byte(s))       // 3
 	fmtPrintf("%d\n", len(s)+4) // 4
 }
 
@@ -23,18 +23,18 @@ func f3() {
 }
 
 func f4() {
-	var s bytes
+	var s []byte
 	var vbytes []byte
 	vbytes = []byte(s)
-	fmtPrintf("%s7\n", bytes(vbytes)) // 7
+	fmtPrintf("%s7\n", []byte(vbytes)) // 7
 	fmtPrintf("%d\n", len(vbytes)+8)   // 8
 }
 
 func f5() {
-	var s bytes
-	var bytes []byte
-	bytes = []byte(s)
-	if bytes == nil {
+	var s []byte
+	var bs []byte
+	bs = []byte(s)
+	if bs == nil {
 		fmtPrintf("9\n")
 	} else {
 		fmtPrintf("ERROR")
