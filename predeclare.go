@@ -74,7 +74,7 @@ var builtinPrintstring = &DeclFunc{
 }
 
 func newUniverse() *Scope {
-	universe := newScope(nil, S("universe"))
+	universe := newScope(nil, "universe")
 	setPredeclaredIdentifiers(universe)
 	return universe
 }
