@@ -12,13 +12,12 @@ func fmtPrintf(format string, a... interface{}) {
 	os.Stdout.Write([]byte(s))
 }
 
-var _trash int
 func Sprintf(format string, a... interface{}) string {
 	var args []interface{}
 	for _, x := range a {
 		var y interface{}
 		switch x.(type) {
-		case identifier:   // This case is not reached by 2nd gen compiler
+		case identifier: // This case is not reached by 2nd gen compiler
 			var tmpgoident identifier = x.(identifier)
 			var tmpbytes2 []byte = []byte(tmpgoident)
 			y = tmpbytes2
@@ -28,7 +27,11 @@ func Sprintf(format string, a... interface{}) string {
 		args = append(args, y)
 	}
 	a = nil // unset
+	return fmtSprintf(format, args...)
+}
 
+var _trash int
+func fmtSprintf(format string, args... interface{}) string {
 	var r []byte
 	var blocks []string
 	var bs []byte
