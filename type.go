@@ -187,7 +187,7 @@ func (gtype *Gtype) String() string {
 			}
 		}
 		 s := Sprintf("G_NAMED(%s.%s)",
-			bytes(gtype.relation.pkg), bytes(gtype.relation.name))
+			gtype.relation.pkg, gtype.relation.name)
 		return s
 	case G_INT:
 		return "int"

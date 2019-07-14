@@ -3,10 +3,10 @@ package main
 import "strings"
 
 // builtin string
-var builtinStringKey1 bytes = bytes("SfmtDumpInterface")
-var builtinStringValue1 bytes = bytes("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
-var builtinStringKey2 bytes = bytes("SfmtDumpSlice")
-var builtinStringValue2 bytes = bytes("# slice = {underlying:%p,len:%d,cap:%d}")
+var builtinStringKey1 string = string("SfmtDumpInterface")
+var builtinStringValue1 string = string("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
+var builtinStringKey2 string = string("SfmtDumpSlice")
+var builtinStringValue2 string = string("# slice = {underlying:%p,len:%d,cap:%d}")
 
 func (program *Program) emitSpecialStrings() {
 	// https://sourceware.org/binutils/docs-2.30/as/Data.html#Data
@@ -25,8 +25,8 @@ func (program *Program) emitDynamicTypes() {
 	emit("# Dynamic Types")
 	for dynamicTypeId, gs := range symbolTable.uniquedDTypes {
 		label := makeDynamicTypeLabel(dynamicTypeId)
-		emitWithoutIndent(".%s:", bytes(label))
-		emit(".string \"%s\"", bytes(gs))
+		emitWithoutIndent(".%s:", label)
+		emit(".string \"%s\"", gs)
 	}
 }
 
