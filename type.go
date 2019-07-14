@@ -438,8 +438,7 @@ func (e *ExprConstVariable) getGtype() *Gtype {
 }
 
 func (e *ExprBinop) getGtype() *Gtype {
-	sop := string(e.op)
-	switch sop {
+	switch e.op {
 	case "<", ">", "<=", ">=", "!=", "==", "&&", "||":
 		return gBool
 	case "+":

@@ -287,7 +287,7 @@ func (f *StmtFor) convert() Stmt {
 		}
 		// i < len(list)
 		var cond = &ExprBinop{
-			op:   bytes("<"),
+			op:   "<",
 			left: f.rng.indexvar, // i
 			// @TODO
 			// The range expression x is evaluated once before beginning the loop
@@ -314,12 +314,12 @@ func (f *StmtFor) convert() Stmt {
 
 		// break if i == len(list) - 1
 		var cond2 = &ExprBinop{
-			op:   bytes("=="),
+			op:   "==",
 			left: f.rng.indexvar, // i
 			// @TODO2
 			// The range expression x is evaluated once before beginning the loop
 			right: &ExprBinop{
-				op: bytes("-"),
+				op: "-",
 				left: &ExprLen{
 					arg: f.rng.rangeexpr, // len(expr)
 				},

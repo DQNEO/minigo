@@ -759,7 +759,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 				}
 				ast = &ExprBinop{
 					tok:   tok,
-					op:    tok.sval,
+					op:    string(tok.sval),
 					left:  ast,
 					right: right,
 				}
@@ -1256,15 +1256,15 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 	defer p.traceOut(__func__)
 	ptok := p.lastToken()
 
-	var op bytes
+	var op string
 	sop := string(assignop)
 	switch sop {
 	case "+=":
-		op = S("+")
+		op = "+"
 	case "-=":
-		op = S("-")
+		op = "-"
 	case "*=":
-		op = S("*")
+		op = "*"
 	default:
 		errorft(ptok, S("internal error"))
 	}
@@ -1272,7 +1272,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 	p.assert(len(rights) == 1, S("num of rights is 1"))
 	binop := &ExprBinop{
 		tok:   ptok,
-		op:    bytes(op),
+		op:    op,
 		left:  left,
 		right: rights[0],
 	}

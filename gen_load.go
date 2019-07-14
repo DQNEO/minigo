@@ -187,7 +187,7 @@ func (ast *ExprUop) emit() {
 		// -(x) -> (-1) * (x)
 		left := &ExprNumberLiteral{val: -1}
 		binop := &ExprBinop{
-			op:    bytes("*"),
+			op:    "*",
 			left:  left,
 			right: ast.operand,
 		}
@@ -386,7 +386,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcLen := &ExprBinop{
-		op:    bytes("-"),
+		op:    "-",
 		left:  e.high,
 		right: e.low,
 	}
@@ -404,7 +404,7 @@ func (e *ExprSlice) emitSlice() {
 		}
 	}
 	calcCap := &ExprBinop{
-		op:    bytes("-"),
+		op:    "-",
 		left:  max,
 		right: e.low,
 	}

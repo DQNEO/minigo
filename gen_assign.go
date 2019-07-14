@@ -278,7 +278,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 						emitOffsetSavePrimitive(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
-			case G_SLICE:
+			case G_SLICE,G_STRING:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,

@@ -376,7 +376,7 @@ func (em *IrStmtRangeMap) emit() {
 	}
 	// counter < len(list)
 	em.condition = &ExprBinop{
-		op:   bytes("<"),
+		op:   "<",
 		left: em.mapCounter, // i
 		// @TODO
 		// The range expression x is evaluated once before beginning the loop

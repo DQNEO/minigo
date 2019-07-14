@@ -26,7 +26,7 @@ func (e *ExprLen) emit() {
 		case *ExprSlice:
 			sliceExpr := arg.(*ExprSlice)
 			uop := &ExprBinop{
-				op:    bytes("-"),
+				op:    "-",
 				left:  sliceExpr.high,
 				right: sliceExpr.low,
 			}
@@ -94,7 +94,7 @@ func (e *ExprCap) emit() {
 			if sliceExpr.collection.getGtype().getKind() == G_ARRAY {
 				cp := &ExprBinop{
 					tok: e.tok,
-					op:  bytes("-"),
+					op:  "-",
 					left: &ExprLen{
 						tok: e.tok,
 						arg: sliceExpr.collection,

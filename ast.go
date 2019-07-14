@@ -108,7 +108,7 @@ type ExprMethodcall struct {
 
 type ExprBinop struct {
 	tok   *Token
-	op    bytes
+	op    string
 	left  Expr
 	right Expr
 }
