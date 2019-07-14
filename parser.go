@@ -180,10 +180,6 @@ func (p *parser) readFuncallArgs() []Expr {
 //var outerPackages map[identifier](map[identifier]interface{})
 
 func (p *parser) addStringLiteral(ast *ExprStringLiteral) {
-	// avoid emitting '(null')
-	if len(ast.val) == 0 {
-		ast.val = bytes("")
-	}
 	p.stringLiterals = append(p.stringLiterals, ast)
 }
 
