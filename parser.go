@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-var __func__ bytes = bytes("__func__")
+var __func__ string = "__func__"
 
 type parser struct {
 	// per function or block
@@ -106,17 +106,17 @@ func (p *parser) expect(punct bytes) *Token {
 	return tok
 }
 
-func getCallerName(n int) bytes {
+func getCallerName(n int) string {
 	pc, _, _, ok := runtime.Caller(n)
 	if !ok {
 		errorf("Unable to get caller")
 	}
 	details := runtime.FuncForPC(pc)
 	//r := (strings.Split(details.Name(), S(".")))[2]
-	return bytes(details.Name())
+	return details.Name()
 }
 
-func (p *parser) traceIn(funcname bytes) int {
+func (p *parser) traceIn(funcname string) int {
 	if !debugParser {
 		return 0
 	}
@@ -128,7 +128,7 @@ func (p *parser) traceIn(funcname bytes) int {
 	return 0
 }
 
-func (p *parser) traceOut(funcname bytes) {
+func (p *parser) traceOut(funcname string) {
 	if !debugParser {
 		return
 	}
