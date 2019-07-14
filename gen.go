@@ -19,7 +19,7 @@ const sliceSize int = IntSize + ptrSize + ptrSize
 
 func emitNewline() {
 	writePos()
-	write(S("\n"))
+	write([]byte("\n"))
 }
 
 var pos *Token // current source position
