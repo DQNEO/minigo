@@ -19,35 +19,35 @@ func f1() {
 }
 
 func f2() {
-	var s []byte
-	s = Itoa(0)
+	var s string
+	s = strconv.Itoa(0)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(7)
+	s = strconv.Itoa(7)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(10)
+	s = strconv.Itoa(10)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(100)
+	s = strconv.Itoa(100)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(1234567890)
+	s = strconv.Itoa(1234567890)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(-1)
+	s = strconv.Itoa(-1)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(-7)
+	s = strconv.Itoa(-7)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(-10)
+	s = strconv.Itoa(-10)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(-100)
+	s = strconv.Itoa(-100)
 	fmtPrintf(S("%s\n"), s)
 
-	s = Itoa(-1234567890)
+	s = strconv.Itoa(-1234567890)
 	fmtPrintf(S("%s\n"), s)
 
 }
