@@ -80,7 +80,7 @@ func f8() {
 }
 
 func f9() {
-	var s2 bytes
+	var s2 string
 	fmtPrintf("%s", s2)
 	if eq(s2, "") {
 		fmtPrintf("13\n")
