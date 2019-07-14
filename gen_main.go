@@ -59,7 +59,7 @@ func (program *Program) emitMethodTable() {
 		emitWithoutIndent("receiverType%d:", i)
 		methods := v
 		for _, methodNameFull := range methods {
-			if eq(methodNameFull, S(".")) {
+			if eq(bytes(methodNameFull), bytes(".")) {
 				panic(S("invalid method name"))
 			}
 			splitted := strings.Split(string(methodNameFull), "$")

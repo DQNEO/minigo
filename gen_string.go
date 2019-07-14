@@ -101,7 +101,7 @@ func (binop *IrExprStringComparison) emit() {
 	// eq(left, right, eEqual)
 	call := &IrStaticCall{
 		tok: binop.token(),
-		symbol: S("iruntime.eqGostrings"),
+		symbol: "iruntime.eqGostrings",
 		isMethodCall:false,
 		args: args,
 		callee: &DeclFunc{

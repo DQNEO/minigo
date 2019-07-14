@@ -114,7 +114,7 @@ func (f *DeclFunc) prepare() Emitter {
 
 type funcPrologueEmitter struct {
 	token        *Token
-	symbol       bytes
+	symbol       string
 	argRegisters []int
 	localvars    []*ExprVariable
 	localarea    int

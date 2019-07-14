@@ -109,8 +109,8 @@ func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
 	return r
 }
 
-func composeMethodTable(funcs []*DeclFunc) map[int][]bytes {
-	var methodTable map[int][]bytes = map[int][]bytes{} // receiverTypeId : []methodTable
+func composeMethodTable(funcs []*DeclFunc) map[int][]string {
+	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
 		if funcdecl.receiver == nil {
@@ -193,7 +193,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(S("libc"), S("write"))
+			staticCall.symbol = getFuncSymbol(identifier("libc"), "write")
 			staticCall.args = []Expr{arg0, arg1}
 			return staticCall
 		case builtinPanic:
@@ -203,7 +203,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(S("iruntime"), S("panic"))
+			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "panic")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinLen:
@@ -226,7 +226,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(S("iruntime"), S("makeSlice"))
+			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "makeSlice")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
@@ -241,9 +241,9 @@ func walkExpr(expr Expr) Expr {
 			}
 			switch slice.getGtype().elementType.getSize() {
 			case 1:
-				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append1"))
+				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append1")
 			case 8:
-				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append8"))
+				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append8")
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
@@ -252,7 +252,7 @@ func walkExpr(expr Expr) Expr {
 					}
 					funcall.args[1] = eConvertion
 				}
-				staticCall.symbol = getFuncSymbol(S("iruntime"), S("append24"))
+				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append24")
 			default:
 				TBI(slice.token(), "")
 			}

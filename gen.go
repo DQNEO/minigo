@@ -68,7 +68,7 @@ func unwrapRel(e Expr) Expr {
 }
 
 // Mytype.method -> Mytype#method
-func getMethodUniqueName(gtype *Gtype, fname identifier) bytes {
+func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	assertNotNil(gtype != nil, nil)
 	var typename identifier
 	if gtype.kind == G_POINTER {
@@ -76,31 +76,31 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) bytes {
 	} else {
 		typename = gtype.relation.name
 	}
-	s := Sprintf("%s$%s", bytes(typename), bytes(fname))
-	return bytes(s)
+	s := Sprintf("%s$%s", typename, fname)
+	return s
 }
 
 // "main","f1" -> "main.f1"
-func getFuncSymbol(pkg bytes, fname bytes) bytes {
-	if eq(pkg, S("libc")) {
+func getFuncSymbol(pkg identifier, fname string) string {
+	if eq(bytes(pkg), S("libc")) {
 		return fname
 	}
 	if len(pkg) == 0 {
-		pkg = bytes("")
+		pkg = ""
 	}
 	s := Sprintf("%s.%s", pkg, fname)
-	return bytes(s)
+	return s
 }
 
-func (f *DeclFunc) getSymbol() bytes {
+func (f *DeclFunc) getSymbol() string {
 	if f.receiver != nil {
 		// method
 		fname := f.fname
-		return getFuncSymbol(bytes(f.pkg), getMethodUniqueName(f.receiver.gtype, fname))
+		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, fname))
 	}
 
 	// other functions
-	return getFuncSymbol(bytes(f.pkg), bytes(f.fname))
+	return getFuncSymbol(f.pkg, string(f.fname))
 }
 
 func align(n int, m int) int {
