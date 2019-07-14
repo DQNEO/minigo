@@ -207,15 +207,16 @@ func Itoa(i int) []byte {
 	return r
 }
 
-func Atoi(gs bytes) (int, error) {
-	if len(gs) == 0 {
+func Atoi(gs string) (int, error) {
+	bts := []byte(gs)
+	if len(bts) == 0 {
 		return 0,nil
 	}
 	var b byte
 	var n int
 	var i int
 	var isMinus bool
-	for i, b = range gs {
+	for i, b = range bts {
 		if b == '.' {
 			return 0,nil // @FIXME all no number should return error
 		}
