@@ -1,7 +1,7 @@
 package main
 
 
-var message bytes = bytes("hello")
+var message string = "hello"
 
 func f1() {
 	fmtPrintf("%s\n", message)
@@ -52,7 +52,7 @@ func f4() {
 	}
 }
 
-type mystring bytes
+type mystring []byte
 
 func f5() {
 	s := "8"
