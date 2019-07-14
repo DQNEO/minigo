@@ -132,7 +132,7 @@ func emit_intcast(gtype *Gtype) {
 	}
 }
 
-func emit_comp_primitive(inst bytes, binop *ExprBinop) {
+func emit_comp_primitive(inst string, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
 	assert(len(inst) > 0 , binop.token(), "inst shoud not be empty")
 	binop.left.emit()
@@ -181,21 +181,21 @@ func (binop *ExprBinop) emitComp() {
 	assert(!binop.left.getGtype().isString(), binop.token(), "should not be string")
 
 
-	var instruction bytes
-	op := string(binop.op)
+	var instruction string
+	op := binop.op
 	switch op {
 	case "<":
-		instruction = S("setl")
+		instruction = "setl"
 	case ">":
-		instruction = S("setg")
+		instruction = "setg"
 	case "<=":
-		instruction = S("setle")
+		instruction = "setle"
 	case ">=":
-		instruction = S("setge")
+		instruction = "setge"
 	case "!=":
-		instruction = S("setne")
+		instruction = "setne"
 	case "==":
-		instruction = S("sete")
+		instruction = "sete"
 	default:
 		assertNotReached(binop.token())
 	}
@@ -505,11 +505,11 @@ func (e *ExprTypeSwitchGuard) emit() {
 	e.expr.emit()
 }
 
-func bool2string(bol bool) bytes {
+func bool2string(bol bool) string {
 	if bol {
-		return S("true")
+		return "true"
 	} else {
-		return S("false")
+		return "false"
 	}
 }
 
