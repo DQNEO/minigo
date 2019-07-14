@@ -53,7 +53,7 @@ func (program *Program) emitMethodTable() {
 		}
 	}
 
-	var shortMethodNames []bytes
+	var shortMethodNames []string
 
 	for i,v := range program.methodTable {
 		emitWithoutIndent("receiverType%d:", i)
@@ -75,8 +75,8 @@ func (program *Program) emitMethodTable() {
 			emit(".quad %s # func addr addr", label)
 
 
-			if !inArray(bytes(shortMethodName), shortMethodNames) {
-				shortMethodNames = append(shortMethodNames, bytes(shortMethodName))
+			if !inArray2(shortMethodName, shortMethodNames) {
+				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
 		}
 	}

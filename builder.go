@@ -113,7 +113,7 @@ func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
 
 type compiledStdlib struct {
 	compiledPackages         map[identifier]*AstPackage
-	uniqImportedPackageNames []bytes
+	uniqImportedPackageNames []string
 }
 
 func (csl *compiledStdlib) getPackages() []*AstPackage {
@@ -127,9 +127,9 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 }
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
-	csl.compiledPackages[identifier(pkg.name)] = pkg
-	if !inArray(bytes(pkg.name), csl.uniqImportedPackageNames) {
-		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, bytes(pkg.name))
+	csl.compiledPackages[pkg.name] = pkg
+	if !inArray2(string(pkg.name), csl.uniqImportedPackageNames) {
+		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 	}
 }
 
@@ -183,7 +183,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	program := &Program{}
 	program.packages = packages
-	program.importOS = inArray(S("os"), csl.uniqImportedPackageNames)
+	program.importOS = inArray2("os", csl.uniqImportedPackageNames)
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
