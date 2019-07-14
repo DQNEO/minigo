@@ -16,7 +16,7 @@ func makeDynamicTypeLabel(id int) bytes {
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
 	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
-		errorft(nil, S("type %s not found in uniquedDTypes"), gtype.String())
+		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
 	}
 	return makeDynamicTypeLabel(dynamicTypeId)
 }
@@ -38,7 +38,7 @@ func resolve(sc *Scope, rel *Relation) *IdentBody {
 		} else if relbody.expr != nil {
 			rel.expr = relbody.expr
 		} else {
-			errorft(rel.token(), S("Bad type relbody %v"), relbody)
+			errorft(rel.token(), "Bad type relbody %v", relbody)
 		}
 	}
 	return relbody
@@ -51,7 +51,7 @@ func resolveIdents(pkg *AstPackage, universe *Scope) {
 		for _, rel := range file.unresolved {
 			relbody := resolve(packageScope, rel)
 			if relbody == nil {
-				errorft(rel.token(), S("unresolved identifier %s"), rel.name)
+				errorft(rel.token(), "unresolved identifier %s", rel.name)
 			}
 		}
 	}
@@ -184,7 +184,7 @@ func walkExpr(expr Expr) Expr {
 		decl := funcall.getFuncDef()
 		switch decl {
 		case builtinPrintstring:
-			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 			arg0 := &ExprNumberLiteral{
 				val: 1, // stdout
 			}
@@ -198,7 +198,7 @@ func walkExpr(expr Expr) Expr {
 			staticCall.args = []Expr{arg0, arg1}
 			return staticCall
 		case builtinPanic:
-			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
@@ -208,7 +208,7 @@ func walkExpr(expr Expr) Expr {
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinLen:
-			assert(len(funcall.args) == 1, funcall.token(), S("invalid arguments for len()"))
+			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
 			arg := funcall.args[0]
 			return &ExprLen{
 				tok: arg.token(),
@@ -221,7 +221,7 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinMakeSlice:
-			assert(len(funcall.args) == 3, funcall.token(), S("append() should take 3 argments"))
+			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
@@ -231,7 +231,7 @@ func walkExpr(expr Expr) Expr {
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
-			assert(len(funcall.args) == 2, funcall.token(), S("append() should take 2 argments"))
+			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
 			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())

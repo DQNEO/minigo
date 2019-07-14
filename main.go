@@ -69,7 +69,7 @@ func main() {
 	// parsing arguments
 	var sourceFiles []bytes
 	osArgs := os.Args
-	assert(len(osArgs) > 0, nil, S("os.Args should not be empty"))
+	assert(len(osArgs) > 0, nil, "os.Args should not be empty")
 	if len(os.Args) > 1 {
 		sourceFiles = parseOpts(osArgs[1:])
 	}

@@ -4,7 +4,7 @@ func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := unwrapRel(e.arg)
 	gtype := arg.getGtype()
-	assert(gtype != nil, e.token(), S("gtype should not be  nil:\n"))
+	assert(gtype != nil, e.token(), "gtype should not be  nil:\n")
 
 	switch gtype.getKind() {
 	case G_ARRAY:
@@ -109,7 +109,7 @@ func (e *ExprCap) emit() {
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
 	case G_MAP:
-		errorft(arg.token(), S("invalid argument for cap"))
+		errorft(arg.token(), "invalid argument for cap")
 	default:
 		TBI(arg.token(), "unable to handle %s", gtype)
 	}

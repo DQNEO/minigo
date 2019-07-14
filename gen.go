@@ -136,7 +136,7 @@ func emit_intcast(gtype *Gtype) {
 
 func emit_comp_primitive(inst bytes, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
-	assert(len(inst) > 0 , binop.token(), S("inst shoud not be empty"))
+	assert(len(inst) > 0 , binop.token(), "inst shoud not be empty")
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
@@ -178,9 +178,9 @@ func emitIncrDecl(inst bytes, operand Expr) {
 
 func (binop *ExprBinop) emitComp() {
 	emit("# emitComp")
-	assert(binop.left != nil, binop.token(), S("should not be nil"))
+	assert(binop.left != nil, binop.token(), "should not be nil")
 
-	assert(!binop.left.getGtype().isString(), binop.token(), S("should not be string"))
+	assert(!binop.left.getGtype().isString(), binop.token(), "should not be string")
 
 
 	var instruction bytes
@@ -267,7 +267,7 @@ func (ast *ExprBinop) emit() {
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 	default:
-		errorft(ast.token(), S("Unknown binop: %s"), op)
+		errorft(ast.token(), "Unknown binop: %s", op)
 	}
 }
 
@@ -347,7 +347,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 	if receiverType.kind == G_POINTER {
 		receiverType = receiverType.origType.relation.gtype
 	}
-	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), S("no receiverTypeId"))
+	//assert(receiverType.receiverTypeId > 0,  dynamicValue.token(), "no receiverTypeId")
 	emit("LOAD_NUMBER %d # receiverTypeId", receiverType.receiverTypeId)
 	emit("PUSH_8 # receiverTypeId")
 
@@ -435,12 +435,12 @@ func (f *ExprFuncRef) emit() {
 }
 
 func (e ExprArrayLiteral) emit() {
-	errorft(e.token(), S("DO NOT EMIT"))
+	errorft(e.token(), "DO NOT EMIT")
 }
 
 // https://golang.org/ref/spec#Type_assertions
 func (e *ExprTypeAssertion) emit() {
-	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), S("expr must be an Interface type"))
+	assert(e.expr.getGtype().getKind() == G_INTERFACE, e.token(), "expr must be an Interface type")
 	if e.gtype.getKind() == G_INTERFACE {
 		TBI(e.token(), "type assertion")
 	} else {
@@ -500,7 +500,7 @@ func (e *IrExprConversion) emit() {
 }
 
 func (e *ExprStructLiteral) emit() {
-	errorft(e.token(), S("This cannot be emitted alone"))
+	errorft(e.token(), "This cannot be emitted alone")
 }
 
 func (e *ExprTypeSwitchGuard) emit() {
@@ -531,7 +531,7 @@ func evalIntExpr(e Expr) int {
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:
-		errorft(e.token(), S("variable cannot be inteppreted at compile time :%#v"), e)
+		errorft(e.token(), "variable cannot be inteppreted at compile time :%#v", e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
 		op := string(binop.op)
@@ -551,7 +551,7 @@ func evalIntExpr(e Expr) int {
 		}
 		return evalIntExpr(cnst.val)
 	default:
-		errorft(e.token(), S("unkown type %T"), e)
+		errorft(e.token(), "unkown type %T", e)
 	}
 	return 0
 }

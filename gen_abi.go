@@ -92,10 +92,10 @@ func (f *DeclFunc) prepare() Emitter {
 	var lvar *ExprVariable
 	for i, lvar = range f.localvars {
 		if lvar.gtype == nil {
-			errorft(lvar.token(), S("i=%d %s has nil gtype"),i, lvar.varname )
+			errorft(lvar.token(), "i=%d %s has nil gtype",i, lvar.varname )
 		}
 		size := lvar.gtype.getSize()
-		assert(size != 0, lvar.token(), S("size should  not be zero:%s"), lvar.gtype.String())
+		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String())
 		loff := align(size, 8)
 		localarea -= loff
 		offset -= loff
@@ -273,7 +273,7 @@ func (ircall *IrStaticCall) emit() {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(ircall.args[0].token(), S("too many arguments"))
+			errorft(ircall.args[0].token(), "too many arguments")
 		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)

@@ -126,8 +126,8 @@ func (gtype *Gtype) isString() bool {
 }
 
 func (gtype *Gtype) getSize() int {
-	assert(gtype != nil, nil, S("gtype should not be nil"))
-	assert(gtype.kind != G_DEPENDENT, nil, S("type should be inferred"))
+	assert(gtype != nil, nil, "gtype should not be nil")
+	assert(gtype.kind != G_DEPENDENT, nil, "type should be inferred")
 	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
 			errorf("relation not resolved: %s", gtype)
@@ -236,7 +236,7 @@ func (gtype *Gtype) String() bytes {
 
 func (strct *Gtype) getField(name goidentifier) *Gtype {
 	assertNotNil(strct != nil, nil)
-	assert(strct.kind == G_STRUCT, nil, S("assume G_STRUCT type"))
+	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type")
 	for _, field := range strct.fields {
 		if eq(bytes(field.fieldname), bytes(name)) {
 			return field
@@ -247,13 +247,13 @@ func (strct *Gtype) getField(name goidentifier) *Gtype {
 }
 
 func (strct *Gtype) calcStructOffset() {
-	assert(strct.getKind() == G_STRUCT, nil, S("assume G_STRUCT type, but got %s"), strct.String())
+	assert(strct.getKind() == G_STRUCT, nil, "assume G_STRUCT type, but got %s", strct.String())
 	var offset int
 	for _, fieldtype := range strct.fields {
 		var align int
 		if fieldtype.getSize() < MaxAlign {
 			align = fieldtype.getSize()
-			assert(align > 0, nil, S("field size should be > 0: filed=%s"), fieldtype.String())
+			assert(align > 0, nil, "field size should be > 0: filed=%s", fieldtype.String())
 		} else {
 			align = MaxAlign
 		}
@@ -271,7 +271,7 @@ func (strct *Gtype) calcStructOffset() {
 
 func (rel *Relation) getGtype() *Gtype {
 	if rel.expr == nil {
-		//errorft(rel.token(), S("rel.expr is nil for %s"), rel)
+		//errorft(rel.token(), "rel.expr is nil for %s", rel)
 		return nil
 	}
 	return rel.expr.getGtype()
@@ -285,10 +285,10 @@ func (e *ExprStructLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprFuncallOrConversion) getGtype() *Gtype {
-	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), S(""))
+	assert(e.rel.expr != nil || e.rel.gtype != nil, e.token(), "")
 	if e.rel.expr != nil {
 		funcref, ok := e.rel.expr.(*ExprFuncRef)
-		assert(ok, e.token(), S("it should be a ExprFuncRef"))
+		assert(ok, e.token(), "it should be a ExprFuncRef")
 		firstRetType := funcref.funcdef.rettypes[0]
 		return firstRetType
 	} else if e.rel.gtype != nil {
@@ -308,14 +308,14 @@ func (e *ExprMethodcall) getGtype() *Gtype {
 	if underlyingType.kind == G_INTERFACE {
 		methodsig, ok := imethodGet(underlyingType.imethods, e.fname)
 		if !ok {
-			errorft(e.token(), S("method %s not found in %s %s"), e.fname, gtype, e.tok)
+			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(methodsig != nil, e.tok)
 		return methodsig.rettypes[0]
 	} else {
 		method, ok := methodGet(underlyingType.methods, e.fname)
 		if !ok {
-			errorft(e.token(), S("method %s not found in %s %s"), e.fname, gtype, e.tok)
+			errorft(e.token(), "method %s not found in %s %s", e.fname, gtype, e.tok)
 		}
 		assertNotNil(method != nil, e.tok)
 		return method.funcdef.rettypes[0]
@@ -355,7 +355,7 @@ func (e *ExprSlice) getGtype() *Gtype {
 }
 
 func (e *ExprIndex) getGtype() *Gtype {
-	assert(e.collection.getGtype() != nil, e.token(), S("collection type should not be nil"))
+	assert(e.collection.getGtype() != nil, e.token(), "collection type should not be nil")
 	gtype := e.collection.getGtype()
 	if gtype.kind == G_NAMED {
 		gtype = gtype.relation.gtype
@@ -386,7 +386,7 @@ func (e *ExprIndex) getSecondGtype() *Gtype {
 func (e *ExprStructField) getGtype() *Gtype {
 	gstruct := e.strct.getGtype()
 
-	assert(gstruct != gInt, e.tok, S("struct should not be gInt"))
+	assert(gstruct != gInt, e.tok, "struct should not be gInt")
 
 	var strctType *Gtype
 	if gstruct.kind == G_POINTER {

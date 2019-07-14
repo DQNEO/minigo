@@ -43,7 +43,7 @@ func (p *parser) clearLocalState() {
 type methods map[identifier]*ExprFuncRef
 
 func (p *parser) assert(cond bool, msg bytes) {
-	assert(cond, p.lastToken(), msg)
+	assert(cond, p.lastToken(), string(msg))
 }
 
 func (p *parser) assertNotNil(x interface{}) {
@@ -85,7 +85,7 @@ func (p *parser) unreadToken() {
 func (p *parser) expectIdent() goidentifier {
 	tok := p.readToken()
 	if !tok.isTypeIdent() {
-		errorft(tok, S("Identifier expected, but got %s"), tok)
+		errorft(tok, "Identifier expected, but got %s", tok)
 	}
 	return tok.getIdent()
 }
@@ -93,7 +93,7 @@ func (p *parser) expectIdent() goidentifier {
 func (p *parser) expectKeyword(name bytes) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
-		errorft(tok, S("Keyword %s expected but got %s"), name, tok)
+		errorft(tok, "Keyword %s expected but got %s", name, tok)
 	}
 	return tok
 }
@@ -101,7 +101,7 @@ func (p *parser) expectKeyword(name bytes) *Token {
 func (p *parser) expect(punct bytes) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
-		errorft(tok, S("punct '%s' expected but got '%s'"), punct, tok)
+		errorft(tok, "punct '%s' expected but got '%s'", punct, tok)
 	}
 	return tok
 }
@@ -172,7 +172,7 @@ func (p *parser) readFuncallArgs() []Expr {
 			p.skip()
 			continue
 		} else {
-			errorft(tok, S("invalid token in funcall arguments"))
+			errorft(tok, "invalid token in funcall arguments")
 		}
 	}
 }
@@ -328,15 +328,15 @@ func (p *parser) parseIndexOrSliceExpr(e Expr) Expr {
 					}
 					p.expect(S("]"))
 				} else {
-					errorft(tok, S("invalid token in index access"))
+					errorft(tok, "invalid token in index access")
 				}
 			}
 		} else {
-			errorft(tok, S("invalid token in index access"))
+			errorft(tok, "invalid token in index access")
 		}
 	}
 	if r == nil {
-		errorft(tok, S("should not be nil"))
+		errorft(tok, "should not be nil")
 	}
 	return r
 }
@@ -541,7 +541,7 @@ func (p *parser) parsePrim() Expr {
 				gtype.length = len(values)
 			} else {
 				if gtype.length < len(values) {
-					errorft(tok, S("array length does not match (%d != %d)"),
+					errorft(tok, "array length does not match (%d != %d)",
 						len(values), gtype.length)
 				}
 			}
@@ -563,7 +563,7 @@ func (p *parser) parsePrim() Expr {
 				}),
 			}
 		default:
-			errorft(tok, S("internal error"))
+			errorft(tok, "internal error")
 		}
 	case tok.isIdent(S("make")):
 		return p.parseMakeExpr()
@@ -572,7 +572,7 @@ func (p *parser) parsePrim() Expr {
 		return p.parseIdentExpr(tok)
 	}
 
-	errorft(tok, S("unable to handle"))
+	errorft(tok, "unable to handle")
 	return nil
 }
 
@@ -600,7 +600,7 @@ func (p *parser) parseArrayLiteral() []Expr {
 		} else if tok.isPunct(S("}")) {
 			break
 		} else {
-			errorft(tok, S("unpexpected token"))
+			errorft(tok, "unpexpected token")
 		}
 	}
 
@@ -755,7 +755,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 				p.skip()
 				right := p.parseExprInt(prior2)
 				if ast == nil {
-					errorft(tok, S("bad lefts unary expr:%v"), ast)
+					errorft(tok, "bad lefts unary expr:%v", ast)
 				}
 				ast = &ExprBinop{
 					tok:   tok,
@@ -872,7 +872,7 @@ func (p *parser) parseType() *Gtype {
 			// vaargs
 			TBI(tok, "VAARGS is not supported yet")
 		} else {
-			errorft(tok, S("Unkonwn token"))
+			errorft(tok, "Unkonwn token")
 		}
 
 	}
@@ -1109,11 +1109,11 @@ func (p *parser) parseForRange(exprs []Expr, infer bool) *StmtFor {
 	tokRange := p.expectKeyword(S("range"))
 
 	if len(exprs) > 2 {
-		errorft(tokRange, S("range values should be 1 or 2"))
+		errorft(tokRange, "range values should be 1 or 2")
 	}
 	indexvar, ok := exprs[0].(*Relation)
 	if !ok {
-		errorft(tokRange, S(" rng.lefts[0]. is not relation"))
+		errorft(tokRange, " rng.lefts[0]. is not relation")
 	}
 	var eIndexvar Expr = indexvar
 
@@ -1167,7 +1167,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	} else {
 		es, ok := stmt.(*StmtExpr)
 		if !ok {
-			errorft(stmt.token(), S("internal error"))
+			errorft(stmt.token(), "internal error")
 		}
 		r.cond = es.expr
 	}
@@ -1186,7 +1186,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 			p.skip()
 			r.els = p.parseCompoundStmt()
 		} else {
-			errorft(tok2, S("Unexpected token"))
+			errorft(tok2, "Unexpected token")
 		}
 	}
 	p.exitScope()
@@ -1266,7 +1266,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 	case "*=":
 		op = "*"
 	default:
-		errorft(ptok, S("internal error"))
+		errorft(ptok, "internal error")
 	}
 	rights := p.parseExpressionList(nil)
 	p.assert(len(rights) == 1, S("num of rights is 1"))
@@ -1288,7 +1288,7 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 
 func (p *parser) shortVarDecl(e Expr) {
 	rel := e.(*Relation) // a brand new rel
-	assert(p.isGlobal() == false, e.token(), S("should not be in global scope"))
+	assert(p.isGlobal() == false, e.token(), "should not be in global scope")
 	var name goidentifier = goidentifier(rel.name)
 	variable := p.newVariable(name, nil)
 	p.currentScope.setVar(name, variable)
@@ -1388,7 +1388,7 @@ func (p *parser) parseSwitchStmt() Stmt {
 			r.dflt = compound
 			break
 		} else {
-			errorft(tok, S("internal error"))
+			errorft(tok, "internal error")
 		}
 	}
 
@@ -1563,7 +1563,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 				break
 			}
 			if !tok.isPunct(S(",")) {
-				errorft(tok, S("Invalid token"))
+				errorft(tok, "Invalid token")
 			}
 		}
 	}
@@ -1586,7 +1586,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 			} else if next.isPunct(S(",")) {
 				p.skip()
 			} else {
-				errorft(next, S("invalid token"))
+				errorft(next, "invalid token")
 			}
 		}
 
@@ -1603,7 +1603,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	ptok := p.expectKeyword(S("func"))
 
 	p.localvars = nil
-	assert(len(p.localvars) == 0, ptok, S("localvars should be zero"))
+	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
 	var isMethod bool
 	p.enterNewScope(S("func"))
 
@@ -1697,12 +1697,12 @@ func (p *parser) parseImport() *ImportDecl {
 			} else if tok.isPunct(S(")")) {
 				break
 			} else {
-				errorft(tok, S("invalid import path"))
+				errorft(tok, "invalid import path")
 			}
 		}
 	} else {
 		if !tok.isTypeString() {
-			errorft(tok, S("import expects package name"))
+			errorft(tok, "import expects package name")
 		}
 		specs = []*ImportSpec{&ImportSpec{
 			tok:  tok,
@@ -1831,7 +1831,7 @@ func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 		// foreign package
 		relbody := symbolTable.allScopes[identifier(pkg)].get(rel.name)
 		if relbody == nil {
-			errorft(rel.token(), S("name %s is not found in %s package"), rel.name, pkg)
+			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}
 
 		if relbody.gtype != nil {
@@ -1839,7 +1839,7 @@ func (p *parser) tryResolve(pkg goidentifier, rel *Relation) {
 		} else if relbody.expr != nil {
 			rel.expr = relbody.expr
 		} else {
-			errorft(rel.token(), S("Bad type relbody %v"), relbody)
+			errorft(rel.token(), "Bad type relbody %v", relbody)
 		}
 	}
 }
@@ -1873,7 +1873,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	defer p.traceOut(__func__)
 
 	if !nextToken.isTypeKeyword() {
-		errorft(nextToken, S("invalid token"))
+		errorft(nextToken, "invalid token")
 	}
 
 	sval := string(nextToken.sval)

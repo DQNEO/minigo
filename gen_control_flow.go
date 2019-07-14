@@ -264,7 +264,7 @@ func (f *StmtFor) convert() Stmt {
 	case FOR_KIND_RANGE_LIST:
 		emit("# for range list")
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
-		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, S("rangeexpr should be G_ARRAY or G_SLICE, but got "), f.rng.rangeexpr.getGtype().String())
+		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got ", f.rng.rangeexpr.getGtype().String())
 
 		var init = &StmtAssignment{
 			lefts: []Expr{
@@ -368,7 +368,7 @@ func (ast *StmtDefer) emit() {
 			call := ast.expr.(*ExprFuncallOrConversion)
 			args = call.args
 		default:
-			errorft(ast.token(), S("defer should be a funcall"))
+			errorft(ast.token(), "defer should be a funcall")
 		}
 	*/
 	labelStart := concat(makeLabel() , S("_defer"))
@@ -395,11 +395,11 @@ func (ast *StmtDefer) emit() {
 }
 
 func (ast *StmtContinue) emit() {
-	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), S("labelEndLoop should not be empty"))
+	assert(len(ast.labels.labelEndBlock) > 0, ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # continue", ast.labels.labelEndBlock)
 }
 
 func (ast *StmtBreak) emit() {
-	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), S("labelEndLoop should not be empty"))
+	assert(len(ast.labels.labelEndLoop) > 0, ast.token(), "labelEndLoop should not be empty")
 	emit("jmp %s # break", ast.labels.labelEndLoop)
 }

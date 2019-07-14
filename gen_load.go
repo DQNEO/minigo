@@ -23,7 +23,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 	case *ExprStructField: // strct.field.field
 		a := strct.(*ExprStructField)
 		strcttype := a.strct.getGtype().Underlying()
-		assert(strcttype.size > 0, a.token(), S("struct size should be > 0"))
+		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field2 := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field2, offset+field.offset)
 	case *ExprIndex: // array[1].field
@@ -64,11 +64,11 @@ func (a *ExprStructField) emit() {
 
 	case G_STRUCT:
 		strcttype := a.strct.getGtype().relation.gtype
-		assert(strcttype.size > 0, a.token(), S("struct size should be > 0"))
+		assert(strcttype.size > 0, a.token(), "struct size should be > 0")
 		field := strcttype.getField(a.fieldname)
 		loadStructField(a.strct, field, 0)
 	default:
-		errorft(a.token(), S("internal error: bad gtype %s"), a.strct.getGtype().String())
+		errorft(a.token(), "internal error: bad gtype %s", a.strct.getGtype().String())
 	}
 }
 
@@ -76,8 +76,8 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 	strct := e.strct
 	strct = unwrapRel(strct)
 	vr, ok := strct.(*ExprVariable)
-	assert(ok, e.tok, S("should be *ExprVariable"))
-	assert(vr.gtype.kind == G_NAMED, e.tok, S("expect G_NAMED, but got "), vr.gtype.String())
+	assert(ok, e.tok, "should be *ExprVariable")
+	assert(vr.gtype.kind == G_NAMED, e.tok, "expect G_NAMED, but got ", vr.gtype.String())
 	field := vr.gtype.relation.gtype.getField(e.fieldname)
 	vr.emitOffsetLoad(size, field.offset+offset)
 }
@@ -97,7 +97,7 @@ func (ast *ExprVariable) emit() {
 
 	} else {
 		if ast.offset == 0 {
-			errorft(ast.token(), S("offset should not be zero for localvar %s"), ast.varname)
+			errorft(ast.token(), "offset should not be zero for localvar %s", ast.varname)
 		}
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
@@ -116,21 +116,21 @@ func (variable *ExprVariable) emitAddress(offset int) {
 		emit("LOAD_GLOBAL_ADDR %s, %d", bytes(variable.varname), offset)
 	} else {
 		if variable.offset == 0 {
-			errorft(variable.token(), S("offset should not be zero for localvar %s"), variable.varname)
+			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
 		}
 		emit("LOAD_LOCAL_ADDR %d+%d", variable.offset, offset)
 	}
 }
 
 func (rel *Relation) emit() {
-	assert(rel.expr != nil, rel.token(), S("rel.expr is nil"))
+	assert(rel.expr != nil, rel.token(), "rel.expr is nil")
 	rel.expr.emit()
 }
 
 func (ast *ExprConstVariable) emit() {
 	emit("# *ExprConstVariable.emit() name=%s iotaindex=%d", bytes(ast.name), ast.iotaIndex)
-	assert(ast.iotaIndex < 10000, ast.token(), S("iotaindex is too large"))
-	assert(ast.val != nil, ast.token(), S("const.val for should not be nil:%s"), bytes(ast.name))
+	assert(ast.iotaIndex < 10000, ast.token(), "iotaindex is too large")
+	assert(ast.val != nil, ast.token(), "const.val for should not be nil:%s", bytes(ast.name))
 	if ast.hasIotaValue() {
 		emit("# const is iota")
 		val := &ExprNumberLiteral{
@@ -157,7 +157,7 @@ func (ast *ExprUop) emit() {
 			vr.emitAddress(0)
 		case *ExprStructLiteral:
 			e := ast.operand.(*ExprStructLiteral)
-			assert(e.invisiblevar.offset != 0, nil, S("ExprStructLiteral's invisible var has offset"))
+			assert(e.invisiblevar.offset != 0, nil, "ExprStructLiteral's invisible var has offset")
 			ivv := e.invisiblevar
 			assignToStruct(ivv, e)
 
@@ -174,7 +174,7 @@ func (ast *ExprUop) emit() {
 			e := ast.operand.(*ExprIndex)
 			emitAddress(e)
 		default:
-			errorft(ast.token(), S("Unknown type: %T"), ast.operand)
+			errorft(ast.token(), "Unknown type: %T", ast.operand)
 		}
 	case "*":
 		ast.operand.emit()
@@ -193,14 +193,14 @@ func (ast *ExprUop) emit() {
 		}
 		binop.emit()
 	default:
-		errorft(ast.token(), S("unable to handle uop %s"), ast.op)
+		errorft(ast.token(), "unable to handle uop %s", ast.op)
 	}
 	//debugf(S("end of emitting ExprUop"))
 
 }
 
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
-	assert(0 <= size && size <= 8, variable.token(), S("invalid size"))
+	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.isGlobal {
 		emit("LOAD_%d_FROM_GLOBAL %s %d", size, bytes(variable.varname), offset)
 	} else {
@@ -285,14 +285,14 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		// @TODO this logic is temporarly. Need to be verified.
 		mcall := lhs.(*ExprMethodcall)
 		rettypes := mcall.getRettypes()
-		assert(len(rettypes) == 1, lhs.token(), S("rettype should be single"))
+		assert(len(rettypes) == 1, lhs.token(), "rettype should be single")
 		rettype := rettypes[0]
-		assert(rettype.getKind() == G_POINTER, lhs.token(), S("only pointer is supported"))
+		assert(rettype.getKind() == G_POINTER, lhs.token(), "only pointer is supported")
 		mcall.emit()
 		emit("ADD_NUMBER %d", offset)
 		emit("LOAD_8_BY_DEREF")
 	default:
-		errorft(lhs.token(), S("unkonwn type %T"), lhs)
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
@@ -301,9 +301,9 @@ func (e *ExprIndex) emitAddressOfArrayOrSliceIndex() {
 	collection := e.collection
 	index := e.index
 	elmType := collection.getGtype().Underlying().elementType
-	assert(elmType != nil, collection.token(), S("elmType should not be nil"))
+	assert(elmType != nil, collection.token(), "elmType should not be nil")
 	elmSize := elmType.getSize()
-	assert(elmSize > 0, nil, S("elmSize > 0"))
+	assert(elmSize > 0, nil, "elmSize > 0")
 
 	collection.emit()
 	emit("PUSH_8 # head")
@@ -360,9 +360,9 @@ func (e *ExprSlice) emit() {
 
 func (e *ExprSlice) emitSlice() {
 	elmType := e.collection.getGtype().Underlying().elementType
-	assert(elmType != nil, e.token(),S("type should not be nil:T %s"), e.collection.getGtype().String())
+	assert(elmType != nil, e.token(),"type should not be nil:T %s", e.collection.getGtype().String())
 	size := elmType.getSize()
-	assert(size > 0, nil, S("size > 0"))
+	assert(size > 0, nil, "size > 0")
 
 	emit("# assign to a slice")
 	emit("#   emit address of the array")

@@ -39,7 +39,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		if ok {
 			values = arrayliteral.values
 		}
-		assert(ok || arrayliteral == nil, ptok, S("*ExprArrayLiteral expected, but got "))
+		assert(ok || arrayliteral == nil, ptok, "*ExprArrayLiteral expected, but got ")
 		elmType := gtype.elementType
 		assertNotNil(elmType != nil, nil)
 		for i := 0; i < gtype.length; i++ {
@@ -57,10 +57,10 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						uop := value.(*ExprUop)
 						operand := unwrapRel(uop.operand)
 						vr, ok := operand.(*ExprVariable)
-						assert(ok, uop.token(), S("only variable is allowed"))
+						assert(ok, uop.token(), "only variable is allowed")
 						emit(".quad %s # %s %s", bytes(vr.varname), value.getGtype().String(), bytes(selector))
 					case *ExprVariable:
-						assert(false, value.token(), S("variable here is not allowed"))
+						assert(false, value.token(), "variable here is not allowed")
 					default:
 						emit(".quad %d # %s %s", evalIntExpr(value), value.getGtype().String(), bytes(selector))
 					}
@@ -96,11 +96,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
 		case *ExprFuncallOrConversion:
 			call := value.(*ExprFuncallOrConversion)
-			assert(call.rel.gtype != nil, value.token(), S("should be Conversion"))
+			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
 			toGtype := call.rel.gtype
-			assert(toGtype.getKind() == G_SLICE, call.token(), S("should be string to slice conversion"))
+			assert(toGtype.getKind() == G_SLICE, call.token(), "should be string to slice conversion")
 			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
-			assert(ok, call.token(), S("arg0 should be stringliteral"))
+			assert(ok, call.token(), "arg0 should be stringliteral")
 			emit(".quad .%s", stringLiteral.slabel)
 			var length int = len(stringLiteral.val)
 			emit(".quad %d", length)
@@ -139,7 +139,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
-			assert(ok, nil, S("ok"))
+			assert(ok, nil, "ok")
 			value := structLiteral.lookup(field.fieldname)
 			if value == nil {
 				// zero value
@@ -173,11 +173,11 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad .%s", stringLiteral.slabel)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(eq(uop.op, bytes("&")), ptok, S("only uop & is allowed"))
+			assert(eq(uop.op, bytes("&")), ptok, "only uop & is allowed")
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {
-				assert(vr.isGlobal, value.token(), S("operand should be a global variable"))
+				assert(vr.isGlobal, value.token(), "operand should be a global variable")
 				emit(".quad %s", bytes(vr.varname))
 			} else {
 				// var gv = &Struct{_}

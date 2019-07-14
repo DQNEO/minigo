@@ -34,7 +34,7 @@ func emitSavePrimitive(lhs Expr) {
 		lhs.(*ExprUop).emitSavePrimitive()
 	default:
 		lhs.dump()
-		errorft(lhs.token(), S("Unknown case %T"), lhs)
+		errorft(lhs.token(), "Unknown case %T", lhs)
 	}
 }
 
@@ -52,16 +52,16 @@ func emitOffsetSavePrimitive(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		emitOffsetSavePrimitive(structfield.strct, size, fieldType.offset+offset)
 	case *ExprUop:
-		errorft(lhs.token(), S("unkonwn type %T"), lhs)
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	default:
-		errorft(lhs.token(), S("unkonwn type %T"), lhs)
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
 // e.g. *x = 1, or *x++
 func (uop *ExprUop) emitSavePrimitive() {
 	emit("# *ExprUop.emitSavePrimitive()")
-	assert(eq(uop.op , bytes("*")), uop.tok, S("uop op should be *"))
+	assert(eq(uop.op , bytes("*")), uop.tok, "uop op should be *")
 	emit("PUSH_8 # what")
 	uop.operand.emit()
 	emit("PUSH_8 # where")
@@ -70,9 +70,9 @@ func (uop *ExprUop) emitSavePrimitive() {
 
 // x = 1
 func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forceIndirection bool) {
-	assert(0 <= size && size <= 8, variable.token(), S("invalid size"))
+	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.getGtype().getKind() == G_POINTER && (offset > 0 || forceIndirection) {
-		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), S(""))
+		assert(variable.getGtype().getKind() == G_POINTER, variable.token(), "")
 		emit("PUSH_8 # what")
 		variable.emit()
 		emit("ADD_NUMBER %d", offset)
@@ -101,14 +101,14 @@ func (e *ExprIndex) emitSave24() {
 		return
 	}
 
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, e.token(), S("unexpected kind"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, e.token(), "unexpected kind")
 	e.collection.emit()
 	emit("PUSH_8 # head address of collection")
 	e.index.emit()
 	emit("PUSH_8 # index")
 	elmType := collectionType.elementType
 	size := elmType.getSize()
-	assert(size > 0, nil, S("size > 0"))
+	assert(size > 0, nil, "size > 0")
 	emit("LOAD_NUMBER %d # elementSize", size)
 	emit("PUSH_8")
 	emit("IMUL_FROM_STACK # index * elementSize")
@@ -167,7 +167,7 @@ func emitSave24(lhs Expr, offset int) {
 		indexExpr := lhs.(*ExprIndex)
 		indexExpr.emitSave24()
 	default:
-		errorft(lhs.token(), S("unkonwn type %T"), lhs)
+		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
 
@@ -186,11 +186,11 @@ func (e *ExprIndex) emitArrayOrSliceSavePrimitive(offset int) {
 	collection := e.collection
 	index := e.index
 	collectionType := collection.getGtype()
-	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, collection.token(), S("should be collection"))
+	assert(collectionType.getKind() == G_ARRAY || collectionType.getKind() == G_SLICE, collection.token(), "should be collection")
 
 	elmType := collectionType.elementType
 	elmSize := elmType.getSize()
-	assert(elmSize > 0, nil, S("elmSize > 0"))
+	assert(elmSize > 0, nil, "elmSize > 0")
 
 	emit("PUSH_8 # rhs")
 

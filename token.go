@@ -82,7 +82,7 @@ type TokenStream struct {
 
 func NewTokenStream(bs *ByteStream) *TokenStream {
 	tokens := Tokenize(bs)
-	assert(len(tokens) > 0, nil, S("tokens should have length"))
+	assert(len(tokens) > 0, nil, "tokens should have length")
 	return &TokenStream{
 		tokens: tokens,
 		index:  0,
@@ -129,7 +129,7 @@ func (tok *Token) isIdent(s bytes) bool {
 
 func (tok *Token) getIdent() goidentifier {
 	if !tok.isTypeIdent() {
-		errorft(tok, S("ident expeced, but got %v"), tok)
+		errorft(tok, "ident expeced, but got %v", tok)
 	}
 	return goidentifier(tok.sval)
 }
