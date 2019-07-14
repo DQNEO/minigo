@@ -27,7 +27,7 @@ var debugNest int
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
 	format2 := concat(S("(To Be Implemented) "), bytes(format))
-	errorft(tok, string(format2), v...)
+	errorft(tok, format2, v...)
 }
 
 // errorf with a position token
@@ -43,7 +43,9 @@ func errorft(tok *Token, format string, v ...interface{}) {
 
 func errorf(format string, v ...interface{}) {
 	s := Sprintf(format, v...)
-	os.Stderr.Write(concat(bytes(s), S("\n")))
+	b := bytes(s)
+	b = append(b, '\n')
+	os.Stderr.Write(b)
 	panic(S(""))
 }
 
@@ -63,7 +65,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 
 func assertNotReached(tok *Token) {
 	msg := concat(S("assertNotReached "), tok.String())
-	os.Stderr.Write(msg)
+	os.Stderr.Write([]byte(msg))
 	panic(S(""))
 }
 

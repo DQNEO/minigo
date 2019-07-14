@@ -202,10 +202,10 @@ func (gtype *Gtype) String() bytes {
 	case G_STRUCT:
 		var r bytes = S("struct{")
 		for _, field := range gtype.fields {
-			var tmp bytes = concat(field.String(), S(","))
-			r = concat(r, tmp)
+			tmp := concat(field.String(), S(","))
+			r = []byte(concat(r, []byte(tmp)))
 		}
-		r = concat(r, S("}"))
+		r = []byte(concat(r, S("}")))
 		return r
 	case G_STRUCT_FIELD:
 		return S("structfield")
