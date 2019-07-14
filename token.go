@@ -134,7 +134,7 @@ func (tok *Token) getIdent() goidentifier {
 }
 
 func (tok *Token) getIntval() int {
-	val, _ := strconv_Atoi(tok.sval)
+	val, _ := strconv_Atoi(string(tok.sval))
 	return val
 }
 
