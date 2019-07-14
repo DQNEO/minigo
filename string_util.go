@@ -6,8 +6,6 @@ import (
 
 type bytes []byte
 
-type osarg string
-
 type identifier string
 
 type goidentifier bytes
