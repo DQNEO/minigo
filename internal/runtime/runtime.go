@@ -13,9 +13,9 @@ func init() {
 }
 
 func cstring2string(b *byte) string {
-	var bytes []byte
+	var bs []byte
 	if b == nil {
-		return string(bytes)
+		return string(bs)
 	}
 
 	var i int
@@ -23,10 +23,10 @@ func cstring2string(b *byte) string {
 		if b == nil || *b == 0 {
 			break
 		}
-		bytes = append(bytes, *b)
+		bs = append(bs, *b)
 		b++
 	}
-	return string(bytes)
+	return string(bs)
 }
 
 func runtime_args() []string {
