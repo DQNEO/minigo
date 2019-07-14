@@ -1956,8 +1956,8 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
-			pkgName := getBaseNameFromImport(spec.path)
-			p.importedNames[identifier(goidentifier(pkgName))] = true
+			pkgName := getBaseNameFromImport(string(spec.path))
+			p.importedNames[identifier(pkgName)] = true
 		}
 	}
 

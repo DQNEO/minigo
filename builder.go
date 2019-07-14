@@ -12,9 +12,9 @@ func parseImports(sourceFiles []bytes) []bytes {
 		astFile := p.ParseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
-				baseName := getBaseNameFromImport(spec.path)
-				if !inArray(baseName, imported) {
-					imported = append(imported, baseName)
+				baseName := getBaseNameFromImport(string(spec.path))
+				if !inArray([]byte(baseName), imported) {
+					imported = append(imported, []byte(baseName))
 				}
 			}
 		}

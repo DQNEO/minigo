@@ -2,11 +2,11 @@ package main
 
 import "strings"
 
-func getBaseNameFromImport(path bytes) bytes {
-	if strings.Contains(string(path), "/") {
-		words := strings.Split(string(path), "/")
+func getBaseNameFromImport(path string) string {
+	if strings.Contains(path, "/") {
+		words := strings.Split(path, "/")
 		r := words[len(words)-1]
-		return bytes(r)
+		return r
 	} else {
 		return path
 	}
