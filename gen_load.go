@@ -147,8 +147,8 @@ func (ast *ExprUop) emit() {
 	operand := unwrapRel(ast.operand)
 	ast.operand = operand
 	emit(S("# emitting ExprUop"))
-	op := ast.op
-	switch switchexpr(op) {
+	op := string(ast.op)
+	switch op {
 
 	case "&" :
 		switch ast.operand.(type) {

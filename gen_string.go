@@ -44,7 +44,8 @@ func (e *IrExprStringComparison) token() *Token {
 func (binop *IrExprStringComparison) emit() {
 	emit(S("# emitCompareStrings"))
 	var equal bool
-	switch switchexpr(binop.op) {
+	op := string(binop.op)
+	switch op {
 	case "<":
 		TBI(binop.token(), S(""))
 	case ">":

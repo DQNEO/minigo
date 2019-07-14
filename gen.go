@@ -182,8 +182,8 @@ func (binop *ExprBinop) emitComp() {
 
 
 	var instruction bytes
-	op := binop.op
-	switch switchexpr(op) {
+	op := string(binop.op)
+	switch op {
 	case "<":
 		instruction = S("setl")
 	case ">":
@@ -208,7 +208,8 @@ func (ast *ExprBinop) emit() {
 		TBI(ast.token(), S("concat strings"))
 		return
 	}
-	switch switchexpr(ast.op) {
+	op := string(ast.op)
+	switch op {
 	case "<", ">", "<=", ">=", "!=", "==":
 		ast.emitComp()
 		return
@@ -244,8 +245,8 @@ func (ast *ExprBinop) emit() {
 	ast.right.emit()
 	emit(S("PUSH_8"))
 
-	op := ast.op
-	switch switchexpr(op) {
+	op = string(ast.op)
+	switch op {
 	case "+":
 		emit(S("SUM_FROM_STACK"))
 	case "-":
@@ -531,7 +532,8 @@ func evalIntExpr(e Expr) int {
 		errorft(e.token(), S("variable cannot be inteppreted at compile time :%#v"), e)
 	case *ExprBinop:
 		binop := e.(*ExprBinop)
-		switch switchexpr(binop.op) {
+		op := string(binop.op)
+		switch op {
 		case "+":
 			return evalIntExpr(binop.left) + evalIntExpr(binop.right)
 		case "-":

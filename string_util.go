@@ -5,7 +5,7 @@ import (
 )
 
 type bytes []byte
-type switchexpr string
+
 type osarg string
 
 type identifier string

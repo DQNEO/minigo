@@ -691,7 +691,8 @@ func (p *parser) parseUnaryExpr() Expr {
 }
 
 func priority(op bytes) int {
-	switch switchexpr(op) {
+	sop := string(op)
+	switch sop {
 	case "&&", "||":
 		return 5
 	case "==", "!=", "<", ">", ">=", "<=":
@@ -1256,7 +1257,8 @@ func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssign
 	ptok := p.lastToken()
 
 	var op bytes
-	switch switchexpr(assignop) {
+	sop := string(assignop)
+	switch sop {
 	case "+=":
 		op = S("+")
 	case "-=":
@@ -1874,7 +1876,8 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 		errorft(nextToken, S("invalid token"))
 	}
 
-	switch switchexpr(nextToken.sval) {
+	sval := string(nextToken.sval)
+	switch sval {
 	case "func":
 		funcdecl := p.parseFuncDef()
 		return &TopLevelDecl{funcdecl: funcdecl}
