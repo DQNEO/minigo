@@ -16,7 +16,7 @@ func debugf(format string, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 	os.Stderr.Write(indents)
-	s2 := Sprintf(string(format), v...)
+	s2 := Sprintf(format, v...)
 	var b []byte = []byte(s2)
 	b = append(b, '\n')
 	os.Stderr.Write(b)
@@ -38,7 +38,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 		tokString = tok.String()
 	}
 	gs := concat3(bytes(format),S("\n "), tokString)
-	errorf(string(gs), v...)
+	errorf(gs, v...)
 }
 
 func errorf(format string, v ...interface{}) {
