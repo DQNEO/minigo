@@ -111,11 +111,11 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emitMapGet(_map.getGtype(), isKeyString)
 }
 
-func mapOkRegister(is24Width bool) bytes {
+func mapOkRegister(is24Width bool) string {
 	if is24Width {
-		return S("rdx")
+		return "rdx"
 	} else {
-		return S("rbx")
+		return "rbx"
 	}
 }
 
