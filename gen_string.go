@@ -4,7 +4,7 @@ func emitEmptyString() {
 	emit("LOAD_EMPTY_SLICE")
 }
 
-func countStrlen(chars bytes) int {
+func countStrlen(chars []byte) int {
 	var length int
 	var isInBackSlash bool
 

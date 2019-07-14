@@ -207,7 +207,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	}
 	if eq(string(rel.name), "__func__") {
 		sliteral := &ExprStringLiteral{
-			val: bytes(p.currentFunc.fname),
+			val: []byte(p.currentFunc.fname),
 		}
 		rel.expr = sliteral
 		p.addStringLiteral(sliteral)

@@ -69,7 +69,7 @@ type ExprNumberLiteral struct {
 
 type ExprStringLiteral struct {
 	tok    *Token
-	val    bytes
+	val    []byte
 	slabel string
 }
 
