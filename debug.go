@@ -16,7 +16,7 @@ func debugf(format bytes, v ...interface{}) {
 		indents = append(indents, ' ')
 	}
 	os.Stderr.Write(indents)
-	s2 := Sprintf(format, v...)
+	s2 := Sprintf(string(format), v...)
 	var b []byte = []byte(s2)
 	b = append(b, '\n')
 	os.Stderr.Write(b)
@@ -41,14 +41,14 @@ func errorft(tok *Token, format bytes, v ...interface{}) {
 }
 
 func errorf(format bytes, v ...interface{}) {
-	s := Sprintf(format, v...)
+	s := Sprintf(string(format), v...)
 	os.Stderr.Write(concat(s, S("\n")))
 	panic(S(""))
 }
 
 func assert(cond bool, tok *Token, format bytes, v ...interface{}) {
 	if !cond {
-		s := Sprintf(format, v...)
+		s := Sprintf(string(format), v...)
 		var toks bytes = S("")
 		if tok != nil {
 			toks = tok.String()

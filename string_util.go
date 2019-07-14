@@ -15,11 +15,11 @@ func S(s string) bytes {
 }
 
 func fmtPrintf(gos bytes, a... interface{}) {
-	r := Sprintf(gos, a...)
+	r := Sprintf(string(gos), a...)
 	write(r)
 }
 var _trash int
-func Sprintf(format []byte, a... interface{}) []byte {
+func Sprintf(format string, a... interface{}) []byte {
 	var args []interface{}
 	for _, x := range a {
 		var y interface{}

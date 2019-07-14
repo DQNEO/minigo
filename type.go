@@ -187,7 +187,7 @@ func (gtype *Gtype) String() bytes {
 				return S("func")
 			}
 		}
-		 gs = Sprintf(S("G_NAMED(%s.%s)"),
+		 gs = Sprintf("G_NAMED(%s.%s)",
 			bytes(gtype.relation.pkg), bytes(gtype.relation.name))
 		return gs
 	case G_INT:
@@ -198,7 +198,7 @@ func (gtype *Gtype) String() bytes {
 		return S("byte")
 	case G_ARRAY:
 		elm := gtype.elementType
-		gs = Sprintf(S("[%d]%s"), gtype.length, elm.String())
+		gs = Sprintf("[%d]%s", gtype.length, elm.String())
 		return gs
 	case G_STRUCT:
 		var r bytes = S("struct{")
@@ -212,10 +212,10 @@ func (gtype *Gtype) String() bytes {
 		return S("structfield")
 	case G_POINTER:
 		origType := gtype.origType
-		gs = Sprintf(S("*%s"), origType.String())
+		gs = Sprintf("*%s", origType.String())
 		return gs
 	case G_SLICE:
-		gs = Sprintf(S("[]%s"), gtype.elementType.String())
+		gs = Sprintf("[]%s", gtype.elementType.String())
 		return gs
 	case G_STRING:
 		return S("clikestring")

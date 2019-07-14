@@ -434,7 +434,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 		default:
 			//var i int = int(c)
 			//fmtPrintf("[%d]\n", i)
-			msg := Sprintf(S("unknown char:%d\n"), c)
+			msg := Sprintf("unknown char:%d\n", c)
 			panic(msg)
 		}
 		if debugToken {

@@ -32,7 +32,7 @@ func (e *ExprLen) emit() {
 			}
 			uop.emit()
 		default:
-			TBI(arg.token(), Sprintf(S("unable to handle %T"), arg))
+			TBI(arg.token(), Sprintf("unable to handle %T", arg))
 		}
 	case G_MAP:
 		emit("# emit len(map)")

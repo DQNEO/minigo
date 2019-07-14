@@ -102,7 +102,7 @@ func (tok *Token) getSval() bytes {
 
 func (tok *Token) String() bytes {
 	sval := tok.getSval()
-	gs := Sprintf(S("(\"%s\" at %s:%d:%d)"),
+	gs := Sprintf("(\"%s\" at %s:%d:%d)",
 		sval, bytes(tok.filename), tok.line, tok.column)
 	return gs
 }
@@ -182,7 +182,7 @@ func (tok *Token) isSemicolon() bool {
 
 func (tok *Token) dump() {
 	sval := tok.getSval()
-	s := Sprintf(S("tok: line=%d, type=%s, sval=\"%s\"\n"),
+	s := Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n",
 		tok.line, typeToGostring(tok.typ), sval)
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
