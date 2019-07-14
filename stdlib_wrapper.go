@@ -7,5 +7,5 @@ func strconv_Atoi(gs bytes) (int, error) {
 }
 
 func strings_Congtains(s bytes, substr bytes) bool {
-	return Contains(s, substr)
+	return Contains(string(s), string(substr))
 }

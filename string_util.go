@@ -171,11 +171,11 @@ func eq(a bytes, b bytes) bool {
 
 
 // Contains reports whether substr is within s.
-func Contains(s bytes, substr bytes) bool {
+func Contains(s string, substr string) bool {
 	return Index(s, substr) >= 0
 }
 
-func Index(s bytes, substr bytes) int {
+func Index(s string, substr string) int {
 	bytes := []byte(s)
 	bsub := []byte(substr)
 	var in bool
