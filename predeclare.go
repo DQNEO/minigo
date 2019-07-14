@@ -162,7 +162,7 @@ func predeclareConsts(universe *Scope) {
 }
 
 func predeclareLibcFuncs(universe *Scope) {
-	libc := identifier(S("libc"))
+	libc := identifier("libc")
 
 	universe.setFunc(identifier("exit"), &ExprFuncRef{
 		funcdef: &DeclFunc{
