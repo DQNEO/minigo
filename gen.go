@@ -47,17 +47,17 @@ func emit(format string, v ...interface{}) {
 	writePos()
 
 	for i := 0; i < gasIndentLevel; i++ {
-		write(bytes("  "))
+		write([]byte("  "))
 	}
 
 	s := Sprintf(format, v...)
-	writeln(bytes(s))
+	writeln([]byte(s))
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
 	s := Sprintf(format, v...)
-	writeln(bytes(s))
+	writeln([]byte(s))
 }
 
 func unwrapRel(e Expr) Expr {

@@ -477,7 +477,7 @@ func (p *parser) parsePrim() Expr {
 		p.skip()
 		ast := &ExprStringLiteral{
 			tok: tok,
-			val: bytes(tok.sval),
+			val: []byte(tok.sval),
 		}
 		p.addStringLiteral(ast)
 		return ast
@@ -490,7 +490,7 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isTypeChar(): // char literal
 		p.skip()
-		sval := bytes(tok.sval)
+		sval := []byte(tok.sval)
 		c := sval[0]
 		return &ExprNumberLiteral{
 			tok: tok,
