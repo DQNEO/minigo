@@ -6,8 +6,8 @@ func strconv_Atoi(gs bytes) (int, error) {
 	return i,e
 }
 
-func strings_HasSuffix(s bytes, suffix bytes) bool {
-	return HasSuffix(string(s), string(suffix))
+func strings_HasSuffix(s string, suffix string) bool {
+	return HasSuffix(s, (suffix))
 }
 
 func strings_Congtains(s bytes, substr bytes) bool {

@@ -54,7 +54,7 @@ func parseOpts(args []string) []bytes {
 		if eq(opt, S("--resolve-only")) {
 			resolveOnly = true
 		}
-		if strings_HasSuffix(opt, S(".go")) {
+		if strings_HasSuffix(string(opt), ".go") {
 			r = append(r, opt)
 		} else if eq(opt, S("-")) {
 			return []bytes{S("/dev/stdin")}
