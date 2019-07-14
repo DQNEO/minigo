@@ -120,7 +120,7 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 	var importedPackages []*AstPackage
 
 	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(goidentifier(pkgName))]
+		compiledPkg := csl.compiledPackages[identifier(pkgName)]
 		importedPackages = append(importedPackages, compiledPkg)
 	}
 	return importedPackages
