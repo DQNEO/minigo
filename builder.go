@@ -6,7 +6,7 @@ func parseImports(sourceFiles []bytes) []bytes {
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
-	var imported []bytes = []bytes{bytes("os")}
+	imported := []bytes{bytes("os")}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
@@ -68,7 +68,7 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 // compileFiles parses files into *AstPackage
 func compileFiles(universe *Scope, sourceFiles []bytes) *AstPackage {
 	// compile the main package
-	var pkgName goidentifier = goidentifier("main")
+	pkgName := goidentifier("main")
 	mainPkg := ParseFiles(pkgName, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
@@ -89,7 +89,7 @@ func compileFiles(universe *Scope, sourceFiles []bytes) *AstPackage {
 
 // parse standard libraries
 func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
-	var libs *compiledStdlib = &compiledStdlib{
+	libs := &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
 	}
@@ -101,7 +101,7 @@ func compileStdLibs(universe *Scope, imported []bytes) *compiledStdlib {
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}
-		var codes []bytes = []bytes{pkgCode}
+		codes := []bytes{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
 		libs.AddPackage(pkg)
