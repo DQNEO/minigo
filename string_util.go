@@ -96,7 +96,7 @@ func Sprintf(format string, a... interface{}) string {
 				}
 				blocks = append(blocks, b)
 			default:
-				panic(S("Unkown type to format"))
+				panic("Unkown type to format")
 			}
 			argIndex++
 			inPercent = false

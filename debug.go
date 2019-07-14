@@ -46,7 +46,7 @@ func errorf(format string, v ...interface{}) {
 	b := []byte(s)
 	b = append(b, '\n')
 	os.Stderr.Write(b)
-	panic(S(""))
+	panic("")
 }
 
 func assert(cond bool, tok *Token, format string, v ...interface{}) {
@@ -59,14 +59,14 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 		msg := concat3("assertion failed: ", s,  toks)
 		os.Stderr.Write([]byte(msg))
 		os.Stderr.Write(S("\n"))
-		panic(S(""))
+		panic("")
 	}
 }
 
 func assertNotReached(tok *Token) {
 	msg := concat("assertNotReached ", string(tok.String()))
 	os.Stderr.Write([]byte(msg))
-	panic(S(""))
+	panic("")
 }
 
 func assertNotNil(cond bool, tok *Token) {
