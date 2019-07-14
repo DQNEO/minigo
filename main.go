@@ -18,8 +18,8 @@ var resolveOnly = false
 var emitPosition = false
 
 func printVersion() {
-	fmtPrintln(S("minigo 0.1.0"))
-	fmtPrintln(S("Copyright (C) 2019 @DQNEO"))
+	fmtPrintln("minigo 0.1.0")
+	fmtPrintln("Copyright (C) 2019 @DQNEO")
 }
 
 func parseOpts(args []string) []bytes {
@@ -75,7 +75,7 @@ func main() {
 	}
 
 	if len(sourceFiles) == 0 {
-		fmtPrintln(S("No input files."))
+		fmtPrintln("No input files.")
 		return
 	}
 

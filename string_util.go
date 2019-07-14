@@ -16,9 +16,10 @@ func S(s string) bytes {
 }
 
 func fmtPrintf(format string, a... interface{}) {
-	r := Sprintf(string(format), a...)
-	write(bytes(r))
+	s := Sprintf(string(format), a...)
+	os.Stdout.Write(bytes(s))
 }
+
 var _trash int
 func Sprintf(format string, a... interface{}) string {
 	var args []interface{}
@@ -122,8 +123,8 @@ func write(s bytes) {
 	os.Stdout.Write(b)
 }
 
-func fmtPrintln(s bytes) {
-	writeln(s)
+func fmtPrintln(s string) {
+	writeln([]byte(s))
 }
 
 func writeln(s bytes) {
