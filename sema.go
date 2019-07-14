@@ -8,12 +8,12 @@ type SymbolTable struct {
 	uniquedDTypes []string
 }
 
-func makeDynamicTypeLabel(id int) bytes {
+func makeDynamicTypeLabel(id int) string {
 	s := Sprintf("DynamicTypeId%d", id)
-	return bytes(s)
+	return s
 }
 
-func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
+func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) string {
 	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
