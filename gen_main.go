@@ -62,7 +62,7 @@ func (program *Program) emitMethodTable() {
 			if eq(bytes(methodNameFull), bytes(".")) {
 				panic(S("invalid method name"))
 			}
-			splitted := strings.Split(string(methodNameFull), "$")
+			splitted := strings.Split(methodNameFull, "$")
 			var shortMethodName string = splitted[1]
 			emit(".quad .S.S.%s # key", shortMethodName)
 			label := makeLabel()
