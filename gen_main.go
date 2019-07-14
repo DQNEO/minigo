@@ -75,7 +75,7 @@ func (program *Program) emitMethodTable() {
 			emit(".quad %s # func addr addr", label)
 
 
-			if !inArray2(shortMethodName, shortMethodNames) {
+			if !inArray(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
 		}

@@ -14,7 +14,7 @@ func makeDynamicTypeLabel(id int) bytes {
 }
 
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
-	dynamicTypeId := getIndex2(gtype.String(), symbolTable.uniquedDTypes)
+	dynamicTypeId := getIndex(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
 	}
@@ -102,7 +102,7 @@ func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
 	var r []string = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
 		gs := gtype.String()
-		if !inArray2(gs, r) {
+		if !inArray(gs, r) {
 			r = append(r, gs)
 		}
 	}
