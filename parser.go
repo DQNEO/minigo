@@ -481,7 +481,7 @@ func (p *parser) parsePrim() Expr {
 		p.skip()
 		ast := &ExprStringLiteral{
 			tok: tok,
-			val: tok.sval,
+			val: bytes(tok.sval),
 		}
 		p.addStringLiteral(ast)
 		return ast
@@ -494,7 +494,7 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isTypeChar(): // char literal
 		p.skip()
-		sval := tok.sval
+		sval := bytes(tok.sval)
 		c := sval[0]
 		return &ExprNumberLiteral{
 			tok: tok,
@@ -654,7 +654,7 @@ func (p *parser) parseUnaryExpr() Expr {
 	case tok.isPunct(S("&")):
 		uop := &ExprUop{
 			tok:     tok,
-			op:      tok.sval,
+			op:      string(tok.sval),
 			operand: p.parsePrim(),
 		}
 		// when &T{}, allocate stack memory
@@ -690,8 +690,8 @@ func (p *parser) parseUnaryExpr() Expr {
 	return p.parsePrim()
 }
 
-func priority(op bytes) int {
-	sop := string(op)
+func priority(op string) int {
+	sop := op
 	switch sop {
 	case "&&", "||":
 		return 5
@@ -715,23 +715,21 @@ func (p *parser) parseExpr() Expr {
 	return p.parseExprInt(-1)
 }
 
-var binops = []bytes{
-	bytes("+"),
-	bytes("*"),
-	bytes("-"),
-	bytes("=="),
-	bytes("!="),
-	bytes("<"),
-	bytes(">"),
-	bytes("<="),
-	bytes(">="),
-	bytes("&&"),
-	bytes("||"),
-	bytes("/"),
-	bytes("%"),
+var binops = []string{
+	"+",
+	"*",
+	"-",
+	"==",
+	"!=",
+	"<",
+	">",
+	"<=",
+	">=",
+	"&&",
+	"||",
+	"/",
+	"%",
 }
-
-var gobinops []bytes
 
 func (p *parser) parseExprInt(prior int) Expr {
 	p.traceIn(__func__)
@@ -749,7 +747,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if inArray(tok.sval, binops) {
+		if inArray2(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
@@ -1251,13 +1249,13 @@ func (p *parser) parseAssignment(lefts []Expr) *StmtAssignment {
 	}
 }
 
-func (p *parser) parseAssignmentOperation(left Expr, assignop bytes) *StmtAssignment {
+func (p *parser) parseAssignmentOperation(left Expr, assignop string) *StmtAssignment {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.lastToken()
 
 	var op string
-	sop := string(assignop)
+	sop := assignop
 	switch sop {
 	case "+=":
 		op = "+"

@@ -115,14 +115,14 @@ type ExprBinop struct {
 
 type IrExprStringComparison struct {
 	tok          *Token
-	op           bytes
+	op           string
 	cstringLeft  Expr
 	cstringRight Expr
 }
 
 type ExprUop struct {
 	tok     *Token
-	op      bytes
+	op      string
 	operand Expr
 }
 

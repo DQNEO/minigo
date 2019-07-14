@@ -177,7 +177,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(eq(uop.op, bytes("&")), ptok, "only uop & is allowed")
+			assert(eq(bytes(uop.op), bytes("&")), ptok, "only uop & is allowed")
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {

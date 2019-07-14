@@ -239,7 +239,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
-		if eq(re.op, bytes("*")) {
+		if eq(bytes(re.op), bytes("*")) {
 			// copy struct
 			emitAddress(lhs)
 			emit("PUSH_8")

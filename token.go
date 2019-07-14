@@ -69,7 +69,7 @@ func typeToGostring (typ TokenType) string {
 
 type Token struct {
 	typ      TokenType
-	sval     bytes
+	sval     string
 	filename string
 	line     int
 	column   int
@@ -94,11 +94,11 @@ func (ts *TokenStream) isEnd() bool {
 	return ts.index > len(ts.tokens)-1
 }
 
-func (tok *Token) getSval() bytes {
+func (tok *Token) getSval() string {
 	if len(tok.sval) > 0 {
 		return tok.sval
 	}
-	return S("")
+	return ""
 }
 
 func (tok *Token) String() string {
@@ -114,17 +114,17 @@ func (tok *Token) isEOF() bool {
 
 func (tok *Token) isPunct(s bytes) bool {
 	gs := bytes(s)
-	return tok != nil && tok.typ == T_PUNCT && eq(tok.sval, gs)
+	return tok != nil && tok.typ == T_PUNCT && eq(bytes(tok.sval), gs)
 }
 
 func (tok *Token) isKeyword(s bytes) bool {
 	gs := bytes(s)
-	return tok != nil && tok.typ == T_KEYWORWD && eq(tok.sval,gs)
+	return tok != nil && tok.typ == T_KEYWORWD && eq(bytes(tok.sval),gs)
 }
 
 func (tok *Token) isIdent(s bytes) bool {
 	gs := bytes(s)
-	return tok != nil && tok.typ == T_IDENT && eq(tok.sval,gs)
+	return tok != nil && tok.typ == T_IDENT && eq(bytes(tok.sval),gs)
 }
 
 func (tok *Token) getIdent() identifier {

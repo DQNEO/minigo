@@ -174,7 +174,7 @@ func (tn *Tokenizer) skipSpace() {
 func (tn *Tokenizer) makeToken(typ TokenType, sval bytes) *Token {
 	return &Token{
 		typ:      typ,
-		sval:     sval,
+		sval:     string(sval),
 		filename: tn.bs.filename,
 		line:     tn.bs.line,
 		column:   tn.bs.column,
