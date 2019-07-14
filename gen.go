@@ -157,17 +157,17 @@ func makeLabel() bytes {
 }
 
 func (ast *StmtInc) emit() {
-	emitIncrDecl(S("ADD_NUMBER 1"), ast.operand)
+	emitIncrDecl("ADD_NUMBER 1", ast.operand)
 }
 func (ast *StmtDec) emit() {
-	emitIncrDecl(S("SUB_NUMBER 1"), ast.operand)
+	emitIncrDecl("SUB_NUMBER 1", ast.operand)
 }
 
 // https://golang.org/ref/spec#IncDecStmt
 // As with an assignment, the operand must be addressable or a map index expression.
-func emitIncrDecl(inst bytes, operand Expr) {
+func emitIncrDecl(inst string, operand Expr) {
 	operand.emit()
-	emit(string(inst))
+	emit(inst)
 
 	left := operand
 	emitSavePrimitive(left)
