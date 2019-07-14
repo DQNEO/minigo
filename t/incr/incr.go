@@ -3,33 +3,33 @@ package main
 
 func local() {
 	var i int = 1
-	fmtPrintf(S("%d\n"), i)
+	fmtPrintf("%d\n", i)
 	i++
-	fmtPrintf(S("%d\n"), i)
+	fmtPrintf("%d\n", i)
 	i = 4
 	i--
-	fmtPrintf(S("%d\n"), i)
+	fmtPrintf("%d\n", i)
 }
 
 var j int = 4
 
 func global() {
-	fmtPrintf(S("%d\n"), j)
+	fmtPrintf("%d\n", j)
 	j++
-	fmtPrintf(S("%d\n"), j)
+	fmtPrintf("%d\n", j)
 	j = 7
 	j--
-	fmtPrintf(S("%d\n"), j)
+	fmtPrintf("%d\n", j)
 }
 
 func pointerderef() {
 	var a int = 6
 	var b *int = &a
 	*b++
-	fmtPrintf(S("%d\n"), a)
+	fmtPrintf("%d\n", a)
 	*b = 9
 	*b--
-	fmtPrintf(S("%d\n"), *b)
+	fmtPrintf("%d\n", *b)
 }
 
 func main() {

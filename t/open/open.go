@@ -18,8 +18,8 @@ func f2() int {
 func main() {
 	var fd int
 	fd = f1()
-	fmtPrintf(S("%d\n"), fd) // 3
+	fmtPrintf("%d\n", fd) // 3
 
 	fd = f2()
-	fmtPrintf(S("%d\n"), fd) // -1
+	fmtPrintf("%d\n", fd) // -1
 }

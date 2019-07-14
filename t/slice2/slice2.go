@@ -9,8 +9,8 @@ func f1() {
 
 	r = append(r, 2)
 
-	fmtPrintf(S("%d\n"), len(r))
-	fmtPrintf(S("%d\n"), r[0])
+	fmtPrintf("%d\n", len(r))
+	fmtPrintf("%d\n", r[0])
 }
 
 func main() {

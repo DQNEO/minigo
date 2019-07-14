@@ -8,11 +8,11 @@ var c = 'A'
 var x = 0
 
 func main() {
-	fmtPrintf(S("%d\n"), x)
-	fmtPrintf(S("%d\n"), a)
+	fmtPrintf("%d\n", x)
+	fmtPrintf("%d\n", a)
 	localvar := 1
-	fmtPrintf(S("%d\n"), localvar)
-	fmtPrintf(S("%d\n"), c)
+	fmtPrintf("%d\n", localvar)
+	fmtPrintf("%d\n", c)
 	a = 3
-	fmtPrintf(S("%d\n"), a)
+	fmtPrintf("%d\n", a)
 }

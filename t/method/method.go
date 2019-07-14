@@ -9,7 +9,7 @@ func f1() {
 	var a myint = 1
 	var b myint
 	b = a.add(2)
-	fmtPrintf(S("%d\n"), b)
+	fmtPrintf("%d\n", b)
 }
 
 func f2() {
@@ -19,7 +19,7 @@ func f2() {
 		age: 4,
 	}
 
-	fmtPrintf(S("%d\n"), u.getAge())
+	fmtPrintf("%d\n", u.getAge())
 }
 
 func f3() {
@@ -27,7 +27,7 @@ func f3() {
 		x: 2,
 		y: 3,
 	}
-	fmtPrintf(S("%d\n"), p.sum())
+	fmtPrintf("%d\n", p.sum())
 }
 
 func main() {

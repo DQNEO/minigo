@@ -23,7 +23,7 @@ func f0() {
 }
 
 func fa() {
-	fmtPrintf(S("%d\n"), ga) // => 0
+	fmtPrintf("%d\n", ga) // => 0
 }
 
 /* this is
@@ -37,37 +37,37 @@ block
 */
 
 func fb() {
-	fmtPrintf(S("%d\n"), 1) // this is a comment
-	fmtPrintf(S("%d\n"), 4-2)
-	fmtPrintf(S("%d\n"), 1+1+1) // this is another comment //
-	fmtPrintf(S("%d\n"), 1*2+2)
-	fmtPrintf(S("%d\n"), 2*3-1)
-	fmtPrintf(S("%d\n"), 9-1-2)
+	fmtPrintf("%d\n", 1) // this is a comment
+	fmtPrintf("%d\n", 4-2)
+	fmtPrintf("%d\n", 1+1+1) // this is another comment //
+	fmtPrintf("%d\n", 1*2+2)
+	fmtPrintf("%d\n", 2*3-1)
+	fmtPrintf("%d\n", 9-1-2)
 }
 
 func fc() {
 	var i int
 	i = 7
-	fmtPrintf(S("%d\n"), i)
+	fmtPrintf("%d\n", i)
 }
 
 func fd() {
 	var j int = 2
-	fmtPrintf(S("%d\n"), j*4)
+	fmtPrintf("%d\n", j*4)
 }
 
 func fe() {
 	var a int = 5
 	var b int = 4
-	fmtPrintf(S("%d\n"), a+b)
+	fmtPrintf("%d\n", a+b)
 }
 
 func ff() {
-	//fmtPrintf(S("%v%v\n"), true, false)
+	//fmtPrintf("%v%v\n", true, false)
 }
 
 func fg(a int, b int) {
-	fmtPrintf(S("%d\n"), a+b)
+	fmtPrintf("%d\n", a+b)
 }
 
 var gc int
@@ -75,7 +75,7 @@ var gd int = 10
 var ge = 2
 
 func fh() {
-	fmtPrintf(S("%d\n"), gc+gd+ge)
+	fmtPrintf("%d\n", gc+gd+ge)
 }
 
 const c0 int = 1
@@ -84,13 +84,13 @@ const c1 = 2
 func fi() {
 	const c1 int = 3
 	const c2 = 9
-	fmtPrintf(S("%d\n"), c0+c1+c2)
+	fmtPrintf("%d\n", c0+c1+c2)
 }
 
 var gb int = 14
 
 func f14() {
-	fmtPrintf(S("%d\n"), gb)
+	fmtPrintf("%d\n", gb)
 }
 
 var garbage int
@@ -121,5 +121,5 @@ func main() {
 	fi()
 	f14()
 	f15()
-	fmtPrintf(S("hello world\n"))
+	fmtPrintf("hello world\n")
 }

@@ -14,13 +14,13 @@ func main() {
 		id:  5,
 		age: 0,
 	}
-	fmtPrintf(S("%d\n"), a)
-	fmtPrintf(S("%c\n"), b)
-	fmtPrintf(S("%s\n"), c)
-	fmtPrintf(S("%d\n"), d.id)
-	fmtPrintf(S("%d\n"), e.id)
-	fmtPrintf(S("%d\n"), f)
-	fmtPrintf(S("%d\n"), g)
+	fmtPrintf("%d\n", a)
+	fmtPrintf("%c\n", b)
+	fmtPrintf("%s\n", c)
+	fmtPrintf("%d\n", d.id)
+	fmtPrintf("%d\n", e.id)
+	fmtPrintf("%d\n", f)
+	fmtPrintf("%d\n", g)
 }
 
 type User struct {

@@ -21,7 +21,7 @@ func f2() {
 	if err != nil {
 		panic(S("err"))
 	}
-	fmtPrintf(S("%s"), bytes)
+	fmtPrintf("%s", bytes)
 	if len(bytes) != 83801 { // This is the size of the target file
 		panic(S("Error: size does not match"))
 	}

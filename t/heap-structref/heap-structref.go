@@ -19,19 +19,19 @@ func dummy1() {
 		id:  0,
 		age: 4,
 	}
-	fmtPrintf(S("%d\n"), ptr.id) // 0
+	fmtPrintf("%d\n", ptr.id) // 0
 }
 
 func dummy2() {
 	var array [4]int = [...]int{0, 1, 0, 0}
-	fmtPrintf(S("%d\n"), array[1]) // 1
+	fmtPrintf("%d\n", array[1]) // 1
 }
 func f1() {
 	p := return_ptr()
 	dummy1()
 	dummy2()
-	fmtPrintf(S("%d\n"), p.id)  // 2
-	fmtPrintf(S("%d\n"), p.age) // 3
+	fmtPrintf("%d\n", p.id)  // 2
+	fmtPrintf("%d\n", p.age) // 3
 }
 
 func main() {

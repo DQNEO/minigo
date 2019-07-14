@@ -18,7 +18,7 @@ func f1() {
 		z = 5
 	}
 
-	fmtPrintf(S("%d\n"), z)
+	fmtPrintf("%d\n", z)
 
 	var s bytes = S("hello")
 	x = s
@@ -32,7 +32,7 @@ func f1() {
 	default:
 		z = 5
 	}
-	fmtPrintf(S("%d\n"), z)
+	fmtPrintf("%d\n", z)
 }
 
 func main() {

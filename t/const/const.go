@@ -15,16 +15,16 @@ const (
 )
 
 func f1() {
-	fmtPrintf(S("%d\n"), 0)
+	fmtPrintf("%d\n", 0)
 }
 
 func f2() {
-	fmtPrintf(S("%d\n"), a)
+	fmtPrintf("%d\n", a)
 }
 
 func main() {
 	f1()
 	f2()
-	fmtPrintf(S("%d\n"), x)
-	fmtPrintf(S("%d\n"), sum)
+	fmtPrintf("%d\n", x)
+	fmtPrintf("%d\n", sum)
 }

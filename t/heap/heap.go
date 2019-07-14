@@ -9,16 +9,16 @@ func main() {
 
 	address = malloc(8)
 	*address = 1
-	fmtPrintf(S("%d\n"), *address)
+	fmtPrintf("%d\n", *address)
 	address = malloc(8)
 	*address = 2
-	fmtPrintf(S("%d\n"), *address)
+	fmtPrintf("%d\n", *address)
 	address = malloc(8)
 	*address = 3
-	fmtPrintf(S("%d\n"), *address)
+	fmtPrintf("%d\n", *address)
 
 	heapA := malloc(8)
 	heapB := malloc(0)
 
-	fmtPrintf(S("%d\n"), (heapB-heapA)-4) // 4
+	fmtPrintf("%d\n", (heapB-heapA)-4) // 4
 }

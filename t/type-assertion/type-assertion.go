@@ -56,10 +56,10 @@ func (p *Point2) calc() int {
 func f1() {
 	var x int
 	x = do(true)
-	fmtPrintf(S("%d\n"), x-2) // 1
+	fmtPrintf("%d\n", x-2) // 1
 
 	x = do(false)
-	fmtPrintf(S("%d\n"), x-4) // 2
+	fmtPrintf("%d\n", x-4) // 2
 }
 
 func f2() {
@@ -68,15 +68,15 @@ func f2() {
 	var p *Point
 	p, ok = i.(*Point)
 	if !ok {
-		fmtPrintf(S("3\n")) // 3
+		fmtPrintf("3\n") // 3
 	} else {
-		fmtPrintf(S("ERROR\n"))
+		fmtPrintf("ERROR\n")
 	}
 
 	if p == nil {
-		fmtPrintf(S("4\n")) // 4
+		fmtPrintf("4\n") // 4
 	} else {
-		fmtPrintf(S("ERROR\n"))
+		fmtPrintf("ERROR\n")
 	}
 
 }

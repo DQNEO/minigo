@@ -9,7 +9,7 @@ func f1() {
 	var gtype *Gtype = &Gtype{}
 	var x []*Gtype
 	x = gtype.fields
-	fmtPrintf(S("%d\n"), len(x))
+	fmtPrintf("%d\n", len(x))
 }
 
 func main() {

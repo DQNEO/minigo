@@ -20,7 +20,7 @@ func return_ifc() Expr {
 
 func f1() {
 	x := return_ifc()
-	fmtPrintf(S("%d\n"), x.emit()-6)
+	fmtPrintf("%d\n", x.emit()-6)
 }
 
 /*
@@ -50,7 +50,7 @@ func f3() {
 
 	var j int
 	j = ifc.(int)
-	fmtPrintf(S("%d\n"), j) // 3
+	fmtPrintf("%d\n", j) // 3
 }
 */
 

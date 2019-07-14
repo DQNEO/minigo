@@ -4,12 +4,12 @@ package main
 func f1() {
 	var s bytes = S("543210")
 	var c byte = s[5]
-	fmtPrintf(S("%c\n"), c)
-	fmtPrintf(S("%c\n"), s[4])
-	fmtPrintf(S("%c\n"), s[3])
-	fmtPrintf(S("%c\n"), s[2])
-	fmtPrintf(S("%c\n"), s[1])
-	fmtPrintf(S("%c\n"), s[0])
+	fmtPrintf("%c\n", c)
+	fmtPrintf("%c\n", s[4])
+	fmtPrintf("%c\n", s[3])
+	fmtPrintf("%c\n", s[2])
+	fmtPrintf("%c\n", s[1])
+	fmtPrintf("%c\n", s[0])
 }
 
 func main() {

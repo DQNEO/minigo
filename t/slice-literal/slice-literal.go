@@ -16,8 +16,8 @@ func (p *Point) getId() int {
 
 func f0() {
 	var slice []int = []int{1, 2, 3}
-	fmtPrintf(S("%d\n"), slice[2]-2)   // 1
-	fmtPrintf(S("%d\n"), len(slice)-1) // 2
+	fmtPrintf("%d\n", slice[2]-2)   // 1
+	fmtPrintf("%d\n", len(slice)-1) // 2
 }
 
 func f1() {
@@ -25,10 +25,10 @@ func f1() {
 		x: 1,
 		y: 2,
 	}
-	fmtPrintf(S("%d\n"), e.getId()+2) // 3
+	fmtPrintf("%d\n", e.getId()+2) // 3
 	var slice []Ifc = []Ifc{e, e, e}
-	fmtPrintf(S("%d\n"), len(slice)+1)       // 4
-	fmtPrintf(S("%d\n"), slice[2].getId()+4) // 5
+	fmtPrintf("%d\n", len(slice)+1)       // 4
+	fmtPrintf("%d\n", slice[2].getId()+4) // 5
 }
 
 func main() {

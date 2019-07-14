@@ -6,9 +6,9 @@ func f1() {
 	var e byte = 'e'
 
 	if e <= 'z' {
-		fmtPrintf(S("1\n"))
+		fmtPrintf("1\n")
 	} else {
-		fmtPrintf(S("%s\n"), x)
+		fmtPrintf("%s\n", x)
 	}
 }
 
@@ -17,11 +17,11 @@ func f2() {
 	var c2 byte = 'a'
 
 	if 'a' <= c1 && c1 <= 'z' {
-		fmtPrintf(S("2\n"))
+		fmtPrintf("2\n")
 	}
 
 	if 'a' <= c2 && c2 <= 'z' {
-		fmtPrintf(S("3\n"))
+		fmtPrintf("3\n")
 	}
 }
 

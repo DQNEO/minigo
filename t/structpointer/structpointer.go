@@ -7,15 +7,15 @@ func literal() {
 		id:  1,
 		age: 2,
 	}
-	fmtPrintf(S("%d\n"), u.id)
-	fmtPrintf(S("%d\n"), u.age)
+	fmtPrintf("%d\n", u.id)
+	fmtPrintf("%d\n", u.age)
 
 	u = &User{
 		id:  3,
 		age: 4,
 	}
-	fmtPrintf(S("%d\n"), u.id)
-	fmtPrintf(S("%d\n"), u.age)
+	fmtPrintf("%d\n", u.id)
+	fmtPrintf("%d\n", u.age)
 }
 
 func assign() {
@@ -25,12 +25,12 @@ func assign() {
 		age: 4,
 	}
 	u.age = 5
-	fmtPrintf(S("%d\n"), u.age)
+	fmtPrintf("%d\n", u.age)
 	u.age++
-	fmtPrintf(S("%d\n"), u.age)
+	fmtPrintf("%d\n", u.age)
 	u.age = 8
 	u.age--
-	fmtPrintf(S("%d\n"), u.age)
+	fmtPrintf("%d\n", u.age)
 }
 
 type S struct {
@@ -44,10 +44,10 @@ func f1() {
 		id: 123,
 	}
 
-	fmtPrintf(S("%d\n"), p.id-115) // 8
+	fmtPrintf("%d\n", p.id-115) // 8
 
 	p.dummy = nil
-	fmtPrintf(S("%d\n"), p.id-114) // 9
+	fmtPrintf("%d\n", p.id-114) // 9
 }
 
 func main() {

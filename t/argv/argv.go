@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	fmtPrintf(S("%d\n"), len(os.Args))
-	fmtPrintf(S("%s\n"), bytes(os.Args[1]))
+	fmtPrintf("%d\n", len(os.Args))
+	fmtPrintf("%s\n", bytes(os.Args[1]))
 }

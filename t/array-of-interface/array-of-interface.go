@@ -26,10 +26,10 @@ func (a *A) emit() {
 func test_array_literal() {
 	var l int
 	l = f1()
-	fmtPrintf(S("%d\n"), l) // 1
+	fmtPrintf("%d\n", l) // 1
 
 	l = f2()
-	fmtPrintf(S("%d\n"), l+1) // 2
+	fmtPrintf("%d\n", l+1) // 2
 }
 
 type Number struct {
@@ -53,7 +53,7 @@ func f3() {
 
 	var j int
 	j = ifc.(int)
-	fmtPrintf(S("%d\n"), j) // 3
+	fmtPrintf("%d\n", j) // 3
 }
 
 func f4() {
@@ -67,13 +67,13 @@ func f4() {
 		id: 4,
 	}
 	ifc = n
-	fmtPrintf(S("%d\n"), ifc.getId()) // 4
+	fmtPrintf("%d\n", ifc.getId()) // 4
 
 	array[1] = ifc
-	fmtPrintf(S("%d\n"), array[1].getId()+1) // 5
+	fmtPrintf("%d\n", array[1].getId()+1) // 5
 
 	ifc2 = array[1]
-	fmtPrintf(S("%d\n"), ifc2.getId()+2) // 6
+	fmtPrintf("%d\n", ifc2.getId()+2) // 6
 }
 
 func f5() {
@@ -86,13 +86,13 @@ func f5() {
 		id: 7,
 	}
 	s = n
-	fmtPrintf(S("%d\n"), s.getId()) // 7
+	fmtPrintf("%d\n", s.getId()) // 7
 	stmts = append(stmts, s)
-	fmtPrintf(S("%d\n"), len(stmts)+7) // 8
+	fmtPrintf("%d\n", len(stmts)+7) // 8
 	s2 = stmts[0]
 	id = s2.getId()
-	fmtPrintf(S("%d\n"), id+2)               // 9
-	fmtPrintf(S("%d\n"), stmts[0].getId()+3) // 10
+	fmtPrintf("%d\n", id+2)               // 9
+	fmtPrintf("%d\n", stmts[0].getId()+3) // 10
 }
 
 func main() {

@@ -15,9 +15,9 @@ func f1() {
 
 	root.vars = vars
 
-	fmtPrintf(S("%d\n"), len(vars))        // 1
-	fmtPrintf(S("%d\n"), len(root.vars)+1) // 2
-	fmtPrintf(S("%d\n"), root.vars[0])     // 3
+	fmtPrintf("%d\n", len(vars))        // 1
+	fmtPrintf("%d\n", len(root.vars)+1) // 2
+	fmtPrintf("%d\n", root.vars[0])     // 3
 }
 
 type IrRoot2 struct {
@@ -36,9 +36,9 @@ func f2() {
 	var ok bool
 	i2, ok = x.(int)
 	if !ok {
-		fmtPrintf(S("ERROR\n"))
+		fmtPrintf("ERROR\n")
 	}
-	fmtPrintf(S("%d\n"), i2) // 4
+	fmtPrintf("%d\n", i2) // 4
 }
 
 func main() {

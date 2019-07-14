@@ -15,5 +15,5 @@ func fibonacci(n int) int {
 func main() {
 	var r int
 	r = fibonacci(12)
-	fmtPrintf(S("%d\n"), r)
+	fmtPrintf("%d\n", r)
 }

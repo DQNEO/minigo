@@ -15,19 +15,19 @@ func f3() {
 		bs: bs,
 	}
 	ident := tn.readIdentifier(c)
-	fmtPrintf(S("%s\n"), []byte(ident))
+	fmtPrintf("%s\n", []byte(ident))
 }
 
 func f4() {
 	path := S("t/min/min.go")
 	bs := NewByteStreamFromFile(path)
 	tokens := Tokenize(bs)
-	fmtPrintf(S("%d\n"), len(tokens)) // 26
-	fmtPrintf(S("----------\n"))
+	fmtPrintf("%d\n", len(tokens)) // 26
+	fmtPrintf("----------\n")
 	// disable befow for now
 	return
 	for _, tok := range tokens {
-		fmtPrintf(S("%d:%s\n"), int(tok.typ), tok.getSval())
+		fmtPrintf("%d:%s\n", int(tok.typ), tok.getSval())
 	}
 }
 
@@ -38,8 +38,8 @@ func f5() {
 
 	tokens := Tokenize(bs)
 	tok := tokens[0]
-	fmtPrintf(S("----------\n"))
-	fmtPrintf(S("[%s]\n"), []byte(tok.sval))
+	fmtPrintf("----------\n")
+	fmtPrintf("[%s]\n", []byte(tok.sval))
 }
 
 func main() {

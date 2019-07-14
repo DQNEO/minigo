@@ -6,13 +6,13 @@ func main() {
 
 	for i := begin; i <= end; i++ {
 		if i%15 == 0 {
-			fmtPrintf(S("%s\n"), S("FizzBuzz"))
+			fmtPrintf("%s\n", "FizzBuzz")
 		} else if i%3 == 0 {
-			fmtPrintf(S("%s\n"), S("Fizz"))
+			fmtPrintf("%s\n", "Fizz")
 		} else if i%5 == 0 {
-			fmtPrintf(S("%s\n"), S("Buzz"))
+			fmtPrintf("%s\n", "Buzz")
 		} else {
-			fmtPrintf(S("%d\n"), i)
+			fmtPrintf("%d\n", i)
 		}
 	}
 }

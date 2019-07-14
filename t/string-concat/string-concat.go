@@ -6,7 +6,7 @@ func f1() {
 	var b = S("defg")
 	var x bytes
 	x = concat(a , b)
-	fmtPrintf(S("%s\n"), x)
+	fmtPrintf("%s\n", x)
 }
 
 func f2() {
@@ -14,7 +14,7 @@ func f2() {
 	for i := 0; i < 3; i++ {
 		spaces = concat(spaces, S("xx"))
 	}
-	fmtPrintf(S("%s\n"), spaces)
+	fmtPrintf("%s\n", spaces)
 }
 
 var seq int = 0
@@ -26,8 +26,8 @@ func foo() bytes {
 
 func f3() {
 	label := concat3(foo() , foo() , S("bar"))
-	fmtPrintf(S("%s\n"), label) // "foofoobar"
-	fmtPrintf(S("%d\n"), seq)   // 2
+	fmtPrintf("%s\n", label) // "foofoobar"
+	fmtPrintf("%d\n", seq)   // 2
 }
 
 func main() {

@@ -4,16 +4,16 @@ package main
 var myarray [2]myint = [2]myint{3, 2}
 
 func anytype(x interface{}) {
-	fmtPrintf(S("%d\n"), x)
+	fmtPrintf("%d\n", x)
 }
 
 func f1() {
 	var a myint = '1'
-	fmtPrintf(S("%c\n"), a)
+	fmtPrintf("%c\n", a)
 }
 
 func f2() {
-	fmtPrintf(S("%d\n"), myarray[1])
+	fmtPrintf("%d\n", myarray[1])
 	anytype(3)
 	anytype(4)
 }

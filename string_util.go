@@ -15,7 +15,7 @@ func S(s string) bytes {
 	return bytes(s)
 }
 
-func fmtPrintf(format bytes, a... interface{}) {
+func fmtPrintf(format string, a... interface{}) {
 	r := Sprintf(string(format), a...)
 	write(bytes(r))
 }

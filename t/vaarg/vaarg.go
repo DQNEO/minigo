@@ -2,17 +2,17 @@ package main
 
 
 func receiveVarg(s bytes, a ...interface{}) {
-	fmtPrintf(S("-\n"))
-	fmtPrintf(S("%d\n"), len(a))
-	fmtPrintf(S("%s\n"), a[0])
-	fmtPrintf(S("%d\n"), a[1])
+	fmtPrintf("-\n")
+	fmtPrintf("%d\n", len(a))
+	fmtPrintf("%s\n", a[0])
+	fmtPrintf("%d\n", a[1])
 }
 
 func receiveIfcSlice(s bytes, a []interface{}) {
-	fmtPrintf(S("-\n"))
-	fmtPrintf(S("%d\n"), len(a))
-	fmtPrintf(S("%s\n"), a[0])
-	fmtPrintf(S("%d\n"), a[1])
+	fmtPrintf("-\n")
+	fmtPrintf("%d\n", len(a))
+	fmtPrintf("%s\n", a[0])
+	fmtPrintf("%d\n", a[1])
 }
 
 var format bytes = bytes("format-%s-%d\n")

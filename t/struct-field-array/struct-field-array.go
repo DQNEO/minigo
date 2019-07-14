@@ -8,11 +8,11 @@ func structfield() {
 		items: [3]int{3, 4, 5},
 	}
 
-	fmtPrintf(S("%d\n"), bilbo.id)
-	fmtPrintf(S("%d\n"), bilbo.age)
-	fmtPrintf(S("%d\n"), bilbo.items[0])
-	fmtPrintf(S("%d\n"), bilbo.items[1])
-	fmtPrintf(S("%d\n"), bilbo.items[2])
+	fmtPrintf("%d\n", bilbo.id)
+	fmtPrintf("%d\n", bilbo.age)
+	fmtPrintf("%d\n", bilbo.items[0])
+	fmtPrintf("%d\n", bilbo.items[1])
+	fmtPrintf("%d\n", bilbo.items[2])
 }
 
 type Hobbit struct {

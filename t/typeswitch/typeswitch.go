@@ -34,10 +34,10 @@ func typeswtch(flg bool) int {
 func f3() {
 	var x int
 	x = typeswtch(true)
-	fmtPrintf(S("%d\n"), x) // 1
+	fmtPrintf("%d\n", x) // 1
 
 	x = typeswtch(false)
-	fmtPrintf(S("%d\n"), x) // 2
+	fmtPrintf("%d\n", x) // 2
 }
 
 func f4() {
@@ -45,23 +45,23 @@ func f4() {
 
 	switch i.(type) {
 	case *Point:
-		fmtPrintf(S("ERROR\n"))
+		fmtPrintf("ERROR\n")
 	default:
-		fmtPrintf(S("3\n"))
+		fmtPrintf("3\n")
 	}
 
 	switch i.(type) {
 	case nil:
-		fmtPrintf(S("4\n"))
+		fmtPrintf("4\n")
 	default:
-		fmtPrintf(S("ERROR\n"))
+		fmtPrintf("ERROR\n")
 	}
 
 	switch i.(type) {
 	case nil:
-		fmtPrintf(S("5\n"))
+		fmtPrintf("5\n")
 	default:
-		fmtPrintf(S("ERROR"))
+		fmtPrintf("ERROR")
 	}
 
 }

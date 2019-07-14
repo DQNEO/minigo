@@ -12,7 +12,7 @@ func f1() {
 	tokens := Tokenize(bs)
 	expectedLen := 17977
 	if len(tokens) == expectedLen {
-		fmtPrintf(S("1\n"))
+		fmtPrintf("1\n")
 	} else {
 		panic(S("ERROR"))
 	}

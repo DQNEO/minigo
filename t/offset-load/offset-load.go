@@ -37,17 +37,17 @@ func ff1() int {
 
 	g := lhs.getGtype()
 	fields := g.relation.gtype.fields
-	fmtPrintf(S("%d\n"), len(fields)+1) // 0
+	fmtPrintf("%d\n", len(fields)+1) // 0
 
 	for _, fieldtype := range fields {
-		fmtPrintf(S("Error %s\n"), fieldtype.fieldname)
+		fmtPrintf("Error %s\n", fieldtype.fieldname)
 	}
 	return lhs.getGtype().typeId
 }
 
 func f1() {
 	id := ff1()
-	fmtPrintf(S("%d\n"), id-10) // 1
+	fmtPrintf("%d\n", id-10) // 1
 }
 
 func main() {

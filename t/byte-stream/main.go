@@ -14,15 +14,15 @@ func f1() {
 	bs := &_bs
 	len1 := len(bs.source)
 
-	fmtPrintf(S("%d\n"), len1-115) // 1
+	fmtPrintf("%d\n", len1-115) // 1
 
 	var c byte
 	c, _ = bs.get()
-	fmtPrintf(S("%d\n"), c-'p'+2)        // 2
-	fmtPrintf(S("%d\n"), bs.nextIndex+2) // 3
+	fmtPrintf("%d\n", c-'p'+2)        // 2
+	fmtPrintf("%d\n", bs.nextIndex+2) // 3
 	c, _ = bs.get()
-	fmtPrintf(S("%d\n"), c-'a'+4)        // 4
-	fmtPrintf(S("%d\n"), bs.nextIndex+3) // 5
+	fmtPrintf("%d\n", c-'a'+4)        // 4
+	fmtPrintf("%d\n", bs.nextIndex+3) // 5
 }
 
 func main() {

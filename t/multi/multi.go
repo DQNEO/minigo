@@ -7,9 +7,9 @@ func f1() {
 	var b int
 	var c int
 	a, b, c = 1, 2, 3
-	fmtPrintf(S("%d\n"), a)
-	fmtPrintf(S("%d\n"), b)
-	fmtPrintf(S("%d\n"), c)
+	fmtPrintf("%d\n", a)
+	fmtPrintf("%d\n", b)
+	fmtPrintf("%d\n", c)
 }
 
 func f2() {
@@ -19,16 +19,16 @@ func f2() {
 	//a, b = 5, 4
 	//a, b = b, a
 	a, b = 4, 5
-	fmtPrintf(S("%d\n"), a)
-	fmtPrintf(S("%d\n"), b)
+	fmtPrintf("%d\n", a)
+	fmtPrintf("%d\n", b)
 }
 
 func f3() {
 	// assign multi
 	a, b, c := 6, 7, 8
-	fmtPrintf(S("%d\n"), a)
-	fmtPrintf(S("%d\n"), b)
-	fmtPrintf(S("%d\n"), c)
+	fmtPrintf("%d\n", a)
+	fmtPrintf("%d\n", b)
+	fmtPrintf("%d\n", c)
 }
 
 func main() {

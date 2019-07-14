@@ -7,11 +7,11 @@ func main() {
 	var array2 [3]byte = [3]byte{'4', '6', '8'}
 
 	for i := range array1 {
-		fmtPrintf(S("%d\n"), i)
+		fmtPrintf("%d\n", i)
 	}
 
 	for k, v := range array2 {
-		fmtPrintf(S("%d\n"), k*2+3)
-		fmtPrintf(S("%c\n"), v)
+		fmtPrintf("%d\n", k*2+3)
+		fmtPrintf("%c\n", v)
 	}
 }

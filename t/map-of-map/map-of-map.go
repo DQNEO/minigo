@@ -3,7 +3,7 @@ package main
 
 func f1() {
 	var x map[int]map[int]int = map[int]map[int]int{}
-	fmtPrintf(S("%d\n"), x[0][0])
+	fmtPrintf("%d\n", x[0][0])
 }
 
 func f2() {
@@ -11,7 +11,7 @@ func f2() {
 		5: 1,
 	}
 
-	fmtPrintf(S("%d\n"), mi[5])
+	fmtPrintf("%d\n", mi[5])
 
 	var x map[int]map[int]int = map[int]map[int]int{
 		111: map[int]int{
@@ -24,11 +24,11 @@ func f2() {
 
 	y := x[111]
 	z := y[11]
-	fmtPrintf(S("%d\n"), z)
+	fmtPrintf("%d\n", z)
 
 	y = x[112]
 	z = y[12]
-	fmtPrintf(S("%d\n"), z)
+	fmtPrintf("%d\n", z)
 }
 
 type MapIntInt map[int]int

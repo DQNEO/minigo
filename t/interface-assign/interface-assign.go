@@ -27,9 +27,9 @@ func f1() bytes {
 
 func main() {
 	p := f0()
-	fmtPrintf(S("%d\n"), *p)
+	fmtPrintf("%d\n", *p)
 	s := f1()
-	fmtPrintf(S("%s\n"), s)
+	fmtPrintf("%s\n", s)
 }
 
 type Point struct {

@@ -21,13 +21,13 @@ func swtch(x int) int {
 func f1() {
 	var i int
 	i = swtch(1)
-	fmtPrintf(S("%d\n"), i) // 1
+	fmtPrintf("%d\n", i) // 1
 	i = swtch(2)
-	fmtPrintf(S("%d\n"), i) // 2
+	fmtPrintf("%d\n", i) // 2
 	i = swtch(3)
-	fmtPrintf(S("%d\n"), i+1) // 3
+	fmtPrintf("%d\n", i+1) // 3
 	i = swtch(999)
-	fmtPrintf(S("%d\n"), i-3) // 4
+	fmtPrintf("%d\n", i-3) // 4
 }
 
 func swtch2(x int) int {
@@ -42,17 +42,17 @@ func swtch2(x int) int {
 
 func f2() {
 	i := swtch2(3)
-	fmtPrintf(S("%d\n"), i+5) // 5
+	fmtPrintf("%d\n", i+5) // 5
 }
 
 func f3() {
 	switch {
 	case 1+1 == 3:
-		fmtPrintf(S("Error\n"))
+		fmtPrintf("Error\n")
 	case 1+1 == 2:
-		fmtPrintf(S("%d\n"), 6)
+		fmtPrintf("%d\n", 6)
 	default:
-		fmtPrintf(S("Error\n"))
+		fmtPrintf("Error\n")
 	}
 }
 

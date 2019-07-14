@@ -13,12 +13,12 @@ type Point struct {
 }
 
 func f1() {
-	fmtPrintf(S("%d\n"), *GlobalPtr) // 1
+	fmtPrintf("%d\n", *GlobalPtr) // 1
 }
 
 func f2() {
-	fmtPrintf(S("%d\n"), pp1.y) // 2
-	fmtPrintf(S("%d\n"), pp2.x) // 3
+	fmtPrintf("%d\n", pp1.y) // 2
+	fmtPrintf("%d\n", pp2.x) // 3
 }
 
 type Gtype struct {
@@ -41,9 +41,9 @@ var builtinLenGlobal = &DeclFunc{
 
 func f3() {
 	retTypes := builtinLenGlobal.rettypes
-	fmtPrintf(S("%d\n"), len(retTypes)+2) // 4
+	fmtPrintf("%d\n", len(retTypes)+2) // 4
 	var gi *Gtype = retTypes[0]
-	fmtPrintf(S("%d\n"), gi.typ-2) // 5
+	fmtPrintf("%d\n", gi.typ-2) // 5
 }
 
 /*
@@ -54,9 +54,9 @@ func f4() {
 	}
 
 	retTypes := builtinLenLocal.rettypes
-	fmtPrintf(S("%d\n"), len(retTypes) + 4) // 6
+	fmtPrintf("%d\n", len(retTypes) + 4) // 6
 	var gi *Gtype = retTypes[0]
-	fmtPrintf(S("%d\n"), gi.size - 1) // 7
+	fmtPrintf("%d\n", gi.size - 1) // 7
 }
 */
 
