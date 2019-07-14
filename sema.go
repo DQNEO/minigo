@@ -5,7 +5,7 @@ var symbolTable *SymbolTable
 
 type SymbolTable struct {
 	allScopes     map[identifier]*Scope
-	uniquedDTypes []bytes
+	uniquedDTypes []string
 }
 
 func makeDynamicTypeLabel(id int) bytes {
@@ -14,7 +14,7 @@ func makeDynamicTypeLabel(id int) bytes {
 }
 
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
-	dynamicTypeId := getIndex(bytes(gtype.String()), symbolTable.uniquedDTypes)
+	dynamicTypeId := getIndex2(gtype.String(), symbolTable.uniquedDTypes)
 	if dynamicTypeId == -1 {
 		errorft(nil, "type %s not found in uniquedDTypes", gtype.String())
 	}
@@ -99,11 +99,11 @@ func calcStructSize(gtypes []*Gtype) {
 	}
 }
 
-func uniqueDynamicTypes(dynamicTypes []*Gtype) []bytes {
-	var r []bytes = builtinTypesAsString
+func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
+	var r []string = builtinTypesAsString
 	for _, gtype := range dynamicTypes {
-		gs := bytes(gtype.String())
-		if !inArray(gs, r) {
+		gs := gtype.String()
+		if !inArray2(gs, r) {
 			r = append(r, gs)
 		}
 	}

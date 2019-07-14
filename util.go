@@ -30,3 +30,21 @@ func inArray(item bytes, list []bytes) bool {
 	}
 	return false
 }
+
+func getIndex2(item string, list []string) int {
+	for id, v := range list {
+		if eq(bytes(v), bytes(item)) {
+			return id
+		}
+	}
+	return -1
+}
+
+func inArray2(item string, list []string) bool {
+	for _, v := range list {
+		if eq(bytes(v), bytes(item)) {
+			return true
+		}
+	}
+	return false
+}

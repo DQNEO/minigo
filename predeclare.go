@@ -13,12 +13,12 @@ var gString = &Gtype{
 	kind: G_STRING,
 }
 
-var builtinTypesAsString []bytes = []bytes{
-	bytes("bool"),
-	bytes("byte"),
-	bytes("int"),
-	bytes("string"),
-	bytes("func"),
+var builtinTypesAsString []string = []string{
+	"bool",
+	"byte",
+	"int",
+	"string",
+	"func",
 }
 
 var eIota = &ExprConstVariable{

@@ -73,7 +73,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		}
 		emit(".quad 0 # nil terminator")
 
-	} else if primType == G_SLICE {
+	} else if primType == G_SLICE || primType == G_STRING {
 		switch value.(type) {
 		case nil:
 			emit(".quad 0")
@@ -94,6 +94,12 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emitDataAddr(arrayLiteral, depth)               // emit underlying array
 			emit(".quad %d", lit.invisiblevar.gtype.length) // len
 			emit(".quad %d", lit.invisiblevar.gtype.length) // cap
+		case *ExprStringLiteral:
+			stringLiteral := value.(*ExprStringLiteral)
+			emit(".quad .%s", stringLiteral.slabel)
+			var length int = len(stringLiteral.val)
+			emit(".quad %d", length)
+			emit(".quad %d", length)
 		case *ExprFuncallOrConversion:
 			call := value.(*ExprFuncallOrConversion)
 			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
@@ -171,9 +177,6 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprBinop:
 			val = evalIntExpr(value)
 			emit(".quad %d # %s ", val, gtypeString)
-		case *ExprStringLiteral:
-			stringLiteral := value.(*ExprStringLiteral)
-			emit(".quad .%s", stringLiteral.slabel)
 		case *ExprUop:
 			uop := value.(*ExprUop)
 			assert(eq(uop.op, bytes("&")), ptok, "only uop & is allowed")
