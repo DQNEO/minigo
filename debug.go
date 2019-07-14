@@ -43,7 +43,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 
 func errorf(format string, v ...interface{}) {
 	s := Sprintf(format, v...)
-	b := bytes(s)
+	b := []byte(s)
 	b = append(b, '\n')
 	os.Stderr.Write(b)
 	panic(S(""))
