@@ -74,13 +74,6 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.cond != nil {
 		cond = stmt.cond
 		emit("# the cond expression")
-		irConversion, ok := cond.(*IrExprConversion)
-		if ! stmt.isTypeSwitch() && ok {
-			origType := irConversion.arg.getGtype()
-			assert(origType.getKind() == G_SLICE, nil, S("must be slice"))
-			cond = irConversion.arg // unwrap conversion. get inner slice
-		}
-
 		cond.emit()
 		if cond.getGtype().is24WidthType() {
 			emit("PUSH_24 # the cond value")
@@ -123,15 +116,13 @@ func (stmt *StmtSwitch) emit() {
 		} else {
 			for _, e := range caseClause.exprs {
 				emit("# Duplicate the cond value in stack")
-
-				sLiteral ,ok := e.(*ExprStringLiteral)
-				if ok {
+				if e.getGtype().isString() {
 					emit("POP_SLICE # the cond value")
 					emit("PUSH_SLICE # the cond value")
 
 					emit("PUSH_SLICE # the cond valiue")
 
-					sLiteral.emit()
+					e.emit()
 					emit("PUSH_SLICE")
 
 					emitGoStringsEqualFromStack()

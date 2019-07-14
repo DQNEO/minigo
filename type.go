@@ -415,10 +415,7 @@ func (e *ExprNumberLiteral) getGtype() *Gtype {
 }
 
 func (e *ExprStringLiteral) getGtype() *Gtype {
-	return &Gtype{
-		kind:   G_SLICE,
-		elementType:gByte,
-	}
+	return gString
 }
 
 func (e *ExprLen) getGtype() *Gtype {
