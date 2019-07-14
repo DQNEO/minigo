@@ -4,7 +4,7 @@ package main
 type IrRoot struct {
 	vars           []int
 	funcs          []int
-	stringLiterals []bytes
+	stringLiterals [][]byte
 }
 
 func f1() {

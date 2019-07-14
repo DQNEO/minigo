@@ -6,5 +6,5 @@ import (
 
 func main() {
 	fmtPrintf("%d\n", len(os.Args))
-	fmtPrintf("%s\n", bytes(os.Args[1]))
+	fmtPrintf("%s\n", []byte(os.Args[1]))
 }

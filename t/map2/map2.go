@@ -74,7 +74,7 @@ func f3() {
 	fmtPrintf("%d\n", val+24) //24
 }
 
-var gkeyFoo2 bytes = bytes("keyfoo")
+var gkeyFoo2 string = "keyfoo"
 
 func f4() {
 	gkeyFoo := "keyfoo"
@@ -85,7 +85,7 @@ func f4() {
 	}
 
 	var ok bool
-	var v bytes
+	var v string
 	v, ok = lmap[string(gkeyFoo2)]
 	if ok {
 		fmtPrintf("%d\n", 25)

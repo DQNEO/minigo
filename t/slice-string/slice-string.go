@@ -2,8 +2,8 @@ package main
 
 
 func f1() {
-	var s bytes = bytes("abcde")
-	var sub bytes
+	var s []byte = []byte("abcde")
+	var sub []byte
 	sub = s[1:3]
 	fmtPrintf("%d\n", len(sub)-1) // 1
 	if eq(string(sub), "bc") {
@@ -12,7 +12,7 @@ func f1() {
 }
 
 func f2() {
-	var s bytes = bytes("main.go")
+	var s []byte = []byte("main.go")
 	var suffix string = ".go"
 	if len(s) == 7 {
 		fmtPrintf("3\n")
@@ -20,7 +20,7 @@ func f2() {
 	if len(suffix) == 3 {
 		fmtPrintf("4\n")
 	}
-	var suf2 bytes
+	var suf2 []byte
 	suf2 = s[4:]
 	if eq(string(suf2), ".go") {
 		fmtPrintf("5\n")
@@ -34,7 +34,7 @@ func f2() {
 	fmtPrintf("%d\n", low+3) //7
 
 	// strings.HasSuffix
-	var suff3 bytes
+	var suff3 []byte
 	suff3 = s[len(s)-len(suffix):]
 	if eq(string(suff3), string(suffix)) {
 		fmtPrintf("8\n") // 8

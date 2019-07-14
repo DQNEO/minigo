@@ -12,7 +12,7 @@ func f1() {
 		z = -1
 	case int:
 		z = 1
-	case bytes:
+	case []byte:
 		z = 2
 	default:
 		z = 5
@@ -20,14 +20,14 @@ func f1() {
 
 	fmtPrintf("%d\n", z)
 
-	var s bytes = bytes("hello")
+	var s []byte = []byte("hello")
 	x = s
 	switch x.(type) {
 	case nil:
 		z = -1
 	case int:
 		z = 1
-	case bytes:
+	case []byte:
 		z = 2
 	default:
 		z = 5

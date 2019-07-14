@@ -1,7 +1,7 @@
 package main
 
 func f1() {
-	var lmap map[string]bytes = map[string]bytes{
+	var lmap map[string][]byte = map[string][]byte{
 		string("key1"):S("value1"),
 	}
 	key11, ok := lmap[string("key1")]
