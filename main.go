@@ -71,7 +71,7 @@ func main() {
 	osArgs := os.Args
 	assert(len(osArgs) > 0, nil, S("os.Args should not be empty"))
 	if len(os.Args) > 1 {
-		sourceFiles = parseOpts(osArgs[1:len(osArgs)])
+		sourceFiles = parseOpts(osArgs[1:])
 	}
 
 	if len(sourceFiles) == 0 {

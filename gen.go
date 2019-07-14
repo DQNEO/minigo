@@ -180,7 +180,7 @@ func (binop *ExprBinop) emitComp() {
 	emit("# emitComp")
 	assert(binop.left != nil, binop.token(), S("should not be nil"))
 
-	assert(!binop.left.getGtype().isString(), binop.token(), S("should not be clike string"))
+	assert(!binop.left.getGtype().isString(), binop.token(), S("should not be string"))
 
 
 	var instruction bytes
