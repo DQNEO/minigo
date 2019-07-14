@@ -53,13 +53,13 @@ func emit(format string, v ...interface{}) {
 	}
 
 	s := Sprintf(format, v...)
-	writeln(s)
+	writeln(bytes(s))
 }
 
 func emitWithoutIndent(format string, v ...interface{}) {
 	writePos()
 	s := Sprintf(format, v...)
-	writeln(s)
+	writeln(bytes(s))
 }
 
 func unwrapRel(e Expr) Expr {
@@ -78,7 +78,8 @@ func getMethodUniqueName(gtype *Gtype, fname goidentifier) bytes {
 	} else {
 		typename = gtype.relation.name
 	}
-	return Sprintf("%s$%s", bytes(typename), bytes(fname))
+	s := Sprintf("%s$%s", bytes(typename), bytes(fname))
+	return bytes(s)
 }
 
 // "main","f1" -> "main.f1"
@@ -89,7 +90,8 @@ func getFuncSymbol(pkg bytes, fname bytes) bytes {
 	if len(pkg) == 0 {
 		pkg = bytes("")
 	}
-	return Sprintf("%s.%s", pkg, fname)
+	s := Sprintf("%s.%s", pkg, fname)
+	return bytes(s)
 }
 
 func (f *DeclFunc) getSymbol() bytes {
@@ -153,7 +155,7 @@ var labelSeq int = 0
 func makeLabel() bytes {
 	r := Sprintf(".L%d", labelSeq)
 	labelSeq++
-	return r
+	return bytes(r)
 }
 
 func (ast *StmtInc) emit() {

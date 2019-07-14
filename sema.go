@@ -9,7 +9,8 @@ type SymbolTable struct {
 }
 
 func makeDynamicTypeLabel(id int) bytes {
-	return Sprintf("DynamicTypeId%d", id)
+	s := Sprintf("DynamicTypeId%d", id)
+	return bytes(s)
 }
 
 func (symbolTable *SymbolTable) getTypeLabel(gtype *Gtype) bytes {
@@ -83,7 +84,8 @@ func collectDecls(pkg *AstPackage) {
 func setStringLables(pkg *AstPackage, prefix bytes) {
 	for id, sl := range pkg.stringLiterals {
 		var no int = id + 1
-		sl.slabel = Sprintf("%s.S%d", prefix, no)
+		s := Sprintf("%s.S%d", prefix, no)
+		sl.slabel = bytes(s)
 	}
 }
 

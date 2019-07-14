@@ -161,7 +161,6 @@ func (gtype *Gtype) getSize() int {
 }
 
 func (gtype *Gtype) String() bytes {
-	var gs bytes
 	if gtype == nil {
 		return S("NO_TYPE")
 	}
@@ -187,9 +186,9 @@ func (gtype *Gtype) String() bytes {
 				return S("func")
 			}
 		}
-		 gs = Sprintf("G_NAMED(%s.%s)",
+		 s := Sprintf("G_NAMED(%s.%s)",
 			bytes(gtype.relation.pkg), bytes(gtype.relation.name))
-		return gs
+		return bytes(s)
 	case G_INT:
 		return S("int")
 	case G_BOOL:
@@ -198,8 +197,8 @@ func (gtype *Gtype) String() bytes {
 		return S("byte")
 	case G_ARRAY:
 		elm := gtype.elementType
-		gs = Sprintf("[%d]%s", gtype.length, elm.String())
-		return gs
+		s := Sprintf("[%d]%s", gtype.length, elm.String())
+		return bytes(s)
 	case G_STRUCT:
 		var r bytes = S("struct{")
 		for _, field := range gtype.fields {
@@ -212,11 +211,11 @@ func (gtype *Gtype) String() bytes {
 		return S("structfield")
 	case G_POINTER:
 		origType := gtype.origType
-		gs = Sprintf("*%s", origType.String())
-		return gs
+		s := Sprintf("*%s", origType.String())
+		return bytes(s)
 	case G_SLICE:
-		gs = Sprintf("[]%s", gtype.elementType.String())
-		return gs
+		s := Sprintf("[]%s", gtype.elementType.String())
+		return bytes(s)
 	case G_STRING:
 		return S("clikestring")
 	case G_FUNC:

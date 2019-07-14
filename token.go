@@ -104,7 +104,7 @@ func (tok *Token) String() bytes {
 	sval := tok.getSval()
 	gs := Sprintf("(\"%s\" at %s:%d:%d)",
 		sval, bytes(tok.filename), tok.line, tok.column)
-	return gs
+	return bytes(gs)
 }
 
 func (tok *Token) isEOF() bool {

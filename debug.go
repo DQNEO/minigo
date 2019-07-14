@@ -42,7 +42,7 @@ func errorft(tok *Token, format bytes, v ...interface{}) {
 
 func errorf(format string, v ...interface{}) {
 	s := Sprintf(format, v...)
-	os.Stderr.Write(concat(s, S("\n")))
+	os.Stderr.Write(concat(bytes(s), S("\n")))
 	panic(S(""))
 }
 
@@ -53,7 +53,7 @@ func assert(cond bool, tok *Token, format bytes, v ...interface{}) {
 		if tok != nil {
 			toks = tok.String()
 		}
-		msg := concat3(S("assertion failed: "), s,  toks)
+		msg := concat3(S("assertion failed: "), bytes(s),  toks)
 		os.Stderr.Write(msg)
 		os.Stderr.Write(S("\n"))
 		panic(S(""))

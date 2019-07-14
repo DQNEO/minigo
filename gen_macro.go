@@ -12,14 +12,14 @@ func emitMacroDefinitions() {
 	var regi bytes
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf("POP_TO_ARG_%d", i)
-		macroStart(macroName, S(""))
+		macroStart(bytes(macroName), S(""))
 		emit("pop %%%s", regi)
 		macroEnd()
 	}
 
 	for i, regi = range RegsForArguments {
 		macroName := Sprintf("PUSH_ARG_%d", i)
-		macroStart(macroName, S(""))
+		macroStart(bytes(macroName), S(""))
 		emit("push %%%s", regi)
 		macroEnd()
 	}
