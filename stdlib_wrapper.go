@@ -1,7 +1,8 @@
 package main
 
-// depends on libc
+import "strconv"
+
 func strconv_Atoi(gs string) (int, error) {
-	i, e := Atoi(gs)
+	i, e := strconv.Atoi(gs)
 	return i,e
 }
