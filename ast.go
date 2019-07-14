@@ -70,7 +70,7 @@ type ExprNumberLiteral struct {
 type ExprStringLiteral struct {
 	tok    *Token
 	val    bytes
-	slabel bytes
+	slabel string
 }
 
 // local or global variable
