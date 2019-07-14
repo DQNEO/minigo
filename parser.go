@@ -1915,7 +1915,7 @@ func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
 
-func (p *parser) ParseString(filename string, code bytes, packageBlockScope *Scope, importOnly bool) *AstFile {
+func (p *parser) ParseString(filename string, code string, packageBlockScope *Scope, importOnly bool) *AstFile {
 	bs := NewByteStreamFromString(filename, code)
 	return p.Parse(bs, packageBlockScope, importOnly)
 }
@@ -2015,7 +2015,7 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 		}
 		if onMemory {
 			var filename string = concat(string(pkgname),  ".memory")
-			astFile = p.ParseString(filename, []byte(source), pkgScope, false)
+			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
 			astFile = p.ParseFile(string(source), pkgScope, false)
 		}

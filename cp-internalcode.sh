@@ -5,7 +5,7 @@ code=$(cat internal/runtime/runtime.go)
 cat > internal_runtime.go <<EOF
 package main
 
-var internalRuntimeCode bytes = bytes(\`
+var internalRuntimeCode string = string(\`
 $code
 \`)
 EOF
@@ -15,7 +15,7 @@ code=$(cat internal/universe/universe.go)
 cat > internal_universe.go <<EOF
 package main
 
-var internalUniverseCode bytes = bytes(\`
+var internalUniverseCode string = string(\`
 $code
 \`)
 EOF

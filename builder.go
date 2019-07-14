@@ -28,7 +28,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier(""),
 	}
-	f := p.ParseString("internal_universe.go", bytes(internalUniverseCode), universe, false)
+	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -45,7 +45,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier("iruntime"),
 	}
-	f := p.ParseString("internal_runtime.go", bytes(internalRuntimeCode), universe, false)
+	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
