@@ -1,7 +1,8 @@
 package syscall
 
 func BytePtrFromString(s string) *byte {
-	var r *byte = s
+	bs := []byte(s)
+	var r *byte = &bs[0]
 	return r
 }
 
