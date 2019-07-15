@@ -19,6 +19,11 @@ const interfaceWidth int = 3
 const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
+func write(s []byte) {
+	var b []byte = []byte(s)
+	os.Stdout.Write(b)
+}
+
 func writeln(s []byte) {
 	var b []byte = []byte(s)
 	b = append(b, '\n')

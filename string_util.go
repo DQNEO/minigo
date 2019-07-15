@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"fmt"
 )
 
@@ -23,10 +22,4 @@ func Sprintf(format string, a... interface{}) string {
 	}
 	a = nil // unset
 	return fmt.Sprintf(format, args...)
-}
-
-
-func write(s []byte) {
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
 }
