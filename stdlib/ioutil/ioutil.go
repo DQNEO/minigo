@@ -9,9 +9,14 @@ func ReadFile(filenameAsString string) ([]byte, error) {
 	var buf []byte
 	buf = makeSlice(MYBUFSIZ, MYBUFSIZ, 24)
 	var err error
-	fd, err = os.Open(filenameAsString)
+
+	// Currently, there is no way to declare type of other package, so Let it infer
+	f := os.AnyFile
+	f = nil
+
+	f, err = os.Open(filenameAsString)
 	var nbtyes int
-	nbtyes = read(fd, buf, MYBUFSIZ)
+	nbtyes = read(f.id, buf, MYBUFSIZ)
 	var buf2 []byte
 	buf2 = buf[0:nbtyes:nbtyes]
 	// @TODO set len of buf
