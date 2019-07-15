@@ -5,10 +5,10 @@ import "syscall"
 const O_RDONLY = 0
 
 var sfd1 PollFD = PollFD{
-	id:1,
+	Sysfd: 1,
 }
 var sfd2 PollFD = PollFD{
-	id:2,
+	Sysfd: 2,
 }
 
 var sstdout file = file{
@@ -32,7 +32,7 @@ type file struct {
 }
 
 type PollFD struct {
-	id int
+	Sysfd int
 }
 
 // File represents an open file descriptor.
@@ -44,7 +44,7 @@ func openFileNolog(name string, flag int, perm int) (*File, error) {
 	fid, err := syscall.Open(name, flag, perm)
 	fl := &file{
 		fd:&PollFD{
-			id: fid,
+			Sysfd: fid,
 		},
 	}
 	f := &File{
@@ -62,7 +62,7 @@ func Open(name string) (*File, error) {
 }
 
 func (fd *PollFD) Write(b []byte) (int, error) {
-	var fid int = fd.id
+	var fid int = fd.Sysfd
 	var n int
 	var addr *byte = &b[0]
 	n = write(fid, addr, len(b))
