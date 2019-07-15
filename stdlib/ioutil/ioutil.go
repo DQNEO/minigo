@@ -5,7 +5,6 @@ import "os"
 const MYBUFSIZ = 65536 * 2
 
 func ReadFile(filenameAsString string) ([]byte, error) {
-	var fd int
 	var buf []byte
 	buf = makeSlice(MYBUFSIZ, MYBUFSIZ, 24)
 	var err error
