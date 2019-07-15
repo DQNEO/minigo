@@ -84,7 +84,7 @@ func (binop *IrExprStringComparison) emit() {
 }
 
 func emitGoStringsEqualFromStack() {
-	emit("LOAD_NUMBER 1 # true")
+	eTrue.emit()
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
