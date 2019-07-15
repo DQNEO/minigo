@@ -7,7 +7,7 @@ func f1() {
 	var sub []byte
 	sub = s[1:3]
 	fmt.Printf("%d\n", len(sub)-1) // 1
-	if eq(string(sub), "bc") {
+	if string(sub) ==  "bc" {
 		fmt.Printf("2\n")
 	}
 }
@@ -23,7 +23,7 @@ func f2() {
 	}
 	var suf2 []byte
 	suf2 = s[4:]
-	if eq(string(suf2), ".go") {
+	if string(suf2) ==  ".go" {
 		fmt.Printf("5\n")
 	}
 
@@ -37,7 +37,7 @@ func f2() {
 	// strings.HasSuffix
 	var suff3 []byte
 	suff3 = s[len(s)-len(suffix):]
-	if eq(string(suff3), string(suffix)) {
+	if string(suff3) ==  string(suffix) {
 		fmt.Printf("8\n") // 8
 	}
 }

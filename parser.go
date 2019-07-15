@@ -205,7 +205,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		name: firstIdent,
 		pkg:  p.packageName, // @TODO is this right?
 	}
-	if eq(string(rel.name), "__func__") {
+	if string(rel.name) ==  "__func__" {
 		sliteral := &ExprStringLiteral{
 			val: []byte(p.currentFunc.fname),
 		}
@@ -1819,7 +1819,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 	if len(pkg) == 0 {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
-		if relbody == nil && !eq(string(rel.name) ,"_") {
+		if relbody == nil && string(rel.name)  != "_" {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {

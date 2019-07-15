@@ -67,18 +67,3 @@ func concat3(as string, bs string, cs string) string {
 	}
 	return string(r)
 }
-
-func eq(as string, bs string) bool {
-	if len(as) != len(bs) {
-		return false
-	}
-
-	a := []byte(as)
-	b := []byte(bs)
-	for i:=0;i<len(a);i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}

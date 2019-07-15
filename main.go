@@ -28,37 +28,37 @@ func parseOpts(args []string) []string {
 
 	for _, _opt := range args {
 		opt := _opt
-		if eq(opt,"--version") {
+		if opt == "--version" {
 			printVersion()
 			return nil
 		}
-		if eq(opt, "-t") {
+		if opt ==  "-t" {
 			debugToken = true
 		}
-		if eq(opt, "-a") {
+		if opt ==  "-a" {
 			debugAst = true
 		}
-		if eq(opt, "-p") {
+		if opt ==  "-p" {
 			debugParser = true
 		}
-		if eq(opt, "--position") {
+		if opt ==  "--position" {
 			emitPosition = true
 		}
-		if eq(opt, "-d") {
+		if opt ==  "-d" {
 			debugMode = true
 		}
-		if eq(opt, "--tokenize-only") {
+		if opt ==  "--tokenize-only" {
 			tokenizeOnly = true
 		}
-		if eq(opt, "--parse-only") {
+		if opt ==  "--parse-only" {
 			parseOnly = true
 		}
-		if eq(opt, "--resolve-only") {
+		if opt ==  "--resolve-only" {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(string(opt), ".go") {
 			r = append(r, string(opt))
-		} else if eq(opt, "-") {
+		} else if opt ==  "-" {
 			return []string{"/dev/stdin"}
 		}
 	}

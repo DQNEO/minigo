@@ -21,7 +21,7 @@ func (decl *DeclVar) emitData() {
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	for _, field := range e.fields {
-		if eq(string(field.key) , string(fieldname)) {
+		if string(field.key)  ==  string(fieldname) {
 			return field.value
 		}
 	}
@@ -177,7 +177,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(eq(uop.op, "&"), ptok, "only uop & is allowed")
+			assert(uop.op ==  "&", ptok, "only uop & is allowed")
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {
