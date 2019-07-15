@@ -179,7 +179,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 	return z
 }
 
-func eq(a []byte, b []byte) bool {
+func eq(a string, b string) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -192,7 +192,7 @@ func eq(a []byte, b []byte) bool {
 	return true
 }
 
-func cmpStrings(a []byte, b []byte, flag bool) bool {
+func cmpStrings(a string, b string, flag bool) bool {
 	var ret bool
 	ret = eq(a,b)
 	if flag {
