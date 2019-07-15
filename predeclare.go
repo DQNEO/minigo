@@ -14,8 +14,10 @@ var gString = &Gtype{
 	kind: G_STRING,
 	elementType:&sByte,
 }
-var sTrue = ExprNumberLiteral{val: 1}
-var sFalse = ExprNumberLiteral{val: 0}
+
+var sTrue = IrExprBoolVal{bol: true}
+var sFalse = IrExprBoolVal{bol: false}
+
 var eTrue = &sTrue
 var eFalse = &sFalse
 

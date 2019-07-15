@@ -531,6 +531,13 @@ func evalIntExpr(e Expr) int {
 	switch e.(type) {
 	case nil:
 		errorf("e is nil")
+	case *IrExprBoolVal:
+		ir := e.(*IrExprBoolVal)
+		if ir.bol {
+			return 1
+		} else {
+			return 0
+		}
 	case *ExprNumberLiteral:
 		return e.(*ExprNumberLiteral).val
 	case *ExprVariable:

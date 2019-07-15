@@ -67,6 +67,35 @@ type ExprNumberLiteral struct {
 	val int
 }
 
+type IrExprBoolVal struct {
+	tok *Token
+	bol bool
+}
+
+func (e *IrExprBoolVal) token() *Token {
+	return e.tok
+}
+
+func (e *IrExprBoolVal) emit() {
+	if e.bol {
+		emit("LOAD_NUMBER 1")
+	} else {
+		emit("LOAD_NUMBER 0")
+	}
+}
+
+func (e *IrExprBoolVal) dump() {
+	if e.bol {
+		debugf("true")
+	} else {
+		debugf("false")
+	}
+}
+
+func (e *IrExprBoolVal) getGtype() *Gtype {
+	return gBool
+}
+
 type ExprStringLiteral struct {
 	tok    *Token
 	val    []byte
