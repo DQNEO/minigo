@@ -1661,7 +1661,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	}
 
 	// every function has a defer_handler
-	l := concat(string(makeLabel()) , "_defer_handler")
+	l := string(makeLabel())  + "_defer_handler"
 	r.labelDeferHandler = l
 	p.currentFunc = r
 	body := p.parseCompoundStmt()
@@ -2014,7 +2014,7 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 			packageName: identifier(pkgname),
 		}
 		if onMemory {
-			var filename string = concat(string(pkgname),  ".memory")
+			var filename string = string(pkgname) + ".memory"
 			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
 			astFile = p.ParseFile(string(source), pkgScope, false)

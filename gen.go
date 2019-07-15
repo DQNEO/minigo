@@ -220,7 +220,7 @@ func (e *IrStringConcat) emit() {
 	params = append(params, &ExprVariable{}) // a []byte
 	params = append(params, &ExprVariable{}) // b []byte
 
-	// concat(left, right)
+	// left + right
 	call := &IrStaticCall{
 		tok: e.token(),
 		symbol: "iruntime.concat",

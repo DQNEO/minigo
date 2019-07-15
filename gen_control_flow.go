@@ -371,8 +371,8 @@ func (ast *StmtDefer) emit() {
 			errorft(ast.token(), "defer should be a funcall")
 		}
 	*/
-	labelStart := concat(string(makeLabel()) , "_defer")
-	labelEnd := concat(string(makeLabel()) , "_defer")
+	labelStart := string(makeLabel())  + "_defer"
+	labelEnd := string(makeLabel())  + "_defer"
 	ast.label = labelStart
 
 	emit("jmp %s", labelEnd)

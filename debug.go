@@ -26,7 +26,7 @@ var debugNest int
 
 // States "To Be Implemented"
 func TBI(tok *Token, format string, v ...interface{}) {
-	format2 := concat("(To Be Implemented) ", format)
+	format2 := "(To Be Implemented) " + format
 	errorft(tok, format2, v...)
 }
 
@@ -65,7 +65,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 }
 
 func assertNotReached(tok *Token) {
-	msg := concat("assertNotReached ", string(tok.String()))
+	msg := "assertNotReached " + string(tok.String())
 	os.Stderr.Write([]byte(msg))
 	panic("")
 }

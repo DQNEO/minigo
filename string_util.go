@@ -36,17 +36,3 @@ func writeln(s []byte) {
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
-
-func concat(as string, bs string) string {
-	a := []byte(as)
-	b := []byte(bs)
-
-	var r []byte
-	for i:=0;i<len(a);i++ {
-		r = append(r, a[i])
-	}
-	for i:=0;i<len(b);i++ {
-		r = append(r, b[i])
-	}
-	return string(r)
-}
