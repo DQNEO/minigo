@@ -2,7 +2,8 @@ package fmt
 
 import "strconv"
 
-var _trash int
+
+var _fmt_trash int
 func Sprintf(format string, args... interface{}) string {
 	var r []byte
 	var blocks []string
@@ -78,7 +79,7 @@ func Sprintf(format string, args... interface{}) string {
 			r = append(r, c)
 		}
 	}
-	_trash = i
-	_trash = j
+	_fmt_trash = i
+	_fmt_trash = j
 	return string(r)
 }
