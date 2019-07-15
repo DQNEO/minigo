@@ -62,11 +62,10 @@ func Open(name string) (*File, error) {
 }
 
 func (fd *PollFD) Write(b []byte) (int, error) {
-	var fid int = fd.Sysfd
 	var n int
-	var addr *byte = &b[0]
-	n = write(fid, addr, len(b))
-	return n,nil
+	var err error
+	n, err = syscall.Write(fd.Sysfd, b)
+	return n,err
 }
 
 func (f *File) write(b []byte) (int, error) {

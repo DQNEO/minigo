@@ -13,3 +13,10 @@ func Open(path string, flag int, perm int) (int, error) {
 	fd = open(_p0, flag)
 	return fd, nil
 }
+
+func Write(fd int, b []byte) (int, error) {
+	var addr *byte = &b[0]
+	var n int
+	n = write(fd, addr, len(b))
+	return n, nil
+}
