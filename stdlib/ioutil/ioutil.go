@@ -15,10 +15,12 @@ func ReadFile(filenameAsString string) ([]byte, error) {
 	f = nil
 
 	f, err = os.Open(filenameAsString)
-	var nbtyes int
-	nbtyes = read(f.id, buf, MYBUFSIZ)
+
+	var n int = MYBUFSIZ
+
+	var nread int
+	nread = read(f.id, buf, n)
 	var buf2 []byte
-	buf2 = buf[0:nbtyes:nbtyes]
-	// @TODO set len of buf
+	buf2 = buf[0:nread:nread]
 	return buf2,nil
 }
