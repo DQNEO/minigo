@@ -14,7 +14,7 @@ func readAll(f *os.File, capacity int) ([]byte, error) {
 	b.Grow(capacity)
 	fd := f.Fd()
 
-	bf := &bytes.BufferFile{
+	bf := &bytes.File{
 		fd: fd,
 	}
 	_, err := b.ReadFrom(bf)

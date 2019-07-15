@@ -13,7 +13,7 @@ func (b *Buffer) Grow(capacity int) {
 	b.buf = buf
 }
 
-func (b *Buffer) ReadFrom(br *BufferFile) (int, error) {
+func (b *Buffer) ReadFrom(br *File) (int, error) {
 	var nread int
 	var err error
 
@@ -28,16 +28,16 @@ func (b *Buffer) Bytes() []byte {
 }
 
 
-type BufferFile struct {
+type File struct {
 	fd int
 }
 
-func (f *BufferFile) Fd() int {
+func (f *File) Fd() int {
 	return f.fd
 }
 
 // Read implements io.Reader
-func (f *BufferFile) Read(p []byte) (int, error) {
+func (f *File) Read(p []byte) (int, error) {
 	//fd := f.innerFile.fd
 	fd := f.Fd()
 	var ptr *byte
