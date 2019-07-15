@@ -192,7 +192,7 @@ func eqGostringInternal(a []byte, b []byte) bool {
 	return true
 }
 
-func eqGostrings(a []byte, b []byte, eq bool) bool {
+func cmpStrings(a []byte, b []byte, eq bool) bool {
 	var ret bool
 	ret = eqGostringInternal(a,b)
 	if eq {

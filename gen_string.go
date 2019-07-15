@@ -78,7 +78,7 @@ func (binop *IrExprStringComparison) emit() {
 	// eq(left, right, eEqual)
 	call := &IrStaticCall{
 		tok: binop.token(),
-		symbol: "iruntime.eqGostrings",
+		symbol: "iruntime.cmpStrings",
 		isMethodCall:false,
 		args: args,
 		callee: &DeclFunc{
@@ -93,7 +93,7 @@ func emitGoStringsEqualFromStack() {
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
-		symbol:        "iruntime.eqGostrings",
+		symbol:        "iruntime.cmpStrings",
 		argsFromStack: 7,
 	}
 	call.emit()
