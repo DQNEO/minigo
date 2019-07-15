@@ -804,18 +804,42 @@ func (p *parser) parseType() *Gtype {
 		tok := p.readToken()
 		if tok.isTypeIdent() {
 			ident := tok.getIdent()
-			// unresolved
-			rel := &Relation{
-				tok:  tok,
-				pkg:  p.packageName,
-				name: ident,
+
+			// ident may be a foreign package name
+			// like "os" in "os.File"
+			_, ok := p.importedNames[ident]
+			if ok {
+				pkgName := ident
+				p.expect(".")
+				tok2 := p.readToken() // "File" in "os.File"
+				assert(tok2.isTypeIdent(), tok, "should be ident")
+				name := tok2.getIdent()
+				rel := &Relation{
+					tok:  tok,
+					pkg:  pkgName, // "os"
+					name: name,    // "File"
+				}
+				// must resolve here
+				p.tryResolve(pkgName, rel)
+				gtype = &Gtype{
+					kind:     G_NAMED,
+					relation: rel,
+				}
+				return gtype
+			} else {
+				// unresolved
+				rel := &Relation{
+					tok:  tok,
+					pkg:  p.packageName,
+					name: ident,
+				}
+				p.tryResolve(identifier(""), rel)
+				gtype = &Gtype{
+					kind:     G_NAMED,
+					relation: rel,
+				}
+				return p.registerDynamicType(gtype)
 			}
-			p.tryResolve(identifier(""), rel)
-			gtype = &Gtype{
-				kind:     G_NAMED,
-				relation: rel,
-			}
-			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("interface") {
 			p.expect("{")
 			p.expect("}")

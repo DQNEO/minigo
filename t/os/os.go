@@ -1,6 +1,15 @@
 package main
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
+
+func f0() {
+	var f *os.File
+	f = os.Stderr
+	fmt.Printf("%d\n", f.innerFile.fd.Sysfd)
+}
 
 func f1() {
 	var a = "hello stdout\n"
@@ -13,5 +22,6 @@ func f1() {
 }
 
 func main() {
+	f0()
 	f1()
 }
