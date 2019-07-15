@@ -13,10 +13,10 @@ func (b *Buffer) Grow(capacity int) {
 	b.buf = buf
 }
 
-func (b *Buffer) ReadFrom(f *BufferFile) (int, error) {
+func (b *Buffer) ReadFrom(r *BufferFile) (int, error) {
 	var nread int
 	var err error
-	nread, err = f.Read(b.buf)
+	nread, err = r.Read(b.buf)
 	bytes := b.buf[0:nread:nread]
 	b.bytes = bytes
 	return nread, err

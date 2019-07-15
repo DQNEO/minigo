@@ -1,7 +1,9 @@
 package ioutil
 
-import "os"
-import "bytes"
+import (
+	"bytes"
+	"os"
+)
 
 const MYBUFSIZ = 65536 * 2
 
