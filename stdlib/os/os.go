@@ -12,10 +12,6 @@ var Stderr *File = &File{
 	id: 2,
 }
 
-var DummyFile *File = &File{
-	id:0,
-}
-
 // File represents an open file descriptor.
 type File struct {
 	id int
