@@ -208,16 +208,6 @@ func (binop *ExprBinop) emitComp() {
 	emit_comp_primitive(instruction, binop)
 }
 
-type IrStringConcat struct {
-	tok *Token
-	left Expr
-	right Expr
-}
-
-func (e *IrStringConcat) token() *Token {
-	return e.tok
-}
-
 func (e *IrStringConcat) emit() {
 	emit("# IrExprStringComparison")
 	var args []Expr
@@ -242,14 +232,6 @@ func (e *IrStringConcat) emit() {
 	}
 	call.emit()
 
-}
-
-func (e *IrStringConcat) dump() {
-	panic("implement me")
-}
-
-func (e *IrStringConcat) getGtype() *Gtype {
-	panic("implement me")
 }
 
 func (ast *ExprBinop) emit() {

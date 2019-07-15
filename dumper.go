@@ -426,3 +426,7 @@ func (e *ExprMapLiteral) dump() {
 func (e *IrExprConversionToInterface) dump() {
 	panic("implement me: IrExprConversionToInterface")
 }
+
+func (e *IrStringConcat) dump() {
+	panic("implement me")
+}

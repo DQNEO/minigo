@@ -149,6 +149,12 @@ type IrExprStringComparison struct {
 	right Expr
 }
 
+type IrStringConcat struct {
+	tok *Token
+	left Expr
+	right Expr
+}
+
 type ExprUop struct {
 	tok     *Token
 	op      string
@@ -500,6 +506,8 @@ func (node *ExprMapLiteral) token() *Token              { return node.tok }
 func (node *ExprLen) token() *Token                     { return node.tok }
 func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
+func (e *IrStringConcat) token() *Token                 { return e.tok }
+
 
 // Internal node made by sema
 type IrStmtForRangeList struct {

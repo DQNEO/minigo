@@ -474,3 +474,7 @@ func (e *ExprMapLiteral) getGtype() *Gtype {
 func (e *IrExprConversionToInterface) getGtype() *Gtype {
 	return gInterface
 }
+
+func (e *IrStringConcat) getGtype() *Gtype {
+	return gString
+}
