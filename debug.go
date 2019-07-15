@@ -37,7 +37,7 @@ func errorft(tok *Token, format string, v ...interface{}) {
 	if tok != nil {
 		tokString = tok.String()
 	}
-	gs := concat3(format,"\n ", tokString)
+	gs := format + "\n " + tokString
 	errorf(gs, v...)
 }
 
@@ -56,7 +56,7 @@ func assert(cond bool, tok *Token, format string, v ...interface{}) {
 		if tok != nil {
 			toks = tok.String()
 		}
-		msg := concat3("assertion failed: ", s,  toks)
+		msg := "assertion failed: " + s + toks
 		b := []byte(msg)
 		b = append(b, '\n')
 		os.Stderr.Write(b)

@@ -50,20 +50,3 @@ func concat(as string, bs string) string {
 	}
 	return string(r)
 }
-
-func concat3(as string, bs string, cs string) string {
-	a := []byte(as)
-	b := []byte(bs)
-	c := []byte(cs)
-	var r []byte
-	for i:=0;i<len(a);i++ {
-		r = append(r, a[i])
-	}
-	for i:=0;i<len(b);i++ {
-		r = append(r, b[i])
-	}
-	for i:=0;i<len(c);i++ {
-		r = append(r, c[i])
-	}
-	return string(r)
-}
