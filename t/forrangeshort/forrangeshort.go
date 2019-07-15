@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 // for range test
 func main() {
@@ -7,11 +8,11 @@ func main() {
 	var array2 [3]byte = [3]byte{'4', '6', '8'}
 
 	for i := range array1 {
-		fmtPrintf("%d\n", i)
+		fmt.Printf("%d\n", i)
 	}
 
 	for k, v := range array2 {
-		fmtPrintf("%d\n", k*2+3)
-		fmtPrintf("%c\n", v)
+		fmt.Printf("%d\n", k*2+3)
+		fmt.Printf("%c\n", v)
 	}
 }

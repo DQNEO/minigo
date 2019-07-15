@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 // for range test
 func f1() {
@@ -9,12 +10,12 @@ func f1() {
 	var v int
 	var i int
 	for i = range array1 {
-		fmtPrintf("%d\n", i)
+		fmt.Printf("%d\n", i)
 	}
 
 	for i, v = range array2 {
-		fmtPrintf("%d\n", i*2+3)
-		fmtPrintf("%d\n", v)
+		fmt.Printf("%d\n", i*2+3)
+		fmt.Printf("%d\n", v)
 	}
 }
 
@@ -25,28 +26,28 @@ func f2() {
 		items: [3]int{9, 10, 11},
 	}
 	for _, v := range bilbo.items {
-		fmtPrintf("%d\n", v)
+		fmt.Printf("%d\n", v)
 	}
 }
 
 func f3() {
 	var slice = []int{112, 113, 114}
 	for _, v := range slice {
-		fmtPrintf("%d\n", v-100)
+		fmt.Printf("%d\n", v-100)
 	}
 }
 
 func f4() {
 	var slice []int
 	for i := range slice {
-		fmtPrintf("error %d\n", i)
+		fmt.Printf("error %d\n", i)
 	}
 }
 
 func f5() {
 	var slice []int = nil
 	for i, v := range slice {
-		fmtPrintf("error %d,%d\n", i, v)
+		fmt.Printf("error %d,%d\n", i, v)
 	}
 
 }
@@ -60,7 +61,7 @@ func f6() {
 		if v == 4 {
 			break
 		}
-		fmtPrintf("%d\n", v+13) // 15,16
+		fmt.Printf("%d\n", v+13) // 15,16
 	}
 
 }
@@ -69,9 +70,9 @@ func f7() {
 	var slice = []int{1, 1, 1}
 	var i int
 	for i, _ = range slice {
-		fmtPrintf("%d\n", i+17) // 17,18,19
+		fmt.Printf("%d\n", i+17) // 17,18,19
 	}
-	fmtPrintf("%d\n", i+18) // 20
+	fmt.Printf("%d\n", i+18) // 20
 }
 
 func main() {

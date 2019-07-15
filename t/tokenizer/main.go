@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var GENERATION int = 2
 
 var debugMode = true
@@ -15,19 +17,19 @@ func f3() {
 		bs: bs,
 	}
 	ident := tn.readIdentifier(c)
-	fmtPrintf("%s\n", []byte(ident))
+	fmt.Printf("%s\n", []byte(ident))
 }
 
 func f4() {
 	path := "t/min/min.go"
 	bs := NewByteStreamFromFile(path)
 	tokens := Tokenize(bs)
-	fmtPrintf("%d\n", len(tokens)) // 26
-	fmtPrintf("----------\n")
+	fmt.Printf("%d\n", len(tokens)) // 26
+	fmt.Printf("----------\n")
 	// disable befow for now
 	return
 	for _, tok := range tokens {
-		fmtPrintf("%d:%s\n", int(tok.typ), tok.getSval())
+		fmt.Printf("%d:%s\n", int(tok.typ), tok.getSval())
 	}
 }
 
@@ -38,8 +40,8 @@ func f5() {
 
 	tokens := Tokenize(bs)
 	tok := tokens[0]
-	fmtPrintf("----------\n")
-	fmtPrintf("[%s]\n", []byte(tok.sval))
+	fmt.Printf("----------\n")
+	fmt.Printf("[%s]\n", []byte(tok.sval))
 }
 
 func main() {

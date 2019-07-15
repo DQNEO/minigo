@@ -1,30 +1,31 @@
 package main
 
 import "strings"
+import "fmt"
 
 func f1() {
 	s := "main.go"
 	suffix := ".go"
 	if strings.HasSuffix(s, suffix) {
-		fmtPrintf("1\n")
+		fmt.Printf("1\n")
 	} else {
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 }
 
 func f2() {
 	if strings.Contains("foo/bar", "/") {
-		fmtPrintf("2\n")
+		fmt.Printf("2\n")
 	} else {
-		fmtPrintf("ERROR")
+		fmt.Printf("ERROR")
 	}
 }
 
 func f3() {
 	s := strings.Split("foo/bar", "/")
-	fmtPrintf("%d\n", len(s)+1) // 3
-	fmtPrintf("%s\n", s[0])     // foo
-	fmtPrintf("%s\n", s[1])     // bar
+	fmt.Printf("%d\n", len(s)+1) // 3
+	fmt.Printf("%s\n", s[0])     // foo
+	fmt.Printf("%s\n", s[1])     // bar
 }
 
 func main() {

@@ -5,14 +5,14 @@ func stdout_write() {
 	s := "hello world\n"
 	var n int
 	n = write(1, s, len(s))
-	fmtPrintf("%d\n", n)
+	fmt.Printf("%d\n", n)
 }
 
 func stderr_write() {
 	s := "hello stderr\n"
 	var n int
 	n = write(2, s, len(s))
-	fmtPrintf("%d\n", n)
+	fmt.Printf("%d\n", n)
 }
 
 func f1() {

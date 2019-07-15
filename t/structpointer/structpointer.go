@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func literal() {
 	var u *User
@@ -7,15 +8,15 @@ func literal() {
 		id:  1,
 		age: 2,
 	}
-	fmtPrintf("%d\n", u.id)
-	fmtPrintf("%d\n", u.age)
+	fmt.Printf("%d\n", u.id)
+	fmt.Printf("%d\n", u.age)
 
 	u = &User{
 		id:  3,
 		age: 4,
 	}
-	fmtPrintf("%d\n", u.id)
-	fmtPrintf("%d\n", u.age)
+	fmt.Printf("%d\n", u.id)
+	fmt.Printf("%d\n", u.age)
 }
 
 func assign() {
@@ -25,12 +26,12 @@ func assign() {
 		age: 4,
 	}
 	u.age = 5
-	fmtPrintf("%d\n", u.age)
+	fmt.Printf("%d\n", u.age)
 	u.age++
-	fmtPrintf("%d\n", u.age)
+	fmt.Printf("%d\n", u.age)
 	u.age = 8
 	u.age--
-	fmtPrintf("%d\n", u.age)
+	fmt.Printf("%d\n", u.age)
 }
 
 type S struct {
@@ -44,10 +45,10 @@ func f1() {
 		id: 123,
 	}
 
-	fmtPrintf("%d\n", p.id-115) // 8
+	fmt.Printf("%d\n", p.id-115) // 8
 
 	p.dummy = nil
-	fmtPrintf("%d\n", p.id-114) // 9
+	fmt.Printf("%d\n", p.id-114) // 9
 }
 
 func main() {

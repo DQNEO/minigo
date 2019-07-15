@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func main() {
 	f, g := getIntInt()
@@ -14,13 +15,13 @@ func main() {
 		id:  5,
 		age: 0,
 	}
-	fmtPrintf("%d\n", a)
-	fmtPrintf("%c\n", b)
-	fmtPrintf("%s\n", c)
-	fmtPrintf("%d\n", d.id)
-	fmtPrintf("%d\n", e.id)
-	fmtPrintf("%d\n", f)
-	fmtPrintf("%d\n", g)
+	fmt.Printf("%d\n", a)
+	fmt.Printf("%c\n", b)
+	fmt.Printf("%s\n", c)
+	fmt.Printf("%d\n", d.id)
+	fmt.Printf("%d\n", e.id)
+	fmt.Printf("%d\n", f)
+	fmt.Printf("%d\n", g)
 }
 
 type User struct {

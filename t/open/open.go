@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 const O_RDONLY = 0
 
@@ -18,8 +19,8 @@ func f2() int {
 func main() {
 	var fd int
 	fd = f1()
-	fmtPrintf("%d\n", fd) // 3
+	fmt.Printf("%d\n", fd) // 3
 
 	fd = f2()
-	fmtPrintf("%d\n", fd) // -1
+	fmt.Printf("%d\n", fd) // -1
 }

@@ -1,13 +1,15 @@
 package main
 
 
+import "fmt"
+
 func f1() {
 	var x byte = 10
 
 	if x == '\n' {
-		fmtPrintf("%d\n", 1)
+		fmt.Printf("%d\n", 1)
 	} else {
-		fmtPrintf("error\n")
+		fmt.Printf("error\n")
 	}
 }
 

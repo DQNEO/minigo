@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func f1() {
 	var h Hobbit = Hobbit{
@@ -7,14 +8,14 @@ func f1() {
 		height: 2,
 	}
 
-	fmtPrintf("%d\n", h.age)
-	fmtPrintf("%d\n", h.height)
+	fmt.Printf("%d\n", h.age)
+	fmt.Printf("%d\n", h.height)
 
 	var h2 Hobbit = h
-	fmtPrintf("%d\n", h2.age+2) // 3
+	fmt.Printf("%d\n", h2.age+2) // 3
 
 	h.height = 100
-	fmtPrintf("%d\n", h2.height+2) // 4
+	fmt.Printf("%d\n", h2.height+2) // 4
 }
 
 func f2() {
@@ -26,8 +27,8 @@ func f2() {
 	var p *Hobbit = &h
 
 	var h3 Hobbit = *p
-	fmtPrintf("%d\n", h3.age+4)    // 5
-	fmtPrintf("%d\n", h3.height+4) // 6
+	fmt.Printf("%d\n", h3.age+4)    // 5
+	fmt.Printf("%d\n", h3.height+4) // 6
 }
 
 type Hobbit struct {

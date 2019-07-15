@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func f1() {
 	var x interface{}
@@ -18,7 +19,7 @@ func f1() {
 		z = 5
 	}
 
-	fmtPrintf("%d\n", z)
+	fmt.Printf("%d\n", z)
 
 	var s []byte = []byte("hello")
 	x = s
@@ -32,7 +33,7 @@ func f1() {
 	default:
 		z = 5
 	}
-	fmtPrintf("%d\n", z)
+	fmt.Printf("%d\n", z)
 }
 
 func main() {

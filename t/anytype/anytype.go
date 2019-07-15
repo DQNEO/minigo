@@ -1,10 +1,11 @@
 package main
 
+import "fmt"
 
 func f1() {
 	i := recover()
 	if i == nil {
-		fmtPrintf("nil\n")
+		fmt.Printf("nil\n")
 	}
 }
 

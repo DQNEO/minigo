@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func structfield() {
 	bilbo := Hobbit{
@@ -8,11 +9,11 @@ func structfield() {
 		items: [3]int{3, 4, 5},
 	}
 
-	fmtPrintf("%d\n", bilbo.id)
-	fmtPrintf("%d\n", bilbo.age)
-	fmtPrintf("%d\n", bilbo.items[0])
-	fmtPrintf("%d\n", bilbo.items[1])
-	fmtPrintf("%d\n", bilbo.items[2])
+	fmt.Printf("%d\n", bilbo.id)
+	fmt.Printf("%d\n", bilbo.age)
+	fmt.Printf("%d\n", bilbo.items[0])
+	fmt.Printf("%d\n", bilbo.items[1])
+	fmt.Printf("%d\n", bilbo.items[2])
 }
 
 type Hobbit struct {

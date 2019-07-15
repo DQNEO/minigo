@@ -1,7 +1,8 @@
 package main
 
+import "fmt"
 
 func main() {
-	fmtPrintf("hello world\n")
-	fmtPrintf("MiniGo=%d\n", MiniGo)
+	fmt.Printf("hello world\n")
+	fmt.Printf("MiniGo=%d\n", MiniGo)
 }

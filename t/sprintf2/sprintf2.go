@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"fmt"
 )
 
 func receiveSliceInVariadic(format []byte, a... interface{})  {
@@ -11,8 +12,8 @@ func receiveSliceInVariadic(format []byte, a... interface{})  {
 
 	b, ok = i0.([]byte)
 
-	fmtPrintf("ok=%d\n", ok)
-	fmtPrintf("b=%s,len=%d,cap=%d\n", b,len(b), cap(b))
+	fmt.Printf("ok=%d\n", ok)
+	fmt.Printf("b=%s,len=%d,cap=%d\n", b,len(b), cap(b))
 }
 
 func f0() {
@@ -61,10 +62,10 @@ func f2() {
 
 
 func main() {
-	fmtPrintf("--- f0 ---\n")
+	fmt.Printf("--- f0 ---\n")
 	f0()
-	fmtPrintf("--- f1 ---\n")
+	fmt.Printf("--- f1 ---\n")
 	f1()
-	fmtPrintf("--- f2 ---\n")
+	fmt.Printf("--- f2 ---\n")
 	f2()
 }

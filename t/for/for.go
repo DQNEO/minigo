@@ -1,10 +1,11 @@
 package main
 
+import "fmt"
 
 func f1() {
 	// C style
 	for i := 0; i < 10; i = i + 1 {
-		fmtPrintf("%d\n", i)
+		fmt.Printf("%d\n", i)
 	}
 }
 
@@ -16,7 +17,7 @@ func f2() {
 		if i == 16 {
 			break
 		}
-		fmtPrintf("%d\n", i)
+		fmt.Printf("%d\n", i)
 	}
 }
 
@@ -27,19 +28,19 @@ func f3() {
 			for {
 				return
 			}
-			fmtPrintf("ERROR")
+			fmt.Printf("ERROR")
 			return
 		}
 		x = 16
 		break
 	}
-	fmtPrintf("%d\n", x)
+	fmt.Printf("%d\n", x)
 }
 
 func f4() {
 	var i int = 17
 	for ; i <= 19; i++ {
-		fmtPrintf("%d\n", i)
+		fmt.Printf("%d\n", i)
 	}
 }
 

@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func typeswtch(flg bool) int {
 	var r int
@@ -34,10 +35,10 @@ func typeswtch(flg bool) int {
 func f3() {
 	var x int
 	x = typeswtch(true)
-	fmtPrintf("%d\n", x) // 1
+	fmt.Printf("%d\n", x) // 1
 
 	x = typeswtch(false)
-	fmtPrintf("%d\n", x) // 2
+	fmt.Printf("%d\n", x) // 2
 }
 
 func f4() {
@@ -45,23 +46,23 @@ func f4() {
 
 	switch i.(type) {
 	case *Point:
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	default:
-		fmtPrintf("3\n")
+		fmt.Printf("3\n")
 	}
 
 	switch i.(type) {
 	case nil:
-		fmtPrintf("4\n")
+		fmt.Printf("4\n")
 	default:
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 
 	switch i.(type) {
 	case nil:
-		fmtPrintf("5\n")
+		fmt.Printf("5\n")
 	default:
-		fmtPrintf("ERROR")
+		fmt.Printf("ERROR")
 	}
 
 }

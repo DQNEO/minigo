@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func f1() {
 	var r []int
@@ -9,8 +10,8 @@ func f1() {
 
 	r = append(r, 2)
 
-	fmtPrintf("%d\n", len(r))
-	fmtPrintf("%d\n", r[0])
+	fmt.Printf("%d\n", len(r))
+	fmt.Printf("%d\n", r[0])
 }
 
 func main() {

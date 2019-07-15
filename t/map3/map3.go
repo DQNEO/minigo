@@ -6,17 +6,17 @@ func f1() {
 	}
 	key11, ok := lmap[string("key1")]
 	if ok {
-		fmtPrintf("%s\n", key11)
+		fmt.Printf("%s\n", key11)
 	} else {
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 
 	lmap[string("key2")] = S("value2")
 	key2, ok := lmap[string("key2")]
 	if ok {
-		fmtPrintf("%s\n", key2)
+		fmt.Printf("%s\n", key2)
 	} else {
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 
 }

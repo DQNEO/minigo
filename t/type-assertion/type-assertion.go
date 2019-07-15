@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func do(flg bool) int {
 	var p *Point = &Point{
@@ -56,10 +57,10 @@ func (p *Point2) calc() int {
 func f1() {
 	var x int
 	x = do(true)
-	fmtPrintf("%d\n", x-2) // 1
+	fmt.Printf("%d\n", x-2) // 1
 
 	x = do(false)
-	fmtPrintf("%d\n", x-4) // 2
+	fmt.Printf("%d\n", x-4) // 2
 }
 
 func f2() {
@@ -68,15 +69,15 @@ func f2() {
 	var p *Point
 	p, ok = i.(*Point)
 	if !ok {
-		fmtPrintf("3\n") // 3
+		fmt.Printf("3\n") // 3
 	} else {
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 
 	if p == nil {
-		fmtPrintf("4\n") // 4
+		fmt.Printf("4\n") // 4
 	} else {
-		fmtPrintf("ERROR\n")
+		fmt.Printf("ERROR\n")
 	}
 
 }

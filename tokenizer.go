@@ -432,8 +432,6 @@ func (tn *Tokenizer) tokenize() []*Token {
 				tok = tn.makeToken(T_PUNCT, "<")
 			}
 		default:
-			//var i int = int(c)
-			//fmtPrintf("[%d]\n", i)
 			msg := Sprintf("unknown char:%d\n", c)
 			panic(msg)
 		}

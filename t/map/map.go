@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 var gmap map[string]bool
 
@@ -7,8 +8,8 @@ var gmap map[string]bool
 
 func f1() {
 	var lmap map[string]bool
-	fmtPrintf("%d\n", len(gmap)+1) // 1
-	fmtPrintf("%d\n", len(lmap)+2) // 2
+	fmt.Printf("%d\n", len(gmap)+1) // 1
+	fmt.Printf("%d\n", len(lmap)+2) // 2
 }
 
 func f2() {
@@ -18,13 +19,13 @@ func f2() {
 		6: 9,
 	}
 
-	fmtPrintf("%d\n", len(lmap)) // 3
+	fmt.Printf("%d\n", len(lmap)) // 3
 	for i := range lmap {
-		fmtPrintf("%d\n", i) // 4,5,6
+		fmt.Printf("%d\n", i) // 4,5,6
 	}
 
 	for _, v := range lmap {
-		fmtPrintf("%d\n", v) // 7,8,9
+		fmt.Printf("%d\n", v) // 7,8,9
 	}
 }
 
@@ -37,8 +38,8 @@ func f3() {
 	lmap[14] = 15
 	lmap[16] = 17
 	for i, v := range lmap {
-		fmtPrintf("%d\n", i)
-		fmtPrintf("%d\n", v)
+		fmt.Printf("%d\n", i)
+		fmt.Printf("%d\n", v)
 	}
 }
 
@@ -50,16 +51,16 @@ func f4() {
 		0:  18,
 	}
 
-	fmtPrintf("%d\n", lmap[0]) // 18
+	fmt.Printf("%d\n", lmap[0]) // 18
 
-	fmtPrintf("%d\n", lmap[999]+19) // 19
+	fmt.Printf("%d\n", lmap[999]+19) // 19
 	lmap[9] = 21
-	fmtPrintf("%d\n", len(lmap)+16) // 20
-	fmtPrintf("%d\n", lmap[9])      // 21
+	fmt.Printf("%d\n", len(lmap)+16) // 20
+	fmt.Printf("%d\n", lmap[9])      // 21
 
 	lmap[2] = 23
-	fmtPrintf("%d\n", len(lmap)+17) // 22
-	fmtPrintf("%d\n", lmap[2])      // 23
+	fmt.Printf("%d\n", len(lmap)+17) // 22
+	fmt.Printf("%d\n", lmap[2])      // 23
 
 	var lmap2 map[int]int = map[int]int{
 		0: 1,
@@ -68,8 +69,8 @@ func f4() {
 		3: 1,
 	}
 
-	fmtPrintf("%d\n", lmap[7]+7)   // 24
-	fmtPrintf("%d\n", lmap2[0]+24) // 25
+	fmt.Printf("%d\n", lmap[7]+7)   // 24
+	fmt.Printf("%d\n", lmap2[0]+24) // 25
 }
 
 func f5() {
@@ -78,14 +79,14 @@ func f5() {
 		26: "twenty six",
 	}
 
-	fmtPrintf("%s\n", lmap[27])
-	fmtPrintf("%s\n", lmap[26])
+	fmt.Printf("%s\n", lmap[27])
+	fmt.Printf("%s\n", lmap[26])
 
 	lmap[1] = "one"
-	fmtPrintf("%s\n", lmap[1])
+	fmt.Printf("%s\n", lmap[1])
 
 	for _, v := range lmap {
-		fmtPrintf("%s\n", v)
+		fmt.Printf("%s\n", v)
 	}
 }
 
@@ -93,7 +94,7 @@ func f5() {
 func f6() {
 	var m map[int]int = map[int]int{}
 	m[3] = 28
-	fmtPrintf("%d\n", m[3])
+	fmt.Printf("%d\n", m[3])
 }
 
 func main() {

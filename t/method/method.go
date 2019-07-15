@@ -2,14 +2,14 @@ package main
 
 
 func f0() {
-	fmtPrintf(S("%d\n", add(1), 1))
+	fmt.Printf(S("%d\n", add(1), 1))
 }
 
 func f1() {
 	var a myint = 1
 	var b myint
 	b = a.add(2)
-	fmtPrintf("%d\n", b)
+	fmt.Printf("%d\n", b)
 }
 
 func f2() {
@@ -19,7 +19,7 @@ func f2() {
 		age: 4,
 	}
 
-	fmtPrintf("%d\n", u.getAge())
+	fmt.Printf("%d\n", u.getAge())
 }
 
 func f3() {
@@ -27,7 +27,7 @@ func f3() {
 		x: 2,
 		y: 3,
 	}
-	fmtPrintf("%d\n", p.sum())
+	fmt.Printf("%d\n", p.sum())
 }
 
 func main() {

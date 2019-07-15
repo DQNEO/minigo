@@ -4,6 +4,8 @@ import (
 	"os"
 )
 
+import "fmt"
+
 const MYBUFSIZ = 1024
 const O_RDONLY = 0
 
@@ -17,5 +19,5 @@ func main() {
 	fd = open(filename, O_RDONLY)
 	ln := read(fd, buf, MYBUFSIZ)
 	s := buf[0:ln]
-	fmtPrintf("%s", s)
+	fmt.Printf("%s", s)
 }

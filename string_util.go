@@ -7,11 +7,6 @@ import (
 
 type identifier string
 
-func fmtPrintf(format string, a... interface{}) {
-	s := Sprintf(string(format), a...)
-	os.Stdout.Write([]byte(s))
-}
-
 func Sprintf(format string, a... interface{}) string {
 	var args []interface{}
 	for _, x := range a {

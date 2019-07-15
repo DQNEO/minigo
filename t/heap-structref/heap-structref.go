@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 type Hobbit struct {
 	id  int
@@ -19,19 +20,19 @@ func dummy1() {
 		id:  0,
 		age: 4,
 	}
-	fmtPrintf("%d\n", ptr.id) // 0
+	fmt.Printf("%d\n", ptr.id) // 0
 }
 
 func dummy2() {
 	var array [4]int = [...]int{0, 1, 0, 0}
-	fmtPrintf("%d\n", array[1]) // 1
+	fmt.Printf("%d\n", array[1]) // 1
 }
 func f1() {
 	p := return_ptr()
 	dummy1()
 	dummy2()
-	fmtPrintf("%d\n", p.id)  // 2
-	fmtPrintf("%d\n", p.age) // 3
+	fmt.Printf("%d\n", p.id)  // 2
+	fmt.Printf("%d\n", p.age) // 3
 }
 
 func main() {

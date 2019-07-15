@@ -1,12 +1,13 @@
 package main
 
+import "fmt"
 
 func f1() {
 	var a = "abc"
 	var b = "defg"
 	var x string
 	x = concat(a , b)
-	fmtPrintf("%s\n", x)
+	fmt.Printf("%s\n", x)
 }
 
 func f2() {
@@ -14,7 +15,7 @@ func f2() {
 	for i := 0; i < 3; i++ {
 		spaces = concat(spaces, "xx")
 	}
-	fmtPrintf("%s\n", spaces)
+	fmt.Printf("%s\n", spaces)
 }
 
 var seq int = 0
@@ -26,8 +27,8 @@ func foo() string {
 
 func f3() {
 	label := concat3(foo() , foo() , "bar")
-	fmtPrintf("%s\n", label) // "foofoobar"
-	fmtPrintf("%d\n", seq)   // 2
+	fmt.Printf("%s\n", label) // "foofoobar"
+	fmt.Printf("%d\n", seq)   // 2
 }
 
 func main() {

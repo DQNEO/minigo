@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 /*
 type myinterface interface  {
@@ -23,7 +24,7 @@ func f0() {
 }
 
 func fa() {
-	fmtPrintf("%d\n", ga) // => 0
+	fmt.Printf("%d\n", ga) // => 0
 }
 
 /* this is
@@ -37,37 +38,37 @@ block
 */
 
 func fb() {
-	fmtPrintf("%d\n", 1) // this is a comment
-	fmtPrintf("%d\n", 4-2)
-	fmtPrintf("%d\n", 1+1+1) // this is another comment //
-	fmtPrintf("%d\n", 1*2+2)
-	fmtPrintf("%d\n", 2*3-1)
-	fmtPrintf("%d\n", 9-1-2)
+	fmt.Printf("%d\n", 1) // this is a comment
+	fmt.Printf("%d\n", 4-2)
+	fmt.Printf("%d\n", 1+1+1) // this is another comment //
+	fmt.Printf("%d\n", 1*2+2)
+	fmt.Printf("%d\n", 2*3-1)
+	fmt.Printf("%d\n", 9-1-2)
 }
 
 func fc() {
 	var i int
 	i = 7
-	fmtPrintf("%d\n", i)
+	fmt.Printf("%d\n", i)
 }
 
 func fd() {
 	var j int = 2
-	fmtPrintf("%d\n", j*4)
+	fmt.Printf("%d\n", j*4)
 }
 
 func fe() {
 	var a int = 5
 	var b int = 4
-	fmtPrintf("%d\n", a+b)
+	fmt.Printf("%d\n", a+b)
 }
 
 func ff() {
-	//fmtPrintf("%v%v\n", true, false)
+	//fmt.Printf("%v%v\n", true, false)
 }
 
 func fg(a int, b int) {
-	fmtPrintf("%d\n", a+b)
+	fmt.Printf("%d\n", a+b)
 }
 
 var gc int
@@ -75,7 +76,7 @@ var gd int = 10
 var ge = 2
 
 func fh() {
-	fmtPrintf("%d\n", gc+gd+ge)
+	fmt.Printf("%d\n", gc+gd+ge)
 }
 
 const c0 int = 1
@@ -84,13 +85,13 @@ const c1 = 2
 func fi() {
 	const c1 int = 3
 	const c2 = 9
-	fmtPrintf("%d\n", c0+c1+c2)
+	fmt.Printf("%d\n", c0+c1+c2)
 }
 
 var gb int = 14
 
 func f14() {
-	fmtPrintf("%d\n", gb)
+	fmt.Printf("%d\n", gb)
 }
 
 var garbage int
@@ -121,5 +122,5 @@ func main() {
 	fi()
 	f14()
 	f15()
-	fmtPrintf("hello world\n")
+	fmt.Printf("hello world\n")
 }

@@ -1,18 +1,19 @@
 package main
 
+import "fmt"
 
 func receiveVarg(s string, a ...interface{}) {
-	fmtPrintf("-\n")
-	fmtPrintf("%d\n", len(a))
-	fmtPrintf("%s\n", a[0])
-	fmtPrintf("%d\n", a[1])
+	fmt.Printf("-\n")
+	fmt.Printf("%d\n", len(a))
+	fmt.Printf("%s\n", a[0])
+	fmt.Printf("%d\n", a[1])
 }
 
 func receiveIfcSlice(s string, a []interface{}) {
-	fmtPrintf("-\n")
-	fmtPrintf("%d\n", len(a))
-	fmtPrintf("%s\n", a[0])
-	fmtPrintf("%d\n", a[1])
+	fmt.Printf("-\n")
+	fmt.Printf("%d\n", len(a))
+	fmt.Printf("%s\n", a[0])
+	fmt.Printf("%d\n", a[1])
 }
 
 var format string = string("format-%s-%d\n")

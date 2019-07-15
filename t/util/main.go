@@ -1,8 +1,10 @@
 package main
 
+import "fmt"
+
 func f1() {
 	baseName := getBaseNameFromImport([]byte("foo/bar"))
-	fmtPrintf("%s\n", baseName) // bar
+	fmt.Printf("%s\n", baseName) // bar
 }
 
 func main() {

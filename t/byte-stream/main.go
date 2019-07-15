@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 
 func f1() {
 	path := "t/min/min.go"
@@ -14,15 +15,15 @@ func f1() {
 	bs := &_bs
 	len1 := len(bs.source)
 
-	fmtPrintf("%d\n", len1-108) // 1
+	fmt.Printf("%d\n", len1-108) // 1
 
 	var c byte
 	c, _ = bs.get()
-	fmtPrintf("%d\n", c-'p'+2)        // 2
-	fmtPrintf("%d\n", bs.nextIndex+2) // 3
+	fmt.Printf("%d\n", c-'p'+2)        // 2
+	fmt.Printf("%d\n", bs.nextIndex+2) // 3
 	c, _ = bs.get()
-	fmtPrintf("%d\n", c-'a'+4)        // 4
-	fmtPrintf("%d\n", bs.nextIndex+3) // 5
+	fmt.Printf("%d\n", c-'a'+4)        // 4
+	fmt.Printf("%d\n", bs.nextIndex+3) // 5
 }
 
 func main() {

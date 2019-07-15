@@ -1,33 +1,34 @@
 package main
 
+import "fmt"
 
 func f1() {
 	var vbytes []byte
 	var s []byte
 	s = []byte(vbytes)
-	fmtPrintf("%s0\n", s)           // 0
-	fmtPrintf("%d\n", len(vbytes)+1) // 1
-	fmtPrintf("%d\n", len(s)+2)     // 2
+	fmt.Printf("%s0\n", s)           // 0
+	fmt.Printf("%d\n", len(vbytes)+1) // 1
+	fmt.Printf("%d\n", len(s)+2)     // 2
 }
 
 func f2() {
 	var s []byte
-	fmtPrintf("%s3\n", []byte(s))       // 3
-	fmtPrintf("%d\n", len(s)+4) // 4
+	fmt.Printf("%s3\n", []byte(s))       // 3
+	fmt.Printf("%d\n", len(s)+4) // 4
 }
 
 func f3() {
 	var s string = ""
-	fmtPrintf("%s5\n", s)       // 5
-	fmtPrintf("%d\n", len(s)+6) // 6
+	fmt.Printf("%s5\n", s)       // 5
+	fmt.Printf("%d\n", len(s)+6) // 6
 }
 
 func f4() {
 	var s []byte
 	var vbytes []byte
 	vbytes = []byte(s)
-	fmtPrintf("%s7\n", []byte(vbytes)) // 7
-	fmtPrintf("%d\n", len(vbytes)+8)   // 8
+	fmt.Printf("%s7\n", []byte(vbytes)) // 7
+	fmt.Printf("%d\n", len(vbytes)+8)   // 8
 }
 
 func f5() {
@@ -35,9 +36,9 @@ func f5() {
 	var bs []byte
 	bs = []byte(s)
 	if bs == nil {
-		fmtPrintf("9\n")
+		fmt.Printf("9\n")
 	} else {
-		fmtPrintf("ERROR")
+		fmt.Printf("ERROR")
 	}
 }
 

@@ -11,6 +11,12 @@ func Println(s string) {
 	os.Stdout.Write(b)
 }
 
+
+func Printf(format string, a... interface{}) {
+	s := Sprintf(string(format), a...)
+	os.Stdout.Write([]byte(s))
+}
+
 var _fmt_trash int
 func Sprintf(format string, args... interface{}) string {
 	var r []byte
