@@ -4,15 +4,36 @@ import "os"
 
 const MYBUFSIZ = 65536 * 2
 
-func readAll(f *os.File, n int) ([]byte, error) {
+type Buffer struct {
+	bytes []byte
+	buf []byte
+}
+
+func (b *Buffer) Grow(capacity int) {
 	var buf []byte
-	buf = makeSlice(n, n, 24)
-	fid := f.innerFile.fd.Sysfd
+	buf = makeSlice(capacity, capacity, 24)
+	b.buf = buf
+}
+
+func (b *Buffer) ReadFrom(f *os.File) (int, error) {
+	fd := f.innerFile.fd.Sysfd
 	var nread int
-	nread = read(fid, buf, n)
-	var buf2 []byte
-	buf2 = buf[0:nread:nread]
-	return buf2,nil
+	nread = read(fd, b.buf, cap(b.buf))
+	bytes := b.buf[0:nread:nread]
+	b.bytes = bytes
+	return nread, nil
+}
+
+func (b *Buffer) Bytes() []byte {
+	return b.bytes
+}
+
+func readAll(f *os.File, capacity int) ([]byte, error) {
+	var b *Buffer = &Buffer{
+	}
+	b.Grow(capacity)
+	_, err := b.ReadFrom(f)
+	return b.Bytes() ,err
 }
 
 func ReadFile(filenameAsString string) ([]byte, error) {
