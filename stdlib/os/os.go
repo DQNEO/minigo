@@ -12,7 +12,7 @@ var Stderr *File = &File{
 	id: 2,
 }
 
-var AnyFile *File = &File{
+var DummyFile *File = &File{
 	id:0,
 }
 
