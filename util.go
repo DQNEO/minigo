@@ -1,6 +1,8 @@
 package main
 
-import "strings"
+import (
+	"strings"
+)
 
 func getBaseNameFromImport(path string) string {
 	if strings.Contains(path, "/") {

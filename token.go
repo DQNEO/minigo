@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
+
+type identifier string
 
 // https://golang.org/ref/spec#Keywords
 var keywords = []string{
@@ -187,4 +190,23 @@ func (tok *Token) dump() {
 		tok.line, typeToGostring(tok.typ), sval)
 	var b []byte = []byte(s)
 	os.Stderr.Write(b)
+}
+
+
+func Sprintf(format string, a... interface{}) string {
+	var args []interface{}
+	for _, x := range a {
+		var y interface{}
+		switch x.(type) {
+		case identifier: // This case is not reached by 2nd gen compiler
+			var tmpgoident identifier = x.(identifier)
+			var tmpbytes2 []byte = []byte(tmpgoident)
+			y = tmpbytes2
+		default:
+			y = x
+		}
+		args = append(args, y)
+	}
+	a = nil // unset
+	return fmt.Sprintf(format, args...)
 }
