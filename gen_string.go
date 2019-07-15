@@ -39,57 +39,34 @@ func (e *IrExprStringComparison) token() *Token {
 }
 
 func (binop *IrExprStringComparison) emit() {
-	emit("# emitCompareStrings")
+	emit("# IrExprStringComparison")
 	var equal bool
-	op := binop.op
-	switch op {
-	case "<":
-		TBI(binop.token(), "")
-	case ">":
-		TBI(binop.token(), "")
-	case "<=":
-		TBI(binop.token(), "")
-	case ">=":
-		TBI(binop.token(), "")
+	switch binop.op {
 	case "!=":
 		equal = false
 	case "==":
 		equal = true
+	default:
+		TBI(binop.token(), "")
 	}
 
 	// 3rd arg
 	var eEqual Expr
 	if equal {
+		// true
 		eEqual = &ExprNumberLiteral{
 			val:1,
 		}
 	} else {
+		// false
 		eEqual = &ExprNumberLiteral{
 			val:0,
 		}
 	}
 
-	left := &IrExprConversion{
-		tok: binop.cstringLeft.token(),
-		toGtype: &Gtype{
-			kind: G_SLICE,
-			elementType:gByte,
-		},
-		arg: binop.cstringLeft,
-	}
-
-	right := &IrExprConversion{
-		tok: binop.cstringRight.token(),
-		toGtype: &Gtype{
-			kind: G_SLICE,
-			elementType:gByte,
-		},
-		arg: binop.cstringRight,
-	}
-
 	var args []Expr
-	args = append(args, left)
-	args = append(args, right)
+	args = append(args, binop.left)
+	args = append(args, binop.right)
 	args = append(args, eEqual)
 
 	var params []*ExprVariable
@@ -112,7 +89,7 @@ func (binop *IrExprStringComparison) emit() {
 }
 
 func emitGoStringsEqualFromStack() {
-	emit("LOAD_NUMBER 1")
+	emit("LOAD_NUMBER 1 # true")
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{

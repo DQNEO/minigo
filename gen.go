@@ -170,12 +170,20 @@ func emitIncrDecl(inst string, operand Expr) {
 	emitSavePrimitive(left)
 }
 
-
 func (binop *ExprBinop) emitComp() {
 	emit("# emitComp")
 	assert(binop.left != nil, binop.token(), "should not be nil")
 
-	assert(!binop.left.getGtype().isString(), binop.token(), "should not be string")
+	if binop.left.getGtype().isString() {
+		e := &IrExprStringComparison{
+			tok:binop.token(),
+			op : binop.op,
+			left: binop.left,
+			right: binop.right,
+		}
+		e.emit()
+		return
+	}
 
 
 	var instruction string

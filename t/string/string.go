@@ -25,7 +25,7 @@ var gfoo string = string("foo")
 
 func f3() {
 	foo := "foo"
-	if eq("foo", "foo") {
+	if "foo" == "foo" {
 		fmt.Printf("1\n")
 	}
 	if eq(foo ,foo) {

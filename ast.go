@@ -114,10 +114,10 @@ type ExprBinop struct {
 }
 
 type IrExprStringComparison struct {
-	tok          *Token
-	op           string
-	cstringLeft  Expr
-	cstringRight Expr
+	tok   *Token
+	op    string
+	left  Expr
+	right Expr
 }
 
 type ExprUop struct {
