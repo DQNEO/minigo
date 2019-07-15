@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func f1() {
-	var s []byte = []byte("543210")
+	var s string = "543210"
 	var c byte = s[5]
 	fmt.Printf("%c\n", c)
 	fmt.Printf("%c\n", s[4])

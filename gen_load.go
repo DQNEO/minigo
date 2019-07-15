@@ -344,13 +344,13 @@ func (e *ExprIndex) emitAddress() {
 func (e *ExprIndex) emitOffsetLoad(offset int) {
 	emit("# ExprIndex.emitOffsetLoad")
 	switch e.collection.getGtype().getKind() {
-	case G_ARRAY, G_SLICE:
+	case G_ARRAY, G_SLICE, G_STRING:
 		e.loadArrayOrSliceIndex(offset)
 		return
 	case G_MAP:
 		loadMapIndexExpr(e)
 	default:
-		TBI(e.collection.token(), "unable to handle %s", e.collection.getGtype().String())
+		TBI(e.collection.token(), "unable to handle kind %d", e.collection.getGtype().String())
 	}
 }
 

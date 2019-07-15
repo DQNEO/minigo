@@ -7,10 +7,12 @@ var sInterface = Gtype{kind: G_INTERFACE, size: sizeOfInterface}
 var gInterface = &sInterface
 var sInt = Gtype{kind: G_INT, size: 8}
 var gInt = &sInt
-var gByte = &Gtype{kind: G_BYTE, size: 1}
+var sByte = Gtype{kind: G_BYTE, size: 1}
+var gByte = &sByte
 var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
 	kind: G_STRING,
+	elementType:&sByte,
 }
 
 var builtinTypesAsString []string = []string{
