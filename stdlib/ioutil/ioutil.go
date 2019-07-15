@@ -17,7 +17,7 @@ func ReadFile(filenameAsString string) ([]byte, error) {
 	var n int = MYBUFSIZ
 
 	var nread int
-	nread = read(f.id, buf, n)
+	nread = read(f.innerFile.id, buf, n)
 	var buf2 []byte
 	buf2 = buf[0:nread:nread]
 	return buf2,nil

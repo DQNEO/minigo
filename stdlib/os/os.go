@@ -4,23 +4,38 @@ import "syscall"
 
 const O_RDONLY = 0
 
+var sstdout file = file{
+	id :1,
+}
+
+var sstderr file = file{
+	id :2,
+}
+
 var Stdout *File = &File{
-	id: 1,
+	innerFile: &sstdout,
 }
 
 var Stderr *File = &File{
-	id: 2,
+	innerFile: &sstderr,
+}
+
+type file struct {
+	id int
 }
 
 // File represents an open file descriptor.
 type File struct {
-	id int
+	innerFile *file
 }
 
 func openFileNolog(name string, flag int, perm int) (*File, error) {
 	fd, err := syscall.Open(name, flag, perm)
-	f := &File{
+	fl := &file{
 		id:fd,
+	}
+	f := &File{
+		innerFile: fl,
 	}
 
 	return f, err
@@ -35,7 +50,7 @@ func Open(name string) (*File, error) {
 }
 
 func (f *File) write(b []byte) (int, error) {
-	var fid int = f.id
+	var fid int = f.innerFile.id
 	var n int
 	var addr *byte = &b[0]
 	n = write(fid, addr, len(b))
