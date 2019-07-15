@@ -179,7 +179,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 	return z
 }
 
-func eqGostringInternal(a []byte, b []byte) bool {
+func eq(a []byte, b []byte) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -192,10 +192,10 @@ func eqGostringInternal(a []byte, b []byte) bool {
 	return true
 }
 
-func cmpStrings(a []byte, b []byte, eq bool) bool {
+func cmpStrings(a []byte, b []byte, flag bool) bool {
 	var ret bool
-	ret = eqGostringInternal(a,b)
-	if eq {
+	ret = eq(a,b)
+	if flag {
 		return ret
 	} else {
 		return !ret
