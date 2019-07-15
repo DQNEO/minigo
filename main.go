@@ -69,10 +69,9 @@ func parseOpts(args []string) []string {
 func main() {
 	// parsing arguments
 	var sourceFiles []string
-	osArgs := os.Args
-	assert(len(osArgs) > 0, nil, "os.Args should not be empty")
+	assert(len(os.Args) > 0, nil, "os.Args should not be empty")
 	if len(os.Args) > 1 {
-		sourceFiles = parseOpts(osArgs[1:])
+		sourceFiles = parseOpts(os.Args[1:])
 	}
 
 	if len(sourceFiles) == 0 {
