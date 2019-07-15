@@ -229,9 +229,11 @@ func (e *IrStringConcat) emit() {
 
 	var params []*ExprVariable
 
-	// @TODO get params by DeclFunc dynamically
-	params = append(params, &ExprVariable{}) // a []byte
-	params = append(params, &ExprVariable{}) // b []byte
+	var dummyVariable = &ExprVariable{
+		isVariadic:false,
+	}
+	params = append(params, dummyVariable) // 1st arg
+	params = append(params, dummyVariable) // 2nd arg
 
 	// left + right
 	call := &IrStaticCall{
