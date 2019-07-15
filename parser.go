@@ -773,6 +773,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	if p.isGlobal() {
 		variable = &ExprVariable{
 			tok:      p.lastToken(),
+			pkg : p.packageName,
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
@@ -920,7 +921,6 @@ func (p *parser) parseVarDecl() *DeclVar {
 	//p.expect(";")
 
 	variable := p.newVariable(newName, typ)
-	variable.pkg = p.packageName
 	r := &DeclVar{
 		tok: ptok,
 		pkg: p.packageName,
