@@ -50,7 +50,7 @@ var builtinAppend = &DeclFunc{
 }
 
 var builtinMakeSlice = &DeclFunc{
-	rettypes: []*Gtype{&sBuiltinRunTimeArgsRettypes1},
+	rettypes: []*Gtype{&sSliceType},
 }
 
 var builtinDumpSlice = &DeclFunc{
@@ -69,7 +69,7 @@ var builtinAsComment = &DeclFunc{
 	rettypes: []*Gtype{},
 }
 
-var sBuiltinRunTimeArgsRettypes1 Gtype = Gtype{
+var sSliceType Gtype = Gtype{
 	kind: G_SLICE,
 	size: IntSize * 3,
 	elementType: &Gtype{
