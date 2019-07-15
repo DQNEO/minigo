@@ -19,7 +19,7 @@ var resolveOnly = false
 var emitPosition = false
 
 func printVersion() {
-	fmt.Println("minigo 0.1.0")
+	fmt.Println("minigo 0.2.1")
 	fmt.Println("Copyright (C) 2019 @DQNEO")
 }
 
