@@ -6,6 +6,8 @@
 
 package main
 
+import "os"
+
 var offset0 int = 0
 var offset8 int = 8
 var offset16 int = 16
@@ -16,6 +18,12 @@ const sliceWidth int = 3
 const interfaceWidth int = 3
 const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
+
+func writeln(s []byte) {
+	var b []byte = []byte(s)
+	b = append(b, '\n')
+	os.Stdout.Write(b)
+}
 
 func emitNewline() {
 	writePos()

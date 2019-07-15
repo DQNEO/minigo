@@ -30,9 +30,3 @@ func write(s []byte) {
 	var b []byte = []byte(s)
 	os.Stdout.Write(b)
 }
-
-func writeln(s []byte) {
-	var b []byte = []byte(s)
-	b = append(b, '\n')
-	os.Stdout.Write(b)
-}
