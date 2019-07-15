@@ -10,7 +10,7 @@ func readAll(f *os.File, capacity int) ([]byte, error) {
 	var b *bytes.Buffer = &bytes.Buffer{
 	}
 	b.Grow(capacity)
-	fd := f.innerFile.fd.Sysfd
+	fd := f.Fd()
 	_, err := b.ReadFrom(fd)
 	return b.Bytes() ,err
 }

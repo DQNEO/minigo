@@ -40,6 +40,10 @@ type File struct {
 	innerFile *file
 }
 
+func (f *File) Fd() int {
+	return f.innerFile.fd.Sysfd
+}
+
 func openFileNolog(name string, flag int, perm int) (*File, error) {
 	fid, err := syscall.Open(name, flag, perm)
 	fl := &file{
