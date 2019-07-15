@@ -34,8 +34,32 @@ func (ast *ExprStringLiteral) emit() {
 	}
 }
 
-func (e *IrExprStringComparison) token() *Token {
-	return e.tok
+func (e *IrStringConcat) emit() {
+	emit("# IrExprStringComparison")
+	var args []Expr
+	args = append(args, e.left)
+	args = append(args, e.right)
+
+	var params []*ExprVariable
+
+	var dummyVariable = &ExprVariable{
+		isVariadic:false,
+	}
+	params = append(params, dummyVariable) // 1st arg
+	params = append(params, dummyVariable) // 2nd arg
+
+	// left + right
+	call := &IrStaticCall{
+		tok: e.token(),
+		symbol: "iruntime.concat",
+		isMethodCall:false,
+		args: args,
+		callee: &DeclFunc{
+			params: params,
+		},
+	}
+	call.emit()
+
 }
 
 func (binop *IrExprStringComparison) emit() {
@@ -65,11 +89,14 @@ func (binop *IrExprStringComparison) emit() {
 
 	var params []*ExprVariable
 
+	var dummyVariable = &ExprVariable{
+		isVariadic:false,
+	}
 	// func eq(a string, b string, eq bool) bool
 	// @TODO get params by DeclFunc dynamically
-	params = append(params, &ExprVariable{}) // a []byte
-	params = append(params, &ExprVariable{}) // b []byte
-	params = append(params, &ExprVariable{}) // eq bool
+	params = append(params, dummyVariable) // a
+	params = append(params, dummyVariable) // b
+	params = append(params, dummyVariable) // eq
 	// eq(left, right, eFlag)
 	call := &IrStaticCall{
 		tok: binop.token(),

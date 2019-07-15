@@ -507,6 +507,7 @@ func (node *ExprLen) token() *Token                     { return node.tok }
 func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
 func (e *IrStringConcat) token() *Token                 { return e.tok }
+func (e *IrExprStringComparison) token() *Token         { return e.tok }
 
 
 // Internal node made by sema

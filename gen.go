@@ -221,34 +221,6 @@ func (binop *ExprBinop) emitComp() {
 	emit_comp_primitive(instruction, binop)
 }
 
-func (e *IrStringConcat) emit() {
-	emit("# IrExprStringComparison")
-	var args []Expr
-	args = append(args, e.left)
-	args = append(args, e.right)
-
-	var params []*ExprVariable
-
-	var dummyVariable = &ExprVariable{
-		isVariadic:false,
-	}
-	params = append(params, dummyVariable) // 1st arg
-	params = append(params, dummyVariable) // 2nd arg
-
-	// left + right
-	call := &IrStaticCall{
-		tok: e.token(),
-		symbol: "iruntime.concat",
-		isMethodCall:false,
-		args: args,
-		callee: &DeclFunc{
-			params: params,
-		},
-	}
-	call.emit()
-
-}
-
 func (ast *ExprBinop) emit() {
 	if ast.op  ==  "+" && ast.left.getGtype().isString() {
 		var e Expr = &IrStringConcat{
