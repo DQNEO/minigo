@@ -34,12 +34,18 @@ func Open(name string) (*File, error) {
 	return OpenFile(name, O_RDONLY, 0)
 }
 
-func (f *File) Write(b []byte) (int, error) {
+func (f *File) write(b []byte) (int, error) {
 	var fid int = f.id
 	var n int
 	var addr *byte = &b[0]
 	n = write(fid, addr, len(b))
 	return n,nil
+}
+
+// Write writes len(b) bytes to the File.
+func (f *File) Write(b []byte) (int, error) {
+	n, err := f.write(b)
+	return n, err
 }
 
 func Exit(i int) {
