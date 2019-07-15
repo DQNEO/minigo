@@ -5,10 +5,10 @@ func BytePtrFromString(s string) *byte {
 	return r
 }
 
-func Open(name string, flag int, perm int) (int, error) {
+func Open(path string, flag int, perm int) (int, error) {
 	var fd int
-	var pchar *byte = BytePtrFromString(name)
-	fd = open(pchar, flag)
+	var _p0 *byte
+	_p0 = BytePtrFromString(path)
+	fd = open(_p0, flag)
 	return fd, nil
 }
-
