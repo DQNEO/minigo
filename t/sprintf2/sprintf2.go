@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func receiveSliceInVariadic(format []byte, a... interface{})  {
+func receiveSliceInVariadic(a... interface{})  {
 	var i0 interface{} = a[0]
 	var b []byte
 	var ok bool
@@ -17,7 +17,7 @@ func receiveSliceInVariadic(format []byte, a... interface{})  {
 }
 
 func f0() {
-	receiveSliceInVariadic([]byte("%s\n"), []byte("abc"))
+	receiveSliceInVariadic([]byte("abc"))
 }
 
 func Write(s string) {
