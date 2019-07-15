@@ -24,7 +24,6 @@ func readAll(f *os.File, capacity int) ([]byte, error) {
 func ReadFile(filename string) ([]byte, error) {
 	var err error
 
-	// Currently, there is no way to declare type of other package, so Let it infer
 	var f *os.File
 	f, err = os.Open(filename)
 	var n int = MYBUFSIZ
