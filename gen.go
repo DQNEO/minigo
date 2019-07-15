@@ -530,19 +530,7 @@ func (e *ExprVaArg) emit() {
 
 func (e *IrExprConversion) emit() {
 	emit("# IrExprConversion.emit()")
-	if  e.arg.getGtype().isBytesSlice() && e.toGtype.isString() {
-		// cstring(bytes)
-		emit("# convert slice to string")
-		labelEnd := makeLabel()
-		e.arg.emit()    // load slice
-		emit("TEST_IT") // check if ptr is nil
-		emit("jne %s # exit if not nil", labelEnd)
-		emit("# if nil then")
-		emitEmptyString()
-		emit("%s:", labelEnd)
-	} else {
-		e.arg.emit()
-	}
+	e.arg.emit()
 }
 
 func (e *ExprStructLiteral) emit() {
