@@ -19,15 +19,19 @@ type File struct {
 	id int
 }
 
-func OpenFile(name string, mode int, perm int) (*File, error) {
+func openFileNolog(name string, flag int, perm int) (*File, error) {
 	var fd int
 	var pchar *byte = name
-	fd = open(pchar, mode)
+	fd = open(pchar, flag)
 	f := &File{
 		id:fd,
 	}
 
 	return f, nil
+}
+
+func OpenFile(name string, flag int, perm int) (*File, error) {
+	return openFileNolog(name, flag, perm)
 }
 
 func Open(name string) (*File, error) {
