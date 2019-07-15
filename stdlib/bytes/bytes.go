@@ -13,7 +13,9 @@ func (b *Buffer) Grow(capacity int) {
 
 func (b *Buffer) ReadFrom(fd int) (int, error) {
 	var nread int
-	nread = read(fd, b.buf, cap(b.buf))
+	var ptr *byte
+	ptr = &b.buf[0]
+	nread = read(fd, ptr, cap(b.buf))
 	bytes := b.buf[0:nread:nread]
 	b.bytes = bytes
 	return nread, nil
