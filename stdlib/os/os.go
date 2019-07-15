@@ -61,12 +61,20 @@ func Open(name string) (*File, error) {
 	return OpenFile(name, O_RDONLY, 0)
 }
 
-func (f *File) write(b []byte) (int, error) {
-	var fid int = f.innerFile.fd.id
+func (fd *PollFD) Write(b []byte) (int, error) {
+	var fid int = fd.id
 	var n int
 	var addr *byte = &b[0]
 	n = write(fid, addr, len(b))
 	return n,nil
+}
+
+func (f *File) write(b []byte) (int, error) {
+	fd := f.innerFile.fd
+	var n int
+	var err error
+	n, err = fd.Write(b)
+	return n, err
 }
 
 // Write writes len(b) bytes to the File.
