@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 import "strings"
 
 // builtin string
@@ -148,9 +149,10 @@ func emitMainFunc(importOS bool) {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	emit("mov %%rsi, libcArgs(%%rip)")
-	emit("mov %%rdi, libcArgs+8(%%rip)")
-	emit("mov %%rdi, libcArgs+16(%%rip)")
+	symbolArgs := fmt.Sprintf("%s.%s", globalPrefix, "libcArgs")
+	emit("mov %%rsi, %s(%%rip)", symbolArgs)
+	emit("mov %%rdi, %s+8(%%rip)", symbolArgs)
+	emit("mov %%rdi, %s+16(%%rip)", symbolArgs)
 	emit("mov $0, %%rsi")
 	emit("mov $0, %%rdi")
 

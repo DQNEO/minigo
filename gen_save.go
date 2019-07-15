@@ -81,7 +81,7 @@ func (variable *ExprVariable) emitOffsetSavePrimitive(size int, offset int, forc
 		return
 	}
 	if variable.isGlobal {
-		emit("STORE_%d_TO_GLOBAL %s %d # %s ", size, variable.varname, offset, variable.varname)
+		emit("STORE_%d_TO_GLOBAL %s %d # %s ", size, variable.globalSymbol(), offset, variable.varname)
 	} else {
 		emit("STORE_%d_TO_LOCAL %d+%d # %s", size, variable.offset, offset, variable.varname)
 	}

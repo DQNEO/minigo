@@ -15,7 +15,7 @@ func loadStructField(strct Expr, field *Gtype, offset int) {
 			variable.emitAddress(field.offset)
 		} else {
 			if variable.isGlobal {
-				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.varname, field.offset, offset)
+				emit("LOAD_8_FROM_GLOBAL %s, %d+%d", variable.globalSymbol(), field.offset, offset)
 			} else {
 				emit("LOAD_8_FROM_LOCAL %d+%d+%d", variable.offset, field.offset, offset)
 			}
@@ -85,14 +85,15 @@ func (e *ExprStructField) emitOffsetLoad(size int, offset int) {
 func (ast *ExprVariable) emit() {
 	emit("# load variable \"%s\" %s", ast.varname, ast.getGtype().String())
 	if ast.isGlobal {
+		symbol := ast.globalSymbol()
 		if ast.gtype.getKind() == G_ARRAY {
 			ast.emitAddress(0)
 		} else if ast.getGtype().is24WidthType() {
-			emit("LOAD_24_FROM_GLOBAL %s", ast.varname)
+			emit("LOAD_24_FROM_GLOBAL %s", symbol)
 		} else if ast.getGtype().getSize() == 1 {
-			emit("LOAD_1_FROM_GLOBAL_CAST %s", ast.varname)
+			emit("LOAD_1_FROM_GLOBAL_CAST %s", symbol)
 		} else {
-			emit("LOAD_8_FROM_GLOBAL %s", ast.varname)
+			emit("LOAD_8_FROM_GLOBAL %s", symbol)
 		}
 
 	} else {
@@ -113,7 +114,7 @@ func (ast *ExprVariable) emit() {
 
 func (variable *ExprVariable) emitAddress(offset int) {
 	if variable.isGlobal {
-		emit("LOAD_GLOBAL_ADDR %s, %d", variable.varname, offset)
+		emit("LOAD_GLOBAL_ADDR %s, %d", variable.globalSymbol(), offset)
 	} else {
 		if variable.offset == 0 {
 			errorft(variable.token(), "offset should not be zero for localvar %s", variable.varname)
@@ -202,7 +203,7 @@ func (ast *ExprUop) emit() {
 func (variable *ExprVariable) emitOffsetLoad(size int, offset int) {
 	assert(0 <= size && size <= 8, variable.token(), "invalid size")
 	if variable.isGlobal {
-		emit("LOAD_%d_FROM_GLOBAL %s %d", size, variable.varname, offset)
+		emit("LOAD_%d_FROM_GLOBAL %s %d", size, variable.globalSymbol(), offset)
 	} else {
 		emit("LOAD_%d_FROM_LOCAL %d+%d", size, variable.offset, offset)
 	}

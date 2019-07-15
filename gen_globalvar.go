@@ -1,11 +1,20 @@
 package main
 
+import "fmt"
+
+const globalPrefix string = "_gbl_"
+
+func (vr *ExprVariable) globalSymbol() string {
+	assert(vr.isGlobal, vr.token(), " Not global var")
+	return fmt.Sprintf("%s.%s", globalPrefix, string(vr.varname))
+}
+
 // gloabal var which should be initialized with zeros
 // https://en.wikipedia.org/wiki/.bss
 func (decl *DeclVar) emitBss() {
 	emit(".data")
 	// https://sourceware.org/binutils/docs-2.30/as/Lcomm.html#Lcomm
-	emit(".lcomm %s, %d", decl.variable.varname, decl.variable.getGtype().getSize())
+	emit(".lcomm %s, %d", decl.variable.globalSymbol(), decl.variable.getGtype().getSize())
 }
 
 func (decl *DeclVar) emitData() {
@@ -13,7 +22,7 @@ func (decl *DeclVar) emitData() {
 	gtype := decl.variable.gtype
 	right := decl.initval
 
-	emitWithoutIndent("%s: # gtype=%s", decl.variable.varname, gtype.String())
+	emitWithoutIndent("%s: # gtype=%s", decl.variable.globalSymbol(), gtype.String())
 	emitWithoutIndent("# right.gtype = %s", right.getGtype().String())
 	emitWithoutIndent(".data 0")
 	doEmitData(ptok, right.getGtype(), right, "", 0)
@@ -58,7 +67,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 						operand := unwrapRel(uop.operand)
 						vr, ok := operand.(*ExprVariable)
 						assert(ok, uop.token(), "only variable is allowed")
-						emit(".quad %s # %s %s", vr.varname, value.getGtype().String(), selector)
+						emit(".quad %s # %s %s", vr.globalSymbol(), value.getGtype().String(), selector)
 					case *ExprVariable:
 						assert(false, value.token(), "variable here is not allowed")
 					default:
@@ -182,7 +191,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			vr, ok := operand.(*ExprVariable)
 			if ok {
 				assert(vr.isGlobal, value.token(), "operand should be a global variable")
-				emit(".quad %s", vr.varname)
+				emit(".quad %s", vr.globalSymbol())
 			} else {
 				// var gv = &Struct{_}
 				emitDataAddr(operand, depth)
@@ -204,7 +213,7 @@ func emitDataAddr(operand Expr, depth int) {
 }
 
 func (decl *DeclVar) emitGlobal() {
-	emitWithoutIndent("# emitGlobal for %s", decl.variable.varname)
+	emitWithoutIndent("# emitGlobal for %s", decl.variable.globalSymbol())
 	assertNotNil(decl.variable.gtype != nil, nil)
 
 	if decl.initval == nil {
