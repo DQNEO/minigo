@@ -50,7 +50,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           identifier(""),
+		name:           identifier("iruntime"),
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
