@@ -1,5 +1,7 @@
 package os
 
+import "syscall"
+
 const O_RDONLY = 0
 
 var Stdout *File = &File{
@@ -20,14 +22,12 @@ type File struct {
 }
 
 func openFileNolog(name string, flag int, perm int) (*File, error) {
-	var fd int
-	var pchar *byte = name
-	fd = open(pchar, flag)
+	fd, err := syscall.Open(name, flag, perm)
 	f := &File{
 		id:fd,
 	}
 
-	return f, nil
+	return f, err
 }
 
 func OpenFile(name string, flag int, perm int) (*File, error) {
