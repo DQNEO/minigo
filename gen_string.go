@@ -51,31 +51,26 @@ func (binop *IrExprStringComparison) emit() {
 	}
 
 	// 3rd arg
-	var eEqual Expr
+	var eFlag Expr
 	if equal {
-		// true
-		eEqual = &ExprNumberLiteral{
-			val:1,
-		}
+		eFlag = eTrue
 	} else {
-		// false
-		eEqual = &ExprNumberLiteral{
-			val:0,
-		}
+		eFlag = eFalse
 	}
 
 	var args []Expr
 	args = append(args, binop.left)
 	args = append(args, binop.right)
-	args = append(args, eEqual)
+	args = append(args, eFlag)
 
 	var params []*ExprVariable
-	// func eq(a []byte, b []byte, eq bool) bool
+
+	// func eq(a string, b string, eq bool) bool
 	// @TODO get params by DeclFunc dynamically
 	params = append(params, &ExprVariable{}) // a []byte
 	params = append(params, &ExprVariable{}) // b []byte
 	params = append(params, &ExprVariable{}) // eq bool
-	// eq(left, right, eEqual)
+	// eq(left, right, eFlag)
 	call := &IrStaticCall{
 		tok: binop.token(),
 		symbol: "iruntime.cmpStrings",

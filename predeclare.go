@@ -14,6 +14,10 @@ var gString = &Gtype{
 	kind: G_STRING,
 	elementType:&sByte,
 }
+var sTrue = ExprNumberLiteral{val: 1}
+var sFalse = ExprNumberLiteral{val: 0}
+var eTrue = &sTrue
+var eFalse = &sFalse
 
 var builtinTypesAsString []string = []string{
 	"bool",
@@ -152,12 +156,12 @@ func predeclareConsts(universe *Scope) {
 	universe.setConst(identifier("true"), &ExprConstVariable{
 		name:  identifier("true"),
 		gtype: gBool,
-		val:   &ExprNumberLiteral{val: 1},
+		val:   eTrue,
 	})
 	universe.setConst(identifier("false"), &ExprConstVariable{
 		name:  identifier("false"),
 		gtype: gBool,
-		val:   &ExprNumberLiteral{val: 0},
+		val:   eFalse,
 	})
 
 	universe.setConst(identifier("iota"), eIota)
