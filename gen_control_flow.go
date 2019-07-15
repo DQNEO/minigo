@@ -241,9 +241,9 @@ func (f *StmtFor) convert() Stmt {
 	l2 := makeLabel()
 	l3 := makeLabel()
 
+	f.labels.labelBegin = l1
+
 	lbls := f.labels
-	// @FIXME:  f.labels.labelBegin = l1  does not work!!!
-	lbls.labelBegin = l1
 	lbls.labelEndBlock = l2
 	lbls.labelEndLoop = l3
 
