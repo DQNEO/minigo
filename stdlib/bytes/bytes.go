@@ -31,11 +31,14 @@ type BufferFile struct {
 	fd int
 }
 
+func (f *BufferFile) Fd() int {
+	return f.fd
+}
 
 // Read implements io.Reader
 func (f *BufferFile) Read(p []byte) (int, error) {
 	//fd := f.innerFile.fd
-	fd := f.fd
+	fd := f.Fd()
 	var ptr *byte
 	ptr = &p[0]
 	var nread int
