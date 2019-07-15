@@ -20,44 +20,47 @@ func f0() {
 	receiveSliceInVariadic([]byte("%s\n"), []byte("abc"))
 }
 
+func Write(s string) {
+	os.Stdout.Write([]byte(s))
+}
 func f1() {
-	var b []byte
-	b = Sprintf([]byte("hello\n"))
-	os.Stdout.Write(b)
+	var b string
+	b = fmt.Sprintf("hello\n")
+	Write(b)
 
-	b = Sprintf([]byte("%s\n"), []byte("world"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("%s\n", "world")
+	Write(b)
 
-	b = Sprintf([]byte("%s\n"), []byte("world"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("%s\n", "world")
+	Write(b)
 
-	b = Sprintf([]byte("left %s right\n"), []byte("center"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("left %s right\n", "center")
+	Write(b)
 
-	b = Sprintf([]byte("%s center right\n"), []byte("left"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("%s center right\n", "left")
+	Write(b)
 
-	b = Sprintf([]byte("left center %s"), []byte("right\n"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("left center %s", "right\n")
+	Write(b)
 
-	b = Sprintf([]byte("%s center %s\n"), []byte("left"), []byte("right"))
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("%s center %s\n", "left", "right")
+	Write(b)
 
 	var i int
 
 	i = 123
-	b = Sprintf([]byte("123=%d\n"), i)
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("123=%d\n", i)
+	Write(b)
 
 	i = 4567
-	b = Sprintf([]byte("%s=%d\n"), []byte("4567"), i)
-	os.Stdout.Write(b)
+	b = fmt.Sprintf("%s=%d\n", "4567", i)
+	Write(b)
 }
 
 func f2() {
-	var b []byte
-	b = Sprintf([]byte("push %%rax\n"))
-	os.Stdout.Write(b)
+	var b string
+	b = fmt.Sprintf("push %%rax\n")
+	Write(b)
 }
 
 

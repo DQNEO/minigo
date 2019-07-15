@@ -2,10 +2,11 @@ package main
 
 import (
 	"os"
+	"fmt"
 )
 
 func myPrintf(format string, a []interface{}) {
-	var s string = Sprintf(string(format), a...)
+	var s string = fmt.Sprintf(string(format), a...)
 	os.Stdout.Write([]byte(s))
 }
 
@@ -89,7 +90,7 @@ func test_dumpToken() {
 	var ifc2 interface{} = s2
 	ifcs = append(ifcs, ifc1)
 	ifcs = append(ifcs, ifc2)
-	b := Sprintf(string(format), ifcs...)
+	b := fmt.Sprintf(string(format), ifcs...)
 	os.Stdout.Write([]byte(b))
 }
 
