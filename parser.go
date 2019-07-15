@@ -920,6 +920,7 @@ func (p *parser) parseVarDecl() *DeclVar {
 	//p.expect(";")
 
 	variable := p.newVariable(newName, typ)
+	variable.pkg = p.packageName
 	r := &DeclVar{
 		tok: ptok,
 		pkg: p.packageName,

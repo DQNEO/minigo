@@ -149,7 +149,7 @@ func emitMainFunc(importOS bool) {
 	emit("push %%rbp")
 	emit("mov %%rsp, %%rbp")
 
-	symbolArgs := fmt.Sprintf("%s.%s", globalPrefix, "libcArgs")
+	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "libcArgs")
 	emit("mov %%rsi, %s(%%rip)", symbolArgs)
 	emit("mov %%rdi, %s+8(%%rip)", symbolArgs)
 	emit("mov %%rdi, %s+16(%%rip)", symbolArgs)

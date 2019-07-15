@@ -2,11 +2,9 @@ package main
 
 import "fmt"
 
-const globalPrefix string = "_gbl_"
-
 func (vr *ExprVariable) globalSymbol() string {
 	assert(vr.isGlobal, vr.token(), " Not global var")
-	return fmt.Sprintf("%s.%s", globalPrefix, string(vr.varname))
+	return fmt.Sprintf("%s.%s", string(vr.pkg), string(vr.varname))
 }
 
 // gloabal var which should be initialized with zeros

@@ -105,6 +105,7 @@ type ExprStringLiteral struct {
 // local or global variable
 type ExprVariable struct {
 	tok        *Token
+	pkg        identifier
 	varname    identifier
 	gtype      *Gtype
 	offset     int // for local variable
