@@ -10,8 +10,7 @@ func ReadFile(filenameAsString string) ([]byte, error) {
 	var err error
 
 	// Currently, there is no way to declare type of other package, so Let it infer
-	f := &os.File{}
-
+	var f *os.File
 	f, err = os.Open(filenameAsString)
 
 	var n int = MYBUFSIZ
