@@ -6,14 +6,14 @@ func f1() {
 	var a = "abc"
 	var b = "defg"
 	var x string
-	x = concat(a , b)
+	x = a + b
 	fmt.Printf("%s\n", x)
 }
 
 func f2() {
 	spaces := "> "
 	for i := 0; i < 3; i++ {
-		spaces = concat(spaces, "xx")
+		spaces = spaces + "xx"
 	}
 	fmt.Printf("%s\n", spaces)
 }
@@ -26,7 +26,7 @@ func foo() string {
 }
 
 func f3() {
-	label := concat3(foo() , foo() , "bar")
+	label := foo() + foo() + "bar"
 	fmt.Printf("%s\n", label) // "foofoobar"
 	fmt.Printf("%d\n", seq)   // 2
 }
