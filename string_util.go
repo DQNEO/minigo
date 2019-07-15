@@ -36,10 +36,6 @@ func write(s []byte) {
 	os.Stdout.Write(b)
 }
 
-func fmtPrintln(s string) {
-	writeln([]byte(s))
-}
-
 func writeln(s []byte) {
 	var b []byte = []byte(s)
 	b = append(b, '\n')

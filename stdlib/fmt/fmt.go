@@ -1,7 +1,15 @@
 package fmt
 
-import "strconv"
+import (
+	"strconv"
+	"os"
+)
 
+func Println(s string) {
+	var b []byte = []byte(s)
+	b = append(b, '\n')
+	os.Stdout.Write(b)
+}
 
 var _fmt_trash int
 func Sprintf(format string, args... interface{}) string {
