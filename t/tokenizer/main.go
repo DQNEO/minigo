@@ -24,7 +24,7 @@ func f4() {
 	path := "t/min/min.go"
 	bs := NewByteStreamFromFile(path)
 	tokens := Tokenize(bs)
-	fmt.Printf("%d\n", len(tokens)) // 26
+	fmt.Printf("%d\n", len(tokens))
 	fmt.Printf("----------\n")
 	// disable befow for now
 	return
