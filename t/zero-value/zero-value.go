@@ -43,7 +43,7 @@ func primitives() {
 	fmt.Printf("%d\n", i+15) // 0
 	var b byte
 
-	var c int = b+16
+	var c int = b + 16
 	fmt.Printf("%d\n", c) // 0
 
 	var bol bool

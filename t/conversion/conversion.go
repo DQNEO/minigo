@@ -6,15 +6,15 @@ func f1() {
 	var vbytes []byte
 	var s []byte
 	s = []byte(vbytes)
-	fmt.Printf("%s0\n", s)           // 0
+	fmt.Printf("%s0\n", s)            // 0
 	fmt.Printf("%d\n", len(vbytes)+1) // 1
-	fmt.Printf("%d\n", len(s)+2)     // 2
+	fmt.Printf("%d\n", len(s)+2)      // 2
 }
 
 func f2() {
 	var s []byte
-	fmt.Printf("%s3\n", []byte(s))       // 3
-	fmt.Printf("%d\n", len(s)+4) // 4
+	fmt.Printf("%s3\n", []byte(s)) // 3
+	fmt.Printf("%d\n", len(s)+4)   // 4
 }
 
 func f3() {

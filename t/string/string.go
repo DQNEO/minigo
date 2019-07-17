@@ -28,27 +28,27 @@ func f3() {
 	if "foo" == "foo" {
 		fmt.Printf("1\n")
 	}
-	if foo  == foo {
+	if foo == foo {
 		fmt.Printf("2\n")
 	}
-	if "foo"  ==  foo {
+	if "foo" == foo {
 		fmt.Printf("3\n")
 	}
-	if foo ==  "foo" {
+	if foo == "foo" {
 		fmt.Printf("4\n")
 	}
-	if foo ==  gfoo {
+	if foo == gfoo {
 		fmt.Printf("5\n")
 	}
 }
 
 func f4() {
 	s1 := "aaa"
-	if s1 !=  "bbb" {
+	if s1 != "bbb" {
 		fmt.Printf("6\n")
 	}
 
-	if s1 !=  "" {
+	if s1 != "" {
 		fmt.Printf("7\n")
 	}
 }
@@ -75,7 +75,7 @@ func f7() {
 
 func f8() {
 	s := "dummy"
-	if s ==  "" {
+	if s == "" {
 		fmt.Printf("ERROR\n")
 	}
 }
@@ -83,7 +83,7 @@ func f8() {
 func f9() {
 	var s2 string
 	fmt.Printf("%s", s2)
-	if s2 ==  "" {
+	if s2 == "" {
 		fmt.Printf("13\n")
 	}
 }
@@ -98,11 +98,11 @@ func f10() {
 	str2 := ""
 	fmt.Printf("1%s6\n", str2)
 
-	fmt.Printf("%d\n", len(str0) + len(str1) + 17) // 17
+	fmt.Printf("%d\n", len(str0)+len(str1)+17) // 17
 
 	str3 := "abc\n"
 
-	fmt.Printf("%d\n", len(str3) + 14) // 18
+	fmt.Printf("%d\n", len(str3)+14) // 18
 }
 
 func main() {

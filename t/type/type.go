@@ -1,6 +1,5 @@
 package main
 
-
 var myarray [2]myint = [2]myint{3, 2}
 
 func anytype(x interface{}) {

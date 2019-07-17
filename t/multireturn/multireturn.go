@@ -2,7 +2,6 @@ package main
 
 import "fmt"
 
-
 func multi(a int, b int, c int, d int) (int, int, int, int) {
 	return a, b, c, d
 }

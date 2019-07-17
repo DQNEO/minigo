@@ -40,19 +40,19 @@ var keywords = []string{
 type TokenType int
 
 const (
-	T_EOF      TokenType = iota
+	T_EOF TokenType = iota
 	T_INT
 	T_STRING
 	T_CHAR
 	T_IDENT
 	T_PUNCT
 	T_KEYWORWD
-	)
+)
 
-func typeToGostring (typ TokenType) string {
+func typeToGostring(typ TokenType) string {
 	switch typ {
 	case T_EOF:
-			return "EOF"
+		return "EOF"
 	case T_INT:
 		return "int"
 	case T_STRING:
@@ -117,7 +117,7 @@ func (tok *Token) isEOF() bool {
 
 func (tok *Token) isPunct(s string) bool {
 	gs := s
-	return tok != nil && tok.typ == T_PUNCT && tok.sval ==  gs
+	return tok != nil && tok.typ == T_PUNCT && tok.sval == gs
 }
 
 func (tok *Token) isKeyword(s string) bool {
@@ -192,8 +192,7 @@ func (tok *Token) dump() {
 	os.Stderr.Write(b)
 }
 
-
-func Sprintf(format string, a... interface{}) string {
+func Sprintf(format string, a ...interface{}) string {
 	var args []interface{}
 	for _, x := range a {
 		var y interface{}

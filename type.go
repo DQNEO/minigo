@@ -67,7 +67,6 @@ func methodSet(methods map[identifier]*ExprFuncRef, name identifier, ref *ExprFu
 	methods[identifier(name)] = ref
 }
 
-
 func (gtype *Gtype) isNil() bool {
 	if gtype == nil {
 		return true
@@ -172,7 +171,7 @@ func (gtype *Gtype) String() string {
 			//errorf("pkg is empty: %s", gtype.relation.name)
 		}
 		child := gtype.relation.gtype
-		if child != nil  {
+		if child != nil {
 			switch child.kind {
 			case G_INT:
 				return "int"
@@ -186,7 +185,7 @@ func (gtype *Gtype) String() string {
 				return "func"
 			}
 		}
-		 s := Sprintf("G_NAMED(%s.%s)",
+		s := Sprintf("G_NAMED(%s.%s)",
 			gtype.relation.pkg, gtype.relation.name)
 		return s
 	case G_INT:
@@ -238,7 +237,7 @@ func (strct *Gtype) getField(name identifier) *Gtype {
 	assertNotNil(strct != nil, nil)
 	assert(strct.kind == G_STRUCT, nil, "assume G_STRUCT type")
 	for _, field := range strct.fields {
-		if string(field.fieldname) ==  string(name) {
+		if string(field.fieldname) == string(name) {
 			return field
 		}
 	}
@@ -398,7 +397,7 @@ func (e *ExprStructField) getGtype() *Gtype {
 	fields := strctType.relation.gtype.fields
 	//debugf(S("fields=%v"), fields)
 	for _, field := range fields {
-		if string(e.fieldname) ==   string(field.fieldname) {
+		if string(e.fieldname) == string(field.fieldname) {
 			//return field.origType
 			return field
 		}

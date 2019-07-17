@@ -40,13 +40,13 @@ func (program *Program) emitMethodTable() {
 	var maxId int
 	var i int
 	var id int
-	for id,_ = range program.methodTable {
+	for id, _ = range program.methodTable {
 		if maxId < id {
 			maxId = id
 		}
 	}
-	for i=1;i<=maxId;i++ {
-		_,ok := program.methodTable[i]
+	for i = 1; i <= maxId; i++ {
+		_, ok := program.methodTable[i]
 		if ok {
 			emit(".quad receiverType%d # receiverTypeId:%d", i, i)
 		} else {
@@ -56,11 +56,11 @@ func (program *Program) emitMethodTable() {
 
 	var shortMethodNames []string
 
-	for i,v := range program.methodTable {
+	for i, v := range program.methodTable {
 		emitWithoutIndent("receiverType%d:", i)
 		methods := v
 		for _, methodNameFull := range methods {
-			if methodNameFull ==  "." {
+			if methodNameFull == "." {
 				panic("invalid method name")
 			}
 			splitted := strings.Split(methodNameFull, "$")
@@ -74,7 +74,6 @@ func (program *Program) emitMethodTable() {
 			gasIndentLevel--
 			emit(".data 0")
 			emit(".quad %s # func addr addr", label)
-
 
 			if !inArray(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)

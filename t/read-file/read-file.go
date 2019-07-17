@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 )
 
 func f1() {

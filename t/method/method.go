@@ -1,6 +1,5 @@
 package main
 
-
 func f0() {
 	fmt.Printf(S("%d\n", add(1), 1))
 }

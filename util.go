@@ -17,7 +17,7 @@ func getBaseNameFromImport(path string) string {
 
 func getIndex(item string, list []string) int {
 	for id, v := range list {
-		if v ==  item {
+		if v == item {
 			return id
 		}
 	}
@@ -26,7 +26,7 @@ func getIndex(item string, list []string) int {
 
 func inArray(item string, list []string) bool {
 	for _, v := range list {
-		if v ==  item {
+		if v == item {
 			return true
 		}
 	}

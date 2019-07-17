@@ -1,6 +1,5 @@
 package main
 
-
 func sum(a int, b int) int {
 	fmt.Printf("%d\n", sum)
 	return a + b

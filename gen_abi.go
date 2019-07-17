@@ -92,7 +92,7 @@ func (f *DeclFunc) prepare() Emitter {
 	var lvar *ExprVariable
 	for i, lvar = range f.localvars {
 		if lvar.gtype == nil {
-			errorft(lvar.token(), "i=%d %s has nil gtype",i, lvar.varname )
+			errorft(lvar.token(), "i=%d %s has nil gtype", i, lvar.varname)
 		}
 		size := lvar.gtype.getSize()
 		assert(size != 0, lvar.token(), "size should  not be zero:%s", lvar.gtype.String())
@@ -353,7 +353,7 @@ func (stmt *StmtReturn) emit() {
 		}
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
-			reg  := retRegi[num64bit-1-j]
+			reg := retRegi[num64bit-1-j]
 			emit("push %%%s", reg)
 			retRegiIndex++
 		}

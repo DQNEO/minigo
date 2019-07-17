@@ -69,7 +69,6 @@ func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
 	return call
 }
 
-
 func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	origType := methodCall.getOrigType()
 	funcref, ok := methodGet(origType.methods, methodCall.fname)

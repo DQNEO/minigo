@@ -151,8 +151,8 @@ type IrExprStringComparison struct {
 }
 
 type IrStringConcat struct {
-	tok *Token
-	left Expr
+	tok   *Token
+	left  Expr
 	right Expr
 }
 
@@ -410,10 +410,10 @@ type ExprCaseClause struct {
 
 // https://golang.org/ref/spec#Switch_statements
 type StmtSwitch struct {
-	tok          *Token
-	cond         Expr
-	cases        []*ExprCaseClause
-	dflt         *StmtSatementList
+	tok   *Token
+	cond  Expr
+	cases []*ExprCaseClause
+	dflt  *StmtSatementList
 }
 
 type KeyedElement struct {
@@ -509,7 +509,6 @@ func (node *ExprCap) token() *Token                     { return node.tok }
 func (node *IrExprConversionToInterface) token() *Token { return node.tok }
 func (e *IrStringConcat) token() *Token                 { return e.tok }
 func (e *IrExprStringComparison) token() *Token         { return e.tok }
-
 
 // Internal node made by sema
 type IrStmtForRangeList struct {

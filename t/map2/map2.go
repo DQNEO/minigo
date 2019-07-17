@@ -44,7 +44,7 @@ func f2() {
 		fmt.Printf("ERROR\n")
 	}
 
-	lenmap = len(lmap) // 3
+	lenmap = len(lmap)            // 3
 	fmt.Printf("%d\n", lenmap+11) // 14
 
 	lmap["15"] = "16"
@@ -81,7 +81,7 @@ func f4() {
 	gkeyFoo := "keyfoo"
 
 	var lmap map[string]string = map[string]string{
-		gkeyFoo:   "26",
+		gkeyFoo:  "26",
 		"keybar": "valuebar",
 	}
 

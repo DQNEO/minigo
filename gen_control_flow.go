@@ -238,7 +238,7 @@ func (f *StmtFor) convert() Stmt {
 	}
 
 	l1 := makeLabel()
-	l2  := makeLabel()
+	l2 := makeLabel()
 	l3 := makeLabel()
 
 	lbls := f.labels
@@ -371,8 +371,8 @@ func (ast *StmtDefer) emit() {
 			errorft(ast.token(), "defer should be a funcall")
 		}
 	*/
-	labelStart := string(makeLabel())  + "_defer"
-	labelEnd := string(makeLabel())  + "_defer"
+	labelStart := string(makeLabel()) + "_defer"
+	labelEnd := string(makeLabel()) + "_defer"
 	ast.label = labelStart
 
 	emit("jmp %s", labelEnd)

@@ -151,7 +151,7 @@ func (ast *ExprUop) emit() {
 	op := string(ast.op)
 	switch op {
 
-	case "&" :
+	case "&":
 		switch ast.operand.(type) {
 		case *ExprVariable:
 			vr := ast.operand.(*ExprVariable)
@@ -227,13 +227,13 @@ func (e *ExprSliceLiteral) emit() {
 
 		emit("pop %%r10 # ptr")
 
-		var baseOffset int = IntSize*3*i
+		var baseOffset int = IntSize * 3 * i
 		if e.gtype.elementType.is24WidthType() {
 			emit("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
 			emit("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
 			emit("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
 		} else if e.gtype.elementType.getSize() <= 8 {
-			var offset int = IntSize*i
+			var offset int = IntSize * i
 			emit("mov %%rax, %d(%%r10)", offset)
 		} else {
 			TBI(e.token(), "ExprSliceLiteral emit")
@@ -270,7 +270,7 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		fieldType := structfield.getGtype()
 		if structfield.strct.getGtype().getKind() == G_POINTER {
 			structfield.strct.emit() // emit address of the struct
-			var sum int = fieldType.offset+offset
+			var sum int = fieldType.offset + offset
 			emit("# offset %d + %d = %d", fieldType.offset, offset, sum)
 			emit("ADD_NUMBER %d+%d", fieldType.offset, offset)
 			//reg := getReg(size)
@@ -296,7 +296,6 @@ func emitOffsetLoad(lhs Expr, size int, offset int) {
 		errorft(lhs.token(), "unkonwn type %T", lhs)
 	}
 }
-
 
 func (e *ExprIndex) emitAddressOfArrayOrSliceIndex() {
 	collection := e.collection
@@ -361,7 +360,7 @@ func (e *ExprSlice) emit() {
 
 func (e *ExprSlice) emitSlice() {
 	elmType := e.collection.getGtype().Underlying().elementType
-	assert(elmType != nil, e.token(),"type should not be nil:T %s", e.collection.getGtype().String())
+	assert(elmType != nil, e.token(), "type should not be nil:T %s", e.collection.getGtype().String())
 	size := elmType.getSize()
 	assert(size > 0, nil, "size > 0")
 
@@ -382,7 +381,7 @@ func (e *ExprSlice) emitSlice() {
 
 	if e.high == nil {
 		e.high = &ExprLen{
-			tok:e.token(),
+			tok: e.token(),
 			arg: e.collection,
 		}
 	}

@@ -11,11 +11,11 @@ func f1() {
 	fmt.Printf("%d\n", i-10485760) // 0
 
 	a = "1"
-	i ,e  = strconv.Atoi(a)
+	i, e = strconv.Atoi(a)
 	fmt.Printf("%d\n", i) // 1
 
 	a = "-2"
-	i ,e  = strconv.Atoi(a)
+	i, e = strconv.Atoi(a)
 	fmt.Printf("%d\n", i+4) // 1
 }
 

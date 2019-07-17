@@ -35,7 +35,7 @@ func f2() {
 	}
 	var h Hobbit
 	h.items = []int{1}
-	fmt.Printf("%d\n", len(h.items)+6)          // 7
+	fmt.Printf("%d\n", len(h.items)+6) // 7
 	var x int = len([]byte{'a', 'b'})
 	fmt.Printf("%d\n", x+6) //8
 	var array [10]int

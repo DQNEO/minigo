@@ -9,7 +9,7 @@ func (e *ExprLen) emit() {
 	switch gtype.getKind() {
 	case G_ARRAY:
 		emit("LOAD_NUMBER %d", gtype.length)
-	case G_SLICE,G_STRING:
+	case G_SLICE, G_STRING:
 		emit("# len(slice|string)")
 		switch arg.(type) {
 		case *ExprStringLiteral:
@@ -66,12 +66,11 @@ type IrLowLevelCall struct {
 
 func (e *IrLowLevelCall) emit() {
 	var i int
-	for i=e.argsFromStack - 1;i>=0;i-- {
+	for i = e.argsFromStack - 1; i >= 0; i-- {
 		emit("POP_TO_ARG_%d", i)
 	}
 	emit("FUNCALL %s", e.symbol)
 }
-
 
 func (e *ExprCap) emit() {
 	emit("# emit cap()")

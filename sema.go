@@ -319,7 +319,7 @@ func walkExpr(expr Expr) Expr {
 	case *ExprMapLiteral:
 		e := expr.(*ExprMapLiteral)
 		for _, elm := range e.elements {
-			elm.key  = walkExpr(elm.key)
+			elm.key = walkExpr(elm.key)
 			elm.value = walkExpr(elm.value)
 		}
 	case *ExprLen:

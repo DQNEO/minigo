@@ -171,7 +171,7 @@ func emitAssignPrimitive(lhs Expr, rhs Expr) {
 	}
 
 	assert(lhs.getGtype().getSize() <= 8, lhs.token(), "invalid type for lhs")
-	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(),"invalid type for rhs")
+	assert(rhs != nil || rhs.getGtype().getSize() <= 8, rhs.token(), "invalid type for rhs")
 	rhs.emit()             //   expr => %rax
 	emitSavePrimitive(lhs) //   %rax => memory
 }
@@ -239,7 +239,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 		emitCopyStructFromStack(lhs.getGtype().getSize())
 	case *ExprUop:
 		re := rhs.(*ExprUop)
-		if re.op ==  "*" {
+		if re.op == "*" {
 			// copy struct
 			emitAddress(lhs)
 			emit("PUSH_8")
@@ -278,7 +278,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 						emitOffsetSavePrimitive(variable, elmSize, arrayType.offset+i*elmSize)
 					}
 				}
-			case G_SLICE,G_STRING:
+			case G_SLICE, G_STRING:
 				left := &ExprStructField{
 					tok:       variable.token(),
 					strct:     lhs,

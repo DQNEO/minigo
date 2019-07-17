@@ -11,8 +11,8 @@ var sByte = Gtype{kind: G_BYTE, size: 1}
 var gByte = &sByte
 var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
-	kind: G_STRING,
-	elementType:&sByte,
+	kind:        G_STRING,
+	elementType: &sByte,
 }
 
 var sTrue = IrExprBoolVal{bol: true}
@@ -179,21 +179,21 @@ func predeclareLibcFuncs(universe *Scope) {
 	})
 	universe.setFunc(identifier("open"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: libc,
+			pkg:      libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc(identifier("read"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: libc,
+			pkg:      libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})
 
 	universe.setFunc(identifier("write"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: libc,
+			pkg:      libc,
 			rettypes: []*Gtype{gInt},
 		},
 	})

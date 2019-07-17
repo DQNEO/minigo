@@ -28,7 +28,7 @@ func (decl *DeclVar) emitData() {
 
 func (e *ExprStructLiteral) lookup(fieldname identifier) Expr {
 	for _, field := range e.fields {
-		if string(field.key)  ==  string(fieldname) {
+		if string(field.key) == string(fieldname) {
 			return field.value
 		}
 	}
@@ -110,7 +110,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 		case *ExprFuncallOrConversion:
 			call := value.(*ExprFuncallOrConversion)
 			assert(call.rel.gtype != nil, value.token(), "should be Conversion")
-			stringLiteral,ok := call.args[0].(*ExprStringLiteral)
+			stringLiteral, ok := call.args[0].(*ExprStringLiteral)
 			assert(ok, call.token(), "arg0 should be stringliteral")
 			emit(".quad .%s", stringLiteral.slabel)
 			var length int = len(stringLiteral.val)
@@ -126,13 +126,13 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 	} else if primType == G_BOOL {
 		if value == nil {
 			// zero value
-			emit(".quad 0 # %s %s",  gtype.String(), containerName)
+			emit(".quad 0 # %s %s", gtype.String(), containerName)
 			return
 		}
 		var val int = evalIntExpr(value)
 		emit(".quad %d # %s %s", val, gtype.String(), containerName)
 	} else if primType == G_STRUCT {
-		s := string(containerName) + "."  + string(gtype.relation.name)
+		s := string(containerName) + "." + string(gtype.relation.name)
 		containerName = s
 		for _, field := range gtype.relation.gtype.fields {
 			emit("# padding=%d", field.padding)
@@ -147,8 +147,8 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			}
 			emit("# field:offesr=%d, fieldname=%s", field.offset, field.fieldname)
 			if value == nil {
-				s2 :=  string(containerName) + "." + string(field.fieldname)
-				doEmitData(ptok, field, nil,s2, depth)
+				s2 := string(containerName) + "." + string(field.fieldname)
+				doEmitData(ptok, field, nil, s2, depth)
 				continue
 			}
 			structLiteral, ok := value.(*ExprStructLiteral)
@@ -159,7 +159,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 				//continue
 			}
 			gtype := field
-			s3 :=  string(containerName) + "." + string(field.fieldname)
+			s3 := string(containerName) + "." + string(field.fieldname)
 			doEmitData(ptok, gtype, value, s3, depth)
 		}
 	} else {
@@ -184,7 +184,7 @@ func doEmitData(ptok *Token /* left type */, gtype *Gtype, value /* nullable */ 
 			emit(".quad %d # %s ", val, gtypeString)
 		case *ExprUop:
 			uop := value.(*ExprUop)
-			assert(uop.op ==  "&", ptok, "only uop & is allowed")
+			assert(uop.op == "&", ptok, "only uop & is allowed")
 			operand := unwrapRel(uop.operand)
 			vr, ok := operand.(*ExprVariable)
 			if ok {

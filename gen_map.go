@@ -313,12 +313,11 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit("# save key")
 
 	emitSaveMapKey(e.index)
-	emit("mov %%rax, %%rcx")   // copy mallocedaddr
+	emit("mov %%rax, %%rcx") // copy mallocedaddr
 	// append key to tail
 	emit("POP_8")              // tailaddr
 	emit("mov %%rcx, (%%rax)") // save mallocedaddr to tailaddr
 	emit("PUSH_8")             // push tailaddr
-
 
 	// save value
 
@@ -392,7 +391,7 @@ func (em *IrStmtRangeMap) emit() {
 
 	if em.indexvar.getGtype().isString() {
 		emit("LOAD_24_BY_DEREF")
-		emitSave24(em.indexvar,0)
+		emitSave24(em.indexvar, 0)
 	} else {
 		emit("LOAD_8_BY_DEREF")
 		emitSavePrimitive(em.indexvar)
@@ -435,7 +434,7 @@ func (em *IrStmtRangeMap) emit() {
 	emit("%s: # end loop", em.labels.labelEndLoop)
 }
 
-var mapUnitSize int = 2*8
+var mapUnitSize int = 2 * 8
 
 // push addr, len, cap
 func (lit *ExprMapLiteral) emit() {
@@ -456,16 +455,16 @@ func (lit *ExprMapLiteral) emit() {
 	//mapKeyType := mapType.mapKey
 
 	for i, element := range lit.elements {
-		var offsetKey int = i*mapUnitSize
-		var offsetValue int = i*mapUnitSize+8
+		var offsetKey int = i * mapUnitSize
+		var offsetValue int = i*mapUnitSize + 8
 
 		// save key
 		emitSaveMapKey(element.key)
-		emit("mov %%rax, %%rcx")   // copy mallocedaddr
+		emit("mov %%rax, %%rcx") // copy mallocedaddr
 		// append key to tail
-		emit("POP_8")                         // map head
+		emit("POP_8")                             // map head
 		emit("mov %%rcx, %d(%%rax) #", offsetKey) // save key address
-		emit("PUSH_8")                        // map head
+		emit("PUSH_8")                            // map head
 
 		if element.value.getGtype().getSize() <= 8 {
 			element.value.emit()

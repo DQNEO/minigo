@@ -95,7 +95,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 
 // "main","f1" -> "main.f1"
 func getFuncSymbol(pkg identifier, fname string) string {
-	if string(pkg) ==  "libc" {
+	if string(pkg) == "libc" {
 		return fname
 	}
 	s := Sprintf("%s.%s", pkg, fname)
@@ -144,7 +144,7 @@ func emit_intcast(gtype *Gtype) {
 
 func emit_comp_primitive(inst string, binop *ExprBinop) {
 	emit("# emit_comp_primitive")
-	assert(len(inst) > 0 , binop.token(), "inst shoud not be empty")
+	assert(len(inst) > 0, binop.token(), "inst shoud not be empty")
 	binop.left.emit()
 	if binop.left.getGtype().getKind() == G_BYTE {
 		emit_intcast(binop.left.getGtype())
@@ -189,15 +189,14 @@ func (binop *ExprBinop) emitComp() {
 
 	if binop.left.getGtype().isString() {
 		e := &IrExprStringComparison{
-			tok:binop.token(),
-			op : binop.op,
-			left: binop.left,
+			tok:   binop.token(),
+			op:    binop.op,
+			left:  binop.left,
 			right: binop.right,
 		}
 		e.emit()
 		return
 	}
-
 
 	var instruction string
 	op := binop.op
@@ -222,9 +221,9 @@ func (binop *ExprBinop) emitComp() {
 }
 
 func (ast *ExprBinop) emit() {
-	if ast.op  ==  "+" && ast.left.getGtype().isString() {
+	if ast.op == "+" && ast.left.getGtype().isString() {
 		var e Expr = &IrStringConcat{
-			left: ast.left,
+			left:  ast.left,
 			right: ast.right,
 		}
 		e.emit()
@@ -281,7 +280,7 @@ func (ast *ExprBinop) emit() {
 		emit("mov $0, %%rdx # init %%rdx")
 		emit("div %%rcx")
 		emit("mov %%rdx, %%rax")
-	case"/":
+	case "/":
 		emit("pop %%rcx")
 		emit("pop %%rax")
 		emit("mov $0, %%rdx # init %%rdx")
@@ -296,7 +295,7 @@ func isUnderScore(e Expr) bool {
 	if !ok {
 		return false
 	}
-	return string(rel.name) ==  "_"
+	return string(rel.name) == "_"
 }
 
 // expect rhs address is in the stack top, lhs is in the second top

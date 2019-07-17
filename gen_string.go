@@ -43,17 +43,17 @@ func (e *IrStringConcat) emit() {
 	var params []*ExprVariable
 
 	var dummyVariable = &ExprVariable{
-		isVariadic:false,
+		isVariadic: false,
 	}
 	params = append(params, dummyVariable) // 1st arg
 	params = append(params, dummyVariable) // 2nd arg
 
 	// left + right
 	call := &IrStaticCall{
-		tok: e.token(),
-		symbol: "iruntime.concat",
-		isMethodCall:false,
-		args: args,
+		tok:          e.token(),
+		symbol:       "iruntime.concat",
+		isMethodCall: false,
+		args:         args,
 		callee: &DeclFunc{
 			params: params,
 		},
@@ -90,7 +90,7 @@ func (binop *IrExprStringComparison) emit() {
 	var params []*ExprVariable
 
 	var dummyVariable = &ExprVariable{
-		isVariadic:false,
+		isVariadic: false,
 	}
 	// func eq(a string, b string, eq bool) bool
 	// @TODO get params by DeclFunc dynamically
@@ -99,10 +99,10 @@ func (binop *IrExprStringComparison) emit() {
 	params = append(params, dummyVariable) // eq
 	// eq(left, right, eFlag)
 	call := &IrStaticCall{
-		tok: binop.token(),
-		symbol: "iruntime.cmpStrings",
-		isMethodCall:false,
-		args: args,
+		tok:          binop.token(),
+		symbol:       "iruntime.cmpStrings",
+		isMethodCall: false,
+		args:         args,
 		callee: &DeclFunc{
 			params: params,
 		},

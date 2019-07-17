@@ -1,6 +1,5 @@
 package main
 
-
 var var2 int = 2
 
 func main() {

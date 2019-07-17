@@ -32,33 +32,33 @@ func parseOpts(args []string) []string {
 			printVersion()
 			return nil
 		}
-		if opt ==  "-t" {
+		if opt == "-t" {
 			debugToken = true
 		}
-		if opt ==  "-a" {
+		if opt == "-a" {
 			debugAst = true
 		}
-		if opt ==  "-p" {
+		if opt == "-p" {
 			debugParser = true
 		}
-		if opt ==  "--position" {
+		if opt == "--position" {
 			emitPosition = true
 		}
-		if opt ==  "-d" {
+		if opt == "-d" {
 			debugMode = true
 		}
-		if opt ==  "--tokenize-only" {
+		if opt == "--tokenize-only" {
 			tokenizeOnly = true
 		}
-		if opt ==  "--parse-only" {
+		if opt == "--parse-only" {
 			parseOnly = true
 		}
-		if opt ==  "--resolve-only" {
+		if opt == "--resolve-only" {
 			resolveOnly = true
 		}
 		if strings.HasSuffix(string(opt), ".go") {
 			r = append(r, string(opt))
-		} else if opt ==  "-" {
+		} else if opt == "-" {
 			return []string{"/dev/stdin"}
 		}
 	}

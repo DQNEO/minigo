@@ -205,7 +205,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		name: firstIdent,
 		pkg:  p.packageName, // @TODO is this right?
 	}
-	if string(rel.name) ==  "__func__" {
+	if string(rel.name) == "__func__" {
 		sliteral := &ExprStringLiteral{
 			val: []byte(p.currentFunc.fname),
 		}
@@ -773,7 +773,7 @@ func (p *parser) newVariable(varname identifier, gtype *Gtype) *ExprVariable {
 	if p.isGlobal() {
 		variable = &ExprVariable{
 			tok:      p.lastToken(),
-			pkg : p.packageName,
+			pkg:      p.packageName,
 			varname:  varname,
 			gtype:    gtype,
 			isGlobal: p.isGlobal(),
@@ -1349,8 +1349,8 @@ func (p *parser) parseSwitchStmt() Stmt {
 
 	p.expect("{")
 	r := &StmtSwitch{
-		tok:          ptok,
-		cond:         cond,
+		tok:  ptok,
+		cond: cond,
 	}
 
 	for {
@@ -1686,7 +1686,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	}
 
 	// every function has a defer_handler
-	l := string(makeLabel())  + "_defer_handler"
+	l := string(makeLabel()) + "_defer_handler"
 	r.labelDeferHandler = l
 	p.currentFunc = r
 	body := p.parseCompoundStmt()
@@ -1844,7 +1844,7 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 
 	if len(pkg) == 0 {
 		relbody := resolve(p.currentScope, rel) //p.currentScope.get(rel.name)
-		if relbody == nil && string(rel.name)  != "_" {
+		if relbody == nil && string(rel.name) != "_" {
 			p.unresolvedRelations = append(p.unresolvedRelations, rel)
 		}
 	} else {

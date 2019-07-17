@@ -1,6 +1,5 @@
 package main
 
-
 func stdout_write() {
 	s := "hello world\n"
 	var n int
