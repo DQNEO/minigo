@@ -2,18 +2,16 @@
 package main
 
 // analyze imports of given go files
-func parseImports(sourceFiles []string) []string {
+func parseImports(sourceFiles []string) map[string]bool {
 
-	var imported []string
+	var imported map[string]bool = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
 		for _, importDecl := range astFile.importDecls {
 			for _, spec := range importDecl.specs {
 				baseName := getBaseNameFromImport(spec.path)
-				if !inArray(baseName, imported) {
-					imported = append(imported, baseName)
-				}
+				imported[baseName] = true
 			}
 		}
 	}
@@ -21,13 +19,13 @@ func parseImports(sourceFiles []string) []string {
 	return imported
 }
 
-func resolveDependencies(directDependencies []string) []string {
+func resolveDependencies(directDependencies map[string]bool) []string {
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
 	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
 	var sortedImports []string
 	sortedImports = primPackages
-	for _, pkg := range directDependencies {
+	for pkg, _ := range directDependencies {
 		sortedImports = append(sortedImports, pkg)
 	}
 
