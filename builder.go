@@ -23,13 +23,15 @@ func resolveDependencies(directDependencies map[string]bool) []string {
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
 	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
-	var sortedImports []string
-	sortedImports = primPackages
+	var sortedUniqueImports []string
+	sortedUniqueImports = primPackages
 	for pkg, _ := range directDependencies {
-		sortedImports = append(sortedImports, pkg)
+		if !inArray(pkg, sortedUniqueImports) {
+			sortedUniqueImports = append(sortedUniqueImports, pkg)
+		}
 	}
 
-	return sortedImports
+	return sortedUniqueImports
 }
 
 // inject builtin functions into the universe scope
@@ -97,14 +99,14 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 }
 
 // parse standard libraries
-func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
+func compileStdLibs(universe *Scope, sortedUniqueImports []string) *compiledStdlib {
 	libs := &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
 		uniqImportedPackageNames: nil,
 	}
 	stdPkgs := makeStdLib()
 
-	for _, spkgName := range imported {
+	for _, spkgName := range sortedUniqueImports {
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdPkgs[pkgName]
 		if !ok {
@@ -137,9 +139,7 @@ func (csl *compiledStdlib) getPackages() []*AstPackage {
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 	csl.compiledPackages[pkg.name] = pkg
-	if !inArray(string(pkg.name), csl.uniqImportedPackageNames) {
-		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
-	}
+	csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 }
 
 type Program struct {
