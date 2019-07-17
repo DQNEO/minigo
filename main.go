@@ -90,14 +90,14 @@ func main() {
 	u := compileUniverse(universe)
 	r := compileRuntime(universe)
 
-	imported := parseImports(sourceFiles)
-
+	directDependencies := parseImports(sourceFiles)
+	sortedImports := resolveDependencies(directDependencies)
 	symbolTable = &SymbolTable{}
 
 	var allScopes map[identifier]*Scope
 	allScopes = map[identifier]*Scope{}
 	symbolTable.allScopes = allScopes
-	libs := compileStdLibs(universe, imported)
+	libs := compileStdLibs(universe, sortedImports)
 
 	m := compileFiles(universe, sourceFiles)
 	if m == nil {

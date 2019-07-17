@@ -4,9 +4,7 @@ package main
 // analyze imports of given go files
 func parseImports(sourceFiles []string) []string {
 
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	imported := []string{"syscall", "io", "bytes", "os", "strconv"}
+	var imported []string
 	for _, sourceFile := range sourceFiles {
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
@@ -21,6 +19,19 @@ func parseImports(sourceFiles []string) []string {
 	}
 
 	return imported
+}
+
+func resolveDependencies(directDependencies []string) []string {
+	// "fmt" depends on "os. So inject it in advance.
+	// Actually, dependency graph should be analyzed.
+	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
+	var sortedImports []string
+	sortedImports = primPackages
+	for _, pkg := range directDependencies {
+		sortedImports = append(sortedImports, pkg)
+	}
+
+	return sortedImports
 }
 
 // inject builtin functions into the universe scope
