@@ -8,7 +8,7 @@ import (
 func f0() {
 	var f *os.File
 	f = os.Stderr
-	fmt.Printf("%d\n", f.innerFile.fd.Sysfd)
+	fmt.Printf("%d\n", f.Fd())
 }
 
 func f1() {
