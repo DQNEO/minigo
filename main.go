@@ -93,10 +93,8 @@ func main() {
 	directDependencies := parseImports(sourceFiles)
 	sortedUniqueImports := resolveDependencies(directDependencies)
 
-	var allScopes map[identifier]*Scope
-	allScopes = map[identifier]*Scope{}
 	symbolTable = &SymbolTable{}
-	symbolTable.allScopes = allScopes
+	symbolTable.allScopes = map[identifier]*Scope{}
 	libs := compileStdLibs(universe, sortedUniqueImports)
 
 	m := compileFiles(universe, sourceFiles)
