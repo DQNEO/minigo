@@ -111,7 +111,8 @@ func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[ide
 
 	var sortedUniqueImports []string
 	var dep map[string]map[string]bool = map[string]map[string]bool{}
-	for spkgName, _ := range directDependencies {
+	var spkgName string
+	for spkgName, _ = range directDependencies {
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdSources[pkgName]
 		if !ok {
@@ -119,7 +120,27 @@ func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[ide
 		}
 		var imports = parseImportsFromString(pkgCode)
 		dep[spkgName] = imports
+		for spkgName , _ := range imports {
+			pkgName := identifier(spkgName)
+			pkgCode, ok := stdSources[pkgName]
+			if !ok {
+				errorf("package '%s' is not a standard library.", spkgName)
+			}
+			var imports = parseImportsFromString(pkgCode)
+			dep[spkgName] = imports
+
+		}
 	}
+
+	// debug dep
+	emit("#------------- dep -----------------")
+	for spkgName, imports := range dep {
+		emit("#  %s", spkgName)
+		for sspkgName, _ := range imports {
+			emit("#    %s", sspkgName)
+		}
+	}
+	emit("#-----------------------------------")
 
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
