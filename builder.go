@@ -107,13 +107,8 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 
 type importMap map[string]bool
 
-// parse standard libraries
-func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
-
-	var sortedUniqueImports []string
-	var dep map[string]importMap = map[string]importMap{}
-	var spkgName string
-	for spkgName, _ = range directDependencies {
+func parseImportRecursive(dep map[string]importMap , directDependencies importMap) {
+	for spkgName , _ := range directDependencies {
 		pkgName := identifier(spkgName)
 		pkgCode, ok := stdSources[pkgName]
 		if !ok {
@@ -121,17 +116,16 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 		}
 		var imports = parseImportsFromString(pkgCode)
 		dep[spkgName] = imports
-		for spkgName , _ := range imports {
-			pkgName := identifier(spkgName)
-			pkgCode, ok := stdSources[pkgName]
-			if !ok {
-				errorf("package '%s' is not a standard library.", spkgName)
-			}
-			var imports = parseImportsFromString(pkgCode)
-			dep[spkgName] = imports
-
-		}
+		parseImportRecursive(dep, imports)
 	}
+}
+
+// parse standard libraries
+func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
+
+	var sortedUniqueImports []string
+	var dep map[string]importMap = map[string]importMap{}
+	parseImportRecursive(dep, directDependencies)
 
 	// debug dep
 	emit("#------------- dep -----------------")
