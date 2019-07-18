@@ -102,7 +102,6 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 func compileStdLibs(universe *Scope, sortedUniqueImports []string) *compiledStdlib {
 	libs := &compiledStdlib{
 		compiledPackages:         map[identifier]*AstPackage{},
-		uniqImportedPackageNames: nil,
 	}
 	stdPkgs := makeStdLib()
 
@@ -124,22 +123,10 @@ func compileStdLibs(universe *Scope, sortedUniqueImports []string) *compiledStdl
 
 type compiledStdlib struct {
 	compiledPackages         map[identifier]*AstPackage
-	uniqImportedPackageNames []string
-}
-
-func (csl *compiledStdlib) getPackages() []*AstPackage {
-	var importedPackages []*AstPackage
-
-	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(pkgName)]
-		importedPackages = append(importedPackages, compiledPkg)
-	}
-	return importedPackages
 }
 
 func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
 	csl.compiledPackages[pkg.name] = pkg
-	csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
 }
 
 type Program struct {
@@ -154,7 +141,7 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 	packages = append(packages, universe)
 	packages = append(packages, iruntime)
 
-	importedPackages := csl.getPackages()
+	importedPackages := csl.compiledPackages
 	for _, pkg := range importedPackages {
 		packages = append(packages, pkg)
 	}
@@ -191,7 +178,8 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	program := &Program{}
 	program.packages = packages
-	program.importOS = inArray("os", csl.uniqImportedPackageNames)
+	_, importOS := csl.compiledPackages["os"]
+	program.importOS = importOS
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
