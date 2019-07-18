@@ -12,6 +12,18 @@ func extractImports(astFile *AstFile) map[string]bool {
 	return imports
 }
 
+// analyze imports of a given go source
+func parseImportsFromString(source string) map[string]bool {
+
+	var imports map[string]bool = map[string]bool{}
+
+	p := &parser{}
+	astFile := p.ParseString("", source, nil, true)
+	imports = extractImports(astFile)
+
+	return imports
+}
+
 // analyze imports of given go files
 func parseImports(sourceFiles []string) map[string]bool {
 
@@ -97,17 +109,26 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 // parse standard libraries
 func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
 
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
 	var sortedUniqueImports []string
-	sortedUniqueImports = primPackages
-	for pkg, _ := range directDependencies {
-		if !inArray(pkg, sortedUniqueImports) {
-			sortedUniqueImports = append(sortedUniqueImports, pkg)
+	var dep map[string]map[string]bool = map[string]map[string]bool{}
+	for spkgName, _ := range directDependencies {
+		pkgName := identifier(spkgName)
+		pkgCode, ok := stdSources[pkgName]
+		if !ok {
+			errorf("package '%s' is not a standard library.", spkgName)
 		}
+		var imports = parseImportsFromString(pkgCode)
+		dep[spkgName] = imports
 	}
 
+	// "fmt" depends on "os. So inject it in advance.
+	// Actually, dependency graph should be analyzed.
+	sortedUniqueImports = []string{"syscall", "bytes", "os", "strconv"}
+	for spkgName, _ := range dep {
+		if !inArray(spkgName, sortedUniqueImports) {
+			sortedUniqueImports = append(sortedUniqueImports, spkgName)
+		}
+	}
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 
 	for _, spkgName := range sortedUniqueImports {
