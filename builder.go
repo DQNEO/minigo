@@ -100,7 +100,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 
 // parse standard libraries
 func compileStdLibs(universe *Scope, sortedUniqueImports []string) map[identifier]*AstPackage {
-	var compiledPackages map[identifier]*AstPackage = map[identifier]*AstPackage{}
+	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 	stdPkgs := makeStdLib()
 
 	for _, spkgName := range sortedUniqueImports {
@@ -112,11 +112,11 @@ func compileStdLibs(universe *Scope, sortedUniqueImports []string) map[identifie
 		codes := []string{string(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
-		compiledPackages[pkg.name] = pkg
+		compiledStdPkgs[pkg.name] = pkg
 		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
 	}
 
-	return compiledPackages
+	return compiledStdPkgs
 }
 
 type Program struct {
