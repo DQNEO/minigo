@@ -98,17 +98,17 @@ func resolveDependencies(directDependencies map[string]bool) []string {
 	return sortedUniqueImports
 }
 
+
 // parse standard libraries
 func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
 
 	sortedUniqueImports := resolveDependencies(directDependencies)
 
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
-	stdPkgs := makeStdLib()
 
 	for _, spkgName := range sortedUniqueImports {
 		pkgName := identifier(spkgName)
-		pkgCode, ok := stdPkgs[pkgName]
+		pkgCode, ok := stdSources[pkgName]
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}
