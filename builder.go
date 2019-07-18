@@ -1,8 +1,8 @@
 // builder builds packages
 package main
 
-func extractImports(astFile *AstFile) map[string]bool {
-	var imports map[string]bool = map[string]bool{}
+func extractImports(astFile *AstFile) importMap {
+	var imports importMap = map[string]bool{}
 	for _, importDecl := range astFile.importDecls {
 		for _, spec := range importDecl.specs {
 			baseName := getBaseNameFromImport(spec.path)
@@ -13,9 +13,9 @@ func extractImports(astFile *AstFile) map[string]bool {
 }
 
 // analyze imports of a given go source
-func parseImportsFromString(source string) map[string]bool {
+func parseImportsFromString(source string) importMap {
 
-	var imports map[string]bool = map[string]bool{}
+	var imports importMap = map[string]bool{}
 
 	p := &parser{}
 	astFile := p.ParseString("", source, nil, true)
@@ -25,11 +25,11 @@ func parseImportsFromString(source string) map[string]bool {
 }
 
 // analyze imports of given go files
-func parseImports(sourceFiles []string) map[string]bool {
+func parseImports(sourceFiles []string) importMap {
 
-	var imported map[string]bool = map[string]bool{}
+	var imported importMap = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
-		var importedInFile map[string]bool = map[string]bool{}
+		var importedInFile importMap = map[string]bool{}
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
 		importedInFile = extractImports(astFile)
@@ -105,12 +105,13 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
+type importMap map[string]bool
 
 // parse standard libraries
-func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
+func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
 
 	var sortedUniqueImports []string
-	var dep map[string]map[string]bool = map[string]map[string]bool{}
+	var dep map[string]importMap = map[string]importMap{}
 	var spkgName string
 	for spkgName, _ = range directDependencies {
 		pkgName := identifier(spkgName)
