@@ -83,7 +83,10 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
-func resolveDependencies(directDependencies map[string]bool) []string {
+
+// parse standard libraries
+func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
+
 	// "fmt" depends on "os. So inject it in advance.
 	// Actually, dependency graph should be analyzed.
 	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
@@ -94,15 +97,6 @@ func resolveDependencies(directDependencies map[string]bool) []string {
 			sortedUniqueImports = append(sortedUniqueImports, pkg)
 		}
 	}
-
-	return sortedUniqueImports
-}
-
-
-// parse standard libraries
-func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
-
-	sortedUniqueImports := resolveDependencies(directDependencies)
 
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 
