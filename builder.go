@@ -19,21 +19,6 @@ func parseImports(sourceFiles []string) map[string]bool {
 	return imported
 }
 
-func resolveDependencies(directDependencies map[string]bool) []string {
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
-	var sortedUniqueImports []string
-	sortedUniqueImports = primPackages
-	for pkg, _ := range directDependencies {
-		if !inArray(pkg, sortedUniqueImports) {
-			sortedUniqueImports = append(sortedUniqueImports, pkg)
-		}
-	}
-
-	return sortedUniqueImports
-}
-
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
@@ -98,8 +83,26 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
+func resolveDependencies(directDependencies map[string]bool) []string {
+	// "fmt" depends on "os. So inject it in advance.
+	// Actually, dependency graph should be analyzed.
+	primPackages := []string{"syscall", "io", "bytes", "os", "strconv"}
+	var sortedUniqueImports []string
+	sortedUniqueImports = primPackages
+	for pkg, _ := range directDependencies {
+		if !inArray(pkg, sortedUniqueImports) {
+			sortedUniqueImports = append(sortedUniqueImports, pkg)
+		}
+	}
+
+	return sortedUniqueImports
+}
+
 // parse standard libraries
-func compileStdLibs(universe *Scope, sortedUniqueImports []string) map[identifier]*AstPackage {
+func compileStdLibs(universe *Scope, directDependencies map[string]bool) map[identifier]*AstPackage {
+
+	sortedUniqueImports := resolveDependencies(directDependencies)
+
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 	stdPkgs := makeStdLib()
 
