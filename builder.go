@@ -109,11 +109,11 @@ func compileStdLibs(universe *Scope, sortedUniqueImports []string) map[identifie
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}
-		codes := []string{string(pkgCode)}
+		codes := []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
-		compiledStdPkgs[pkg.name] = pkg
-		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
+		compiledStdPkgs[pkgName] = pkg
+		symbolTable.allScopes[pkgName] = pkg.scope
 	}
 
 	return compiledStdPkgs
