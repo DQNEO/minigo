@@ -1,18 +1,28 @@
 // builder builds packages
 package main
 
+func extractImports(astFile *AstFile) map[string]bool {
+	var imports map[string]bool = map[string]bool{}
+	for _, importDecl := range astFile.importDecls {
+		for _, spec := range importDecl.specs {
+			baseName := getBaseNameFromImport(spec.path)
+			imports[baseName] = true
+		}
+	}
+	return imports
+}
+
 // analyze imports of given go files
 func parseImports(sourceFiles []string) map[string]bool {
 
 	var imported map[string]bool = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
+		var importedInFile map[string]bool = map[string]bool{}
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
-		for _, importDecl := range astFile.importDecls {
-			for _, spec := range importDecl.specs {
-				baseName := getBaseNameFromImport(spec.path)
-				imported[baseName] = true
-			}
+		importedInFile = extractImports(astFile)
+		for name, _ := range importedInFile {
+			imported[name] = true
 		}
 	}
 
