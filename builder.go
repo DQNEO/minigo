@@ -114,7 +114,7 @@ func compileStdLibs(universe *Scope, sortedUniqueImports []string) *compiledStdl
 		codes := []string{string(pkgCode)}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
-		libs.AddPackage(pkg)
+		libs.compiledPackages[pkg.name] = pkg
 		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
 	}
 
@@ -123,10 +123,6 @@ func compileStdLibs(universe *Scope, sortedUniqueImports []string) *compiledStdl
 
 type compiledStdlib struct {
 	compiledPackages         map[identifier]*AstPackage
-}
-
-func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
-	csl.compiledPackages[pkg.name] = pkg
 }
 
 type Program struct {
