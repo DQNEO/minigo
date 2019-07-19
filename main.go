@@ -93,10 +93,9 @@ func main() {
 
 	symbolTable = &SymbolTable{}
 	symbolTable.allScopes = map[identifier]*Scope{}
-	var stdSources map[identifier]string
-	stdSources = makeStdLib()
+
 	directDependencies := parseImports(sourceFiles)
-	libs := compileStdLibs(universe, directDependencies, stdSources)
+	libs := compileStdLibs(universe, directDependencies)
 
 	m := compileFiles(universe, sourceFiles)
 	if m == nil {
