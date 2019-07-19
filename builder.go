@@ -27,11 +27,10 @@ func parseImports(sourceFiles []string) importMap {
 
 	var imported importMap = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
-		var importedInFile importMap = map[string]bool{}
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
-		importedInFile = extractImports(astFile)
-		for name, _ := range importedInFile {
+		importsInFile := extractImports(astFile)
+		for name, _ := range importsInFile {
 			imported[name] = true
 		}
 	}
@@ -108,7 +107,7 @@ type importMap map[string]bool
 func parseImportRecursive(dep map[string]importMap , directDependencies importMap, stdSources map[identifier]string) {
 	for spkgName , _ := range directDependencies {
 		file := getStdFileName(spkgName)
-		var imports = parseImportsFromFile(file)
+		imports := parseImportsFromFile(file)
 		dep[spkgName] = imports
 		parseImportRecursive(dep, imports, stdSources)
 	}
