@@ -148,11 +148,11 @@ func removeResolvedPackages(dep map[string]importMap, sortedUniqueImports []stri
 }
 
 func dumpDep(dep map[string]importMap) {
-	emit("#------------- dep -----------------")
+	debugf("#------------- dep -----------------")
 	for spkgName, imports := range dep {
-		emit("#  %s has %d imports:", spkgName, len(imports))
+		debugf("#  %s has %d imports:", spkgName, len(imports))
 		for sspkgName, _ := range imports {
-			emit("#    %s", sspkgName)
+			debugf("#    %s", sspkgName)
 		}
 	}
 }
