@@ -176,17 +176,15 @@ func get0dependentPackages(dep map[string]importMap) []string {
 	return moved
 }
 
-// parse standard libraries
-func compileStdLibs(universe *Scope, directDependencies importMap, stdSources map[identifier]string) map[identifier]*AstPackage {
 
+func resolveDependency(directDependencies importMap, stdSources map[identifier]string) []string {
 	var sortedUniqueImports []string
 	var dep map[string]importMap = map[string]importMap{}
 	parseImportRecursive(dep, directDependencies, stdSources)
-	var moved []string
 
 	for  {
 		//dumpDep(dep)
-		moved = get0dependentPackages(dep)
+		moved := get0dependentPackages(dep)
 		if len(moved) == 0 {
 			break
 		}
@@ -196,6 +194,13 @@ func compileStdLibs(universe *Scope, directDependencies importMap, stdSources ma
 		}
 
 	}
+	return sortedUniqueImports
+}
+
+// Compile standard libraries
+func compileStdLibs(universe *Scope, directDependencies importMap, stdSources map[identifier]string) map[identifier]*AstPackage {
+
+	sortedUniqueImports := resolveDependency(directDependencies, stdSources)
 
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 

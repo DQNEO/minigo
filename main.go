@@ -90,12 +90,12 @@ func main() {
 	u := compileUniverse(universe)
 	r := compileRuntime(universe)
 
-	directDependencies := parseImports(sourceFiles)
 
 	symbolTable = &SymbolTable{}
 	symbolTable.allScopes = map[identifier]*Scope{}
 	var stdSources map[identifier]string
 	stdSources = makeStdLib()
+	directDependencies := parseImports(sourceFiles)
 	libs := compileStdLibs(universe, directDependencies, stdSources)
 
 	m := compileFiles(universe, sourceFiles)
