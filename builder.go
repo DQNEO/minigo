@@ -1,6 +1,8 @@
 // builder builds packages
 package main
 
+import "fmt"
+
 func extractImports(astFile *AstFile) importMap {
 	var imports importMap = map[string]bool{}
 	for _, importDecl := range astFile.importDecls {
@@ -197,6 +199,10 @@ func resolveDependency(directDependencies importMap, stdSources map[identifier]s
 	return sortedUniqueImports
 }
 
+func getStdFileName(pkgName string) string {
+	return fmt.Sprintf("stdlib/%s/%s.go", pkgName, pkgName)
+}
+
 // Compile standard libraries
 func compileStdLibs(universe *Scope, directDependencies importMap, stdSources map[identifier]string) map[identifier]*AstPackage {
 
@@ -206,12 +212,9 @@ func compileStdLibs(universe *Scope, directDependencies importMap, stdSources ma
 
 	for _, spkgName := range sortedUniqueImports {
 		pkgName := identifier(spkgName)
-		pkgCode, ok := stdSources[pkgName]
-		if !ok {
-			errorf("package '%s' is not a standard library.", spkgName)
-		}
-		codes := []string{pkgCode}
-		pkg := ParseFiles(pkgName, codes, true)
+		file := getStdFileName(spkgName)
+		files := []string{file}
+		pkg := ParseFiles(pkgName, files, false)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
 		symbolTable.allScopes[pkgName] = pkg.scope
