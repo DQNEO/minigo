@@ -66,8 +66,6 @@ func parseOpts(args []string) []string {
 	return r
 }
 
-var stdSources map[identifier]string
-
 func main() {
 	// parsing arguments
 	var sourceFiles []string
@@ -96,8 +94,9 @@ func main() {
 
 	symbolTable = &SymbolTable{}
 	symbolTable.allScopes = map[identifier]*Scope{}
+	var stdSources map[identifier]string
 	stdSources = makeStdLib()
-	libs := compileStdLibs(universe, directDependencies)
+	libs := compileStdLibs(universe, directDependencies, stdSources)
 
 	m := compileFiles(universe, sourceFiles)
 	if m == nil {
