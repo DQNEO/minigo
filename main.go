@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"./stdlib/fmt"
 	"os"
 	"./stdlib/strings"
 )
