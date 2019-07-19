@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strings"
+	"./stdlib/strings"
 )
 
 func getBaseNameFromImport(path string) string {

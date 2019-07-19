@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
+	"./stdlib/strings"
 )
 
 var GENERATION int = 1
