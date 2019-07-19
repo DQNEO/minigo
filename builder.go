@@ -1,6 +1,8 @@
 // builder builds packages
 package main
 
+import "fmt"
+
 func extractImports(astFile *AstFile) importMap {
 	var imports importMap = map[string]bool{}
 	for _, importDecl := range astFile.importDecls {
@@ -13,14 +15,10 @@ func extractImports(astFile *AstFile) importMap {
 }
 
 // analyze imports of a given go source
-func parseImportsFromString(source string) importMap {
-
-	var imports importMap = map[string]bool{}
-
+func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{}
-	astFile := p.ParseString("", source, nil, true)
-	imports = extractImports(astFile)
-
+	astFile := p.ParseFile(sourceFile, nil, true)
+	imports := extractImports(astFile)
 	return imports
 }
 
@@ -29,11 +27,8 @@ func parseImports(sourceFiles []string) importMap {
 
 	var imported importMap = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
-		var importedInFile importMap = map[string]bool{}
-		p := &parser{}
-		astFile := p.ParseFile(sourceFile, nil, true)
-		importedInFile = extractImports(astFile)
-		for name, _ := range importedInFile {
+		importsInFile := parseImportsFromFile(sourceFile)
+		for name, _ := range importsInFile {
 			imported[name] = true
 		}
 	}
@@ -107,16 +102,12 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 
 type importMap map[string]bool
 
-func parseImportRecursive(dep map[string]importMap , directDependencies importMap, stdSources map[identifier]string) {
+func parseImportRecursive(dep map[string]importMap , directDependencies importMap) {
 	for spkgName , _ := range directDependencies {
-		pkgName := identifier(spkgName)
-		pkgCode, ok := stdSources[pkgName]
-		if !ok {
-			errorf("package '%s' is not a standard library.", spkgName)
-		}
-		var imports = parseImportsFromString(pkgCode)
+		file := getStdFileName(spkgName)
+		imports := parseImportsFromFile(file)
 		dep[spkgName] = imports
-		parseImportRecursive(dep, imports, stdSources)
+		parseImportRecursive(dep, imports)
 	}
 }
 
@@ -177,10 +168,10 @@ func get0dependentPackages(dep map[string]importMap) []string {
 }
 
 
-func resolveDependency(directDependencies importMap, stdSources map[identifier]string) []string {
+func resolveDependency(directDependencies importMap) []string {
 	var sortedUniqueImports []string
 	var dep map[string]importMap = map[string]importMap{}
-	parseImportRecursive(dep, directDependencies, stdSources)
+	parseImportRecursive(dep, directDependencies)
 
 	for  {
 		//dumpDep(dep)
@@ -197,21 +188,22 @@ func resolveDependency(directDependencies importMap, stdSources map[identifier]s
 	return sortedUniqueImports
 }
 
-// Compile standard libraries
-func compileStdLibs(universe *Scope, directDependencies importMap, stdSources map[identifier]string) map[identifier]*AstPackage {
+func getStdFileName(pkgName string) string {
+	return fmt.Sprintf("stdlib/%s/%s.go", pkgName, pkgName)
+}
 
-	sortedUniqueImports := resolveDependency(directDependencies, stdSources)
+// Compile standard libraries
+func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
+
+	sortedUniqueImports := resolveDependency(directDependencies)
 
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 
 	for _, spkgName := range sortedUniqueImports {
 		pkgName := identifier(spkgName)
-		pkgCode, ok := stdSources[pkgName]
-		if !ok {
-			errorf("package '%s' is not a standard library.", spkgName)
-		}
-		codes := []string{pkgCode}
-		pkg := ParseFiles(pkgName, codes, true)
+		file := getStdFileName(spkgName)
+		files := []string{file}
+		pkg := ParseFiles(pkgName, files, false)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
 		symbolTable.allScopes[pkgName] = pkg.scope
