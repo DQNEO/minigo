@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"./stdlib/strconv"
 )
 
 type identifier string
