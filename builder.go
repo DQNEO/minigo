@@ -15,14 +15,10 @@ func extractImports(astFile *AstFile) importMap {
 }
 
 // analyze imports of a given go source
-func parseImportsFromString(source string) importMap {
-
-	var imports importMap = map[string]bool{}
-
+func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{}
-	astFile := p.ParseString("", source, nil, true)
-	imports = extractImports(astFile)
-
+	astFile := p.ParseFile(sourceFile, nil, true)
+	imports := extractImports(astFile)
 	return imports
 }
 
@@ -111,12 +107,8 @@ type importMap map[string]bool
 
 func parseImportRecursive(dep map[string]importMap , directDependencies importMap, stdSources map[identifier]string) {
 	for spkgName , _ := range directDependencies {
-		pkgName := identifier(spkgName)
-		pkgCode, ok := stdSources[pkgName]
-		if !ok {
-			errorf("package '%s' is not a standard library.", spkgName)
-		}
-		var imports = parseImportsFromString(pkgCode)
+		file := getStdFileName(spkgName)
+		var imports = parseImportsFromFile(file)
 		dep[spkgName] = imports
 		parseImportRecursive(dep, imports, stdSources)
 	}
