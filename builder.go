@@ -120,6 +120,26 @@ func parseImportRecursive(dep map[string]importMap , directDependencies importMa
 	}
 }
 
+func removeResolvedPkg(dep map[string]importMap, pkgToRemove string) map[string]importMap {
+	var dep2 map[string]importMap = map[string]importMap{}
+
+	for pkg1, imports := range dep {
+		if pkg1 == pkgToRemove {
+			continue
+		}
+		var newimports importMap = map[string]bool{}
+		for pkg2, _ := range imports {
+			if pkg2 == pkgToRemove {
+				continue
+			}
+			newimports[pkg2] = true
+		}
+		dep2[pkg1] = newimports
+	}
+
+	return dep2
+}
+
 // parse standard libraries
 func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
 
@@ -130,16 +150,73 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 	// debug dep
 	emit("#------------- dep -----------------")
 	for spkgName, imports := range dep {
-		emit("#  %s", spkgName)
+		emit("#  %s has %d imports:", spkgName, len(imports))
 		for sspkgName, _ := range imports {
 			emit("#    %s", sspkgName)
 		}
 	}
 	emit("#-----------------------------------")
 
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	sortedUniqueImports = []string{"syscall", "bytes", "os", "strconv"}
+	// move 0 depend pacages
+	for spkgName, imports := range dep {
+		var numDepends int
+		for _, flg  := range imports {
+			if flg {
+				numDepends++
+			}
+		}
+		if numDepends == 0 {
+			emit("#  move %s", spkgName)
+			sortedUniqueImports = append(sortedUniqueImports, spkgName)
+		}
+	}
+
+	// mark them resolved
+	for _, resolved := range sortedUniqueImports {
+		dep = removeResolvedPkg(dep, resolved)
+	}
+
+
+	// debug dep
+	emit("#------------- dep -----------------")
+	for spkgName, imports := range dep {
+		emit("#  %s has %d imports:", spkgName, len(imports))
+		for sspkgName, _ := range imports {
+			emit("#    %s", sspkgName)
+		}
+	}
+	emit("#-----------------------------------")
+
+
+	for spkgName, imports := range dep {
+		var numDepends int
+		for _, flg  := range imports {
+			if flg {
+				numDepends++
+			}
+		}
+		if numDepends == 0 {
+			emit("#  move %s", spkgName)
+			sortedUniqueImports = append(sortedUniqueImports, spkgName)
+		}
+	}
+
+	// mark them resolved
+	for _, resolved := range sortedUniqueImports {
+		dep = removeResolvedPkg(dep, resolved)
+	}
+
+	// debug dep
+	emit("#------------- dep -----------------")
+	for spkgName, imports := range dep {
+		emit("#  %s has %d imports:", spkgName, len(imports))
+		for sspkgName, _ := range imports {
+			emit("#    %s", sspkgName)
+		}
+	}
+	emit("#-----------------------------------")
+
+
 	for spkgName, _ := range dep {
 		if !inArray(spkgName, sortedUniqueImports) {
 			sortedUniqueImports = append(sortedUniqueImports, spkgName)
@@ -162,6 +239,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 
 	return compiledStdPkgs
 }
+
 
 type Program struct {
 	packages    []*AstPackage
