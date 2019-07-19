@@ -1,22 +1,40 @@
 // builder builds packages
 package main
 
-// analyze imports of given go files
-func parseImports(sourceFiles []string) []string {
+func extractImports(astFile *AstFile) importMap {
+	var imports importMap = map[string]bool{}
+	for _, importDecl := range astFile.importDecls {
+		for _, spec := range importDecl.specs {
+			baseName := getBaseNameFromImport(spec.path)
+			imports[baseName] = true
+		}
+	}
+	return imports
+}
 
-	// "fmt" depends on "os. So inject it in advance.
-	// Actually, dependency graph should be analyzed.
-	imported := []string{"syscall", "io", "bytes", "os", "strconv"}
+// analyze imports of a given go source
+func parseImportsFromString(source string) importMap {
+
+	var imports importMap = map[string]bool{}
+
+	p := &parser{}
+	astFile := p.ParseString("", source, nil, true)
+	imports = extractImports(astFile)
+
+	return imports
+}
+
+// analyze imports of given go files
+func parseImports(sourceFiles []string) importMap {
+
+	var imported importMap = map[string]bool{}
 	for _, sourceFile := range sourceFiles {
+		var importedInFile importMap = map[string]bool{}
 		p := &parser{}
 		astFile := p.ParseFile(sourceFile, nil, true)
-		for _, importDecl := range astFile.importDecls {
-			for _, spec := range importDecl.specs {
-				baseName := getBaseNameFromImport(spec.path)
-				if !inArray(baseName, imported) {
-					imported = append(imported, baseName)
-				}
-			}
+		importedInFile = extractImports(astFile)
+		for name, _ := range importedInFile {
+			imported[name] = true
 		}
 	}
 
@@ -87,51 +105,121 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
-// parse standard libraries
-func compileStdLibs(universe *Scope, imported []string) *compiledStdlib {
-	libs := &compiledStdlib{
-		compiledPackages:         map[identifier]*AstPackage{},
-		uniqImportedPackageNames: nil,
-	}
-	stdPkgs := makeStdLib()
+type importMap map[string]bool
 
-	for _, spkgName := range imported {
+func parseImportRecursive(dep map[string]importMap , directDependencies importMap, stdSources map[identifier]string) {
+	for spkgName , _ := range directDependencies {
 		pkgName := identifier(spkgName)
-		pkgCode, ok := stdPkgs[pkgName]
+		pkgCode, ok := stdSources[pkgName]
 		if !ok {
 			errorf("package '%s' is not a standard library.", spkgName)
 		}
-		codes := []string{string(pkgCode)}
+		var imports = parseImportsFromString(pkgCode)
+		dep[spkgName] = imports
+		parseImportRecursive(dep, imports, stdSources)
+	}
+}
+
+func removeResolvedPkg(dep map[string]importMap, pkgToRemove string) map[string]importMap {
+	var dep2 map[string]importMap = map[string]importMap{}
+
+	for pkg1, imports := range dep {
+		if pkg1 == pkgToRemove {
+			continue
+		}
+		var newimports importMap = map[string]bool{}
+		for pkg2, _ := range imports {
+			if pkg2 == pkgToRemove {
+				continue
+			}
+			newimports[pkg2] = true
+		}
+		dep2[pkg1] = newimports
+	}
+
+	return dep2
+}
+
+func removeResolvedPackages(dep map[string]importMap, sortedUniqueImports []string) map[string]importMap {
+	for _, resolved := range sortedUniqueImports {
+		dep = removeResolvedPkg(dep, resolved)
+	}
+	return dep
+}
+
+func dumpDep(dep map[string]importMap) {
+	debugf("#------------- dep -----------------")
+	for spkgName, imports := range dep {
+		debugf("#  %s has %d imports:", spkgName, len(imports))
+		for sspkgName, _ := range imports {
+			debugf("#    %s", sspkgName)
+		}
+	}
+}
+
+func get0dependentPackages(dep map[string]importMap) []string {
+	var moved []string
+	if len(dep) == 0 {
+		return nil
+	}
+	for spkgName, imports := range dep {
+		var numDepends int
+		for _, flg  := range imports {
+			if flg {
+				numDepends++
+			}
+		}
+		if numDepends == 0 {
+			moved = append(moved, spkgName)
+		}
+	}
+	return moved
+}
+
+
+func resolveDependency(directDependencies importMap, stdSources map[identifier]string) []string {
+	var sortedUniqueImports []string
+	var dep map[string]importMap = map[string]importMap{}
+	parseImportRecursive(dep, directDependencies, stdSources)
+
+	for  {
+		//dumpDep(dep)
+		moved := get0dependentPackages(dep)
+		if len(moved) == 0 {
+			break
+		}
+		dep = removeResolvedPackages(dep, moved)
+		for _, pkg := range moved {
+			sortedUniqueImports = append(sortedUniqueImports, pkg)
+		}
+
+	}
+	return sortedUniqueImports
+}
+
+// Compile standard libraries
+func compileStdLibs(universe *Scope, directDependencies importMap, stdSources map[identifier]string) map[identifier]*AstPackage {
+
+	sortedUniqueImports := resolveDependency(directDependencies, stdSources)
+
+	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
+
+	for _, spkgName := range sortedUniqueImports {
+		pkgName := identifier(spkgName)
+		pkgCode, ok := stdSources[pkgName]
+		if !ok {
+			errorf("package '%s' is not a standard library.", spkgName)
+		}
+		codes := []string{pkgCode}
 		pkg := ParseFiles(pkgName, codes, true)
 		pkg = makePkg(pkg, universe)
-		libs.AddPackage(pkg)
-		symbolTable.allScopes[identifier(pkgName)] = pkg.scope
+		compiledStdPkgs[pkgName] = pkg
+		symbolTable.allScopes[pkgName] = pkg.scope
 	}
 
-	return libs
+	return compiledStdPkgs
 }
 
-type compiledStdlib struct {
-	compiledPackages         map[identifier]*AstPackage
-	uniqImportedPackageNames []string
-}
-
-func (csl *compiledStdlib) getPackages() []*AstPackage {
-	var importedPackages []*AstPackage
-
-	for _, pkgName := range csl.uniqImportedPackageNames {
-		compiledPkg := csl.compiledPackages[identifier(pkgName)]
-		importedPackages = append(importedPackages, compiledPkg)
-	}
-	return importedPackages
-}
-
-func (csl *compiledStdlib) AddPackage(pkg *AstPackage) {
-	csl.compiledPackages[pkg.name] = pkg
-	if !inArray(string(pkg.name), csl.uniqImportedPackageNames) {
-		csl.uniqImportedPackageNames = append(csl.uniqImportedPackageNames, string(pkg.name))
-	}
-}
 
 type Program struct {
 	packages    []*AstPackage
@@ -139,17 +227,15 @@ type Program struct {
 	importOS    bool
 }
 
-func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, mainPkg *AstPackage) *Program {
+func build(universe *AstPackage, iruntime *AstPackage, stdPkgs map[identifier]*AstPackage, mainPkg *AstPackage) *Program {
 	var packages []*AstPackage
 
 	packages = append(packages, universe)
+	packages = append(packages, iruntime)
 
-	importedPackages := csl.getPackages()
-	for _, pkg := range importedPackages {
+	for _, pkg := range stdPkgs {
 		packages = append(packages, pkg)
 	}
-
-	packages = append(packages, iruntime)
 
 	packages = append(packages, mainPkg)
 
@@ -183,7 +269,8 @@ func build(universe *AstPackage, iruntime *AstPackage, csl *compiledStdlib, main
 
 	program := &Program{}
 	program.packages = packages
-	program.importOS = inArray("os", csl.uniqImportedPackageNames)
+	_, importOS := stdPkgs["os"]
+	program.importOS = importOS
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
