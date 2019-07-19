@@ -140,6 +140,13 @@ func removeResolvedPkg(dep map[string]importMap, pkgToRemove string) map[string]
 	return dep2
 }
 
+func removeResolvedPackages(dep map[string]importMap, sortedUniqueImports []string) map[string]importMap {
+	for _, resolved := range sortedUniqueImports {
+		dep = removeResolvedPkg(dep, resolved)
+	}
+	return dep
+}
+
 // parse standard libraries
 func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
 
@@ -170,11 +177,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 			sortedUniqueImports = append(sortedUniqueImports, spkgName)
 		}
 	}
-
-	// mark them resolved
-	for _, resolved := range sortedUniqueImports {
-		dep = removeResolvedPkg(dep, resolved)
-	}
+	dep = removeResolvedPackages(dep, sortedUniqueImports)
 
 
 	// debug dep
@@ -201,10 +204,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 		}
 	}
 
-	// mark them resolved
-	for _, resolved := range sortedUniqueImports {
-		dep = removeResolvedPkg(dep, resolved)
-	}
+	dep = removeResolvedPackages(dep, sortedUniqueImports)
 
 	// debug dep
 	emit("#------------- dep -----------------")
