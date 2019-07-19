@@ -147,81 +147,56 @@ func removeResolvedPackages(dep map[string]importMap, sortedUniqueImports []stri
 	return dep
 }
 
+func dumpDep(dep map[string]importMap) {
+	emit("#------------- dep -----------------")
+	for spkgName, imports := range dep {
+		emit("#  %s has %d imports:", spkgName, len(imports))
+		for sspkgName, _ := range imports {
+			emit("#    %s", sspkgName)
+		}
+	}
+}
+
+func get0dependentPackages(dep map[string]importMap) []string {
+	var moved []string
+	if len(dep) == 0 {
+		return nil
+	}
+	for spkgName, imports := range dep {
+		var numDepends int
+		for _, flg  := range imports {
+			if flg {
+				numDepends++
+			}
+		}
+		if numDepends == 0 {
+			moved = append(moved, spkgName)
+		}
+	}
+	return moved
+}
+
 // parse standard libraries
 func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
 
 	var sortedUniqueImports []string
 	var dep map[string]importMap = map[string]importMap{}
 	parseImportRecursive(dep, directDependencies)
+	var moved []string
 
-	// debug dep
-	emit("#------------- dep -----------------")
-	for spkgName, imports := range dep {
-		emit("#  %s has %d imports:", spkgName, len(imports))
-		for sspkgName, _ := range imports {
-			emit("#    %s", sspkgName)
+	for  {
+		//dumpDep(dep)
+		moved = get0dependentPackages(dep)
+		if len(moved) == 0 {
+			break
 		}
-	}
-	emit("#-----------------------------------")
+		dep = removeResolvedPackages(dep, moved)
+		for _, pkg := range moved {
+			sortedUniqueImports = append(sortedUniqueImports, pkg)
+		}
 
-	// move 0 depend pacages
-	for spkgName, imports := range dep {
-		var numDepends int
-		for _, flg  := range imports {
-			if flg {
-				numDepends++
-			}
-		}
-		if numDepends == 0 {
-			emit("#  move %s", spkgName)
-			sortedUniqueImports = append(sortedUniqueImports, spkgName)
-		}
-	}
-	dep = removeResolvedPackages(dep, sortedUniqueImports)
-
-
-	// debug dep
-	emit("#------------- dep -----------------")
-	for spkgName, imports := range dep {
-		emit("#  %s has %d imports:", spkgName, len(imports))
-		for sspkgName, _ := range imports {
-			emit("#    %s", sspkgName)
-		}
-	}
-	emit("#-----------------------------------")
-
-
-	for spkgName, imports := range dep {
-		var numDepends int
-		for _, flg  := range imports {
-			if flg {
-				numDepends++
-			}
-		}
-		if numDepends == 0 {
-			emit("#  move %s", spkgName)
-			sortedUniqueImports = append(sortedUniqueImports, spkgName)
-		}
 	}
 
-	dep = removeResolvedPackages(dep, sortedUniqueImports)
-
-	// debug dep
-	emit("#------------- dep -----------------")
-	for spkgName, imports := range dep {
-		emit("#  %s has %d imports:", spkgName, len(imports))
-		for sspkgName, _ := range imports {
-			emit("#    %s", sspkgName)
-		}
-	}
-	emit("#-----------------------------------")
-
-
-	for spkgName, _ := range dep {
-		if !inArray(spkgName, sortedUniqueImports) {
-			sortedUniqueImports = append(sortedUniqueImports, spkgName)
-		}
-	}
 	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
 
 	for _, spkgName := range sortedUniqueImports {
