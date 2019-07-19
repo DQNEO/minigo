@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"./stdlib/fmt"
 	"os"
-	"strings"
+	"./stdlib/strings"
 )
 
 var GENERATION int = 1

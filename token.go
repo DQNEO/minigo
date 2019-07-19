@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"./stdlib/fmt"
 	"os"
-	"strconv"
+	"./stdlib/strconv"
 )
 
 type identifier string
