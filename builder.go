@@ -1,7 +1,7 @@
 // builder builds packages
 package main
 
-import "fmt"
+import "./stdlib/fmt"
 
 func extractImports(astFile *AstFile) importMap {
 	var imports importMap = map[string]bool{}
