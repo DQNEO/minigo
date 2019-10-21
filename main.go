@@ -56,8 +56,8 @@ func parseOpts(args []string) []string {
 		if opt == "--resolve-only" {
 			resolveOnly = true
 		}
-		if strings.HasSuffix(string(opt), ".go") {
-			r = append(r, string(opt))
+		if strings.HasSuffix(opt, ".go") {
+			r = append(r, opt)
 		} else if opt == "-" {
 			return []string{"/dev/stdin"}
 		}
