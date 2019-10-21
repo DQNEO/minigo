@@ -26,8 +26,7 @@ func printVersion() {
 func parseOpts(args []string) []string {
 	var r []string
 
-	for _, _opt := range args {
-		opt := _opt
+	for _, opt := range args {
 		if opt == "--version" {
 			printVersion()
 			return nil
