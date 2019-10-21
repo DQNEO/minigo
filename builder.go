@@ -219,25 +219,25 @@ type Program struct {
 	importOS    bool
 }
 
-func build(universe *AstPackage, iruntime *AstPackage, stdPkgs map[identifier]*AstPackage, mainPkg *AstPackage) *Program {
+func build(pkgUniverse *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
 	var packages []*AstPackage
 
-	packages = append(packages, universe)
-	packages = append(packages, iruntime)
+	packages = append(packages, pkgUniverse)
+	packages = append(packages, pkgIRuntime)
 
 	for _, pkg := range stdPkgs {
 		packages = append(packages, pkg)
 	}
 
-	packages = append(packages, mainPkg)
+	packages = append(packages, pkgMain)
 
 	var dynamicTypes []*Gtype
 	var funcs []*DeclFunc
 
 	for _, pkg := range packages {
 		collectDecls(pkg)
-		if pkg == universe {
-			setStringLables(pkg, "universe")
+		if pkg == pkgUniverse {
+			setStringLables(pkg, "pkgUniverse")
 		} else {
 			setStringLables(pkg, pkg.name)
 		}

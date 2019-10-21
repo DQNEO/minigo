@@ -86,8 +86,8 @@ func main() {
 	// setup the universe scope
 	universe := newUniverse()
 
-	u := compileUniverse(universe)
-	r := compileRuntime(universe)
+	pkgUniverse := compileUniverse(universe)
+	pkgIRuntime := compileRuntime(universe)
 
 
 	symbolTable = &SymbolTable{}
@@ -96,11 +96,11 @@ func main() {
 	directDependencies := parseImports(sourceFiles)
 	libs := compileStdLibs(universe, directDependencies)
 
-	m := compileFiles(universe, sourceFiles)
-	if m == nil {
+	pkgMain := compileFiles(universe, sourceFiles)
+	if pkgMain == nil {
 		return
 	}
 
-	program := build(u, r, libs, m)
+	program := build(pkgUniverse, pkgIRuntime, libs, pkgMain)
 	program.emit()
 }
