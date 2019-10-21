@@ -26,8 +26,15 @@ func paren() {
 	fmt.Printf("%d\n", y)
 }
 
+func sum(a int, b int) int {
+	return a + b
+}
+
 func main() {
 	divmode()
 	uop_minus()
 	paren()
+
+	s := sum(3, 5)
+	fmt.Printf("%d\n", s)
 }
