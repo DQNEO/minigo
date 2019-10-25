@@ -1,4 +1,4 @@
-# Minigo
+# Minigo🐥
 
 [![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
 
@@ -6,7 +6,7 @@ A Go compiler from scratch.
 
 # Description
 
-`minigo` is a small Go compiler made from scratch. It can compile itself.
+`minigo🐥` is a small Go compiler made from scratch. It can compile itself.
 
 * No dependency on yacc/lex
 * No dependency on external libraries
