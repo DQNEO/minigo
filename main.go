@@ -18,9 +18,11 @@ var parseOnly = false
 var resolveOnly = false
 var emitPosition = false
 
+var _printVersion = false
 func printVersion() {
-	fmt.Println("minigo 0.2.1")
+	fmt.Println("minigo 0.3.0")
 	fmt.Println("Copyright (C) 2019 @DQNEO")
+	_printVersion = true
 }
 
 func parseOpts(args []string) []string {
@@ -74,6 +76,9 @@ func main() {
 	}
 
 	if len(sourceFiles) == 0 {
+		if _printVersion {
+			return
+		}
 		fmt.Println("No input files.")
 		return
 	}
