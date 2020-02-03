@@ -90,7 +90,7 @@ func panic(msg []byte) {
 	printstring([]byte("panic: "))
 	printstring(msg)
 	printstring([]byte("\n"))
-	exit(1)
+	syscallwrapper(60, 1) // exit with 1  https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl#L71
 }
 
 func reportMemoryUsage() {

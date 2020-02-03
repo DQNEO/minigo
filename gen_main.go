@@ -111,6 +111,7 @@ func (program *Program) emit() {
 
 	emitMainFunc(program.importOS)
 	emitMakeSliceFunc()
+	emitSyscallWrapperFunc()
 
 	// emit packages
 	for _, pkg := range program.packages {
@@ -169,4 +170,23 @@ func emitMainFunc(importOS bool) {
 	emit("FUNCALL main.main")
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 	emitFuncEpilogue("noop_handler", nil)
+}
+
+func emitSyscallWrapperFunc() {
+	// syscall
+	emitWithoutIndent("%s:", "syscallwrapper")
+	emit("FUNC_PROLOGUE")
+	emitNewline()
+	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
+	emit("movq %%rdi, %%rax") // Syscall number
+	emit("movq %%rsi, %%rdi") // shift arg1
+	emit("movq %%rdx, %%rsi") // shift arg2
+	emit("movq %%rcx, %%rdx") // shift arg3
+	emit("movq %%r8, %%r10")  // shift arg4
+	emit("movq %%r9, %%r8")   // shift arg5
+	emit("movq 8(%%rsp),%%r9")	/* arg6 is on the stack.  */
+	emit("syscall")			/* Do the system call.  */
+	emit("cmpq $-4095, %%rax")
+	emit("LEAVE_AND_RET")			/* Return to caller.  */
+	emitNewline()
 }
