@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"syscall"
 )
 
 import "fmt"
@@ -13,11 +14,11 @@ var buf [1024]byte
 
 func main() {
 	var fd int
-
+	var b []byte = buf[0:len(buf)]
 	fname := os.Args[1]
-	var filename *byte = fname
-	fd = open(filename, O_RDONLY)
-	ln := read(fd, buf, MYBUFSIZ)
+
+	fd, _= syscall.Open(fname, O_RDONLY, 0)
+	ln, _ := syscall.Read(fd, b)
 	s := buf[0:ln]
 	fmt.Printf("%s", s)
 }
