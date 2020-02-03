@@ -92,7 +92,14 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareNil(universe)
 	predeclareTypes(universe)
 	predeclareConsts(universe)
-	predeclareLibcFuncs(universe)
+
+	// treat "syscall" specially
+	universe.setFunc(identifier("syscall"), &ExprFuncRef{
+		funcdef: &DeclFunc{
+			pkg:      identifier("libc"),
+			rettypes: []*Gtype{gInt},
+		},
+	})
 
 	universe.setFunc(identifier("panic"), &ExprFuncRef{
 		funcdef: builtinPanic,
@@ -167,21 +174,4 @@ func predeclareConsts(universe *Scope) {
 	})
 
 	universe.setConst(identifier("iota"), eIota)
-}
-
-func predeclareLibcFuncs(universe *Scope) {
-	libc := identifier("libc")
-
-	universe.setFunc(identifier("exit"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg: libc,
-		},
-	})
-
-	universe.setFunc(identifier("syscall"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg:      libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
 }
