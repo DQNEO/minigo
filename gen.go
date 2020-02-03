@@ -95,8 +95,8 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 
 // "main","f1" -> "main.f1"
 func getFuncSymbol(pkg identifier, fname string) string {
-	if string(pkg) == "libc" {
-		return fname
+	if len(pkg) == 0 {
+		return Sprintf(".%s", fname)
 	}
 	s := Sprintf("%s.%s", pkg, fname)
 	return s

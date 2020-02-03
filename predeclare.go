@@ -92,7 +92,6 @@ func setPredeclaredIdentifiers(universe *Scope) {
 
 	universe.setFunc(identifier("syscallwrapper"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg: identifier("libc"),
 			rettypes: []*Gtype{gInt},
 		},
 	})
