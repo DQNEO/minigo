@@ -177,26 +177,6 @@ func predeclareLibcFuncs(universe *Scope) {
 			pkg: libc,
 		},
 	})
-	universe.setFunc(identifier("open"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg:      libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
-
-	universe.setFunc(identifier("read"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg:      libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
-
-	universe.setFunc(identifier("write"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			pkg:      libc,
-			rettypes: []*Gtype{gInt},
-		},
-	})
 
 	universe.setFunc(identifier("syscall"), &ExprFuncRef{
 		funcdef: &DeclFunc{
