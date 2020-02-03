@@ -79,14 +79,6 @@ func (fd *PollFD) Read(b []byte) (int, error) {
 	return n,err
 }
 
-func (f *File) read(p []byte) (int, error) {
-	fd := f.innerFile.fd
-	var n int
-	var err error
-	n, err = fd.Read(p)
-	return n, err
-}
-
 func (f *File) write(b []byte) (int, error) {
 	fd := f.innerFile.fd
 	var n int
@@ -98,6 +90,14 @@ func (f *File) write(b []byte) (int, error) {
 // Write writes len(b) bytes to the File.
 func (f *File) Write(b []byte) (int, error) {
 	n, err := f.write(b)
+	return n, err
+}
+
+func (f *File) read(p []byte) (int, error) {
+	fd := f.innerFile.fd
+	var n int
+	var err error
+	n, err = fd.Read(p)
 	return n, err
 }
 
