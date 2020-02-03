@@ -6,6 +6,8 @@ func BytePtrFromString(s string) *byte {
 	return r
 }
 
+// 64-bit system call numbers
+const __x64_sys_read = 0
 const __x64_sys_write = 1
 const __x64_sys_open = 2
 
@@ -28,6 +30,6 @@ func Read(fd int, b []byte) (int, error) {
 	var ptr *byte
 	ptr = &b[0]
 	var nread int
-	nread = read(fd, ptr, cap(b))
+	nread = syscall(__x64_sys_read, fd, ptr, cap(b))
 	return nread, nil
 }
