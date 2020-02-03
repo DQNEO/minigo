@@ -1,6 +1,7 @@
 package bytes
 
 import "io"
+import "os"
 
 type Buffer struct {
 	bytes []byte
@@ -13,7 +14,7 @@ func (b *Buffer) Grow(capacity int) {
 	b.buf = buf
 }
 
-func (b *Buffer) ReadFrom(br *File) (int, error) {
+func (b *Buffer) ReadFrom(br *os.File) (int, error) {
 	var nread int
 	var err error
 
@@ -25,24 +26,4 @@ func (b *Buffer) ReadFrom(br *File) (int, error) {
 
 func (b *Buffer) Bytes() []byte {
 	return b.bytes
-}
-
-
-type File struct {
-	fd int
-}
-
-func (f *File) Fd() int {
-	return f.fd
-}
-
-// Read implements io.Reader
-func (f *File) Read(p []byte) (int, error) {
-	//fd := f.innerFile.fd
-	fd := f.Fd()
-	var ptr *byte
-	ptr = &p[0]
-	var nread int
-	nread = read(fd, ptr, cap(p))
-	return nread, nil
 }
