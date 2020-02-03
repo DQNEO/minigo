@@ -77,10 +77,6 @@ var sSliceType Gtype = Gtype{
 	},
 }
 
-var builtinPrintstring = &DeclFunc{
-	rettypes: []*Gtype{},
-}
-
 func newUniverse() *Scope {
 	universe := newScope(nil, "universe")
 	setPredeclaredIdentifiers(universe)
@@ -132,11 +128,6 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	universe.setFunc(identifier("asComment"), &ExprFuncRef{
 		funcdef: builtinAsComment,
 	})
-
-	universe.setFunc(identifier("printstring"), &ExprFuncRef{
-		funcdef: builtinPrintstring,
-	})
-
 }
 
 // Zero value:

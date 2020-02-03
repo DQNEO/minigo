@@ -86,6 +86,12 @@ func itoa(i int) []byte {
 	return r
 }
 
+func printstring(b []byte) {
+	var addr *byte = &b[0]
+	var n int
+	syscallwrapper(1, 1, addr, len(b))
+}
+
 func panic(msg []byte) {
 	printstring([]byte("panic: "))
 	printstring(msg)
