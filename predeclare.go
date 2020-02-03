@@ -93,10 +93,10 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareTypes(universe)
 	predeclareConsts(universe)
 
-	// treat "syscall" specially
-	universe.setFunc(identifier("syscall"), &ExprFuncRef{
+
+	universe.setFunc(identifier("syscallwrapper"), &ExprFuncRef{
 		funcdef: &DeclFunc{
-			pkg:      identifier("libc"),
+			pkg: identifier("libc"),
 			rettypes: []*Gtype{gInt},
 		},
 	})
