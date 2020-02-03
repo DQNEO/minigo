@@ -72,6 +72,13 @@ func (fd *PollFD) Write(b []byte) (int, error) {
 	return n,err
 }
 
+func (fd *PollFD) Read(b []byte) (int, error) {
+	var n int
+	var err error
+	n, err = syscall.Read(fd.Sysfd, b)
+	return n,err
+}
+
 func (f *File) write(b []byte) (int, error) {
 	fd := f.innerFile.fd
 	var n int
@@ -84,6 +91,20 @@ func (f *File) write(b []byte) (int, error) {
 func (f *File) Write(b []byte) (int, error) {
 	n, err := f.write(b)
 	return n, err
+}
+
+func (f *File) read(p []byte) (int, error) {
+	fd := f.innerFile.fd
+	var n int
+	var err error
+	n, err = fd.Read(p)
+	return n, err
+}
+
+// Read reads up to len(b) bytes from the File.
+func (f *File) Read(p []byte) (int, error) {
+	//fd := f.innerFile.fd
+	return f.read(p)
 }
 
 func Exit(i int) {

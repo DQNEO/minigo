@@ -20,3 +20,11 @@ func Write(fd int, b []byte) (int, error) {
 	n = write(fd, addr, len(b))
 	return n, nil
 }
+
+func Read(fd int, b []byte) (int, error) {
+	var ptr *byte
+	ptr = &b[0]
+	var nread int
+	nread = read(fd, ptr, cap(b))
+	return nread, nil
+}
