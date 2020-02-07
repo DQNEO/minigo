@@ -3,6 +3,8 @@ package main
 import "fmt"
 import "strings"
 
+const __x64_sys_exit int = 60
+
 // builtin string
 var builtinStringKey1 string = string("SfmtDumpInterface")
 var builtinStringValue1 string = string("# interface = {ptr:%p,receiverTypeId:%d,dtype:'%s'}")
@@ -170,6 +172,11 @@ func emitMainFunc(importOS bool) {
 	emit("FUNCALL main.main")
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 	emitFuncEpilogue("noop_handler", nil)
+
+	// exit(0)
+	emit("mov $%d, %%rax", __x64_sys_exit) // 1st argument
+	emit("mov $0,  %%rdi") // int 0
+	emit("syscall")
 }
 
 func emitSyscallWrapperFunc() {
