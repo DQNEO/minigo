@@ -8,11 +8,11 @@ A Go compiler from scratch.
 
 `minigo🐥` is a small Go compiler made from scratch. It can compile itself.
 
-* Generates a static single binary executable
+* Generates a single static  binary executable
 * No dependency on yacc/lex or any external libraries
 * Standard libraries are also made from scratch
 
-It depends only on GNU Assembler and a linker.
+It depends only on GNU Assembler and gcc as a linker.
 
 `minigo` supports x86-64 Linux only.
  
