@@ -145,21 +145,20 @@ func (program *Program) emit() {
 }
 
 func emitMainFunc(importOS bool) {
-	fname := "main"
+	fname := "_start"
 	emit(".global	%s", fname)
 	emitWithoutIndent("%s:", fname)
-	emit("mov %%rdi, %%r10")
-	emit("mov %%rsi, %%r11")
-	emit("mov $0, %%rsi")
-	emit("mov $0, %%rdi")
+
+	emit("pop %%rax # argc")  // get argc from stack top
+	emit("mov %%rsp, %%rbx # argv") // now %rsp value equals to argv
 
 	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "libcArgs")
-	emit("mov %%r11, %s(%%rip)", symbolArgs) // argv
-	emit("mov %%r10, %s+8(%%rip)", symbolArgs) // argc
-	emit("mov %%r10, %s+16(%%rip)", symbolArgs) // argc
+	emit("mov %%rbx, %s(%%rip)", symbolArgs) // argv
+	emit("mov %%rax, %s+8(%%rip)", symbolArgs) // argc
+	emit("mov %%rax, %s+16(%%rip)", symbolArgs) // argc
 
-	emit("mov $0, %%r10")
-	emit("mov $0, %%r11")
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
 
 	// init runtime
 	emit("# init runtime")
