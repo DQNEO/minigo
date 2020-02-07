@@ -145,18 +145,20 @@ func (program *Program) emit() {
 }
 
 func emitMainFunc(importOS bool) {
-	fname := "main"
+	fname := "_start"
 	emit(".global	%s", fname)
 	emitWithoutIndent("%s:", fname)
-	emit("push %%rbp")
-	emit("mov %%rsp, %%rbp")
 
-	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "libcArgs")
-	emit("mov %%rsi, %s(%%rip)", symbolArgs)
-	emit("mov %%rdi, %s+8(%%rip)", symbolArgs)
-	emit("mov %%rdi, %s+16(%%rip)", symbolArgs)
-	emit("mov $0, %%rsi")
-	emit("mov $0, %%rdi")
+	emit("pop %%rax # argc")  // get argc from stack top
+	emit("mov %%rsp, %%rbx # argv") // now %rsp value equals to argv
+
+	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "_argv")
+	emit("mov %%rbx, %s(%%rip)", symbolArgs)    // ptr
+	emit("mov %%rax, %s+8(%%rip)", symbolArgs)  // len
+	emit("mov %%rax, %s+16(%%rip)", symbolArgs) // cap
+
+	emit("mov $0, %%rax")
+	emit("mov $0, %%rbx")
 
 	// init runtime
 	emit("# init runtime")
@@ -171,7 +173,6 @@ func emitMainFunc(importOS bool) {
 	emitNewline()
 	emit("FUNCALL main.main")
 	//emit("FUNCALL iruntime.reportMemoryUsage")
-	emitFuncEpilogue("noop_handler", nil)
 
 	// exit(0)
 	emit("mov $%d, %%rax", __x64_sys_exit) // 1st argument

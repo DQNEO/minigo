@@ -2,7 +2,7 @@
 
 ./minigo terror/panic/panic.go > /tmp/out/a.s
 
-gcc -g -no-pie /tmp/out/a.s && ./a.out >/dev/null
+gcc -nostdlib -g -no-pie /tmp/out/a.s && ./a.out >/dev/null
 
 if [[ $? -ne 1 ]]; then
     echo "FAILED"
