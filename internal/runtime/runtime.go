@@ -1,6 +1,6 @@
 package iruntime
 
-var libcArgs []*byte
+var _argv []*byte
 
 var heap [640485760]byte
 var heapTail *int
@@ -31,7 +31,7 @@ func cstring2string(b *byte) string {
 
 func runtime_args() []string {
 	var r []string
-	for _, a := range libcArgs {
+	for _, a := range _argv {
 		// Convert *byte to string
 		var s string = cstring2string(a)
 		r = append(r, s)
