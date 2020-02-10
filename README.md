@@ -42,9 +42,10 @@ After entering the container, you can build and run it.
 
 ```sh
 $ make
-$ ./minigo t/hello/hello.go > a.s
-$ gcc -g -no-pie a.s
-$ ./a.out
+$ ./minigo t/hello/hello.go > hello.s
+$ as -o hello.o hello.s
+$ gcc -nostdlib -g -no-pie -o hello hello.o
+$ ./hello
 hello world
 ```
 
@@ -57,13 +58,15 @@ minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 
 $ ./minigo *.go > /tmp/minigo2.s
-$ gcc -no-pie -o minigo2 /tmp/minigo2.s
+$ as -o /tmp/minigo2.o /tmp/minigo2.s
+$ gcc -nostdlib -no-pie -o minigo2 /tmp/minigo2.o
 $ ./minigo2 --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO
 
 $ ./minigo2 *.go > /tmp/minigo3.s
-$ gcc -no-pie -o minigo3 /tmp/minigo3.s
+$ as -o /tmp/minigo3.o /tmp/minigo3.s
+$ gcc -nostdlib -no-pie -o minigo3 /tmp/minigo3.o
 $ ./minigo3 --version
 minigo 0.1.0
 Copyright (C) 2019 @DQNEO

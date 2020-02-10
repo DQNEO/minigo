@@ -1,8 +1,10 @@
 /out
 /minigo
 /minigo.s
+/minigo.o
 /minigo2
 /minigo2.s
+/minigo2.o
 /minigo3
 /minigo3.s
 a.go
@@ -12,3 +14,8 @@ a.go
 /child
 /tmp/
 minigo.pos.s
+
+# Ignore generated file in README example
+/hello
+/hello.o
+/hello.s
