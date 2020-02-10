@@ -32,7 +32,7 @@ function as_run {
     as -o $obj_file $as_file
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
-    gcc -nostdlib -no-pie -o $bin_file $obj_file
+    ld -o $bin_file $obj_file
     $bin_file $ARGS > $actual
     diff -u $expected $actual
 }

@@ -25,7 +25,7 @@ minigo.s: minigo
 # 2gen compiler
 minigo2: minigo.s
 	as -o minigo.o minigo.s
-	gcc -nostdlib -g -no-pie -o minigo2  minigo.o
+	ld -o minigo2 minigo.o
 
 # assembly for 3gen
 minigo2.s: minigo2
@@ -35,7 +35,7 @@ minigo2.s: minigo2
 # 3gen compiler
 minigo3: minigo2.s
 	as -o minigo2.o minigo2.s
-	gcc -nostdlib -g -no-pie -o minigo3 minigo2.o
+	ld -o minigo3 minigo2.o
 
 # assembly for 4gen
 minigo3.s: minigo3
