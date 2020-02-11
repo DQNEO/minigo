@@ -1,6 +1,5 @@
 # All the commands are supposed to run on Linux.
-# I use Docker like below.
-# docker run -it --rm -w /mnt -v `pwd`:/mnt --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' --tmpfs=/tmp/tmpfs:rw,size=500m,mode=1777 dqneo/ubuntu-build-essential:go bash
+# I use Docker. Please see README.md
 
 all: minigo /tmp/tmpfs
 

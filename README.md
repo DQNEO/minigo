@@ -84,6 +84,15 @@ $ diff /tmp/minigo2.s /tmp/minigo3.s
 $ make test
 ```
 
+# Debug by gdb
+
+Add `--cap-add=SYS_PTRACE --security-opt='seccomp=unconfined'` option to `docker run`.
+It will allow you to use `gdb` in the docker image.
+
+```
+docker run --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' -it --rm -w /mnt -v `pwd`:/mnt --tmpfs=/tmp/tmpfs:rw,size=500m,mode=1777 dqneo/ubuntu-build-essential:go bash
+```
+
 # AUTHOR
 
 [@DQNEO](https://twitter.com/DQNEO)
