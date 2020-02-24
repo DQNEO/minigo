@@ -7,9 +7,11 @@ func BytePtrFromString(s string) *byte {
 }
 
 // 64-bit system call numbers
+// https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl#L11
 const __x64_sys_read = 0
 const __x64_sys_write = 1
 const __x64_sys_open = 2
+const __x64_sys_exit = 60
 
 func Open(path string, flag int, perm int) (int, error) {
 	var fd int
@@ -32,4 +34,9 @@ func Read(fd int, b []byte) (int, error) {
 	var nread int
 	nread = syscallwrapper(__x64_sys_read, fd, ptr, cap(b))
 	return nread, nil
+}
+
+func Exit(code int) {
+	syscallwrapper(__x64_sys_exit, code)
+	return
 }

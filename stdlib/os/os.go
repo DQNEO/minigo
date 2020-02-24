@@ -107,7 +107,8 @@ func (f *File) Read(p []byte) (int, error) {
 	return f.read(p)
 }
 
-func Exit(i int) {
+func Exit(code int) {
+	syscall.Exit(code)
 }
 
 var Args []string

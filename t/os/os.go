@@ -24,4 +24,5 @@ func f1() {
 func main() {
 	f0()
 	f1()
+	os.Exit(0)
 }
