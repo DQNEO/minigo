@@ -7,7 +7,7 @@ program="minigo"
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    ./unit_test.sh $program $name
+    ./unit_test.sh $program $name 1
     if [[ $? -ne 0 ]];then
         differ=1
     fi

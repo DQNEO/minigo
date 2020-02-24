@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 progname=$1
 basename=$2
 suffix=$3
@@ -9,11 +9,7 @@ out_dir=/tmp/out
 out_dir_as=/tmp/tmpfs/out
 mkdir -p $out_dir $out_dir_as
 
-if [[ -z $suffix ]];then
-    as_file=$out_dir_as/${basename}.s
-else
-    as_file=$out_dir_as/${basename}.${suffix}.s
-fi
+as_file=$out_dir_as/${basename}.${suffix}.s
 src=t/$basename/*.go
 expected=t/expected/${basename}.txt
 bin_file=$out_dir/${basename}.bin
