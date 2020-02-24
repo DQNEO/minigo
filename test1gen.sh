@@ -2,8 +2,8 @@
 set -u
 
 differ=0
-program="minigo"
-generation=1
+program=$1
+generation=$2
 
 for testfile in t/expected/*.txt
 do
