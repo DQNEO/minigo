@@ -3,11 +3,12 @@ set -u
 
 differ=0
 program="minigo2"
+generation=2
 
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    ./unit_test.sh $program $name 2
+    ./unit_test.sh $program $name $generation
     if [[ $? -ne 0 ]];then
         differ=1
     fi
