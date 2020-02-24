@@ -2,11 +2,13 @@
 set -u
 
 differ=0
+program=$1
+generation=$2
 
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    ./unit_test.sh minigo2 $name 2
+    ./unit_test.sh $program $name $generation
     if [[ $? -ne 0 ]];then
         differ=1
     fi
@@ -20,6 +22,6 @@ else
 fi
 
 set -e
-./testerror.sh minigo2
+./terror/testerror.sh $program
 
 echo "All tests passed"
