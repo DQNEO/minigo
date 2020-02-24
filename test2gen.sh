@@ -20,6 +20,6 @@ else
 fi
 
 set -e
-./testerror.sh
+./testerror.sh minigo2
 
 echo "All tests passed"
