@@ -2,11 +2,12 @@
 set -u
 
 differ=0
+program="minigo"
 
 for testfile in t/expected/*.txt
 do
     name=$(basename -s .txt $testfile)
-    ./unit_test.sh minigo $name
+    ./unit_test.sh $program $name
     if [[ $? -ne 0 ]];then
         differ=1
     fi
@@ -20,6 +21,6 @@ else
 fi
 
 set -e
-./testerror.sh minigo
+./terror/testerror.sh $program
 
 echo "All tests passed"
