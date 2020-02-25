@@ -7,4 +7,4 @@ jobs:
     working_directory: /go/src/github.com/DQNEO/minigo
     steps:
       - checkout
-      - run: PATH="/usr/lib/go-1.10/bin:$PATH" make test
+      - run: PATH="/usr/lib/go-1.14/bin:$PATH" make test
