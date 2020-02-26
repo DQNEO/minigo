@@ -143,7 +143,7 @@ func emitMakeSliceFunc() {
 }
 
 func emitSyscallWrapperFunc() {
-	emitWithoutIndent(".syscallwrapper:")
+	emitWithoutIndent(".Syscall:")
 	emitNewline()
 
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
