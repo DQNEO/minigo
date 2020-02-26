@@ -90,7 +90,7 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 
 
-	universe.setFunc(identifier("syscallwrapper"), &ExprFuncRef{
+	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
 		funcdef: &DeclFunc{
 			rettypes: []*Gtype{gInt},
 		},

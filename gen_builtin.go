@@ -114,9 +114,9 @@ func (e *ExprCap) emit() {
 	}
 }
 
-func emitMakeSliceFunc() {
-	// makeSlice
-	emitWithoutIndent("%s:", "iruntime.makeSlice")
+func emitStaticFunctions() {
+	// .makeSlice
+	emitWithoutIndent(".makeSlice:")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 
@@ -139,5 +139,23 @@ func emitMakeSliceFunc() {
 	emit("mov -16(%%rbp), %%rcx # newcap")
 
 	emit("LEAVE_AND_RET")
+	emitNewline()
+
+	// .Syscall
+	emitWithoutIndent(".Syscall:")
+	emitNewline()
+
+	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
+	emit("movq %%rdi, %%rax") // Syscall number
+	emit("movq %%rsi, %%rdi") // shift arg1
+	emit("movq %%rdx, %%rsi") // shift arg2
+	emit("movq %%rcx, %%rdx") // shift arg3
+	emit("movq $0, %%r10")
+	emit("movq $0, %%r8")
+	emit("movq $0, %%r9")
+	emit("syscall")			/* Do the system call.  */
+	emit("cmpq $-4095, %%rax")
+
+	emit("ret")			/* Return to caller.  */
 	emitNewline()
 }

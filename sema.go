@@ -207,13 +207,13 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinMakeSlice:
-			assert(len(funcall.args) == 3, funcall.token(), "append() should take 3 argments")
+			assert(len(funcall.args) == 3, funcall.token(), "makeSlice() should take 3 argments")
 			var staticCall *IrStaticCall = &IrStaticCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "makeSlice")
+			staticCall.symbol = getFuncSymbol(identifier(""), "makeSlice")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
