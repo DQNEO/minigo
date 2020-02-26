@@ -104,16 +104,18 @@ func (program *Program) emit() {
 
 	emitMacroDefinitions()
 
+	// emit static function definition
+	emitWithoutIndent(".text")
+	emitSyscallWrapperFunc()
+	emitMakeSliceFunc()
+
 	emit(".data 0")
 	program.emitSpecialStrings()
 	program.emitDynamicTypes()
 	program.emitMethodTable()
 
 	emitWithoutIndent(".text")
-
 	emitMainFunc(program.importOS)
-	emitMakeSliceFunc()
-	emitSyscallWrapperFunc()
 
 	// emit packages
 	for _, pkg := range program.packages {
