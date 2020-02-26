@@ -114,8 +114,8 @@ func (e *ExprCap) emit() {
 	}
 }
 
-func emitMakeSliceFunc() {
-	// makeSlice
+func emitStaticFunctions() {
+	// .makeSlice
 	emitWithoutIndent(".makeSlice:")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
@@ -140,9 +140,8 @@ func emitMakeSliceFunc() {
 
 	emit("LEAVE_AND_RET")
 	emitNewline()
-}
 
-func emitSyscallWrapperFunc() {
+	// .Syscall
 	emitWithoutIndent(".Syscall:")
 	emitNewline()
 

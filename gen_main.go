@@ -106,8 +106,7 @@ func (program *Program) emit() {
 
 	// emit static function definition
 	emitWithoutIndent(".text")
-	emitSyscallWrapperFunc()
-	emitMakeSliceFunc()
+	emitStaticFunctions()
 
 	emit(".data 0")
 	program.emitSpecialStrings()
