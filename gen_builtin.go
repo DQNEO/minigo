@@ -143,10 +143,9 @@ func emitMakeSliceFunc() {
 }
 
 func emitSyscallWrapperFunc() {
-	// syscall
 	emitWithoutIndent(".syscallwrapper:")
-	emit("FUNC_PROLOGUE")
 	emitNewline()
+
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
 	emit("movq %%rdi, %%rax") // Syscall number
 	emit("movq %%rsi, %%rdi") // shift arg1
@@ -157,6 +156,7 @@ func emitSyscallWrapperFunc() {
 	// emit("movq 8(%%rsp),%%r9")	// (NOT USED) arg6 is on the stack.
 	emit("syscall")			/* Do the system call.  */
 	emit("cmpq $-4095, %%rax")
-	emit("LEAVE_AND_RET")			/* Return to caller.  */
+
+	emit("ret")			/* Return to caller.  */
 	emitNewline()
 }
