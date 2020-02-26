@@ -182,7 +182,7 @@ func emitMainFunc(importOS bool) {
 
 func emitSyscallWrapperFunc() {
 	// syscall
-	emitWithoutIndent("%s:", ".syscallwrapper")
+	emitWithoutIndent(".syscallwrapper:")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
