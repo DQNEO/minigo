@@ -54,7 +54,7 @@ var builtinMakeSlice = &DeclFunc{
 }
 
 var builtinSyscall = &DeclFunc{
-	rettypes: []*Gtype{gInt},
+	rettypes: []*Gtype{&sInt},
 }
 
 var builtinDumpSlice = &DeclFunc{
@@ -94,7 +94,7 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 
 
-	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
+	universe.setFunc(identifier("syscall"), &ExprFuncRef{
 		funcdef: builtinSyscall,
 	})
 

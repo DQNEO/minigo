@@ -115,7 +115,7 @@ func (e *ExprCap) emit() {
 }
 
 func emitStaticFunctions() {
-	// .makeSlice
+	// iruntime.makeSlice
 	emitWithoutIndent("iruntime.makeSlice:")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
@@ -141,8 +141,8 @@ func emitStaticFunctions() {
 	emit("LEAVE_AND_RET")
 	emitNewline()
 
-	// .Syscall
-	emitWithoutIndent(".Syscall:")
+	// iruntime.syscall
+	emitWithoutIndent("iruntime.syscall:")
 	emitNewline()
 
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html

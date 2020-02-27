@@ -89,14 +89,14 @@ func itoa(i int) []byte {
 func printstring(b []byte) {
 	var addr *byte = &b[0]
 	var n int
-	Syscall(1, 1, addr, len(b))
+	syscall(1, 1, addr, len(b))
 }
 
 func panic(msg []byte) {
 	printstring([]byte("panic: "))
 	printstring(msg)
 	printstring([]byte("\n"))
-	Syscall(60, 2) // exit with 2  https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl#L71
+	syscall(60, 2) // exit with 2  https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl#L71
 }
 
 func reportMemoryUsage() {
