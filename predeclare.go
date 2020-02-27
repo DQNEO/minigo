@@ -53,6 +53,10 @@ var builtinMakeSlice = &DeclFunc{
 	rettypes: []*Gtype{&sSliceType},
 }
 
+var builtinSyscall = &DeclFunc{
+	rettypes: []*Gtype{&sInt},
+}
+
 var builtinDumpSlice = &DeclFunc{
 	rettypes: []*Gtype{},
 }
@@ -90,10 +94,8 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareConsts(universe)
 
 
-	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
-		funcdef: &DeclFunc{
-			rettypes: []*Gtype{gInt},
-		},
+	universe.setFunc(identifier("syscall"), &ExprFuncRef{
+		funcdef: builtinSyscall,
 	})
 
 	universe.setFunc(identifier("panic"), &ExprFuncRef{
