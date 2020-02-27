@@ -2,19 +2,21 @@ package iruntime
 
 var _argv []*byte
 
-var heap [640485760]byte
-var heapTail *int
-
-const intSize = 8
+const heapSize uintptr = 640485760
+var heap [heapSize]byte
+var heapHead uintptr
+var heapPtr uintptr
 
 // https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
 const __x64_sys_write = 1
 const __x64_sys_exit = 60
 
+/*  init() is define in assembly
 func init() {
-	// set head address of heap
-	heapTail = heap
+	heapHead = uintptr(unsafe.Pointer(&heap[0]))
+	heapPtr = heapHead
 }
+*/
 
 func cstring2string(b *byte) string {
 	var bs []byte
@@ -43,13 +45,13 @@ func runtime_args() []string {
 	return r
 }
 
-func malloc(size int) *int {
-	if heapTail+ size > len(heap) + heap  {
+func malloc(size uintptr) uintptr {
+	if heapPtr+ size > heapHead + heapSize {
 		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
-	r := heapTail
-	heapTail += size
+	r := heapPtr
+	heapPtr += size
 	return r
 }
 
@@ -113,13 +115,13 @@ func panic(msg []byte) {
 func reportMemoryUsage() {
 	printstring([]byte("# memory-usage: "))
 	i := getMemoryUsage()
-	s := itoa(i)
+	s := itoa(int(i))
 	printstring([]byte(s))
 	printstring([]byte("\n"))
 }
 
-func getMemoryUsage() int {
-	return heapTail - heap
+func getMemoryUsage() uintptr {
+	return heapPtr - heapHead
 }
 
 func append1(x []byte, elm byte) []byte {
