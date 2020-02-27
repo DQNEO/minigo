@@ -3,7 +3,7 @@ package iruntime
 var _argv []*byte
 
 var heap [640485760]byte
-var heapTail *int
+var heapTail uintptr
 
 const intSize = 8
 
@@ -13,7 +13,7 @@ const __x64_sys_exit = 60
 
 func init() {
 	// set head address of heap
-	heapTail = heap
+	heapTail = &heap[0]
 }
 
 func cstring2string(b *byte) string {

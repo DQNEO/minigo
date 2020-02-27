@@ -7,6 +7,8 @@ var sInterface = Gtype{kind: G_INTERFACE, size: sizeOfInterface}
 var gInterface = &sInterface
 var sInt = Gtype{kind: G_INT, size: 8}
 var gInt = &sInt
+var sUintptr = Gtype{kind: G_UINT_PTR, size: 8}
+var gUintptr = &sUintptr
 var sByte = Gtype{kind: G_BYTE, size: 1}
 var gByte = &sByte
 var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
@@ -149,6 +151,7 @@ func predeclareTypes(universe *Scope) {
 	universe.setGtype(identifier("int"), gInt)
 	universe.setGtype(identifier("string"), gString)
 	universe.setGtype(identifier("uint8"), gByte)
+	universe.setGtype(identifier("uintptr"), gUintptr)
 }
 
 // Constants:

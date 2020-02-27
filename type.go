@@ -12,6 +12,7 @@ const (
 	G_INT
 	G_BOOL
 	G_BYTE
+	G_UINT_PTR
 	// end of primitives
 	G_STRUCT
 	G_STRUCT_FIELD
@@ -129,7 +130,7 @@ func (gtype *Gtype) getSize() int {
 	assert(gtype.kind != G_DEPENDENT, nil, "type should be inferred")
 	if gtype.kind == G_NAMED {
 		if gtype.relation.gtype == nil {
-			errorf("relation not resolved: %s", gtype)
+			errorf("relation not resolved: %s", gtype.String())
 		}
 		return gtype.relation.gtype.getSize()
 	} else {
@@ -142,7 +143,7 @@ func (gtype *Gtype) getSize() int {
 				gtype.calcStructOffset()
 			}
 			return gtype.size
-		case G_POINTER:
+		case G_POINTER, G_UINT_PTR:
 			return ptrSize
 		case G_INTERFACE:
 			//     data    ,  receiverTypeId, dtype
