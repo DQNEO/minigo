@@ -2,7 +2,7 @@ package iruntime
 
 var _argv []*byte
 
-const heapSize = 640485760
+const heapSize uintptr = 640485760
 var heap [heapSize]byte
 var heapTail uintptr
 var heapHead uintptr
@@ -46,7 +46,7 @@ func runtime_args() []string {
 }
 
 func malloc(size uintptr) uintptr {
-	if heapTail + size > heapHead + uintptr(heapSize) {
+	if heapTail + size > heapHead + heapSize {
 		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
