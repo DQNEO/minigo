@@ -12,11 +12,12 @@ const intSize = 8
 const __x64_sys_write = 1
 const __x64_sys_exit = 60
 
+/*  init() is define in assembly
 func init() {
-	// set head address of heap
-	heapHead = uintptr(&heap[0])
+	heapHead = uintptr(unsafe.Pointer(&heap[0]))
 	heapPtr = heapHead
 }
+*/
 
 func cstring2string(b *byte) string {
 	var bs []byte
