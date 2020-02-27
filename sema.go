@@ -213,7 +213,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(identifier(""), "makeSlice")
+			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "makeSlice")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
