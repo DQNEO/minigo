@@ -7,6 +7,7 @@ var heapTail *int
 
 const intSize = 8
 
+// https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
 const __x64_sys_write = 1
 const __x64_sys_exit = 60
 
@@ -91,14 +92,22 @@ func itoa(i int) []byte {
 
 func printstring(b []byte) {
 	var addr *byte = &b[0]
-	syscall(__x64_sys_write, 1, addr, len(b))
+	write(1, addr, len(b))
+}
+
+func write(fd int, addr *byte, length int) {
+	syscall(__x64_sys_write, fd, addr, length)
+}
+
+func exit(code int) {
+	syscall(__x64_sys_exit, code)
 }
 
 func panic(msg []byte) {
 	printstring([]byte("panic: "))
 	printstring(msg)
 	printstring([]byte("\n"))
-	syscall(__x64_sys_exit, 2) // exit with 2  https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl#L71
+	exit(2)
 }
 
 func reportMemoryUsage() {
