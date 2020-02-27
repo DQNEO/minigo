@@ -6,7 +6,6 @@ const heapSize uintptr = 640485760
 var heap [heapSize]byte
 var heapHead uintptr
 var heapPtr uintptr
-const intSize = 8
 
 // https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
 const __x64_sys_write = 1
