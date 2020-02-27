@@ -20,11 +20,6 @@ func init() {
 
 func cstring2string(b *byte) string {
 	var bs []byte
-	if b == nil {
-		return string(bs)
-	}
-
-	var i int
 	for {
 		if b == nil || *b == 0 {
 			break
