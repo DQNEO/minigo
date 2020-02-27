@@ -4,8 +4,8 @@ var _argv []*byte
 
 const heapSize uintptr = 640485760
 var heap [heapSize]byte
-var heapTail uintptr
 var heapHead uintptr
+var heapPtr uintptr
 const intSize = 8
 
 // https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
@@ -15,7 +15,7 @@ const __x64_sys_exit = 60
 func init() {
 	// set head address of heap
 	heapHead = uintptr(&heap[0])
-	heapTail = heapHead
+	heapPtr = heapHead
 }
 
 func cstring2string(b *byte) string {
@@ -46,12 +46,12 @@ func runtime_args() []string {
 }
 
 func malloc(size uintptr) uintptr {
-	if heapTail + size > heapHead + heapSize {
+	if heapPtr+ size > heapHead + heapSize {
 		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
-	r := heapTail
-	heapTail += size
+	r := heapPtr
+	heapPtr += size
 	return r
 }
 
@@ -121,7 +121,7 @@ func reportMemoryUsage() {
 }
 
 func getMemoryUsage() uintptr {
-	return heapTail - heapHead
+	return heapPtr - heapHead
 }
 
 func append1(x []byte, elm byte) []byte {
