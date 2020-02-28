@@ -62,13 +62,13 @@ type Pointer *int
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
-	unsafeScope := newScope(nil, pkgName)
-	symbolTable.allScopes[pkgName] = unsafeScope
+	pkgScope := newScope(nil, pkgName)
+	symbolTable.allScopes[pkgName] = pkgScope
 
 	p := &parser{
 		packageName: pkgName,
 	}
-	f := p.ParseString("internal_unsafe.go", internalUnsafeCode, unsafeScope, false)
+	f := p.ParseString("internal_unsafe.go", internalUnsafeCode, pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -82,15 +82,18 @@ func compileUnsafe(universe *Scope) *AstPackage {
 
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
+	pkgName := identifier("iruntime")
+	pkgScope := newScope(nil, pkgName)
+	symbolTable.allScopes[pkgName] = pkgScope
 	p := &parser{
-		packageName: identifier("iruntime"),
+		packageName: pkgName,
 	}
 	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           identifier("iruntime"),
+		name:           pkgName,
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
