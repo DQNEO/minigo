@@ -2,8 +2,8 @@ package main
 
 import (
 	"./stdlib/fmt"
-	"os"
 	"./stdlib/strings"
+	"os"
 )
 
 var GENERATION int = 1
@@ -19,6 +19,7 @@ var resolveOnly = false
 var emitPosition = false
 
 var _printVersion = false
+
 func printVersion() {
 	fmt.Println("minigo 0.3.0")
 	fmt.Println("Copyright (C) 2019 @DQNEO")

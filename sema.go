@@ -214,8 +214,8 @@ func walkExpr(expr Expr) Expr {
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
-				symbol: getFuncSymbol(identifier("iruntime"), "syscall"),
-				args: funcall.args,
+				symbol:   getFuncSymbol(identifier("iruntime"), "syscall"),
+				args:     funcall.args,
 			}
 			return staticCall
 		case builtinMakeSlice:

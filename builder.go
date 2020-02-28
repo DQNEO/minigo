@@ -127,8 +127,8 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 
 type importMap map[string]bool
 
-func parseImportRecursive(dep map[string]importMap , directDependencies importMap) {
-	for spkgName , _ := range directDependencies {
+func parseImportRecursive(dep map[string]importMap, directDependencies importMap) {
+	for spkgName, _ := range directDependencies {
 		file := getStdFileName(spkgName)
 		imports := parseImportsFromFile(file)
 		dep[spkgName] = imports
@@ -180,7 +180,7 @@ func get0dependentPackages(dep map[string]importMap) []string {
 	}
 	for spkgName, imports := range dep {
 		var numDepends int
-		for _, flg  := range imports {
+		for _, flg := range imports {
 			if flg {
 				numDepends++
 			}
@@ -192,13 +192,12 @@ func get0dependentPackages(dep map[string]importMap) []string {
 	return moved
 }
 
-
 func resolveDependency(directDependencies importMap) []string {
 	var sortedUniqueImports []string
 	var dep map[string]importMap = map[string]importMap{}
 	parseImportRecursive(dep, directDependencies)
 
-	for  {
+	for {
 		//dumpDep(dep)
 		moved := get0dependentPackages(dep)
 		if len(moved) == 0 {
@@ -237,7 +236,6 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 
 	return compiledStdPkgs
 }
-
 
 type Program struct {
 	packages    []*AstPackage

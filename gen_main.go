@@ -148,7 +148,7 @@ func emitMainFunc(packages []*AstPackage) {
 	emit(".global	%s", fname)
 	emitWithoutIndent("%s:", fname)
 
-	emit("pop %%rax # argc")  // get argc from stack top
+	emit("pop %%rax # argc")        // get argc from stack top
 	emit("mov %%rsp, %%rbx # argv") // now %rsp value equals to argv
 
 	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "_argv")
@@ -161,7 +161,7 @@ func emitMainFunc(packages []*AstPackage) {
 
 	// init imported packages
 	for _, pkg := range packages {
-		if pkg.hasInit  {
+		if pkg.hasInit {
 			emit("# init %s", pkg.name)
 			emit("FUNCALL %s.init", pkg.name)
 		}

@@ -154,9 +154,9 @@ func emitStaticFunctions() {
 	emit("movq $0, %%r10")
 	emit("movq $0, %%r8")
 	emit("movq $0, %%r9")
-	emit("syscall")			/* Do the system call.  */
+	emit("syscall") /* Do the system call.  */
 	emit("cmpq $-4095, %%rax")
 
-	emit("ret")			/* Return to caller.  */
+	emit("ret") /* Return to caller.  */
 	emitNewline()
 }

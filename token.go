@@ -2,8 +2,8 @@ package main
 
 import (
 	"./stdlib/fmt"
-	"os"
 	"./stdlib/strconv"
+	"os"
 )
 
 type identifier string
