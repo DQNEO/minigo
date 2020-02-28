@@ -41,7 +41,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier(""),
 	}
-	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
+	f := p.ParseFile("internal/universe/universe.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -62,7 +62,7 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: pkgName,
 	}
-	f := p.ParseString("internal_unsafe.go", internalUnsafeCode, pkgScope, false)
+	f := p.ParseFile("stdlib/unsafe/unsafe.go", pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -82,7 +82,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: pkgName,
 	}
-	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	f := p.ParseFile("internal/runtime/runtime.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -107,7 +107,7 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
 	pkgScope := newScope(nil, pkgName)
-	mainPkg := ParseFiles(pkgScope, sourceFiles, false)
+	mainPkg := ParseFiles(pkgScope, sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -230,7 +230,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 		files := []string{file}
 		pkgScope := newScope(nil, pkgName)
 		symbolTable.allScopes[pkgName] = pkgScope
-		pkg := ParseFiles(pkgScope, files, false)
+		pkg := ParseFiles(pkgScope, files)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
 	}
