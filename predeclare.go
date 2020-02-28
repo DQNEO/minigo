@@ -84,7 +84,7 @@ var sSliceType Gtype = Gtype{
 }
 
 func newUniverse() *Scope {
-	universe := newScope(nil, "universe")
+	universe := newScope(nil, identifier("universe"))
 	setPredeclaredIdentifiers(universe)
 	return universe
 }

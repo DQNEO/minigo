@@ -6,14 +6,8 @@ all: minigo /tmp/tmpfs
 /tmp/tmpfs:
 	mkdir -p /tmp/tmpfs
 
-internal_runtime.go: internal/runtime/*.go cp-internalcode.sh
-	./cp-internalcode.sh
-
-internal_universe.go: internal/universe/*.go cp-internalcode.sh
-	./cp-internalcode.sh
-
 # 1st gen compiler
-minigo: *.go internal_runtime.go internal_universe.go /tmp/tmpfs
+minigo: *.go /tmp/tmpfs
 	go build -o minigo *.go
 
 # assembly for 2gen

@@ -96,13 +96,7 @@ func main() {
 	// compiler unsafe package
 	symbolTable = &SymbolTable{}
 	symbolTable.allScopes = map[identifier]*Scope{}
-	symbolTable.allScopes[identifier("unsafe")] = newScope(nil, "unsafe")
-	// register unsafe.Pointer as *int
-	symbolTable.allScopes[identifier("unsafe")].setGtype("Pointer", &Gtype{
-		kind:           G_POINTER,
-		origType:       gInt,
-	})
-
+	pkgUnsafe := compileUnsafe(universe)
 	pkgIRuntime := compileRuntime(universe)
 
 	directDependencies := parseImports(sourceFiles)
@@ -113,6 +107,6 @@ func main() {
 		return
 	}
 
-	program := build(pkgUniverse, pkgIRuntime, libs, pkgMain)
+	program := build(pkgUniverse, pkgUnsafe, pkgIRuntime, libs, pkgMain)
 	program.emit()
 }

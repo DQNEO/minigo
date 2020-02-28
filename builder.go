@@ -41,7 +41,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier(""),
 	}
-	f := p.ParseString("internal_universe.go", internalUniverseCode, universe, false)
+	f := p.ParseFile("stdlib/builtin/builtin.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -53,17 +53,41 @@ func compileUniverse(universe *Scope) *AstPackage {
 	}
 }
 
-// inject runtime things into the universe scope
-func compileRuntime(universe *Scope) *AstPackage {
+// inject unsafe package
+func compileUnsafe(universe *Scope) *AstPackage {
+	pkgName := identifier("unsafe")
+	pkgScope := newScope(nil, pkgName)
+	symbolTable.allScopes[pkgName] = pkgScope
+
 	p := &parser{
-		packageName: identifier("iruntime"),
+		packageName: pkgName,
 	}
-	f := p.ParseString("internal_runtime.go", internalRuntimeCode, universe, false)
+	f := p.ParseFile("stdlib/unsafe/unsafe.go", pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
-		name:           identifier("iruntime"),
+		name:           pkgName,
+		files:          []*AstFile{f},
+		stringLiterals: f.stringLiterals,
+		dynamicTypes:   f.dynamicTypes,
+	}
+}
+
+// inject runtime things into the universe scope
+func compileRuntime(universe *Scope) *AstPackage {
+	pkgName := identifier("iruntime")
+	pkgScope := newScope(nil, pkgName)
+	symbolTable.allScopes[pkgName] = pkgScope
+	p := &parser{
+		packageName: pkgName,
+	}
+	f := p.ParseFile("internal/runtime/runtime.go", universe, false)
+	attachMethodsToTypes(f.methods, p.packageBlockScope)
+	inferTypes(f.uninferredGlobals, f.uninferredLocals)
+	calcStructSize(f.dynamicTypes)
+	return &AstPackage{
+		name:           pkgName,
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
 		dynamicTypes:   f.dynamicTypes,
@@ -82,7 +106,8 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
-	mainPkg := ParseFiles(pkgName, sourceFiles, false)
+	pkgScope := newScope(nil, pkgName)
+	mainPkg := ParseFiles(pkgScope, sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -203,10 +228,11 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 		pkgName := identifier(spkgName)
 		file := getStdFileName(spkgName)
 		files := []string{file}
-		pkg := ParseFiles(pkgName, files, false)
+		pkgScope := newScope(nil, pkgName)
+		symbolTable.allScopes[pkgName] = pkgScope
+		pkg := ParseFiles(pkgScope, files)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
-		symbolTable.allScopes[pkgName] = pkg.scope
 	}
 
 	return compiledStdPkgs
@@ -219,10 +245,11 @@ type Program struct {
 	importOS    bool
 }
 
-func build(pkgUniverse *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
+func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
 	var packages []*AstPackage
 
 	packages = append(packages, pkgUniverse)
+	packages = append(packages, pkgUnsafe)
 	packages = append(packages, pkgIRuntime)
 
 	for _, pkg := range stdPkgs {
