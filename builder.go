@@ -41,7 +41,7 @@ func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
 		packageName: identifier(""),
 	}
-	f := p.ParseFile("internal/universe/universe.go", universe, false)
+	f := p.ParseFile("stdlib/builtin/builtin.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
