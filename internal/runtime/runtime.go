@@ -5,6 +5,7 @@ import "unsafe"
 var _argv []*byte
 
 const heapSize uintptr = 640485760
+
 var heap [heapSize]byte
 var heapHead uintptr
 var heapPtr uintptr
@@ -42,7 +43,7 @@ func runtime_args() []string {
 }
 
 func malloc(size uintptr) uintptr {
-	if heapPtr+ size > heapHead + heapSize {
+	if heapPtr+size > heapHead+heapSize {
 		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
@@ -63,22 +64,21 @@ func itoa(i int) []byte {
 		i = i - 2147483648*2
 	}
 
-
 	if i < 0 {
 		i = i * -1
 		isMinus = true
 	}
-	for i>0 {
+	for i > 0 {
 		mod := i % 10
-		tmp = append(tmp, byte('0') + byte(mod))
-		i = i /10
+		tmp = append(tmp, byte('0')+byte(mod))
+		i = i / 10
 	}
 
 	if isMinus {
 		r = append(r, '-')
 	}
 
-	for j:=len(tmp)-1;j>=0;j--{
+	for j := len(tmp) - 1; j >= 0; j-- {
 		r = append(r, tmp[j])
 	}
 
@@ -135,7 +135,7 @@ func append1(x []byte, elm byte) []byte {
 			newcap = xlen * 2
 		}
 		z = makeSlice(zlen, newcap, 1)
-		for i:=0;i<xlen;i++ {
+		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
 	}
@@ -158,8 +158,8 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
- 		z = makeSlice(zlen, newcap, 8)
-		for i:=0;i<xlen;i++ {
+		z = makeSlice(zlen, newcap, 8)
+		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
 	}
@@ -167,7 +167,6 @@ func append8(x []int, elm int) []int {
 	z[xlen] = elm
 	return z
 }
-
 
 func append24(x []interface{}, elm interface{}) []interface{} {
 	//dumpInterface(elm)
@@ -185,7 +184,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 			newcap = xlen * 2
 		}
 		z = makeSlice(zlen, newcap, 24)
-		for i:=0;i<xlen;i++ {
+		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
 	}
@@ -199,7 +198,7 @@ func eq(a string, b string) bool {
 		return false
 	}
 
-	for i:=0;i<len(a);i++ {
+	for i := 0; i < len(a); i++ {
 		if a[i] != b[i] {
 			return false
 		}
@@ -209,7 +208,7 @@ func eq(a string, b string) bool {
 
 func cmpStrings(a string, b string, flag bool) bool {
 	var ret bool
-	ret = eq(a,b)
+	ret = eq(a, b)
 	if flag {
 		return ret
 	} else {
@@ -222,10 +221,10 @@ func concat(as string, bs string) string {
 	b := []byte(bs)
 
 	var r []byte
-	for i:=0;i<len(a);i++ {
+	for i := 0; i < len(a); i++ {
 		r = append(r, a[i])
 	}
-	for i:=0;i<len(b);i++ {
+	for i := 0; i < len(b); i++ {
 		r = append(r, b[i])
 	}
 	return string(r)

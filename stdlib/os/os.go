@@ -12,11 +12,11 @@ var sfd2 PollFD = PollFD{
 }
 
 var sstdout file = file{
-	fd : &sfd1,
+	fd: &sfd1,
 }
 
 var sstderr file = file{
-	fd : &sfd2,
+	fd: &sfd2,
 }
 
 var Stdout *File = &File{
@@ -47,7 +47,7 @@ func (f *File) Fd() int {
 func openFileNolog(name string, flag int, perm int) (*File, error) {
 	fid, err := syscall.Open(name, flag, perm)
 	fl := &file{
-		fd:&PollFD{
+		fd: &PollFD{
 			Sysfd: fid,
 		},
 	}
@@ -69,14 +69,14 @@ func (fd *PollFD) Write(b []byte) (int, error) {
 	var n int
 	var err error
 	n, err = syscall.Write(fd.Sysfd, b)
-	return n,err
+	return n, err
 }
 
 func (fd *PollFD) Read(b []byte) (int, error) {
 	var n int
 	var err error
 	n, err = syscall.Read(fd.Sysfd, b)
-	return n,err
+	return n, err
 }
 
 func (f *File) write(b []byte) (int, error) {
@@ -116,4 +116,3 @@ var Args []string
 func init() {
 	Args = runtime_args()
 }
-

@@ -5,7 +5,7 @@ var __strconv_trash int
 func Atoi(gs string) (int, error) {
 	bts := []byte(gs)
 	if len(bts) == 0 {
-		return 0,nil
+		return 0, nil
 	}
 	var b byte
 	var n int
@@ -13,14 +13,14 @@ func Atoi(gs string) (int, error) {
 	var isMinus bool
 	for i, b = range bts {
 		if b == '.' {
-			return 0,nil // @FIXME all no number should return error
+			return 0, nil // @FIXME all no number should return error
 		}
 		if b == '-' {
 			isMinus = true
 			continue
 		}
 		var x byte = b - byte('0')
-		n  = n * 10
+		n = n * 10
 		n = n + int(x)
 	}
 	if isMinus {
@@ -41,22 +41,21 @@ func Itoa(i int) string {
 		i = i - 2147483648*2
 	}
 
-
 	if i < 0 {
 		i = i * -1
 		isMinus = true
 	}
-	for i>0 {
+	for i > 0 {
 		mod := i % 10
-		tmp = append(tmp, byte('0') + byte(mod))
-		i = i /10
+		tmp = append(tmp, byte('0')+byte(mod))
+		i = i / 10
 	}
 
 	if isMinus {
 		r = append(r, '-')
 	}
 
-	for j:=len(tmp)-1;j>=0;j--{
+	for j := len(tmp) - 1; j >= 0; j-- {
 		r = append(r, tmp[j])
 	}
 

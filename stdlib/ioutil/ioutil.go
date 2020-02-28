@@ -7,13 +7,11 @@ import (
 
 const MYBUFSIZ = 65536 * 2
 
-
 func readAll(f *os.File, capacity int) ([]byte, error) {
-	var buf *bytes.Buffer = &bytes.Buffer{
-	}
+	var buf *bytes.Buffer = &bytes.Buffer{}
 	buf.Grow(capacity)
 	_, err := buf.ReadFrom(f)
-	return buf.Bytes() ,err
+	return buf.Bytes(), err
 }
 
 func ReadFile(filename string) ([]byte, error) {

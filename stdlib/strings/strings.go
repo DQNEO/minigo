@@ -4,7 +4,7 @@ package strings
 func Split(ss string, ssep string) []string {
 	s := []byte(ss)
 	sep := []byte(ssep)
-	if len(sep) > 1  {
+	if len(sep) > 1 {
 		panic("no supported")
 	}
 	seps := []byte(sep)
@@ -29,12 +29,12 @@ func HasSuffix(ss string, ssuffix string) bool {
 	s := []byte(ss)
 	suffix := []byte(ssuffix)
 	if len(s) >= len(suffix) {
-		var low int =  len(s)-len(suffix)
+		var low int = len(s) - len(suffix)
 		var lensb int = len(s)
 		var suf []byte
 		sb := []byte(s)
-		suf = sb[low:lensb]  // lensb is required
-		return eq2([]byte(suf) , suffix)
+		suf = sb[low:lensb] // lensb is required
+		return eq2([]byte(suf), suffix)
 	}
 	return false
 }
@@ -44,7 +44,7 @@ func eq2(a []byte, b []byte) bool {
 		return false
 	}
 
-	for i:=0;i<len(a);i++ {
+	for i := 0; i < len(a); i++ {
 		if a[i] != b[i] {
 			return false
 		}
@@ -72,7 +72,7 @@ func Index(s string, substr string) int {
 
 		if in {
 			if b == bsub[subIndex] {
-				if subIndex == len(bsub) - 1 {
+				if subIndex == len(bsub)-1 {
 					return r
 				}
 			} else {

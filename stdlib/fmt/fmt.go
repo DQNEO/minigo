@@ -1,8 +1,8 @@
 package fmt
 
 import (
-	"strconv"
 	"os"
+	"strconv"
 )
 
 func Println(s string) {
@@ -11,14 +11,14 @@ func Println(s string) {
 	os.Stdout.Write(b)
 }
 
-
-func Printf(format string, a... interface{}) {
+func Printf(format string, a ...interface{}) {
 	s := Sprintf(string(format), a...)
 	os.Stdout.Write([]byte(s))
 }
 
 var _fmt_trash int
-func Sprintf(format string, args... interface{}) string {
+
+func Sprintf(format string, args ...interface{}) string {
 	var r []byte
 	var blocks []string
 	var bs []byte
@@ -31,7 +31,7 @@ func Sprintf(format string, args... interface{}) string {
 	var argIndex int
 	//var sign byte
 	for i, c = range f {
-		if ! inPercent && c == '%' {
+		if !inPercent && c == '%' {
 			inPercent = true
 			blocks = append(blocks, string(bs))
 			bs = nil
@@ -40,7 +40,7 @@ func Sprintf(format string, args... interface{}) string {
 		}
 		if inPercent {
 			if c == '%' {
-				bs = append(bs,c)
+				bs = append(bs, c)
 				inPercent = false
 				continue
 			}
@@ -71,7 +71,7 @@ func Sprintf(format string, args... interface{}) string {
 				var b string
 				if _argBool {
 					b = "true"
-				} else{
+				} else {
 					b = "false"
 				}
 				blocks = append(blocks, b)
@@ -83,7 +83,7 @@ func Sprintf(format string, args... interface{}) string {
 			bs = nil
 			continue
 		}
-		bs = append(bs,c)
+		bs = append(bs, c)
 	}
 	blocks = append(blocks, string(bs))
 	var ss string

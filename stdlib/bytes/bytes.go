@@ -5,7 +5,7 @@ import "os"
 
 type Buffer struct {
 	bytes []byte
-	buf []byte
+	buf   []byte
 }
 
 func (b *Buffer) Grow(capacity int) {

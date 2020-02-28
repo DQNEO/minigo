@@ -1,6 +1,5 @@
 package io
 
-
 /* This does not work
 
 type Reader interface {
