@@ -116,19 +116,6 @@ func (e *ExprCap) emit() {
 
 func emitStaticFunctions() {
 
-	// iruntime.init
-	emitWithoutIndent("iruntime.init:")
-	emitNewline()
-	emit("# heapHead = unsafe.Pointer(&heap[0])")
-	emit("lea iruntime.heap(%%rip), %%rax")
-	emit("mov %%rax, iruntime.heapHead(%%rip)")
-	emitNewline()
-	emit("# heapPtr = heapHead")
-	emit("mov %%rax, iruntime.heapPtr(%%rip)")
-	emit("mov $0, %%rax")
-	emit("ret")
-	emitNewline()
-
 	// iruntime.makeSlice
 	emitWithoutIndent("iruntime.makeSlice:")
 	emit("FUNC_PROLOGUE")

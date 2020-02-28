@@ -1849,7 +1849,14 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		}
 	} else {
 		// foreign package
-		relbody := symbolTable.allScopes[identifier(pkg)].get(rel.name)
+		if symbolTable == nil {
+			errorft(rel.token(), "symbolTable is empty")
+		}
+		scope := symbolTable.allScopes[pkg]
+		if scope == nil {
+			errorft(rel.token(), "pkg %s is not set in allScopes", pkg)
+		}
+		relbody := scope.get(rel.name)
 		if relbody == nil {
 			errorft(rel.token(), "name %s is not found in %s package", rel.name, pkg)
 		}

@@ -1,5 +1,7 @@
 package iruntime
 
+import "unsafe"
+
 var _argv []*byte
 
 const heapSize uintptr = 640485760
@@ -11,12 +13,11 @@ var heapPtr uintptr
 const __x64_sys_write = 1
 const __x64_sys_exit = 60
 
-/*  init() is define in assembly
+/*  init() is define in assembly */
 func init() {
 	heapHead = uintptr(unsafe.Pointer(&heap[0]))
 	heapPtr = heapHead
 }
-*/
 
 func cstring2string(b *byte) string {
 	var bs []byte
@@ -25,7 +26,7 @@ func cstring2string(b *byte) string {
 			break
 		}
 		bs = append(bs, *b)
-		b++
+		b = uintptr(b) + 1
 	}
 	return string(bs)
 }

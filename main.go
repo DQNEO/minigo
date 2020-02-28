@@ -92,11 +92,18 @@ func main() {
 	universe := newUniverse()
 
 	pkgUniverse := compileUniverse(universe)
-	pkgIRuntime := compileRuntime(universe)
 
-
+	// compiler unsafe package
 	symbolTable = &SymbolTable{}
 	symbolTable.allScopes = map[identifier]*Scope{}
+	symbolTable.allScopes[identifier("unsafe")] = newScope(nil, "unsafe")
+	// register unsafe.Pointer as *int
+	symbolTable.allScopes[identifier("unsafe")].setGtype("Pointer", &Gtype{
+		kind:           G_POINTER,
+		origType:       gInt,
+	})
+
+	pkgIRuntime := compileRuntime(universe)
 
 	directDependencies := parseImports(sourceFiles)
 	libs := compileStdLibs(universe, directDependencies)
