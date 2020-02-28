@@ -14,7 +14,6 @@ var heapPtr uintptr
 const __x64_sys_write = 1
 const __x64_sys_exit = 60
 
-/*  init() is define in assembly */
 func init() {
 	heapHead = uintptr(unsafe.Pointer(&heap[0]))
 	heapPtr = heapHead
