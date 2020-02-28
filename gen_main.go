@@ -112,7 +112,7 @@ func (program *Program) emit() {
 	program.emitMethodTable()
 
 	emitWithoutIndent(".text")
-	emitMainFunc(program.importOS)
+	emitMainFunc(program.packages)
 
 	// emit packages
 	for _, pkg := range program.packages {
@@ -143,7 +143,7 @@ func (program *Program) emit() {
 
 }
 
-func emitMainFunc(importOS bool) {
+func emitMainFunc(packages []*AstPackage) {
 	fname := "_start"
 	emit(".global	%s", fname)
 	emitWithoutIndent("%s:", fname)
@@ -159,14 +159,12 @@ func emitMainFunc(importOS bool) {
 	emit("mov $0, %%rax")
 	emit("mov $0, %%rbx")
 
-	// init runtime
-	emit("# init runtime")
-	emit("FUNCALL iruntime.init")
-
 	// init imported packages
-	if importOS {
-		emit("# init os")
-		emit("FUNCALL os.init")
+	for _, pkg := range packages {
+		if pkg.hasInit  {
+			emit("# init %s", pkg.name)
+			emit("FUNCALL %s.init", pkg.name)
+		}
 	}
 
 	emitNewline()

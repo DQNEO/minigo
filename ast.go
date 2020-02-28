@@ -14,6 +14,7 @@ type AstPackage struct {
 	vars              []*DeclVar
 	funcs             []*DeclFunc
 	methods           mapToIdentToMethods
+	hasInit           bool
 }
 
 type AstFile struct {

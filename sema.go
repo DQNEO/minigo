@@ -75,6 +75,9 @@ func collectDecls(pkg *AstPackage) {
 			if decl.vardecl != nil {
 				pkg.vars = append(pkg.vars, decl.vardecl)
 			} else if decl.funcdecl != nil {
+				if decl.funcdecl.fname == "init" {
+					pkg.hasInit = true
+				}
 				pkg.funcs = append(pkg.funcs, decl.funcdecl)
 			}
 		}
