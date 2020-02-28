@@ -1022,7 +1022,7 @@ func (p *parser) parseConstDecl() *DeclConst {
 	return r
 }
 
-func (p *parser) enterNewScope(name string) {
+func (p *parser) enterNewScope(name identifier) {
 	p.currentScope = newScope(p.currentScope, name)
 }
 
@@ -1046,7 +1046,7 @@ func (p *parser) parseForStmt() *StmtFor {
 		labels: &LoopLabels{},
 	}
 	p.currentForStmt = r
-	p.enterNewScope("for")
+	p.enterNewScope(identifier("for"))
 	var cond Expr
 	if p.peekToken().isPunct("{") {
 		// inifinit loop : for { ___ }
@@ -1176,7 +1176,7 @@ func (p *parser) parseIfStmt() *StmtIf {
 	var r = &StmtIf{
 		tok: ptok,
 	}
-	p.enterNewScope("if")
+	p.enterNewScope(identifier("if"))
 	p.requireBlock = true
 	stmt := p.parseStmt()
 	if p.peekToken().isPunct(";") {
@@ -1624,7 +1624,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	p.localvars = nil
 	assert(len(p.localvars) == 0, ptok, "localvars should be zero")
 	var isMethod bool
-	p.enterNewScope("func")
+	p.enterNewScope(identifier("func"))
 
 	var receiver *ExprVariable
 
@@ -2028,9 +2028,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage {
-	pkgScope := newScope(nil, string(pkgname))
-
+func ParseFiles(pkgScope *Scope, sources []string, onMemory bool) *AstPackage {
 	var astFiles []*AstFile
 
 	var uninferredGlobals []*ExprVariable
@@ -2043,10 +2041,10 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 	for _, source := range sources {
 		var astFile *AstFile
 		p := &parser{
-			packageName: identifier(pkgname),
+			packageName: pkgScope.name,
 		}
 		if onMemory {
-			var filename string = string(pkgname) + ".memory"
+			var filename string = string(pkgScope.name) + ".memory"
 			astFile = p.ParseString(filename, source, pkgScope, false)
 		} else {
 			astFile = p.ParseFile(string(source), pkgScope, false)
@@ -2081,7 +2079,7 @@ func ParseFiles(pkgname identifier, sources []string, onMemory bool) *AstPackage
 	}
 
 	return &AstPackage{
-		name:              pkgname,
+		name:              pkgScope.name,
 		scope:             pkgScope,
 		files:             astFiles,
 		namedTypes:        namedTypes,

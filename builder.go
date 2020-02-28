@@ -53,6 +53,33 @@ func compileUniverse(universe *Scope) *AstPackage {
 	}
 }
 
+var internalUnsafeCode string = string(`
+package unsafe
+
+type Pointer *int
+`)
+
+// inject unsafe package
+func compileUnsafe(universe *Scope) *AstPackage {
+	pkgName := identifier("unsafe")
+	unsafeScope := newScope(nil, pkgName)
+	symbolTable.allScopes[pkgName] = unsafeScope
+
+	p := &parser{
+		packageName: pkgName,
+	}
+	f := p.ParseString("internal_unsafe.go", internalUnsafeCode, unsafeScope, false)
+	attachMethodsToTypes(f.methods, p.packageBlockScope)
+	inferTypes(f.uninferredGlobals, f.uninferredLocals)
+	calcStructSize(f.dynamicTypes)
+	return &AstPackage{
+		name:           pkgName,
+		files:          []*AstFile{f},
+		stringLiterals: f.stringLiterals,
+		dynamicTypes:   f.dynamicTypes,
+	}
+}
+
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	p := &parser{
@@ -82,7 +109,8 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
-	mainPkg := ParseFiles(pkgName, sourceFiles, false)
+	pkgScope := newScope(nil, pkgName)
+	mainPkg := ParseFiles(pkgScope, sourceFiles, false)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -203,10 +231,11 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 		pkgName := identifier(spkgName)
 		file := getStdFileName(spkgName)
 		files := []string{file}
-		pkg := ParseFiles(pkgName, files, false)
+		pkgScope := newScope(nil, pkgName)
+		symbolTable.allScopes[pkgName] = pkgScope
+		pkg := ParseFiles(pkgScope, files, false)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
-		symbolTable.allScopes[pkgName] = pkg.scope
 	}
 
 	return compiledStdPkgs
@@ -219,10 +248,11 @@ type Program struct {
 	importOS    bool
 }
 
-func build(pkgUniverse *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
+func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
 	var packages []*AstPackage
 
 	packages = append(packages, pkgUniverse)
+	packages = append(packages, pkgUnsafe)
 	packages = append(packages, pkgIRuntime)
 
 	for _, pkg := range stdPkgs {
