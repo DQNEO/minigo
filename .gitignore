@@ -9,6 +9,7 @@
 /minigo3.s
 a.go
 /internal_universe.go
+/internal_unsafe.go
 /internal_runtime.go
 /a.s
 /a.o

@@ -19,3 +19,13 @@ var internalUniverseCode string = string(\`
 $code
 \`)
 EOF
+
+code=$(cat stdlib/unsafe/unsafe.go)
+
+cat > internal_unsafe.go <<EOF
+package main
+
+var internalUnsafeCode string = string(\`
+$code
+\`)
+EOF

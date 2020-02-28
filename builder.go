@@ -53,12 +53,6 @@ func compileUniverse(universe *Scope) *AstPackage {
 	}
 }
 
-var internalUnsafeCode string = string(`
-package unsafe
-
-type Pointer *int
-`)
-
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
