@@ -41,7 +41,7 @@ func parseImports(sourceFiles []string) importMap {
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
-		packagePath: "/builtin",
+		packagePath: normalizeImportPath("builtin"), // anything goes
 		packageName: identifier("builtin"),
 	}
 	f := p.ParseFile("stdlib/builtin/builtin.go", universe, false)
