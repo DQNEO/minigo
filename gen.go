@@ -93,12 +93,30 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	return s
 }
 
-// "main","f1" -> "main.f1"
-func getFuncSymbol(pkg identifier, fname string) string {
-	if len(pkg) == 0 {
-		return Sprintf(".%s", fname)
+// tr '/' => '_'
+func escapeForAssembler(pkgPath normalizedPackagePath) string {
+	var converted []byte
+	var bp []byte = []byte(pkgPath)
+	for i, b := range bp {
+		if b == '/' {
+			if i == 0 {
+				// skip the intial "/"
+				continue
+			}
+			b = '.'
+		}
+		converted = append(converted, b)
 	}
-	s := Sprintf("%s.%s", pkg, fname)
+	return string(converted)
+}
+
+// "main","f1" -> "main.f1"
+func getFuncSymbol(pkgPath normalizedPackagePath, fname string) string {
+	if len(pkgPath) == 0 {
+		errorft(nil, "pkg should not be empty: %s", fname)
+	}
+	convertedPath := escapeForAssembler(pkgPath)
+	s := Sprintf("%s.%s", convertedPath, fname)
 	return s
 }
 
@@ -106,11 +124,11 @@ func (f *DeclFunc) getSymbol() string {
 	if f.receiver != nil {
 		// method
 		fname := f.fname
-		return getFuncSymbol(f.pkg, getMethodUniqueName(f.receiver.gtype, fname))
+		return getFuncSymbol(f.pkgPath, getMethodUniqueName(f.receiver.gtype, fname))
 	}
 
 	// other functions
-	return getFuncSymbol(f.pkg, string(f.fname))
+	return getFuncSymbol(f.pkgPath, string(f.fname))
 }
 
 func align(n int, m int) int {
@@ -324,7 +342,7 @@ func emitCallMallocDinamicSize(eSize Expr) {
 	eSize.emit()
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "malloc"))
 }
 
 func emitCallMalloc(size int) {

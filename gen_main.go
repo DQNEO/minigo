@@ -117,7 +117,7 @@ func (program *Program) emit() {
 	// emit packages
 	for _, pkg := range program.packages {
 		emitWithoutIndent("#--------------------------------------------------------")
-		emitWithoutIndent("# package %s", pkg.name)
+		emitWithoutIndent("# package %s:%s", string(pkg.normalizedPath), pkg.name)
 		emitWithoutIndent("# string literals")
 		emitWithoutIndent(".data 0")
 		for _, ast := range pkg.stringLiterals {
@@ -162,16 +162,16 @@ func emitMainFunc(packages []*AstPackage) {
 	// init imported packages
 	for _, pkg := range packages {
 		if pkg.hasInit {
-			emit("# init %s", pkg.name)
-			emit("FUNCALL %s.init", pkg.name)
+			emit("# init %s", string(pkg.normalizedPath))
+			emit("FUNCALL %s", getFuncSymbol(pkg.normalizedPath, "init"))
 		}
 	}
 
 	emitNewline()
-	emit("FUNCALL main.main")
+	emit("FUNCALL %s", getFuncSymbol("main","main"))
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 
 	// exit(0)
 	emit("mov $0,  %%rdi")
-	emit("FUNCALL iruntime.exit")
+	emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "exit"))
 }

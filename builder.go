@@ -3,29 +3,31 @@ package main
 
 import "./stdlib/fmt"
 
-func extractImports(astFile *AstFile) importMap {
-	var imports importMap = map[string]bool{}
-	for _, importDecl := range astFile.importDecls {
-		for _, spec := range importDecl.specs {
-			baseName := getBaseNameFromImport(spec.path)
-			imports[baseName] = true
-		}
+// "fmt" => "/stdlib/fmt"
+// "./stdlib/fmt" => "/stdlib/fmt"
+func normalizeImportPath(path string) normalizedPackagePath {
+	if len(path) > 9 && path[0] == '.' {
+		// "./stdlib/fmt" => "/stdlib/fmt"
+		bpath := []byte(path)
+		bpath2 := bpath[1:]
+		return normalizedPackagePath(string(bpath2))
+	} else {
+		// "fmt" => "/stdlib/fmt"
+		return normalizedPackagePath("/stdlib/" + path)
 	}
-	return imports
 }
 
 // analyze imports of a given go source
 func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{}
 	astFile := p.ParseFile(sourceFile, nil, true)
-	imports := extractImports(astFile)
-	return imports
+	return astFile.imports
 }
 
 // analyze imports of given go files
 func parseImports(sourceFiles []string) importMap {
 
-	var imported importMap = map[string]bool{}
+	var imported importMap = map[normalizedPackagePath]bool{}
 	for _, sourceFile := range sourceFiles {
 		importsInFile := parseImportsFromFile(sourceFile)
 		for name, _ := range importsInFile {
@@ -39,7 +41,8 @@ func parseImports(sourceFiles []string) importMap {
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: identifier(""),
+		packagePath: normalizeImportPath("builtin"), // anything goes
+		packageName: identifier("builtin"),
 	}
 	f := p.ParseFile("stdlib/builtin/builtin.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
@@ -56,13 +59,15 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
+	pkgPath := normalizeImportPath("unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
-	symbolTable.allScopes[pkgName] = pkgScope
+	symbolTable.allScopes[pkgPath] = pkgScope
 
 	p := &parser{
+		packagePath:pkgPath,
 		packageName: pkgName,
 	}
-	f := p.ParseFile("stdlib/unsafe/unsafe.go", pkgScope, false)
+	f := p.ParseFile(getStdFileName(pkgPath), pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
@@ -74,12 +79,17 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	}
 }
 
+const IRuntimePath normalizedPackagePath = "iruntime"
+const MainPath normalizedPackagePath = "main"
+
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	pkgName := identifier("iruntime")
+	pkgPath := IRuntimePath
 	pkgScope := newScope(nil, pkgName)
-	symbolTable.allScopes[pkgName] = pkgScope
+	symbolTable.allScopes[pkgPath] = pkgScope
 	p := &parser{
+		packagePath: pkgPath,
 		packageName: pkgName,
 	}
 	f := p.ParseFile("internal/runtime/runtime.go", universe, false)
@@ -87,6 +97,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
+		normalizedPath: pkgPath,
 		name:           pkgName,
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
@@ -102,12 +113,12 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 	return pkg
 }
 
-// compileFiles parses files into *AstPackage
-func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
+// compileMainFiles parses files into *AstPackage
+func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
 	pkgScope := newScope(nil, pkgName)
-	mainPkg := ParseFiles(pkgScope, sourceFiles)
+	mainPkg := ParseFiles("main", MainPath, pkgScope, sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -125,25 +136,25 @@ func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	return mainPkg
 }
 
-type importMap map[string]bool
+type importMap map[normalizedPackagePath]bool
 
-func parseImportRecursive(dep map[string]importMap, directDependencies importMap) {
-	for spkgName, _ := range directDependencies {
-		file := getStdFileName(spkgName)
+func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
+	for normalizedPackagePath, _ := range directDependencies {
+		file := getStdFileName(normalizedPackagePath)
 		imports := parseImportsFromFile(file)
-		dep[spkgName] = imports
+		dep[normalizedPackagePath] = imports
 		parseImportRecursive(dep, imports)
 	}
 }
 
-func removeResolvedPkg(dep map[string]importMap, pkgToRemove string) map[string]importMap {
-	var dep2 map[string]importMap = map[string]importMap{}
+func removeResolvedPkg(dep map[normalizedPackagePath]importMap, pkgToRemove normalizedPackagePath) map[normalizedPackagePath]importMap {
+	var dep2 map[normalizedPackagePath]importMap = map[normalizedPackagePath]importMap{}
 
 	for pkg1, imports := range dep {
 		if pkg1 == pkgToRemove {
 			continue
 		}
-		var newimports importMap = map[string]bool{}
+		var newimports importMap = map[normalizedPackagePath]bool{}
 		for pkg2, _ := range imports {
 			if pkg2 == pkgToRemove {
 				continue
@@ -156,7 +167,7 @@ func removeResolvedPkg(dep map[string]importMap, pkgToRemove string) map[string]
 	return dep2
 }
 
-func removeResolvedPackages(dep map[string]importMap, sortedUniqueImports []string) map[string]importMap {
+func removeResolvedPackages(dep map[normalizedPackagePath]importMap, sortedUniqueImports []normalizedPackagePath) map[normalizedPackagePath]importMap {
 	for _, resolved := range sortedUniqueImports {
 		dep = removeResolvedPkg(dep, resolved)
 	}
@@ -173,8 +184,8 @@ func dumpDep(dep map[string]importMap) {
 	}
 }
 
-func get0dependentPackages(dep map[string]importMap) []string {
-	var moved []string
+func get0dependentPackages(dep map[normalizedPackagePath]importMap) []normalizedPackagePath {
+	var moved []normalizedPackagePath
 	if len(dep) == 0 {
 		return nil
 	}
@@ -192,9 +203,9 @@ func get0dependentPackages(dep map[string]importMap) []string {
 	return moved
 }
 
-func resolveDependency(directDependencies importMap) []string {
-	var sortedUniqueImports []string
-	var dep map[string]importMap = map[string]importMap{}
+func resolveDependency(directDependencies importMap) []normalizedPackagePath {
+	var sortedUniqueImports []normalizedPackagePath
+	var dep map[normalizedPackagePath]importMap = map[normalizedPackagePath]importMap{}
 	parseImportRecursive(dep, directDependencies)
 
 	for {
@@ -212,26 +223,29 @@ func resolveDependency(directDependencies importMap) []string {
 	return sortedUniqueImports
 }
 
-func getStdFileName(pkgName string) string {
-	return fmt.Sprintf("stdlib/%s/%s.go", pkgName, pkgName)
+// "/stdlib/fmt" => "./stdlib/fmt/fmt.go"
+func getStdFileName(path normalizedPackagePath) string {
+	baseName := getBaseNameFromImport(string(path))
+	filename := baseName + ".go"
+	return fmt.Sprintf("./%s/%s", string(path), filename)
 }
 
 // Compile standard libraries
-func compileStdLibs(universe *Scope, directDependencies importMap) map[identifier]*AstPackage {
+func compileStdLibs(universe *Scope, directDependencies importMap) map[normalizedPackagePath]*AstPackage {
 
 	sortedUniqueImports := resolveDependency(directDependencies)
 
-	var compiledStdPkgs map[identifier]*AstPackage = map[identifier]*AstPackage{}
+	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
 
-	for _, spkgName := range sortedUniqueImports {
-		pkgName := identifier(spkgName)
-		file := getStdFileName(spkgName)
+	for _, path := range sortedUniqueImports {
+		file := getStdFileName(path) // => "./stdlib/io/ioutil/ioutil.go"
 		files := []string{file}
-		pkgScope := newScope(nil, pkgName)
-		symbolTable.allScopes[pkgName] = pkgScope
-		pkg := ParseFiles(pkgScope, files)
+		pkgScope := newScope(nil, identifier(path))
+		symbolTable.allScopes[path] = pkgScope
+		pkgShortName := getBaseNameFromImport(string(path))
+		pkg := ParseFiles(identifier(pkgShortName), path, pkgScope, files)
 		pkg = makePkg(pkg, universe)
-		compiledStdPkgs[pkgName] = pkg
+		compiledStdPkgs[path] = pkg
 	}
 
 	return compiledStdPkgs
@@ -242,7 +256,7 @@ type Program struct {
 	methodTable map[int][]string
 }
 
-func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
+func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[normalizedPackagePath]*AstPackage, pkgMain *AstPackage) *Program {
 	var packages []*AstPackage
 
 	packages = append(packages, pkgUniverse)

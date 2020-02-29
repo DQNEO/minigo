@@ -96,14 +96,14 @@ func main() {
 
 	// compiler unsafe package
 	symbolTable = &SymbolTable{}
-	symbolTable.allScopes = map[identifier]*Scope{}
+	symbolTable.allScopes = map[normalizedPackagePath]*Scope{}
 	pkgUnsafe := compileUnsafe(universe)
 	pkgIRuntime := compileRuntime(universe)
 
 	directDependencies := parseImports(sourceFiles)
 	libs := compileStdLibs(universe, directDependencies)
 
-	pkgMain := compileFiles(universe, sourceFiles)
+	pkgMain := compileMainFiles(universe, sourceFiles)
 	if pkgMain == nil {
 		return
 	}

@@ -4,7 +4,7 @@ package main
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
-	allScopes     map[identifier]*Scope
+	allScopes     map[normalizedPackagePath]*Scope
 	uniquedDTypes []string
 }
 
@@ -193,7 +193,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "panic")
+			staticCall.symbol = getFuncSymbol(IRuntimePath, "panic")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinLen:
@@ -214,7 +214,7 @@ func walkExpr(expr Expr) Expr {
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
-				symbol:   getFuncSymbol(identifier("iruntime"), "syscall"),
+				symbol:   getFuncSymbol(IRuntimePath,  "syscall"),
 				args:     funcall.args,
 			}
 			return staticCall
@@ -225,7 +225,7 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(identifier("iruntime"), "makeSlice")
+			staticCall.symbol = getFuncSymbol(IRuntimePath,  "makeSlice")
 			staticCall.args = funcall.args
 			return staticCall
 		case builtinAppend:
@@ -240,9 +240,9 @@ func walkExpr(expr Expr) Expr {
 			}
 			switch slice.getGtype().elementType.getSize() {
 			case 1:
-				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append1")
+				staticCall.symbol = getFuncSymbol(IRuntimePath, "append1")
 			case 8:
-				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append8")
+				staticCall.symbol = getFuncSymbol(IRuntimePath, "append8")
 			case 24:
 				if slice.getGtype().elementType.getKind() == G_INTERFACE && valueToAppend.getGtype().getKind() != G_INTERFACE {
 					eConvertion := &IrExprConversionToInterface{
@@ -251,7 +251,7 @@ func walkExpr(expr Expr) Expr {
 					}
 					funcall.args[1] = eConvertion
 				}
-				staticCall.symbol = getFuncSymbol(identifier("iruntime"), "append24")
+				staticCall.symbol = getFuncSymbol(IRuntimePath, "append24")
 			default:
 				TBI(slice.token(), "")
 			}
