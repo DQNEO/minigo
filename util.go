@@ -4,14 +4,6 @@ import (
 	"./stdlib/strings"
 )
 
-// Tentative implementation
-// "foo" => "foo"
-// "foo/bar" => "bar"
-// "./stdlib/foo/bar" => "bar"
-func getPackageNameInImport(importPath string) string {
-	return string(getBaseNameFromImport(importPath))
-}
-
 func getBaseNameFromImport(path string) string {
 	if strings.Contains(path, "/") {
 		words := strings.Split(path, "/")

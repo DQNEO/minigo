@@ -1974,6 +1974,14 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 	p.methods = map[identifier]methods{}
 }
 
+// Tentative implementation
+// "foo" => "foo"
+// "foo/bar" => "bar"
+// "./stdlib/foo/bar" => "bar"
+func getPackageNameInImport(importPath string) string {
+	return string(getBaseNameFromImport(importPath))
+}
+
 // https://golang.org/ref/spec#Source_file_organization
 // Each source file consists of
 // a package clause defining the package to which it belongs,
@@ -1985,13 +1993,14 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 
 	packageClause := p.parsePackageClause()
 	importDecls := p.parseImportDecls()
-
+	var imports importMap = map[normalizedPackagePath]bool{}
 	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			pkgName := identifier(getPackageNameInImport(spec.path))
 			normalizedPath := normalizeImportPath(spec.path)
 			p.importedNames[pkgName] = normalizedPath
+			imports[normalizedPath] = true
 		}
 	}
 
@@ -2000,6 +2009,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 			tok:           packageClause.tok,
 			packageClause: packageClause,
 			importDecls:   importDecls,
+			imports: imports,
 		}
 	}
 
@@ -2032,6 +2042,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		dynamicTypes:      p.dynamicTypes,
 		namedTypes:        p.namedTypes,
 		methods:           p.methods,
+		imports: imports,
 	}
 }
 

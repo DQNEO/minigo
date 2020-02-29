@@ -26,6 +26,7 @@ type AstFile struct {
 	name              string
 	packageClause     *PackageClause
 	importDecls       []*ImportDecl
+	imports           importMap
 	DeclList          []*TopLevelDecl
 	unresolved        []*Relation
 	uninferredGlobals []*ExprVariable

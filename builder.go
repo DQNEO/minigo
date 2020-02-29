@@ -26,23 +26,11 @@ func normalizeImportPath(path string) normalizedPackagePath {
 	return ""
 }
 
-func extractImports(astFile *AstFile) importMap {
-	var imports importMap = map[normalizedPackagePath]bool{}
-	for _, importDecl := range astFile.importDecls {
-		for _, spec := range importDecl.specs {
-			path := normalizeImportPath(spec.path)
-			imports[path] = true
-		}
-	}
-	return imports
-}
-
 // analyze imports of a given go source
 func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{}
 	astFile := p.ParseFile(sourceFile, nil, true)
-	imports := extractImports(astFile)
-	return imports
+	return astFile.imports
 }
 
 // analyze imports of given go files
