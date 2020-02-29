@@ -69,14 +69,15 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
-	pkgPath := normalizedPackagePath("/stdlib/unsafe") // "/stdlib" is required because it's imported
+	pkgPath := normalizeImportPath("unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
 
 	p := &parser{
+		packagePath:pkgPath,
 		packageName: pkgName,
 	}
-	f := p.ParseFile("stdlib/unsafe/unsafe.go", pkgScope, false)
+	f := p.ParseFile(getStdFileName(pkgPath), pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
