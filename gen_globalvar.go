@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "./stdlib/fmt"
 
 func (vr *ExprVariable) globalSymbol() string {
 	assert(vr.isGlobal, vr.token(), " Not global var")

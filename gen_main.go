@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "./stdlib/fmt"
 import "strings"
 
 // builtin string
