@@ -163,15 +163,15 @@ func emitMainFunc(packages []*AstPackage) {
 	for _, pkg := range packages {
 		if pkg.hasInit {
 			emit("# init %s", string(pkg.normalizedPath))
-			emit("FUNCALL %s", getFuncSymbol(pkg.normalizedPath, pkg.name, "init"))
+			emit("FUNCALL %s", getFuncSymbol(pkg.normalizedPath, "init"))
 		}
 	}
 
 	emitNewline()
-	emit("FUNCALL main.main")
+	emit("FUNCALL %s", getFuncSymbol("main","main"))
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 
 	// exit(0)
 	emit("mov $0,  %%rdi")
-	emit("FUNCALL _iruntime.exit")
+	emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "exit"))
 }

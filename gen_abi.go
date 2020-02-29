@@ -264,7 +264,7 @@ func (ircall *IrStaticCall) emit() {
 				emit("POP_TO_ARG_2 # cap")
 				emit("POP_TO_ARG_1 # len")
 				emit("POP_TO_ARG_0 # ptr")
-				emit("FUNCALL _iruntime.append24")
+				emit("FUNCALL %s", getFuncSymbol(IRuntimePath,"append24"))
 				emit("PUSH_SLICE")
 			}
 		}

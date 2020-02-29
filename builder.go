@@ -89,12 +89,13 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	}
 }
 
-const normalizedRuntimePath normalizedPackagePath = "/iruntime"
+const IRuntimePath normalizedPackagePath = "iruntime"
+const MainPath normalizedPackagePath = "main"
 
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	pkgName := identifier("iruntime")
-	pkgPath := normalizedRuntimePath
+	pkgPath := IRuntimePath
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
 	p := &parser{
@@ -127,7 +128,7 @@ func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
 	pkgScope := newScope(nil, pkgName)
-	mainPkg := ParseFiles("main", "main", pkgScope, sourceFiles)
+	mainPkg := ParseFiles("main", MainPath, pkgScope, sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
