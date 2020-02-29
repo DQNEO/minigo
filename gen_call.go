@@ -82,10 +82,11 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	}
 
 	pkgname := funcref.funcdef.pkg
+	pkgPath := funcref.funcdef.pkgPath
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
 		tok:          methodCall.token(),
-		symbol:       getFuncSymbol(pkgname, name),
+		symbol:       getFuncSymbol(pkgPath, pkgname, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
 		args:         args,
@@ -148,7 +149,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrStaticCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(decl.pkg, string(funcall.fname)),
+			symbol:   getFuncSymbol(decl.pkgPath, decl.pkg, string(funcall.fname)),
 			callee:   decl,
 			args:     funcall.args,
 			origExpr: funcall,
@@ -232,7 +233,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	emit("lea %s, %%rax", slabel)
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
-	emit("FUNCALL %s", "iruntime.panic")
+	emit("FUNCALL %s", "_iruntime.panic")
 
 	emitWithoutIndent("%s:", labelEnd)
 	emitNewline()

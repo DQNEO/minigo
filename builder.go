@@ -39,7 +39,8 @@ func parseImports(sourceFiles []string) importMap {
 // inject builtin functions into the universe scope
 func compileUniverse(universe *Scope) *AstPackage {
 	p := &parser{
-		packageName: identifier(""),
+		packagePath: "/builtin",
+		packageName: identifier("builtin"),
 	}
 	f := p.ParseFile("stdlib/builtin/builtin.go", universe, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
@@ -56,8 +57,9 @@ func compileUniverse(universe *Scope) *AstPackage {
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
+	pkgPath := "/stdlib/unsafe"
 	pkgScope := newScope(nil, pkgName)
-	symbolTable.allScopes[pkgName] = pkgScope
+	symbolTable.allScopes[pkgPath] = pkgScope
 
 	p := &parser{
 		packageName: pkgName,
@@ -77,9 +79,11 @@ func compileUnsafe(universe *Scope) *AstPackage {
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
 	pkgName := identifier("iruntime")
+	pkgPath := "/iruntime"
 	pkgScope := newScope(nil, pkgName)
-	symbolTable.allScopes[pkgName] = pkgScope
+	symbolTable.allScopes[pkgPath] = pkgScope
 	p := &parser{
+		packagePath: pkgPath,
 		packageName: pkgName,
 	}
 	f := p.ParseFile("internal/runtime/runtime.go", universe, false)
@@ -87,6 +91,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
 	return &AstPackage{
+		packagePath: "/iruntime",
 		name:           pkgName,
 		files:          []*AstFile{f},
 		stringLiterals: f.stringLiterals,
@@ -102,12 +107,12 @@ func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
 	return pkg
 }
 
-// compileFiles parses files into *AstPackage
-func compileFiles(universe *Scope, sourceFiles []string) *AstPackage {
+// compileMainFiles parses files into *AstPackage
+func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 	// compile the main package
 	pkgName := identifier("main")
 	pkgScope := newScope(nil, pkgName)
-	mainPkg := ParseFiles(pkgScope, sourceFiles)
+	mainPkg := ParseFiles("main", pkgScope, sourceFiles)
 	if parseOnly {
 		if debugAst {
 			mainPkg.dump()
@@ -212,8 +217,14 @@ func resolveDependency(directDependencies importMap) []string {
 	return sortedUniqueImports
 }
 
+//
 func getStdFileName(pkgName string) string {
-	return fmt.Sprintf("stdlib/%s/%s.go", pkgName, pkgName)
+	/*
+	if pkgName == "ioutil" {
+		return "./stdlib/io/ioutil/ioutil.go"
+	}
+	 */
+	return fmt.Sprintf("./stdlib/%s/%s.go", pkgName, pkgName)
 }
 
 // Compile standard libraries
@@ -225,11 +236,15 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 
 	for _, spkgName := range sortedUniqueImports {
 		pkgName := identifier(spkgName)
-		file := getStdFileName(spkgName)
+		pkgPath := "/stdlib/" + spkgName
+		if spkgName == "ioutil" {
+			pkgPath = "/stdlib/io/ioutil"
+		}
+		file := getStdFileName(spkgName) // => "./stdlib/io/ioutil/ioutil.go"
 		files := []string{file}
 		pkgScope := newScope(nil, pkgName)
-		symbolTable.allScopes[pkgName] = pkgScope
-		pkg := ParseFiles(pkgScope, files)
+		symbolTable.allScopes[pkgPath] = pkgScope
+		pkg := ParseFiles(pkgPath, pkgScope, files)
 		pkg = makePkg(pkg, universe)
 		compiledStdPkgs[pkgName] = pkg
 	}

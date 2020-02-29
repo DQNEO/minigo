@@ -51,7 +51,7 @@ func (e *IrStringConcat) emit() {
 	// left + right
 	call := &IrStaticCall{
 		tok:          e.token(),
-		symbol:       "iruntime.concat",
+		symbol:       "_iruntime.concat",
 		isMethodCall: false,
 		args:         args,
 		callee: &DeclFunc{
@@ -100,7 +100,7 @@ func (binop *IrExprStringComparison) emit() {
 	// eq(left, right, eFlag)
 	call := &IrStaticCall{
 		tok:          binop.token(),
-		symbol:       "iruntime.cmpStrings",
+		symbol:       "_iruntime.cmpStrings",
 		isMethodCall: false,
 		args:         args,
 		callee: &DeclFunc{
@@ -115,7 +115,7 @@ func emitGoStringsEqualFromStack() {
 	emit("PUSH_8")
 
 	call := &IrLowLevelCall{
-		symbol:        "iruntime.cmpStrings",
+		symbol:        getFuncSymbol("/iruntime", "", "cmpStrings"),
 		argsFromStack: 7,
 	}
 	call.emit()

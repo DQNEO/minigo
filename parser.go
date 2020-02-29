@@ -17,11 +17,12 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
+	packagePath         string
 	packageName         identifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
-	importedNames       map[identifier]bool
+	importedNames       map[identifier]string
 	unresolvedRelations []*Relation
 	uninferredGlobals   []*ExprVariable
 	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
@@ -1650,6 +1651,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	r := &DeclFunc{
 		tok:      fnameToken,
+		pkgPath:  p.packagePath,
 		pkg:      p.packageName,
 		receiver: receiver,
 		fname:    fname,
@@ -1852,9 +1854,18 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		if symbolTable == nil {
 			errorft(rel.token(), "symbolTable is empty")
 		}
-		scope := symbolTable.allScopes[pkg]
+		pkgPath := p.importedNames[pkg]
+		if len(pkgPath) == 0 {
+			errorft(rel.token(), "pkgPath for %s should not be empty", pkg)
+		}
+		scope := symbolTable.allScopes[pkgPath]
 		if scope == nil {
-			errorft(rel.token(), "pkg %s is not set in allScopes", pkg)
+			/*
+			for k,_ := range symbolTable.allScopes {
+				warnf(k)
+			}
+			 */
+			errorft(rel.token(), "pkg %s(%s) is not set in allScopes", pkgPath, pkg)
 		}
 		relbody := scope.get(rel.name)
 		if relbody == nil {
@@ -1959,7 +1970,7 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
-	p.importedNames = map[identifier]bool{}
+	p.importedNames = map[identifier]string{}
 	p.methods = map[identifier]methods{}
 }
 
@@ -1978,8 +1989,9 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
-			pkgName := getBaseNameFromImport(string(spec.path))
-			p.importedNames[identifier(pkgName)] = true
+			pkgName := getBaseNameFromImport(spec.path)
+			normalizedPath := normalizeImportPath(spec.path)
+			p.importedNames[identifier(pkgName)] = normalizedPath
 		}
 	}
 
@@ -2023,7 +2035,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgScope *Scope, sources []string) *AstPackage {
+func ParseFiles(pkgPath string, pkgScope *Scope, sources []string) *AstPackage {
 	var astFiles []*AstFile
 
 	var uninferredGlobals []*ExprVariable
@@ -2036,6 +2048,7 @@ func ParseFiles(pkgScope *Scope, sources []string) *AstPackage {
 	for _, source := range sources {
 		var astFile *AstFile
 		p := &parser{
+			packagePath:pkgPath,
 			packageName: pkgScope.name,
 		}
 		astFile = p.ParseFile(string(source), pkgScope, false)
@@ -2069,6 +2082,7 @@ func ParseFiles(pkgScope *Scope, sources []string) *AstPackage {
 	}
 
 	return &AstPackage{
+		packagePath:pkgPath,
 		name:              pkgScope.name,
 		scope:             pkgScope,
 		files:             astFiles,

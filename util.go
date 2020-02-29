@@ -4,6 +4,27 @@ import (
 	"./stdlib/strings"
 )
 
+// "fmt" => "/stdlib/fmt"
+func normalizeImportPath(path string) string {
+	if len(path) > 9 {
+		if path[0] == '.' {
+			bp := []byte(path)
+			var path2 []byte
+			for i, b := range bp {
+				if i == 0 {
+					continue
+				}
+				path2 = append(path2, b)
+			}
+			return string(path2)
+		}
+	} else {
+		// "fmt" => "/stdlib/fmt"
+		return "/stdlib/" + path
+	}
+	return ""
+}
+
 func getBaseNameFromImport(path string) string {
 	if strings.Contains(path, "/") {
 		words := strings.Split(path, "/")

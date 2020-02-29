@@ -117,7 +117,7 @@ func (e *ExprCap) emit() {
 func emitStaticFunctions() {
 
 	// iruntime.makeSlice
-	emitWithoutIndent("iruntime.makeSlice:")
+	emitWithoutIndent("_iruntime.makeSlice:")
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 
@@ -134,7 +134,7 @@ func emitStaticFunctions() {
 
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
-	emit("FUNCALL iruntime.malloc")
+	emit("FUNCALL _iruntime.malloc")
 
 	emit("mov -24(%%rbp), %%rbx # newlen")
 	emit("mov -16(%%rbp), %%rcx # newcap")
@@ -143,7 +143,7 @@ func emitStaticFunctions() {
 	emitNewline()
 
 	// iruntime.syscall
-	emitWithoutIndent("iruntime.syscall:")
+	emitWithoutIndent("_iruntime.syscall:")
 	emitNewline()
 
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
