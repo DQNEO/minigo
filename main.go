@@ -96,7 +96,7 @@ func main() {
 
 	// compiler unsafe package
 	symbolTable = &SymbolTable{}
-	symbolTable.allScopes = map[string]*Scope{}
+	symbolTable.allScopes = map[normalizedPackagePath]*Scope{}
 	pkgUnsafe := compileUnsafe(universe)
 	pkgIRuntime := compileRuntime(universe)
 

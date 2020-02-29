@@ -2,8 +2,11 @@ package main
 
 type mapToIdentToMethods map[identifier]methods
 
+type normalizedPackagePath string // "/stdlib/io/iotuil"
+
+
 type AstPackage struct {
-	packagePath       string // "/stdlib/io/iotuil"
+	normalizedPath    normalizedPackagePath
 	name              identifier
 	scope             *Scope
 	files             []*AstFile
@@ -292,7 +295,7 @@ type ExprFuncRef struct {
 
 type DeclFunc struct {
 	tok       *Token
-	pkgPath   string
+	pkgPath   normalizedPackagePath
 	pkg       identifier
 	receiver  *ExprVariable
 	fname     identifier

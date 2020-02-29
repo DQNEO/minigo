@@ -17,12 +17,12 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	packagePath         string
+	packagePath         normalizedPackagePath
 	packageName         identifier
 	tokenStream         *TokenStream
 	packageBlockScope   *Scope
 	currentScope        *Scope
-	importedNames       map[identifier]string
+	importedNames       map[identifier]normalizedPackagePath
 	unresolvedRelations []*Relation
 	uninferredGlobals   []*ExprVariable
 	uninferredLocals    []Inferrer // VarDecl, StmtShortVarDecl or RangeClause
@@ -194,7 +194,7 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	// https://golang.org/ref/spec#QualifiedIdent
 	// read QualifiedIdent
 	var pkg identifier // ignored for now
-	if _, ok := p.importedNames[identifier(firstIdent)]; ok {
+	if _, ok := p.importedNames[firstIdent]; ok {
 		pkg = firstIdent
 		p.expect(".")
 		// shift firstident
@@ -1970,7 +1970,7 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 	p.tokenStream = NewTokenStream(bs)
 	p.packageBlockScope = packageBlockScope
 	p.currentScope = packageBlockScope
-	p.importedNames = map[identifier]string{}
+	p.importedNames = map[identifier]normalizedPackagePath{}
 	p.methods = map[identifier]methods{}
 }
 
@@ -1989,9 +1989,9 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	// regsiter imported names
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
-			pkgName := getBaseNameFromImport(spec.path)
+			pkgName := identifier(getPackageNameInImport(spec.path))
 			normalizedPath := normalizeImportPath(spec.path)
-			p.importedNames[identifier(pkgName)] = normalizedPath
+			p.importedNames[pkgName] = normalizedPath
 		}
 	}
 
@@ -2035,7 +2035,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(pkgPath string, pkgScope *Scope, sources []string) *AstPackage {
+func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope *Scope, sources []string) *AstPackage {
 	var astFiles []*AstFile
 
 	var uninferredGlobals []*ExprVariable
@@ -2049,7 +2049,7 @@ func ParseFiles(pkgPath string, pkgScope *Scope, sources []string) *AstPackage {
 		var astFile *AstFile
 		p := &parser{
 			packagePath:pkgPath,
-			packageName: pkgScope.name,
+			packageName: packageName,
 		}
 		astFile = p.ParseFile(string(source), pkgScope, false)
 		astFiles = append(astFiles, astFile)
@@ -2082,8 +2082,8 @@ func ParseFiles(pkgPath string, pkgScope *Scope, sources []string) *AstPackage {
 	}
 
 	return &AstPackage{
-		packagePath:pkgPath,
-		name:              pkgScope.name,
+		normalizedPath:pkgPath,
+		name:              packageName,
 		scope:             pkgScope,
 		files:             astFiles,
 		namedTypes:        namedTypes,

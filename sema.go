@@ -4,7 +4,7 @@ package main
 var symbolTable *SymbolTable
 
 type SymbolTable struct {
-	allScopes     map[string]*Scope
+	allScopes     map[normalizedPackagePath]*Scope
 	uniquedDTypes []string
 }
 

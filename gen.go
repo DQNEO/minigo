@@ -93,22 +93,26 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 	return s
 }
 
-// "main","f1" -> "main.f1"
-func getFuncSymbol(pkgPath string, pkg identifier, fname string) string {
-	if len(pkgPath) == 0 {
-		errorft(nil, "pkg should not be empty: %s %s", pkg, fname)
-	}
-	var convertedPath []byte
+// tr '/' => '_'
+func escapeForAssembler(pkgPath normalizedPackagePath) string {
+	var converted []byte
 	var bp []byte = []byte(pkgPath)
 	for _, b := range bp {
 		if b == '/' {
 			b = '_'
 		}
-		convertedPath = append(convertedPath, b)
+		converted = append(converted, b)
 	}
+	return string(converted)
+}
 
-
-	s := Sprintf("%s.%s", string(convertedPath), fname)
+// "main","f1" -> "main.f1"
+func getFuncSymbol(pkgPath normalizedPackagePath, pkg identifier, fname string) string {
+	if len(pkgPath) == 0 {
+		errorft(nil, "pkg should not be empty: %s %s", pkg, fname)
+	}
+	convertedPath := escapeForAssembler(pkgPath)
+	s := Sprintf("%s.%s", convertedPath, fname)
 	return s
 }
 

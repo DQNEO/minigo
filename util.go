@@ -4,25 +4,12 @@ import (
 	"./stdlib/strings"
 )
 
-// "fmt" => "/stdlib/fmt"
-func normalizeImportPath(path string) string {
-	if len(path) > 9 {
-		if path[0] == '.' {
-			bp := []byte(path)
-			var path2 []byte
-			for i, b := range bp {
-				if i == 0 {
-					continue
-				}
-				path2 = append(path2, b)
-			}
-			return string(path2)
-		}
-	} else {
-		// "fmt" => "/stdlib/fmt"
-		return "/stdlib/" + path
-	}
-	return ""
+// Tentative implementation
+// "foo" => "foo"
+// "foo/bar" => "bar"
+// "./stdlib/foo/bar" => "bar"
+func getPackageNameInImport(importPath string) string {
+	return string(getBaseNameFromImport(importPath))
 }
 
 func getBaseNameFromImport(path string) string {
