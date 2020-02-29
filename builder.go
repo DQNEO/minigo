@@ -7,6 +7,7 @@ import "./stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
 func normalizeImportPath(path string) normalizedPackagePath {
 	if len(path) > 9 {
+		// "./stdlib/fmt" => "/stdlib/fmt"
 		if path[0] == '.' {
 			// if "./stdlib/..."
 			bp := []byte(path)
