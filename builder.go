@@ -6,25 +6,15 @@ import "./stdlib/fmt"
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
 func normalizeImportPath(path string) normalizedPackagePath {
-	if len(path) > 9 {
+	if len(path) > 9 && path[0] == '.' {
 		// "./stdlib/fmt" => "/stdlib/fmt"
-		if path[0] == '.' {
-			// if "./stdlib/..."
-			bp := []byte(path)
-			var path2 []byte
-			for i, b := range bp {
-				if i == 0 {
-					continue
-				}
-				path2 = append(path2, b)
-			}
-			return normalizedPackagePath(path2)
-		}
+		bpath := []byte(path)
+		bpath2 := bpath[1:]
+		return normalizedPackagePath(string(bpath2))
 	} else {
 		// "fmt" => "/stdlib/fmt"
 		return normalizedPackagePath("/stdlib/" + path)
 	}
-	return ""
 }
 
 // analyze imports of a given go source
