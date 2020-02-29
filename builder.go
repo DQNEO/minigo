@@ -240,7 +240,6 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[identifie
 type Program struct {
 	packages    []*AstPackage
 	methodTable map[int][]string
-	importOS    bool
 }
 
 func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPackage, stdPkgs map[identifier]*AstPackage, pkgMain *AstPackage) *Program {
@@ -286,8 +285,6 @@ func build(pkgUniverse *AstPackage, pkgUnsafe *AstPackage, pkgIRuntime *AstPacka
 
 	program := &Program{}
 	program.packages = packages
-	_, importOS := stdPkgs["os"]
-	program.importOS = importOS
 	program.methodTable = composeMethodTable(funcs)
 	return program
 }
