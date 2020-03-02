@@ -12,9 +12,9 @@
         do { perror(msg); exit(EXIT_FAILURE); } while (0)
 
 struct linux_dirent {
-    long           d_ino;
-    off_t          d_off;
-    unsigned short d_reclen;
+    long           d_ino; // 8 bytes
+    off_t          d_off; // 8 bytes
+    unsigned short d_reclen; // 2 bytes
     char           d_name[];
 };
 
