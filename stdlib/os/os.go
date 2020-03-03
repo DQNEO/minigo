@@ -80,6 +80,11 @@ func (fd *PollFD) Read(b []byte) (int, error) {
 	return n, err
 }
 
+func (fd *PollFD) ReadDirent(buf []byte) (int, error) {
+	nread, _ := syscall.ReadDirent(fd.Sysfd, buf[:])
+	return nread, nil
+}
+
 func (f *File) write(b []byte) (int, error) {
 	fd := f.innerFile.fd
 	var n int
@@ -132,33 +137,33 @@ func cstring2string(b *byte) string {
 	return string(bs)
 }
 
+func ParseDirent(buf []byte, names []string) (int, []string) {
+	p := uintptr(unsafe.Pointer(&buf[0]))
+	var dirp *linux_dirent = p
+	name := cstring2string(uintptr(unsafe.Pointer(&dirp.d_name)))
+	names = append(names, name)
+	return int(dirp.d_reclen1), names
+}
 
 func (f *File) readdirnames(n int) ([]string, error) {
-	fd := f.Fd()
-	var r []string
-	var counter int
-	var buf [1024]byte
+	var names []string
+	var buf [4096]byte
 	for {
-		nread, _ := syscall.ReadDirent(fd, buf[:])
-		if nread == -1 {
+		nbuf, _ := f.innerFile.fd.ReadDirent(buf[:])
+		if nbuf == -1 {
 			panic("getdents failed")
 		}
-		if nread == 0 {
+		if nbuf == 0 {
 			break
 		}
-
-		for bpos := 0; bpos < nread; 1 {
-			var dirp *linux_dirent
-			dirp = uintptr(buf) + uintptr(bpos)
-
-			bpos = bpos + int(dirp.d_reclen1) // 24 is wrong
-			var bp *byte = uintptr(unsafe.Pointer(&dirp.d_name))
-			var s string = cstring2string(bp)
-			r = append(r, s)
-			counter++
+		var bufp int
+		for ; bufp < nbuf; 1 {
+			var reclen int
+			reclen, names = ParseDirent(buf[bufp:], names)
+			bufp = bufp + reclen
 		}
 	}
-	return r, nil
+	return names, nil
 }
 
 func Exit(code int) {
