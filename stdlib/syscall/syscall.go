@@ -50,7 +50,8 @@ func Getdents(fd int, buf []byte) (int, error) {
 	return nread, nil
 }
 
-type linux_dirent struct {
+// http://man7.org/linux/man-pages/man2/getdents64.2.html#top_of_page
+type LinuxDirent64 struct {
 	d_ino    int
 	d_off    int
 	d_reclen1 uint16
@@ -73,7 +74,7 @@ func cstring2string(b *byte) string {
 
 func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
 	p := uintptr(unsafe.Pointer(&buf[0]))
-	var dirp *linux_dirent = p
+	var dirp *LinuxDirent64 = p
 	name := cstring2string(uintptr(unsafe.Pointer(&dirp.d_name)))
 	if name != "." && name != ".." {
 		names = append(names, name)
