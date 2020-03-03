@@ -11,11 +11,12 @@
 #define handle_error(msg) \
         do { perror(msg); exit(EXIT_FAILURE); } while (0)
 
-struct linux_dirent {
-    long           d_ino; // 8 bytes
-    off_t          d_off; // 8 bytes
-    unsigned short d_reclen; // 2 bytes
-    char           d_name[];
+struct linux_dirent64 {
+   ino64_t        d_ino;    /* 8 bytes: 64-bit inode number */
+   off64_t        d_off;    /* 8 bytes: 64-bit offset to next structure */
+   unsigned short d_reclen; /* 2 bytes: Size of this dirent  */
+   unsigned char  d_type;   /* 1 byte: File type */
+   char           d_name[]; /* Filename (null-terminated) */
 };
 
 #define BUF_SIZE 4096
@@ -23,9 +24,17 @@ struct linux_dirent {
 int
 main(int argc, char *argv[])
 {
+/*
+    printf("unsigned short=%ld\n", sizeof(unsigned short));
+    printf("int=%ld\n", sizeof(int));
+    printf("long=%ld\n", sizeof(long));
+    printf("off_t=%ld\n", sizeof(off_t));
+    printf("size_t=%ld\n", sizeof(size_t));
+*/
+
     int fd, nread;
     char buf[BUF_SIZE];
-    struct linux_dirent *d;
+    struct linux_dirent64 *d;
     int bpos;
     char d_type;
 
@@ -34,7 +43,7 @@ main(int argc, char *argv[])
         handle_error("open");
 
     for ( ; ; ) {
-        nread = syscall(SYS_getdents, fd, buf, BUF_SIZE);
+        nread = syscall(SYS_getdents64, fd, buf, BUF_SIZE);
         if (nread == -1)
             handle_error("getdents");
 
@@ -44,9 +53,9 @@ main(int argc, char *argv[])
         printf("--------------- nread=%d ---------------\n", nread);
         printf("inode#    file type  d_reclen  d_off   d_name\n");
         for (bpos = 0; bpos < nread;) {
-            d = (struct linux_dirent *) (buf + bpos);
+            d = (struct linux_dirent64 *) (buf + bpos);
             printf("%8ld  ", d->d_ino);
-            d_type = *(buf + bpos + d->d_reclen - 1);
+            d_type = d->d_type;
             printf("%-10s ", (d_type == DT_REG) ?  "regular" :
                              (d_type == DT_DIR) ?  "directory" :
                              (d_type == DT_FIFO) ? "FIFO" :
