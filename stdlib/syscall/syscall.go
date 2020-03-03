@@ -1,5 +1,7 @@
 package syscall
 
+import "unsafe"
+
 func BytePtrFromString(s string) *byte {
 	bs := []byte(s)
 	var r *byte = &bs[0]
@@ -12,6 +14,7 @@ const __x64_sys_read = 0
 const __x64_sys_write = 1
 const __x64_sys_open = 2
 const __x64_sys_exit = 60
+const  _x64_getdents64 = 217
 
 func Open(path string, flag int, perm int) (int, error) {
 	var fd int
@@ -33,6 +36,17 @@ func Read(fd int, b []byte) (int, error) {
 	ptr = &b[0]
 	var nread int
 	nread = syscall(__x64_sys_read, fd, ptr, cap(b))
+	return nread, nil
+}
+
+func ReadDirent(fd int, buf []byte) (int, error) {
+	return Getdents(fd, buf)
+}
+
+func Getdents(fd int, buf []byte) (int, error) {
+	var _p0 unsafe.Pointer
+	_p0 = unsafe.Pointer(&buf[0])
+	nread := syscall(_x64_getdents64, uintptr(fd), uintptr(_p0), len(buf))
 	return nread, nil
 }
 

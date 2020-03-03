@@ -1,5 +1,6 @@
 package os
 
+import "unsafe"
 import "syscall"
 
 const O_RDONLY = 0
@@ -107,6 +108,59 @@ func (f *File) Read(p []byte) (int, error) {
 	return f.read(p)
 }
 
+func (f *File) Readdirnames(n int) ([]string, error) {
+	return f.readdirnames(n)
+}
+
+type linux_dirent struct {
+	d_ino    int
+	d_off    int
+	d_reclen1 uint16
+	d_type   byte
+	d_name   byte
+}
+
+func cstring2string(b *byte) string {
+	var bs []byte
+	for {
+		if b == nil || *b == 0 {
+			break
+		}
+		bs = append(bs, *b)
+		b = uintptr(b) + 1
+	}
+	return string(bs)
+}
+
+
+func (f *File) readdirnames(n int) ([]string, error) {
+	fd := f.Fd()
+	var r []string
+	var counter int
+	var buf [1024]byte
+	for {
+		nread, _ := syscall.ReadDirent(fd, buf[:])
+		if nread == -1 {
+			panic("getdents failed")
+		}
+		if nread == 0 {
+			break
+		}
+
+		for bpos := 0; bpos < nread; 1 {
+			var dirp *linux_dirent
+			dirp = uintptr(buf) + uintptr(bpos)
+
+			bpos = bpos + int(dirp.d_reclen1) // 24 is wrong
+			var bp *byte = uintptr(unsafe.Pointer(&dirp.d_name))
+			var s string = cstring2string(bp)
+			r = append(r, s)
+			counter++
+		}
+	}
+	return r, nil
+}
+
 func Exit(code int) {
 	syscall.Exit(code)
 }
@@ -116,3 +170,4 @@ var Args []string
 func init() {
 	Args = runtime_args()
 }
+
