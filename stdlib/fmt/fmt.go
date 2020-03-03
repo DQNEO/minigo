@@ -41,37 +41,35 @@ func Sprintf(format string, args ...interface{}) string {
 				inPercent = false
 				continue
 			}
+			inPercent = false
+			bs = nil
+			var s string
 			arg := args[argIndex]
+			argIndex++
 			switch arg.(type) {
 			case string:
-				s := arg.(string)
-				blocks = append(blocks, s)
+				s = arg.(string)
 			case []byte:
 				bf := arg.([]byte)
-				blocks = append(blocks, string(bf))
+				s = string(bf)
 			case byte:
 				b := arg.(byte)
 				bf := []byte{b}
-				blocks = append(blocks,  string(bf))
+				s = string(bf)
 			case int:
 				var _int int
 				_int = arg.(int)
-				s := strconv.Itoa(_int)
-				blocks = append(blocks, s)
+				s = strconv.Itoa(_int)
 			case bool: // "%v"
-				var s string
 				if arg.(bool) {
 					s = "true"
 				} else {
 					s = "false"
 				}
-				blocks = append(blocks, s)
 			default:
 				panic("Unkown type to format:")
 			}
-			argIndex++
-			inPercent = false
-			bs = nil
+			blocks = append(blocks, s)
 			continue
 		}
 		bs = append(bs, c)
