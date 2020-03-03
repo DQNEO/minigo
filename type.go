@@ -13,6 +13,7 @@ const (
 	G_BOOL
 	G_BYTE
 	G_UINT_PTR
+	G_UINT_16
 	// end of primitives
 	G_STRUCT
 	G_STRUCT_FIELD

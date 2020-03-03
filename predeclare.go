@@ -11,6 +11,8 @@ var sUintptr = Gtype{kind: G_UINT_PTR, size: 8}
 var gUintptr = &sUintptr
 var sByte = Gtype{kind: G_BYTE, size: 1}
 var gByte = &sByte
+var sUint16 = Gtype{kind: G_UINT_16, size: 2}
+var gUint16 = &sUint16
 var gBool = &Gtype{kind: G_BOOL, size: 8} // we treat bool as quad length data for now
 var gString = &Gtype{
 	kind:        G_STRING,
@@ -27,6 +29,7 @@ var builtinTypesAsString []string = []string{
 	"bool",
 	"byte",
 	"int",
+	"uint16",
 	"string",
 	"func",
 }
@@ -150,6 +153,7 @@ func predeclareTypes(universe *Scope) {
 	universe.setGtype(identifier("int"), gInt)
 	universe.setGtype(identifier("string"), gString)
 	universe.setGtype(identifier("uint8"), gByte)
+	universe.setGtype(identifier("uint16"), gUint16)
 	universe.setGtype(identifier("uintptr"), gUintptr)
 }
 

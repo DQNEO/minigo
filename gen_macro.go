@@ -109,6 +109,10 @@ func emitMacroDefinitions() {
 	emit("mov %%al, \\offset(%%rbp)")
 	macroEnd()
 
+	macroStart("STORE_2_TO_LOCAL", "offset")
+	emit("mov %%ax, \\offset(%%rbp)")
+	macroEnd()
+
 	macroStart("STORE_8_TO_LOCAL", "offset")
 	emit("mov %%rax, \\offset(%%rbp)")
 	macroEnd()
@@ -125,8 +129,16 @@ func emitMacroDefinitions() {
 	emit("movsbq \\offset(%%rbp), %%rax")
 	macroEnd()
 
+	macroStart("LOAD_2_FROM_LOCAL_CAST", "offset")
+	emit("movswq \\offset(%%rbp), %%rax")
+	macroEnd()
+
 	macroStart("LOAD_1_FROM_LOCAL", "offset")
 	emit("mov \\offset(%%rbp), %%al")
+	macroEnd()
+
+	macroStart("LOAD_2_FROM_LOCAL", "offset")
+	emit("mov \\offset(%%rbp), %%ax")
 	macroEnd()
 
 	macroStart("LOAD_8_FROM_LOCAL", "offset")
@@ -137,6 +149,10 @@ func emitMacroDefinitions() {
 	emit("mov %%al, \\varname+\\offset(%%rip)")
 	macroEnd()
 
+	macroStart("STORE_2_TO_GLOBAL", "varname, offset")
+	emit("mov %%ax, \\varname+\\offset(%%rip)")
+	macroEnd()
+
 	macroStart("STORE_8_TO_GLOBAL", "varname, offset")
 	emit("mov %%rax, \\varname+\\offset(%%rip)")
 	macroEnd()
@@ -145,8 +161,16 @@ func emitMacroDefinitions() {
 	emit("movsbq \\varname+\\offset(%%rip), %%rax")
 	macroEnd()
 
+	macroStart("LOAD_2_FROM_GLOBAL_CAST", "varname, offset=0")
+	emit("movswq \\varname+\\offset(%%rip), %%rax")
+	macroEnd()
+
 	macroStart("LOAD_1_FROM_GLOBAL", "varname, offset=0")
 	emit("mov \\varname+\\offset(%%rip), %%al")
+	macroEnd()
+
+	macroStart("LOAD_2_FROM_GLOBAL", "varname, offset=0")
+	emit("mov \\varname+\\offset(%%rip), %%ax")
 	macroEnd()
 
 	macroStart("LOAD_8_FROM_GLOBAL", "varname, offset=0")
@@ -167,6 +191,10 @@ func emitMacroDefinitions() {
 	emit("movsbq (%%rax), %%rax")
 	macroEnd()
 
+	macroStart("LOAD_2_BY_DEREF", "")
+	emit("movswq (%%rax), %%rax")
+	macroEnd()
+
 	macroStart("LOAD_24_FROM_GLOBAL", "varname")
 	emit("mov \\varname+%d(%%rip), %%rax # 1st", offset0)
 	emit("mov \\varname+%d(%%rip), %%rbx # 2nd", offset8)
@@ -181,6 +209,10 @@ func emitMacroDefinitions() {
 
 	macroStart("CAST_UINT8_TO_INT", "")
 	emit("movzbq %%al, %%rax")
+	macroEnd()
+
+	macroStart("CAST_UINT16_TO_INT", "")
+	emit("movzwq %%al, %%rax")
 	macroEnd()
 
 	macroStart("CMP_EQ_ZERO", "")
@@ -229,6 +261,12 @@ func emitMacroDefinitions() {
 	emit("pop %%rax # where")
 	emit("pop %%rcx # what")
 	emit("mov %%cl, (%%rax)")
+	macroEnd()
+
+	macroStart("STORE_2_INDIRECT_FROM_STACK", "")
+	emit("pop %%rax # where")
+	emit("pop %%rcx # what")
+	emit("mov %%cx, (%%rax)")
 	macroEnd()
 
 	macroStart("STORE_8_INDIRECT_FROM_STACK", "")
