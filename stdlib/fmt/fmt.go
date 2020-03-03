@@ -56,8 +56,8 @@ func Sprintf(format string, args ...interface{}) string {
 			case int:
 				var _int int
 				_int = arg.(int)
-				b := string(strconv.Itoa(_int))
-				blocks = append(blocks, b)
+				s := strconv.Itoa(_int)
+				blocks = append(blocks, s)
 			case bool: // "%v"
 				var s string
 				if arg.(bool) {
