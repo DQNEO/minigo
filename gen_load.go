@@ -59,7 +59,14 @@ func (a *ExprStructField) emit() {
 		case true:
 			emit("LOAD_24_BY_DEREF")
 		default:
-			emit("LOAD_8_BY_DEREF")
+			switch field.getKind() {
+			case G_BYTE:
+				emit("LOAD_1_BY_DEREF")
+			case G_UINT_16:
+				emit("LOAD_2_BY_DEREF")
+			default:
+				emit("LOAD_8_BY_DEREF")
+			}
 		}
 
 	case G_STRUCT:
