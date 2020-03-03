@@ -1,5 +1,1 @@
-.
-..
-hello.go
-sample.txt
-string.txt
+5

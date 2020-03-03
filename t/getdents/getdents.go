@@ -51,6 +51,7 @@ func print_dirp(dirp *linux_dirent) {
 	//fmt.Printf("%d  ", dirp.d_type)
 	var bp *byte = uintptr(unsafe.Pointer(&dirp.d_name))
 	var s string = cstring2string(bp)
+	return
 	fmt.Printf("%s", s)
 	fmt.Printf("\n")
 }
@@ -62,6 +63,7 @@ func main() {
 	}
 	fd := f.Fd()
 
+	var counter int
 	for {
 		nread := syscall(_x_sys_getdents64, fd, buf, len(buf))
 		if nread == -1 {
@@ -70,6 +72,7 @@ func main() {
 		if nread == 0 {
 			break
 		}
+
 		//fmt.Printf("--------------- nread=%d ---------------\n", nread)
 		//fmt.Printf("inode   d_off   d_type  d_reclen    d_name\n")
 		for bpos := 0; bpos < nread; 1 {
@@ -77,6 +80,9 @@ func main() {
 			dirp = uintptr(buf) + uintptr(bpos)
 			print_dirp(dirp)
 			bpos = bpos + int(dirp.d_reclen1) // 24 is wrong
+			counter++
 		}
 	}
+
+	fmt.Printf("%d\n", counter)
 }
