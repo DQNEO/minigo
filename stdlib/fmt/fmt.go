@@ -39,8 +39,8 @@ func Sprintf(format string, args ...interface{}) string {
 			}
 		} else if inPercent {
 			if c == '%' {
-				plainstring = append(plainstring, c)
 				inPercent = false
+				plainstring = append(plainstring, c)
 				continue
 			}
 			inPercent = false
