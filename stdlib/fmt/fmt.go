@@ -43,6 +43,7 @@ func Sprintf(format string, args ...interface{}) string {
 				plainstring = append(plainstring, c)
 				continue
 			}
+			var flag byte = c
 			inPercent = false
 			plainstring = nil
 			var s string
@@ -54,8 +55,17 @@ func Sprintf(format string, args ...interface{}) string {
 			case []byte: // for %s
 				s = string(arg.([]byte))
 			case byte: // for %c
-				b := arg.(byte)
-				s = string([]byte{b})
+				switch flag {
+				case 'c':
+					b := arg.(byte)
+					s = string([]byte{b})
+				case 'd':
+					b := arg.(byte)
+					i := int(b)
+					s = strconv.Itoa(i)
+				default:
+					panic("unknown format flag")
+				}
 			case int: // for %d
 				s = strconv.Itoa(arg.(int))
 			case bool: // for %v
