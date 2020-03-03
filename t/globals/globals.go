@@ -30,7 +30,7 @@ func eval() {
 func evalnested() {
 	// nested data
 	fmt.Printf("%d\n", gstruct.inner.gint)        // 12
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // A
+	fmt.Printf("%c\n", gstruct.inner.inner.gchar) // A
 	if gstruct.inner.inner.gtrue == true {
 		fmt.Printf("14\n")
 	}
@@ -55,7 +55,7 @@ func assign1() {
 	garray = [3]int{23, 24}
 
 	fmt.Printf("%d\n", gint)  // 19
-	fmt.Printf("%d\n", gchar) // B
+	fmt.Printf("%c\n", gchar) // B
 	if !gtrue {
 		fmt.Printf("21\n") //21
 	}
@@ -103,7 +103,7 @@ func assign4() {
 			},
 		},
 	}
-	fmt.Printf("%d\n", gstruct.inner.inner.gchar) // C
+	fmt.Printf("%c\n", gstruct.inner.inner.gchar) // C
 }
 
 func assign5() {
