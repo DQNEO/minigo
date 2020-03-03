@@ -20,29 +20,31 @@ var _fmt_trash int
 
 func Sprintf(format string, args ...interface{}) string {
 	var blocks []string
-	var bs []byte
-	var f []byte = []byte(format)
+	var plainstring []byte
 	var numPercent int
 	var inPercent bool
 	var argIndex int
 
 	//var sign byte
-	for _, c := range f {
-		if !inPercent && c == '%' {
-			inPercent = true
-			blocks = append(blocks, string(bs))
-			bs = nil
-			numPercent++
-			continue
-		}
-		if inPercent {
+	bformat := []byte(format)
+	for _, c := range bformat {
+		if !inPercent  {
+			if  c == '%' {
+				inPercent = true
+				blocks = append(blocks, string(plainstring))
+				plainstring = nil
+				numPercent++
+			} else {
+				plainstring = append(plainstring, c)
+			}
+		} else if inPercent {
 			if c == '%' {
-				bs = append(bs, c)
+				plainstring = append(plainstring, c)
 				inPercent = false
 				continue
 			}
 			inPercent = false
-			bs = nil
+			plainstring = nil
 			var s string
 			arg := args[argIndex]
 			argIndex++
@@ -70,11 +72,9 @@ func Sprintf(format string, args ...interface{}) string {
 				panic("Unkown type to format:")
 			}
 			blocks = append(blocks, s)
-			continue
 		}
-		bs = append(bs, c)
 	}
-	blocks = append(blocks, string(bs))
+	blocks = append(blocks, string(plainstring))
 
 	var r []byte
 	for _, block := range blocks {
