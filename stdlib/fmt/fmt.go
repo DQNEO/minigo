@@ -19,18 +19,15 @@ func Printf(format string, a ...interface{}) {
 var _fmt_trash int
 
 func Sprintf(format string, args ...interface{}) string {
-	var r []byte
 	var blocks []string
 	var bs []byte
 	var f []byte = []byte(format)
-	var c byte
-	var i int
-	var j int
 	var numPercent int
 	var inPercent bool
 	var argIndex int
+
 	//var sign byte
-	for i, c = range f {
+	for _, c := range f {
 		if !inPercent && c == '%' {
 			inPercent = true
 			blocks = append(blocks, string(bs))
@@ -47,34 +44,28 @@ func Sprintf(format string, args ...interface{}) string {
 			arg := args[argIndex]
 			switch arg.(type) {
 			case string:
-				var _args string
-				_args = arg.(string)
-				blocks = append(blocks, _args)
+				s := arg.(string)
+				blocks = append(blocks, s)
 			case []byte:
-				var _arg []byte
-				_arg = arg.([]byte)
-				blocks = append(blocks, string(_arg))
+				bf := arg.([]byte)
+				blocks = append(blocks, string(bf))
 			case byte:
-				var _argByte byte
-				_argByte = arg.(byte)
-				bts := []byte{_argByte}
-				g := string(bts)
-				blocks = append(blocks, g)
+				b := arg.(byte)
+				bf := []byte{b}
+				blocks = append(blocks,  string(bf))
 			case int:
-				var _argInt int
-				_argInt = arg.(int)
-				b := string(strconv.Itoa(_argInt))
+				var _int int
+				_int = arg.(int)
+				b := string(strconv.Itoa(_int))
 				blocks = append(blocks, b)
 			case bool: // "%v"
-				var _argBool bool
-				_argBool = arg.(bool)
-				var b string
-				if _argBool {
-					b = "true"
+				var s string
+				if arg.(bool) {
+					s = "true"
 				} else {
-					b = "false"
+					s = "false"
 				}
-				blocks = append(blocks, b)
+				blocks = append(blocks, s)
 			default:
 				panic("Unkown type to format:")
 			}
@@ -86,14 +77,14 @@ func Sprintf(format string, args ...interface{}) string {
 		bs = append(bs, c)
 	}
 	blocks = append(blocks, string(bs))
-	var ss string
-	for i, ss = range blocks {
-		var bb []byte = []byte(ss)
-		for j, c = range bb {
+
+	var r []byte
+	for _, block := range blocks {
+		bf := []byte(block)
+		for _, c := range bf {
 			r = append(r, c)
 		}
 	}
-	_fmt_trash = i
-	_fmt_trash = j
+
 	return string(r)
 }
