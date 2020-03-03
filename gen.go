@@ -156,7 +156,7 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 
 func emit_intcast(gtype *Gtype) {
 	if gtype.getKind() == G_BYTE {
-		emit("CAST_BYTE_TO_INT")
+		emit("CAST_UINT8_TO_INT")
 	}
 }
 

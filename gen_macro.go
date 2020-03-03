@@ -179,7 +179,7 @@ func emitMacroDefinitions() {
 	emit("mov \\offset+%d(%%rbp), %%rcx # 3rd", offset16)
 	macroEnd()
 
-	macroStart("CAST_BYTE_TO_INT", "")
+	macroStart("CAST_UINT8_TO_INT", "")
 	emit("movzbq %%al, %%rax")
 	macroEnd()
 
