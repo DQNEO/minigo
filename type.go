@@ -177,6 +177,10 @@ func (gtype *Gtype) String() string {
 			switch child.kind {
 			case G_INT:
 				return "int"
+			case G_UINT_PTR:
+				return "uintptr"
+			case G_UINT_16:
+				return "uint16"
 			case G_BOOL:
 				return "bool"
 			case G_BYTE:
@@ -192,6 +196,10 @@ func (gtype *Gtype) String() string {
 		return s
 	case G_INT:
 		return "int"
+	case G_UINT_PTR:
+		return "uintptr"
+	case G_UINT_16:
+		return "uint16"
 	case G_BOOL:
 		return "bool"
 	case G_BYTE:
