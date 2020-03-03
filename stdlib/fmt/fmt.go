@@ -49,20 +49,16 @@ func Sprintf(format string, args ...interface{}) string {
 			arg := args[argIndex]
 			argIndex++
 			switch arg.(type) {
-			case string:
+			case string: // for %s
 				s = arg.(string)
-			case []byte:
-				bf := arg.([]byte)
-				s = string(bf)
-			case byte:
+			case []byte: // for %s
+				s = string(arg.([]byte))
+			case byte: // for %c
 				b := arg.(byte)
-				bf := []byte{b}
-				s = string(bf)
-			case int:
-				var _int int
-				_int = arg.(int)
-				s = strconv.Itoa(_int)
-			case bool: // "%v"
+				s = string([]byte{b})
+			case int: // for %d
+				s = strconv.Itoa(arg.(int))
+			case bool: // for %v
 				if arg.(bool) {
 					s = "true"
 				} else {
