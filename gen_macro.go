@@ -211,7 +211,7 @@ func emitMacroDefinitions() {
 	emit("movzbq %%al, %%rax")
 	macroEnd()
 
-	macroStart("CAST_UINT8_TO_INT", "")
+	macroStart("CAST_UINT16_TO_INT", "")
 	emit("movzwq %%al, %%rax")
 	macroEnd()
 
