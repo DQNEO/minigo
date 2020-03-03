@@ -117,33 +117,6 @@ func (f *File) Readdirnames(n int) ([]string, error) {
 	return f.readdirnames(n)
 }
 
-type linux_dirent struct {
-	d_ino    int
-	d_off    int
-	d_reclen1 uint16
-	d_type   byte
-	d_name   byte
-}
-
-func cstring2string(b *byte) string {
-	var bs []byte
-	for {
-		if b == nil || *b == 0 {
-			break
-		}
-		bs = append(bs, *b)
-		b = uintptr(b) + 1
-	}
-	return string(bs)
-}
-
-func ParseDirent(buf []byte, names []string) (int, []string) {
-	p := uintptr(unsafe.Pointer(&buf[0]))
-	var dirp *linux_dirent = p
-	name := cstring2string(uintptr(unsafe.Pointer(&dirp.d_name)))
-	names = append(names, name)
-	return int(dirp.d_reclen1), names
-}
 
 func (f *File) readdirnames(n int) ([]string, error) {
 	var names []string
@@ -159,7 +132,7 @@ func (f *File) readdirnames(n int) ([]string, error) {
 		var bufp int
 		for ; bufp < nbuf; 1 {
 			var reclen int
-			reclen, names = ParseDirent(buf[bufp:], names)
+			reclen,  names = syscall.ParseDirent(buf[bufp:], 0,  names)
 			bufp = bufp + reclen
 		}
 	}

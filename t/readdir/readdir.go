@@ -6,7 +6,7 @@ import (
 )
 
 func f1() {
-	dir := "."
+	dir := "t/data"
 	f, err := os.Open(dir)
 	if err != nil {
 		panic(err)
