@@ -29,6 +29,7 @@ var builtinTypesAsString []string = []string{
 	"bool",
 	"byte",
 	"int",
+	"uint16",
 	"string",
 	"func",
 }

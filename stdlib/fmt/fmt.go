@@ -68,6 +68,8 @@ func Sprintf(format string, args ...interface{}) string {
 				}
 			case int: // for %d
 				s = strconv.Itoa(arg.(int))
+			case uint16: // for %d
+				s = strconv.Itoa(int(arg.(uint16)))
 			case bool: // for %v
 				if arg.(bool) {
 					s = "true"
