@@ -244,14 +244,6 @@ func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	return sortedUniqueImports
 }
 
-// "/stdlib/fmt" => "./stdlib/fmt/fmt.go"
-func getStdFileName(path normalizedPackagePath) string {
-	baseName := getBaseNameFromImport(string(path))
-	filename := baseName + ".go"
-	return fmt.Sprintf("./%s/%s", string(path), filename)
-}
-
-
 // "/stdlib/fmt"  => "./stdlib/fmt"
 func getStdDir(path normalizedPackagePath) string {
 	return fmt.Sprintf(".%s", string(path))
