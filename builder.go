@@ -62,22 +62,13 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	pkgPath := normalizeImportPath("unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
-
-	p := &parser{
-		packagePath:pkgPath,
-		packageName: pkgName,
-	}
 	filepath := getStdFileName(pkgPath)
-	f := p.ParseFile(filepath, pkgScope, false)
-	attachMethodsToTypes(f.methods, p.packageBlockScope)
-	inferTypes(f.uninferredGlobals, f.uninferredLocals)
-	calcStructSize(f.dynamicTypes)
-	return &AstPackage{
-		name:           pkgName,
-		files:          []*AstFile{f},
-		stringLiterals: f.stringLiterals,
-		dynamicTypes:   f.dynamicTypes,
-	}
+	var sourceFiles []string = []string{filepath}
+	pkg := ParseFiles(pkgName, pkgPath, pkgScope, sourceFiles)
+	attachMethodsToTypes(pkg.methods, pkgScope)
+	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
+	calcStructSize(pkg.dynamicTypes)
+	return pkg
 }
 
 const IRuntimePath normalizedPackagePath = "iruntime"
