@@ -1,7 +1,10 @@
 // builder builds packages
 package main
 
-import "./stdlib/fmt"
+import (
+	"./stdlib/fmt"
+	"os"
+)
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
@@ -56,14 +59,30 @@ func compileUniverse(universe *Scope) *AstPackage {
 	}
 }
 
+// "path/dir" => {"path/dir/a.go", ...}
+func getPackageFiles(pkgDir string) []string {
+	f, err := os.Open(pkgDir)
+	if err != nil {
+		panic(err)
+	}
+	names, err := f.Readdirnames(-1)
+	if err != nil {
+		panic(err)
+	}
+	var sourceFiles []string
+	for _, name := range names {
+		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
+	}
+	return sourceFiles
+}
+
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
 	pkgPath := normalizeImportPath("unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
-	filepath := getStdFileName(pkgPath)
-	var sourceFiles []string = []string{filepath}
+	sourceFiles := getPackageFiles(getStdDir(pkgPath))
 	pkg := ParseFiles(pkgName, pkgPath, pkgScope, sourceFiles)
 	attachMethodsToTypes(pkg.methods, pkgScope)
 	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
@@ -220,6 +239,12 @@ func getStdFileName(path normalizedPackagePath) string {
 	baseName := getBaseNameFromImport(string(path))
 	filename := baseName + ".go"
 	return fmt.Sprintf("./%s/%s", string(path), filename)
+}
+
+
+// "/stdlib/fmt"  => "./stdlib/fmt"
+func getStdDir(path normalizedPackagePath) string {
+	return fmt.Sprintf("./%s", string(path))
 }
 
 // Compile standard libraries
