@@ -1,7 +1,10 @@
 // builder builds packages
 package main
 
-import "./stdlib/fmt"
+import (
+	"./stdlib/fmt"
+	"os"
+)
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
@@ -56,28 +59,39 @@ func compileUniverse(universe *Scope) *AstPackage {
 	}
 }
 
+// "path/dir" => {"path/dir/a.go", ...}
+func getPackageFiles(pkgDir string) []string {
+	f, err := os.Open(pkgDir)
+	if err != nil {
+		panic(err)
+	}
+	names, err := f.Readdirnames(-1)
+	if err != nil {
+		panic(err)
+	}
+	var sourceFiles []string
+	for _, name := range names {
+		if name == "ioutil" {
+			// @TODO we must skip directory
+			continue
+		}
+		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
+	}
+	return sourceFiles
+}
+
 // inject unsafe package
 func compileUnsafe(universe *Scope) *AstPackage {
 	pkgName := identifier("unsafe")
 	pkgPath := normalizeImportPath("unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
-
-	p := &parser{
-		packagePath:pkgPath,
-		packageName: pkgName,
-	}
-	filepath := getStdFileName(pkgPath)
-	f := p.ParseFile(filepath, pkgScope, false)
-	attachMethodsToTypes(f.methods, p.packageBlockScope)
-	inferTypes(f.uninferredGlobals, f.uninferredLocals)
-	calcStructSize(f.dynamicTypes)
-	return &AstPackage{
-		name:           pkgName,
-		files:          []*AstFile{f},
-		stringLiterals: f.stringLiterals,
-		dynamicTypes:   f.dynamicTypes,
-	}
+	sourceFiles := getPackageFiles(getStdDir(pkgPath))
+	pkg := ParseFiles(pkgName, pkgPath, pkgScope, sourceFiles)
+	attachMethodsToTypes(pkg.methods, pkgScope)
+	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
+	calcStructSize(pkg.dynamicTypes)
+	return pkg
 }
 
 const IRuntimePath normalizedPackagePath = "iruntime"
@@ -140,10 +154,16 @@ func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 type importMap map[normalizedPackagePath]bool
 
 func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
-	for normalizedPackagePath, _ := range directDependencies {
-		file := getStdFileName(normalizedPackagePath)
-		imports := parseImportsFromFile(file)
-		dep[normalizedPackagePath] = imports
+	for path, _ := range directDependencies {
+		files := getPackageFiles(getStdDir(path))
+		var imports importMap = map[normalizedPackagePath]bool{}
+		for _, file := range files {
+			imprts := parseImportsFromFile(file)
+			for k, v := range imprts {
+				imports[k] = v
+			}
+		}
+		dep[path] = imports
 		parseImportRecursive(dep, imports)
 	}
 }
@@ -224,11 +244,9 @@ func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	return sortedUniqueImports
 }
 
-// "/stdlib/fmt" => "./stdlib/fmt/fmt.go"
-func getStdFileName(path normalizedPackagePath) string {
-	baseName := getBaseNameFromImport(string(path))
-	filename := baseName + ".go"
-	return fmt.Sprintf("./%s/%s", string(path), filename)
+// "/stdlib/fmt"  => "./stdlib/fmt"
+func getStdDir(path normalizedPackagePath) string {
+	return fmt.Sprintf(".%s", string(path))
 }
 
 // Compile standard libraries
@@ -239,8 +257,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[normalize
 	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
 
 	for _, path := range sortedUniqueImports {
-		file := getStdFileName(path) // => "./stdlib/io/ioutil/ioutil.go"
-		files := []string{file}
+		files := getPackageFiles(getStdDir(path))
 		pkgScope := newScope(nil, identifier(path))
 		symbolTable.allScopes[path] = pkgScope
 		pkgShortName := getBaseNameFromImport(string(path))
