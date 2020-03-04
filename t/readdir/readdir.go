@@ -15,9 +15,8 @@ func f1() {
 	if err != nil {
 		panic(err)
 	}
-	for _, n := range names {
-		fmt.Printf("%s\n", n)
-	}
+
+	fmt.Printf("%d\n", len(names))
 }
 
 func main() {
