@@ -67,7 +67,8 @@ func compileUnsafe(universe *Scope) *AstPackage {
 		packagePath:pkgPath,
 		packageName: pkgName,
 	}
-	f := p.ParseFile(getStdFileName(pkgPath), pkgScope, false)
+	filepath := getStdFileName(pkgPath)
+	f := p.ParseFile(filepath, pkgScope, false)
 	attachMethodsToTypes(f.methods, p.packageBlockScope)
 	inferTypes(f.uninferredGlobals, f.uninferredLocals)
 	calcStructSize(f.dynamicTypes)
