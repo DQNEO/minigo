@@ -154,10 +154,16 @@ func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 type importMap map[normalizedPackagePath]bool
 
 func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
-	for normalizedPackagePath, _ := range directDependencies {
-		file := getStdFileName(normalizedPackagePath)
-		imports := parseImportsFromFile(file)
-		dep[normalizedPackagePath] = imports
+	for path, _ := range directDependencies {
+		files := getPackageFiles(getStdDir(path))
+		var imports importMap = map[normalizedPackagePath]bool{}
+		for _, file := range files {
+			imprts := parseImportsFromFile(file)
+			for k, v := range imprts {
+				imports[k] = v
+			}
+		}
+		dep[path] = imports
 		parseImportRecursive(dep, imports)
 	}
 }
