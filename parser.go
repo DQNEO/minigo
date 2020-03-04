@@ -102,7 +102,7 @@ func (p *parser) expectKeyword(name string) *Token {
 func (p *parser) expect(punct string) *Token {
 	tok := p.readToken()
 	if !tok.isPunct(punct) {
-		errorft(tok, "punct '%s' expected but got '%s'", punct, tok)
+		errorft(tok, "punct '%s' expected but got '%s'", punct, tok.String())
 	}
 	return tok
 }

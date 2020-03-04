@@ -1,5 +1,6 @@
 package os
 
+import "unsafe"
 import "syscall"
 
 const O_RDONLY = 0
@@ -79,6 +80,11 @@ func (fd *PollFD) Read(b []byte) (int, error) {
 	return n, err
 }
 
+func (fd *PollFD) ReadDirent(buf []byte) (int, error) {
+	nread, _ := syscall.ReadDirent(fd.Sysfd, buf[:])
+	return nread, nil
+}
+
 func (f *File) write(b []byte) (int, error) {
 	fd := f.innerFile.fd
 	var n int
@@ -107,6 +113,32 @@ func (f *File) Read(p []byte) (int, error) {
 	return f.read(p)
 }
 
+func (f *File) Readdirnames(n int) ([]string, error) {
+	return f.readdirnames(n)
+}
+
+
+func (f *File) readdirnames(n int) ([]string, error) {
+	var names []string
+	var buf [4096]byte
+	for {
+		nbuf, _ := f.innerFile.fd.ReadDirent(buf[:])
+		if nbuf == -1 {
+			panic("getdents failed")
+		}
+		if nbuf == 0 {
+			break
+		}
+		var bufp int
+		for ; bufp < nbuf; 1 {
+			var reclen int
+			reclen,  names = syscall.ParseDirent(buf[bufp:], 0,  names)
+			bufp = bufp + reclen
+		}
+	}
+	return names, nil
+}
+
 func Exit(code int) {
 	syscall.Exit(code)
 }
@@ -116,3 +148,4 @@ var Args []string
 func init() {
 	Args = runtime_args()
 }
+
