@@ -2046,7 +2046,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	}
 }
 
-func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope *Scope, sources []string) *AstPackage {
+func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope *Scope, files []string) *AstPackage {
 	var astFiles []*AstFile
 
 	var uninferredGlobals []*ExprVariable
@@ -2056,13 +2056,13 @@ func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope 
 	var namedTypes []*DeclType
 	var allmethods map[identifier]methods = map[identifier]methods{}
 
-	for _, source := range sources {
+	for _, source := range files {
 		var astFile *AstFile
 		p := &parser{
 			packagePath:pkgPath,
 			packageName: packageName,
 		}
-		astFile = p.ParseFile(string(source), pkgScope, false)
+		astFile = p.ParseFile(source, pkgScope, false)
 		astFiles = append(astFiles, astFile)
 		for _, g := range astFile.uninferredGlobals {
 			uninferredGlobals = append(uninferredGlobals, g)
