@@ -72,7 +72,7 @@ func getPackageFiles(pkgDir string) []string {
 	var sourceFiles []string
 	for _, name := range names {
 		if name == "ioutil" {
-			// skip inner directory
+			// @TODO we must skip directory
 			continue
 		}
 		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
