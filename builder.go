@@ -71,6 +71,10 @@ func getPackageFiles(pkgDir string) []string {
 	}
 	var sourceFiles []string
 	for _, name := range names {
+		if name == "ioutil" {
+			// skip inner directory
+			continue
+		}
 		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
 	}
 	return sourceFiles
@@ -244,7 +248,7 @@ func getStdFileName(path normalizedPackagePath) string {
 
 // "/stdlib/fmt"  => "./stdlib/fmt"
 func getStdDir(path normalizedPackagePath) string {
-	return fmt.Sprintf("./%s", string(path))
+	return fmt.Sprintf(".%s", string(path))
 }
 
 // Compile standard libraries
@@ -255,8 +259,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[normalize
 	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
 
 	for _, path := range sortedUniqueImports {
-		file := getStdFileName(path) // => "./stdlib/io/ioutil/ioutil.go"
-		files := []string{file}
+		files := getPackageFiles(getStdDir(path))
 		pkgScope := newScope(nil, identifier(path))
 		symbolTable.allScopes[path] = pkgScope
 		pkgShortName := getBaseNameFromImport(string(path))
