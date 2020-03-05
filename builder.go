@@ -3,24 +3,22 @@ package main
 
 import (
 	"./stdlib/fmt"
-	"os"
-	"./stdlib/strings"
 	"./stdlib/path"
+	"./stdlib/strings"
+	"os"
 )
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
 func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
-	bpath := []byte(pth)
 	if strings.HasPrefix(pth, "./stdlib/") {
 		// "./stdlib/fmt" => "/stdlib/fmt"
-		return normalizedPackagePath(string(bpath[1:]))
+		return normalizedPackagePath(pth[1:])
 	} else if strings.HasPrefix(pth, "./") {
 		// parser relative pth
 		// "./mylib" => "/mylib"
-		bbpath := bpath[1:]
-		return normalizedPackagePath("./" + currentPath + string(bbpath))
+		return normalizedPackagePath("./" + currentPath + pth[1:])
 	} else {
 		// "fmt" => "/stdlib/fmt"
 		return normalizedPackagePath("/stdlib/" + pth)

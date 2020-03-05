@@ -18,8 +18,7 @@ func Dir(path string) string {
 		return path
 	}
 
-	buf := []byte(path)
-	return string(buf[0:found])
+	return path[:found]
 }
 
 // "foo/bar/buz" => "buz"
@@ -32,14 +31,13 @@ func Base(path string) string {
 		return "/"
 	}
 	if path[len(path) - 1] == '/' {
-		buf := []byte(path)
-		path = string(buf[0:len(buf) - 1])
+		path = path[:len(path) - 1]
 	}
 	found := strings.LastIndexByte(path, '/')
 	if found == -1 {
 		// not found
 		return path
 	}
-	buf := []byte(path)
-	return string(buf[found+1:])
+
+	return path[found+1:]
 }
