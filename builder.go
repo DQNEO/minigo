@@ -13,8 +13,7 @@ func normalizeImportPath(path string) normalizedPackagePath {
 	if strings.HasPrefix(path, "./stdlib/") {
 		// "./stdlib/fmt" => "/stdlib/fmt"
 		bpath := []byte(path)
-		bpath2 := bpath[1:]
-		return normalizedPackagePath(string(bpath2))
+		return normalizedPackagePath(string(bpath[1:]))
 	} else {
 		// "fmt" => "/stdlib/fmt"
 		return normalizedPackagePath("/stdlib/" + path)
