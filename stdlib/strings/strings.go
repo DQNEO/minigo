@@ -25,6 +25,17 @@ func Split(ss string, ssep string) []string {
 	return r
 }
 
+func HasPrefix(s string, prefix string) bool {
+	bs := []byte(s)
+	bprefix := []byte(prefix)
+	for i, bp := range bprefix {
+		if bp != bs[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func HasSuffix(ss string, ssuffix string) bool {
 	s := []byte(ss)
 	suffix := []byte(ssuffix)

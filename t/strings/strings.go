@@ -28,8 +28,24 @@ func f3() {
 	fmt.Printf("%s\n", s[1])     // bar
 }
 
+func f4() {
+	target := "foo bar buz"
+	if !strings.HasPrefix(target, "foo") {
+		panic("error")
+	}
+
+	if strings.HasPrefix(target, " ") {
+		panic("error")
+	}
+
+	if strings.HasPrefix(target, "buz") {
+		panic("error")
+	}
+	fmt.Printf("4\n")
+}
 func main() {
 	f1()
 	f2()
 	f3()
+	f4()
 }

@@ -4,12 +4,13 @@ package main
 import (
 	"./stdlib/fmt"
 	"os"
+	"./stdlib/strings"
 )
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
 func normalizeImportPath(path string) normalizedPackagePath {
-	if len(path) > 9 && path[0] == '.' {
+	if strings.HasPrefix(path, "./stdlib/") {
 		// "./stdlib/fmt" => "/stdlib/fmt"
 		bpath := []byte(path)
 		bpath2 := bpath[1:]
