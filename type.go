@@ -357,8 +357,14 @@ func (f *ExprFuncRef) getGtype() *Gtype {
 }
 
 func (e *ExprSlice) getGtype() *Gtype {
+	var kind EType
+	if e.collection.getGtype().isString() {
+		kind = G_STRING
+	} else {
+		kind = G_SLICE
+	}
 	return &Gtype{
-		kind:        G_SLICE,
+		kind:        kind,
 		elementType: e.collection.getGtype().elementType,
 	}
 }

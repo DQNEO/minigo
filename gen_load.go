@@ -361,11 +361,8 @@ func (e *ExprIndex) emitOffsetLoad(offset int) {
 	}
 }
 
+// Slice expressions construct a substring or slice from a string, array, pointer to array, or slice.
 func (e *ExprSlice) emit() {
-	e.emitSlice()
-}
-
-func (e *ExprSlice) emitSlice() {
 	elmType := e.collection.getGtype().Underlying().elementType
 	assert(elmType != nil, e.token(), "type should not be nil:T %s", e.collection.getGtype().String())
 	size := elmType.getSize()
@@ -400,24 +397,28 @@ func (e *ExprSlice) emitSlice() {
 	calcLen.emit()
 	emit("PUSH_8")
 
-	emit("#   calc and set cap")
-	var max Expr
-	if e.max != nil {
-		max = e.max
+	if e.collection.getGtype().isString() {
+		emit("PUSH_8")
 	} else {
-		max = &ExprCap{
-			tok: e.token(),
-			arg: e.collection,
+		emit("#   calc and set cap")
+		var max Expr
+		if e.max != nil {
+			max = e.max
+		} else {
+			max = &ExprCap{
+				tok: e.token(),
+				arg: e.collection,
+			}
 		}
-	}
-	calcCap := &ExprBinop{
-		op:    "-",
-		left:  max,
-		right: e.low,
+		calcCap := &ExprBinop{
+			op:    "-",
+			left:  max,
+			right: e.low,
+		}
+
+		calcCap.emit()
+		emit("PUSH_8")
 	}
 
-	calcCap.emit()
-
-	emit("PUSH_8")
 	emit("POP_SLICE")
 }

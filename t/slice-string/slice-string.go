@@ -42,7 +42,20 @@ func f2() {
 	}
 }
 
+func f3() {
+	s := "hello"
+	subs := s[0:3]
+	if subs == "hel" {
+		fmt.Println("9")
+	}
+
+	if s[3:] == "lo" {
+		fmt.Println("10")
+	}
+}
+
 func main() {
 	f1()
 	f2()
+	f3()
 }
