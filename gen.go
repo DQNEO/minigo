@@ -20,12 +20,10 @@ const mapWidth int = 3
 const sliceSize int = IntSize + ptrSize + ptrSize
 
 func write(s []byte) {
-	var b []byte = []byte(s)
-	os.Stdout.Write(b)
+	os.Stdout.Write(s)
 }
 
-func writeln(s []byte) {
-	var b []byte = []byte(s)
+func writeln(b []byte) {
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
