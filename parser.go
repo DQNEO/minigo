@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"runtime"
+	"./stdlib/path"
 )
 
 var __func__ string = "__func__"
@@ -1980,7 +1981,7 @@ func (p *parser) initFile(bs *ByteStream, packageBlockScope *Scope) {
 // "foo/bar" => "bar"
 // "./stdlib/foo/bar" => "bar"
 func getPackageNameInImport(importPath string) string {
-	return string(getBaseNameFromImport(importPath))
+	return path.Base(importPath)
 }
 
 // https://golang.org/ref/spec#Source_file_organization
@@ -2060,8 +2061,8 @@ func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope 
 	for _, source := range files {
 		var astFile *AstFile
 		p := &parser{
-			currentPath:getDir(source),
-			packagePath:pkgPath,
+			currentPath: path.Dir(source),
+			packagePath: pkgPath,
 			packageName: packageName,
 		}
 		astFile = p.ParseFile(source, pkgScope, false)

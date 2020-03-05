@@ -5,31 +5,32 @@ import (
 	"./stdlib/fmt"
 	"os"
 	"./stdlib/strings"
+	"./stdlib/path"
 )
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
-func normalizeImportPath(currentPath string, path string) normalizedPackagePath {
-	bpath := []byte(path)
-	if strings.HasPrefix(path, "./stdlib/") {
+func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
+	bpath := []byte(pth)
+	if strings.HasPrefix(pth, "./stdlib/") {
 		// "./stdlib/fmt" => "/stdlib/fmt"
 		return normalizedPackagePath(string(bpath[1:]))
-	} else if strings.HasPrefix(path, "./") {
-		// parser relative path
+	} else if strings.HasPrefix(pth, "./") {
+		// parser relative pth
 		// "./mylib" => "/mylib"
 		bbpath := bpath[1:]
 		return normalizedPackagePath("./" + currentPath + string(bbpath))
 	} else {
 		// "fmt" => "/stdlib/fmt"
-		return normalizedPackagePath("/stdlib/" + path)
+		return normalizedPackagePath("/stdlib/" + pth)
 	}
 }
 
 // analyze imports of a given go source
 func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{
-		currentPath:getDir(sourceFile),
+		currentPath: path.Dir(sourceFile),
 	}
 	astFile := p.ParseFile(sourceFile, nil, true)
 	return astFile.imports
@@ -162,8 +163,8 @@ func compileMainFiles(universe *Scope, sourceFiles []string) *AstPackage {
 type importMap map[normalizedPackagePath]bool
 
 func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
-	for path, _ := range directDependencies {
-		files := getPackageFiles(convertStdPath(path))
+	for pth, _ := range directDependencies {
+		files := getPackageFiles(convertStdPath(pth))
 		var imports importMap = map[normalizedPackagePath]bool{}
 		for _, file := range files {
 			imprts := parseImportsFromFile(file)
@@ -171,7 +172,7 @@ func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDepende
 				imports[k] = v
 			}
 		}
-		dep[path] = imports
+		dep[pth] = imports
 		parseImportRecursive(dep, imports)
 	}
 }
@@ -253,11 +254,11 @@ func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 }
 
 // if "/stdlib/foo" => "./stdlib/foo"
-func convertStdPath(path normalizedPackagePath) string {
-	if strings.HasPrefix(string(path), "/stdlib/") {
-		return fmt.Sprintf(".%s", string(path))
+func convertStdPath(pth normalizedPackagePath) string {
+	if strings.HasPrefix(string(pth), "/stdlib/") {
+		return fmt.Sprintf(".%s", string(pth))
 	}
-	return string(path)
+	return string(pth)
 }
 
 // Compile standard libraries
@@ -267,14 +268,14 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[normalize
 
 	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
 
-	for _, path := range sortedUniqueImports {
-		files := getPackageFiles(convertStdPath(path))
-		pkgScope := newScope(nil, identifier(path))
-		symbolTable.allScopes[path] = pkgScope
-		pkgShortName := getBaseNameFromImport(string(path))
-		pkg := ParseFiles(identifier(pkgShortName), path, pkgScope, files)
+	for _, pth := range sortedUniqueImports {
+		files := getPackageFiles(convertStdPath(pth))
+		pkgScope := newScope(nil, identifier(pth))
+		symbolTable.allScopes[pth] = pkgScope
+		pkgShortName := path.Base(string(pth))
+		pkg := ParseFiles(identifier(pkgShortName), pth, pkgScope, files)
 		pkg = makePkg(pkg, universe)
-		compiledStdPkgs[path] = pkg
+		compiledStdPkgs[pth] = pkg
 	}
 
 	return compiledStdPkgs

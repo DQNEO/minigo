@@ -1,9 +1,10 @@
 package main
 
 import "fmt"
+import "path"
 
 func f1() {
-	baseName := getBaseNameFromImport([]byte("foo/bar"))
+	baseName := path.Base("foo/bar")
 	fmt.Printf("%s\n", baseName) // bar
 }
 
