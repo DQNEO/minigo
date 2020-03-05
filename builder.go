@@ -94,7 +94,7 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	pkgPath := normalizeImportPath("", "unsafe") // need to be normalized because it's imported by iruntime
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
-	sourceFiles := getPackageFiles(getStdDir(pkgPath))
+	sourceFiles := getPackageFiles(convertStdPath(pkgPath))
 	pkg := ParseFiles(pkgName, pkgPath, pkgScope, sourceFiles)
 	attachMethodsToTypes(pkg.methods, pkgScope)
 	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
@@ -163,7 +163,7 @@ type importMap map[normalizedPackagePath]bool
 
 func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
 	for path, _ := range directDependencies {
-		files := getPackageFiles(getStdDir(path))
+		files := getPackageFiles(convertStdPath(path))
 		var imports importMap = map[normalizedPackagePath]bool{}
 		for _, file := range files {
 			imprts := parseImportsFromFile(file)
@@ -252,15 +252,12 @@ func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	return sortedUniqueImports
 }
 
-// "/stdlib/fmt"  => "./stdlib/fmt"
-func getStdDir(path normalizedPackagePath) string {
-	s := string(path)
-	if s[0] == '.' {
-		// relative path
-		return s
-	} else {
+// if "/stdlib/foo" => "./stdlib/foo"
+func convertStdPath(path normalizedPackagePath) string {
+	if strings.HasPrefix(string(path), "/stdlib/") {
 		return fmt.Sprintf(".%s", string(path))
 	}
+	return string(path)
 }
 
 // Compile standard libraries
@@ -271,7 +268,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[normalize
 	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
 
 	for _, path := range sortedUniqueImports {
-		files := getPackageFiles(getStdDir(path))
+		files := getPackageFiles(convertStdPath(path))
 		pkgScope := newScope(nil, identifier(path))
 		symbolTable.allScopes[path] = pkgScope
 		pkgShortName := getBaseNameFromImport(string(path))
