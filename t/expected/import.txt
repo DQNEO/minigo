@@ -1,0 +1,3 @@
+Hello MyFunc
+1234
+MyString

@@ -96,3 +96,15 @@ func Index(s string, substr string) int {
 
 	return -1
 }
+
+// search index of the specified char from backward
+func LastIndexByte(s string, c byte) int {
+	buf := []byte(s)
+	for i:=len(s)-1;i>=0;i-- {
+		if buf[i] == c {
+			return i
+		}
+	}
+	// not found
+	return -1
+}

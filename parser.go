@@ -17,6 +17,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
+	currentPath         string
 	packagePath         normalizedPackagePath
 	packageName         identifier
 	tokenStream         *TokenStream
@@ -1998,7 +1999,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			pkgName := identifier(getPackageNameInImport(spec.path))
-			normalizedPath := normalizeImportPath(spec.path)
+			normalizedPath := normalizeImportPath(p.currentPath, spec.path)
 			p.importedNames[pkgName] = normalizedPath
 			imports[normalizedPath] = true
 		}
@@ -2059,6 +2060,7 @@ func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope 
 	for _, source := range files {
 		var astFile *AstFile
 		p := &parser{
+			currentPath:getDir(source),
 			packagePath:pkgPath,
 			packageName: packageName,
 		}
