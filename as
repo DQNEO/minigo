@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 file=$1
-set -ux
+set -u
+
+if [[ $1 == "--verbose" ]];then
+  set -x
+fi
 
 [[ $file == ""  ]] &&  { echo "not input" ; exit 1 ;}
 [[ -e $file ]] || { echo "file not found: $file"; exit 1; }
