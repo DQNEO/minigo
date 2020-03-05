@@ -41,8 +41,8 @@ selfhost: minigo3.s
 
 test: minigo3.s
 	make vet selfhost
-	./test_one_gen.sh minigo 1
-	./test_one_gen.sh minigo2 2
+	./test_one_gen.sh 1
+	./test_one_gen.sh 2
 	./comparison-test.sh
 
 clean:

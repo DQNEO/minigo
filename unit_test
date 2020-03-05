@@ -1,15 +1,26 @@
 #!/bin/bash
 
 set -eu
-progname=$1
-basename=$2
-suffix=$3
+basename=$1
+generation=$2
+
+progname=""
+if [[ $generation == "1" ]];then
+  progname="minigo"
+elif [[ $generation == "2" ]]; then
+  progname="minigo2"
+else
+  echo "Invalid argument"
+  exit 1
+fi
+
+
 
 out_dir=/tmp/out
 out_dir_as=/tmp/tmpfs/out
 mkdir -p $out_dir $out_dir_as
 
-as_file=$out_dir_as/${basename}.${suffix}.s
+as_file=$out_dir_as/${basename}.${generation}.s
 src=t/$basename/*.go
 expected=t/expected/${basename}.txt
 bin_file=$out_dir/${basename}.bin
