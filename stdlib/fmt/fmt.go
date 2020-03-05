@@ -6,13 +6,13 @@ import (
 )
 
 func Println(s string) {
-	var b []byte = []byte(s)
+	b := []byte(s)
 	b = append(b, '\n')
 	os.Stdout.Write(b)
 }
 
 func Printf(format string, a ...interface{}) {
-	s := Sprintf(string(format), a...)
+	s := Sprintf(format, a...)
 	os.Stdout.Write([]byte(s))
 }
 
