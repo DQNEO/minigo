@@ -110,7 +110,7 @@ func (e *ExprCap) emit() {
 	case G_MAP:
 		errorft(arg.token(), "invalid argument for cap")
 	default:
-		TBI(arg.token(), "unable to handle %s", gtype)
+		TBI(e.token(), "unable to handle %s", gtype.String())
 	}
 }
 
