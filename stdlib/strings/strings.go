@@ -23,18 +23,16 @@ func Split(s string, ssep string) []string {
 }
 
 func HasPrefix(s string, prefix string) bool {
-	bs := []byte(s)
 	bprefix := []byte(prefix)
 	for i, bp := range bprefix {
-		if bp != bs[i] {
+		if bp != s[i] {
 			return false
 		}
 	}
 	return true
 }
 
-func HasSuffix(ss string, ssuffix string) bool {
-	s := []byte(ss)
+func HasSuffix(s string, ssuffix string) bool {
 	suffix := []byte(ssuffix)
 	if len(s) >= len(suffix) {
 		var low int = len(s) - len(suffix)
@@ -42,7 +40,7 @@ func HasSuffix(ss string, ssuffix string) bool {
 		var suf []byte
 		sb := []byte(s)
 		suf = sb[low:lensb] // lensb is required
-		return eq2([]byte(suf), suffix)
+		return eq2(suf, suffix)
 	}
 	return false
 }
@@ -67,20 +65,19 @@ func Contains(s string, substr string) bool {
 
 func Index(s string, substr string) int {
 	bytes := []byte(s)
-	bsub := []byte(substr)
 	var in bool
 	var subIndex int
 	var r int = -1 // not found
 	for i, b := range bytes {
-		if !in && b == bsub[0] {
+		if !in && b == substr[0] {
 			in = true
 			r = i
 			subIndex = 0
 		}
 
 		if in {
-			if b == bsub[subIndex] {
-				if subIndex == len(bsub)-1 {
+			if b == substr[subIndex] {
+				if subIndex == len(substr)-1 {
 					return r
 				}
 			} else {
@@ -96,9 +93,8 @@ func Index(s string, substr string) int {
 
 // search index of the specified char from backward
 func LastIndexByte(s string, c byte) int {
-	buf := []byte(s)
 	for i:=len(s)-1;i>=0;i-- {
-		if buf[i] == c {
+		if s[i] == c {
 			return i
 		}
 	}
