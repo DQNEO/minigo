@@ -1,17 +1,14 @@
 package strings
 
 // "foo/bar", "/" => []bytes{"foo", "bar"}
-func Split(ss string, ssep string) []string {
-	s := []byte(ss)
-	sep := []byte(ssep)
-	if len(sep) > 1 {
+func Split(s string, ssep string) []string {
+	if len(ssep) > 1 {
 		panic("no supported")
 	}
-	seps := []byte(sep)
-	sepchar := seps[0]
-	vbytes := []byte(s)
+	sepchar := ssep[0]
 	var buf []byte
 	var r []string
+	vbytes := []byte(s)
 	for _, b := range vbytes {
 		if b == sepchar {
 			r = append(r, string(buf))
