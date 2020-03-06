@@ -1,6 +1,9 @@
 package main
 
-import "./stdlib/fmt"
+import (
+	"./stdlib/fmt"
+	"./util"
+)
 import "./stdlib/strings"
 
 // builtin string
@@ -75,7 +78,7 @@ func (program *Program) emitMethodTable() {
 			emit(".data 0")
 			emit(".quad %s # func addr addr", label)
 
-			if !inArray(shortMethodName, shortMethodNames) {
+			if !util.InArray(shortMethodName, shortMethodNames) {
 				shortMethodNames = append(shortMethodNames, shortMethodName)
 			}
 		}

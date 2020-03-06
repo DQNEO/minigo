@@ -25,10 +25,17 @@ func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
 	}
 }
 
+func getParsingDir(sourceFile string) string {
+	found := strings.LastIndexByte(sourceFile, '/')
+	if found == -1 {
+		return "."
+	}
+	return path.Dir(sourceFile)
+}
 // analyze imports of a given go source
 func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{
-		currentPath: path.Dir(sourceFile),
+		parsingDir: getParsingDir(sourceFile),
 	}
 	astFile := p.ParseFile(sourceFile, nil, true)
 	return astFile.imports

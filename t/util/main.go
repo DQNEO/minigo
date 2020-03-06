@@ -1,11 +1,18 @@
 package main
 
-import "fmt"
-import "path"
+import (
+	"./util"
+	"fmt"
+)
 
 func f1() {
-	baseName := path.Base("foo/bar")
-	fmt.Printf("%s\n", baseName) // bar
+	strings := []string{"foo", "bar", "buz"}
+	i := util.Index("bar", strings)
+	fmt.Printf("%s\n", strings[i])
+
+	if util.InArray("foo", strings) {
+		fmt.Printf("foo\n")
+	}
 }
 
 func main() {

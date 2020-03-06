@@ -1,9 +1,10 @@
 package main
 
 import (
+	"./stdlib/path"
+	"./util"
 	"os"
 	"runtime"
-	"./stdlib/path"
 )
 
 var __func__ string = "__func__"
@@ -18,7 +19,7 @@ type parser struct {
 	currentForStmt *StmtFor
 
 	// per file
-	currentPath         string
+	parsingDir          string // current dir
 	packagePath         normalizedPackagePath
 	packageName         identifier
 	tokenStream         *TokenStream
@@ -745,7 +746,7 @@ func (p *parser) parseExprInt(prior int) Expr {
 		}
 
 		// if bion
-		if inArray(tok.sval, binops) {
+		if util.InArray(tok.sval, binops) {
 			prior2 := priority(tok.sval)
 			if prior < prior2 {
 				p.skip()
@@ -1999,7 +2000,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 	for _, importdecl := range importDecls {
 		for _, spec := range importdecl.specs {
 			pkgName := identifier(getPackageNameInImport(spec.path))
-			normalizedPath := normalizeImportPath(p.currentPath, spec.path)
+			normalizedPath := normalizeImportPath(p.parsingDir, spec.path)
 			p.importedNames[pkgName] = normalizedPath
 			imports[normalizedPath] = true
 		}
@@ -2060,7 +2061,7 @@ func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope 
 	for _, source := range files {
 		var astFile *AstFile
 		p := &parser{
-			currentPath: path.Dir(source),
+			parsingDir:  getParsingDir(source),
 			packagePath: pkgPath,
 			packageName: packageName,
 		}
