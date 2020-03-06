@@ -493,8 +493,7 @@ func (p *parser) parsePrim() Expr {
 		}
 	case tok.isTypeChar(): // char literal
 		p.skip()
-		sval := []byte(tok.sval)
-		c := sval[0]
+		c := tok.sval[0]
 		return &ExprNumberLiteral{
 			tok: tok,
 			val: int(c),
