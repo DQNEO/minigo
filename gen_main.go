@@ -2,9 +2,9 @@ package main
 
 import (
 	"./stdlib/fmt"
+	"./stdlib/strings"
 	"./util"
 )
-import "./stdlib/strings"
 
 // builtin string
 var builtinStringKey1 string = string("SfmtDumpInterface")
