@@ -188,8 +188,7 @@ func (tok *Token) dump() {
 	sval := tok.getSval()
 	s := Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n",
 		tok.line, typeToGostring(tok.typ), sval)
-	var b []byte = []byte(s)
-	os.Stderr.Write(b)
+	os.Stderr.Write([]byte(s))
 }
 
 func Sprintf(format string, a ...interface{}) string {
@@ -198,8 +197,8 @@ func Sprintf(format string, a ...interface{}) string {
 		var y interface{}
 		switch x.(type) {
 		case identifier: // This case is not reached by 2nd gen compiler
-			var tmpgoident identifier = x.(identifier)
-			var tmpbytes2 []byte = []byte(tmpgoident)
+			var ident identifier = x.(identifier)
+			tmpbytes2 := []byte(ident)
 			y = tmpbytes2
 		default:
 			y = x

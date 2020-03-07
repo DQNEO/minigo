@@ -3,15 +3,14 @@ package strconv
 var __strconv_trash int
 
 func Atoi(gs string) (int, error) {
-	bts := []byte(gs)
-	if len(bts) == 0 {
+	if len(gs) == 0 {
 		return 0, nil
 	}
 	var b byte
 	var n int
 	var i int
 	var isMinus bool
-	for i, b = range bts {
+	for i, b = range []byte(gs) {
 		if b == '.' {
 			return 0, nil // @FIXME all no number should return error
 		}

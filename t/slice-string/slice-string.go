@@ -35,9 +35,8 @@ func f2() {
 	fmt.Printf("%d\n", low+3) //7
 
 	// strings.HasSuffix
-	var suff3 []byte
-	suff3 = s[len(s)-len(suffix):]
-	if string(suff3) == string(suffix) {
+	suff3 := s[len(s)-len(suffix):]
+	if string(suff3) == suffix {
 		fmt.Printf("8\n") // 8
 	}
 }

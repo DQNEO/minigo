@@ -94,8 +94,7 @@ func getMethodUniqueName(gtype *Gtype, fname identifier) string {
 // tr '/' => '_'
 func escapeForAssembler(pkgPath normalizedPackagePath) string {
 	var converted []byte
-	var bp []byte = []byte(pkgPath)
-	for i, b := range bp {
+	for i, b := range []byte(pkgPath) {
 		if b == '/' {
 			if i == 0 {
 				// skip the intial "/"
