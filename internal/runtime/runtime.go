@@ -216,15 +216,12 @@ func cmpStrings(a string, b string, flag bool) bool {
 }
 
 func concat(as string, bs string) string {
-	a := []byte(as)
-	b := []byte(bs)
-
 	var r []byte
-	for i := 0; i < len(a); i++ {
-		r = append(r, a[i])
+	for i := 0; i < len(as); i++ {
+		r = append(r, as[i])
 	}
-	for i := 0; i < len(b); i++ {
-		r = append(r, b[i])
+	for i := 0; i < len(bs); i++ {
+		r = append(r, bs[i])
 	}
 	return string(r)
 }

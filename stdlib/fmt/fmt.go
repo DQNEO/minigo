@@ -26,8 +26,7 @@ func Sprintf(format string, args ...interface{}) string {
 	var argIndex int
 
 	//var sign byte
-	bformat := []byte(format)
-	for _, c := range bformat {
+	for _, c := range []byte(format) {
 		if !inPercent  {
 			if  c == '%' {
 				inPercent = true
@@ -86,8 +85,7 @@ func Sprintf(format string, args ...interface{}) string {
 
 	var r []byte
 	for _, block := range blocks {
-		bf := []byte(block)
-		for _, c := range bf {
+		for _, c := range []byte(block) {
 			r = append(r, c)
 		}
 	}
