@@ -13,16 +13,6 @@ type ByteStream struct {
 	column    int
 }
 
-func NewByteStreamFromString(name string, contents string) *ByteStream {
-	return &ByteStream{
-		filename:  name,
-		source:    []byte(contents),
-		nextIndex: 0,
-		line:      1,
-		column:    0,
-	}
-}
-
 func NewByteStreamFromFile(path string) *ByteStream {
 	s := readFile(path)
 	return &ByteStream{
