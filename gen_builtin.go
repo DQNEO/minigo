@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func (e *ExprLen) emit() {
 	emit("# emit len()")
 	arg := unwrapRel(e.arg)
@@ -32,7 +34,7 @@ func (e *ExprLen) emit() {
 			}
 			uop.emit()
 		default:
-			bs := Sprintf("unable to handle %T", arg)
+			bs := fmt.Sprintf("unable to handle %T", arg)
 			TBI(arg.token(), string(bs))
 		}
 	case G_MAP:
