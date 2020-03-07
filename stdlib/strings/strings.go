@@ -8,8 +8,7 @@ func Split(s string, ssep string) []string {
 	sepchar := ssep[0]
 	var buf []byte
 	var r []string
-	vbytes := []byte(s)
-	for _, b := range vbytes {
+	for _, b := range []byte(s) {
 		if b == sepchar {
 			r = append(r, string(buf))
 			buf = nil
@@ -23,8 +22,7 @@ func Split(s string, ssep string) []string {
 }
 
 func HasPrefix(s string, prefix string) bool {
-	bprefix := []byte(prefix)
-	for i, bp := range bprefix {
+	for i, bp := range []byte(prefix) {
 		if bp != s[i] {
 			return false
 		}
@@ -32,15 +30,14 @@ func HasPrefix(s string, prefix string) bool {
 	return true
 }
 
-func HasSuffix(s string, ssuffix string) bool {
-	suffix := []byte(ssuffix)
+func HasSuffix(s string, suffix string) bool {
 	if len(s) >= len(suffix) {
 		var low int = len(s) - len(suffix)
 		var lensb int = len(s)
 		var suf []byte
 		sb := []byte(s)
 		suf = sb[low:lensb] // lensb is required
-		return eq2(suf, suffix)
+		return eq2(suf, []byte(suffix))
 	}
 	return false
 }
@@ -64,11 +61,10 @@ func Contains(s string, substr string) bool {
 }
 
 func Index(s string, substr string) int {
-	bytes := []byte(s)
 	var in bool
 	var subIndex int
 	var r int = -1 // not found
-	for i, b := range bytes {
+	for i, b := range []byte(s) {
 		if !in && b == substr[0] {
 			in = true
 			r = i
