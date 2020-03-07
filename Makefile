@@ -7,7 +7,7 @@ all: minigo /tmp/tmpfs
 	mkdir -p /tmp/tmpfs
 
 # 1st gen compiler
-minigo: *.go /tmp/tmpfs
+minigo: *.go internal/*/* stdlib/*/* /tmp/tmpfs
 	go build -o minigo *.go
 
 # assembly for 2gen
