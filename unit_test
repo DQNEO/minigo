@@ -1,8 +1,18 @@
 #!/bin/bash
 
 set -eu
+
+function usage() {
+  echo "unit_test <test_name> <generation> "
+}
+
+if [[ "$#" -ne 2 ]]; then
+  usage
+  exit 1
+fi
 basename=$1
 generation=$2
+
 
 progname=""
 if [[ $generation == "1" ]];then
@@ -10,7 +20,7 @@ if [[ $generation == "1" ]];then
 elif [[ $generation == "2" ]]; then
   progname="minigo2"
 else
-  echo "Invalid argument"
+  usage
   exit 1
 fi
 
