@@ -74,6 +74,13 @@ func f7() {
 	fmt.Printf("%d\n", i+18) // 20
 }
 
+func f8() {
+	var s string = "abc"
+	for _, c := range []byte(([]byte(s))) {
+		fmt.Printf("%d\n", c - 76)
+	}
+}
+
 func main() {
 	f1()
 	f2()
@@ -82,6 +89,7 @@ func main() {
 	f5()
 	f6()
 	f7()
+	f8()
 }
 
 type Hobbit struct {

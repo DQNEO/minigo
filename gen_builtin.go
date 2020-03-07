@@ -33,6 +33,10 @@ func (e *ExprLen) emit() {
 				right: sliceExpr.low,
 			}
 			uop.emit()
+		case *IrExprConversion:
+			conv := arg.(*IrExprConversion)
+			e.arg = conv.arg
+			e.emit()
 		default:
 			bs := fmt.Sprintf("unable to handle %T", arg)
 			TBI(arg.token(), string(bs))
@@ -106,6 +110,10 @@ func (e *ExprCap) emit() {
 			} else {
 				TBI(arg.token(), "unable to handle %T", arg)
 			}
+		case *IrExprConversion:
+			conv := arg.(*IrExprConversion)
+			e.arg = conv.arg
+			e.emit()
 		default:
 			TBI(arg.token(), "unable to handle %T", arg)
 		}
