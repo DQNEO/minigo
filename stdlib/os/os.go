@@ -8,28 +8,17 @@ const O_RDONLY = 0
 var sfd1 PollFD = PollFD{
 	Sysfd: 1,
 }
+
 var sfd2 PollFD = PollFD{
 	Sysfd: 2,
 }
 
-var sstdout file = file{
-	fd: &sfd1,
-}
-
-var sstderr file = file{
-	fd: &sfd2,
-}
-
 var Stdout *File = &File{
-	innerFile: &sstdout,
+	pfd: &sfd1,
 }
 
 var Stderr *File = &File{
-	innerFile: &sstderr,
-}
-
-type file struct {
-	fd *PollFD
+	pfd: &sfd2,
 }
 
 type PollFD struct {
@@ -38,22 +27,20 @@ type PollFD struct {
 
 // File represents an open file descriptor.
 type File struct {
-	innerFile *file
+	pfd *PollFD
 }
 
 func (f *File) Fd() int {
-	return f.innerFile.fd.Sysfd
+	return f.pfd.Sysfd
 }
 
 func openFileNolog(name string, flag int, perm int) (*File, error) {
 	fid, err := syscall.Open(name, flag, perm)
-	fl := &file{
-		fd: &PollFD{
-			Sysfd: fid,
-		},
+	pfd := &PollFD{
+		Sysfd: fid,
 	}
 	f := &File{
-		innerFile: fl,
+		pfd: pfd,
 	}
 	return f, err
 }
@@ -86,7 +73,7 @@ func (fd *PollFD) ReadDirent(buf []byte) (int, error) {
 }
 
 func (f *File) write(b []byte) (int, error) {
-	fd := f.innerFile.fd
+	fd := f.pfd
 	var n int
 	var err error
 	n, err = fd.Write(b)
@@ -100,7 +87,7 @@ func (f *File) Write(b []byte) (int, error) {
 }
 
 func (f *File) read(p []byte) (int, error) {
-	fd := f.innerFile.fd
+	fd := f.pfd
 	var n int
 	var err error
 	n, err = fd.Read(p)
@@ -109,7 +96,6 @@ func (f *File) read(p []byte) (int, error) {
 
 // Read reads up to len(b) bytes from the File.
 func (f *File) Read(p []byte) (int, error) {
-	//fd := f.innerFile.fd
 	return f.read(p)
 }
 
@@ -122,7 +108,7 @@ func (f *File) readdirnames(n int) ([]string, error) {
 	var names []string
 	var buf [4096]byte
 	for {
-		nbuf, _ := f.innerFile.fd.ReadDirent(buf[:])
+		nbuf, _ := f.pfd.ReadDirent(buf[:])
 		if nbuf == -1 {
 			panic("getdents failed")
 		}
