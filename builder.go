@@ -89,6 +89,10 @@ func getPackageFiles(pkgDir string) []string {
 			// @TODO we must skip directory
 			continue
 		}
+		// minigo ignores ignore.go
+		if name == "ignore.go" {
+			continue
+		}
 		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
 	}
 	return sourceFiles

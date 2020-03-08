@@ -93,11 +93,11 @@ func printstring(b []byte) {
 }
 
 func write(fd int, addr *byte, length int) {
-	Syscall(__x64_sys_write, fd, addr, length)
+	Syscall(__x64_sys_write, uintptr(fd), uintptr(unsafe.Pointer(addr)), uintptr(length))
 }
 
 func exit(code int) {
-	Syscall(__x64_sys_exit, code)
+	Syscall(__x64_sys_exit, uintptr(code), 0 , 0)
 }
 
 func panic(msg []byte) {

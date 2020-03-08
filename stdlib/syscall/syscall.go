@@ -2,8 +2,6 @@ package syscall
 
 import "unsafe"
 
-//func Syscall(number uintptr, a1 uintptr, a2 uintptr, a3 uintptr) int
-
 func BytePtrFromString(s string) (*byte, error) {
 	bs := []byte(s)
 	return &bs[0], nil
