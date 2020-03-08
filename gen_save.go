@@ -65,7 +65,12 @@ func (uop *ExprUop) emitSavePrimitive() {
 	emit("PUSH_8 # what")
 	uop.operand.emit()
 	emit("PUSH_8 # where")
-	emit("STORE_8_INDIRECT_FROM_STACK")
+
+	if uop.getGtype().getSize() == 1 {
+		emit("STORE_1_INDIRECT_FROM_STACK")
+	} else {
+		emit("STORE_8_INDIRECT_FROM_STACK")
+	}
 }
 
 // x = 1

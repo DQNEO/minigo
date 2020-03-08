@@ -131,6 +131,7 @@ type ExprConstVariable struct {
 type ExprFuncallOrConversion struct {
 	tok   *Token
 	rel   *Relation
+	typ   *Gtype // type to convert (*T)(e)
 	fname identifier
 	args  []Expr
 }
