@@ -20,8 +20,6 @@ func Printf(format string, a ...interface{}) {
 	os.Stdout.Write([]byte(s))
 }
 
-var _fmt_trash int
-
 func Sprintf(format string, args ...interface{}) string {
 	var blocks []string
 	var plainstring []byte
