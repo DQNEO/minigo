@@ -4,10 +4,9 @@ import "unsafe"
 
 //func Syscall(number uintptr, a1 uintptr, a2 uintptr, a3 uintptr) int
 
-func BytePtrFromString(s string) *byte {
+func BytePtrFromString(s string) (*byte, error) {
 	bs := []byte(s)
-	var r *byte = &bs[0]
-	return r
+	return &bs[0], nil
 }
 
 // 64-bit system call numbers
@@ -21,7 +20,7 @@ const  _x64_getdents64 = 217
 func Open(path string, flag int, perm int) (int, error) {
 	var fd int
 	var _p0 *byte
-	_p0 = BytePtrFromString(path)
+	_p0,_ = BytePtrFromString(path)
 	fd = Syscall(__x64_sys_open, uintptr(unsafe.Pointer(_p0)), uintptr(flag), 0)
 	return fd, nil
 }
