@@ -58,20 +58,6 @@ type LinuxDirent64 struct {
 	d_name   byte
 }
 
-//@TODO DRY: Same func exists in iruntime
-func cstring2string(b *byte) string {
-	var buf []byte
-	for {
-		if b == nil || *b == 0 {
-			break
-		}
-		buf = append(buf, *b)
-		p := uintptr(unsafe.Pointer(b)) + 1
-		b = (*byte)(unsafe.Pointer(p))
-	}
-	return string(buf)
-}
-
 func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
 	p := uintptr(unsafe.Pointer(&buf[0]))
 	var dirp *LinuxDirent64 = p
