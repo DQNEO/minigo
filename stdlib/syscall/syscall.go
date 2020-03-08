@@ -60,15 +60,16 @@ type LinuxDirent64 struct {
 
 //@TODO DRY: Same func exists in iruntime
 func cstring2string(b *byte) string {
-	var bs []byte
+	var buf []byte
 	for {
 		if b == nil || *b == 0 {
 			break
 		}
-		bs = append(bs, *b)
-		b = uintptr(b) + 1
+		buf = append(buf, *b)
+		p := uintptr(unsafe.Pointer(b)) + 1
+		b = (*byte)(unsafe.Pointer(p))
 	}
-	return string(bs)
+	return string(buf)
 }
 
 func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
