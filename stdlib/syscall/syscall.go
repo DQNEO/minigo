@@ -2,6 +2,8 @@ package syscall
 
 import "unsafe"
 
+//func Syscall(number uintptr, a1 uintptr, a2 uintptr, a3 uintptr) int
+
 func BytePtrFromString(s string) *byte {
 	bs := []byte(s)
 	var r *byte = &bs[0]
@@ -20,14 +22,14 @@ func Open(path string, flag int, perm int) (int, error) {
 	var fd int
 	var _p0 *byte
 	_p0 = BytePtrFromString(path)
-	fd = Syscall(__x64_sys_open, _p0, flag)
+	fd = Syscall(__x64_sys_open, uintptr(unsafe.Pointer(_p0)), uintptr(flag), 0)
 	return fd, nil
 }
 
 func Write(fd int, b []byte) (int, error) {
 	var addr *byte = &b[0]
 	var n int
-	n = Syscall(__x64_sys_write, fd, addr, len(b))
+	n = Syscall(__x64_sys_write, uintptr(fd), uintptr(unsafe.Pointer(addr)), uintptr(len(b)))
 	return n, nil
 }
 
@@ -35,7 +37,7 @@ func Read(fd int, b []byte) (int, error) {
 	var ptr *byte
 	ptr = &b[0]
 	var nread int
-	nread = Syscall(__x64_sys_read, fd, ptr, cap(b))
+	nread = Syscall(__x64_sys_read, uintptr(fd), uintptr(unsafe.Pointer(ptr)), uintptr(cap(b)))
 	return nread, nil
 }
 
@@ -46,7 +48,7 @@ func ReadDirent(fd int, buf []byte) (int, error) {
 func Getdents(fd int, buf []byte) (int, error) {
 	var _p0 unsafe.Pointer
 	_p0 = unsafe.Pointer(&buf[0])
-	nread := Syscall(_x64_getdents64, uintptr(fd), uintptr(_p0), len(buf))
+	nread := Syscall(_x64_getdents64, uintptr(fd), uintptr(_p0), uintptr(len(buf)))
 	return nread, nil
 }
 
@@ -83,6 +85,6 @@ func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
 }
 
 func Exit(code int) {
-	Syscall(__x64_sys_exit, code)
+	Syscall(__x64_sys_exit, uintptr(code), 0 ,0)
 	return
 }
