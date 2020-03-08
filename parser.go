@@ -647,6 +647,21 @@ func (p *parser) parseUnaryExpr() Expr {
 	tok := p.readToken()
 	switch {
 	case tok.isPunct("("):
+		tok2 := p.peekToken()
+		if tok2.isPunct("*") {
+			// we assume this as conversion (*T)(expr)
+			typ := p.parseType()
+			p.expect(")")
+			p.expect("(")
+			e := p.parseExpr()
+			p.expect(")")
+			return &ExprFuncallOrConversion{
+				tok:   tok,
+				typ:   typ,
+				fname: "",
+				args:  []Expr{e},
+			}
+		}
 		e := p.parseExpr()
 		p.expect(")")
 		return e
@@ -666,6 +681,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		}
 		return uop
 	case tok.isPunct("*"):
+
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
