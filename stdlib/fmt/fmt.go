@@ -5,6 +5,10 @@ import (
 	"strconv"
 )
 
+func Print(s string) {
+	os.Stdout.Write([]byte(s))
+}
+
 func Println(s string) {
 	b := []byte(s)
 	b = append(b, '\n')
