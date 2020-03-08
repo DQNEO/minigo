@@ -4,10 +4,11 @@ package main
 import (
 	"os"
 	"unsafe"
+	"syscall"
 )
 import "fmt"
 
-var buf [1024]byte
+var _buf [1024]byte
 const _x_sys_getdents64  = 217
 
 /*
@@ -62,10 +63,10 @@ func main() {
 		panic(err)
 	}
 	fd := f.Fd()
-
+	var buf []byte = _buf[:]
 	var counter int
 	for {
-		nread := syscall(_x_sys_getdents64, fd, buf, len(buf))
+		nread,_ := syscall.Getdents(int(fd), buf)
 		if nread == -1 {
 			panic("getdents failed")
 		}
@@ -77,7 +78,8 @@ func main() {
 		//fmt.Printf("inode   d_off   d_type  d_reclen    d_name\n")
 		for bpos := 0; bpos < nread; 1 {
 			var dirp *linux_dirent
-			dirp = uintptr(buf) + uintptr(bpos)
+			p := uintptr(unsafe.Pointer(&buf[0])) + uintptr(bpos)
+			dirp = p
 			print_dirp(dirp)
 			bpos = bpos + int(dirp.d_reclen1) // 24 is wrong
 			counter++
