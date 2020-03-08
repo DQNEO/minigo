@@ -99,7 +99,7 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareTypes(universe)
 	predeclareConsts(universe)
 
-	universe.setFunc(identifier("syscall"), &ExprFuncRef{
+	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
 		funcdef: builtinSyscall,
 	})
 

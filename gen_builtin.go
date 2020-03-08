@@ -152,8 +152,8 @@ func emitStaticFunctions() {
 	emit("LEAVE_AND_RET")
 	emitNewline()
 
-	// iruntime.syscall
-	emitWithoutIndent("%s:", getFuncSymbol(IRuntimePath, "syscall"))
+	// iruntime.Syscall
+	emitWithoutIndent("%s:", getFuncSymbol(IRuntimePath, "Syscall"))
 	emitNewline()
 
 	// copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html

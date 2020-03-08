@@ -216,7 +216,7 @@ func walkExpr(expr Expr) Expr {
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
-				symbol:   getFuncSymbol(IRuntimePath,  "syscall"),
+				symbol:   getFuncSymbol(IRuntimePath,  "Syscall"),
 				args:     funcall.args,
 			}
 			return staticCall
