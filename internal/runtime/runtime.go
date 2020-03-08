@@ -89,7 +89,7 @@ func itoa(i int) []byte {
 
 func printstring(b []byte) {
 	var addr *byte = &b[0]
-	write(1, addr, len(b))
+	write(2, addr, len(b))
 }
 
 func write(fd int, addr *byte, length int) {
