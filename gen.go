@@ -110,7 +110,7 @@ func escapeForAssembler(pkgPath normalizedPackagePath) string {
 // "main","f1" -> "main.f1"
 func getFuncSymbol(pkgPath normalizedPackagePath, fname string) string {
 	if len(pkgPath) == 0 {
-		errorft(nil, "pkg should not be empty: %s", fname)
+		errorft(nil, "pkgPath should not be empty: %s", fname)
 	}
 	convertedPath := escapeForAssembler(pkgPath)
 	s := Sprintf("%s.%s", convertedPath, fname)
