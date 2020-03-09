@@ -1,6 +1,5 @@
 package bytes
 
-import "io"
 import "os"
 
 type Buffer struct {
