@@ -58,7 +58,7 @@ type LinuxDirent64 struct {
 	d_name   byte
 }
 
-func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
+func ParseDirent(buf []byte, void int, names []string) (int, int,  []string) {
 	p := uintptr(unsafe.Pointer(&buf[0]))
 	var dirp *LinuxDirent64 = (*LinuxDirent64)(unsafe.Pointer(p))
 	up := uintptr(unsafe.Pointer(&dirp.d_name))
@@ -66,7 +66,8 @@ func ParseDirent(buf []byte, void int, names []string) (int,  []string) {
 	if name != "." && name != ".." {
 		names = append(names, name)
 	}
-	return int(dirp.d_reclen1), names
+	var r int = 0
+	return int(dirp.d_reclen1), r, names
 }
 
 func Exit(code int) {

@@ -60,6 +60,7 @@ func (f *File) Readdirnames(n int) ([]string, error) {
 	return f.readdirnames(n)
 }
 
+var void int
 
 func (f *File) readdirnames(n int) ([]string, error) {
 	var names []string
@@ -75,7 +76,7 @@ func (f *File) readdirnames(n int) ([]string, error) {
 		var bufp int
 		for ; bufp < nbuf; {
 			var reclen int
-			reclen,  names = syscall.ParseDirent(buf[bufp:], 0,  names)
+			reclen, void /* _ causes segmentation fault */, names = syscall.ParseDirent(buf[bufp:], 0,  names)
 			bufp = bufp + reclen
 		}
 	}
