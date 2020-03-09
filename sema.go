@@ -225,7 +225,7 @@ func walkExpr(expr Expr) Expr {
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
-				symbol:   getFuncSymbol(IRuntimePath,  "Syscall"),
+				symbol:   getFuncSymbol(IRuntimePath, "Syscall"),
 				args:     funcall.args,
 			}
 			return staticCall
@@ -239,9 +239,9 @@ func walkExpr(expr Expr) Expr {
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(IRuntimePath,  "makeSlice")
+			staticCall.symbol = getFuncSymbol(IRuntimePath, "makeSlice")
 			size := funcall.typarg.elementType.getSize()
-			staticCall.args = []Expr{lenArg,capArg, &ExprNumberLiteral{val:size},}
+			staticCall.args = []Expr{lenArg, capArg, &ExprNumberLiteral{val: size}}
 			return staticCall
 		case builtinAppend:
 			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")

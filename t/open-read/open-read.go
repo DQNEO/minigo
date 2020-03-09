@@ -17,7 +17,7 @@ func main() {
 	var b []byte = buf[0:len(buf)]
 	fname := os.Args[1]
 
-	fd, _= syscall.Open(fname, O_RDONLY, 0)
+	fd, _ = syscall.Open(fname, O_RDONLY, 0)
 	ln, _ := syscall.Read(fd, b)
 	s := buf[0:ln]
 	fmt.Printf("%s", s)

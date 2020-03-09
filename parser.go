@@ -253,11 +253,11 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 		typ, args := p.readFuncallArgs(requireTypeAs1stArg)
 		fname := rel.name
 		e = &ExprFuncallOrConversion{
-			tok:   next,
-			rel:   rel,
-			fname: fname,
-			typarg:typ,
-			args:  args,
+			tok:    next,
+			rel:    rel,
+			fname:  fname,
+			typarg: typ,
+			args:   args,
 		}
 	} else if next.isPunct("[") {
 		// index access
@@ -1100,7 +1100,7 @@ func (p *parser) parseForStmt() *StmtFor {
 			cls.init = nil
 			cls.cond = p.parseStmt()
 			p.expect(";")
-			if ! p.peekToken().isPunct("{") {
+			if !p.peekToken().isPunct("{") {
 				cls.post = p.parseStmt()
 			}
 			r.cls = cls
@@ -1901,10 +1901,10 @@ func (p *parser) tryResolve(pkg identifier, rel *Relation) {
 		scope := symbolTable.allScopes[pkgPath]
 		if scope == nil {
 			/*
-			for k,_ := range symbolTable.allScopes {
-				warnf(k)
-			}
-			 */
+				for k,_ := range symbolTable.allScopes {
+					warnf(k)
+				}
+			*/
 			errorft(rel.token(), "pkg %s(%s) is not set in allScopes", pkgPath, pkg)
 		}
 		relbody := scope.get(rel.name)
@@ -2049,7 +2049,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 			tok:           packageClause.tok,
 			packageClause: packageClause,
 			importDecls:   importDecls,
-			imports: imports,
+			imports:       imports,
 		}
 	}
 
@@ -2082,7 +2082,7 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		dynamicTypes:      p.dynamicTypes,
 		namedTypes:        p.namedTypes,
 		methods:           p.methods,
-		imports: imports,
+		imports:           imports,
 	}
 }
 
@@ -2134,7 +2134,7 @@ func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope 
 	}
 
 	return &AstPackage{
-		normalizedPath:pkgPath,
+		normalizedPath:    pkgPath,
 		name:              packageName,
 		scope:             pkgScope,
 		files:             astFiles,

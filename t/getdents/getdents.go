@@ -3,13 +3,14 @@ package main
 
 import (
 	"os"
-	"unsafe"
 	"syscall"
+	"unsafe"
 )
 import "fmt"
 
 var _buf [1024]byte
-const _x_sys_getdents64  = 217
+
+const _x_sys_getdents64 = 217
 
 /*
 struct linux_dirent64 {
@@ -19,13 +20,13 @@ struct linux_dirent64 {
 	unsigned char  d_type;   // 1 byte: File type
 	char           d_name[]; // Filename (null-terminated)
 };
- */
+*/
 type linux_dirent struct {
-	d_ino    int
-	d_off    int
+	d_ino     int
+	d_off     int
 	d_reclen1 uint16
-	d_type   byte
-	d_name   byte
+	d_type    byte
+	d_name    byte
 }
 
 func cstring2string(b *byte) string {
@@ -58,7 +59,7 @@ func print_dirp(dirp *linux_dirent) {
 }
 
 func main() {
-	f , err := os.Open("t/data")
+	f, err := os.Open("t/data")
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +67,7 @@ func main() {
 	var buf []byte = _buf[:]
 	var counter int
 	for {
-		nread,_ := syscall.Getdents(int(fd), buf)
+		nread, _ := syscall.Getdents(int(fd), buf)
 		if nread == -1 {
 			panic("getdents failed")
 		}

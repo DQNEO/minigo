@@ -40,52 +40,52 @@ var eIota = &ExprConstVariable{
 }
 
 var builtinPanic = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinLen = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinCap = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinAppend = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinMake = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinSyscall = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinDumpSlice = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinDumpInterface = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAssertInterface = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAsComment = &DeclFunc{
-	pkgPath:"/builtin",
+	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 

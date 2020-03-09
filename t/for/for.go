@@ -43,7 +43,7 @@ func f4() {
 		fmt.Printf("%d\n", i)
 	}
 
-	for ; i <= 22; {
+	for i <= 22 {
 		fmt.Printf("%d\n", i)
 		i++
 	}

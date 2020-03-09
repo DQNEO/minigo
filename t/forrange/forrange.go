@@ -77,7 +77,7 @@ func f7() {
 func f8() {
 	var s string = "abc"
 	for _, c := range []byte(([]byte(s))) {
-		fmt.Printf("%d\n", c - 76)
+		fmt.Printf("%d\n", c-76)
 	}
 }
 

@@ -4,7 +4,6 @@ type mapToIdentToMethods map[identifier]methods
 
 type normalizedPackagePath string // "/stdlib/io/iotuil"
 
-
 type AstPackage struct {
 	normalizedPath    normalizedPackagePath
 	name              identifier
@@ -129,12 +128,12 @@ type ExprConstVariable struct {
 
 // ident( ___ )
 type ExprFuncallOrConversion struct {
-	tok   *Token
-	rel   *Relation
-	typ   *Gtype // type to convert (*T)(e)
-	fname identifier
+	tok    *Token
+	rel    *Relation
+	typ    *Gtype // type to convert (*T)(e)
+	fname  identifier
 	typarg *Gtype // 1st argument for make() etc.
-	args  []Expr
+	args   []Expr
 }
 
 type ExprMethodcall struct {

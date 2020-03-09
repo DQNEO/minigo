@@ -127,7 +127,7 @@ func (e *ExprCap) emit() {
 func emitStaticFunctions() {
 
 	// iruntime.makeSlice
-	emitWithoutIndent("%s:", getFuncSymbol(IRuntimePath,"makeSlice"))
+	emitWithoutIndent("%s:", getFuncSymbol(IRuntimePath, "makeSlice"))
 	emit("FUNC_PROLOGUE")
 	emitNewline()
 

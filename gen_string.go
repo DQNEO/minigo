@@ -51,7 +51,7 @@ func (e *IrStringConcat) emit() {
 	// left + right
 	call := &IrStaticCall{
 		tok:          e.token(),
-		symbol:       getFuncSymbol(IRuntimePath,"concat"),
+		symbol:       getFuncSymbol(IRuntimePath, "concat"),
 		isMethodCall: false,
 		args:         args,
 		callee: &DeclFunc{

@@ -32,6 +32,7 @@ func getParsingDir(sourceFile string) string {
 	}
 	return path.Dir(sourceFile)
 }
+
 // analyze imports of a given go source
 func parseImportsFromFile(sourceFile string) importMap {
 	p := &parser{
@@ -93,7 +94,7 @@ func getPackageFiles(pkgDir string) []string {
 		if name == "ignore.go" {
 			continue
 		}
-		sourceFiles = append(sourceFiles, pkgDir + "/" + name)
+		sourceFiles = append(sourceFiles, pkgDir+"/"+name)
 	}
 	return sourceFiles
 }

@@ -171,7 +171,7 @@ func emitMainFunc(packages []*AstPackage) {
 	}
 
 	emitNewline()
-	emit("FUNCALL %s", getFuncSymbol("main","main"))
+	emit("FUNCALL %s", getFuncSymbol("main", "main"))
 	//emit("FUNCALL iruntime.reportMemoryUsage")
 
 	// exit(0)
