@@ -66,8 +66,7 @@ func ParseDirent(buf []byte, void int, names []string) (int, int,  []string) {
 	if name != "." && name != ".." {
 		names = append(names, name)
 	}
-	var r int = 0
-	return int(dirp.d_reclen1), r, names
+	return int(dirp.d_reclen1), 0, names
 }
 
 func Exit(code int) {
