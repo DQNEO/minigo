@@ -97,7 +97,7 @@ func (p *parser) expectIdent() identifier {
 func (p *parser) expectKeyword(name string) *Token {
 	tok := p.readToken()
 	if !tok.isKeyword(name) {
-		errorft(tok, "Keyword %s expected but got %s", name, tok)
+		errorft(tok, "Keyword %s expected but got %s", name, tok.String())
 	}
 	return tok
 }

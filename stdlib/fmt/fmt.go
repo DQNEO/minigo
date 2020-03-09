@@ -78,6 +78,7 @@ func Sprintf(format string, args ...interface{}) string {
 					s = "false"
 				}
 			default:
+				//panic(fmt.Sprintf("%T\n", arg))
 				panic("Unkown type to format:")
 			}
 			blocks = append(blocks, s)
