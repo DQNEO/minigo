@@ -79,7 +79,7 @@ func main() {
 		for bpos := 0; bpos < nread; 1 {
 			var dirp *linux_dirent
 			p := uintptr(unsafe.Pointer(&buf[0])) + uintptr(bpos)
-			dirp = p
+			dirp = (*linux_dirent)(unsafe.Pointer(p))
 			print_dirp(dirp)
 			bpos = bpos + int(dirp.d_reclen1) // 24 is wrong
 			counter++
