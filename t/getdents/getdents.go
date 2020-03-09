@@ -76,7 +76,8 @@ func main() {
 
 		//fmt.Printf("--------------- nread=%d ---------------\n", nread)
 		//fmt.Printf("inode   d_off   d_type  d_reclen    d_name\n")
-		for bpos := 0; bpos < nread; 1 {
+		var bpos int
+		for ; bpos < nread; {
 			var dirp *linux_dirent
 			p := uintptr(unsafe.Pointer(&buf[0])) + uintptr(bpos)
 			dirp = (*linux_dirent)(unsafe.Pointer(p))
