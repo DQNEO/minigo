@@ -243,16 +243,6 @@ func walkExpr(expr Expr) Expr {
 			size := funcall.typarg.elementType.getSize()
 			staticCall.args = []Expr{lenArg,capArg, &ExprNumberLiteral{val:size},}
 			return staticCall
-		case builtinMakeSlice:
-			assert(len(funcall.args) == 3, funcall.token(), "makeSlice() should take 3 argments")
-			var staticCall *IrStaticCall = &IrStaticCall{
-				tok:      funcall.token(),
-				origExpr: funcall,
-				callee:   decl,
-			}
-			staticCall.symbol = getFuncSymbol(IRuntimePath,  "makeSlice")
-			staticCall.args = funcall.args
-			return staticCall
 		case builtinAppend:
 			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 			slice := funcall.args[0]
