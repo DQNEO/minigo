@@ -9,7 +9,7 @@ type Buffer struct {
 
 func (b *Buffer) Grow(capacity int) {
 	var buf []byte
-	buf = makeSlice(capacity, capacity, 24)
+	buf = make([]byte, capacity, capacity)
 	b.buf = buf
 }
 

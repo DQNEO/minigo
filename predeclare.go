@@ -59,9 +59,9 @@ var builtinAppend = &DeclFunc{
 	rettypes: []*Gtype{&sInt},
 }
 
-var builtinMakeSlice = &DeclFunc{
+var builtinMake = &DeclFunc{
 	pkgPath:"/builtin",
-	rettypes: []*Gtype{&sSliceType},
+	rettypes: []*Gtype{},
 }
 
 var builtinSyscall = &DeclFunc{
@@ -125,10 +125,9 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	universe.setFunc(identifier("append"), &ExprFuncRef{
 		funcdef: builtinAppend,
 	})
-	universe.setFunc(identifier("makeSlice"), &ExprFuncRef{
-		funcdef: builtinMakeSlice,
+	universe.setFunc(identifier("make"), &ExprFuncRef{
+		funcdef: builtinMake,
 	})
-
 	universe.setFunc(identifier("dumpSlice"), &ExprFuncRef{
 		funcdef: builtinDumpSlice,
 	})
