@@ -42,6 +42,11 @@ func f4() {
 	for ; i <= 19; i++ {
 		fmt.Printf("%d\n", i)
 	}
+
+	for ; i <= 22; {
+		fmt.Printf("%d\n", i)
+		i++
+	}
 }
 
 func main() {

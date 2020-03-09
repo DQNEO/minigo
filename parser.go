@@ -1100,7 +1100,9 @@ func (p *parser) parseForStmt() *StmtFor {
 			cls.init = nil
 			cls.cond = p.parseStmt()
 			p.expect(";")
-			cls.post = p.parseStmt()
+			if ! p.peekToken().isPunct("{") {
+				cls.post = p.parseStmt()
+			}
 			r.cls = cls
 			p.expect("{")
 			r.block = p.parseCompoundStmt()

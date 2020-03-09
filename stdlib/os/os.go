@@ -73,7 +73,7 @@ func (f *File) readdirnames(n int) ([]string, error) {
 			break
 		}
 		var bufp int
-		for ; bufp < nbuf; 1 {
+		for ; bufp < nbuf; {
 			var reclen int
 			reclen,  names = syscall.ParseDirent(buf[bufp:], 0,  names)
 			bufp = bufp + reclen
