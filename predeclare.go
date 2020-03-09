@@ -40,42 +40,52 @@ var eIota = &ExprConstVariable{
 }
 
 var builtinPanic = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinLen = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinCap = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinAppend = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinMakeSlice = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{&sSliceType},
 }
 
 var builtinSyscall = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinDumpSlice = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinDumpInterface = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAssertInterface = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAsComment = &DeclFunc{
+	pkgPath:"/builtin",
 	rettypes: []*Gtype{},
 }
 
