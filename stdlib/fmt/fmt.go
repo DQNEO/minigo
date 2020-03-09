@@ -15,9 +15,13 @@ func Println(s string) {
 	os.Stdout.Write(b)
 }
 
-func Printf(format string, a ...interface{}) {
+func Fprintf(w *os.File, format string, a ...interface{}) {
 	s := Sprintf(format, a...)
-	os.Stdout.Write([]byte(s))
+	w.Write([]byte(s))
+}
+
+func Printf(format string, a ...interface{}) {
+	Fprintf(os.Stdout, format, a...)
 }
 
 func Sprintf(format string, args ...interface{}) string {
