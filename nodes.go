@@ -133,6 +133,7 @@ type ExprFuncallOrConversion struct {
 	rel   *Relation
 	typ   *Gtype // type to convert (*T)(e)
 	fname identifier
+	typarg *Gtype // 1st argument for make() etc.
 	args  []Expr
 }
 

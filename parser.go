@@ -146,15 +146,30 @@ func (p *parser) traceOut(funcname string) {
 	debugf("func %s end after %s", funcname, p.lastToken().sval)
 }
 
-func (p *parser) readFuncallArgs() []Expr {
+func (p *parser) readFuncallArgs(requireTypeAs1stArg bool) (*Gtype, []Expr) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
+	var typ *Gtype
 	var r []Expr
 	for {
 		tok := p.peekToken()
 		if tok.isPunct(")") {
 			p.skip()
-			return r
+			return typ, r
+		}
+		if requireTypeAs1stArg {
+			typ = p.parseType()
+			requireTypeAs1stArg = false
+			tok = p.peekToken()
+			if tok.isPunct(")") {
+				p.skip()
+				return typ, r
+			} else if tok.isPunct(",") {
+				p.skip()
+				continue
+			} else {
+				errorft(tok, "invalid token in funcall arguments")
+			}
 		}
 		arg := p.parseExpr()
 		if p.peekToken().isPunct("...") {
@@ -165,13 +180,13 @@ func (p *parser) readFuncallArgs() []Expr {
 			}
 			r = append(r, arg)
 			p.expect(")")
-			return r
+			return typ, r
 		}
 		r = append(r, arg)
 		tok = p.peekToken()
 		if tok.isPunct(")") {
 			p.skip()
-			return r
+			return typ, r
 		} else if tok.isPunct(",") {
 			p.skip()
 			continue
@@ -230,12 +245,18 @@ func (p *parser) parseIdentExpr(firstIdentToken *Token) Expr {
 	} else if next.isPunct("(") {
 		// funcall or method call
 		p.skip()
-		args := p.readFuncallArgs()
+		var requireTypeAs1stArg bool
+		if string(firstIdent) == "make" {
+			// @TODO: make should be overridden
+			requireTypeAs1stArg = true
+		}
+		typ, args := p.readFuncallArgs(requireTypeAs1stArg)
 		fname := rel.name
 		e = &ExprFuncallOrConversion{
 			tok:   next,
 			rel:   rel,
 			fname: fname,
+			typarg:typ,
 			args:  args,
 		}
 	} else if next.isPunct("[") {
@@ -385,7 +406,7 @@ func (p *parser) succeedingExpr(e Expr) Expr {
 		if next.isPunct("(") {
 			// (expr).method()
 			p.expect("(")
-			args := p.readFuncallArgs()
+			_, args := p.readFuncallArgs(false)
 			r = &ExprMethodcall{
 				tok:      tok,
 				receiver: e,
@@ -564,8 +585,6 @@ func (p *parser) parsePrim() Expr {
 		default:
 			errorft(tok, "internal error")
 		}
-	case tok.isIdent("make"):
-		return p.parseMakeExpr()
 	case tok.isTypeIdent():
 		p.skip()
 		return p.parseIdentExpr(tok)
@@ -905,12 +924,13 @@ func (p *parser) parseType() *Gtype {
 				return p.registerDynamicType(gtype)
 			}
 		} else if tok.isPunct("]") {
+			errorft(tok, "What should we do after ? ] ")
 
 		} else if tok.isPunct("...") {
 			// vaargs
 			TBI(tok, "VAARGS is not supported yet")
 		} else {
-			errorft(tok, "Unkonwn token")
+			errorft(tok, "Unkonwn token %s", tok.String())
 		}
 
 	}

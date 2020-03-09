@@ -229,6 +229,20 @@ func walkExpr(expr Expr) Expr {
 				args:     funcall.args,
 			}
 			return staticCall
+		case builtinMake:
+			assert(funcall.typarg != nil, funcall.token(), "make() should take Type argment")
+			assert(len(funcall.args) >= 1, funcall.token(), "make() should take 1 argments other than type")
+			lenArg := funcall.args[0]
+			capArg := funcall.args[1]
+			var staticCall *IrStaticCall = &IrStaticCall{
+				tok:      funcall.token(),
+				origExpr: funcall,
+				callee:   decl,
+			}
+			staticCall.symbol = getFuncSymbol(IRuntimePath,  "makeSlice")
+			size := funcall.typarg.elementType.getSize()
+			staticCall.args = []Expr{lenArg,capArg, &ExprNumberLiteral{val:size},}
+			return staticCall
 		case builtinMakeSlice:
 			assert(len(funcall.args) == 3, funcall.token(), "makeSlice() should take 3 argments")
 			var staticCall *IrStaticCall = &IrStaticCall{

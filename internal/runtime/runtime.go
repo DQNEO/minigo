@@ -134,7 +134,7 @@ func append1(x []byte, elm byte) []byte {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice(zlen, newcap, 1)
+		z = make([]byte, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
@@ -158,7 +158,7 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice(zlen, newcap, 8)
+		z = make([]int, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
@@ -183,7 +183,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 		} else {
 			newcap = xlen * 2
 		}
-		z = makeSlice(zlen, newcap, 24)
+		z = make([]interface{}, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
