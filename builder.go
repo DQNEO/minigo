@@ -122,20 +122,17 @@ func compileRuntime(universe *Scope) *AstPackage {
 	pkgPath := IRuntimePath
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
-	p := &parser{
-		packagePath: pkgPath,
-		packageName: pkgName,
-	}
-	f := p.ParseFile("internal/runtime/runtime.go", universe, false)
-	attachMethodsToTypes(f.methods, p.packageBlockScope)
-	inferTypes(f.uninferredGlobals, f.uninferredLocals)
-	calcStructSize(f.dynamicTypes)
+	sourceFiles := getPackageFiles("internal/runtime")
+	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
+	attachMethodsToTypes(pkg.methods, universe)
+	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
+	calcStructSize(pkg.dynamicTypes)
 	return &AstPackage{
 		normalizedPath: pkgPath,
 		name:           pkgName,
-		files:          []*AstFile{f},
-		stringLiterals: f.stringLiterals,
-		dynamicTypes:   f.dynamicTypes,
+		files:          pkg.files,
+		stringLiterals: pkg.stringLiterals,
+		dynamicTypes:   pkg.dynamicTypes,
 	}
 }
 
