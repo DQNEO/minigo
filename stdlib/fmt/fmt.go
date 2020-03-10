@@ -3,6 +3,7 @@ package fmt
 import (
 	"os"
 	"strconv"
+	"io"
 )
 
 func Print(s string) {
@@ -15,7 +16,7 @@ func Println(s string) {
 	os.Stdout.Write(b)
 }
 
-func Fprintf(w *os.File, format string, a ...interface{}) {
+func Fprintf(w io.Writer, format string, a ...interface{}) {
 	s := Sprintf(format, a...)
 	w.Write([]byte(s))
 }

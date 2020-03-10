@@ -1,6 +1,8 @@
 package bytes
 
-import "os"
+import (
+	"io"
+)
 
 type Buffer struct {
 	bytes []byte
@@ -13,7 +15,7 @@ func (b *Buffer) Grow(capacity int) {
 	b.buf = buf
 }
 
-func (b *Buffer) ReadFrom(br *os.File) (int, error) {
+func (b *Buffer) ReadFrom(br io.Reader) (int, error) {
 	var nread int
 	var err error
 

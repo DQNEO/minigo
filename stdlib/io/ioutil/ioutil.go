@@ -2,12 +2,13 @@ package ioutil
 
 import (
 	"bytes"
+	"io"
 	"os"
 )
 
 const MYBUFSIZ = 65536 * 2
 
-func readAll(f *os.File, capacity int) ([]byte, error) {
+func readAll(f io.Reader, capacity int) ([]byte, error) {
 	var buf *bytes.Buffer = &bytes.Buffer{}
 	buf.Grow(capacity)
 	_, err := buf.ReadFrom(f)

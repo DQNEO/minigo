@@ -285,24 +285,32 @@ func (ircall *IrStaticCall) emit() {
 
 // @TODO: This is too simple. It should use the same logic as in IrStaticCall for passing args.
 func (call *IrInterfaceMethodCall) emitMethodCall() {
-	for i, arg := range call.args {
+	var numRegs int
+	for _, arg := range call.args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
 			emit("mov $0, %%rax")
 		} else {
 			arg.emit()
 		}
-		var no int = i + 2
-		emit("PUSH_8 # argument no %d", no)
+
+		var width int
+		doConvertToInterface := false
+		if doConvertToInterface || arg.getGtype().is24WidthType() {
+			emit("PUSH_24")
+			width = 3
+		} else {
+			emit("PUSH_8")
+			width = 1
+		}
+		numRegs += width
 	}
 
-	var ln int = len(call.args)
-	emit("POP_TO_ARG_%d", ln)
-
-	for i := range call.args {
-		j := len(call.args) - 1 - i
-		var n int = j
-		emit("POP_TO_ARG_%d", n)
+	emit("# numRegs=%d", numRegs)
+	emit("POP_TO_ARG_%d # receiver", numRegs)
+	for i := numRegs - 1; i >= 0; i-- {
+		var j int = i
+		emit("POP_TO_ARG_%d", j)
 	}
 
 	emit("POP_8 # funcref")
