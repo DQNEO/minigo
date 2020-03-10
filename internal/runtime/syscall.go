@@ -12,8 +12,9 @@ func brk(addr uintptr) uintptr {
 	return ret
 }
 
-func write(fd int, addr *byte, length int) {
-	Syscall(__x64_sys_write, uintptr(fd), uintptr(unsafe.Pointer(addr)), uintptr(length))
+func write(fd int, buf []byte) {
+	var addr *byte = &buf[0]
+	Syscall(__x64_sys_write, uintptr(fd), uintptr(unsafe.Pointer(addr)), uintptr(len(buf)))
 }
 
 func exit(code int) {
