@@ -9,7 +9,7 @@ func reportMemoryUsage() {
 }
 
 func getMemoryUsage() uintptr {
-	return heapPtr - heapHead
+	return heapCurrent - heapHead
 }
 
 // This is a copy from stconv
