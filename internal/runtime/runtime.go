@@ -6,16 +6,18 @@ var _argv []*byte
 
 const heapSize uintptr = 640485760
 
-var heap [heapSize]byte
 var heapHead uintptr
 var heapPtr uintptr
+var heapTail uintptr
 
 // https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
 const __x64_sys_write = 1
+const __x64_sys_brk  = 12
 const __x64_sys_exit = 60
 
 func init() {
-	heapHead = uintptr(unsafe.Pointer(&heap[0]))
+	heapHead = brk(0)
+	heapTail = brk(heapHead + heapSize)
 	heapPtr = heapHead
 }
 
@@ -42,8 +44,13 @@ func runtime_args() []string {
 	return r
 }
 
+func brk(addr uintptr) uintptr {
+	var ret uintptr = Syscall(__x64_sys_brk, addr, 0, 0)
+	return ret
+}
+
 func malloc(size uintptr) uintptr {
-	if heapPtr+size > heapHead+heapSize {
+	if heapPtr+size > heapTail {
 		panic([]byte("malloc exceeds heap capacity"))
 		return 0
 	}
