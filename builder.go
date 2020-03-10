@@ -124,6 +124,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	symbolTable.allScopes[pkgPath] = pkgScope
 	sourceFiles := getPackageFiles("internal/runtime")
 	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
+	resolveIdents(pkg, universe)
 	attachMethodsToTypes(pkg.methods, universe)
 	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
 	calcStructSize(pkg.dynamicTypes)

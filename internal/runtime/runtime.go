@@ -4,21 +4,13 @@ import "unsafe"
 
 var _argv []*byte
 
-const heapSize uintptr = 640485760
-
-var heapHead uintptr
-var heapPtr uintptr
-var heapTail uintptr
-
 // https://github.com/torvalds/linux/blob/v5.5/arch/x86/entry/syscalls/syscall_64.tbl
 const __x64_sys_write = 1
 const __x64_sys_brk  = 12
 const __x64_sys_exit = 60
 
 func init() {
-	heapHead = brk(0)
-	heapTail = brk(heapHead + heapSize)
-	heapPtr = heapHead
+	heapInit()
 }
 
 func cstring2string(b *byte) string {
@@ -47,16 +39,6 @@ func runtime_args() []string {
 func brk(addr uintptr) uintptr {
 	var ret uintptr = Syscall(__x64_sys_brk, addr, 0, 0)
 	return ret
-}
-
-func malloc(size uintptr) uintptr {
-	if heapPtr+size > heapTail {
-		panic([]byte("malloc exceeds heap capacity"))
-		return 0
-	}
-	r := heapPtr
-	heapPtr += size
-	return r
 }
 
 // This is a copy from stconv
