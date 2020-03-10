@@ -2,7 +2,10 @@ package main
 
 import "fmt"
 
+func f1() {
+	fmt.Printf("%d\n", 11)
+	fmt.Printf("%s\n", 22)
+}
 func main() {
-	fmt.Printf("%d\n", 1)
-	fmt.Printf("%s\n", 2)
+	f1()
 }
