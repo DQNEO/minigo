@@ -1,7 +1,5 @@
 package io
 
-/* This does not work
-
 type Reader interface {
 	Read(p []byte) (int, error)
 }
@@ -9,4 +7,3 @@ type Reader interface {
 type Writer interface {
 	Write(p []byte) (int, error)
 }
-*/
