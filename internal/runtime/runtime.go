@@ -1,4 +1,4 @@
-package iruntime
+package runtime
 
 import "unsafe"
 
