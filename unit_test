@@ -46,8 +46,6 @@ function run_unit_test {
     ./${progname} $src > $as_file
     rm -f $actual
     as -o $obj_file $as_file
-    # gave up direct invocation of "ld"
-    # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     ld -o $bin_file $obj_file
     $bin_file $ARGS > $actual
 
