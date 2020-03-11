@@ -25,5 +25,7 @@ func main() {
 	fmt.Printf("%d\n", fd) // 3
 
 	fd = f2()
-	fmt.Printf("%d\n", fd) // -1
+	if fd < 0 {
+		fmt.Printf("error ok\n")
+	}
 }
