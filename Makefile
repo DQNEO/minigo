@@ -44,6 +44,7 @@ test: minigo3.s
 	./test_one_gen.sh 1
 	./test_one_gen.sh 2
 	./comparison-test.sh
+	./test_one_gen.sh 0
 
 clean:
 	rm -f minigo minigo2 minigo3
