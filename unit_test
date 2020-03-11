@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -u
 
 function usage() {
   echo "unit_test <test_name> <generation> "
@@ -16,15 +16,19 @@ generation=$2
 
 progname=""
 if [[ $generation == "1" ]];then
-  progname="minigo"
+  progname="./minigo"
 elif [[ $generation == "2" ]]; then
-  progname="minigo2"
+  progname="./minigo2"
+elif [[ $generation == "0" ]]; then
+  progname="go run"
+  if [[ $basename =~ ^_ ]];then
+    # skip if basename begin with _
+    exit 0
+  fi
 else
   usage
   exit 1
 fi
-
-
 
 bin_dir=/tmp/out
 tmpfs_dir=/tmp/tmpfs/out
@@ -44,12 +48,15 @@ ARGS=t/data/sample.txt
 function run_unit_test {
     echo -n "./unit_test $progname $basename ... "
     rm -f $actual
-
-    ./${progname} $src > $as_file
-    as -o $obj_file $as_file
-    ld -o $bin_file $obj_file
-    $bin_file $ARGS > $actual
-
+    if [[ $progname == "go run" ]];then
+      # official go
+      ${progname} $src $ARGS > $actual
+    else
+      ${progname} $src > $as_file
+      as -o $obj_file $as_file
+      ld -o $bin_file $obj_file
+      $bin_file $ARGS > $actual
+    fi
     diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         echo failed
