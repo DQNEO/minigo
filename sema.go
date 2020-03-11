@@ -115,7 +115,7 @@ func uniqueDynamicTypes(dynamicTypes []*Gtype) []string {
 }
 
 func composeMethodTable(funcs []*DeclFunc) map[int][]string {
-	var methodTable map[int][]string = map[int][]string{} // receiverTypeId : []methodTable
+	var methodTable map[int][]string = make(map[int][]string) // receiverTypeId : []methodTable
 
 	for _, funcdecl := range funcs {
 		if funcdecl.receiver == nil {
@@ -231,18 +231,36 @@ func walkExpr(expr Expr) Expr {
 			return staticCall
 		case builtinMake:
 			assert(funcall.typarg != nil, funcall.token(), "make() should take Type argment")
-			assert(len(funcall.args) >= 1, funcall.token(), "make() should take 1 argments other than type")
-			lenArg := funcall.args[0]
-			capArg := funcall.args[1]
 			var staticCall *IrCall = &IrCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
 			}
-			staticCall.symbol = getFuncSymbol(IRuntimePath, "makeSlice")
-			size := funcall.typarg.elementType.getSize()
-			staticCall.args = []Expr{lenArg, capArg, &ExprNumberLiteral{val: size}}
-			return staticCall
+			var lenArg Expr
+			var capArg Expr
+			switch funcall.typarg.getKind() {
+			case G_SLICE:
+				assert(len(funcall.args) >= 1, funcall.token(), "make() should take 1 argments other than type")
+				lenArg = funcall.args[0]
+				staticCall.symbol = getFuncSymbol(IRuntimePath, "makeSlice")
+				capArg = funcall.args[1]
+				size := funcall.typarg.elementType.getSize()
+				staticCall.args = []Expr{lenArg, capArg, &ExprNumberLiteral{val: size}}
+				return staticCall
+			case G_MAP:
+				// Replace by an empty map literal for now.
+				if len(funcall.args) >= 1 {
+					lenArg = funcall.args[0]
+				}
+				mapInitializer := &IrMapInitializer{
+					tok:    funcall.token(),
+					gtype:  funcall.typarg,
+					lenArg: lenArg,
+				}
+				return mapInitializer
+			default:
+				errorft(funcall.token(), "make for invalid type:%s", funcall.typarg.String())
+			}
 		case builtinAppend:
 			assert(len(funcall.args) == 2, funcall.token(), "append() should take 2 argments")
 			slice := funcall.args[0]

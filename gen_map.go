@@ -2,6 +2,25 @@ package main
 
 const MAX_METHODS_PER_TYPE int = 128
 
+type IrMapInitializer struct {
+	tok      *Token
+	gtype    *Gtype
+	elements []*MapElement // for map literal
+	lenArg   Expr          // for make(T, n)
+}
+
+func (e *IrMapInitializer) token() *Token {
+	return e.tok
+}
+
+func (e *IrMapInitializer) dump() {
+	panic("implement me")
+}
+
+func (e *IrMapInitializer) getGtype() *Gtype {
+	return e.gtype
+}
+
 func (call *IrInterfaceMethodCall) emit() {
 	receiver := call.receiver
 	methodName := call.methodName
@@ -438,25 +457,54 @@ func (em *IrStmtRangeMap) emit() {
 
 var mapUnitSize int = 2 * 8
 
-// push addr, len, cap
-func (lit *ExprMapLiteral) emit() {
-	var length int = len(lit.elements)
-
-	// allocaated address of the map head
-	// @FIXME 1024 is a tentative number
-	var size int
-	if length == 0 {
-		size = ptrSize * 1024
-	} else {
-		size = length * ptrSize * 1024
+func (e *ExprMapLiteral) emit() {
+	mapInitializer := &IrMapInitializer{
+		tok:      e.token(),
+		gtype:    e.getGtype(),
+		elements: e.elements,
 	}
-	emitCallMalloc(size)
+	mapInitializer.emit()
+}
+// push addr, len, cap
+func (e *IrMapInitializer) emit() {
+	var multiple int = 1024 // Forgot what it is ...
+	if e.lenArg != nil {
+		// make(T, n)
+		eLen := &ExprBinop{
+			tok:   e.token(),
+			op:    "*",
+			left:  e.lenArg,
+			right: &ExprNumberLiteral{
+				val: ptrSize * multiple,
+			},
+		}
+		emit("# make map")
+		emit("mov $0, %%rax")
+		emit("PUSH_8") // map len
+		emit("# alloc map area")
+		emitCallMallocDinamicSize(eLen)
+	} else {
+		// make(T) or map[T1]T2{...}
+		var length int = len(e.elements)
+		// allocaated address of the map head
+		var size int
+		if length == 0 {
+			size = ptrSize * multiple
+		} else {
+			size = length * (ptrSize * multiple)
+		}
+		elen := &ExprNumberLiteral{val:length}
+		elen.emit()
+		emit("PUSH_8") // map len
+		emitCallMalloc(size)
+	}
+
 	emit("PUSH_8") // map head
 
-	//mapType := lit.getGtype()
+	//mapType := e.getGtype()
 	//mapKeyType := mapType.mapKey
 
-	for i, element := range lit.elements {
+	for i, element := range e.elements {
 		var offsetKey int = i * mapUnitSize
 		var offsetValue int = i*mapUnitSize + 8
 
@@ -494,6 +542,6 @@ func (lit *ExprMapLiteral) emit() {
 	emitCallMalloc(16)
 	emit("pop %%rbx") // address (head of the heap)
 	emit("mov %%rbx, (%%rax)")
-	emit("mov $%d, %%rcx", length) // len
+	emit("pop %%rcx") // map len
 	emit("mov %%rcx, 8(%%rax)")
 }

@@ -45,7 +45,7 @@ func parseImportsFromFile(sourceFile string) importMap {
 // analyze imports of given go files
 func parseImports(sourceFiles []string) importMap {
 
-	var imported importMap = map[normalizedPackagePath]bool{}
+	var imported importMap = make(map[normalizedPackagePath]bool)
 	for _, sourceFile := range sourceFiles {
 		importsInFile := parseImportsFromFile(sourceFile)
 		for name, _ := range importsInFile {
@@ -162,7 +162,7 @@ type importMap map[normalizedPackagePath]bool
 func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDependencies importMap) {
 	for pth, _ := range directDependencies {
 		files := getPackageFiles(convertStdPath(pth))
-		var imports importMap = map[normalizedPackagePath]bool{}
+		var imports importMap = make(map[normalizedPackagePath]bool)
 		for _, file := range files {
 			imprts := parseImportsFromFile(file)
 			for k, v := range imprts {
@@ -175,13 +175,13 @@ func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDepende
 }
 
 func removeResolvedPkg(dep map[normalizedPackagePath]importMap, pkgToRemove normalizedPackagePath) map[normalizedPackagePath]importMap {
-	var dep2 map[normalizedPackagePath]importMap = map[normalizedPackagePath]importMap{}
+	var dep2 map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
 
 	for pkg1, imports := range dep {
 		if pkg1 == pkgToRemove {
 			continue
 		}
-		var newimports importMap = map[normalizedPackagePath]bool{}
+		var newimports importMap = make(map[normalizedPackagePath]bool)
 		for pkg2, _ := range imports {
 			if pkg2 == pkgToRemove {
 				continue
@@ -232,7 +232,7 @@ func get0dependentPackages(dep map[normalizedPackagePath]importMap) []normalized
 
 func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	var sortedUniqueImports []normalizedPackagePath
-	var dep map[normalizedPackagePath]importMap = map[normalizedPackagePath]importMap{}
+	var dep map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
 	parseImportRecursive(dep, directDependencies)
 
 	for {
@@ -263,7 +263,7 @@ func compileStdLibs(universe *Scope, directDependencies importMap) map[normalize
 
 	sortedUniqueImports := resolveDependency(directDependencies)
 
-	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = map[normalizedPackagePath]*AstPackage{}
+	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = make(map[normalizedPackagePath]*AstPackage)
 
 	for _, pth := range sortedUniqueImports {
 		files := getPackageFiles(convertStdPath(pth))
