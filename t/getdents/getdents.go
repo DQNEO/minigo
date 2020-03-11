@@ -36,13 +36,14 @@ func cstring2string(b *byte) string {
 			break
 		}
 		bs = append(bs, *b)
-		b = uintptr(b) + 1
+		p := uintptr(unsafe.Pointer(b)) + 1
+		b = (*byte)(unsafe.Pointer(p))
 	}
 	return string(bs)
 }
 
 func print_dirp(dirp *linux_dirent) {
-	var reclen int = int(dirp.d_reclen1)
+	//var reclen int = int(dirp.d_reclen1)
 
 	//fmt.Printf("%p  ", uintptr(dirp))
 	//fmt.Printf("%d\t", dirp.d_ino)
@@ -51,7 +52,8 @@ func print_dirp(dirp *linux_dirent) {
 	//fmt.Printf("%d\t", reclen)
 	//reclen := int(dirp.d_reclen1)
 	//fmt.Printf("%d  ", dirp.d_type)
-	var bp *byte = uintptr(unsafe.Pointer(&dirp.d_name))
+	p := unsafe.Pointer(&dirp.d_name)
+	var bp *byte = (*byte)(p)
 	var s string = cstring2string(bp)
 	return
 	fmt.Printf("%s", s)
