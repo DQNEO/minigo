@@ -270,6 +270,7 @@ func (call *IrStaticCall) emit() {
 		}
 		numRegs += 3
 	}
+	emit("# numRegs=%d", numRegs)
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
@@ -311,6 +312,9 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	emit("# numRegs=%d", numRegs)
 	emit("POP_TO_ARG_%d # receiver", numRegs)
 	for i := numRegs - 1; i >= 0; i-- {
+		if i >= len(RegsForArguments) {
+			errorft(call.args[0].token(), "too many arguments")
+		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
 	}
