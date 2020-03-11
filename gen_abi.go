@@ -279,6 +279,7 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 func (call *IrStaticCall) emit() {
 	emit("# emitCall %s", call.symbol)
 
+	// args[0] is a receiver when it's method call
 	emitCall(0, call.isMethodCall, call.args, call.callee.params)
 
 	emit("FUNCALL %s", call.symbol)
