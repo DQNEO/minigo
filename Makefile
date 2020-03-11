@@ -46,8 +46,7 @@ test: minigo3.s
 	./comparison-test.sh
 
 clean:
-	rm -f minigo minigo2 minigo3
-	rm -f minigo*.s
+	rm -f minigo*
 	rm -f a.s a.out
 	rm -rf /tmp/tmpfs/*
 
