@@ -41,12 +41,6 @@ func (call *IrInterfaceMethodCall) emit() {
 	emit("mov $0, %%rax")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
-
-	receiver.emit()
-	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
-
-	emit("PUSH_8 # receiver")
-
 	call.emitMethodCall()
 }
 

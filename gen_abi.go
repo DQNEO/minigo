@@ -270,6 +270,7 @@ func (call *IrStaticCall) emit() {
 		}
 		numRegs += 3
 	}
+
 	emit("# numRegs=%d", numRegs)
 
 	for i := numRegs - 1; i >= 0; i-- {
@@ -289,8 +290,21 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	emit("# emitMethodCall")
 	var numRegs int
 
-	for _, arg := range call.args {
-		doConvertToInterface := false
+	call.receiver.emit()
+	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
+	emit("PUSH_8 # receiver")
+	numRegs = 1
+
+	var collectVariadicArgs bool // gather variadic args into a slice
+	var arg Expr
+
+	var argIndex int
+	for argIndex, arg = range call.args {
+		var doConvertToInterface bool
+
+		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
+			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
+
 		if doConvertToInterface {
 			emit("# doConvertToInterface !!!")
 			emitConversionToInterface(arg)
@@ -310,7 +324,7 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	}
 
 	emit("# numRegs=%d", numRegs)
-	emit("POP_TO_ARG_%d # receiver", numRegs)
+
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
 			errorft(call.args[0].token(), "too many arguments")
