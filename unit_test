@@ -55,8 +55,8 @@ function run_unit_test {
       go run $src $ARGS > $actual
     else
       ./${progname} $src > $as_file
-      ld -o $bin_file $obj_file
       as -o $obj_file $as_file
+      ld -o $bin_file $obj_file
       $bin_file $ARGS > $actual
     fi
     diff -u $expected $actual
