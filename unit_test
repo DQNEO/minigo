@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -u
 
 function usage() {
   echo "unit_test <test_name> <generation> "
@@ -19,6 +19,8 @@ if [[ $generation == "1" ]];then
   progname="minigo"
 elif [[ $generation == "2" ]]; then
   progname="minigo2"
+elif [[ $generation == "0" ]]; then
+  progname="go"
 else
   usage
   exit 1
@@ -56,8 +58,15 @@ function as_run {
 
 function run_unit_test {
     echo -n "./unit_test.sh $progname $basename ... "
-    compile
-    as_run
+    if [[ $progname == "go" ]];then
+      # official go
+      rm -f $actual
+      go run $src $ARGS > $actual
+      diff -u $expected $actual
+    else
+      compile
+      as_run
+    fi
     if [[ $? -ne 0 ]];then
         echo failed
         return 1
