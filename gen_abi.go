@@ -146,7 +146,7 @@ func (fe *funcPrologueEmitter) emit() {
 	emitNewline()
 }
 
-func emitCallWrapper(symbol string, receiver Expr, args []Expr, params []*ExprVariable) {
+func emitCall(symbol string, receiver Expr, args []Expr, params []*ExprVariable) {
 	if symbol == "" {
 		// interface method call
 		receiver.emit()
@@ -157,10 +157,10 @@ func emitCallWrapper(symbol string, receiver Expr, args []Expr, params []*ExprVa
 
 		emit("POP_8 # funcref")
 		emit("call *%%rax")
-		emitNewline()
 	} else {
 		var numRegs int
 		if receiver != nil {
+			// method call of a dynamic type
 			receiver.emit()
 			if receiver.getGtype().is24WidthType() {
 				emit("PUSH_24")
@@ -173,8 +173,9 @@ func emitCallWrapper(symbol string, receiver Expr, args []Expr, params []*ExprVa
 		emitCallInner(numRegs, args, params)
 
 		emit("FUNCALL %s", symbol)
-		emitNewline()
 	}
+
+	emitNewline()
 }
 
 func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
@@ -308,12 +309,7 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 
 func (call *IrStaticCall) emit() {
 	emit("# emitCallInner %s", call.symbol)
-	emitCallWrapper(call.symbol, call.receiver, call.args, call.callee.params)
-}
-
-func (call *IrInterfaceMethodCall) emitMethodCall() {
-	emit("# emitMethodCall")
-	emitCallWrapper("", call.receiver, call.args, call.callee.params)
+	emitCall(call.symbol, call.receiver, call.args, call.callee.params)
 }
 
 func (stmt *StmtReturn) emit() {
