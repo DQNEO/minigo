@@ -4,10 +4,6 @@ import "fmt"
 
 func f1() {
 	var r []int
-	var args []int = []int{
-		1,
-	}
-
 	r = append(r, 2)
 
 	fmt.Printf("%d\n", len(r))
