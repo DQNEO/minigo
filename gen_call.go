@@ -58,13 +58,20 @@ type IrInterfaceMethodCall struct {
 	receiver   Expr
 	methodName identifier
 	args       []Expr
+	callee     *signature
 }
 
 func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
+	iType := methodCall.getOrigType()
+	sig, ok := iType.imethods[methodCall.fname]
+	if !ok {
+		panic("signature not found in the interface")
+	}
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
 		args:       methodCall.args,
+		callee:sig,
 	}
 	return call
 }

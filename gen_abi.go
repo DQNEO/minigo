@@ -147,16 +147,17 @@ func (fe *funcPrologueEmitter) emit() {
 }
 
 func (call *IrStaticCall) emit() {
-	// nothing to do
-	emit("# emitCall %s", call.symbol)
-
 	var numRegs int
+
+	emit("# emitCall %s", call.symbol)
+	isMethodCall := call.isMethodCall
 	var param *ExprVariable
+
 	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-	isMethodCall := call.isMethodCall
+
 	for argIndex, arg = range call.args {
 		var fromGtype string
 		if arg.getGtype() != nil {
@@ -177,7 +178,6 @@ func (call *IrStaticCall) emit() {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
-
 		var doConvertToInterface bool
 
 		// do not convert receiver
@@ -230,8 +230,8 @@ func (call *IrStaticCall) emit() {
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
 		if argIndex+1 < len(call.callee.params) {
-			param = call.callee.params[argIndex+1]
-			if param.isVariadic {
+			_param := call.callee.params[argIndex+1]
+			if _param.isVariadic {
 				collectVariadicArgs = true
 			}
 		}
@@ -289,23 +289,41 @@ func (call *IrStaticCall) emit() {
 
 // @TODO: This is too simple. It should use the same logic as in IrStaticCall for passing args.
 func (call *IrInterfaceMethodCall) emitMethodCall() {
-	emit("# emitMethodCall")
 	var numRegs int
+
+	emit("# emitMethodCall")
 	isMethodCall := true
+	var paramType *Gtype
 	call.receiver.emit()
 	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 	emit("PUSH_8 # receiver")
 	numRegs = 1
 
 	var collectVariadicArgs bool // gather variadic args into a slice
+	var variadicArgs []Expr
 	var arg Expr
-
 	var argIndex int
+
 	for argIndex, arg = range call.args {
-		var doConvertToInterface bool
+		var fromGtype string
+		if arg.getGtype() != nil {
+			emit("# get fromGtype")
+			fromGtype = arg.getGtype().String()
+		}
+		emit("# from %s", fromGtype)
+		if argIndex < len(call.callee.paramTypes) {
+			paramType = call.callee.paramTypes[argIndex]
+			emit("# paramType=%s", paramType.String())
+		}
 		isReceiver := isMethodCall && argIndex == 0
 		if !isReceiver {
 		}
+
+		if collectVariadicArgs {
+			variadicArgs = append(variadicArgs, arg)
+			continue
+		}
+		var doConvertToInterface bool
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
