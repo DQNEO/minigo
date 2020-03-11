@@ -10,7 +10,7 @@
 /a.s
 /a.o
 /a.out
-/child
+/c.out
 /tmp/
 minigo.pos.s
 
@@ -18,4 +18,3 @@ minigo.pos.s
 /hello
 /hello.o
 /hello.s
-/c.out
