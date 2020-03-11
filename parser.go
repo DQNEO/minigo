@@ -1853,13 +1853,9 @@ func (p *parser) parseInterfaceDef(newName identifier) *DeclType {
 		fname := fnameToken.getIdent()
 		p.expect(";")
 
-		var paramTypes []*Gtype
-		for _, param := range params {
-			paramTypes = append(paramTypes, param.gtype)
-		}
 		method := &signature{
 			fname:      fname,
-			paramTypes: paramTypes,
+			params: params,
 			rettypes:   rettypes,
 		}
 		imethodSet(imethods, fname, method)

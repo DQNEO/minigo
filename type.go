@@ -28,7 +28,7 @@ const (
 
 type signature struct {
 	fname      identifier
-	paramTypes []*Gtype
+	params     []*ExprVariable
 	rettypes   []*Gtype
 }
 

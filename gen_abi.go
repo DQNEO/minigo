@@ -151,13 +151,12 @@ func (call *IrStaticCall) emit() {
 
 	emit("# emitCall %s", call.symbol)
 	isMethodCall := call.isMethodCall
-	var param *ExprVariable
 
 	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-
+	var param *ExprVariable
 	for argIndex, arg = range call.args {
 		var fromGtype string
 		if arg.getGtype() != nil {
@@ -173,13 +172,11 @@ func (call *IrStaticCall) emit() {
 				}
 			}
 		}
-
 		if collectVariadicArgs {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
 		var doConvertToInterface bool
-
 		// do not convert receiver
 		isReceiver := isMethodCall && argIndex == 0
 		if !isReceiver {
@@ -293,7 +290,6 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 
 	emit("# emitMethodCall")
 	isMethodCall := true
-	var paramType *Gtype
 	call.receiver.emit()
 	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 	emit("PUSH_8 # receiver")
@@ -303,7 +299,7 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-
+	var param *ExprVariable
 	for argIndex, arg = range call.args {
 		var fromGtype string
 		if arg.getGtype() != nil {
@@ -311,19 +307,43 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if argIndex < len(call.callee.paramTypes) {
-			paramType = call.callee.paramTypes[argIndex]
-			emit("# paramType=%s", paramType.String())
+		if argIndex < len(call.callee.params) {
+			param = call.callee.params[argIndex]
+			if param.isVariadic {
+				if _, ok := arg.(*ExprVaArg); !ok {
+					collectVariadicArgs = true
+				}
+			}
 		}
-		isReceiver := isMethodCall && argIndex == 0
-		if !isReceiver {
-		}
-
 		if collectVariadicArgs {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
 		var doConvertToInterface bool
+		// do not convert receiver
+		isReceiver := isMethodCall && argIndex == 0
+		if !isReceiver {
+			if param != nil {
+				emit("# has a corresponding param")
+
+				var fromGtype *Gtype
+				if arg.getGtype() != nil {
+					fromGtype = arg.getGtype()
+					emit("# fromGtype:%s", fromGtype.String())
+				}
+
+				var toGtype *Gtype
+				if param.getGtype() != nil {
+					toGtype = param.getGtype()
+					emit("# toGtype:%s", toGtype.String())
+				}
+
+				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
+					doConvertToInterface = true
+				}
+			}
+		}
+
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
@@ -343,6 +363,54 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 			width = 1
 		}
 		numRegs += width
+	}
+
+	// check if callee has a variadic
+	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
+	// If f is invoked with no actual arguments for p, the value passed to p is nil.
+	if !collectVariadicArgs {
+		if argIndex+1 < len(call.callee.params) {
+			_param := call.callee.params[argIndex+1]
+			if _param.isVariadic {
+				collectVariadicArgs = true
+			}
+		}
+	}
+
+	if collectVariadicArgs {
+		emit("# collectVariadicArgs = true")
+		lenArgs := len(variadicArgs)
+		if lenArgs == 0 {
+			emit("LOAD_EMPTY_SLICE")
+			emit("PUSH_SLICE")
+		} else {
+			// var a []interface{}
+			for vargIndex, varg := range variadicArgs {
+				emit("# emit variadic arg")
+				if vargIndex == 0 {
+					emit("# make an empty slice to append")
+					emit("LOAD_EMPTY_SLICE")
+					emit("PUSH_SLICE")
+				}
+				// conversion : var ifc = x
+				if varg.getGtype().getKind() == G_INTERFACE {
+					varg.emit()
+				} else {
+					emitConversionToInterface(varg)
+				}
+				emit("PUSH_INTERFACE")
+				emit("# calling append24")
+				emit("POP_TO_ARG_5 # ifc_c")
+				emit("POP_TO_ARG_4 # ifc_b")
+				emit("POP_TO_ARG_3 # ifc_a")
+				emit("POP_TO_ARG_2 # cap")
+				emit("POP_TO_ARG_1 # len")
+				emit("POP_TO_ARG_0 # ptr")
+				emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "append24"))
+				emit("PUSH_SLICE")
+			}
+		}
+		numRegs += 3
 	}
 
 	emit("# numRegs=%d", numRegs)
