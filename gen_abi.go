@@ -277,36 +277,26 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 }
 
 func (call *IrStaticCall) emit() {
-	var numRegs int
-
 	emit("# emitCall %s", call.symbol)
-	isMethodCall := call.isMethodCall
-	args := call.args
-	params := call.callee.params
 
-	emitCall(numRegs, isMethodCall, args, params)
+	emitCall(0, call.isMethodCall, call.args, call.callee.params)
 
 	emit("FUNCALL %s", call.symbol)
 	emitNewline()
 }
 
 func (call *IrInterfaceMethodCall) emitMethodCall() {
-	var numRegs int
-
 	emit("# emitMethodCall")
-	isMethodCall := true
+
 	call.receiver.emit()
 	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 	emit("PUSH_8 # receiver")
-	numRegs = 1
 
-	args := call.args
-	params := call.callee.params
-
-	emitCall(numRegs, isMethodCall, args, params)
+	emitCall(1, true, call.args, call.callee.params)
 
 	emit("POP_8 # funcref")
 	emit("call *%%rax")
+	emitNewline()
 }
 
 func (stmt *StmtReturn) emit() {
