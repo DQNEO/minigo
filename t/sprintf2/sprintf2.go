@@ -12,7 +12,7 @@ func receiveSliceInVariadic(a ...interface{}) {
 
 	b, ok = i0.([]byte)
 
-	fmt.Printf("ok=%d\n", ok)
+	fmt.Printf("ok=%v\n", ok)
 	fmt.Printf("b=%s,len=%d,cap=%d\n", b, len(b), cap(b))
 }
 
