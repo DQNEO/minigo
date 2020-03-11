@@ -153,6 +153,7 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 	var argIndex int
 	var param *ExprVariable
 	for argIndex, arg = range args {
+		isReceiver := isMethodCall && argIndex == 0
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
@@ -173,7 +174,6 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 		}
 		var doConvertToInterface bool
 		// do not convert receiver
-		isReceiver := isMethodCall && argIndex == 0
 		if !isReceiver {
 			if param != nil {
 				emit("# has a corresponding param")
