@@ -1,4 +1,4 @@
-# Minigo🐥
+# minigo🐥
 
 [![Go](https://github.com/DQNEO/minigo/workflows/Go/badge.svg)](https://github.com/DQNEO/minigo/actions) [![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
 
