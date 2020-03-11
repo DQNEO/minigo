@@ -40,11 +40,11 @@ selfhost: minigo3.s
 	diff /tmp/tmpfs/minigo2.s /tmp/tmpfs/minigo3.s && echo ok
 
 test: minigo3.s
-	./test_group 0
 	make vet selfhost
 	./test_group 1
 	./test_group 2
 	./comparison-test.sh
+	./test_group 0
 
 clean:
 	rm -f minigo*
