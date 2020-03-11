@@ -7,7 +7,7 @@ all: minigo /tmp/tmpfs
 	mkdir -p /tmp/tmpfs
 
 # 1st gen compiler
-minigo: *.go internal/*/* stdlib/*/* /tmp/tmpfs
+minigo: *.go internal/*/* stdlib/*/*
 	go build -o minigo *.go
 
 # assembly for 2gen
@@ -47,11 +47,9 @@ test: minigo3.s
 	./test_one_gen.sh 0
 
 clean:
-	rm -f minigo minigo2 minigo3
-	rm -f minigo*.s
+	rm -f minigo*
 	rm -f a.s a.out
 	rm -rf /tmp/tmpfs/*
-	rm -f internal_*.go
 
 fmt:
 	gofmt -w *.go t/*/*.go

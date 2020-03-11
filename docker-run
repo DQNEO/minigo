@@ -1,5 +1,14 @@
 #!/bin/bash
-# run `make test` on docker
+# Usage:
+#    ./docker-run   enter into container with bash
+#    ./docker-run <command> run a command in the container
+
+if [[ $# -eq 1 ]]; then
+  cmd="bash"
+else
+  cmd="$@"
+fi
+
 docker run \
     -it\
     --rm\
@@ -9,6 +18,4 @@ docker run \
     -v `pwd`:/mnt\
     --env PATH=/usr/lib/go-1.14/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\
     --tmpfs=/tmp/tmpfs:rw,size=500m,mode=1777\
-     dqneo/ubuntu-build-essential:go make test
-
-
+     dqneo/ubuntu-build-essential:go $cmd
