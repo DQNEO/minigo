@@ -289,12 +289,7 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	var numRegs int
 
 	for _, arg := range call.args {
-		if _, ok := arg.(*ExprVaArg); ok {
-			// skip VaArg for now
-			emit("mov $0, %%rax")
-		} else {
-			arg.emit()
-		}
+		arg.emit()
 
 		var width int
 		doConvertToInterface := false
