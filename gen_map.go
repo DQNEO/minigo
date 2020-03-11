@@ -42,12 +42,14 @@ func (call *IrInterfaceMethodCall) emit() {
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
 
-	receiver.emit()
-	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
-
-	emit("PUSH_8 # receiver")
-
-	call.emitMethodCall()
+	_call := &IrCall{
+		isInterfaceMethodCall: true,
+		symbol:                "",
+		icallee:                call.callee,
+		receiver:              call.receiver,
+		args:                  call.args,
+	}
+	_call.emit()
 }
 
 // emit map index expr

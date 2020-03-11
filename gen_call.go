@@ -58,13 +58,20 @@ type IrInterfaceMethodCall struct {
 	receiver   Expr
 	methodName identifier
 	args       []Expr
+	callee     *signature
 }
 
 func (methodCall *ExprMethodcall) interfaceMethodCall() Emitter {
+	iType := methodCall.getOrigType()
+	sig, ok := iType.imethods[methodCall.fname]
+	if !ok {
+		panic("signature not found in the interface")
+	}
 	call := &IrInterfaceMethodCall{
 		receiver:   methodCall.receiver,
 		methodName: methodCall.fname,
 		args:       methodCall.args,
+		callee:sig,
 	}
 	return call
 }
@@ -76,18 +83,13 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
-	args := []Expr{methodCall.receiver}
-	for _, arg := range methodCall.args {
-		args = append(args, arg)
-	}
-
 	name := methodCall.getUniqueName()
-	var staticCall Expr = &IrStaticCall{
+	var staticCall Expr = &IrCall{
 		tok:          methodCall.token(),
 		symbol:       getFuncSymbol(funcref.funcdef.pkgPath, name),
 		callee:       funcref.funcdef,
-		isMethodCall: true,
-		args:         args,
+		receiver:     methodCall.receiver,
+		args:         methodCall.args,
 		origExpr:     methodCall,
 	}
 	return staticCall
@@ -145,7 +147,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 			arg: arg,
 		}
 	default:
-		return &IrStaticCall{
+		return &IrCall{
 			tok:      funcall.token(),
 			symbol:   getFuncSymbol(decl.pkgPath, string(funcall.fname)),
 			callee:   decl,
@@ -161,26 +163,28 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	e.emit()
 }
 
-type IrStaticCall struct {
+type IrCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	tok          *Token
+	isInterfaceMethodCall bool
 	symbol       string
+	icallee      *signature
 	callee       *DeclFunc
-	isMethodCall bool
+	receiver     Expr
 	args         []Expr
 	origExpr     Expr
 }
 
-func (ircall *IrStaticCall) token() *Token {
+func (ircall *IrCall) token() *Token {
 	return ircall.tok
 }
 
-func (ircall *IrStaticCall) dump() {
+func (ircall *IrCall) dump() {
 	ircall.origExpr.dump()
 }
 
-func (ircall *IrStaticCall) getGtype() *Gtype {
+func (ircall *IrCall) getGtype() *Gtype {
 	return ircall.origExpr.getGtype()
 }
 

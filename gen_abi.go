@@ -146,59 +146,89 @@ func (fe *funcPrologueEmitter) emit() {
 	emitNewline()
 }
 
-func (ircall *IrStaticCall) emit() {
-	// nothing to do
-	emit("# emitCall %s", ircall.symbol)
-
+func (call *IrCall) emit() {
+	receiver := call.receiver
+	var params []*ExprVariable
 	var numRegs int
-	var param *ExprVariable
+
+	if call.isInterfaceMethodCall {
+		emit("# emit interface method call")
+		params = call.icallee.params
+		// interface method call
+		receiver.emit()
+		emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
+		emit("PUSH_8 # receiver")
+		numRegs = 1
+		emitCallInner(numRegs, call.args, params)
+
+		emit("POP_8 # funcref")
+		emit("call *%%rax")
+	} else {
+		emit("# emit static call:  %s", call.symbol)
+		params = call.callee.params
+
+		if receiver != nil {
+			// method call of a dynamic type
+			receiver.emit()
+			if receiver.getGtype().is24WidthType() {
+				emit("PUSH_24")
+				numRegs = 3
+			} else {
+				emit("PUSH_8")
+				numRegs = 1
+			}
+		}
+		emitCallInner(numRegs, call.args, params)
+
+		emit("FUNCALL %s", call.symbol)
+	}
+	emitNewline()
+}
+
+func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-	for argIndex, arg = range ircall.args {
+	var param *ExprVariable
+	for argIndex, arg = range args {
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if argIndex < len(ircall.callee.params) {
-			param = ircall.callee.params[argIndex]
+		if argIndex < len(params) {
+			param = params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
 					collectVariadicArgs = true
 				}
 			}
 		}
-
 		if collectVariadicArgs {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
-
 		var doConvertToInterface bool
 
-		// do not convert receiver
-		if !ircall.isMethodCall || argIndex != 0 {
-			if param != nil {
-				emit("# has a corresponding param")
+		if param != nil {
+			emit("# has a corresponding param")
 
-				var fromGtype *Gtype
-				if arg.getGtype() != nil {
-					fromGtype = arg.getGtype()
-					emit("# fromGtype:%s", fromGtype.String())
-				}
+			var fromGtype *Gtype
+			if arg.getGtype() != nil {
+				fromGtype = arg.getGtype()
+				emit("# fromGtype:%s", fromGtype.String())
+			}
 
-				var toGtype *Gtype
-				if param.getGtype() != nil {
-					toGtype = param.getGtype()
-					emit("# toGtype:%s", toGtype.String())
-				}
+			var toGtype *Gtype
+			if param.getGtype() != nil {
+				toGtype = param.getGtype()
+				emit("# toGtype:%s", toGtype.String())
+			}
 
-				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
-					doConvertToInterface = true
-				}
+			if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
+				doConvertToInterface = true
 			}
 		}
 
@@ -227,9 +257,9 @@ func (ircall *IrStaticCall) emit() {
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
-		if argIndex+1 < len(ircall.callee.params) {
-			param = ircall.callee.params[argIndex+1]
-			if param.isVariadic {
+		if argIndex+1 < len(params) {
+			_param := params[argIndex+1]
+			if _param.isVariadic {
 				collectVariadicArgs = true
 			}
 		}
@@ -271,50 +301,15 @@ func (ircall *IrStaticCall) emit() {
 		numRegs += 3
 	}
 
+	emit("# numRegs=%d", numRegs)
+
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(ircall.args[0].token(), "too many arguments")
+			errorft(args[0].token(), "too many arguments")
 		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
 	}
-
-	emit("FUNCALL %s", ircall.symbol)
-	emitNewline()
-}
-
-// @TODO: This is too simple. It should use the same logic as in IrStaticCall for passing args.
-func (call *IrInterfaceMethodCall) emitMethodCall() {
-	var numRegs int
-	for _, arg := range call.args {
-		if _, ok := arg.(*ExprVaArg); ok {
-			// skip VaArg for now
-			emit("mov $0, %%rax")
-		} else {
-			arg.emit()
-		}
-
-		var width int
-		doConvertToInterface := false
-		if doConvertToInterface || arg.getGtype().is24WidthType() {
-			emit("PUSH_24")
-			width = 3
-		} else {
-			emit("PUSH_8")
-			width = 1
-		}
-		numRegs += width
-	}
-
-	emit("# numRegs=%d", numRegs)
-	emit("POP_TO_ARG_%d # receiver", numRegs)
-	for i := numRegs - 1; i >= 0; i-- {
-		var j int = i
-		emit("POP_TO_ARG_%d", j)
-	}
-
-	emit("POP_8 # funcref")
-	emit("call *%%rax")
 }
 
 func (stmt *StmtReturn) emit() {
