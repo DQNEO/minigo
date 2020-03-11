@@ -50,7 +50,6 @@ clean:
 	rm -f minigo*.s
 	rm -f a.s a.out
 	rm -rf /tmp/tmpfs/*
-	rm -f internal_*.go
 
 fmt:
 	gofmt -w *.go t/*/*.go
