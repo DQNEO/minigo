@@ -289,10 +289,15 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	var numRegs int
 
 	for _, arg := range call.args {
-		arg.emit()
+		doConvertToInterface := false
+		if doConvertToInterface {
+			emit("# doConvertToInterface !!!")
+			emitConversionToInterface(arg)
+		} else {
+			arg.emit()
+		}
 
 		var width int
-		doConvertToInterface := false
 		if doConvertToInterface || arg.getGtype().is24WidthType() {
 			emit("PUSH_24")
 			width = 3
