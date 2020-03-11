@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	f, g := getIntInt()
 	a := 1
-	b := 2 // should be '2'
+	b := byte('2')
 	c := "3"
 	d := User{
 		id:  4,
