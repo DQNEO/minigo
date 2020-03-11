@@ -156,6 +156,7 @@ func (call *IrStaticCall) emit() {
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
+	isMethodCall := call.isMethodCall
 	for argIndex, arg = range call.args {
 		var fromGtype string
 		if arg.getGtype() != nil {
@@ -180,7 +181,7 @@ func (call *IrStaticCall) emit() {
 		var doConvertToInterface bool
 
 		// do not convert receiver
-		isReceiver := call.isMethodCall && argIndex == 0
+		isReceiver := isMethodCall && argIndex == 0
 		if !isReceiver {
 			if param != nil {
 				emit("# has a corresponding param")
@@ -290,7 +291,7 @@ func (call *IrStaticCall) emit() {
 func (call *IrInterfaceMethodCall) emitMethodCall() {
 	emit("# emitMethodCall")
 	var numRegs int
-
+	isMethodCall := true
 	call.receiver.emit()
 	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 	emit("PUSH_8 # receiver")
@@ -302,7 +303,9 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	var argIndex int
 	for argIndex, arg = range call.args {
 		var doConvertToInterface bool
-
+		isReceiver := isMethodCall && argIndex == 0
+		if !isReceiver {
+		}
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
 			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
 
