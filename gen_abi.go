@@ -180,7 +180,8 @@ func (call *IrStaticCall) emit() {
 		var doConvertToInterface bool
 
 		// do not convert receiver
-		if !call.isMethodCall || argIndex != 0 {
+		isReceiver := call.isMethodCall && argIndex == 0
+		if !isReceiver {
 			if param != nil {
 				emit("# has a corresponding param")
 
