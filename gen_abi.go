@@ -204,26 +204,24 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			continue
 		}
 		var doConvertToInterface bool
-		// do not convert receiver
-		if true {
-			if param != nil {
-				emit("# has a corresponding param")
 
-				var fromGtype *Gtype
-				if arg.getGtype() != nil {
-					fromGtype = arg.getGtype()
-					emit("# fromGtype:%s", fromGtype.String())
-				}
+		if param != nil {
+			emit("# has a corresponding param")
 
-				var toGtype *Gtype
-				if param.getGtype() != nil {
-					toGtype = param.getGtype()
-					emit("# toGtype:%s", toGtype.String())
-				}
+			var fromGtype *Gtype
+			if arg.getGtype() != nil {
+				fromGtype = arg.getGtype()
+				emit("# fromGtype:%s", fromGtype.String())
+			}
 
-				if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
-					doConvertToInterface = true
-				}
+			var toGtype *Gtype
+			if param.getGtype() != nil {
+				toGtype = param.getGtype()
+				emit("# toGtype:%s", toGtype.String())
+			}
+
+			if toGtype != nil && toGtype.getKind() == G_INTERFACE && fromGtype != nil && fromGtype.getKind() != G_INTERFACE {
+				doConvertToInterface = true
 			}
 		}
 
