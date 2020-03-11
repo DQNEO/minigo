@@ -125,13 +125,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	sourceFiles := getPackageFiles("internal/runtime")
 	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
 	makePkg(pkg, universe)
-	return &AstPackage{
-		normalizedPath: pkgPath,
-		name:           pkgName,
-		files:          pkg.files,
-		stringLiterals: pkg.stringLiterals,
-		dynamicTypes:   pkg.dynamicTypes,
-	}
+	return pkg
 }
 
 func makePkg(pkg *AstPackage, universe *Scope) *AstPackage {
