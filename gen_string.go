@@ -52,7 +52,6 @@ func (e *IrStringConcat) emit() {
 	call := &IrStaticCall{
 		tok:          e.token(),
 		symbol:       getFuncSymbol(IRuntimePath, "concat"),
-		isMethodCall: false,
 		args:         args,
 		callee: &DeclFunc{
 			params: params,
@@ -101,7 +100,6 @@ func (binop *IrExprStringComparison) emit() {
 	call := &IrStaticCall{
 		tok:          binop.token(),
 		symbol:       getFuncSymbol(IRuntimePath, "cmpStrings"),
-		isMethodCall: false,
 		args:         args,
 		callee: &DeclFunc{
 			params: params,

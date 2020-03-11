@@ -146,14 +146,44 @@ func (fe *funcPrologueEmitter) emit() {
 	emitNewline()
 }
 
-func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariable) {
+func emitCallWrapper(symbol string, receiver Expr, args []Expr, params []*ExprVariable) {
+	if symbol == "" {
+		// interface method call
+		receiver.emit()
+		emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
+		emit("PUSH_8 # receiver")
+		numRegs := 1
+		emitCallInner(numRegs, args, params)
+
+		emit("POP_8 # funcref")
+		emit("call *%%rax")
+		emitNewline()
+	} else {
+		var numRegs int
+		if receiver != nil {
+			receiver.emit()
+			if receiver.getGtype().is24WidthType() {
+				emit("PUSH_24")
+				numRegs = 3
+			} else {
+				emit("PUSH_8")
+				numRegs = 1
+			}
+		}
+		emitCallInner(numRegs, args, params)
+
+		emit("FUNCALL %s", symbol)
+		emitNewline()
+	}
+}
+
+func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
 	var param *ExprVariable
 	for argIndex, arg = range args {
-		isReceiver := isMethodCall && argIndex == 0
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
@@ -174,7 +204,7 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 		}
 		var doConvertToInterface bool
 		// do not convert receiver
-		if !isReceiver {
+		if true {
 			if param != nil {
 				emit("# has a corresponding param")
 
@@ -277,27 +307,13 @@ func emitCall(numRegs int, isMethodCall bool, args []Expr, params []*ExprVariabl
 }
 
 func (call *IrStaticCall) emit() {
-	emit("# emitCall %s", call.symbol)
-
-	// args[0] is a receiver when it's method call
-	emitCall(0, call.isMethodCall, call.args, call.callee.params)
-
-	emit("FUNCALL %s", call.symbol)
-	emitNewline()
+	emit("# emitCallInner %s", call.symbol)
+	emitCallWrapper(call.symbol, call.receiver, call.args, call.callee.params)
 }
 
 func (call *IrInterfaceMethodCall) emitMethodCall() {
 	emit("# emitMethodCall")
-
-	call.receiver.emit()
-	emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
-	emit("PUSH_8 # receiver")
-
-	emitCall(1, true, call.args, call.callee.params)
-
-	emit("POP_8 # funcref")
-	emit("call *%%rax")
-	emitNewline()
+	emitCallWrapper("", call.receiver, call.args, call.callee.params)
 }
 
 func (stmt *StmtReturn) emit() {

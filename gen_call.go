@@ -83,19 +83,13 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
-	// set receiver to args[0]
-	args := []Expr{methodCall.receiver}
-	for _, arg := range methodCall.args {
-		args = append(args, arg)
-	}
-
 	name := methodCall.getUniqueName()
 	var staticCall Expr = &IrStaticCall{
 		tok:          methodCall.token(),
 		symbol:       getFuncSymbol(funcref.funcdef.pkgPath, name),
 		callee:       funcref.funcdef,
-		isMethodCall: true,
-		args:         args, // args[0] is receiver
+		receiver:     methodCall.receiver,
+		args:         methodCall.args,
 		origExpr:     methodCall,
 	}
 	return staticCall
@@ -175,7 +169,7 @@ type IrStaticCall struct {
 	tok          *Token
 	symbol       string
 	callee       *DeclFunc
-	isMethodCall bool
+	receiver     Expr
 	args         []Expr
 	origExpr     Expr
 }
