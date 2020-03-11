@@ -47,6 +47,10 @@ function run_unit_test {
     echo -n "./unit_test $progname $basename ... "
     rm -f $actual
     if [[ $progname == "go" ]];then
+      if [[ $basename =~ ^_ ]];then
+        # skip if basename begin with _
+        return 0
+      fi
       # official go
       go run $src $ARGS > $actual
     else
