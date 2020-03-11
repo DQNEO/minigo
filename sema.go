@@ -199,7 +199,7 @@ func walkExpr(expr Expr) Expr {
 
 		case builtinPanic:
 			assert(len(funcall.args) == 1, funcall.token(), "invalid arguments for len()")
-			var staticCall *IrStaticCall = &IrStaticCall{
+			var staticCall *IrCall = &IrCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
@@ -221,7 +221,7 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinSyscall:
-			var staticCall *IrStaticCall = &IrStaticCall{
+			var staticCall *IrCall = &IrCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
@@ -234,7 +234,7 @@ func walkExpr(expr Expr) Expr {
 			assert(len(funcall.args) >= 1, funcall.token(), "make() should take 1 argments other than type")
 			lenArg := funcall.args[0]
 			capArg := funcall.args[1]
-			var staticCall *IrStaticCall = &IrStaticCall{
+			var staticCall *IrCall = &IrCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,
@@ -248,7 +248,7 @@ func walkExpr(expr Expr) Expr {
 			slice := funcall.args[0]
 			valueToAppend := funcall.args[1]
 			emit("# append(%s, %s)", slice.getGtype().String(), valueToAppend.getGtype().String())
-			var staticCall *IrStaticCall = &IrStaticCall{
+			var staticCall *IrCall = &IrCall{
 				tok:      funcall.token(),
 				origExpr: funcall,
 				callee:   decl,

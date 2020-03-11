@@ -146,19 +146,27 @@ func (fe *funcPrologueEmitter) emit() {
 	emitNewline()
 }
 
-func emitCall(symbol string, receiver Expr, args []Expr, params []*ExprVariable) {
+func (call *IrCall) emit() {
+	receiver := call.receiver
+	var params []*ExprVariable
 	var numRegs int
-	if symbol == "" {
+
+	if call.isInterfaceMethodCall {
+		emit("# emit interface method call")
+		params = call.icallee.params
 		// interface method call
 		receiver.emit()
 		emit("LOAD_8_BY_DEREF # dereference: convert an interface value to a concrete value")
 		emit("PUSH_8 # receiver")
 		numRegs = 1
-		emitCallInner(numRegs, args, params)
+		emitCallInner(numRegs, call.args, params)
 
 		emit("POP_8 # funcref")
 		emit("call *%%rax")
 	} else {
+		emit("# emit static call:  %s", call.symbol)
+		params = call.callee.params
+
 		if receiver != nil {
 			// method call of a dynamic type
 			receiver.emit()
@@ -170,11 +178,10 @@ func emitCall(symbol string, receiver Expr, args []Expr, params []*ExprVariable)
 				numRegs = 1
 			}
 		}
-		emitCallInner(numRegs, args, params)
+		emitCallInner(numRegs, call.args, params)
 
-		emit("FUNCALL %s", symbol)
+		emit("FUNCALL %s", call.symbol)
 	}
-
 	emitNewline()
 }
 
@@ -303,11 +310,6 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
 	}
-}
-
-func (call *IrStaticCall) emit() {
-	emit("# emitCallInner %s", call.symbol)
-	emitCall(call.symbol, call.receiver, call.args, call.callee.params)
 }
 
 func (stmt *StmtReturn) emit() {

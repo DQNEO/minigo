@@ -84,7 +84,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 	}
 
 	name := methodCall.getUniqueName()
-	var staticCall Expr = &IrStaticCall{
+	var staticCall Expr = &IrCall{
 		tok:          methodCall.token(),
 		symbol:       getFuncSymbol(funcref.funcdef.pkgPath, name),
 		callee:       funcref.funcdef,
@@ -147,7 +147,7 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 			arg: arg,
 		}
 	default:
-		return &IrStaticCall{
+		return &IrCall{
 			tok:      funcall.token(),
 			symbol:   getFuncSymbol(decl.pkgPath, string(funcall.fname)),
 			callee:   decl,
@@ -163,26 +163,28 @@ func (funcall *ExprFuncallOrConversion) emit() {
 	e.emit()
 }
 
-type IrStaticCall struct {
+type IrCall struct {
 	// https://sourceware.org/binutils/docs-2.30/as/Symbol-Intro.html#Symbol-Intro
 	// A symbol is one or more characters chosen from the set of all letters (both upper and lower case), digits and the three characters ‘_.$’.
 	tok          *Token
+	isInterfaceMethodCall bool
 	symbol       string
+	icallee      *signature
 	callee       *DeclFunc
 	receiver     Expr
 	args         []Expr
 	origExpr     Expr
 }
 
-func (ircall *IrStaticCall) token() *Token {
+func (ircall *IrCall) token() *Token {
 	return ircall.tok
 }
 
-func (ircall *IrStaticCall) dump() {
+func (ircall *IrCall) dump() {
 	ircall.origExpr.dump()
 }
 
-func (ircall *IrStaticCall) getGtype() *Gtype {
+func (ircall *IrCall) getGtype() *Gtype {
 	return ircall.origExpr.getGtype()
 }
 

@@ -42,8 +42,14 @@ func (call *IrInterfaceMethodCall) emit() {
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
 
-	emit("# emit interface method call")
-	emitCall("", call.receiver, call.args, call.callee.params)
+	_call := &IrCall{
+		isInterfaceMethodCall: true,
+		symbol:                "",
+		icallee:                call.callee,
+		receiver:              call.receiver,
+		args:                  call.args,
+	}
+	_call.emit()
 }
 
 // emit map index expr
