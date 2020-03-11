@@ -3,10 +3,11 @@ package main
 import "strconv"
 import "fmt"
 
+var e error
+
 func f1() {
 	var a string = "10485760"
 	var i int
-	var e error
 	i, e = strconv.Atoi(a)
 	fmt.Printf("%d\n", i-10485760) // 0
 
