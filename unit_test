@@ -40,24 +40,18 @@ actual=$out_dir/actual.txt
 # for os.Args
 ARGS=t/data/sample.txt
 
-function compile {
-    ./${progname} $src > $as_file
-}
+function run_unit_test {
+    echo -n "./unit_test.sh $progname $basename ... "
 
-function as_run {
+    ./${progname} $src > $as_file
     rm -f $actual
     as -o $obj_file $as_file
     # gave up direct invocation of "ld"
     # https://stackoverflow.com/questions/33970159/bash-a-out-no-such-file-or-directory-on-running-executable-produced-by-ld
     ld -o $bin_file $obj_file
     $bin_file $ARGS > $actual
-    diff -u $expected $actual
-}
 
-function run_unit_test {
-    echo -n "./unit_test.sh $progname $basename ... "
-    compile
-    as_run
+    diff -u $expected $actual
     if [[ $? -ne 0 ]];then
         echo failed
         return 1
