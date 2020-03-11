@@ -43,8 +43,8 @@ ARGS=t/data/sample.txt
 
 function run_unit_test {
     echo -n "./unit_test $progname $basename ... "
-
     rm -f $actual
+
     ./${progname} $src > $as_file
     as -o $obj_file $as_file
     ld -o $bin_file $obj_file
