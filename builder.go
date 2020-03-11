@@ -107,9 +107,7 @@ func compileUnsafe(universe *Scope) *AstPackage {
 	symbolTable.allScopes[pkgPath] = pkgScope
 	sourceFiles := getPackageFiles(convertStdPath(pkgPath))
 	pkg := ParseFiles(pkgName, pkgPath, pkgScope, sourceFiles)
-	attachMethodsToTypes(pkg.methods, pkgScope)
-	inferTypes(pkg.uninferredGlobals, pkg.uninferredLocals)
-	calcStructSize(pkg.dynamicTypes)
+	makePkg(pkg, universe)
 	return pkg
 }
 
