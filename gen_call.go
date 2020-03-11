@@ -76,6 +76,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 		errorft(methodCall.token(), "method %s is not found in type %s", methodCall.fname, methodCall.receiver.getGtype().String())
 	}
 
+	// set receiver to args[0]
 	args := []Expr{methodCall.receiver}
 	for _, arg := range methodCall.args {
 		args = append(args, arg)
@@ -87,7 +88,7 @@ func (methodCall *ExprMethodcall) dynamicTypeMethodCall() Emitter {
 		symbol:       getFuncSymbol(funcref.funcdef.pkgPath, name),
 		callee:       funcref.funcdef,
 		isMethodCall: true,
-		args:         args,
+		args:         args, // args[0] is receiver
 		origExpr:     methodCall,
 	}
 	return staticCall
