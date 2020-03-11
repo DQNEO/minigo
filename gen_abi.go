@@ -146,9 +146,9 @@ func (fe *funcPrologueEmitter) emit() {
 	emitNewline()
 }
 
-func (ircall *IrStaticCall) emit() {
+func (call *IrStaticCall) emit() {
 	// nothing to do
-	emit("# emitCall %s", ircall.symbol)
+	emit("# emitCall %s", call.symbol)
 
 	var numRegs int
 	var param *ExprVariable
@@ -156,15 +156,15 @@ func (ircall *IrStaticCall) emit() {
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
-	for argIndex, arg = range ircall.args {
+	for argIndex, arg = range call.args {
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if argIndex < len(ircall.callee.params) {
-			param = ircall.callee.params[argIndex]
+		if argIndex < len(call.callee.params) {
+			param = call.callee.params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
 					collectVariadicArgs = true
@@ -180,7 +180,7 @@ func (ircall *IrStaticCall) emit() {
 		var doConvertToInterface bool
 
 		// do not convert receiver
-		if !ircall.isMethodCall || argIndex != 0 {
+		if !call.isMethodCall || argIndex != 0 {
 			if param != nil {
 				emit("# has a corresponding param")
 
@@ -227,8 +227,8 @@ func (ircall *IrStaticCall) emit() {
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
-		if argIndex+1 < len(ircall.callee.params) {
-			param = ircall.callee.params[argIndex+1]
+		if argIndex+1 < len(call.callee.params) {
+			param = call.callee.params[argIndex+1]
 			if param.isVariadic {
 				collectVariadicArgs = true
 			}
@@ -273,19 +273,21 @@ func (ircall *IrStaticCall) emit() {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(ircall.args[0].token(), "too many arguments")
+			errorft(call.args[0].token(), "too many arguments")
 		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
 	}
 
-	emit("FUNCALL %s", ircall.symbol)
+	emit("FUNCALL %s", call.symbol)
 	emitNewline()
 }
 
 // @TODO: This is too simple. It should use the same logic as in IrStaticCall for passing args.
 func (call *IrInterfaceMethodCall) emitMethodCall() {
+	emit("# emitMethodCall")
 	var numRegs int
+
 	for _, arg := range call.args {
 		if _, ok := arg.(*ExprVaArg); ok {
 			// skip VaArg for now
