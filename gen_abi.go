@@ -157,15 +157,17 @@ func (call *IrStaticCall) emit() {
 	var arg Expr
 	var argIndex int
 	var param *ExprVariable
-	for argIndex, arg = range call.args {
+	args := call.args
+	params := call.callee.params
+	for argIndex, arg = range args {
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if argIndex < len(call.callee.params) {
-			param = call.callee.params[argIndex]
+		if argIndex < len(params) {
+			param = params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
 					collectVariadicArgs = true
@@ -226,8 +228,8 @@ func (call *IrStaticCall) emit() {
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
-		if argIndex+1 < len(call.callee.params) {
-			_param := call.callee.params[argIndex+1]
+		if argIndex+1 < len(params) {
+			_param := params[argIndex+1]
 			if _param.isVariadic {
 				collectVariadicArgs = true
 			}
@@ -274,7 +276,7 @@ func (call *IrStaticCall) emit() {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(call.args[0].token(), "too many arguments")
+			errorft(args[0].token(), "too many arguments")
 		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
@@ -300,15 +302,17 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	var arg Expr
 	var argIndex int
 	var param *ExprVariable
-	for argIndex, arg = range call.args {
+	args := call.args
+	params := call.callee.params
+	for argIndex, arg = range args {
 		var fromGtype string
 		if arg.getGtype() != nil {
 			emit("# get fromGtype")
 			fromGtype = arg.getGtype().String()
 		}
 		emit("# from %s", fromGtype)
-		if argIndex < len(call.callee.params) {
-			param = call.callee.params[argIndex]
+		if argIndex < len(params) {
+			param = params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
 					collectVariadicArgs = true
@@ -369,8 +373,8 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if !collectVariadicArgs {
-		if argIndex+1 < len(call.callee.params) {
-			_param := call.callee.params[argIndex+1]
+		if argIndex+1 < len(params) {
+			_param := params[argIndex+1]
 			if _param.isVariadic {
 				collectVariadicArgs = true
 			}
@@ -417,7 +421,7 @@ func (call *IrInterfaceMethodCall) emitMethodCall() {
 
 	for i := numRegs - 1; i >= 0; i-- {
 		if i >= len(RegsForArguments) {
-			errorft(call.args[0].token(), "too many arguments")
+			errorft(args[0].token(), "too many arguments")
 		}
 		var j int = i
 		emit("POP_TO_ARG_%d", j)
