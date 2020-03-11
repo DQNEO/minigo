@@ -17,7 +17,7 @@ mkdir -p /tmp/out
 
 ${progname} terror/panic/panic.go > /tmp/out/a.s 2>/dev/null
 status=$?
-if [[ $generation != "0" ]]; then
+if [[ $progname != "go run" ]]; then
   as -o /tmp/out/a.o /tmp/out/a.s && ld -o a.out /tmp/out/a.o && ./a.out >/dev/null
   status=$?
 fi
@@ -28,7 +28,7 @@ fi
 
 ${progname} terror/exit/exit.go > /tmp/out/a.s 2>/dev/null
 status=$?
-if [[ $generation != "0" ]]; then
+if [[ $progname != "go run" ]]; then
   as -o /tmp/out/a.o /tmp/out/a.s && ld -o a.out /tmp/out/a.o && ./a.out >/dev/null
   status=$?
 fi
