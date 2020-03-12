@@ -48,7 +48,7 @@ func (p *printer) free() {
 	p.buf = p.buf[0:0]
 }
 
-func (p *printer) doPrintf(format string, args []interface{}) {
+func (p *printer) doPrintf(format string, a []interface{}) {
 
 	var blocks []string
 	var plainstring []byte
@@ -75,7 +75,7 @@ func (p *printer) doPrintf(format string, args []interface{}) {
 			}
 			inPercent = false
 			plainstring = nil
-			arg := args[argIndex]
+			arg := a[argIndex]
 			argIndex++
 			s := p.printArg(arg, c)
 			blocks = append(blocks, s)
