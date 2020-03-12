@@ -99,7 +99,7 @@ func (p *printer) printArg(arg interface{}, c byte) string {
 		s = arg.(string)
 	case []byte: // for %s
 		s = string(arg.([]byte))
-	case byte: // for %c
+	case byte: // for %c or %d
 		switch c {
 		case 'c':
 			b := arg.(byte)
