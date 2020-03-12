@@ -113,10 +113,11 @@ func compileUnsafe(universe *Scope) *AstPackage {
 
 const IRuntimePath normalizedPackagePath = "iruntime"
 const MainPath normalizedPackagePath = "main"
+const IRuntimePkgName identifier = "iruntime"
 
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
-	pkgName := identifier("iruntime")
+	pkgName := IRuntimePkgName
 	pkgPath := IRuntimePath
 	pkgScope := newScope(nil, pkgName)
 	symbolTable.allScopes[pkgPath] = pkgScope
