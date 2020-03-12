@@ -154,7 +154,7 @@ func emitMainFunc(packages []*AstPackage) {
 	emit("pop %%rax # argc")        // get argc from stack top
 	emit("mov %%rsp, %%rbx # argv") // now %rsp value equals to argv
 
-	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "_argv")
+	symbolArgs := fmt.Sprintf("%s.%s", "iruntime", "argv")
 	emit("mov %%rbx, %s(%%rip)", symbolArgs)    // ptr
 	emit("mov %%rax, %s+8(%%rip)", symbolArgs)  // len
 	emit("mov %%rax, %s+16(%%rip)", symbolArgs) // cap
