@@ -109,8 +109,10 @@ func (program *Program) emit() {
 	buf, _ = ioutil.ReadFile("./macro.s")
 	emitBuf(buf)
 
-	// insert runtime asm
-	emitBuf(pkgIRuntime.asm)
+	// insert runtime asm codes
+	for _, txt := range pkgIRuntime.asm {
+		emitBuf([]byte(txt))
+	}
 
 	emit(".data 0")
 	program.emitSpecialStrings()
