@@ -2,8 +2,8 @@
 .text
   .global	_start
 _start:
-  pop %rdx # argc
-  mov %rsp, %rsi # argv
+  mov 0(%rsp), %rdx
+  lea 8(%rsp), %rsi # argv
   jmp runtime.rt0_go
 
 runtime.rt0_go:
