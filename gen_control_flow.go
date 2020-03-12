@@ -262,7 +262,6 @@ func (f *StmtFor) convert() Stmt {
 			mapCounter: f.rng.invisibleMapCounter,
 		}
 	case FOR_KIND_RANGE_LIST:
-		emit("# for range list")
 		assertNotNil(f.rng.indexvar != nil, f.rng.tok)
 		assert(f.rng.rangeexpr.getGtype().isArrayLike(), f.rng.tok, "rangeexpr should be G_ARRAY or G_SLICE, but got ", f.rng.rangeexpr.getGtype().String())
 
