@@ -1,8 +1,8 @@
 // start up routines
 .text
-  .global	_start
+  .global _start
 _start:
-  mov 0(%rsp), %rdx
+  mov 0(%rsp), %rdx # argc
   lea 8(%rsp), %rsi # argv
   jmp runtime.rt0_go
 
