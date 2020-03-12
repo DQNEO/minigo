@@ -4,9 +4,9 @@
 _start:
   pop %rax # argc
   mov %rsp, %rbx # argv
-  mov %rbx, iruntime.argv(%rip)
-  mov %rax, iruntime.argv+8(%rip)
-  mov %rax, iruntime.argv+16(%rip)
+  mov %rbx, iruntime.argv(%rip)    # ptr
+  mov %rax, iruntime.argv+8(%rip)  # len
+  mov %rax, iruntime.argv+16(%rip) # cap
   mov $0, %rax
   mov $0, %rbx
   jmp _init_packages
