@@ -126,9 +126,13 @@ func compileRuntime(universe *Scope) *AstPackage {
 	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
 	makePkg(pkg, universe)
 	pkgIRuntime = pkg
-	buf1, _ := ioutil.ReadFile("internal/runtime/start.s")
-	buf2, _ := ioutil.ReadFile("internal/runtime/runtime.s")
-	pkgIRuntime.asm = []string{string(buf1), string(buf2)}
+
+	// read asm files
+	for _, asmfile := range []string{"internal/runtime/start.s", "internal/runtime/runtime.s"} {
+		buf, _ := ioutil.ReadFile(asmfile)
+		pkgIRuntime.asm = append(pkgIRuntime.asm, string(buf))
+	}
+
 	return pkg
 }
 
