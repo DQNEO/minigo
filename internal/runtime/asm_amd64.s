@@ -2,8 +2,13 @@
 .text
   .global	_start
 _start:
-  pop %rax # argc
-  mov %rsp, %rbx # argv
+  pop %rdx # argc
+  mov %rsp, %rsi # argv
+  jmp runtime.rt0_go
+
+runtime.rt0_go:
+  mov %rdx, %rax
+  mov %rsi, %rbx
   mov %rbx, iruntime.argv(%rip)    # ptr
   mov %rax, iruntime.argv+8(%rip)  # len
   mov %rax, iruntime.argv+16(%rip) # cap
