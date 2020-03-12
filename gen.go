@@ -28,6 +28,10 @@ func writeln(b []byte) {
 	os.Stdout.Write(b)
 }
 
+func emitBuf(buf []byte) {
+	write([]byte(buf))
+}
+
 func emitNewline() {
 	writePos()
 	write([]byte("\n"))
