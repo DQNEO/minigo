@@ -12,7 +12,7 @@ func TypeOf(arg interface{}) *Type {
 	case string:
 		name = "string"
 	case byte:
-		name = "byte"
+		name = "uint8"
 	case bool:
 		name = "bool"
 	case uintptr:

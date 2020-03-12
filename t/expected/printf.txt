@@ -2,5 +2,6 @@
 22
 string
 int
+uint8
 bool
 uintptr
