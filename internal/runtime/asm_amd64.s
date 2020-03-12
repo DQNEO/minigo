@@ -9,7 +9,7 @@ _start:
 runtime.rt0_go:
   mov %rdx, %rax
   mov %rsi, %rbx
-  mov %rbx, iruntime.argv(%rip)    # ptr
+  mov %rbx, iruntime.argv+0(%rip)  # ptr
   mov %rax, iruntime.argv+8(%rip)  # len
   mov %rax, iruntime.argv+16(%rip) # cap
   mov $0, %rax
