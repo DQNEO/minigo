@@ -2,6 +2,7 @@ package fmt
 
 import (
 	"os"
+	"reflect"
 	"strconv"
 	"io"
 )
@@ -93,6 +94,14 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 }
 
 func (p *printer) printArg(arg interface{}, verb byte) string {
+
+	switch verb {
+	case 'T':
+		return reflect.TypeOf(arg).String()
+	case 'p':
+		return "[==ADDRESS==]"
+	}
+
 	var s string
 	switch arg.(type) {
 	case string: // for %s

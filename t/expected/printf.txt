@@ -1,2 +1,6 @@
 11
 22
+string
+int
+bool
+uintptr
