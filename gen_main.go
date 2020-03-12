@@ -109,7 +109,7 @@ func (program *Program) emit() {
 	emitBuf(buf)
 
 	// insert static asm file
-	buf, _ = ioutil.ReadFile("./runtime.s")
+	buf, _ = ioutil.ReadFile("internal/runtime/runtime.s")
 	emitBuf(buf)
 
 	emit(".data 0")
