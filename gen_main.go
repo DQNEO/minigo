@@ -3,6 +3,7 @@ package main
 import (
 	"./stdlib/fmt"
 	"./stdlib/strings"
+	"./stdlib/io/ioutil"
 	"./util"
 )
 
@@ -103,11 +104,13 @@ func (program *Program) emitMethodTable() {
 // generate code
 func (program *Program) emit() {
 
-	emitMacroDefinitions()
+	var buf []byte
+	buf, _ = ioutil.ReadFile("./macro.s")
+	emitBuf(buf)
 
-	// emit static function definition
-	emitWithoutIndent(".text")
-	emitStaticFunctions()
+	// insert static asm file
+	buf, _ = ioutil.ReadFile("internal/runtime/runtime.s")
+	emitBuf(buf)
 
 	emit(".data 0")
 	program.emitSpecialStrings()

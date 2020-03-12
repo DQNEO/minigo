@@ -86,8 +86,7 @@ func getPackageFiles(pkgDir string) []string {
 	}
 	var sourceFiles []string
 	for _, name := range names {
-		if name == "ioutil" {
-			// @TODO we must skip directory
+		if !strings.HasSuffix(name, ".go") {
 			continue
 		}
 		// minigo ignores ignore.go
