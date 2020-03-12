@@ -105,12 +105,13 @@ func (program *Program) emitMethodTable() {
 func (program *Program) emit() {
 
 	var buf []byte
+
+	// insert macro
 	buf, _ = ioutil.ReadFile("./macro.s")
 	emitBuf(buf)
 
-	// insert static asm file
-	buf, _ = ioutil.ReadFile("internal/runtime/runtime.s")
-	emitBuf(buf)
+	// insert runtime asm
+	emitBuf(pkgIRuntime.asm)
 
 	emit(".data 0")
 	program.emitSpecialStrings()

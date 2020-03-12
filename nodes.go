@@ -18,6 +18,7 @@ type AstPackage struct {
 	funcs             []*DeclFunc
 	methods           mapToIdentToMethods
 	hasInit           bool
+	asm               []byte
 }
 
 type AstFile struct {

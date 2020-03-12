@@ -5,6 +5,7 @@ import (
 	"./stdlib/fmt"
 	"./stdlib/path"
 	"./stdlib/strings"
+	"./stdlib/io/ioutil"
 	"os"
 )
 
@@ -113,6 +114,7 @@ func compileUnsafe(universe *Scope) *AstPackage {
 const IRuntimePath normalizedPackagePath = "iruntime"
 const MainPath normalizedPackagePath = "main"
 const IRuntimePkgName identifier = "iruntime"
+var pkgIRuntime *AstPackage
 
 // inject runtime things into the universe scope
 func compileRuntime(universe *Scope) *AstPackage {
@@ -123,6 +125,9 @@ func compileRuntime(universe *Scope) *AstPackage {
 	sourceFiles := getPackageFiles("internal/runtime")
 	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
 	makePkg(pkg, universe)
+	pkgIRuntime = pkg
+	buf, _ := ioutil.ReadFile("internal/runtime/runtime.s")
+	pkgIRuntime.asm = buf
 	return pkg
 }
 
