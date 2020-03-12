@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./stdlib/fmt"
 	"./stdlib/strings"
 	"./stdlib/io/ioutil"
 	"./util"
@@ -151,22 +150,7 @@ func (program *Program) emit() {
 }
 
 func emitMainFunc(packages []*AstPackage) {
-	fname := "_start"
-	emit(".global	%s", fname)
-	emitWithoutIndent("%s:", fname)
-
-	emit("pop %%rax # argc")        // get argc from stack top
-	emit("mov %%rsp, %%rbx # argv") // now %rsp value equals to argv
-
-	symbolArgs := fmt.Sprintf("%s.%s", string(IRuntimePkgName), "argv")
-
-	emit("mov %%rbx, %s(%%rip)", symbolArgs)    // ptr
-	emit("mov %%rax, %s+8(%%rip)", symbolArgs)  // len
-	emit("mov %%rax, %s+16(%%rip)", symbolArgs) // cap
-
-	emit("mov $0, %%rax")
-	emit("mov $0, %%rbx")
-
+	emitWithoutIndent("_init_packages:")
 	// init imported packages
 	for _, pkg := range packages {
 		if pkg.hasInit {
@@ -174,12 +158,6 @@ func emitMainFunc(packages []*AstPackage) {
 			emit("FUNCALL %s", getFuncSymbol(pkg.normalizedPath, "init"))
 		}
 	}
-
+	emit("jmp iruntime.main")
 	emitNewline()
-	emit("FUNCALL %s", getFuncSymbol("main", "main"))
-	//emit("FUNCALL iruntime.reportMemoryUsage")
-
-	// exit(0)
-	emit("mov $0,  %%rdi")
-	emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "exit"))
 }
