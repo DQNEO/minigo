@@ -456,6 +456,10 @@ func walkStmt(stmt Stmt) Stmt {
 		s := stmt.(*StmtDefer)
 		s.expr = walkExpr(s.expr)
 		return s
+	case *StmtGo:
+		s := stmt.(*StmtGo)
+		s.expr = walkExpr(s.expr)
+		return s
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)
 		s.cond = walkExpr(s.cond)

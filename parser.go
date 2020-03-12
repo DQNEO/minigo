@@ -1503,6 +1503,8 @@ func (p *parser) parseStmt() Stmt {
 		}
 	} else if tok.isKeyword("defer") {
 		return p.parseDeferStmt()
+	} else if tok.isKeyword("go") {
+		return p.parseGoStmt()
 	}
 
 	expr1 := p.parseExpr()
@@ -2081,6 +2083,20 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		imports:           imports,
 	}
 }
+
+func (p *parser) parseGoStmt() Stmt {
+	p.traceIn(__func__)
+	defer p.traceOut(__func__)
+	ptok := p.expectKeyword("go")
+
+	callExpr := p.parsePrim()
+	stmtGo := &StmtGo{
+		tok:  ptok,
+		expr: callExpr,
+	}
+	return stmtGo
+}
+
 
 func ParseFiles(packageName identifier, pkgPath normalizedPackagePath, pkgScope *Scope, files []string) *AstPackage {
 	var astFiles []*AstFile

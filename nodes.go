@@ -386,6 +386,24 @@ type StmtExpr struct {
 	expr Expr
 }
 
+type StmtGo struct {
+	tok   *Token
+	expr  Expr
+}
+
+func (stmt *StmtGo) token() *Token {
+	return stmt.tok
+}
+
+func (stmt *StmtGo) emit() {
+	// @TODO should be called in a different timeing
+	//stmt.expr.emit()
+}
+
+func (stmt *StmtGo) dump() {
+	stmt.expr.dump()
+}
+
 type StmtDefer struct {
 	tok   *Token
 	expr  Expr
