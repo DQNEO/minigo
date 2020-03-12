@@ -92,7 +92,7 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 	p.buf = r
 }
 
-func (p *printer) printArg(arg interface{}, c byte) string {
+func (p *printer) printArg(arg interface{}, verb byte) string {
 	var s string
 	switch arg.(type) {
 	case string: // for %s
@@ -100,7 +100,7 @@ func (p *printer) printArg(arg interface{}, c byte) string {
 	case []byte: // for %s
 		s = string(arg.([]byte))
 	case byte: // for %c or %d
-		switch c {
+		switch verb {
 		case 'c':
 			b := arg.(byte)
 			s = string([]byte{b})
