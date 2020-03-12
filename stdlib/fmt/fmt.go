@@ -73,43 +73,11 @@ func (p *printer) doPrintf(format string, args []interface{}) {
 				plainstring = append(plainstring, c)
 				continue
 			}
-			var flag byte = c
 			inPercent = false
 			plainstring = nil
-			var s string
 			arg := args[argIndex]
 			argIndex++
-			switch arg.(type) {
-			case string: // for %s
-				s = arg.(string)
-			case []byte: // for %s
-				s = string(arg.([]byte))
-			case byte: // for %c
-				switch flag {
-				case 'c':
-					b := arg.(byte)
-					s = string([]byte{b})
-				case 'd':
-					b := arg.(byte)
-					i := int(b)
-					s = strconv.Itoa(i)
-				default:
-					panic("unknown format flag")
-				}
-			case int: // for %d
-				s = strconv.Itoa(arg.(int))
-			case uint16: // for %d
-				s = strconv.Itoa(int(arg.(uint16)))
-			case bool: // for %v
-				if arg.(bool) {
-					s = "true"
-				} else {
-					s = "false"
-				}
-			default:
-				//panic(fmt.Sprintf("%T\n", arg))
-				panic("Unkown type to format:")
-			}
+			s := p.printArg(arg, c)
 			blocks = append(blocks, s)
 		}
 	}
@@ -122,4 +90,40 @@ func (p *printer) doPrintf(format string, args []interface{}) {
 		}
 	}
 	p.buf = r
+}
+
+func (p *printer) printArg(arg interface{}, c byte) string {
+	var s string
+	switch arg.(type) {
+	case string: // for %s
+		s = arg.(string)
+	case []byte: // for %s
+		s = string(arg.([]byte))
+	case byte: // for %c
+		switch c {
+		case 'c':
+			b := arg.(byte)
+			s = string([]byte{b})
+		case 'd':
+			b := arg.(byte)
+			i := int(b)
+			s = strconv.Itoa(i)
+		default:
+			panic("unknown format flag")
+		}
+	case int: // for %d
+		s = strconv.Itoa(arg.(int))
+	case uint16: // for %d
+		s = strconv.Itoa(int(arg.(uint16)))
+	case bool: // for %v
+		if arg.(bool) {
+			s = "true"
+		} else {
+			s = "false"
+		}
+	default:
+		//panic(fmt.Sprintf("%T\n", arg))
+		panic("Unkown type to format:")
+	}
+	return s
 }
