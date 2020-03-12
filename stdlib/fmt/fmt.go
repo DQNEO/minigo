@@ -17,20 +17,38 @@ func Println(s string) {
 }
 
 func Fprintf(w io.Writer, format string, a ...interface{}) {
-	buf := doPrintf(format, a)
-	w.Write(buf)
+	p := newPrinter()
+	p.doPrintf(format, a)
+	w.Write(p.buf)
+	p.free()
 }
 
 func Sprintf(format string, a ...interface{}) string {
-	buf := doPrintf(format, a)
-	return string(buf)
+	p := newPrinter()
+	p.doPrintf(format, a)
+	s := string(p.buf)
+	p.free()
+	return s
 }
 
 func Printf(format string, a ...interface{}) {
 	Fprintf(os.Stdout, format, a...)
 }
 
-func doPrintf(format string, args []interface{}) []byte {
+type printer struct {
+	buf []byte
+}
+
+func newPrinter() *printer {
+	p := &printer{}
+	return p
+}
+
+func (p *printer) free() {
+	p.buf = p.buf[0:0]
+}
+
+func (p *printer) doPrintf(format string, args []interface{}) {
 
 	var blocks []string
 	var plainstring []byte
@@ -103,5 +121,5 @@ func doPrintf(format string, args []interface{}) []byte {
 			r = append(r, c)
 		}
 	}
-	return r
+	p.buf = r
 }
