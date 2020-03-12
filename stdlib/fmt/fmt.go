@@ -17,15 +17,21 @@ func Println(s string) {
 }
 
 func Fprintf(w io.Writer, format string, a ...interface{}) {
-	s := Sprintf(format, a...)
-	w.Write([]byte(s))
+	buf := doPrintf(format, a)
+	w.Write(buf)
+}
+
+func Sprintf(format string, a ...interface{}) string {
+	buf := doPrintf(format, a)
+	return string(buf)
 }
 
 func Printf(format string, a ...interface{}) {
 	Fprintf(os.Stdout, format, a...)
 }
 
-func Sprintf(format string, args ...interface{}) string {
+func doPrintf(format string, args []interface{}) []byte {
+
 	var blocks []string
 	var plainstring []byte
 	var numPercent int
@@ -97,6 +103,5 @@ func Sprintf(format string, args ...interface{}) string {
 			r = append(r, c)
 		}
 	}
-
-	return string(r)
+	return r
 }
