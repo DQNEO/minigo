@@ -2,12 +2,14 @@
 package main
 
 import (
-	"./stdlib/fmt"
-	"./stdlib/path"
-	"./stdlib/strings"
-	"./stdlib/io/ioutil"
+	"github.com/DQNEO/minigo/stdlib/fmt"
+	"github.com/DQNEO/minigo/stdlib/path"
+	"github.com/DQNEO/minigo/stdlib/strings"
+	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 	"os"
 )
+
+var GOPATH string = "/root/go"
 
 // "fmt" => "/stdlib/fmt"
 // "./stdlib/fmt" => "/stdlib/fmt"
@@ -20,6 +22,13 @@ func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
 		// parser relative pth
 		// "./mylib" => "/mylib"
 		return normalizedPackagePath("./" + currentPath + pth[1:])
+	} else if strings.HasPrefix(pth, "github.com/DQNEO/minigo/stdlib/") {
+		// "github.com/DQNEO/minigo/stdlib/fmt" => "/stdlib/fmt"
+		renamed := "/stdlib" + pth[len("github.com/DQNEO/minigo/stdlib/") -1:]
+		return normalizedPackagePath(renamed)
+	} else if strings.HasPrefix(pth, "github.com/") {
+		renamed := GOPATH + "/src/" + pth
+		return normalizedPackagePath(renamed)
 	} else {
 		// "fmt" => "/stdlib/fmt"
 		return normalizedPackagePath("/stdlib/" + pth)

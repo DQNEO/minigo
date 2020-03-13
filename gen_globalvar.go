@@ -1,6 +1,6 @@
 package main
 
-import "./stdlib/fmt"
+import "github.com/DQNEO/minigo/stdlib/fmt"
 
 func (vr *ExprVariable) globalSymbol() string {
 	assert(vr.isGlobal, vr.token(), " Not global var")

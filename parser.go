@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./stdlib/path"
+	"github.com/DQNEO/minigo/stdlib/path"
 	"./util"
 	"os"
 	"runtime"
