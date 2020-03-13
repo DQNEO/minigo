@@ -9,8 +9,6 @@ import (
 	"os"
 )
 
-var GOPATH string = "/root/go"
-
 // "fmt" => "/stdlib/fmt"
 // "github.com/DQNEO/minigo/stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
@@ -26,8 +24,7 @@ func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
 		renamed := "/stdlib" + pth[len("github.com/DQNEO/minigo/stdlib/") -1:]
 		return normalizedPackagePath(renamed)
 	} else if strings.HasPrefix(pth, "github.com/") {
-		renamed := GOPATH + "/src/" + pth
-		return normalizedPackagePath(renamed)
+		return normalizedPackagePath("../../../" + pth)
 	} else {
 		// "io/ioutil" => "/stdlib/io/ioutil"
 		return normalizedPackagePath("/stdlib/" + pth)
