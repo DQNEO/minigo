@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./stdlib/strings"
-	"./stdlib/io/ioutil"
+	"github.com/DQNEO/minigo/stdlib/strings"
+	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 	"./util"
 )
 

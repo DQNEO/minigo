@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./stdlib/fmt"
-	"./stdlib/strconv"
+	"github.com/DQNEO/minigo/stdlib/fmt"
+	"github.com/DQNEO/minigo/stdlib/strconv"
 	"os"
 )
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./stdlib/fmt"
-	"./stdlib/strings"
+	"github.com/DQNEO/minigo/stdlib/fmt"
+	"github.com/DQNEO/minigo/stdlib/strings"
 	"os"
 )
 

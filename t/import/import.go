@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./mylib"
+	"github.com/DQNEO/minigo/t/import/mylib"
 	"fmt"
 )
 

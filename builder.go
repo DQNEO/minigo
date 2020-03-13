@@ -2,26 +2,31 @@
 package main
 
 import (
-	"./stdlib/fmt"
-	"./stdlib/path"
-	"./stdlib/strings"
-	"./stdlib/io/ioutil"
+	"github.com/DQNEO/minigo/stdlib/fmt"
+	"github.com/DQNEO/minigo/stdlib/path"
+	"github.com/DQNEO/minigo/stdlib/strings"
+	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 	"os"
 )
 
 // "fmt" => "/stdlib/fmt"
-// "./stdlib/fmt" => "/stdlib/fmt"
+// "github.com/DQNEO/minigo/stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
+// "github.com/foo/bar" => "$GOPATH/src/github.com/foo/bar"
 func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
-	if strings.HasPrefix(pth, "./stdlib/") {
-		// "./stdlib/fmt" => "/stdlib/fmt"
-		return normalizedPackagePath(pth[1:])
-	} else if strings.HasPrefix(pth, "./") {
+	if strings.HasPrefix(pth, "./") {
 		// parser relative pth
 		// "./mylib" => "/mylib"
 		return normalizedPackagePath("./" + currentPath + pth[1:])
+	} else if strings.HasPrefix(pth, "github.com/DQNEO/minigo/stdlib/") {
+		// Special treatment for stdlib
+		// "github.com/DQNEO/minigo/stdlib/fmt" => "/stdlib/fmt"
+		renamed := "/stdlib" + pth[len("github.com/DQNEO/minigo/stdlib/") -1:]
+		return normalizedPackagePath(renamed)
+	} else if strings.HasPrefix(pth, "github.com/") {
+		return normalizedPackagePath("../../../" + pth)
 	} else {
-		// "fmt" => "/stdlib/fmt"
+		// "io/ioutil" => "/stdlib/io/ioutil"
 		return normalizedPackagePath("/stdlib/" + pth)
 	}
 }
