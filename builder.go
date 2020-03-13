@@ -15,10 +15,7 @@ var GOPATH string = "/root/go"
 // "./stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
 func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
-	if strings.HasPrefix(pth, "./stdlib/") {
-		// "./stdlib/fmt" => "/stdlib/fmt"
-		return normalizedPackagePath(pth[1:])
-	} else if strings.HasPrefix(pth, "./") {
+	if strings.HasPrefix(pth, "./") {
 		// parser relative pth
 		// "./mylib" => "/mylib"
 		return normalizedPackagePath("./" + currentPath + pth[1:])
