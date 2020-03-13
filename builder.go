@@ -3,9 +3,9 @@ package main
 
 import (
 	"github.com/DQNEO/minigo/stdlib/fmt"
+	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 	"github.com/DQNEO/minigo/stdlib/path"
 	"github.com/DQNEO/minigo/stdlib/strings"
-	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 	"os"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
+	"github.com/DQNEO/minigo/stdlib/io/ioutil"
 )
 
 type ByteStream struct {
