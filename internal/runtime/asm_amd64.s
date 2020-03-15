@@ -2,14 +2,22 @@
 .text
   .global _start
 _start:
+  mov %rsp,    %rbp # initial stack top addr
   mov 0(%rsp), %rdx # argc
   lea 8(%rsp), %rsi # argv
+  # get envp
+  mov %rbp, %rax # stack top addr
+  mov %rdx, %rbx # argc
+  imul $8,  %rbx # argc * 8
+  add %rbx, %rax # stack top addr + (argc * 8)
+  add $16,  %rax # + 16 (skip null and go to next) => envp
+  mov %rax, iruntime.envp+0(%rip) # envp
+  mov $0, %rax
+  mov $0, %rbx
   jmp iruntime.rt0_go
 
 iruntime.rt0_go:
   call iruntime.args
-  mov $0, %rax
-  mov $0, %rbx
   jmp _init_packages
 
 iruntime.args:
