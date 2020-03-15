@@ -2,8 +2,16 @@
 .text
   .global _start
 _start:
+  mov %rsp,    %rbp # initial stack top addr
   mov 0(%rsp), %rdx # argc
   lea 8(%rsp), %rsi # argv
+  # get envp
+  mov %rsp, %rax
+  mov %rdx, %rbx
+  imul $8, %rbx
+  addq %rbx, %rax
+  addq $16, %rax
+  mov %rax, iruntime.envp+0(%rip) # envp
   jmp iruntime.rt0_go
 
 iruntime.rt0_go:

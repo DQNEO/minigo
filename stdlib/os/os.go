@@ -93,3 +93,7 @@ func init() {
 	Args = runtime_args()
 }
 
+func Getenv(key string) string {
+	v, _ := runtime_getenv(key)
+	return v
+}

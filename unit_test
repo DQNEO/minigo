@@ -44,6 +44,8 @@ bin_file=$bin_dir/${basename}.bin
 actual=$tmpfs_dir/actual.txt
 # for os.Args
 ARGS=t/data/sample.txt
+# for os.Env
+export FOO=BAR
 
 function run_unit_test {
     echo -n "./unit_test $progname $basename ... "
