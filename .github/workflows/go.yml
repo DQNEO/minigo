@@ -23,8 +23,5 @@ jobs:
       with:
         path: ./src/github.com/${{ github.repository }}
 
-    - name: symlink
-      run:  mkdir /home/runner/go && ln -s /home/runner/work/minigo/minigo/src /home/runner/go/src
-
     - name: Test
-      run: make -C ./src/github.com/DQNEO/minigo test
+      run: GOPATH=/home/runner/work/minigo/minigo  make -C ./src/github.com/DQNEO/minigo test
