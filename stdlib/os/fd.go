@@ -1,6 +1,6 @@
 package os
 
-import "syscall"
+import "github.com/DQNEO/minigo/stdlib/syscall"
 
 var sfd1 PollFD = PollFD{
 	Sysfd: 1,

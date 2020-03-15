@@ -1,8 +1,8 @@
 package ioutil
 
 import (
-	"bytes"
-	"io"
+	"github.com/DQNEO/minigo/stdlib/bytes"
+	"github.com/DQNEO/minigo/stdlib/io"
 	"os"
 )
 

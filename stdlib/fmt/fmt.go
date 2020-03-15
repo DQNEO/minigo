@@ -2,9 +2,9 @@ package fmt
 
 import (
 	"os"
-	"reflect"
-	"strconv"
-	"io"
+	"github.com/DQNEO/minigo/stdlib/reflect"
+	"github.com/DQNEO/minigo/stdlib/strconv"
+	"github.com/DQNEO/minigo/stdlib/io"
 )
 
 func Print(s string) {

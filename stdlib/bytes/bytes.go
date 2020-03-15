@@ -1,7 +1,7 @@
 package bytes
 
 import (
-	"io"
+	"github.com/DQNEO/minigo/stdlib/io"
 )
 
 type Buffer struct {
