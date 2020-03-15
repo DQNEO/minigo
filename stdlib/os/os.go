@@ -1,6 +1,6 @@
 package os
 
-import "syscall"
+import "github.com/DQNEO/minigo/stdlib/syscall"
 
 const O_RDONLY = 0
 

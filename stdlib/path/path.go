@@ -1,6 +1,6 @@
 package path
 
-import "strings"
+import "github.com/DQNEO/minigo/stdlib/strings"
 
 // "foo/bar/buz" => "foo/bar"
 func Dir(path string) string {

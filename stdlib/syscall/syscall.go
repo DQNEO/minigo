@@ -1,6 +1,6 @@
 package syscall
 
-import "unsafe"
+import "github.com/DQNEO/minigo/stdlib/unsafe"
 
 func BytePtrFromString(s string) (*byte, error) {
 	bs := []byte(s)
