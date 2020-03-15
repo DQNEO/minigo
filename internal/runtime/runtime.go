@@ -10,17 +10,14 @@ var Envvars map[string]string
 // http://asm.sourceforge.net/articles/startup.html#st
 func envvarsInit() {
 	var p uintptr // **byte
-	var envlines []string
-	p = envp
-	for  {
+	var envlines []string // []{"FOO=BAR\0", "HOME=/home/...\0", ..}
+
+	for p = envp; true ; p = p + 8{
 		var bpp **byte = (**byte)(unsafe.Pointer(p))
-		var bp *byte = *bpp
-		if bp == nil {
+		if *bpp == nil {
 			break
 		}
-		var s = cstring2string(bp)
-		envlines = append(envlines, s)
-		p = p + 8
+		envlines = append(envlines, cstring2string(*bpp))
 	}
 
 	Envvars = make(map[string]string)
