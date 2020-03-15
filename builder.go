@@ -9,6 +9,16 @@ import (
 	"os"
 )
 
+func getGOPATH() string {
+	envgopath := os.Getenv("GOPATH")
+	if envgopath == "" {
+		// default GOPATH
+		return os.Getenv("HOME") + "/go"
+	}
+
+	return envgopath
+}
+
 // "fmt" => "/stdlib/fmt"
 // "github.com/DQNEO/minigo/stdlib/fmt" => "/stdlib/fmt"
 // "./mylib"      => "./mylib"
@@ -24,7 +34,8 @@ func normalizeImportPath(currentPath string, pth string) normalizedPackagePath {
 		renamed := "/stdlib" + pth[len("github.com/DQNEO/minigo/stdlib/") -1:]
 		return normalizedPackagePath(renamed)
 	} else if strings.HasPrefix(pth, "github.com/") {
-		return normalizedPackagePath("../../../" + pth)
+		gopath := getGOPATH()
+		return normalizedPackagePath(gopath + "/src/" + pth)
 	} else {
 		// "io/ioutil" => "/stdlib/io/ioutil"
 		return normalizedPackagePath("/stdlib/" + pth)
