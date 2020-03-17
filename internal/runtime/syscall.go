@@ -6,6 +6,7 @@ import "unsafe"
 const __x64_sys_write = 1
 const __x64_sys_brk  = 12
 const __x64_sys_exit = 60
+const __x64_sys_exit_group = 231
 
 func brk(addr uintptr) uintptr {
 	var ret uintptr = Syscall(__x64_sys_brk, addr, 0, 0)
@@ -18,6 +19,6 @@ func write(fd int, buf []byte) {
 }
 
 func exit(code int) {
-	Syscall(__x64_sys_exit, uintptr(code), 0 , 0)
+	Syscall(__x64_sys_exit_group, uintptr(code), 0 , 0)
 }
 
