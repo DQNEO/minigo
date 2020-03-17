@@ -112,43 +112,27 @@ func setPredeclaredIdentifiers(universe *Scope) {
 }
 
 func predeclareFuncs(universe *Scope) {
-	// Inject genuine funcs
-	universe.setFunc(identifier("panic"), &ExprFuncRef{
-		funcdef: builtinPanic,
-	})
-	universe.setFunc(identifier("len"), &ExprFuncRef{
-		funcdef: builtinLen,
-	})
-	universe.setFunc(identifier("cap"), &ExprFuncRef{
-		funcdef: builtinCap,
-	})
-	universe.setFunc(identifier("append"), &ExprFuncRef{
-		funcdef: builtinAppend,
-	})
-	universe.setFunc(identifier("make"), &ExprFuncRef{
-		funcdef: builtinMake,
-	})
+	var builtinFuncs map[identifier]*DeclFunc = map[identifier]*DeclFunc{
+		// Inject genuine builtin funcs
+		"panic": builtinPanic,
+		"len": builtinLen,
+		"cap": builtinCap,
+		"append": builtinAppend,
+		"make": builtinMake,
 
-	// Inject my fake funcs
-	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
-		funcdef: builtinSyscall,
-	})
+		// Inject my builtin funcs
+		"Syscall": builtinSyscall,
+		"dumpSlice": builtinDumpSlice,
+		"dumpInterface": builtinDumpInterface,
+		"assertInterface": builtinAssertInterface,
+		"asComment": builtinAsComment,
+	}
 
-	universe.setFunc(identifier("dumpSlice"), &ExprFuncRef{
-		funcdef: builtinDumpSlice,
-	})
-
-	universe.setFunc(identifier("dumpInterface"), &ExprFuncRef{
-		funcdef: builtinDumpInterface,
-	})
-
-	universe.setFunc(identifier("assertInterface"), &ExprFuncRef{
-		funcdef: builtinAssertInterface,
-	})
-
-	universe.setFunc(identifier("asComment"), &ExprFuncRef{
-		funcdef: builtinAsComment,
-	})
+	for name, def := range builtinFuncs {
+		universe.setFunc(name,  &ExprFuncRef{
+			funcdef: def,
+		})
+	}
 }
 
 // Zero value:
