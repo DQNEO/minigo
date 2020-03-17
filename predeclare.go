@@ -108,11 +108,11 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	predeclareNil(universe)
 	predeclareTypes(universe)
 	predeclareConsts(universe)
+	predeclareFuncs(universe)
+}
 
-	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
-		funcdef: builtinSyscall,
-	})
-
+func predeclareFuncs(universe *Scope) {
+	// Inject genuine funcs
 	universe.setFunc(identifier("panic"), &ExprFuncRef{
 		funcdef: builtinPanic,
 	})
@@ -128,6 +128,12 @@ func setPredeclaredIdentifiers(universe *Scope) {
 	universe.setFunc(identifier("make"), &ExprFuncRef{
 		funcdef: builtinMake,
 	})
+
+	// Inject my fake funcs
+	universe.setFunc(identifier("Syscall"), &ExprFuncRef{
+		funcdef: builtinSyscall,
+	})
+
 	universe.setFunc(identifier("dumpSlice"), &ExprFuncRef{
 		funcdef: builtinDumpSlice,
 	})
