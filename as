@@ -12,5 +12,6 @@ fi
 set -e
 as -o a.o $file
 ld -o a.out a.o
-./a.out || gdb --batch --eval-command=run ./a.out
+./a.out
+#|| gdb --batch --eval-command=run ./a.out
 
