@@ -12,6 +12,7 @@ func BytePtrFromString(s string) (*byte, error) {
 const __x64_sys_read = 0
 const __x64_sys_write = 1
 const __x64_sys_open = 2
+const __x64_sys_nanosleep = 35
 const __x64_sys_exit = 60
 const  _x64_getdents64 = 217
 
@@ -72,4 +73,13 @@ func ParseDirent(buf []byte, void int, names []string) (int, int,  []string) {
 func Exit(code int) {
 	Syscall(__x64_sys_exit, uintptr(code), 0 ,0)
 	return
+}
+
+type Timespec struct {
+	Sec int
+	Nsec int
+}
+
+func Nanosleep(ts *Timespec) {
+	Syscall(__x64_sys_nanosleep, uintptr(unsafe.Pointer(ts)), 0, 0)
 }

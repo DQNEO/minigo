@@ -12,6 +12,7 @@ int main() {
     struct timespec spec;
     spec.tv_sec  = 2;
     spec.tv_nsec = 0;
+    printf("size of int = %ld\n", sizeof(int));
     printf("size of time_t = %ld\n", sizeof(spec.tv_sec));
     printf("size of long = %ld\n", sizeof(spec.tv_nsec));
     write(1, "hello ", 6);
