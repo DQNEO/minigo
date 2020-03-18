@@ -396,11 +396,6 @@ func (stmt *StmtGo) token() *Token {
 	return stmt.tok
 }
 
-func (stmt *StmtGo) emit() {
-	// @TODO should be called in a different timeing
-	//stmt.expr.emit()
-}
-
 func (stmt *StmtGo) dump() {
 	stmt.expr.dump()
 }

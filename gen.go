@@ -469,8 +469,13 @@ func (s *StmtShortVarDecl) emit() {
 }
 
 func (f *ExprFuncRef) emit() {
-	emit("LOAD_NUMBER 1 # funcref") // emit 1 for now.  @FIXME
+	f.funcdef.emitLoadFuncRef()
 }
+
+func (f *DeclFunc) emitLoadFuncRef() {
+	emit("leaq %s, %%rax # funcref", f.getSymbol())
+}
+
 
 func (e ExprArrayLiteral) emit() {
 	errorft(e.token(), "DO NOT EMIT")

@@ -22,3 +22,10 @@ func exit(code int) {
 	Syscall(__x64_sys_exit_group, uintptr(code), 0 , 0)
 }
 
+const stackSizeForThread = 1024*1024
+
+func malloc_and_cloe(fn uintptr) int {
+	stack := malloc(stackSizeForThread)
+	return asm_clone(stack, fn)
+}
+
