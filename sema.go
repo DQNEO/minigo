@@ -156,6 +156,19 @@ func walkStmtList(stmtList *StmtSatementList) *StmtSatementList {
 	return stmtList
 }
 
+func proxyToIRuntimeFunc(funcall *ExprFuncallOrConversion) *IrCall {
+	def := funcall.getFuncDef()
+	symbol := getFuncSymbol(IRuntimePath, string(def.builtinname))
+	var staticCall *IrCall = &IrCall{
+		tok:      funcall.token(),
+		origExpr: funcall,
+		callee:   def,
+		symbol:   symbol,
+		args:     funcall.args,
+	}
+	return staticCall
+}
+
 func walkExpr(expr Expr) Expr {
 	var r Expr
 	switch expr.(type) {
@@ -221,14 +234,7 @@ func walkExpr(expr Expr) Expr {
 				arg: arg,
 			}
 		case builtinSyscall:
-			var staticCall *IrCall = &IrCall{
-				tok:      funcall.token(),
-				origExpr: funcall,
-				callee:   decl,
-				symbol:   getFuncSymbol(IRuntimePath, "Syscall"),
-				args:     funcall.args,
-			}
-			return staticCall
+			return proxyToIRuntimeFunc(funcall)
 		case builtinMake:
 			assert(funcall.typarg != nil, funcall.token(), "make() should take Type argment")
 			var staticCall *IrCall = &IrCall{

@@ -40,51 +40,61 @@ var eIota = &ExprConstVariable{
 }
 
 var builtinPanic = &DeclFunc{
+	builtinname:"panic",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinLen = &DeclFunc{
+	builtinname: "len",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinCap = &DeclFunc{
+	builtinname: "cap",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinAppend = &DeclFunc{
+	builtinname: "append",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinMake = &DeclFunc{
+	builtinname: "make",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinSyscall = &DeclFunc{
+	builtinname: "Syscall",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }
 
 var builtinDumpSlice = &DeclFunc{
+	builtinname: "dumpSlice",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinDumpInterface = &DeclFunc{
+	builtinname: "dumpInterface",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAssertInterface = &DeclFunc{
+	builtinname: "assertInterface",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
 
 var builtinAsComment = &DeclFunc{
+	builtinname: "asComment",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{},
 }
@@ -112,25 +122,24 @@ func setPredeclaredIdentifiers(universe *Scope) {
 }
 
 func predeclareFuncs(universe *Scope) {
-	var builtinFuncs map[identifier]*DeclFunc = map[identifier]*DeclFunc{
+	var builtinFuncs []*DeclFunc = []*DeclFunc{
 		// Inject genuine builtin funcs
-		"panic": builtinPanic,
-		"len": builtinLen,
-		"cap": builtinCap,
-		"append": builtinAppend,
-		"make": builtinMake,
-
+		builtinPanic,
+		builtinLen,
+		builtinCap,
+		builtinAppend,
+		builtinMake,
 		// Inject my builtin funcs
-		"Syscall": builtinSyscall,
-		"dumpSlice": builtinDumpSlice,
-		"dumpInterface": builtinDumpInterface,
-		"assertInterface": builtinAssertInterface,
-		"asComment": builtinAsComment,
+		builtinSyscall,
+		builtinDumpSlice,
+		builtinDumpInterface,
+		builtinAssertInterface,
+		builtinAsComment,
 	}
 
-	for name, def := range builtinFuncs {
-		universe.setFunc(name,  &ExprFuncRef{
-			funcdef: def,
+	for _, decl := range builtinFuncs {
+		universe.setFunc(decl.builtinname,  &ExprFuncRef{
+			funcdef: decl,
 		})
 	}
 }

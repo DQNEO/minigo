@@ -302,6 +302,7 @@ type DeclFunc struct {
 	pkg       identifier
 	receiver  *ExprVariable
 	fname     identifier
+	builtinname identifier
 	rettypes  []*Gtype
 	params    []*ExprVariable
 	localvars []*ExprVariable
