@@ -122,10 +122,10 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")
 	assert(funcall.getFuncDef() != nil, funcall.token(), "funcdef is nil")
-	decl := funcall.getFuncDef()
+	declFunc := funcall.getFuncDef()
 
 	// check if it's a builtin function
-	switch decl {
+	switch declFunc {
 	case builtinDumpSlice:
 		arg := funcall.args[0]
 		return &builtinDumpSliceEmitter{
@@ -149,8 +149,8 @@ func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 	default:
 		return &IrCall{
 			tok:      funcall.token(),
-			symbol:   getFuncSymbol(decl.pkgPath, string(funcall.fname)),
-			callee:   decl,
+			symbol:   declFunc.getSymbol(),
+			callee:   declFunc,
 			args:     funcall.args,
 			origExpr: funcall,
 		}
