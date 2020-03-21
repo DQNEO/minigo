@@ -26,6 +26,6 @@ const stackSizeForThread = 1024*1024
 
 func malloc_and_cloe(fn uintptr) int {
 	stack := malloc(stackSizeForThread)
-	return asm_clone(stack, fn)
+	return asm_clone(331520, stack, fn)
 }
 

@@ -33,12 +33,10 @@ iruntime.Syscall:
   ret
 
 iruntime.asm_clone:
-  movq %rdi, %rax # stk
-  movq %rax, %rcx # stk
-  movq %rsi, %rbx # fn
-  movq %rbx, %r12 # fn
-  movq $331520, %rdi # arg1 (flag)
-  movq %rcx, %rsi # stk for arg2
+  #movq %rdi, %rdi  # flag (arg1)
+  #movq %rsi, %rsi # stk for arg2
+
+  movq %rdx, %r12 # fn
 
   movq $0, %rdx # set arg3 ptid
   movq $0, %r10 # ctid
