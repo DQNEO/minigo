@@ -118,6 +118,18 @@ func (funcall *ExprFuncallOrConversion) getFuncDef() *DeclFunc {
 	return funcref.funcdef
 }
 
+func (stmt *StmtGo) emit() {
+	call, ok := stmt.expr.(*ExprFuncallOrConversion)
+	if !ok {
+		errorft(stmt.expr.token(), "Unexpected expr for go routine")
+	}
+	declFunc := call.getFuncDef()
+	declFunc.emitLoadFuncRef() // load funcref
+	emit("mov %%rax, %%rdi # set funcref")
+	emit("call iruntime.newosproc")
+}
+
+
 func funcall2emitter(funcall *ExprFuncallOrConversion) Emitter {
 
 	assert(funcall.rel.expr != nil && funcall.rel.gtype == nil, funcall.token(), "this is conversion")

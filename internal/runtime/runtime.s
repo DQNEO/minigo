@@ -31,3 +31,25 @@ iruntime.Syscall:
   syscall
   cmpq $-4095, %rax
   ret
+
+iruntime.clone:
+  #movq %rdi, %rdi # cloneFlag
+  #movq %rsi, %rsi # stk
+
+  movq %rdx, %r12 # mstart
+
+  movq $0, %rdx # ptid
+  movq $0, %r10 # ctid
+  movq $0, %r8  # regs
+  movq $0, %r9
+  movq $56, %rax # Syscall number (sys_clone)
+  syscall
+  cmp	$0, %rax
+  je	.child # jmp if child
+  ret # return if parent
+
+.child:
+    call *%r12
+    mov $0, %rdi
+    mov $60, %rax # exit
+    syscall

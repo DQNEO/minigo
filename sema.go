@@ -233,7 +233,7 @@ func walkExpr(expr Expr) Expr {
 				tok: arg.token(),
 				arg: arg,
 			}
-		case builtinSyscall:
+		case builtinSyscall, builtinClone:
 			return proxyToIRuntimeFunc(funcall)
 		case builtinMake:
 			assert(funcall.typarg != nil, funcall.token(), "make() should take Type argment")
@@ -465,6 +465,10 @@ func walkStmt(stmt Stmt) Stmt {
 	case *StmtGo:
 		s := stmt.(*StmtGo)
 		s.expr = walkExpr(s.expr)
+		_, ok := s.expr.(*ExprFuncallOrConversion)
+		if !ok {
+			panic("invalid expresson for go routine")
+		}
 		return s
 	case *StmtSwitch:
 		s := stmt.(*StmtSwitch)

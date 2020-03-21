@@ -22,3 +22,11 @@ func exit(code int) {
 	Syscall(__x64_sys_exit_group, uintptr(code), 0 , 0)
 }
 
+const stackSizeForThread = 1024*1024
+
+const cloneFlag int = 331520
+
+func newosproc(mstart uintptr) int {
+	stk := malloc(stackSizeForThread)
+	return clone(cloneFlag, stk, mstart)
+}

@@ -75,6 +75,12 @@ var builtinSyscall = &DeclFunc{
 	rettypes: []*Gtype{&sInt},
 }
 
+var builtinClone = &DeclFunc{
+	builtinname: "clone",
+	pkgPath:  "/builtin",
+	rettypes: []*Gtype{&sInt},
+}
+
 var builtinDumpSlice = &DeclFunc{
 	builtinname: "dumpSlice",
 	pkgPath:  "/builtin",
@@ -131,6 +137,7 @@ func predeclareFuncs(universe *Scope) {
 		builtinMake,
 		// Inject my builtin funcs
 		builtinSyscall,
+		builtinClone,
 		builtinDumpSlice,
 		builtinDumpInterface,
 		builtinAssertInterface,
