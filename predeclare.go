@@ -76,7 +76,7 @@ var builtinSyscall = &DeclFunc{
 }
 
 var builtinClone = &DeclFunc{
-	builtinname: "asm_clone",
+	builtinname: "clone",
 	pkgPath:  "/builtin",
 	rettypes: []*Gtype{&sInt},
 }

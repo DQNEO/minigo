@@ -28,6 +28,6 @@ const cloneFlag int = 331520
 
 func malloc_and_cloe(fn uintptr) int {
 	stack := malloc(stackSizeForThread)
-	return asm_clone(cloneFlag, stack, fn)
+	return clone(cloneFlag, stack, fn)
 }
 

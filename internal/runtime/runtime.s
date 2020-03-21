@@ -32,7 +32,7 @@ iruntime.Syscall:
   cmpq $-4095, %rax
   ret
 
-iruntime.asm_clone:
+iruntime.clone:
   #movq %rdi, %rdi  # flag (arg1)
   #movq %rsi, %rsi # stk for arg2
 
