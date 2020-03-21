@@ -26,8 +26,7 @@ const stackSizeForThread = 1024*1024
 
 const cloneFlag int = 331520
 
-func malloc_and_cloe(fn uintptr) int {
-	stack := malloc(stackSizeForThread)
-	return clone(cloneFlag, stack, fn)
+func newosproc(mstart uintptr) int {
+	stk := malloc(stackSizeForThread)
+	return clone(cloneFlag, stk, mstart)
 }
-

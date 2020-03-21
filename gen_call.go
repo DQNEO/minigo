@@ -125,8 +125,8 @@ func (stmt *StmtGo) emit() {
 	}
 	declFunc := call.getFuncDef()
 	declFunc.emitLoadFuncRef() // load funcref
-	emit("mov %%rax, %%rdi # set arg1")
-	emit("call iruntime.malloc_and_cloe")
+	emit("mov %%rax, %%rdi # set funcref")
+	emit("call iruntime.newosproc")
 }
 
 
