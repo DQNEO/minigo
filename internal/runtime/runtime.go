@@ -74,7 +74,15 @@ const stackSizeForThread = 1024*1024
 
 const cloneFlag int = 331520
 
-func newosproc(mstart uintptr) int {
+func newm(mstart uintptr) {
+	newm1(mstart)
+}
+
+func newm1(mstart uintptr) {
 	stk := malloc(stackSizeForThread)
+	newosproc(stk, mstart)
+}
+
+func newosproc(stk uintptr, mstart uintptr) int {
 	return clone(cloneFlag, stk, mstart)
 }
