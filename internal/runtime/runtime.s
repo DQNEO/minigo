@@ -33,12 +33,12 @@ iruntime.Syscall:
   ret
 
 iruntime.clone:
-  #movq %rdi, %rdi  # flag (arg1)
-  #movq %rsi, %rsi # stk for arg2
+  #movq %rdi, %rdi # cloneFlag
+  #movq %rsi, %rsi # stk
 
-  movq %rdx, %r12 # fn
+  movq %rdx, %r12 # mstart
 
-  movq $0, %rdx # set arg3 ptid
+  movq $0, %rdx # ptid
   movq $0, %r10 # ctid
   movq $0, %r8  # regs
   movq $0, %r9
