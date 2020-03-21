@@ -24,8 +24,10 @@ func exit(code int) {
 
 const stackSizeForThread = 1024*1024
 
+const cloneFlag int = 331520
+
 func malloc_and_cloe(fn uintptr) int {
 	stack := malloc(stackSizeForThread)
-	return asm_clone(331520, stack, fn)
+	return asm_clone(cloneFlag, stack, fn)
 }
 
