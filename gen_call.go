@@ -126,7 +126,7 @@ func (stmt *StmtGo) emit() {
 	declFunc := call.getFuncDef()
 	declFunc.emitLoadFuncRef() // load funcref
 	emit("mov %%rax, %%rdi # set funcref")
-	emit("call iruntime.newm")
+	emit("call iruntime.startm")
 }
 
 

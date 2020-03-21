@@ -74,6 +74,10 @@ const stackSizeForThread = 1024*1024
 
 const cloneFlag int = 331520
 
+func startm(mstart uintptr) {
+	newm(mstart)
+}
+
 func newm(mstart uintptr) {
 	newm1(mstart)
 }
