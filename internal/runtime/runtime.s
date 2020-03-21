@@ -32,15 +32,20 @@ iruntime.Syscall:
   cmpq $-4095, %rax
   ret
 
+// http://man7.org/linux/man-pages/man2/clone.2.html
+// The raw system call interface is:
+//       long clone(unsigned long flags, void *stack,
+//                  int *parent_tid, int *child_tid,
+//                  unsigned long tls);
 iruntime.clone:
   #movq %rdi, %rdi # cloneFlag
   #movq %rsi, %rsi # stk
 
   movq %rdx, %r12 # mstart
 
-  movq $0, %rdx # ptid
-  movq $0, %r10 # ctid
-  movq $0, %r8  # regs
+  movq $0, %rdx # parent_tid
+  movq $0, %r10 # child_tid
+  movq $0, %r8  # tls or regs
   movq $0, %r9
   movq $56, %rax # Syscall number (sys_clone)
   syscall
