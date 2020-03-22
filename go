@@ -8,9 +8,7 @@ set -u
 shift
 if [[ $subcmd == "run" ]]; then
     make --silent
-    ./minigo "$@" > /tmp/a.s
-    cp /tmp/a.s a.s
-    ./as /tmp/a.s
+    ./minigo "$@" > /tmp/tmpfs/a.s
+    cp /tmp/tmpfs/a.s a.s
+    ./as /tmp/tmpfs/a.s
 fi
-
-
