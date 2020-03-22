@@ -94,6 +94,11 @@ It will allow you to use `gdb` in the docker image.
 docker run --cap-add=SYS_PTRACE --security-opt='seccomp=unconfined' -it --rm -w /mnt -v `pwd`:/mnt --tmpfs=/tmp/tmpfs:rw,size=500m,mode=1777 dqneo/ubuntu-build-essential:go bash
 ```
 
+## The Assembly language
+We are currently using GNU assembler in AT&T syntax.
+
+https://sourceware.org/binutils/docs/as/i386_002dDependent.html#i386_002dDependent
+
 # AUTHOR
 
 [@DQNEO](https://twitter.com/DQNEO)
