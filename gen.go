@@ -319,8 +319,8 @@ func isUnderScore(e Expr) bool {
 
 // expect rhs address is in the stack top, lhs is in the second top
 func emitCopyStructFromStack(size int) {
-	emit("pop %%rbx") // to
-	emit("pop %%rax") // from
+	emit("popq %%rbx") // to
+	emit("popq %%rax") // from
 
 	var i int
 	for ; i < size; i += 8 {
@@ -391,7 +391,7 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	gtype := dynamicValue.getGtype()
 	label := symbolTable.getTypeLabel(gtype)
-	emit("lea .%s, %%rax# dynamicType %s", label, gtype.String())
+	emit("leaq .%s, %%rax# dynamicType %s", label, gtype.String())
 	emit("PUSH_8 # dynamicType")
 
 	emit("POP_INTERFACE")
@@ -494,16 +494,16 @@ func (e *ExprTypeAssertion) emit() {
 		// rax(ptr), rbx(receiverTypeId of method table), rcx(gtype as astring)
 		emit("PUSH_8 # push dynamic data")
 
-		emit("push %%rcx # push dynamic type addr")
+		emit("pushq %%rcx # push dynamic type addr")
 		emitCompareDynamicTypeFromStack(e.gtype)
 
 		// move ok value
 		if e.gtype.is24WidthType() {
-			emit("mov %%rax, %%rdx")
+			emit("movq %%rax, %%rdx")
 		} else {
-			emit("mov %%rax, %%rbx")
+			emit("movq %%rax, %%rbx")
 		}
-		emit("pop %%rax # load dynamic data")
+		emit("popq %%rax # load dynamic data")
 		emit("TEST_IT")
 		labelEnd := makeLabel()
 		emit("je %s # exit if nil", labelEnd)
