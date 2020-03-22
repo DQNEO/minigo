@@ -74,7 +74,15 @@ const stackSizeForThread = 1024*1024
 
 const cloneFlag int = 331520
 
-func startm(mstart uintptr) {
+var task uintptr
+
+func getTask() uintptr {
+	tk := task
+	return tk
+}
+
+func startm(mstart uintptr, tsk uintptr) {
+	task = tsk
 	newm(mstart)
 }
 

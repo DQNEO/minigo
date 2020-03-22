@@ -54,7 +54,13 @@ iruntime.clone:
   ret # return if parent
 
 .child:
-    call *%r12
+    call *%r12 # call iruntime.mstart
     mov $0, %rdi
     mov $60, %rax # exit
     syscall
+
+
+iruntime.mstart:
+  call iruntime.getTask
+  call *%rax
+  ret
