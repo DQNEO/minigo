@@ -75,14 +75,17 @@ const stackSizeForThread = 1024*1024
 const cloneFlag int = 331520
 
 var task uintptr
+var tasks []uintptr
 
 func getTask() uintptr {
 	tk := task
-	return tk
+	tk0 := tasks[0]
+	return tk0
 }
 
 func startm(mstart uintptr, tsk uintptr) {
 	task = tsk
+	tasks = append(tasks, task)
 	newm(mstart)
 }
 
