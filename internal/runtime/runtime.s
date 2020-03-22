@@ -15,8 +15,8 @@ iruntime.makeSlice:
   PUSH_8
   POP_TO_ARG_0
   FUNCALL iruntime.malloc
-  mov -24(%rbp), %rbx # newlen
-  mov -16(%rbp), %rcx # newcap
+  movq -24(%rbp), %rbx # newlen
+  movq -16(%rbp), %rcx # newcap
   LEAVE_AND_RET
 
 // copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
@@ -54,13 +54,13 @@ iruntime.clone:
   ret # return if parent
 
 .child:
-    call *%r12 # call iruntime.mstart
-    mov $0, %rdi
-    mov $60, %rax # exit
+    callq *%r12 # call iruntime.mstart
+    movq $0, %rdi
+    movq $60, %rax # exit
     syscall
 
 
 iruntime.mstart:
-  call iruntime.getTask
-  call *%rax
+  callq iruntime.getTask
+  callq *%rax
   ret
