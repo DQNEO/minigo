@@ -5,15 +5,12 @@ import (
 	"time"
 )
 
-var i int = 0
-
 func hello() {
-	i++
-	fmt.Printf("hello %d\n", i)
+	fmt.Printf("hello child\n")
 }
 
 func main() {
 	go hello()
+	fmt.Printf("hello parent\n")
 	time.Sleep(999)
-	hello()
 }
