@@ -294,16 +294,16 @@ func (ast *ExprBinop) emit() {
 	case "*":
 		emit("IMUL_FROM_STACK")
 	case "%":
-		emit("pop %%rcx")
-		emit("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
-		emit("mov %%rdx, %%rax")
+		emit("popq %%rcx")
+		emit("popq %%rax")
+		emit("movq $0, %%rdx # init %%rdx")
+		emit("divq %%rcx")
+		emit("movq %%rdx, %%rax")
 	case "/":
-		emit("pop %%rcx")
-		emit("pop %%rax")
-		emit("mov $0, %%rdx # init %%rdx")
-		emit("div %%rcx")
+		emit("popq %%rcx")
+		emit("popq %%rax")
+		emit("movq $0, %%rdx # init %%rdx")
+		emit("divq %%rcx")
 	default:
 		errorft(ast.token(), "Unknown binop: %s", op)
 	}
