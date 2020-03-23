@@ -549,7 +549,7 @@ func bool2string(bol bool) string {
 func (f *DeclFunc) emit() {
 	f.prologue.emit()
 	f.body.emit()
-	emit("movq $0, %%rax")
+	emit("LOAD_EMPTY_8")
 	emitFuncEpilogue(f.labelDeferHandler, f.stmtDefer)
 }
 

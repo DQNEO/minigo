@@ -57,7 +57,7 @@ func (call *IrInterfaceMethodCall) emit() {
 
 	emit("PUSH_8 # funcref")
 
-	emit("movq $0, %%rax")
+	emit("LOAD_EMPTY_8")
 	receiverType := receiver.getGtype()
 	assert(receiverType.getKind() == G_INTERFACE, nil, "should be interface")
 
@@ -113,7 +113,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	emit("jmp %s", labelEnd)
 	// nil case
 	emit("%s:", labelNil)
-	emit("movq $0, %%rax")
+	emit("LOAD_EMPTY_8")
 	emit("movq $0, %%rbx")
 	emit("movq $0, %%rcx")
 	emit("movq $0, %%rdx")
@@ -181,7 +181,7 @@ func emitMapGet(mapType *Gtype, cmpGoString bool) {
 	if isValue24Width {
 		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else {
-		emit("movq $0, %%rax # key not found")
+		emit("LOAD_EMPTY_8 # key not found")
 	}
 
 	okRegister := mapOkRegister(isValue24Width)
@@ -479,7 +479,7 @@ func (e *IrMapInitializer) emit() {
 			},
 		}
 		emit("# make map")
-		emit("movq $0, %%rax")
+		emit("LOAD_EMPTY_8")
 		emit("PUSH_8") // map len
 		emit("# alloc map area")
 		emitCallMallocDinamicSize(eLen)

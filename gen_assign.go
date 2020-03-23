@@ -204,7 +204,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			default:
 				assert(0 <= elmSize && elmSize <= 8, lhs.token(), "invalid size")
 				for i := 0; i < arrayType.length; i++ {
-					emit("movq $0, %%rax")
+					emit("LOAD_EMPTY_8")
 					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
 				}
 			}
@@ -215,7 +215,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 			assignToStruct(left, nil)
 		default:
-			emit("movq $0, %%rax")
+			emit("LOAD_EMPTY_8")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, lhs.token(), "%s", fieldtype.String())
 			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)
