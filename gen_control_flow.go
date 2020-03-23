@@ -107,7 +107,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("POP_24")
 				emit("PUSH_24")
 
-				emit("push %%rcx # push dynamic type addr")
+				emit("pushq %%rcx # push dynamic type addr")
 				emitCompareDynamicTypeFromStack(gtype)
 
 				emit("TEST_IT")
@@ -378,13 +378,13 @@ func (ast *StmtDefer) emit() {
 	emit("%s: # defer start", labelStart)
 
 	for i := 0; i < len(retRegi); i++ {
-		emit("push %%%s", retRegi[i])
+		emit("pushq %%%s", retRegi[i])
 	}
 
 	ast.expr.emit()
 
 	for i := len(retRegi) - 1; i >= 0; i-- {
-		emit("pop %%%s", retRegi[i])
+		emit("popq %%%s", retRegi[i])
 	}
 
 	emit("leave")

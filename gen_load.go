@@ -232,25 +232,25 @@ func (e *ExprSliceLiteral) emit() {
 			value.emit()
 		}
 
-		emit("pop %%r10 # ptr")
+		emit("popq %%r10 # ptr")
 
 		var baseOffset int = IntSize * 3 * i
 		if e.gtype.elementType.is24WidthType() {
-			emit("mov %%rax, %d+%d(%%r10)", baseOffset, offset0)
-			emit("mov %%rbx, %d+%d(%%r10)", baseOffset, offset8)
-			emit("mov %%rcx, %d+%d(%%r10)", baseOffset, offset16)
+			emit("movq %%rax, %d+%d(%%r10)", baseOffset, offset0)
+			emit("movq %%rbx, %d+%d(%%r10)", baseOffset, offset8)
+			emit("movq %%rcx, %d+%d(%%r10)", baseOffset, offset16)
 		} else if e.gtype.elementType.getSize() <= 8 {
 			var offset int = IntSize * i
-			emit("mov %%rax, %d(%%r10)", offset)
+			emit("movq %%rax, %d(%%r10)", offset)
 		} else {
 			TBI(e.token(), "ExprSliceLiteral emit")
 		}
-		emit("push %%r10 # ptr")
+		emit("pushq %%r10 # ptr")
 	}
 
-	emit("pop %%rax # ptr")
-	emit("mov $%d, %%rbx # len", length)
-	emit("mov $%d, %%rcx # cap", length)
+	emit("popq %%rax # ptr")
+	emit("movq $%d, %%rbx # len", length)
+	emit("movq $%d, %%rcx # cap", length)
 }
 
 func emitAddress(e Expr) {
