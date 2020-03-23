@@ -406,7 +406,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 					emitSave24(lhs, offsetByIndex)
 					continue
 				} else {
-					emit("mov $0, %%rax")
+					emit("LOAD_EMPTY_8")
 				}
 			case *ExprArrayLiteral:
 				arrayLiteral := rhs.(*ExprArrayLiteral)
@@ -432,7 +432,7 @@ func assignToArray(lhs Expr, rhs Expr) {
 
 				if i >= len(arrayLiteral.values) {
 					// zero value
-					emit("mov $0, %%rax")
+					emit("LOAD_EMPTY_8")
 				} else {
 					val := arrayLiteral.values[i]
 					val.emit()

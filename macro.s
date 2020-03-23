@@ -150,6 +150,11 @@
   popq %rax # ifc.1st
 .endm
 
+
+.macro LOAD_EMPTY_8
+  movq $0, %rax
+.endm
+
 .macro LOAD_EMPTY_24
   movq $0, %rax
   movq $0, %rbx
