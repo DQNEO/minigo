@@ -41,7 +41,7 @@ func emitConvertNilToEmptyString() {
 	emit("PUSH_8")
 	emit("# convert nil to an empty string")
 	emit("TEST_IT")
-	emit("pop %%rax")
+	emit("popq %%rax")
 	labelEnd := makeLabel()
 	emit("jne %s # jump if not nil", labelEnd)
 	emit("# if nil then")

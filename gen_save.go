@@ -179,11 +179,11 @@ func emitSave24(lhs Expr, offset int) {
 func (variable *ExprVariable) emitSave24(offset int) {
 	emit("PUSH_24")
 	emit("# *ExprVariable.emitSave24()")
-	emit("pop %%rax # 3rd")
+	emit("popq %%rax # 3rd")
 	variable.emitOffsetSavePrimitive(8, offset+16, false)
-	emit("pop %%rax # 2nd")
+	emit("popq %%rax # 2nd")
 	variable.emitOffsetSavePrimitive(8, offset+8, false)
-	emit("pop %%rax # 1st")
+	emit("popq %%rax # 1st")
 	variable.emitOffsetSavePrimitive(8, offset+0, true)
 }
 
