@@ -315,7 +315,7 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 func (stmt *StmtReturn) emit() {
 	if len(stmt.exprs) == 0 {
 		// return void
-		emit("mov $0, %%rax")
+		emit("movq $0, %%rax")
 		stmt.emitDeferAndReturn()
 		return
 	}

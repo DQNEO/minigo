@@ -29,8 +29,8 @@ func (ast *ExprStringLiteral) emit() {
 		emitEmptyString()
 	} else {
 		emit("LOAD_STRING_LITERAL .%s", ast.slabel)
-		emit("mov $%d, %%rbx", length)
-		emit("mov $%d, %%rcx", length)
+		emit("movq $%d, %%rbx", length)
+		emit("movq $%d, %%rcx", length)
 	}
 }
 
