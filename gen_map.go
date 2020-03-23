@@ -337,7 +337,7 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit("movq %%rax, %%rcx") // copy mallocedaddr
 	// append key to tail
 	emit("POP_8")              // tailaddr
-	emit("mov %%rcx, (%%rax)") // save mallocedaddr to tailaddr
+	emit("movq %%rcx, (%%rax)") // save mallocedaddr to tailaddr
 	emit("PUSH_8")             // push tailaddr
 
 	// save value
@@ -479,7 +479,7 @@ func (e *IrMapInitializer) emit() {
 			},
 		}
 		emit("# make map")
-		emit("mov $0, %%rax")
+		emit("movq $0, %%rax")
 		emit("PUSH_8") // map len
 		emit("# alloc map area")
 		emitCallMallocDinamicSize(eLen)
@@ -513,7 +513,7 @@ func (e *IrMapInitializer) emit() {
 		emit("mov %%rax, %%rcx") // copy mallocedaddr
 		// append key to tail
 		emit("POP_8")                             // map head
-		emit("mov %%rcx, %d(%%rax) #", offsetKey) // save key address
+		emit("movq %%rcx, %d(%%rax) #", offsetKey) // save key address
 		emit("PUSH_8")                            // map head
 
 		if element.value.getGtype().getSize() <= 8 {
@@ -534,14 +534,14 @@ func (e *IrMapInitializer) emit() {
 
 		}
 
-		emit("pop %%rbx") // map head
-		emit("mov %%rax, %d(%%rbx) #", offsetValue)
-		emit("push %%rbx")
+		emit("popq %%rbx") // map head
+		emit("movq %%rax, %d(%%rbx) #", offsetValue)
+		emit("pushq %%rbx")
 	}
 
 	emitCallMalloc(16)
-	emit("pop %%rbx") // address (head of the heap)
-	emit("mov %%rbx, (%%rax)")
-	emit("pop %%rcx") // map len
-	emit("mov %%rcx, 8(%%rax)")
+	emit("popq %%rbx") // address (head of the heap)
+	emit("movq %%rbx, (%%rax)")
+	emit("popq %%rcx") // map len
+	emit("movq %%rcx, 8(%%rax)")
 }
