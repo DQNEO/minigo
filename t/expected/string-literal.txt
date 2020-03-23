@@ -1,1 +1,1 @@
-lea \varname+\offset(%rip), %rax
+leaq \varname+\offset(%rip), %rax
