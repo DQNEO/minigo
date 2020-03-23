@@ -17,7 +17,8 @@ iruntime.makeSlice:
   FUNCALL iruntime.malloc
   movq -24(%rbp), %rbx # newlen
   movq -16(%rbp), %rcx # newcap
-  LEAVE_AND_RET
+  leave
+  ret
 
 // copied from https://sys.readthedocs.io/en/latest/doc/07_calling_system_calls.html
 iruntime.Syscall:

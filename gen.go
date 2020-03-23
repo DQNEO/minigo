@@ -152,7 +152,8 @@ func emitFuncEpilogue(labelDeferHandler string, stmtDefer *StmtDefer) {
 		emit("jmp %s", stmtDefer.label)
 	}
 
-	emit("LEAVE_AND_RET")
+	emit("leave")
+	emit("ret")
 }
 
 func emit_intcast(gtype *Gtype) {

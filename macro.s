@@ -384,8 +384,3 @@
 .macro TEST_IT
   test %rax, %rax
 .endm
-
-.macro LEAVE_AND_RET
-  leave
-  ret
-.endm
