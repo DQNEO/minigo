@@ -140,7 +140,7 @@ func (fe *funcPrologueEmitter) emit() {
 			emit("# offset %d variable \"%s\" %s", lvar.offset, lvar.varname, lvar.gtype.String())
 		}
 		var localarea int = -fe.localarea
-		emit("sub $%d, %%rsp # total stack size", localarea)
+		emit("subq $%d, %%rsp # total stack size", localarea)
 	}
 
 	emitNewline()
