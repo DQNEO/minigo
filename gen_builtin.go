@@ -53,7 +53,7 @@ func (e *ExprLen) emit() {
 		emit("TEST_IT # map && map (check if map is nil)")
 		emit("je %s # jump if map is nil", labelNil)
 		// not nil case
-		emit("mov 8(%%rax), %%rax # load map len")
+		emit("movq 8(%%rax), %%rax # load map len")
 		emit("jmp %s", labelEnd)
 		// nil case
 		emit("%s:", labelNil)
