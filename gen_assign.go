@@ -120,7 +120,7 @@ func emitAssignOneRightToMultiLeft(ast *StmtAssignment) {
 		okVariable := ast.lefts[1]
 		//emit("# lefts[0] type = %s", ast.lefts[0].getGtype().String())
 		okRegister := mapOkRegister(ast.lefts[0].getGtype().is24WidthType())
-		emit("mov %%%s, %%rax # emit okValue", okRegister)
+		emit("movq %%%s, %%rax # emit okValue", okRegister)
 		emitSavePrimitive(okVariable)
 	}
 }
@@ -204,7 +204,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			default:
 				assert(0 <= elmSize && elmSize <= 8, lhs.token(), "invalid size")
 				for i := 0; i < arrayType.length; i++ {
-					emit("mov $0, %%rax")
+					emit("movq $0, %%rax")
 					emitOffsetSavePrimitive(lhs, elmSize, fieldtype.offset+i*elmSize)
 				}
 			}
@@ -215,7 +215,7 @@ func assignToStruct(lhs Expr, rhs Expr) {
 			}
 			assignToStruct(left, nil)
 		default:
-			emit("mov $0, %%rax")
+			emit("movq $0, %%rax")
 			regSize := fieldtype.getSize()
 			assert(0 < regSize && regSize <= 8, lhs.token(), "%s", fieldtype.String())
 			emitOffsetSavePrimitive(lhs, regSize, fieldtype.offset)

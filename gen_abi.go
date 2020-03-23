@@ -357,13 +357,13 @@ func (stmt *StmtReturn) emit() {
 		var num64bit int = size / 8 // @TODO odd size
 		for j := 0; j < num64bit; j++ {
 			reg := retRegi[num64bit-1-j]
-			emit("push %%%s", reg)
+			emit("pushq %%%s", reg)
 			retRegiIndex++
 		}
 	}
 	for i := 0; i < retRegiIndex; i++ {
 		reg := retRegi[retRegiIndex-1-i]
-		emit("pop %%%s", reg)
+		emit("popq %%%s", reg)
 	}
 
 	stmt.emitDeferAndReturn()
