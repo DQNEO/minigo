@@ -298,13 +298,13 @@
 .endm
 
 .macro CMP_EQ_ZERO
-  cmp $0, %rax
+  cmpq $0, %rax
   sete %al
   movzb %al, %eax
 .endm
 
 .macro CMP_NE_ZERO
-  cmp $0, %rax
+  cmpq $0, %rax
   setne %al
   movzb %al, %eax
 .endm
