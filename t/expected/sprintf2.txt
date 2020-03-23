@@ -12,4 +12,4 @@ left center right
 123=123
 4567=4567
 --- f2 ---
-push %rax
+pushq %rax

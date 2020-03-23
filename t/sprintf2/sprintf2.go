@@ -59,7 +59,7 @@ func f1() {
 
 func f2() {
 	var b string
-	b = fmt.Sprintf("push %%rax\n")
+	b = fmt.Sprintf("pushq %%rax\n")
 	Write(b)
 }
 
