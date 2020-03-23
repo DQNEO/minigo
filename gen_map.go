@@ -510,7 +510,7 @@ func (e *IrMapInitializer) emit() {
 
 		// save key
 		emitSaveMapKey(element.key)
-		emit("mov %%rax, %%rcx") // copy mallocedaddr
+		emit("movq %%rax, %%rcx") // copy mallocedaddr
 		// append key to tail
 		emit("POP_8")                             // map head
 		emit("movq %%rcx, %d(%%rax) #", offsetKey) // save key address

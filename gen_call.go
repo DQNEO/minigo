@@ -125,10 +125,10 @@ func (stmt *StmtGo) emit() {
 	}
 	declFunc := call.getFuncDef()
 	declFunc.emitLoadFuncRef() // load funcref
-	emit("mov %%rax, %%rsi # set task")
+	emit("movq %%rax, %%rsi # set task")
 
 	emit("leaq iruntime.mstart+0(%%rip), %%rax # load mstart")
-	emit("mov %%rax, %%rdi")
+	emit("movq %%rax, %%rdi")
 	emit("call iruntime.startm")
 }
 
@@ -236,7 +236,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	emit("TEST_IT")
 	emit("je %s", labelEnd)
 
-	emit("mov %%rcx, %%rax")
+	emit("movq %%rcx, %%rax")
 
 	emit("CMP_EQ_ZERO")
 	emit("TEST_IT")
@@ -247,7 +247,7 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	emitWithoutIndent("%s:", slabel)
 	emit(".string \"%s\"", "assertInterface failed")
 	emit(".text")
-	emit("lea %s, %%rax", slabel)
+	emit("leaq %s, %%rax", slabel)
 	emit("PUSH_8")
 	emit("POP_TO_ARG_0")
 	emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "panic"))
