@@ -8,7 +8,7 @@ type slice struct {
 
 func makeSlice(elmSize int, len int, cap int) slice
 
-func append1(x []byte, elm byte) []byte {
+func append1(x []byte, elm byte) slice {
 	var z []byte
 	xlen := len(x)
 	zlen := xlen + 1
@@ -32,7 +32,7 @@ func append1(x []byte, elm byte) []byte {
 	return z
 }
 
-func append8(x []int, elm int) []int {
+func append8(x []int, elm int) slice {
 	var z []int
 	xlen := len(x)
 	zlen := xlen + 1
@@ -56,7 +56,7 @@ func append8(x []int, elm int) []int {
 	return z
 }
 
-func append24(x []interface{}, elm interface{}) []interface{} {
+func append24(x []interface{}, elm interface{}) slice {
 	//dumpInterface(elm)
 	var z []interface{}
 	xlen := len(x)
