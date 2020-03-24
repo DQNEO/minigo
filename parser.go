@@ -1689,7 +1689,6 @@ func (p *parser) parseFuncDef() *DeclFunc {
 
 	fnameToken, params, rettypes := p.parseFuncSignature()
 	fname := fnameToken.getIdent()
-	ptok2 := p.expect("{")
 
 	r := &DeclFunc{
 		tok:      fnameToken,
@@ -1702,7 +1701,7 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	}
 
 	ref := &ExprFuncRef{
-		tok:     ptok2,
+		tok:     fnameToken,
 		funcdef: r,
 	}
 
@@ -1732,6 +1731,13 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	// every function has a defer_handler
 	l := string(makeLabel()) + "_defer_handler"
 	r.labelDeferHandler = l
+
+	ptok2 := p.peekToken()
+	if ! ptok2.isPunct("{") {
+		errorft(ptok2, "no func body")
+	}
+
+	p.expect("{")
 	p.currentFunc = r
 	body := p.parseCompoundStmt()
 	r.body = body
