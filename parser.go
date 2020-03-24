@@ -1733,15 +1733,14 @@ func (p *parser) parseFuncDef() *DeclFunc {
 	r.labelDeferHandler = l
 
 	ptok2 := p.peekToken()
-	if ! ptok2.isPunct("{") {
-		errorft(ptok2, "no func body")
+	if ptok2.isPunct("{") {
+		// parse func body
+		p.expect("{")
+		p.currentFunc = r
+		body := p.parseCompoundStmt()
+		r.body = body
+		r.localvars = p.localvars
 	}
-
-	p.expect("{")
-	p.currentFunc = r
-	body := p.parseCompoundStmt()
-	r.body = body
-	r.localvars = p.localvars
 
 	p.localvars = nil
 	p.exitScope()

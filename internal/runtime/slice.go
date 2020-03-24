@@ -1,5 +1,7 @@
 package runtime
 
+func makeSlice(elmSize int, len int, cap int)
+
 func append1(x []byte, elm byte) []byte {
 	var z []byte
 	xlen := len(x)

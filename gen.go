@@ -548,6 +548,10 @@ func bool2string(bol bool) string {
 }
 
 func (f *DeclFunc) emit() {
+	if f.body == nil {
+		return
+	}
+
 	f.prologue.emit()
 	f.body.emit()
 	emit("LOAD_EMPTY_8")
