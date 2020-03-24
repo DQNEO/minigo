@@ -1,22 +1,22 @@
 // iruntime
 .text
-iruntime.makeSlice:
+iruntime.makeSlice: # (len int, cap int, elmSize int)
   FUNC_PROLOGUE
 
-  PUSH_ARG_2 # -8
-  PUSH_ARG_1 # -16
-  PUSH_ARG_0 # -24
-  LOAD_8_FROM_LOCAL -16 # newcap
+  PUSH_ARG_2 # -8 elmSize
+  PUSH_ARG_1 # -16 cap
+  PUSH_ARG_0 # -24 len
+  LOAD_8_FROM_LOCAL -16 # cap
   PUSH_8
-  LOAD_8_FROM_LOCAL -8 # unit
+  LOAD_8_FROM_LOCAL -8 # elmSize
   PUSH_8
   IMUL_FROM_STACK
   ADD_NUMBER 1 # 1 byte buffer
   PUSH_8
   POP_TO_ARG_0
   FUNCALL iruntime.malloc
-  movq -24(%rbp), %rbx # newlen
-  movq -16(%rbp), %rcx # newcap
+  movq -24(%rbp), %rbx # len
+  movq -16(%rbp), %rcx # cap
   leave
   ret
 
