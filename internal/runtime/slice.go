@@ -1,6 +1,12 @@
 package runtime
 
-func makeSlice(elmSize int, len int, cap int)
+type slice struct {
+	ptr uintptr
+	ln int
+	cap int
+}
+
+func makeSlice(elmSize int, len int, cap int) slice
 
 func append1(x []byte, elm byte) []byte {
 	var z []byte
@@ -16,7 +22,7 @@ func append1(x []byte, elm byte) []byte {
 		} else {
 			newcap = xlen * 2
 		}
-		z = make([]byte, zlen, newcap)
+		z = makeSlice(1, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
@@ -40,7 +46,7 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
-		z = make([]int, zlen, newcap)
+		z = makeSlice(8, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
@@ -65,7 +71,7 @@ func append24(x []interface{}, elm interface{}) []interface{} {
 		} else {
 			newcap = xlen * 2
 		}
-		z = make([]interface{}, zlen, newcap)
+		z = makeSlice(24, zlen, newcap)
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
