@@ -140,7 +140,7 @@ func compileRuntime(universe *Scope) *AstPackage {
 	symbolTable.allScopes[pkgPath] = pkgScope
 	sourceFiles := getPackageFiles("internal/runtime")
 	pkg := ParseFiles(pkgName, pkgPath, universe, sourceFiles)
-	makePkg(pkg, universe)
+	makePkg(pkg, nil) // avoid circulated reference
 	pkgIRuntime = pkg
 
 	// read asm files
