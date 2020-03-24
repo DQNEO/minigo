@@ -251,7 +251,7 @@ func walkExpr(expr Expr) Expr {
 				staticCall.symbol = getFuncSymbol(IRuntimePath, "makeSlice")
 				capArg = funcall.args[1]
 				size := funcall.typarg.elementType.getSize()
-				staticCall.args = []Expr{lenArg, capArg, &ExprNumberLiteral{val: size}}
+				staticCall.args = []Expr{&ExprNumberLiteral{val: size}, lenArg, capArg}
 				return staticCall
 			case G_MAP:
 				// Replace by an empty map literal for now.
