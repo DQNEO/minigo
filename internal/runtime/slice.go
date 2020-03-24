@@ -1,5 +1,40 @@
 package runtime
 
+type slice struct {
+	ptr uintptr
+	length int
+	cap int
+}
+
+func _append1(slc slice, elm byte) slice {
+	var slc2 slice = slice{
+	}
+	xlen := slc.length
+	zlen := xlen + 1
+
+	if slc.cap >= zlen {
+		slc2 = slice{
+			ptr: slc.ptr,
+			length: zlen,
+			cap : slc.cap,
+		}
+		return slc2
+	} else {
+		var newcap int
+		if xlen == 0 {
+			newcap = 1
+		} else {
+			newcap = xlen * 2
+		}
+	slc2 = make([]byte, zlen, newcap)
+		for i := 0; i < xlen; i++ {
+
+		}
+	}
+
+	return slc2
+}
+
 func append1(x []byte, elm byte) []byte {
 	var z []byte
 	xlen := len(x)
@@ -38,7 +73,7 @@ func append8(x []int, elm int) []int {
 		} else {
 			newcap = xlen * 2
 		}
-		z = make([]int, zlen, newcap)
+		slc = makeSlice()
 		for i := 0; i < xlen; i++ {
 			z[i] = x[i]
 		}
