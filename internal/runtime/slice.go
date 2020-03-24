@@ -8,6 +8,35 @@ type slice struct {
 
 func makeSlice(elmSize int, len int, cap int) slice
 
+func copySlice1(src []byte, dst []byte) {
+	for i := 0; i < len(src); i++ {
+		dst[i] = src[i]
+	}
+}
+
+func copySlice8(src []int, dst []int) {
+	for i := 0; i < len(src); i++ {
+		dst[i] = src[i]
+	}
+}
+
+func copySlice24(src []interface{}, dst []interface{}) {
+	for i := 0; i < len(src); i++ {
+		dst[i] = src[i]
+	}
+}
+
+func copySlice(size int, src []interface{}, dst []interface{}) {
+	switch size {
+	case 1:
+		copySlice1(src, dst)
+	case 8:
+		copySlice8(src, dst)
+	case 24:
+		copySlice24(src, dst)
+	}
+}
+
 func append1(x []byte, elm byte) slice {
 	var z []byte
 	xlen := len(x)
@@ -23,9 +52,7 @@ func append1(x []byte, elm byte) slice {
 			newcap = xlen * 2
 		}
 		z = makeSlice(1, zlen, newcap)
-		for i := 0; i < xlen; i++ {
-			z[i] = x[i]
-		}
+		copySlice(1, x,z)
 	}
 
 	z[xlen] = elm
@@ -47,9 +74,7 @@ func append8(x []int, elm int) slice {
 			newcap = xlen * 2
 		}
 		z = makeSlice(8, zlen, newcap)
-		for i := 0; i < xlen; i++ {
-			z[i] = x[i]
-		}
+		copySlice(8, x,z)
 	}
 
 	z[xlen] = elm
@@ -72,11 +97,9 @@ func append24(x []interface{}, elm interface{}) slice {
 			newcap = xlen * 2
 		}
 		z = makeSlice(24, zlen, newcap)
-		for i := 0; i < xlen; i++ {
-			z[i] = x[i]
-		}
+		copySlice(24, x,z)
 	}
 
 	z[xlen] = elm
-	return z
+	return slice(z)
 }
