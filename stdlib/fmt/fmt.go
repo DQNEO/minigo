@@ -57,7 +57,6 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 	var inPercent bool
 	var argIndex int
 
-	//var sign byte
 	for _, c := range []byte(format) {
 		if !inPercent  {
 			if  c == '%' {
