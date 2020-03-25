@@ -34,12 +34,6 @@ func Itoa(i int) string {
 	var tmp []byte
 	var isMinus bool
 
-	// open(2) returs  0xffffffff 4294967295 on error.
-	// I don't understand this yet.
-	if i > 2147483648 {
-		i = i - 2147483648*2
-	}
-
 	if i < 0 {
 		i = i * -1
 		isMinus = true
