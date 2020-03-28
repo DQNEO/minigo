@@ -48,11 +48,5 @@ echo -n "resolving *.go ...  "
 diff -u /tmp/all.1.resolved /tmp/all.2.resolved || exit 1
 echo "resolver ok"
 
-./minigo2 *.go > /tmp/all.2.s
-./minigo3  *.go > /tmp/all.3.s
-
-diff -u /tmp/all.2.s /tmp/all.3.s || exit 1
-echo "compile ok"
-
 echo "All comparison ok"
 
