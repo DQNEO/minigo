@@ -32,20 +32,15 @@ func Atoi(gs string) (int, error) {
 func Itoa(i int) string {
 	var r []byte
 	var tmp []byte
-	var isMinus bool
 
 	if i < 0 {
 		i = i * -1
-		isMinus = true
+		r = append(r, '-')
 	}
 	for i > 0 {
 		mod := i % 10
 		tmp = append(tmp, byte('0')+byte(mod))
 		i = i / 10
-	}
-
-	if isMinus {
-		r = append(r, '-')
 	}
 
 	for j := len(tmp) - 1; j >= 0; j-- {
