@@ -16,7 +16,6 @@ const (
 	G_UINT_16
 	// end of primitives
 	G_STRUCT
-	G_STRUCT_FIELD
 	G_ARRAY
 	G_SLICE
 	G_STRING
@@ -216,8 +215,6 @@ func (gtype *Gtype) String() string {
 		}
 		r = r + "}"
 		return r
-	case G_STRUCT_FIELD:
-		return "structfield"
 	case G_POINTER:
 		origType := gtype.origType
 		s := Sprintf("*%s", origType.String())
