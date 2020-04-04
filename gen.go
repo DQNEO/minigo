@@ -162,22 +162,6 @@ func emit_intcast(gtype *Gtype) {
 	}
 }
 
-func emit_comp_primitive(inst string, binop *ExprBinop) {
-	emit("# emit_comp_primitive")
-	assert(len(inst) > 0, binop.token(), "inst shoud not be empty")
-	binop.left.emit()
-	if binop.left.getGtype().getKind() == G_BYTE {
-		emit_intcast(binop.left.getGtype())
-	}
-	emit("PUSH_8 # left") // left
-	binop.right.emit()
-	if binop.right.getGtype().getKind() == G_BYTE {
-		emit_intcast(binop.right.getGtype())
-	}
-	emit("PUSH_8 # right") // right
-	emit("CMP_FROM_STACK %s", inst)
-}
-
 var labelSeq int = 0
 
 func makeLabel() string {
@@ -237,7 +221,17 @@ func (binop *ExprBinop) emitComp() {
 		assertNotReached(binop.token())
 	}
 
-	emit_comp_primitive(instruction, binop)
+	binop.left.emit()
+	if binop.left.getGtype().getKind() == G_BYTE {
+		emit_intcast(binop.left.getGtype())
+	}
+	emit("PUSH_8 # left") // left
+	binop.right.emit()
+	if binop.right.getGtype().getKind() == G_BYTE {
+		emit_intcast(binop.right.getGtype())
+	}
+	emit("PUSH_8 # right") // right
+	emit("CMP_FROM_STACK %s", instruction)
 }
 
 func (ast *ExprBinop) emit() {
