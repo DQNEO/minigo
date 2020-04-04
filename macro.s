@@ -382,5 +382,5 @@
 .endm
 
 .macro TEST_IT
-  test %rax, %rax
+  cmpq $0, %rax
 .endm
