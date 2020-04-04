@@ -251,11 +251,11 @@ func (ast *ExprBinop) emit() {
 	case "&&":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		eFalse.emit()
 		emit("je %s", labelEnd)
 		ast.right.emit()
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		eFalse.emit()
 		emit("je %s", labelEnd)
 		eTrue.emit()
@@ -264,11 +264,11 @@ func (ast *ExprBinop) emit() {
 	case "||":
 		labelEnd := makeLabel()
 		ast.left.emit()
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		eTrue.emit()
 		emit("jne %s", labelEnd)
 		ast.right.emit()
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		eTrue.emit()
 		emit("jne %s", labelEnd)
 		eFalse.emit()
@@ -499,7 +499,7 @@ func (e *ExprTypeAssertion) emit() {
 			emit("movq %%rax, %%rbx")
 		}
 		emit("popq %%rax # load dynamic data")
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		labelEnd := makeLabel()
 		emit("je %s # exit if nil", labelEnd)
 		if e.gtype.is24WidthType() {

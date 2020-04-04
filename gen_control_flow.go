@@ -6,7 +6,7 @@ func (stmt *StmtIf) emit() {
 		stmt.simplestmt.emit()
 	}
 	stmt.cond.emit()
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	labelEndif := makeLabel()
 	if stmt.els != nil {
 		labelElse := makeLabel()
@@ -39,7 +39,7 @@ func emitConvertNilToEmptyString() {
 	emit("POP_8")
 	emit("PUSH_8")
 	emit("# convert nil to an empty string")
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("popq %%rax")
 	labelEnd := makeLabel()
 	emit("jne %s # jump if not nil", labelEnd)
@@ -96,7 +96,7 @@ func (stmt *StmtSwitch) emit() {
 		if stmt.cond == nil {
 			for _, e := range caseClause.exprs {
 				e.emit()
-				emit("TEST_IT")
+				emit("cmpq $0, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		} else if stmt.isTypeSwitch() {
@@ -109,7 +109,7 @@ func (stmt *StmtSwitch) emit() {
 				emit("pushq %%rcx # push dynamic type addr")
 				emitCompareDynamicTypeFromStack(gtype)
 
-				emit("TEST_IT")
+				emit("cmpq $0, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		} else {
@@ -135,7 +135,7 @@ func (stmt *StmtSwitch) emit() {
 					emit("CMP_FROM_STACK sete")
 				}
 
-				emit("TEST_IT")
+				emit("cmpq $0, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
 		}
@@ -180,7 +180,7 @@ func (f *IrStmtForRangeList) emit() {
 	emit("%s: # begin loop ", f.labels.labelBegin)
 
 	f.cond.emit()
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("je %s  # if false, go to loop end", f.labels.labelEndLoop)
 
 	if f.assignVar != nil {
@@ -191,7 +191,7 @@ func (f *IrStmtForRangeList) emit() {
 	emit("%s: # end block", f.labels.labelEndBlock)
 
 	f.cond2.emit()
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("jne %s  # if this iteration is final, go to loop end", f.labels.labelEndLoop)
 
 	f.incr.emit()
@@ -208,7 +208,7 @@ func (f *IrStmtClikeFor) emit() {
 	emit("%s: # begin loop ", f.labels.labelBegin)
 	if f.cls.cond != nil {
 		f.cls.cond.emit()
-		emit("TEST_IT")
+		emit("cmpq $0, %%rax")
 		emit("je %s  # jump if false", f.labels.labelEndLoop)
 	}
 	f.block.emit()

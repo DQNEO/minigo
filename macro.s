@@ -376,7 +376,3 @@
   movq $0, %rbx
   callq \fname
 .endm
-
-.macro TEST_IT
-  cmpq $0, %rax
-.endm

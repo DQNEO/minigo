@@ -233,13 +233,13 @@ func (em *builtinAssertInterfaceEmitter) emit() {
 	// (ptr != nil && rcx == nil) => Error
 
 	emit("CMP_NE_ZERO")
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("je %s", labelEnd)
 
 	emit("movq %%rcx, %%rax")
 
 	emit("CMP_EQ_ZERO")
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("je %s", labelEnd)
 
 	slabel := makeLabel()

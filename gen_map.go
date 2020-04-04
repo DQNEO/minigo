@@ -86,7 +86,7 @@ func loadMapIndexExpr(e *ExprIndex) {
 	// else emit 24width 0
 	labelNil := makeLabel()
 	labelEnd := makeLabel()
-	emit("TEST_IT # map && map (check if map is nil)")
+	emit("cmpq $0, %%rax # map && map (check if map is nil)")
 	emit("je %s # jump if map is nil", labelNil)
 	// not nil case
 	emit("# not nil")
@@ -177,7 +177,7 @@ func emitMapGet(mapType *Gtype, cmpGoString bool) {
 	emit("pushq %%r12 # loop counter")
 	emit("pushq %%r11 # map len")
 	emit("CMP_FROM_STACK setl")
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	if isValue24Width {
 		emit("LOAD_EMPTY_SLICE # NOT FOUND")
 	} else {
@@ -230,7 +230,7 @@ func emitMapGet(mapType *Gtype, cmpGoString bool) {
 		emit("movzbq %%al, %%rax")
 	}
 
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("popq %%rax") // index address
 	emit("je %s  # Not match. go to next iteration", labelIncr)
 
@@ -296,7 +296,7 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	emit("cmpq $1, %%%s # ok == true", mapOkRegister(isValueWidth24))
 	emit("sete %%al")
 	emit("movzbq %%al, %%rax")
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("je %s  # jump to append if not found", labelAppend)
 
 	// update
@@ -396,7 +396,7 @@ func (em *IrStmtRangeMap) emit() {
 	emit("%s: # begin loop ", em.labels.labelBegin)
 
 	em.condition.emit()
-	emit("TEST_IT")
+	emit("cmpq $0, %%rax")
 	emit("je %s  # if false, exit loop", em.labels.labelEndLoop)
 
 	// set key and value
