@@ -296,13 +296,13 @@
 .macro CMP_EQ_ZERO
   cmpq $0, %rax
   sete %al
-  movzb %al, %eax
+  movzbq %al, %rax
 .endm
 
 .macro CMP_NE_ZERO
   cmpq $0, %rax
   setne %al
-  movzb %al, %eax
+  movzbq %al, %rax
 .endm
 
 .macro CMP_FROM_STACK inst
@@ -310,7 +310,7 @@
   popq %rcx # left
   cmpq %rax, %rcx
   \inst %al
-  movzb %al, %eax
+  movzbq %al, %rax
 .endm
 
 .macro SUM_FROM_STACK

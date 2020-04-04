@@ -227,7 +227,7 @@ func emitMapGet(mapType *Gtype, cmpGoString bool) {
 		// primitive comparison
 		emit("cmpq %%r13, %%rax # compare specifiedvalue vs indexvalue")
 		emit("sete %%al")
-		emit("movzb %%al, %%eax")
+		emit("movzbq %%al, %%rax")
 	}
 
 	emit("TEST_IT")
@@ -295,7 +295,7 @@ func (e *ExprIndex) emitMapSetFromStack(isValueWidth24 bool) {
 	// jusdge update or append
 	emit("cmpq $1, %%%s # ok == true", mapOkRegister(isValueWidth24))
 	emit("sete %%al")
-	emit("movzb %%al, %%eax")
+	emit("movzbq %%al, %%rax")
 	emit("TEST_IT")
 	emit("je %s  # jump to append if not found", labelAppend)
 
