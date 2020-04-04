@@ -293,10 +293,6 @@
   movzbq %al, %rax
 .endm
 
-.macro CAST_UINT16_TO_INT
-  movzwq %al, %rax
-.endm
-
 .macro CMP_EQ_ZERO
   cmpq $0, %rax
   sete %al
