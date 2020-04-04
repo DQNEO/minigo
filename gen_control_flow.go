@@ -7,9 +7,9 @@ func (stmt *StmtIf) emit() {
 	}
 	stmt.cond.emit()
 	emit("TEST_IT")
+	labelEndif := makeLabel()
 	if stmt.els != nil {
 		labelElse := makeLabel()
-		labelEndif := makeLabel()
 		emit("je %s  # jump if 0", labelElse)
 		emit("# then block")
 		stmt.then.emit()
@@ -21,7 +21,6 @@ func (stmt *StmtIf) emit() {
 		emit("%s:", labelEndif)
 	} else {
 		// no else block
-		labelEndif := makeLabel()
 		emit("je %s  # jump if 0", labelEndif)
 		emit("# then block")
 		stmt.then.emit()
