@@ -39,7 +39,7 @@ func cmpStrings(a string, b string, flag bool) bool {
 }
 
 func concat(as string, bs string) string {
-	var r []byte
+	var r []byte = make([]byte, 0, len(as) + len(bs))
 	for i := 0; i < len(as); i++ {
 		r = append(r, as[i])
 	}
