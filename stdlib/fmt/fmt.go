@@ -58,7 +58,18 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 	var argIndex int
 
 	for _, c := range []byte(format) {
-		if !inPercent  {
+		if inPercent {
+			if c == '%' {
+				plainstring = append(plainstring, c)
+			} else {
+				plainstring = nil
+				arg := a[argIndex]
+				argIndex++
+				s := p.printArg(arg, c)
+				blocks = append(blocks, s)
+			}
+			inPercent = false
+		} else {
 			if  c == '%' {
 				inPercent = true
 				blocks = append(blocks, string(plainstring))
@@ -67,18 +78,6 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 			} else {
 				plainstring = append(plainstring, c)
 			}
-		} else if inPercent {
-			if c == '%' {
-				inPercent = false
-				plainstring = append(plainstring, c)
-				continue
-			}
-			inPercent = false
-			plainstring = nil
-			arg := a[argIndex]
-			argIndex++
-			s := p.printArg(arg, c)
-			blocks = append(blocks, s)
 		}
 	}
 	blocks = append(blocks, string(plainstring))
