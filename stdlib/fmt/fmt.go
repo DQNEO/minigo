@@ -51,7 +51,7 @@ func (p *printer) free() {
 
 func (p *printer) doPrintf(format string, a []interface{}) {
 
-	var blocks []string
+	var buf string
 	var tmpbuf []byte
 	var numPercent int
 	var inPercent bool
@@ -66,13 +66,13 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 				arg := a[argIndex]
 				argIndex++
 				s := p.printArg(arg, c)
-				blocks = append(blocks, s)
+				buf = buf + s
 			}
 			inPercent = false
 		} else {
 			if  c == '%' {
 				inPercent = true
-				blocks = append(blocks, string(tmpbuf))
+				buf = buf + string(tmpbuf)
 				tmpbuf = nil
 				numPercent++
 			} else {
@@ -80,15 +80,9 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 			}
 		}
 	}
-	blocks = append(blocks, string(tmpbuf))
+	buf = buf + string(tmpbuf)
 
-	var r []byte
-	for _, block := range blocks {
-		for _, c := range []byte(block) {
-			r = append(r, c)
-		}
-	}
-	p.buf = r
+	p.buf = []byte(buf)
 }
 
 func (p *printer) printArg(arg interface{}, verb byte) string {
