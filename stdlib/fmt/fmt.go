@@ -53,7 +53,6 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 
 	var buf string
 	var tmpbuf []byte
-	var numPercent int
 	var inPercent bool
 	var argIndex int
 
@@ -74,7 +73,6 @@ func (p *printer) doPrintf(format string, a []interface{}) {
 				inPercent = true
 				buf = buf + string(tmpbuf)
 				tmpbuf = nil
-				numPercent++
 			} else {
 				tmpbuf = append(tmpbuf, c)
 			}
