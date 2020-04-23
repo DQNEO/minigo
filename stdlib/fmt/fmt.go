@@ -51,36 +51,33 @@ func (p *printer) free() {
 
 func (p *printer) doPrintf(format string, a []interface{}) {
 
-	var buf string
-	var tmpbuf []byte
+	var buf []byte
 	var inPercent bool
 	var argIndex int
 
 	for _, c := range []byte(format) {
 		if inPercent {
 			if c == '%' {
-				tmpbuf = append(tmpbuf, c)
+				buf = append(buf, c)
 			} else {
-				tmpbuf = nil
 				arg := a[argIndex]
 				argIndex++
 				s := p.printArg(arg, c)
-				buf = buf + s
+				for _, _c := range []byte(s) {
+					buf = append(buf, _c)
+				}
 			}
 			inPercent = false
 		} else {
 			if  c == '%' {
 				inPercent = true
-				buf = buf + string(tmpbuf)
-				tmpbuf = nil
 			} else {
-				tmpbuf = append(tmpbuf, c)
+				buf = append(buf, c)
 			}
 		}
 	}
-	buf = buf + string(tmpbuf)
 
-	p.buf = []byte(buf)
+	p.buf = buf
 }
 
 func (p *printer) printArg(arg interface{}, verb byte) string {
