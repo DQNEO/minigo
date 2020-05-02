@@ -74,11 +74,7 @@ func (stmt *StmtSwitch) emit() {
 		cond = stmt.cond
 		emit("# the cond expression")
 		cond.emit()
-		if cond.getGtype().is24WidthType() {
-			emit("PUSH_24 # the cond value")
-		} else {
-			emit("PUSH_8 # the cond value")
-		}
+		emitPush(cond.getGtype())
 	} else {
 		// switch {
 		emit("# no condition")

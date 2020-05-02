@@ -170,11 +170,10 @@ func (call *IrCall) emit() {
 		if receiver != nil {
 			// method call of a dynamic type
 			receiver.emit()
+			emitPush(receiver.getGtype())
 			if receiver.getGtype().is24WidthType() {
-				emit("PUSH_24")
 				numRegs = 3
 			} else {
-				emit("PUSH_8")
 				numRegs = 1
 			}
 		}

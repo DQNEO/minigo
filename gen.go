@@ -75,6 +75,14 @@ func emitWithoutIndent(format string, v ...interface{}) {
 	writeln([]byte(s))
 }
 
+func emitPush(gtype *Gtype) {
+	if gtype.is24WidthType() {
+		emit("PUSH_24")
+	} else {
+		emit("PUSH_8")
+	}
+}
+
 func unwrapRel(e Expr) Expr {
 	if rel, ok := e.(*Relation); ok {
 		return rel.expr
@@ -363,13 +371,12 @@ func emitConversionToInterface(dynamicValue Expr) {
 
 	emit("# emitConversionToInterface from %s", dynamicValue.getGtype().String())
 	dynamicValue.emit()
+	emitPush(dynamicValue.getGtype())
 	if dynamicValue.getGtype().is24WidthType() {
-		emit("PUSH_24")
 		emitCallMalloc(24)
 		emit("PUSH_8")
 		emit("STORE_24_INDIRECT_FROM_STACK")
 	} else {
-		emit("PUSH_8")
 		emitCallMalloc(8)
 		emit("PUSH_8")
 		emit("STORE_8_INDIRECT_FROM_STACK")
