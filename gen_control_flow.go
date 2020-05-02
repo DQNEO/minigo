@@ -48,6 +48,14 @@ func emitConvertNilToEmptyString() {
 	emit("%s:", labelEnd)
 }
 
+func emitCompareEqFromStack(gtype *Gtype) {
+	if gtype.isString() {
+		emitGoStringsEqualFromStack()
+	} else {
+		emit("CMP_FROM_STACK sete")
+	}
+}
+
 func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	emitConvertNilToEmptyString()
 	emit("PUSH_8")
@@ -60,7 +68,7 @@ func emitCompareDynamicTypeFromStack(gtype *Gtype) {
 	}
 
 	emit("PUSH_8")
-	emit("CMP_FROM_STACK sete") // compare addresses
+	emitCompareEqFromStack(gUintptr)
 }
 
 func (stmt *StmtSwitch) emit() {
@@ -119,8 +127,6 @@ func (stmt *StmtSwitch) emit() {
 
 					e.emit()
 					emit("PUSH_SLICE")
-
-					emitGoStringsEqualFromStack()
 				} else {
 					emit("POP_8 # the cond value")
 					emit("PUSH_8 # the cond value")
@@ -128,9 +134,8 @@ func (stmt *StmtSwitch) emit() {
 					emit("PUSH_8 # arg1: the cond value")
 					e.emit()
 					emit("PUSH_8 # arg2: case value")
-					emit("CMP_FROM_STACK sete")
 				}
-
+				emitCompareEqFromStack(e.getGtype())
 				emit("cmpq $0, %%rax")
 				emit("jne %s # jump if matches", myCaseLabel)
 			}
