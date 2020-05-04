@@ -146,7 +146,7 @@ func (stmt *StmtSwitch) emit() {
 	if stmt.dflt == nil {
 		emit("jmp %s", labelEnd)
 	} else {
-		emit("# default")
+		emit("# jump to default")
 		defaultLabel = makeLabel()
 		emit("jmp %s", defaultLabel)
 	}
@@ -159,13 +159,14 @@ func (stmt *StmtSwitch) emit() {
 	}
 	emit("#")
 	for i, caseClause := range stmt.cases {
-		emit("# case stmts")
+		emit("# case clause")
 		emit("%s:", labels[i])
 		caseClause.compound.emit()
 		emit("jmp %s", labelEnd)
 	}
 
 	if stmt.dflt != nil {
+		emit("# default case clause")
 		emit("%s:", defaultLabel)
 		stmt.dflt.emit()
 	}
