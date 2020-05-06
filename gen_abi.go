@@ -200,7 +200,7 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			param = params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
-					variadicArgs = make([]Expr, 0, len(args))
+					variadicArgs = make([]Expr, 0, len(args) - argIndex)
 				}
 			}
 		}
