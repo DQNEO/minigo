@@ -190,12 +190,6 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 	var argIndex int
 	var param *ExprVariable
 	for argIndex, arg = range args {
-		var fromGtype string
-		if arg.getGtype() != nil {
-			emit("# get fromGtype")
-			fromGtype = arg.getGtype().String()
-		}
-		emit("# from %s", fromGtype)
 		if argIndex < len(params) {
 			param = params[argIndex]
 			if param.isVariadic {
@@ -209,6 +203,13 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			continue
 		}
 		var doConvertToInterface bool
+
+		var fromGtype string
+		if arg.getGtype() != nil {
+			emit("# get fromGtype")
+			fromGtype = arg.getGtype().String()
+		}
+		emit("# from %s", fromGtype)
 
 		if param != nil {
 			emit("# has a corresponding param")
