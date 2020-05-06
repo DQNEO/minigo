@@ -265,39 +265,31 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 	}
 
 	if collectVariadicArgs {
+		numRegs += 3 // for one slice
 		emit("# collectVariadicArgs = true")
-		lenArgs := len(variadicArgs)
-		if lenArgs == 0 {
-			emit("LOAD_EMPTY_SLICE")
-			emit("PUSH_SLICE")
-		} else {
-			// var a []interface{}
-			for vargIndex, varg := range variadicArgs {
-				emit("# emit variadic arg")
-				if vargIndex == 0 {
-					emit("# make an empty slice to append")
-					emit("LOAD_EMPTY_SLICE")
-					emit("PUSH_SLICE")
-				}
-				// conversion : var ifc = x
-				if varg.getGtype().getKind() == G_INTERFACE {
-					varg.emit()
-				} else {
-					emitConversionToInterface(varg)
-				}
-				emit("PUSH_INTERFACE")
-				emit("# calling append24")
-				emit("POP_TO_ARG_5 # ifc_c")
-				emit("POP_TO_ARG_4 # ifc_b")
-				emit("POP_TO_ARG_3 # ifc_a")
-				emit("POP_TO_ARG_2 # cap")
-				emit("POP_TO_ARG_1 # len")
-				emit("POP_TO_ARG_0 # ptr")
-				emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "append24"))
-				emit("PUSH_SLICE")
+		emit("# make an empty slice")
+		emit("LOAD_EMPTY_SLICE")
+		emit("PUSH_SLICE")
+		// var a []interface{}
+		for _, varg := range variadicArgs {
+			emit("# emit variadic arg")
+			// conversion : var ifc = x
+			if varg.getGtype().getKind() == G_INTERFACE {
+				varg.emit()
+			} else {
+				emitConversionToInterface(varg)
 			}
+			emit("PUSH_INTERFACE")
+			emit("# calling append24")
+			emit("POP_TO_ARG_5 # ifc_c")
+			emit("POP_TO_ARG_4 # ifc_b")
+			emit("POP_TO_ARG_3 # ifc_a")
+			emit("POP_TO_ARG_2 # cap")
+			emit("POP_TO_ARG_1 # len")
+			emit("POP_TO_ARG_0 # ptr")
+			emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "append24"))
+			emit("PUSH_SLICE")
 		}
-		numRegs += 3
 	}
 
 	emit("# numRegs=%d", numRegs)
