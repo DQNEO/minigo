@@ -252,18 +252,6 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 		numRegs += width
 	}
 
-	// check if callee has a variadic
-	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
-	// If f is invoked with no actual arguments for p, the value passed to p is nil.
-	if !collectVariadicArgs {
-		if argIndex+1 < len(params) {
-			_param := params[argIndex+1]
-			if _param.isVariadic {
-				collectVariadicArgs = true
-			}
-		}
-	}
-
 	if collectVariadicArgs {
 		numRegs += 3 // for one slice
 		emit("# collectVariadicArgs = true")
@@ -288,6 +276,16 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			emit("POP_TO_ARG_1 # len")
 			emit("POP_TO_ARG_0 # ptr")
 			emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "append24"))
+			emit("PUSH_SLICE")
+		}
+	} else {
+		// check if callee has a variadic
+		// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
+		// If f is invoked with no actual arguments for p, the value passed to p is nil.
+		if argIndex+1 < len(params) && params[argIndex+1].isVariadic {
+			numRegs += 3 // for one slice
+			emit("# pass an empty slice")
+			emit("LOAD_EMPTY_SLICE")
 			emit("PUSH_SLICE")
 		}
 	}
