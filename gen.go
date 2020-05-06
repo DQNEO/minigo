@@ -260,26 +260,36 @@ func (ast *ExprBinop) emit() {
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("cmpq $0, %%rax")
+
+		// exit with false if left is false
 		eFalse.emit()
 		emit("je %s", labelEnd)
+
+		// if left is true, then eval right
 		ast.right.emit()
 		emit("cmpq $0, %%rax")
 		eFalse.emit()
 		emit("je %s", labelEnd)
 		eTrue.emit()
+
 		emit("%s:", labelEnd)
 		return
 	case "||":
 		labelEnd := makeLabel()
 		ast.left.emit()
 		emit("cmpq $0, %%rax")
+
+		// exit with true if left is true,
 		eTrue.emit()
 		emit("jne %s", labelEnd)
+
+		// if left is false, then eval right
 		ast.right.emit()
 		emit("cmpq $0, %%rax")
 		eTrue.emit()
 		emit("jne %s", labelEnd)
 		eFalse.emit()
+
 		emit("%s:", labelEnd)
 		return
 	}
