@@ -185,7 +185,6 @@ func (call *IrCall) emit() {
 }
 
 func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
-	var collectVariadicArgs bool // gather variadic args into a slice
 	var variadicArgs []Expr
 	var arg Expr
 	var argIndex int
@@ -201,11 +200,11 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			param = params[argIndex]
 			if param.isVariadic {
 				if _, ok := arg.(*ExprVaArg); !ok {
-					collectVariadicArgs = true
+					variadicArgs = make([]Expr, 0, len(args))
 				}
 			}
 		}
-		if collectVariadicArgs {
+		if variadicArgs != nil {
 			variadicArgs = append(variadicArgs, arg)
 			continue
 		}
@@ -232,7 +231,7 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 		}
 
 		emit("# arg %d, doConvertToInterface=%s, collectVariadicArgs=%s",
-			argIndex, bool2string(doConvertToInterface), bool2string(collectVariadicArgs))
+			argIndex, bool2string(doConvertToInterface), bool2string(variadicArgs != nil))
 
 		if doConvertToInterface {
 			emit("# doConvertToInterface !!!")
@@ -252,9 +251,9 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 		numRegs += width
 	}
 
-	if collectVariadicArgs {
+	if len(variadicArgs) > 0 {
 		numRegs += 3 // for one slice
-		emit("# collectVariadicArgs = true")
+		emit("# VariadicArgs = true")
 		emit("# make an empty slice")
 		emit("LOAD_EMPTY_SLICE")
 		emit("PUSH_SLICE")
