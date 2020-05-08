@@ -185,7 +185,7 @@ func (call *IrCall) emit() {
 }
 
 func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
-	var variadicArgs []Expr
+	var variadicArgs []Expr // nil means there is no varadic in funcdecl
 	var arg Expr
 	var argIndex int
 	var param *ExprVariable
@@ -252,13 +252,21 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 		numRegs += width
 	}
 
-	if len(variadicArgs) > 0 {
-		numRegs += 3 // for one slice
-		emit("# VariadicArgs = true")
+	// check if callee has a variadic
+	// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
+	// If f is invoked with no actual arguments for p, the value passed to p is nil.
+	if argIndex < len(params) - 1 && params[argIndex+1].isVariadic {
+		// pass nil as vaargs
+		variadicArgs = make([]Expr, 0, len(args) - argIndex)
+	}
+
+	if variadicArgs != nil {
+		numRegs += 3 // pass one slice
+		emit("# pass variadic = true")
 		emit("# make an empty slice")
 		emit("LOAD_EMPTY_SLICE")
 		emit("PUSH_SLICE")
-		// var a []interface{}
+		// pass a []interface{}
 		for _, varg := range variadicArgs {
 			emit("# emit variadic arg")
 			// conversion : var ifc = x
@@ -276,16 +284,6 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 			emit("POP_TO_ARG_1 # len")
 			emit("POP_TO_ARG_0 # ptr")
 			emit("FUNCALL %s", getFuncSymbol(IRuntimePath, "append24"))
-			emit("PUSH_SLICE")
-		}
-	} else {
-		// check if callee has a variadic
-		// https://golang.org/ref/spec#Passing_arguments_to_..._parameters
-		// If f is invoked with no actual arguments for p, the value passed to p is nil.
-		if argIndex+1 < len(params) && params[argIndex+1].isVariadic {
-			numRegs += 3 // for one slice
-			emit("# pass an empty slice")
-			emit("LOAD_EMPTY_SLICE")
 			emit("PUSH_SLICE")
 		}
 	}
