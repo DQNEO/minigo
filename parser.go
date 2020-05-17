@@ -2056,8 +2056,6 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		}
 	}
 
-	// @TODO import external decls here
-
 	topLevelDecls := p.parseTopLevelDecls()
 
 	var stillUnresolved []*Relation
