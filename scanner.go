@@ -237,6 +237,10 @@ func (tn *Tokenizer) tokenize() []*Token {
 		if err != nil {
 			return r
 		}
+		if tn.isSpace(c) {
+			tn.skipSpace()
+			continue
+		}
 		var tok *Token
 		switch c {
 		case 0: // no need?
@@ -271,9 +275,6 @@ func (tn *Tokenizer) tokenize() []*Token {
 		case '`':
 			sval := tn.read_raw_string()
 			tok = tn.makeToken(T_STRING, sval)
-		case ' ', '\t', '\r':
-			tn.skipSpace()
-			continue
 		case '/':
 			c, _ = tn.bs.get()
 			if c == '/' {
