@@ -257,7 +257,7 @@ func emitCallInner(numRegs int, args []Expr, params []*ExprVariable) {
 	// If f is invoked with no actual arguments for p, the value passed to p is nil.
 	if argIndex < len(params) - 1 && params[argIndex+1].isVariadic {
 		// pass nil as vaargs
-		variadicArgs = make([]Expr, 0, len(args) - argIndex)
+		variadicArgs = make([]Expr, 0, 0)
 	}
 
 	if variadicArgs != nil {

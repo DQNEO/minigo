@@ -64,6 +64,16 @@ func (p *parser) peekToken() *Token {
 	return r
 }
 
+func (p *parser) peek2Token() *Token {
+	if p.tokenStream.isEnd() {
+		return &Token{
+			typ: T_EOF,
+		}
+	}
+	r := p.tokenStream.tokens[p.tokenStream.index+1]
+	return r
+}
+
 func (p *parser) lastToken() *Token {
 	return p.tokenStream.tokens[p.tokenStream.index-1]
 }
@@ -80,10 +90,6 @@ func (p *parser) readToken() *Token {
 	tok := p.peekToken()
 	p.skip()
 	return tok
-}
-
-func (p *parser) unreadToken() {
-	p.tokenStream.index--
 }
 
 func (p *parser) expectIdent() identifier {
@@ -663,9 +669,10 @@ func (p *parser) parseUnaryExpr() Expr {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
-	tok := p.readToken()
+	tok := p.peekToken()
 	switch {
 	case tok.isPunct("("):
+		p.skip()
 		tok2 := p.peekToken()
 		if tok2.isPunct("*") {
 			// we assume this as conversion (*T)(expr)
@@ -685,6 +692,7 @@ func (p *parser) parseUnaryExpr() Expr {
 		p.expect(")")
 		return e
 	case tok.isPunct("&"):
+		p.skip()
 		uop := &ExprUop{
 			tok:     tok,
 			op:      string(tok.sval),
@@ -700,28 +708,29 @@ func (p *parser) parseUnaryExpr() Expr {
 		}
 		return uop
 	case tok.isPunct("*"):
-
+		p.skip()
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("!"):
+		p.skip()
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	case tok.isPunct("-"):
+		p.skip()
 		return &ExprUop{
 			tok:     tok,
 			op:      tok.sval,
 			operand: p.parsePrim(),
 		}
 	default:
-		p.unreadToken()
+		return p.parsePrim()
 	}
-	return p.parsePrim()
 }
 
 func priority(op string) int {
@@ -840,8 +849,9 @@ func (p *parser) parseType() *Gtype {
 	var gtype *Gtype
 
 	for {
-		tok := p.readToken()
+		tok := p.peekToken()
 		if tok.isTypeIdent() {
+			p.skip()
 			ident := tok.getIdent()
 
 			// ident may be a foreign package name
@@ -880,10 +890,12 @@ func (p *parser) parseType() *Gtype {
 				return p.registerDynamicType(gtype)
 			}
 		} else if tok.isKeyword("interface") {
+			p.skip()
 			p.expect("{")
 			p.expect("}")
 			return gInterface
 		} else if tok.isPunct("*") {
+			p.skip()
 			// pointer
 			gtype = &Gtype{
 				kind:     G_POINTER,
@@ -891,14 +903,13 @@ func (p *parser) parseType() *Gtype {
 			}
 			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("struct") {
-			p.unreadToken()
 			gtype = p.parseStructDef()
 			return p.registerDynamicType(gtype)
 		} else if tok.isKeyword("map") {
-			p.unreadToken()
 			gtype = p.parseMapType()
 			return p.registerDynamicType(gtype)
 		} else if tok.isPunct("[") {
+			p.skip()
 			// array or slice
 			tok := p.readToken()
 			// @TODO consider "..." case in a composite literal.
@@ -1129,8 +1140,8 @@ func (p *parser) parseForStmt() *StmtFor {
 				initstmt = p.parseAssignment(lefts)
 			}
 		} else if tok2.isPunct(":=") {
-			p.skip()
-			if p.peekToken().isKeyword("range") {
+			if p.peek2Token().isKeyword("range") {
+				p.skip()
 				p.assert(len(lefts) == 1 || len(lefts) == 2, "lefts is not empty")
 				p.shortVarDecl(lefts[0])
 
@@ -1141,7 +1152,6 @@ func (p *parser) parseForStmt() *StmtFor {
 				r := p.parseForRange(lefts, true)
 				return r
 			} else {
-				p.unreadToken()
 				initstmt = p.parseShortAssignment(lefts)
 			}
 		}
