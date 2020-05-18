@@ -271,7 +271,7 @@ func (tn *Tokenizer) tokenize() []*Token {
 		case '`':
 			sval := tn.read_raw_string()
 			tok = tn.makeToken(T_STRING, sval)
-		case ' ', '\t':
+		case ' ', '\t', '\r':
 			tn.skipSpace()
 			continue
 		case '/':
