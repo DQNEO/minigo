@@ -698,7 +698,7 @@ func (p *parser) parseUnaryExpr() Expr {
 			op:      string(tok.sval),
 			operand: p.parsePrim(),
 		}
-		// when &T{}, allocate stack memory
+		// when &T{}, allocate heap memory
 		if strctliteral, ok := uop.operand.(*ExprStructLiteral); ok {
 			// newVariable
 			strctliteral.invisiblevar = p.newVariable(identifier(""), &Gtype{
