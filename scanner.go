@@ -275,6 +275,20 @@ func (tn *Tokenizer) tokenize() []*Token {
 		case '`':
 			sval := tn.read_raw_string()
 			tok = tn.makeToken(T_STRING, sval)
+
+			/**
+
+			   Operators and punctuation
+			   https://golang.org/ref/spec#Operators_and_punctuation
+
+			  +    &     +=    &=     &&    ==    !=    (    )
+			  -    |     -=    |=     ||    <     <=    [    ]
+			  *    ^     *=    ^=     <-    >     >=    {    }
+			  /    <<    /=    <<=    ++    =     :=    ,    ;
+			  %    >>    %=    >>=    --    !     ...   .    :
+			       &^          &^=
+
+			*/
 		case '/':
 			c, _ = tn.bs.get()
 			if c == '/' {

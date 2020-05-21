@@ -170,20 +170,6 @@ func (tok *Token) isSemicolon() bool {
 	return tok.isPunct(";")
 }
 
-/**
-
- Operators and punctuation
- https://golang.org/ref/spec#Operators_and_punctuation
-
-+    &     +=    &=     &&    ==    !=    (    )
--    |     -=    |=     ||    <     <=    [    ]
-*    ^     *=    ^=     <-    >     >=    {    }
-/    <<    /=    <<=    ++    =     :=    ,    ;
-%    >>    %=    >>=    --    !     ...   .    :
-     &^          &^=
-
-*/
-
 func (tok *Token) dump() {
 	sval := tok.getSval()
 	s := Sprintf("tok: line=%d, type=%s, sval=\"%s\"\n",
