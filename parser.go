@@ -1987,26 +1987,6 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	return nil
 }
 
-func (p *parser) parseTopLevelDecls() []*TopLevelDecl {
-	p.traceIn(__func__)
-	defer p.traceOut(__func__)
-
-	var r []*TopLevelDecl
-	for {
-		tok := p.peekToken()
-		if tok.isEOF() {
-			return r
-		}
-
-		if tok.isPunct(";") {
-			p.skip()
-			continue
-		}
-		ast := p.parseTopLevelDecl(tok)
-		r = append(r, ast)
-	}
-}
-
 func (p *parser) isGlobal() bool {
 	return p.currentScope == p.packageBlockScope
 }
@@ -2066,7 +2046,20 @@ func (p *parser) Parse(bs *ByteStream, packageBlockScope *Scope, importOnly bool
 		}
 	}
 
-	topLevelDecls := p.parseTopLevelDecls()
+	var topLevelDecls []*TopLevelDecl
+	for {
+		tok := p.peekToken()
+		if tok.isEOF() {
+			break
+		}
+
+		if tok.isPunct(";") {
+			p.skip()
+			continue
+		}
+		topLevelDecl := p.parseTopLevelDecl(tok)
+		topLevelDecls = append(topLevelDecls, topLevelDecl)
+	}
 
 	var stillUnresolved []*Relation
 
