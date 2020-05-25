@@ -1590,13 +1590,12 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 
-	tok := p.readToken()
-	fnameToken := tok
+	fnameToken := p.readToken()
 	p.expect("(")
 
 	var params []*ExprVariable
 
-	tok = p.peekToken()
+	tok := p.peekToken()
 	if tok.isPunct(")") {
 		p.skip()
 	} else {
