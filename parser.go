@@ -1669,7 +1669,7 @@ func (p *parser) parseFuncSignature() (*Token, []*ExprVariable, []*Gtype) {
 	return fnameToken, params, rettypes
 }
 
-func (p *parser) parseFuncDef() *DeclFunc {
+func (p *parser) parseFuncDecl() *DeclFunc {
 	p.traceIn(__func__)
 	defer p.traceOut(__func__)
 	ptok := p.expectKeyword("func")
@@ -1970,7 +1970,7 @@ func (p *parser) parseTopLevelDecl(nextToken *Token) *TopLevelDecl {
 	sval := string(nextToken.sval)
 	switch sval {
 	case "func":
-		funcdecl := p.parseFuncDef()
+		funcdecl := p.parseFuncDecl()
 		return &TopLevelDecl{funcdecl: funcdecl}
 	case "var":
 		vardecl := p.parseVarDecl()
