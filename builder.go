@@ -200,11 +200,11 @@ func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDepende
 	}
 }
 
-func removeResolvedPkg(dep map[normalizedPackagePath]importMap, pkgToRemove normalizedPackagePath) map[normalizedPackagePath]importMap {
-	var dep2 map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
+func removeNode(nodes map[normalizedPackagePath]importMap, pkgToRemove normalizedPackagePath) map[normalizedPackagePath]importMap {
+	var newNodes map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
 
-	for pkg1, imports := range dep {
-		if pkg1 == pkgToRemove {
+	for _path, imports := range nodes {
+		if _path == pkgToRemove {
 			continue
 		}
 		var newimports importMap = make(map[normalizedPackagePath]bool)
@@ -214,10 +214,10 @@ func removeResolvedPkg(dep map[normalizedPackagePath]importMap, pkgToRemove norm
 			}
 			newimports[pkg2] = true
 		}
-		dep2[pkg1] = newimports
+		newNodes[_path] = newimports
 	}
 
-	return dep2
+	return newNodes
 }
 
 func dumpDep(dep map[string]importMap) {
@@ -232,17 +232,17 @@ func dumpDep(dep map[string]importMap) {
 
 func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	var sortedUniqueImports []normalizedPackagePath
-	var dep map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
-	parseImportRecursive(dep, directDependencies)
+	var nodes map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
+	parseImportRecursive(nodes, directDependencies)
 
 	for  {
-		if len(dep) == 0 {
+		if len(nodes) == 0 {
 			return sortedUniqueImports
 		}
-		for node, children := range dep {
+		for node, children := range nodes {
 			if len(children) == 0 {
-				dep = removeResolvedPkg(dep, node)
 				sortedUniqueImports = append(sortedUniqueImports, node)
+				nodes = removeNode(nodes, node)
 			}
 		}
 	}
