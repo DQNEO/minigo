@@ -220,13 +220,6 @@ func removeResolvedPkg(dep map[normalizedPackagePath]importMap, pkgToRemove norm
 	return dep2
 }
 
-func removeResolvedPackages(dep map[normalizedPackagePath]importMap, sortedUniqueImports []normalizedPackagePath) map[normalizedPackagePath]importMap {
-	for _, resolved := range sortedUniqueImports {
-		dep = removeResolvedPkg(dep, resolved)
-	}
-	return dep
-}
-
 func dumpDep(dep map[string]importMap) {
 	debugf("#------------- dep -----------------")
 	for spkgName, imports := range dep {
@@ -237,43 +230,22 @@ func dumpDep(dep map[string]importMap) {
 	}
 }
 
-func get0dependentPackages(dep map[normalizedPackagePath]importMap) []normalizedPackagePath {
-	var moved []normalizedPackagePath
-	if len(dep) == 0 {
-		return nil
-	}
-	for spkgName, imports := range dep {
-		var numDepends int
-		for _, flg := range imports {
-			if flg {
-				numDepends++
-			}
-		}
-		if numDepends == 0 {
-			moved = append(moved, spkgName)
-		}
-	}
-	return moved
-}
-
 func resolveDependency(directDependencies importMap) []normalizedPackagePath {
 	var sortedUniqueImports []normalizedPackagePath
 	var dep map[normalizedPackagePath]importMap = make(map[normalizedPackagePath]importMap)
 	parseImportRecursive(dep, directDependencies)
 
-	for {
-		//dumpDep(dep)
-		moved := get0dependentPackages(dep)
-		if len(moved) == 0 {
-			break
+	for  {
+		if len(dep) == 0 {
+			return sortedUniqueImports
 		}
-		dep = removeResolvedPackages(dep, moved)
-		for _, pkg := range moved {
-			sortedUniqueImports = append(sortedUniqueImports, pkg)
+		for node, children := range dep {
+			if len(children) == 0 {
+				dep = removeResolvedPkg(dep, node)
+				sortedUniqueImports = append(sortedUniqueImports, node)
+			}
 		}
-
 	}
-	return sortedUniqueImports
 }
 
 // if "/stdlib/foo" => "./stdlib/foo"
@@ -292,7 +264,6 @@ func compilePackages(universe *Scope, directDependencies importMap) map[normaliz
 	var compiledPkgs map[normalizedPackagePath]*AstPackage = make(map[normalizedPackagePath]*AstPackage)
 
 	for _, pth := range sortedUniqueImports {
-		fmt.Printf("# @@@ pth=%s\n", string(pth))
 		files := getPackageFiles(convertStdPath(pth))
 		pkgScope := newScope(nil, identifier(pth))
 		symbolTable.allScopes[pth] = pkgScope
