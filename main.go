@@ -101,7 +101,7 @@ func main() {
 	pkgIRuntime := compileRuntime(universe)
 
 	directDependencies := parseImports(sourceFiles)
-	libs := compileStdLibs(universe, directDependencies)
+	libs := compilePackages(universe, directDependencies)
 
 	pkgMain := compileMainFiles(universe, sourceFiles)
 	if pkgMain == nil {

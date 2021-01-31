@@ -284,24 +284,25 @@ func convertStdPath(pth normalizedPackagePath) string {
 	return string(pth)
 }
 
-// Compile standard libraries
-func compileStdLibs(universe *Scope, directDependencies importMap) map[normalizedPackagePath]*AstPackage {
+// Compile dependent packages (both of stdlib and 3rd party)
+func compilePackages(universe *Scope, directDependencies importMap) map[normalizedPackagePath]*AstPackage {
 
 	sortedUniqueImports := resolveDependency(directDependencies)
 
-	var compiledStdPkgs map[normalizedPackagePath]*AstPackage = make(map[normalizedPackagePath]*AstPackage)
+	var compiledPkgs map[normalizedPackagePath]*AstPackage = make(map[normalizedPackagePath]*AstPackage)
 
 	for _, pth := range sortedUniqueImports {
+		fmt.Printf("# @@@ pth=%s\n", string(pth))
 		files := getPackageFiles(convertStdPath(pth))
 		pkgScope := newScope(nil, identifier(pth))
 		symbolTable.allScopes[pth] = pkgScope
 		pkgShortName := path.Base(string(pth))
 		pkg := ParseFiles(identifier(pkgShortName), pth, pkgScope, files)
 		pkg = makePkg(pkg, universe)
-		compiledStdPkgs[pth] = pkg
+		compiledPkgs[pth] = pkg
 	}
 
-	return compiledStdPkgs
+	return compiledPkgs
 }
 
 type Program struct {
