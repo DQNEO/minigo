@@ -1,7 +1,7 @@
 // Semantic Analyzer to produce IR struct
 package main
 
-import "./util"
+import "github.com/DQNEO/minigo/util"
 
 var symbolTable *SymbolTable
 

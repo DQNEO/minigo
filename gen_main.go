@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/DQNEO/minigo/stdlib/strings"
 	"github.com/DQNEO/minigo/stdlib/io/ioutil"
-	"./util"
+	"github.com/DQNEO/minigo/util"
 )
 
 // builtin string

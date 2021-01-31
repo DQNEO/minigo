@@ -1,6 +1,6 @@
 package main
 
-import "./util"
+import "github.com/DQNEO/minigo/util"
 
 type Tokenizer struct {
 	bs *ByteStream

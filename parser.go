@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/DQNEO/minigo/stdlib/path"
-	"./util"
+	"github.com/DQNEO/minigo/util"
 	"os"
 	"runtime"
 )
