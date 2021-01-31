@@ -1,6 +1,6 @@
 package strings
 
-// "foo/bar", "/" => []bytes{"foo", "bar"}
+// "foo/bar", "/" => []string{"foo", "bar"}
 func Split(s string, ssep string) []string {
 	if len(ssep) > 1 {
 		panic("no supported")
