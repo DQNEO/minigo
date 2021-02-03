@@ -3,7 +3,16 @@
 [![Go](https://github.com/DQNEO/minigo/workflows/Go/badge.svg)](https://github.com/DQNEO/minigo/actions) [![CircleCI](https://circleci.com/gh/DQNEO/minigo.svg?style=svg)](https://circleci.com/gh/DQNEO/minigo)
 
 
-A Go compiler from scratch.
+A Go compiler made from scratch.
+
+# Notice
+
+This repository is no longer maintained actively.
+
+I made another Go compiler from scratch, which is much more simple, sophisticated and understandable.
+
+Please look at my new compier: https://github.com/DQNEO/babygo
+
 
 # Description
 
