@@ -191,8 +191,8 @@ func parseImportRecursive(dep map[normalizedPackagePath]importMap, directDepende
 		var imports importMap = make(map[normalizedPackagePath]bool)
 		for _, file := range files {
 			imprts := parseImportsFromFile(file)
-			for k, v := range imprts {
-				imports[k] = v
+			for k, _ := range imprts {
+				imports[k] = true
 			}
 		}
 		dep[pth] = imports
