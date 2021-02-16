@@ -9,9 +9,9 @@ A Go compiler made from scratch.
 
 This repository is no longer maintained actively.
 
-I made another Go compiler from scratch, which is much more simple, sophisticated and understandable.
+I made another Go compiler `babygo` from scratch again, which is much more simple, sophisticated and understandable.
 
-Please look at my new compier: https://github.com/DQNEO/babygo
+Please look at https://github.com/DQNEO/babygo
 
 
 # Description
